@@ -1,39 +1,26 @@
-# storage_app_file_manager
+# app_file_manager
 
-#### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
-
-#### 软件架构
-软件架构说明
+## 介绍
 
 
-#### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+提供应用沙箱内的目录与文件管能力，以及目录和文件的操作接口，包括以下内容：
 
-#### 使用说明
+1. 提供基础文件操作的同步和异步接口
+2. 提供目录操作的异步接口
+3. 提供流式相关操作的文件接口
+4. 提供statfs接口能力
+5. 提供目录环境相关配置接口
+6. 提供本地系统扩展接口能力
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## 目录
 
-#### 参与贡献
+```
+interfaces                      # 接口代码
+    └── kits                    # 对外JS接口代码
+LICENSE                         # 证书文件
+```
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+## 接口能力
 
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+[statfs接口](https://gitee.com/openharmony/docs/tree/master/zh-cn/application-dev/reference/apis/js-apis-statfs.md)
