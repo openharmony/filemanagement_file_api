@@ -1,6 +1,6 @@
-# app_file_manager
+# 文件访问接口
 
-## 介绍
+## 简介
 
 
 
@@ -21,6 +21,8 @@ interfaces                      # 接口代码
 LICENSE                         # 证书文件
 ```
 
-## 接口能力
+## 说明
+
+### 接口说明
 
 [statfs接口](https://gitee.com/openharmony/docs/tree/master/zh-cn/application-dev/reference/apis/js-apis-statfs.md)
