@@ -1,28 +1,36 @@
-# 文件访问接口
+# storage_app_file_manager
 
-## 简介
+#### Description
+{**When you're done, you can delete the content in this README and update the file with details for others getting started with your repository**}
+
+#### Software Architecture
+Software architecture description
+
+#### Installation
+
+1.  xxxx
+2.  xxxx
+3.  xxxx
+
+#### Instructions
+
+1.  xxxx
+2.  xxxx
+3.  xxxx
+
+#### Contribution
+
+1.  Fork the repository
+2.  Create Feat_xxx branch
+3.  Commit your code
+4.  Create Pull Request
 
 
+#### Gitee Feature
 
-提供目录与文件管理能力，即目录和文件的访问操作接口，包括以下内容：
-
-1. 提供基础文件操作的同步和异步接口
-2. 提供目录操作的异步接口
-3. 提供流式相关操作的文件接口
-4. 提供statfs接口能力
-5. 提供目录环境相关配置接口
-6. 提供本地系统扩展接口能力
-
-## 目录
-
-```
-interfaces                      # 接口代码
-    └── kits                    # 对外JS接口代码
-LICENSE                         # 证书文件
-```
-
-## 说明
-
-### 接口说明
-
-[statfs接口](https://gitee.com/openharmony/docs/tree/master/zh-cn/application-dev/reference/apis/js-apis-statfs.md)
+1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
+2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
+3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
+4.  The most valuable open source project [GVP](https://gitee.com/gvp)
+5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
+6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
