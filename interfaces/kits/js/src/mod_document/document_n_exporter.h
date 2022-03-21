@@ -23,7 +23,6 @@ namespace DistributedFS {
 namespace ModuleDocument {
 napi_value Choose(napi_env env, napi_callback_info info);
 napi_value Show(napi_env env, napi_callback_info info);
-
 } // namespace ModuleDocument
 } // namespace DistributedFS
 } // namespace OHOS

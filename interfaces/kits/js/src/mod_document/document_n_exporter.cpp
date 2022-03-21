@@ -31,12 +31,12 @@ namespace DistributedFS {
 namespace ModuleDocument {
 napi_value Choose(napi_env env, napi_callback_info info)
 {
-  UniError(EINVAL).ThrowErr(env, "error");
+    UniError(EINVAL).ThrowErr(env, "error");
 }
 
 napi_value Show(napi_env env, napi_callback_info info)
 {
-  UniError(EINVAL).ThrowErr(env, "error");
+    UniError(EINVAL).ThrowErr(env, "error");
 }
 } // namespace ModuleDocument
 } // namespace DistributedFS
