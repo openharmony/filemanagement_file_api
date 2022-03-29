@@ -14,10 +14,10 @@
  */
 
 #include "statfs_napi.h"
+#include "statfs_n_exporter.h"
+
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-
-#include "statfs_n_exporter.h"
 
 namespace OHOS {
 namespace DistributedFS {
