@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
+#include "statfs_napi.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
 #include "statfs_n_exporter.h"
-#include "statfs_napi.h"
 
 namespace OHOS {
 namespace DistributedFS {
