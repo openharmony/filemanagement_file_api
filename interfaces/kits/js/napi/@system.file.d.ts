@@ -19,7 +19,7 @@ export interface FileResponse {
    * @syscap SystemCapability.FileManagement.File.FileIO
    * @since 3
    */
-  uri: string;
+  uri: string;.
 
   /**
    * File size, in bytes.
