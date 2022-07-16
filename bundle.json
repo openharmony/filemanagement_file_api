@@ -1,0 +1,34 @@
+{
+    "name": "file_api",
+    "description": "provides the application with JS interfaces for IO",
+    "version": "3.1",
+    "license": "Apache License 2.0",
+    "publishAs": "code-segment",
+    "segment": {
+      "destPath": "foundation/filemanagement/file_api"
+    },
+    "dirs": {},
+    "scripts": {},
+    "component": {
+      "name": "file_api",
+      "subsystem": "filemanagement",
+      "syscap": [],
+      "features": [],
+      "adapted_system_type": ["standard"],
+      "rom": "",
+      "ram": "",
+      "deps": {
+        "components": [
+            "ability_manager",
+            "libhilog",
+            "ace_napi",
+            "samgr_proxy"
+        ]
+      },
+      "build": {
+        "sub_component": [
+            "//foundation/filemanagement/file_api/interfaces/kits/js:build_kits_js"
+        ]
+      }
+    }
+  }
