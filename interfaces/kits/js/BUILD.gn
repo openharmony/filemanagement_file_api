@@ -12,8 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import(
-    "//foundation/filemanagement/file_api/file_api.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
 
 file_common_src = [
   "src/common/file_helper/fd_guard.cpp",
