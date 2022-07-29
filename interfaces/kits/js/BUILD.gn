@@ -32,14 +32,15 @@ ohos_shared_library("fileio") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "//third_party/node/src",
     "//foundation/arkui/napi/interfaces/kits",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/libuv/include",
-    "//third_party/openssl/include",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/file_helper",
+    "//third_party/node/src",
+    "//third_party/bounds_checking_function/include",
+    "//third_party/libuv/include",
+    "//third_party/openssl/include",
+    
   ]
 
   sources = file_common_src
@@ -101,12 +102,12 @@ ohos_shared_library("file") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "//third_party/node/src",
     "//foundation/arkui/napi/interfaces/kits",
-    "//third_party/bounds_checking_function/include",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/file_helper",
+    "//third_party/node/src",
+    "//third_party/bounds_checking_function/include",
   ]
 
   sources = file_common_src
@@ -157,9 +158,9 @@ ohos_shared_library("environment") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "//third_party/node/src",
     "//foundation/arkui/napi/interfaces/kits",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
+    "//third_party/node/src",
   ]
 
   sources = [
@@ -211,9 +212,9 @@ ohos_shared_library("document") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "//third_party/node/src",
     "//foundation/arkui/napi/interfaces/kits",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
+    "//third_party/node/src",
   ]
 
   sources = [
