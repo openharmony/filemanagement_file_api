@@ -33,14 +33,13 @@ ohos_shared_library("fileio") {
 
   include_dirs = [
     "//foundation/arkui/napi/interfaces/kits",
+    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/file_helper",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi",
     "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/file_helper",
     "//third_party/node/src",
     "//third_party/bounds_checking_function/include",
     "//third_party/libuv/include",
     "//third_party/openssl/include",
-    
   ]
 
   sources = file_common_src
@@ -125,8 +124,6 @@ ohos_shared_library("file") {
   ]
 
   external_deps = [
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
   ]
