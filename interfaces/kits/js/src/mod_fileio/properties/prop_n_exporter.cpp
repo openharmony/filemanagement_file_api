@@ -54,7 +54,7 @@ namespace ModuleFileIO {
 using namespace std;
 namespace {
     static constexpr int MODE_RUO_RWX = 0750;
-}	
+}
 napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
