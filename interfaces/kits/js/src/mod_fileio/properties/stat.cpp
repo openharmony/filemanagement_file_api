@@ -40,7 +40,7 @@ napi_value Stat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    aut [resGetFirstArg, pathPtr, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, pathPtr, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!resGetFirstArg) {
         UniError(EINVAL).ThrowErr(env, "The first argument requires type string");
         return nullptr;
@@ -87,7 +87,7 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
 
     string path = tmp.get();
     auto arg = make_shared<AsyncStatArg>();
-    auto cbExec = [arg, path](napi_env env) -> UniError {
+    auto cbExec = [arg = arg, path = path](napi_env env) -> UniError {
         if (stat(path.c_str(), &arg->stat_)) {
             return UniError(errno);
         } else {
@@ -95,7 +95,7 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
         }
     };
 
-    auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
+    auto cbCompl = [arg = arg](napi_env env, UniError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }

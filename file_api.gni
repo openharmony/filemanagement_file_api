@@ -11,5 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
-aafwk_path = "//foundation/ability/ability_runtime"
+aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/native"
+aafwk_path = "${aafwk_kits_path}/frameworks/kits"

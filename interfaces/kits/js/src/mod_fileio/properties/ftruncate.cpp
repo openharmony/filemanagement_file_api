@@ -47,6 +47,7 @@ napi_value Ftruncate::Sync(napi_env env, napi_callback_info info)
         ret = ftruncate(fd, 0);
     } else {
         int len;
+        bool succ = false;
         tie(succ, len) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
         if (!succ) {
             UniError(EINVAL).ThrowErr(env, "Invalid len");
@@ -88,7 +89,7 @@ napi_value Ftruncate::Async(napi_env env, napi_callback_info info)
         len = length;
     }
 
-    auto cbExec = [fd, len](napi_env env) -> UniError {
+    auto cbExec = [fd = fd, len = len](napi_env env) -> UniError {
         int ret = ftruncate(fd, len);
         if (ret == -1) {
             return UniError(errno);

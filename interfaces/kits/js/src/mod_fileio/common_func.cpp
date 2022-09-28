@@ -82,6 +82,36 @@ static tuple<bool, size_t> GetActualLen(napi_env env, int64_t bufLen, int64_t bu
     return { true, retLen };
 }
 
+int CommonFunc::ConvertJsFlags(int &flags)
+{
+    static constexpr int USR_O_RDONLY = 00;
+    static constexpr int USR_O_WRONLY = 01;
+    static constexpr int USR_O_RDWR = 02;
+    static constexpr int USR_O_CREAT = 0100;
+    static constexpr int USR_O_EXCL = 0200;
+    static constexpr int USR_O_TRUNC = 01000;
+    static constexpr int USR_O_APPEND = 02000;
+    static constexpr int USR_O_NONBLOCK = 04000;
+    static constexpr int USR_O_DIRECTORY = 0200000;
+    static constexpr int USR_O_NOFOLLOW = 0400000;
+    static constexpr int USR_O_SYNC = 04010000;
+
+    int flagsABI = 0;
+    flagsABI |= ((flags & USR_O_RDONLY) == USR_O_RDONLY) ? O_RDONLY : 0;
+    flagsABI |= ((flags & USR_O_WRONLY) == USR_O_WRONLY) ? O_WRONLY : 0;
+    flagsABI |= ((flags & USR_O_RDWR) == USR_O_RDWR) ? O_RDWR : 0;
+    flagsABI |= ((flags & USR_O_CREAT) == USR_O_CREAT) ? O_CREAT : 0;
+    flagsABI |= ((flags & USR_O_EXCL) == USR_O_EXCL) ? O_EXCL : 0;
+    flagsABI |= ((flags & USR_O_TRUNC) == USR_O_TRUNC) ? O_TRUNC : 0;
+    flagsABI |= ((flags & USR_O_APPEND) == USR_O_APPEND) ? O_APPEND : 0;
+    flagsABI |= ((flags & USR_O_NONBLOCK) == USR_O_NONBLOCK) ? O_NONBLOCK : 0;
+    flagsABI |= ((flags & USR_O_DIRECTORY) == USR_O_DIRECTORY) ? O_DIRECTORY : 0;
+    flagsABI |= ((flags & USR_O_NOFOLLOW) == USR_O_NOFOLLOW) ? O_NOFOLLOW : 0;
+    flagsABI |= ((flags & USR_O_SYNC) == USR_O_SYNC) ? O_SYNC : 0;
+    flags = flagsABI;
+    return flagsABI;
+}
+
 tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,
     napi_value srcPath,
     napi_value dstPath)
@@ -91,7 +121,7 @@ tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(n
         return { false, nullptr, nullptr };
     }
 
-    tie(res, dest, useless) = NVal(env, dstPath).ToUTF8String();
+    auto [res, dest, useless] = NVal(env, dstPath).ToUTF8String();
     if (!res) {
         return { false, nullptr, nullptr };
     }
@@ -149,7 +179,6 @@ static tuple<bool, unique_ptr<char[]>, int64_t> DecodeString(napi_env env, NVal 
         return jsStr.ToUTF8String();
     }
 
-    unique_ptr<char[]> encodingBuf;
     auto [resToUTF8String, encodingBuf, unuse] = encoding.ToUTF8String();
     if (!resToUTF8String) {
         return { false, nullptr, 0 };

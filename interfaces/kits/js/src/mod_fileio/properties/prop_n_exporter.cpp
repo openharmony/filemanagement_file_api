@@ -23,6 +23,7 @@
 #include "chown.h"
 #include "close.h"
 #include "copy_file.h"
+#include "create_randomaccessfile.h"
 #include "create_stream.h"
 #include "fchmod.h"
 #include "fchown.h"
@@ -40,9 +41,11 @@
 #include "open.h"
 #include "open_dir.h"
 #include "posix_fallocate.h"
+#include "read_dir.h"
 #include "read_text.h"
 #include "rename.h"
 #include "rmdir.h"
+#include "rmdirent.h"
 #include "stat.h"
 #include "symlink.h"
 #include "truncate.h"
@@ -148,7 +151,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto cbExec = [path = move(path), mode](napi_env env) -> UniError {
+    auto cbExec = [path = move(path), mode = move(mode)](napi_env env) -> UniError {
         int ret = access(path.c_str(), mode);
         if (ret == -1) {
             return UniError(errno);
@@ -191,7 +194,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
     }
 
     string path = tmp.get();
-    auto cbExec = [path](napi_env env) -> UniError {
+    auto cbExec = [path = move(path)](napi_env env) -> UniError {
         if (unlink(path.c_str()) == -1) {
             return UniError(errno);
         } else {
@@ -245,7 +248,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
         mode = modes;
     }
 
-    auto cbExec = [path, mode](napi_env env) -> UniError {
+    auto cbExec = [path = move(path), mode = move(mode)](napi_env env) -> UniError {
         if (mkdir(path.c_str(), mode) == -1) {
             return UniError(errno);
         }
@@ -434,7 +437,8 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
-    auto cbExec = [arg, buf, len, fd, hasPos, pos, offset](napi_env env) -> UniError {
+    auto cbExec = [
+        arg = arg, buf = buf, len = len, fd = fd, hasPos = hasPos, pos = pos, offset = offset](napi_env env) -> UniError {
         ssize_t actLen;
         if (hasPos) {
             actLen = pread(fd, buf, len, pos);
@@ -451,7 +455,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         }
     };
 
-    auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
+    auto cbCompl = [arg = arg](napi_env env, UniError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
@@ -514,7 +518,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
 
     auto [resGetWriteArg, bufGuard, buf, len, hasPos, position] =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
-    if (!resGetWriteArgresGetWriteArg) {
+    if (!resGetWriteArg) {
         UniError(EINVAL).ThrowErr(env, "Failed GetWriteArg");
         return nullptr;
     }
@@ -526,11 +530,11 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         arg = make_shared<AsyncIOWrtieArg>(NVal(env, funcArg[NARG_POS::SECOND]));
     }
 
-    auto cbExec = [arg, buf, len, fd, position](napi_env env) -> UniError {
+    auto cbExec = [arg = arg, buf = buf, len = len, fd = fd, position = position](napi_env env) -> UniError {
         return WriteExec(arg, buf, len, fd, position);
     };
 
-    auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
+    auto cbCompl = [arg = arg](napi_env env, UniError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
@@ -626,6 +630,8 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("closeSync", Close::Sync),
         NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
         NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
+        NVal::DeclareNapiFunction("createRandomAccessFile", CreateRandomAccessFile::Async),
+        NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),
         NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
         NVal::DeclareNapiFunction("createWatcher", Watcher::CreateWatcher),
@@ -657,9 +663,11 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("mkdtemp", Mkdtemp::Async),
         NVal::DeclareNapiFunction("mkdtempSync", Mkdtemp::Sync),
         NVal::DeclareNapiFunction("open", Open::Async),
+        NVal::DeclareNapiFunction("openSync", Open::Sync),
         NVal::DeclareNapiFunction("opendir", OpenDir::Async),
         NVal::DeclareNapiFunction("opendirSync", OpenDir::Sync),
-        NVal::DeclareNapiFunction("openSync", Open::Sync),
+        NVal::DeclareNapiFunction("readdir", ReadDir::Async),
+        NVal::DeclareNapiFunction("readdirSync", ReadDir::Sync),
         NVal::DeclareNapiFunction("posixFallocate", PosixFallocate::Async),
         NVal::DeclareNapiFunction("posixFallocateSync", PosixFallocate::Sync),
         NVal::DeclareNapiFunction("read", Read),
@@ -668,8 +676,8 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("readTextSync", ReadText::Sync),
         NVal::DeclareNapiFunction("rename", Rename::Async),
         NVal::DeclareNapiFunction("renameSync", Rename::Sync),
-        NVal::DeclareNapiFunction("rmdir", Rmdir::Async),
-        NVal::DeclareNapiFunction("rmdirSync", Rmdir::Sync),
+        NVal::DeclareNapiFunction("rmdir", Rmdirent::Async),
+        NVal::DeclareNapiFunction("rmdirSync", Rmdirent::Sync),
         NVal::DeclareNapiFunction("stat", Stat::Async),
         NVal::DeclareNapiFunction("statSync", Stat::Sync),
         NVal::DeclareNapiFunction("symlink", Symlink::Async),

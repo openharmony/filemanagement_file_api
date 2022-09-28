@@ -34,11 +34,14 @@ public:
 
     static napi_value CloseSync(napi_env env, napi_callback_info info);
     static napi_value ReadSync(napi_env env, napi_callback_info info);
+    static napi_value ListFileSync(napi_env env, napi_callback_info info);
     static napi_value Read(napi_env env, napi_callback_info info);
     static napi_value Close(napi_env env, napi_callback_info info);
+    static napi_value ListFile(napi_env env, napi_callback_info info);
     DirNExporter(napi_env env, napi_value exports);
     ~DirNExporter() override;
 };
+const std::string listfileProcedureName = "fileioDirListFile";
 } // namespace ModuleFileIO
 } // namespace DistributedFS
 } // namespace OHOS

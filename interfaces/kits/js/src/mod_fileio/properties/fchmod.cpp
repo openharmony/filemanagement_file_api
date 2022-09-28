@@ -77,7 +77,7 @@ napi_value Fchmod::Async(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Invalid owner");
     }
 
-    auto cbExec = [fd, mode](napi_env env) -> UniError {
+    auto cbExec = [fd = fd, mode = mode](napi_env env) -> UniError {
         int ret = fchmod(fd, mode);
         if (ret == -1) {
             return UniError(errno);

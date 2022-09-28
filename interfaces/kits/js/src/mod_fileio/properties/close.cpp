@@ -63,7 +63,7 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto cbExec = [fd](napi_env env) -> UniError {
+    auto cbExec = [fd = fd](napi_env env) -> UniError {
         int ret = close(fd);
         if (ret == -1) {
             return UniError(errno);

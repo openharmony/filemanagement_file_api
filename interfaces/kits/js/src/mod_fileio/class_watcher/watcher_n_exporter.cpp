@@ -113,7 +113,7 @@ bool WatcherNExporter::Export()
     };
 
     string className = GetClassName();
-    auto [resDefineClass, classValue) = NClass::DefineClass(exports_.env_,
+    auto [resDefineClass, classValue] = NClass::DefineClass(exports_.env_,
                                                 className,
                                                 WatcherNExporter::Constructor,
                                                 std::move(props));

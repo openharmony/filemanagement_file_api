@@ -106,7 +106,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncFdopenStreamArg>();
-    auto cbExec = [arg, fd, mode = move(mode)](napi_env env) -> UniError {
+    auto cbExec = [arg = arg, fd = fd, mode = move(mode)](napi_env env) -> UniError {
         arg->fp = { fdopen(fd, mode.c_str()), fclose };
         if (!arg->fp) {
             return UniError(errno);
@@ -115,7 +115,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
         }
     };
 
-    auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
+    auto cbCompl = [arg = arg](napi_env env, UniError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }

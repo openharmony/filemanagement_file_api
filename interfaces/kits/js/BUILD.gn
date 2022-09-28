@@ -48,6 +48,7 @@ ohos_shared_library("fileio") {
     "src/mod_fileio/class_constants/constants.cpp",
     "src/mod_fileio/class_dir/dir_n_exporter.cpp",
     "src/mod_fileio/class_dirent/dirent_n_exporter.cpp",
+    "src/mod_fileio/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
     "src/mod_fileio/class_stat/stat_n_exporter.cpp",
     "src/mod_fileio/class_stream/flush.cpp",
     "src/mod_fileio/class_stream/stream_n_exporter.cpp",
@@ -58,6 +59,7 @@ ohos_shared_library("fileio") {
     "src/mod_fileio/properties/chown.cpp",
     "src/mod_fileio/properties/close.cpp",
     "src/mod_fileio/properties/copy_file.cpp",
+    "src/mod_fileio/properties/create_randomaccessfile.cpp",
     "src/mod_fileio/properties/create_stream.cpp",
     "src/mod_fileio/properties/fchmod.cpp",
     "src/mod_fileio/properties/fchown.cpp",
@@ -76,9 +78,11 @@ ohos_shared_library("fileio") {
     "src/mod_fileio/properties/open_dir.cpp",
     "src/mod_fileio/properties/posix_fallocate.cpp",
     "src/mod_fileio/properties/prop_n_exporter.cpp",
+    "src/mod_fileio/properties/read_dir.cpp",
     "src/mod_fileio/properties/read_text.cpp",
     "src/mod_fileio/properties/rename.cpp",
     "src/mod_fileio/properties/rmdir.cpp",
+    "src/mod_fileio/properties/rmdirent.cpp",
     "src/mod_fileio/properties/stat.cpp",
     "src/mod_fileio/properties/symlink.cpp",
     "src/mod_fileio/properties/truncate.cpp",
@@ -87,6 +91,7 @@ ohos_shared_library("fileio") {
 
   deps = [
     "//foundation/arkui/napi:ace_napi",
+    "//foundation/filemanagement/file_api/interfaces/kits/native:remote_uri_native",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/openssl:libcrypto_static",
   ]
