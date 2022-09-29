@@ -24,8 +24,8 @@ namespace OHOS {
 namespace DistributedFS {
 namespace ModuleFileIO {
 struct RandomAccessFileEntity {
-    std::unique_ptr<FDGuard> fd_ = { nullptr };
-    size_t fpointer;
+    std::unique_ptr<FDGuard> fd_;
+    size_t fpointer = 0;
 };
 } // namespace ModuleFileIO
 } // namespace DistributedFS

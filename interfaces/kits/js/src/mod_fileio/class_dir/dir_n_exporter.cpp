@@ -73,7 +73,7 @@ napi_value DirNExporter::Close(napi_env env, napi_callback_info info)
     }
 
     auto dirEntity = NClass::GetEntityOf<DirEntity>(env, funcArg.GetThisVar());
-    if (dirEntity == nullptr) {
+    if (!dirEntity) {
         UniError(EIO).ThrowErr(env, "Cannot get entity of Dir");
         return nullptr;
     }
@@ -104,10 +104,10 @@ napi_value DirNExporter::Close(napi_env env, napi_callback_info info)
     static const string procedureName = "fileioDirClose";
     if (funcArg.GetArgc() == NARG_CNT::ZERO) {
         return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
+    } else {
+        NVal cb(env, funcArg[NARG_POS::FIRST]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
     }
-
-    NVal cb(env, funcArg[NARG_POS::FIRST]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
 }
 
 struct DirReadArgs {
@@ -137,7 +137,7 @@ static NVal DoReadComplete(napi_env env, UniError err, shared_ptr<DirReadArgs> a
         }
 
         if (strlen(arg->dirRes.d_name) == 0) {
-            return { env, nullptr };
+            return { env, NVal::CreateUndefined(env).val_ };
         } else {
             direntEntity->dirent_ = arg->dirRes;
             return { env, objDirent };
@@ -165,9 +165,6 @@ napi_value DirNExporter::Read(napi_env env, napi_callback_info info)
     }
 
     DIR *dir = dirEntity->dir_.get();
-    if (dir == nullptr) {
-        return nullptr;
-    }
     auto arg = make_shared<DirReadArgs>(NVal(env, funcArg.GetThisVar()));
     auto cbExec = [arg, dir, dirEntity](napi_env env) -> UniError {
         struct dirent tmpDirent;

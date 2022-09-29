@@ -75,6 +75,7 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
     }
+
     auto [resGetCreateStreamArgs, argPath, argMode] = GetCreateStreamArgs(env, funcArg);
     if (!resGetCreateStreamArgs) {
         return nullptr;

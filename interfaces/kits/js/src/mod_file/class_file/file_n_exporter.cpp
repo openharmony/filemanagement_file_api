@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,6 @@
 
 #include "../../common/ability_helper.h"
 #include "../../common/file_helper/fd_guard.h"
-#include "../../common/log.h"
 #include "../../common/napi/n_class.h"
 #include "../../common/napi/n_func_arg.h"
 #include "../../common/napi/n_val.h"
@@ -43,19 +42,17 @@ namespace OHOS {
 namespace DistributedFS {
 namespace ModuleFile {
 using namespace std;
-namespace {
-    constexpr int SUCCESS = 0;
-    constexpr int FAILED = -1;
-    constexpr int PARAMS_NUMBER_TWO = 2;
-    constexpr int URI_PARAMER_ERROR = 202;
-    constexpr int FILE_IO_ERROR = 300;
-    constexpr int FILE_PATH_ERROR = 301;
-    constexpr int DIR_FAULT_PERM = 0775;
-    constexpr int SPLIT_ZERO = 0;
-    static const string TYPE_FILE = "file";
-    static const string TYPE_DIR = "dir";
-    static const string ENCODING_UTF8 = "utf-8";
-}
+
+constexpr int SUCCESS = 0;
+constexpr int FAILED = -1;
+constexpr int URI_PARAMER_ERROR = 202;
+constexpr int FILE_IO_ERROR = 300;
+constexpr int FILE_PATH_ERROR = 301;
+constexpr int DIR_FAULT_PERM = 0775;
+constexpr int SPLITE_ZERO = 0;
+const string TYPE_FILE = "file";
+const string TYPE_DIR = "dir";
+const string ENCODING_UTF8 = "utf-8";
 
 void CallBackSuccess(napi_env env, napi_ref successFuncRef, int32_t count, napi_value obj)
 {
@@ -72,7 +69,7 @@ void CallBackSuccess(napi_env env, napi_ref successFuncRef, int32_t count, napi_
 
 void CallBackError(napi_env env, napi_ref failFuncRef, string errorProp, int errorCode)
 {
-    napi_value argvFail[PARAMS_NUMBER_TWO] = { 0 };
+    napi_value argvFail[2] = { 0 };
     napi_value results = nullptr;
     napi_value failFunc = nullptr;
     napi_value global = nullptr;
@@ -99,54 +96,41 @@ void CallComplete(napi_env env, napi_ref completeFuncRef)
     napi_call_function(env, global, completeFunc, COMMON_NUM::ZERO, nullptr, &results);
 }
 
-vector<string> SplitString(const string &path)
+bool CheckUri(napi_env env, string &path)
 {
+    constexpr int spilteOne = 1;
+    constexpr int spilteTwo = 2;
+    constexpr int spilteThree = 3;
+    string pathOrigin = path;
     vector<string> uriSplit;
-    if (path == "") {
-        HILOGE("Parameter path is empty");
-        return uriSplit;
-    }
-
     string pattern = "/";
-    string pathTmp = path + pattern;
+    if (path == "") {
+        return false;
+    }
+    string pathTmp = pathOrigin + pattern;
     size_t pos = pathTmp.find(pattern);
     while (pos != pathTmp.npos) {
-        string temp = pathTmp.substr(SPLIT_ZERO, pos);
+        string temp = pathTmp.substr(SPLITE_ZERO, pos);
         uriSplit.push_back(temp);
         pathTmp = pathTmp.substr(pos + 1, pathTmp.size());
         pos = pathTmp.find(pattern);
     }
-
-    return uriSplit;
-}
-
-bool CheckUri(napi_env env, string &path)
-{
-    constexpr int splitOne = 1;
-    constexpr int splitTwo = 2;
-    constexpr int splitThree = 3;
-    vector<string> uriSplit = SplitString(path);
-    if (uriSplit[SPLIT_ZERO] != "internal:" || uriSplit[splitOne] != "" || uriSplit.size() <= splitThree) {
-        HILOGE("Illegal URI address");
+    if (uriSplit[SPLITE_ZERO] != "internal:" || uriSplit[spilteOne] != "" || uriSplit.size() <= spilteThree) {
         return false;
     }
-
     AppExecFwk::Ability *ability = AbilityHelper::GetJsAbility(env);
     if (!ability) {
-        HILOGE("JS ability object address is empty");
         return false;
     }
-
     auto abilityContext = ability->GetAbilityContext();
-    if (abilityContext && uriSplit[splitTwo] == "app") {
+    if (abilityContext && uriSplit[spilteTwo] == "app") {
         path = abilityContext->GetFilesDir();
-    } else if (abilityContext && uriSplit[splitTwo] == "cache") {
+    } else if (abilityContext && uriSplit[spilteTwo] == "cache") {
         path = abilityContext->GetCacheDir();
     } else {
-        HILOGE("Failed to get URI path");
         return false;
     }
-    for (size_t i = splitThree; i < uriSplit.size(); ++i) {
+    for (size_t i = spilteThree; i < uriSplit.size(); ++i) {
         path = path + "/" + uriSplit[i];
     }
     return true;
@@ -165,7 +149,17 @@ int GetRealPath(string &path)
 string UriToAbsolute(string path)
 {
     stack<string> uriResult;
-    vector<string> uriSplit = SplitString(path);
+    vector<string> uriSplit;
+    string pattern = "/";
+
+    string pathTmp = path + pattern;
+    size_t pos = pathTmp.find(pattern);
+    while (pos != pathTmp.npos) {
+        string temp = pathTmp.substr(SPLITE_ZERO, pos);
+        uriSplit.push_back(temp);
+        pathTmp = pathTmp.substr(pos + 1, pathTmp.size());
+        pos = pathTmp.find(pattern);
+    }
     for (auto urisp : uriSplit) {
         if (urisp == "." || urisp == "") {
             continue;
@@ -183,12 +177,11 @@ string UriToAbsolute(string path)
     return path;
 }
 
-bool GetFileNames(const string &path, vector<string> &filenames, bool rec, bool isList)
+bool GetFileNames(string path, vector<string> &filenames, bool rec, bool isList)
 {
     DIR *pDir;
     struct dirent *ptr = nullptr;
     if (!(pDir = opendir(path.c_str()))) {
-        HILOGE("open a directory %{public}s failed", path.c_str());
         return false;
     }
     while ((ptr = readdir(pDir)) != nullptr) {
@@ -213,14 +206,12 @@ bool Mkdirs(string path)
         if (path[i] == '/') {
             path[i] = '\0';
             if (access(path.c_str(), 0) != 0 && mkdir(path.c_str(), DIR_FAULT_PERM) == FAILED) {
-                HILOGE("create a directory %{public}s failed", path.c_str());
                 return false;
             }
             path[i] = '/';
         }
     }
     if (path.length() <= 0 || access(path.c_str(), 0) == 0 || mkdir(path.c_str(), DIR_FAULT_PERM) == FAILED) {
-        HILOGE("path is empty, or access failed, or create a directory failed");
         return false;
     }
     return true;
@@ -231,7 +222,6 @@ bool Rmdirs(string path)
     DIR *pDir;
     struct dirent *ptr = nullptr;
     if (!(pDir = opendir(path.c_str()))) {
-        HILOGE("open a directory %{public}s failed", path.c_str());
         return false;
     }
     while ((ptr = readdir(pDir)) != nullptr) {
@@ -246,7 +236,6 @@ bool Rmdirs(string path)
     }
     closedir(pDir);
     if (rmdir(path.c_str()) != 0) {
-        HILOGE("delete a directory %{public}s failed", path.c_str());
         return false;
     }
     return true;
@@ -254,10 +243,6 @@ bool Rmdirs(string path)
 
 string ConvertUri(string path, string originPath, string originUri)
 {
-    if (originPath.length() > path.length()) {
-        return "error";
-    }
-
     if (path.find(originPath) != path.npos) {
         if (originUri[originUri.length() - 1] == '/') {
             originUri = originUri.substr(0, originUri.length() - 1);
@@ -266,7 +251,6 @@ string ConvertUri(string path, string originPath, string originUri)
     } else {
         return "error";
     }
-
     return path;
 }
 
@@ -280,7 +264,7 @@ void MkdirExec(napi_env env, void *data)
         path = UriToAbsolute(path);
         if (asyncCallbackInfo->recursive && Mkdirs(path)) {
             asyncCallbackInfo->result = SUCCESS;
-        } else if (mkdir(const_cast<char *>(path.c_str()), DIR_FAULT_PERM) != FAILED) {
+        } else if (mkdir((char *)path.c_str(), DIR_FAULT_PERM) != FAILED) {
             asyncCallbackInfo->result = SUCCESS;
         }
     }
@@ -313,7 +297,7 @@ void RmdirExec(napi_env env, void *data)
     if (statPath == COMMON_NUM::ZERO) {
         if (asyncCallbackInfo->recursive && Rmdirs(path)) {
             asyncCallbackInfo->result = SUCCESS;
-        } else if (remove(const_cast<char *>(path.c_str())) != FAILED) {
+        } else if (remove((char *)path.c_str()) != FAILED) {
             asyncCallbackInfo->result = SUCCESS;
         }
     } else if (statPath == ENOENT) {
@@ -347,7 +331,7 @@ void GetExec(napi_env env, void *data)
     asyncCallbackInfo->errorType = FILE_IO_ERROR;
     struct stat buf;
     int statPath = GetRealPath(path);
-    if (statPath == COMMON_NUM::ZERO && stat(const_cast<char *>(path.c_str()), &buf) == COMMON_NUM::ZERO) {
+    if (statPath == COMMON_NUM::ZERO && stat((char *)path.c_str(), &buf) == COMMON_NUM::ZERO) {
         asyncCallbackInfo->length = buf.st_size;
         asyncCallbackInfo->lastMT = buf.st_mtime * COMMON_NUM::THOUSAND +
             (int64_t)((buf.st_mtim).tv_nsec / COMMON_NUM::MILLION);
@@ -413,7 +397,7 @@ void ListExec(napi_env env, void *data)
     int statPath = GetRealPath(path);
     if (statPath == ENOENT) {
         asyncCallbackInfo->errorType = FILE_PATH_ERROR;
-    } else if (statPath != COMMON_NUM::ZERO || stat(const_cast<char *>(path.c_str()), &buf) != COMMON_NUM::ZERO) {
+    } else if (statPath != COMMON_NUM::ZERO || stat((char *)path.c_str(), &buf) != COMMON_NUM::ZERO) {
         asyncCallbackInfo->errorType = FILE_IO_ERROR;
     } else if ((buf.st_mode & S_IFMT) == S_IFREG) {
         asyncCallbackInfo->result = SUCCESS;
@@ -487,14 +471,14 @@ int FileCopy(const string& srcPath, const string& dstPath)
     if (GetRealPath(src) == 0) {
         if (GetRealPath(dest) == ENOENT) {
             FDGuard sfd;
-            sfd.SetFD(open(const_cast<char *>(src.c_str()), O_RDONLY));
+            sfd.SetFD(open((char *)src.c_str(), O_RDONLY));
             struct stat attrSrc;
-            if (stat(const_cast<char *>(src.c_str()), &attrSrc) == FAILED) {
+            if (stat((char *)src.c_str(), &attrSrc) == FAILED) {
                 return FILE_IO_ERROR;
             }
             dest = UriToAbsolute(dest);
             FDGuard ofd;
-            ofd.SetFD(open(const_cast<char *>(dest.c_str()), O_WRONLY | O_CREAT, attrSrc.st_mode));
+            ofd.SetFD(open((char *)dest.c_str(), O_WRONLY | O_CREAT, attrSrc.st_mode));
             if (sfd.GetFD() == FAILED || ofd.GetFD() == FAILED) {
                 return FILE_IO_ERROR;
             }
@@ -502,7 +486,7 @@ int FileCopy(const string& srcPath, const string& dstPath)
             if (sendfile(ofd.GetFD(), sfd.GetFD(), nullptr, attrSrc.st_size) != FAILED) {
                 ret = SUCCESS;
             } else {
-                remove(const_cast<char *>(dest.c_str()));
+                remove((char *)dest.c_str());
             }
         } else if (GetRealPath(dest) == 0) {
             return (dest == src) ? SUCCESS : FILE_IO_ERROR;
@@ -520,7 +504,7 @@ int DirCopy(const string& srcPath, const string& dstPath)
     }
     if (GetRealPath(dest) == ENOENT) {
         struct stat attrSrc;
-        if (stat(const_cast<char *>(src.c_str()), &attrSrc) == FAILED || !S_ISDIR(attrSrc.st_mode)) {
+        if (stat((char *)src.c_str(), &attrSrc) == FAILED || !S_ISDIR(attrSrc.st_mode)) {
             return FILE_IO_ERROR;
         }
         dest = UriToAbsolute(dest);
@@ -546,7 +530,7 @@ void CopyExec(napi_env env, void *data)
     }
 
     struct stat statbf;
-    if (stat(const_cast<char *>(path.c_str()), &statbf) == FAILED) {
+    if (stat((char *)path.c_str(), &statbf) == FAILED) {
         asyncCallbackInfo->errorType = FILE_IO_ERROR;
         return;
     }
@@ -604,7 +588,7 @@ int DirMove(const string& srcPath, const string& dstPath)
     }
 
     struct stat attrSrc;
-    if (stat(const_cast<char *>(src.c_str()), &attrSrc) == FAILED || !S_ISDIR(attrSrc.st_mode)) {
+    if (stat((char *)src.c_str(), &attrSrc) == FAILED || !S_ISDIR(attrSrc.st_mode)) {
         return FILE_IO_ERROR;
     }
     dest = UriToAbsolute(dest);
@@ -655,7 +639,7 @@ void MoveExec(napi_env env, void *data)
     }
 
     struct stat statbf;
-    if (stat(const_cast<char *>(path.c_str()), &statbf) == FAILED) {
+    if (stat((char *)path.c_str(), &statbf) == FAILED) {
         asyncCallbackInfo->errorType = FILE_IO_ERROR;
         return;
     }
@@ -664,7 +648,7 @@ void MoveExec(napi_env env, void *data)
         int retval = FileCopy(path, pathDst);
         if (retval == SUCCESS) {
             asyncCallbackInfo->result = SUCCESS;
-            remove(const_cast<char *>(path.c_str()));
+            remove((char *)path.c_str());
         } else {
             asyncCallbackInfo->errorType = retval;
         }
@@ -705,7 +689,7 @@ void DeleteExec(napi_env env, void *data)
     int statPath = GetRealPath(path);
     if (statPath == ENOENT) {
         asyncCallbackInfo->errorType = FILE_PATH_ERROR;
-    } else if (statPath == COMMON_NUM::ZERO && remove(const_cast<char *>(path.c_str())) != FAILED) {
+    } else if (statPath == COMMON_NUM::ZERO && remove((char *)path.c_str()) != FAILED) {
         asyncCallbackInfo->result = SUCCESS;
     } else {
         asyncCallbackInfo->errorType = FILE_IO_ERROR;
@@ -859,7 +843,7 @@ void ReadTextExec(napi_env env, void *data)
         FDGuard fdg;
         fdg.SetFD(open(path.c_str(), O_RDONLY));
         struct stat buf;
-        int result = stat(const_cast<char *>(path.c_str()), &buf);
+        int result = stat((char *)path.c_str(), &buf);
         if (fdg.GetFD() != FAILED && result != FAILED) {
             auto buffer = std::make_unique<char[]>(buf.st_size + 1);
             if (buffer == nullptr) {
@@ -907,7 +891,7 @@ void ReadArrayBufferExec(napi_env env, void *data)
         FDGuard fdg;
         fdg.SetFD(open(path.c_str(), O_RDONLY));
         struct stat buf;
-        int result = stat(const_cast<char *>(path.c_str()), &buf);
+        int result = stat((char *)path.c_str(), &buf);
         if (fdg.GetFD() != FAILED && result != FAILED) {
             int32_t begin = (buf.st_size < asyncCallbackInfo->position) ? buf.st_size : asyncCallbackInfo->position;
             int32_t len =
@@ -969,21 +953,12 @@ napi_value FileNExporter::Mkdir(napi_env env, napi_callback_info info)
     };
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> uri;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
 
     bool recursive = false;
     tie(succ, recursive) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("recursive").ToBool();
-    if (!succ) {
-        HILOGE("Unpacking parameters recursive failed");
-    }
 
     string path = (uri == nullptr) ? "" : uri.get();
     if (!CheckUri(env, path)) {
@@ -1015,21 +990,12 @@ napi_value FileNExporter::Rmdir(napi_env env, napi_callback_info info)
     };
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> uri;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
 
     bool recursive = false;
     tie(succ, recursive) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("recursive").ToBool();
-    if (!succ) {
-        HILOGE("Unpacking parameters recursive failed");
-    }
 
     string path = (uri == nullptr) ? "" : uri.get();
     if (!CheckUri(env, path)) {
@@ -1062,22 +1028,11 @@ napi_value FileNExporter::Get(napi_env env, napi_callback_info info)
     bool succ = false;
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
-
     unique_ptr<char[]> uri = nullptr;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
 
     bool recursive = false;
     tie(succ, recursive) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("recursive").ToBool();
-    if (!succ) {
-        HILOGE("Unpacking parameters recursive failed");
-    }
-
     string path = (uri == nullptr) ? "" : uri.get();
     asyncCallbackInfo->originUri = path;
     if (!CheckUri(env, path)) {
@@ -1110,15 +1065,9 @@ napi_value FileNExporter::List(napi_env env, napi_callback_info info)
     bool succ = false;
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> uri = nullptr;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
 
     string path = (uri == nullptr) ? "" : uri.get();
     asyncCallbackInfo->originUri = path;
@@ -1151,21 +1100,10 @@ napi_value FileNExporter::Copy(napi_env env, napi_callback_info info)
     };
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> srcUri, dstUri;
     tie(succ, srcUri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("srcUri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters srcUri failed");
-    }
-
     tie(succ, dstUri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("dstUri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters dstUri failed");
-    }
-
     string srcPath = ((srcUri == nullptr) ? "" : (srcUri.get()));
     string dstPath = ((dstUri == nullptr) ? "" : (dstUri.get()));
     asyncCallbackInfo->originDst = dstPath;
@@ -1198,20 +1136,10 @@ napi_value FileNExporter::Move(napi_env env, napi_callback_info info)
     };
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> srcUri, dstUri;
     tie(succ, srcUri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("srcUri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters srcUri failed");
-    }
-
     tie(succ, dstUri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("dstUri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters dstUri failed");
-    }
 
     string srcPath = ((srcUri == nullptr) ? "" : (srcUri.get()));
     string dstPath = ((dstUri == nullptr) ? "" : (dstUri.get()));
@@ -1245,15 +1173,9 @@ napi_value FileNExporter::Delete(napi_env env, napi_callback_info info)
     };
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> uri;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
 
     string path = (uri == nullptr) ? "" : uri.get();
     if (!CheckUri(env, path)) {
@@ -1285,15 +1207,9 @@ napi_value FileNExporter::Access(napi_env env, napi_callback_info info)
     };
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> uri;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
 
     string path = (uri == nullptr) ? "" : uri.get();
     if (!CheckUri(env, path)) {
@@ -1324,31 +1240,14 @@ napi_value FileNExporter::WriteText(napi_env env, napi_callback_info info)
     bool succ = false;
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> uri, text, encoding;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
-
     tie(succ, text, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("text").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters text failed");
-    }
-
     tie(succ, encoding, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("encoding").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters encoding failed");
-    }
 
     bool append = false;
     tie(succ, append) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("append").ToBool();
-    if (!succ) {
-        HILOGE("Unpacking parameters append failed");
-    }
 
     string path = (uri == nullptr) ? "" : uri.get();
     string encode = (encoding == nullptr) ? ENCODING_UTF8 : encoding.get();
@@ -1390,27 +1289,15 @@ napi_value FileNExporter::WriteArrayBuffer(napi_env env, napi_callback_info info
     };
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> uri;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
 
     int32_t position = 0;
     tie(succ, position) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("position").ToInt32();
-    if (!succ) {
-        HILOGE("Unpacking parameters position failed");
-    }
 
     bool append = false;
     tie(succ, append) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("append").ToBool();
-    if (!succ) {
-        HILOGE("Unpacking parameters append failed");
-    }
 
     void *buffer = nullptr;
     size_t bufLength = 0;
@@ -1454,20 +1341,10 @@ napi_value FileNExporter::ReadText(napi_env env, napi_callback_info info)
     };
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> uri, encoding;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
-
     tie(succ, encoding, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("encoding").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters encoding failed");
-    }
 
     string path = (uri == nullptr) ? "" : uri.get();
     string encode = (encoding == nullptr) ? ENCODING_UTF8 : encoding.get();
@@ -1506,27 +1383,15 @@ napi_value FileNExporter::ReadArrayBuffer(napi_env env, napi_callback_info info)
     bool succ = false;
     tie(succ, asyncCallbackInfo->callback[COMMON_NUM::ZERO], asyncCallbackInfo->callback[COMMON_NUM::ONE],
         asyncCallbackInfo->callback[COMMON_NUM::TWO]) = CommonFunc::GetCallbackHandles(env, funcArg[NARG_POS::FIRST]);
-    if (!succ) {
-        HILOGE("Unpacking napi callback failed");
-    }
 
     unique_ptr<char[]> uri;
     tie(succ, uri, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("uri").ToUTF8String();
-    if (!succ) {
-        HILOGE("Unpacking parameters uri failed");
-    }
 
     int position = 0;
     tie(succ, position) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("position").ToInt32();
-    if (!succ) {
-        HILOGE("Unpacking parameters position failed");
-    }
 
     int length = 0;
     tie(succ, length) = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("length").ToInt32();
-    if (!succ) {
-        HILOGE("Unpacking parameters length failed");
-    }
 
     string path = (uri == nullptr) ? "" : uri.get();
     if (!CheckUri(env, path)) {

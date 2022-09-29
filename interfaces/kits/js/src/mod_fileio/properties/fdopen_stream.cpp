@@ -106,7 +106,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncFdopenStreamArg>();
-    auto cbExec = [arg = arg, fd = fd, mode = move(mode)](napi_env env) -> UniError {
+    auto cbExec = [arg = arg, fd = fd, mode = mode](napi_env env) -> UniError {
         arg->fp = { fdopen(fd, mode.c_str()), fclose };
         if (!arg->fp) {
             return UniError(errno);

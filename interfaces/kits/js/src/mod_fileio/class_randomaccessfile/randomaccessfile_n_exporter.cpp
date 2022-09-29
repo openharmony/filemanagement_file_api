@@ -43,7 +43,7 @@ static RandomAccessFileEntity *GetRAFEntity(napi_env env, napi_value raf_entity)
         UniError(EINVAL).ThrowErr(env, "Cannot get entity of RandomAccessFile");
         return nullptr;
     }
-    if (!rafEntity->fd_) {
+    if (rafEntity->fd_ == 0) {
         UniError(EINVAL).ThrowErr(env, "RandomAccessFile has been closed yet");
         return nullptr;
     }
@@ -66,7 +66,7 @@ static tuple<bool, void*, size_t, bool, size_t, size_t> GetRAFReadArg(napi_env e
     if (!succ) {
         return { false, nullptr, 0, false, 0, 0 };
     }
-    return { succ, buf, len, hasPos, pos, offset };
+    return { true, buf, len, hasPos, pos, offset };
 }
 
 static tuple<bool, void *, size_t, bool, size_t> GetRAFWriteArg(napi_env env,
@@ -79,7 +79,7 @@ static tuple<bool, void *, size_t, bool, size_t> GetRAFWriteArg(napi_env env,
     if (!succ) {
         return  { false, nullptr, 0, false, 0 };
     }
-    return { succ, buf, len, hasPos, pos };
+    return { true, buf, len, hasPos, pos };
 }
 
 static size_t DoReadRAF(napi_env env, void* buf, size_t len, int fd, size_t pos)
@@ -146,6 +146,7 @@ napi_value RandomAccessFileNExporter::SetFilePointerSync(napi_env env, napi_call
     auto [succ, fp] = ParseJsFP(env, funcArg[NARG_POS::FIRST]);
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid fpointer");
+        return nullptr;
     }
     rafEntity->fpointer = fp;
     return NVal::CreateUndefined(env).val_;
@@ -166,6 +167,7 @@ napi_value RandomAccessFileNExporter::ReadSync(napi_env env, napi_callback_info 
         GetRAFReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid buffer/options");
+        return nullptr;
     }
     ssize_t actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
     if (actLen < 0) {
@@ -239,7 +241,6 @@ napi_value RandomAccessFileNExporter::Read(napi_env env, napi_callback_info info
         NVal cb(env, funcArg[cbIdx]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(readProcedureName, cbExec, cbCompl).val_;
     }
-    return NVal::CreateUndefined(env).val_;
 }
 
 napi_value RandomAccessFileNExporter::WriteSync(napi_env env, napi_callback_info info)
@@ -338,7 +339,6 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
         NVal cb(env, funcArg[cbIdx]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(writeProcedureName, cbExec, cbCompl).val_;
     }
-    return NVal::CreateUndefined(env).val_;
 }
 
 napi_value RandomAccessFileNExporter::CloseSync(napi_env env, napi_callback_info info)

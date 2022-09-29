@@ -26,8 +26,8 @@ constexpr int64_t INVALID_POSITION = std::numeric_limits<decltype(INVALID_POSITI
 struct CommonFunc {
     static int ConvertJsFlags(int &flags);
     static std::tuple<bool, void *, int64_t, bool, int64_t, int> GetReadArg(napi_env env,
-                                                                       napi_value readBuf,
-                                                                       napi_value option);
+                                                                            napi_value readBuf,
+                                                                            napi_value option);
     static std::tuple<bool, std::unique_ptr<char[]>, void *, int64_t, bool, int64_t> GetWriteArg(napi_env env,
                                                                                                  napi_value argWBuf,
                                                                                                  napi_value argOption);

@@ -45,12 +45,12 @@ static void PromiseOnComplete(napi_env env, napi_status status, void *data)
     }
 
     if (!ctx->res_.TypeIsError(true)) {
-        napi_status status = napi_resolve_deferred(env, ctx->deferred_, ctx->res_.val_);
+        status = napi_resolve_deferred(env, ctx->deferred_, ctx->res_.val_);
         if (status != napi_ok) {
             HILOGE("Internal BUG, cannot resolve promise for %{public}d", status);
         }
     } else {
-        napi_status status = napi_reject_deferred(env, ctx->deferred_, ctx->res_.val_);
+        status = napi_reject_deferred(env, ctx->deferred_, ctx->res_.val_);
         if (status != napi_ok) {
             HILOGE("Internal BUG, cannot reject promise for %{public}d", status);
         }
