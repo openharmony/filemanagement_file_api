@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -349,9 +349,7 @@ napi_value StreamNExporter::Constructor(napi_env env, napi_callback_info info)
 
     unique_ptr<StreamEntity> streamEntity = make_unique<StreamEntity>();
     if (!NClass::SetEntityFor<StreamEntity>(env, funcArg.GetThisVar(), move(streamEntity))) {
-        stringstream ss;
-        ss << "INNER BUG. Failed to wrap entity for obj stat";
-        UniError(EIO).ThrowErr(env, ss.str());
+        UniError(EIO).ThrowErr(env, "INNER BUG. Failed to wrap entity for obj stream");
         return nullptr;
     }
     return funcArg.GetThisVar();

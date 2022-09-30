@@ -59,7 +59,7 @@ static tuple<bool, string, string> GetCreateStreamArgs(napi_env env, const NFunc
         return { false, "", "" };
     }
 
-    tie(resGetSecondArg, mode, useless) = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
+    auto [resGetSecondArg, mode, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
     if (!resGetSecondArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid mode");
         return { false, "", "" };
@@ -76,7 +76,7 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetCreateStreamArgs, argPath, argMode) = GetCreateStreamArgs(env, funcArg);
+    auto [resGetCreateStreamArgs, argPath, argMode] = GetCreateStreamArgs(env, funcArg);
     if (!resGetCreateStreamArgs) {
         return nullptr;
     }

@@ -73,7 +73,7 @@ napi_value DirNExporter::Close(napi_env env, napi_callback_info info)
     }
 
     auto dirEntity = NClass::GetEntityOf<DirEntity>(env, funcArg.GetThisVar());
-    if (dirEntity == nullptr) {
+    if (!dirEntity) {
         UniError(EIO).ThrowErr(env, "Cannot get entity of Dir");
         return nullptr;
     }
@@ -104,10 +104,10 @@ napi_value DirNExporter::Close(napi_env env, napi_callback_info info)
     static const string procedureName = "fileioDirClose";
     if (funcArg.GetArgc() == NARG_CNT::ZERO) {
         return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
+    } else {
+        NVal cb(env, funcArg[NARG_POS::FIRST]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
     }
-
-    NVal cb(env, funcArg[NARG_POS::FIRST]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
 }
 
 struct DirReadArgs {
@@ -137,7 +137,7 @@ static NVal DoReadComplete(napi_env env, UniError err, shared_ptr<DirReadArgs> a
         }
 
         if (strlen(arg->dirRes.d_name) == 0) {
-            return { env, nullptr };
+            return { env, NVal::CreateUndefined(env).val_ };
         } else {
             direntEntity->dirent_ = arg->dirRes;
             return { env, objDirent };
@@ -165,9 +165,6 @@ napi_value DirNExporter::Read(napi_env env, napi_callback_info info)
     }
 
     DIR *dir = dirEntity->dir_.get();
-    if (dir == nullptr) {
-        return nullptr;
-    }
     auto arg = make_shared<DirReadArgs>(NVal(env, funcArg.GetThisVar()));
     auto cbExec = [arg, dir, dirEntity](napi_env env) -> UniError {
         struct dirent tmpDirent;
@@ -253,6 +250,161 @@ napi_value DirNExporter::ReadSync(napi_env env, napi_callback_info info)
     return objDirent;
 }
 
+struct DirListFileArgs {
+    vector<dirent> dirents;
+    explicit DirListFileArgs()
+    {
+        dirents = vector<dirent>();
+    }
+    ~DirListFileArgs() = default;
+};
+
+static DirEntity *CheckDirEntity(napi_env env, napi_value dir_entity)
+{
+    auto dirEntity = NClass::GetEntityOf<DirEntity>(env, dir_entity);
+    if (!dirEntity) {
+        UniError(EIO).ThrowErr(env, "Cannot get entity of Dir");
+        return nullptr;
+    }
+
+    if (!dirEntity || !dirEntity->dir_) {
+        UniError(EBADF).ThrowErr(env, "Dir has been closed yet");
+        return nullptr;
+    }
+    return dirEntity;
+}
+
+static tuple<bool, int> ParseJsListNum(napi_env env, napi_value listNumFromJs)
+{
+    auto [succ, listNum] = NVal(env, listNumFromJs).ToInt32();
+    return {succ, listNum};
+}
+
+static napi_value DoListFileVector2NV(napi_env env, vector<dirent> dirents)
+{
+    napi_value res = nullptr;
+    napi_create_array(env, &res);
+    for (size_t i = 0; i < dirents.size(); i++) {
+        napi_value objDirent = NClass::InstantiateClass(env, DirentNExporter::className_, {});
+        if (!objDirent) {
+            UniError(EINVAL).ThrowErr(env);
+            return nullptr;
+        }
+        auto direntEntity = NClass::GetEntityOf<DirentEntity>(env, objDirent);
+        if (!direntEntity) {
+            UniError(EINVAL).ThrowErr(env);
+            return nullptr;
+        }
+        direntEntity->dirent_ = dirents[i];
+        napi_set_element(env, res, i, objDirent);
+    }
+    return res;
+}
+
+static NVal DoListFileCompile(napi_env env, UniError err, shared_ptr<DirListFileArgs> arg)
+{
+    if (err) {
+        return { env, err.GetNapiErr(env) };
+    } else {
+        return { env, DoListFileVector2NV(env, arg->dirents) };
+    }
+}
+
+napi_value DirNExporter::ListFile(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
+        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        return nullptr;
+    }
+    auto dirEntity = CheckDirEntity(env, funcArg.GetThisVar());
+    if (!dirEntity) {
+        return nullptr;
+    }
+    auto [succ, num] = ParseJsListNum(env, funcArg[NARG_POS::FIRST]);
+    if (!succ) {
+        UniError(EINVAL).ThrowErr(env, "Invalid listNum");
+        return nullptr;
+    }
+
+    DIR *dir = dirEntity->dir_.get();
+    auto arg = make_shared<DirListFileArgs>();
+    int listNum = num;
+    auto cbExec = [arg, dir, dirEntity, listNum](napi_env env) -> UniError {
+        lock_guard(dirEntity->lock_);
+        errno = 0;
+        dirent *res = nullptr;
+        int listCount = 0;
+        do {
+            res = readdir(dir);
+            if (res == nullptr && errno) {
+                return UniError(errno);
+            } else if (res == nullptr) {
+                return UniError(ERRNO_NOERR);
+            } else if (string(res->d_name) == "." || string(res->d_name) == "..") {
+                continue;
+            } else {
+                arg->dirents.push_back(*res);
+                listCount++;
+            }
+        } while (listCount < listNum || listNum == 0);
+        return UniError(ERRNO_NOERR);
+    };
+    auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
+        return DoListFileCompile(env, err, arg);
+    };
+    NVal thisVar(env, funcArg.GetThisVar());
+
+    if (funcArg.GetArgc() == NARG_CNT::ONE) {
+        return NAsyncWorkPromise(env, thisVar).Schedule(listfileProcedureName, cbExec, cbCompl).val_;
+    } else {
+        NVal cb(env, funcArg[NARG_POS::SECOND]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(listfileProcedureName, cbExec, cbCompl).val_;
+    }
+}
+
+napi_value DirNExporter::ListFileSync(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ONE)) {
+        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        return nullptr;
+    }
+    auto dirEntity = CheckDirEntity(env, funcArg.GetThisVar());
+    if (!dirEntity) {
+        return nullptr;
+    }
+    auto [succ, listNum] = ParseJsListNum(env, funcArg[NARG_POS::FIRST]);
+    if (!succ) {
+        UniError(EINVAL).ThrowErr(env, "Invalid listNum");
+        return nullptr;
+    }
+
+    vector<dirent> dirents;
+    {
+        lock_guard(dirEntity->lock_);
+        errno = 0;
+        dirent *res = nullptr;
+        int listCount = 0;
+        auto dir = dirEntity->dir_.get();
+        do {
+            res = readdir(dir);
+            if (res == nullptr && errno) {
+                UniError(errno).ThrowErr(env);
+                return nullptr;
+            } else if (res == nullptr) {
+                break;
+            } else if (string(res->d_name) == "." || string(res->d_name) == "..") {
+                continue;
+            } else {
+                dirents.push_back(*res);
+                listCount++;
+            }
+        } while (listCount < listNum || listNum == 0);
+    }
+    return DoListFileVector2NV(env, dirents);
+}
+
 napi_value DirNExporter::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -274,8 +426,10 @@ bool DirNExporter::Export()
     vector<napi_property_descriptor> props = {
         NVal::DeclareNapiFunction("readSync", ReadSync),
         NVal::DeclareNapiFunction("closeSync", CloseSync),
+        NVal::DeclareNapiFunction("listfileSync", ListFileSync),
         NVal::DeclareNapiFunction("read", Read),
         NVal::DeclareNapiFunction("close", Close),
+        NVal::DeclareNapiFunction("listfile", ListFile),
     };
 
     string className = GetClassName();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,7 @@ static tuple<bool, size_t> GetActualLen(napi_env env, int64_t bufLen, int64_t bu
 {
     bool succ = false;
     int64_t retLen;
+
     if (op.HasProp("length")) {
         int64_t opLength;
         tie(succ, opLength) = op.GetProp("length").ToInt64();
@@ -66,33 +67,65 @@ static tuple<bool, size_t> GetActualLen(napi_env env, int64_t bufLen, int64_t bu
             UniError(EINVAL).ThrowErr(env, "Invalid option.length, expect integer");
             return { false, 0 };
         }
-
         if (opLength < 0) {
-            retLen = (bufLen > bufOff) ? bufLen - bufOff : 0;
-        } else if ((bufLen > opLength) && (bufOff > bufLen - opLength)) {
+            retLen = bufLen - bufOff;
+        } else if (opLength + bufOff > bufLen) {
             UniError(EINVAL).ThrowErr(env, "Invalid option.length, buffer limit exceeded");
             return { false, 0 };
         } else {
             retLen = opLength;
         }
     } else {
-        retLen = (bufLen > bufOff) ? bufLen - bufOff : 0;
+        retLen = bufLen - bufOff;
     }
 
     return { true, retLen };
 }
 
-tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,
-    napi_value srcPath,
-    napi_value dstPath)
+int CommonFunc::ConvertJsFlags(int &flags)
 {
-    auto [succ, src, unuse] = NVal(env, srcPath).ToUTF8String();
+    static constexpr int USR_O_RDONLY = 00;
+    static constexpr int USR_O_WRONLY = 01;
+    static constexpr int USR_O_RDWR = 02;
+    static constexpr int USR_O_CREAT = 0100;
+    static constexpr int USR_O_EXCL = 0200;
+    static constexpr int USR_O_TRUNC = 01000;
+    static constexpr int USR_O_APPEND = 02000;
+    static constexpr int USR_O_NONBLOCK = 04000;
+    static constexpr int USR_O_DIRECTORY = 0200000;
+    static constexpr int USR_O_NOFOLLOW = 0400000;
+    static constexpr int USR_O_SYNC = 04010000;
+
+    int flagsABI = 0;
+    flagsABI |= ((flags & USR_O_RDONLY) == USR_O_RDONLY) ? O_RDONLY : 0;
+    flagsABI |= ((flags & USR_O_WRONLY) == USR_O_WRONLY) ? O_WRONLY : 0;
+    flagsABI |= ((flags & USR_O_RDWR) == USR_O_RDWR) ? O_RDWR : 0;
+    flagsABI |= ((flags & USR_O_CREAT) == USR_O_CREAT) ? O_CREAT : 0;
+    flagsABI |= ((flags & USR_O_EXCL) == USR_O_EXCL) ? O_EXCL : 0;
+    flagsABI |= ((flags & USR_O_TRUNC) == USR_O_TRUNC) ? O_TRUNC : 0;
+    flagsABI |= ((flags & USR_O_APPEND) == USR_O_APPEND) ? O_APPEND : 0;
+    flagsABI |= ((flags & USR_O_NONBLOCK) == USR_O_NONBLOCK) ? O_NONBLOCK : 0;
+    flagsABI |= ((flags & USR_O_DIRECTORY) == USR_O_DIRECTORY) ? O_DIRECTORY : 0;
+    flagsABI |= ((flags & USR_O_NOFOLLOW) == USR_O_NOFOLLOW) ? O_NOFOLLOW : 0;
+    flagsABI |= ((flags & USR_O_SYNC) == USR_O_SYNC) ? O_SYNC : 0;
+    flags = flagsABI;
+    return flagsABI;
+}
+
+tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,
+                                                                               napi_value srcPath,
+                                                                               napi_value dstPath)
+{
+    bool succ = false;
+    unique_ptr<char[]> src;
+    tie(succ, src, ignore) = NVal(env, srcPath).ToUTF8String();
     if (!succ) {
         return { false, nullptr, nullptr };
     }
 
-    tie(res, dest, useless) = NVal(env, dstPath).ToUTF8String();
-    if (!res) {
+    unique_ptr<char[]> dest;
+    tie(succ, dest, ignore) = NVal(env, dstPath).ToUTF8String();
+    if (!succ) {
         return { false, nullptr, nullptr };
     }
 
@@ -103,35 +136,41 @@ tuple<bool, void *, int64_t, bool, int64_t, int> CommonFunc::GetReadArg(napi_env
                                                                         napi_value readBuf,
                                                                         napi_value option)
 {
+    bool succ = false;
+    void *retBuf = nullptr;
+    int64_t retLen = 0;
     bool posAssigned = false;
     int64_t position = 0;
+
     NVal txt(env, readBuf);
-    auto [resToArraybuffer, buf, bufLen] = txt.ToArraybuffer();
-    if (!resToArraybuffer) {
+    void *buf = nullptr;
+    int64_t bufLen = 0;
+    int offset = 0;
+    tie(succ, buf, bufLen) = txt.ToArraybuffer();
+    if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid read buffer, expect arraybuffer");
-        return { false, nullptr, 0, posAssigned, position, 0 };
+        return { false, nullptr, 0, posAssigned, position, offset };
     }
 
     NVal op = NVal(env, option);
-    auto [resGetActualBuf, retBuf, offset] = GetActualBuf(env, buf, bufLen, op);
-    if (!resGetActualBuf) {
-        return { false, nullptr, 0, posAssigned, position, 0 };
+    tie(succ, retBuf, offset) = GetActualBuf(env, buf, bufLen, op);
+    if (!succ) {
+        return { false, nullptr, 0, posAssigned, position, offset };
     }
 
     int64_t bufOff = static_cast<uint8_t *>(retBuf) - static_cast<uint8_t *>(buf);
-    auto [resGetActualLen, retLen] = GetActualLen(env, bufLen, bufOff, op);
-    if (!resGetActualLen) {
-        return { false, nullptr, 0, posAssigned, position, 0 };
+    tie(succ, retLen) = GetActualLen(env, bufLen, bufOff, op);
+    if (!succ) {
+        return { false, nullptr, 0, posAssigned, position, offset };
     }
 
     if (op.HasProp("position")) {
-        auto [resGetProp, pos] = op.GetProp("position").ToInt64();
-        if (resGetProp && pos >= 0) {
+        tie(succ, position) = op.GetProp("position").ToInt64();
+        if (succ && position >= 0) {
             posAssigned = true;
-            position = pos;
         } else {
             UniError(EINVAL).ThrowErr(env, "option.position shall be positive number");
-            return { false, nullptr, 0, posAssigned, position, 0 };
+            return { false, nullptr, 0, posAssigned, position, offset };
         }
     }
 
@@ -145,16 +184,16 @@ static tuple<bool, unique_ptr<char[]>, int64_t> DecodeString(napi_env env, NVal 
         return { false, nullptr, 0 };
     }
 
+    bool succ = false;
     if (!encoding) {
         return jsStr.ToUTF8String();
     }
 
     unique_ptr<char[]> encodingBuf;
-    auto [resToUTF8String, encodingBuf, unuse] = encoding.ToUTF8String();
-    if (!resToUTF8String) {
+    tie(succ, encodingBuf, ignore) = encoding.ToUTF8String();
+    if (!succ) {
         return { false, nullptr, 0 };
     }
-
     string encodingStr(encodingBuf.release());
     if (encodingStr == "utf-8") {
         return jsStr.ToUTF8String();
@@ -169,38 +208,44 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
                                                                                         napi_value argWBuf,
                                                                                         napi_value argOption)
 {
+    void *retBuf = nullptr;
+    int64_t retLen = 0;
     bool hasPos = false;
     int64_t retPos = 0;
+
     bool succ = false;
     void *buf = nullptr;
+    int64_t bufLen = 0;
     NVal op(env, argOption);
     NVal jsBuffer(env, argWBuf);
-    auto [resDecodeString, bufferGuard, bufLen] = DecodeString(env, jsBuffer, op.GetProp("encoding"));
-    if (!resDecodeString) {
+    unique_ptr<char[]> bufferGuard;
+    tie(succ, bufferGuard, bufLen) = DecodeString(env, jsBuffer, op.GetProp("encoding"));
+    if (!succ) {
         tie(succ, buf, bufLen) = NVal(env, argWBuf).ToArraybuffer();
         if (!succ) {
             UniError(EINVAL).ThrowErr(env, "Illegal write buffer or encoding");
-            return { false, nullptr, nullptr, 0, false, 0 };
+            return { false, nullptr, nullptr, 0, hasPos, retPos };
         }
     } else {
         buf = bufferGuard.get();
     }
 
-    auto [resGetActualBuf, retBuf, unused] = GetActualBuf(env, buf, bufLen, op);
-    if (!resGetActualBuf) {
-        return { false, nullptr, nullptr, 0, false, 0 };
+    tie(succ, retBuf, ignore) = GetActualBuf(env, buf, bufLen, op);
+    if (!succ) {
+        return { false, nullptr, nullptr, 0, hasPos, retPos };
     }
 
     int64_t bufOff = static_cast<uint8_t *>(retBuf) - static_cast<uint8_t *>(buf);
-    auto [resGetActualLen, retLen] = GetActualLen(env, bufLen, bufOff, op);
-    if (!resGetActualLen) {
-        return { false, nullptr, nullptr, 0, false, 0 };
+    tie(succ, retLen) = GetActualLen(env, bufLen, bufOff, op);
+    if (!succ) {
+        return { false, nullptr, nullptr, 0, hasPos, retPos };
     }
 
     /* To parse options - Where to begin writing */
     if (op.HasProp("position")) {
-        auto [resGetProp, position] = op.GetProp("position").ToInt32();
-        if (!resGetProp || position < 0) {
+        int32_t position = 0;
+        tie(succ, position) = op.GetProp("position").ToInt32();
+        if (!succ || position < 0) {
             UniError(EINVAL).ThrowErr(env, "option.position shall be positive number");
             return { false, nullptr, nullptr, 0, hasPos, retPos };
         }

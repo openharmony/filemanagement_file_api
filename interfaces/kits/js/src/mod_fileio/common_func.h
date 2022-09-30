@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ namespace ModuleFileIO {
 constexpr int64_t INVALID_POSITION = std::numeric_limits<decltype(INVALID_POSITION)>::max();
 
 struct CommonFunc {
+    static int ConvertJsFlags(int &flags);
     static std::tuple<bool, void *, int64_t, bool, int64_t, int> GetReadArg(napi_env env,
                                                                             napi_value readBuf,
                                                                             napi_value option);

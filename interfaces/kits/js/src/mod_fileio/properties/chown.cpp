@@ -48,7 +48,7 @@ static tuple<bool, string, int, int> GetChownArg(napi_env env, const NFuncArg &f
         return { false, "", -1, -1 };
     }
 
-    return { succ, path.get(), owner, group };
+    return { true, path.get(), owner, group };
 }
 
 napi_value Chown::Sync(napi_env env, napi_callback_info info)
@@ -85,7 +85,7 @@ napi_value Chown::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto cbExec = [path, owner, group](napi_env env) -> UniError {
+    auto cbExec = [path = path, owner = owner, group = group](napi_env env) -> UniError {
         if (chown(path.c_str(), owner, group) == -1) {
             return UniError(errno);
         } else {

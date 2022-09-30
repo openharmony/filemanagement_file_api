@@ -113,10 +113,10 @@ bool WatcherNExporter::Export()
     };
 
     string className = GetClassName();
-    auto [resDefineClass, classValue) = NClass::DefineClass(exports_.env_,
-                                                className,
-                                                WatcherNExporter::Constructor,
-                                                std::move(props));
+    auto [resDefineClass, classValue] = NClass::DefineClass(exports_.env_,
+                                                            className,
+                                                            WatcherNExporter::Constructor,
+                                                            std::move(props));
     if (!resDefineClass) {
         UniError(EIO).ThrowErr(exports_.env_, "INNER BUG. Failed to define class");
         return false;

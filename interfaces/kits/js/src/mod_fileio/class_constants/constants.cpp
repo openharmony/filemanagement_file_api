@@ -50,79 +50,78 @@ bool Constants::Export()
 {
     // access
     napi_value F_OK_ = nullptr;
-    napi_create_int32(exports_.env_, 0, &F_OK_);                       // 0 F_OK
+    napi_create_int32(exports_.env_, F_OK, &F_OK_);                       // 0 F_OK
     napi_value R_OK_ = nullptr;
-    napi_create_int32(exports_.env_, 4, &R_OK_);                       // 4 R_OK
+    napi_create_int32(exports_.env_, R_OK, &R_OK_);                       // 4 R_OK
     napi_value W_OK_ = nullptr;
-    napi_create_int32(exports_.env_, 2, &W_OK_);                       // 2 W_OK
+    napi_create_int32(exports_.env_, W_OK, &W_OK_);                       // 2 W_OK
     napi_value X_OK_ = nullptr;
-    napi_create_int32(exports_.env_, 1, &X_OK_);                       // 1  X_OK
-
+    napi_create_int32(exports_.env_, X_OK, &X_OK_);                       // 1  X_OK
     // open
     napi_value O_RDONLY_ = nullptr;
-    napi_create_int32(exports_.env_, 0, &O_RDONLY_);               // 0 O_RDONLY
+    napi_create_int32(exports_.env_, O_RDONLY, &O_RDONLY_);               // 0 O_RDONLY
     napi_value O_WRONLY_ = nullptr;
-    napi_create_int32(exports_.env_, 1, &O_WRONLY_);               // 1 O_WRONLY
+    napi_create_int32(exports_.env_, O_WRONLY, &O_WRONLY_);               // 1 O_WRONLY
     napi_value O_RDWR_ = nullptr;
-    napi_create_int32(exports_.env_, 2, &O_RDWR_);                   // 2 O_RDWR
+    napi_create_int32(exports_.env_, O_RDWR, &O_RDWR_);                   // 2 O_RDWR
     napi_value O_CREAT_ = nullptr;
-    napi_create_int32(exports_.env_, 0o100, &O_CREAT_);                 // 0o100 O_CREAT
+    napi_create_int32(exports_.env_, O_CREAT, &O_CREAT_);                 // 0o100 O_CREAT
     napi_value O_EXCL_ = nullptr;
-    napi_create_int32(exports_.env_, 0o200, &O_EXCL_);                   // 0o200 O_EXCL
+    napi_create_int32(exports_.env_, O_EXCL, &O_EXCL_);                   // 0o200 O_EXCL
     napi_value O_TRUNC_  = nullptr;
-    napi_create_int32(exports_.env_, 0o1000, &O_TRUNC_);                 // 0o1000 O_TRUNC
+    napi_create_int32(exports_.env_, O_TRUNC, &O_TRUNC_);                 // 0o1000 O_TRUNC
     napi_value O_APPEND_ = nullptr;
-    napi_create_int32(exports_.env_, 0o2000, &O_APPEND_);               // 0o2000 O_APPEND
+    napi_create_int32(exports_.env_, O_APPEND, &O_APPEND_);               // 0o2000 O_APPEND
     napi_value O_NONBLOCK_ = nullptr;
-    napi_create_int32(exports_.env_, 0o4000, &O_NONBLOCK_);           // 0o4000 O_NONBLOCK
+    napi_create_int32(exports_.env_, O_NONBLOCK, &O_NONBLOCK_);           // 0o4000 O_NONBLOCK
     napi_value O_DIRECTORY_ = nullptr;
-    napi_create_int32(exports_.env_, 0o200000, &O_DIRECTORY_);         // 0o200000 O_DIRECTORY
+    napi_create_int32(exports_.env_, O_DIRECTORY, &O_DIRECTORY_);         // 0o200000 O_DIRECTORY
     napi_value O_NOFOLLOW_ = nullptr;
-    napi_create_int32(exports_.env_, 0o400000, &O_NOFOLLOW_);           // 0o400000 O_NOFOLLOW
+    napi_create_int32(exports_.env_, O_NOFOLLOW, &O_NOFOLLOW_);           // 0o400000 O_NOFOLLOW
     napi_value O_SYNC_ = nullptr;
-    napi_create_int32(exports_.env_, 0o4010000, &O_SYNC_);                   // 0o4010000 O_SYNC
+    napi_create_int32(exports_.env_, O_SYNC, &O_SYNC_);                   // 0o4010000 O_SYNC
 
     // stat
     napi_value S_IFMT_ = nullptr;
-    napi_create_int32(exports_.env_, 0o170000, &S_IFMT_);                   // 0o170000 S_IFMT
+    napi_create_int32(exports_.env_, S_IFMT, &S_IFMT_);                   // 0o170000 S_IFMT
     napi_value S_IFSOCK_ = nullptr;
-    napi_create_int32(exports_.env_, 0o140000, &S_IFSOCK_);               // 0o140000 S_IFSOCK
+    napi_create_int32(exports_.env_, S_IFSOCK, &S_IFSOCK_);               // 0o140000 S_IFSOCK
     napi_value S_IFLNK_ = nullptr;
-    napi_create_int32(exports_.env_, 0o120000, &S_IFLNK_);                 // 0o120000 S_IFLNK
+    napi_create_int32(exports_.env_, S_IFLNK, &S_IFLNK_);                 // 0o120000 S_IFLNK
     napi_value S_IFREG_ = nullptr;
-    napi_create_int32(exports_.env_, 0o100000, &S_IFREG_);                 // 0o100000 S_IFREG
+    napi_create_int32(exports_.env_, S_IFREG, &S_IFREG_);                 // 0o100000 S_IFREG
     napi_value S_IFBLK_ = nullptr;
-    napi_create_int32(exports_.env_, 0o060000, &S_IFBLK_);                 // 0o060000 S_IFBLK
+    napi_create_int32(exports_.env_, S_IFBLK, &S_IFBLK_);                 // 0o060000 S_IFBLK
     napi_value S_IFDIR_ = nullptr;
-    napi_create_int32(exports_.env_, 0o040000, &S_IFDIR_);                 // 0o040000 S_IFDIR
+    napi_create_int32(exports_.env_, S_IFDIR, &S_IFDIR_);                 // 0o040000 S_IFDIR
     napi_value S_IFCHR_  = nullptr;
-    napi_create_int32(exports_.env_, 0o020000, &S_IFCHR_);                 // 0o020000 S_IFCHR
+    napi_create_int32(exports_.env_, S_IFCHR, &S_IFCHR_);                 // 0o020000 S_IFCHR
     napi_value S_IFIFO_  = nullptr;
-    napi_create_int32(exports_.env_, 0o010000, &S_IFIFO_);                 // 0o010000 S_IFIFO
+    napi_create_int32(exports_.env_, S_IFIFO, &S_IFIFO_);                 // 0o010000 S_IFIFO
     napi_value S_IRWXU_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0700, &S_IRWXU_);                 // 0o0700 S_IRWXU
+    napi_create_int32(exports_.env_, S_IRWXU, &S_IRWXU_);                 // 0o0700 S_IRWXU
     napi_value S_IRUSR_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0400, &S_IRUSR_);                 // 0o0400 S_IRUSR
+    napi_create_int32(exports_.env_, S_IRUSR, &S_IRUSR_);                 // 0o0400 S_IRUSR
     napi_value S_IWUSR_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0200, &S_IWUSR_);                 // 0o0200 S_IWUSR
+    napi_create_int32(exports_.env_, S_IWUSR, &S_IWUSR_);                 // 0o0200 S_IWUSR
     napi_value S_IXUSR_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0100, &S_IXUSR_);                 // 0o0100 S_IXUSR
+    napi_create_int32(exports_.env_, S_IXUSR, &S_IXUSR_);                 // 0o0100 S_IXUSR
     napi_value S_IRWXG_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0070, &S_IRWXG_);                 // 0o0070 S_IRWXG
+    napi_create_int32(exports_.env_, S_IRWXG, &S_IRWXG_);                 // 0o0070 S_IRWXG
     napi_value S_IRGRP_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0040, &S_IRGRP_);                 // 0o0040 S_IRGRP
+    napi_create_int32(exports_.env_, S_IRGRP, &S_IRGRP_);                 // 0o0040 S_IRGRP
     napi_value S_IWGRP_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0020, &S_IWGRP_);                 // 0o0020 S_IWGRP
+    napi_create_int32(exports_.env_, S_IWGRP, &S_IWGRP_);                 // 0o0020 S_IWGRP
     napi_value S_IXGRP_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0010, &S_IXGRP_);                 // 0o0010 S_IXGRP
+    napi_create_int32(exports_.env_, S_IXGRP, &S_IXGRP_);                 // 0o0010 S_IXGRP
     napi_value S_IRWXO_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0007, &S_IRWXO_);                 // 0o0007 S_IRWXO
+    napi_create_int32(exports_.env_, S_IRWXO, &S_IRWXO_);                 // 0o0007 S_IRWXO
     napi_value S_IROTH_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0004, &S_IROTH_);                 // 0o0004 S_IROTH
+    napi_create_int32(exports_.env_, S_IROTH, &S_IROTH_);                 // 0o0004 S_IROTH
     napi_value S_IWOTH_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0002, &S_IWOTH_);                 // 0o0002 S_IWOTH
+    napi_create_int32(exports_.env_, S_IWOTH, &S_IWOTH_);                 // 0o0002 S_IWOTH
     napi_value S_IXOTH_  = nullptr;
-    napi_create_int32(exports_.env_, 0o0001, &S_IXOTH_);                 // 0o0001 S_IXOTH
+    napi_create_int32(exports_.env_, S_IXOTH, &S_IXOTH_);                 // 0o0001 S_IXOTH
 
     vector<napi_property_descriptor> props = {
         NVal::DeclareNapiStaticProperty("F_OK", F_OK_),

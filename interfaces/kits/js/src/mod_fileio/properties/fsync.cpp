@@ -64,7 +64,7 @@ napi_value Fsync::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto cbExec = [fd](napi_env env) -> UniError {
+    auto cbExec = [fd = fd](napi_env env) -> UniError {
         if (fsync(fd) == -1) {
             return UniError(errno);
         } else {

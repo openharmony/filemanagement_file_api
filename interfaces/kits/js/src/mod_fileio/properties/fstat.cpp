@@ -87,7 +87,7 @@ napi_value Fstat::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncStatArg>();
-    auto cbExec = [fd, arg](napi_env env) -> UniError {
+    auto cbExec = [fd = fd, arg = arg](napi_env env) -> UniError {
         if (fstat(fd, &arg->stat_)) {
             return UniError(errno);
         } else {
@@ -95,7 +95,7 @@ napi_value Fstat::Async(napi_env env, napi_callback_info info)
         }
     };
 
-    auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
+    auto cbCompl = [arg = arg](napi_env env, UniError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }

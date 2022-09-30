@@ -77,7 +77,7 @@ napi_value Chmod::Async(napi_env env, napi_callback_info info)
     }
 
     string path = tmp.get();
-    auto cbExec = [path, mode](napi_env env) -> UniError {
+    auto cbExec = [path = path, mode = mode](napi_env env) -> UniError {
         if (chmod(path.c_str(), mode) == -1) {
             return UniError(errno);
         } else {

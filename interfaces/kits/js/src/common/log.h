@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ namespace OHOS {
 namespace DistributedFS {
 #ifndef FILE_SUBSYSTEM_DEBUG_LOCAL
 static constexpr int FILEIO_DOMAIN_ID = 0;
-static constexpr OHOS::HiviewDFX::HiLogLabel FILEIO_LABEL = { LOG_CORE, FILEIO_DOMAIN_ID, "distributedfilejs" };
+static constexpr OHOS::HiviewDFX::HiLogLabel FILEIO_LABEL = { LOG_CORE, FILEIO_DOMAIN_ID, "file_api" };
 
 #ifdef HILOGD
 #undef HILOGD

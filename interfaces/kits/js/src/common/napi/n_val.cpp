@@ -124,6 +124,36 @@ tuple<bool, int64_t> NVal::ToInt64() const
     return make_tuple(status == napi_ok, res);
 }
 
+tuple<bool, double> NVal::ToDouble() const
+{
+    double res = 0;
+    napi_status status = napi_get_value_double(env_, val_, &res);
+    return make_tuple(status == napi_ok, res);
+}
+
+tuple<bool, uint64_t, bool> NVal::ToUint64() const
+{
+    uint64_t res = 0;
+    bool lossless = false;
+    napi_status status = napi_get_value_bigint_uint64(env_, val_, &res, &lossless);
+    return make_tuple(status == napi_ok, res, lossless);
+}
+
+tuple<bool, vector<string>, uint32_t> NVal::ToStringArray()
+{
+    napi_status status;
+    uint32_t size;
+    status = napi_get_array_length(env_, val_, &size);
+    vector<string> stringArray;
+    napi_value result;
+    for (uint32_t i = 0; i < size; i++) {
+        status = napi_get_element(env_, val_, i, &result);
+        auto [succ, str, ignore] = NVal(env_, result).ToUTF8String();
+        stringArray.push_back(string(str.get()));
+    }
+    return make_tuple(status == napi_ok, stringArray, size);
+}
+
 tuple<bool, void *, size_t> NVal::ToArraybuffer() const
 {
     void *buf = nullptr;
@@ -263,6 +293,18 @@ NVal NVal::CreateUint8Array(napi_env env, void *buf, size_t bufLen)
     napi_value output_array = nullptr;
     napi_create_typedarray(env, napi_uint8_array, bufLen, output_buffer, 0, &output_array);
     return { env, output_array };
+}
+
+NVal NVal::CreateArrayString(napi_env env, vector<string> strs)
+{
+    napi_value res = nullptr;
+    napi_create_array(env, &res);
+    for (size_t i = 0; i < strs.size(); i++) {
+        napi_value filename;
+        napi_create_string_utf8(env, strs[i].c_str(), strs[i].length(), &filename);
+        napi_set_element(env, res, i, filename);
+    }
+    return {env, res};
 }
 
 tuple<NVal, void *> NVal::CreateArrayBuffer(napi_env env, size_t len)

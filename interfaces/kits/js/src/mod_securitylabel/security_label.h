@@ -25,11 +25,11 @@
 namespace OHOS {
 namespace DistributedFS {
 namespace ModuleSecurityLabel {
+const char XATTR_KEY[] = {"user.security"};
+const std::string DEFAULT_DATA_LEVEL = "s3";
+const std::set<std::string> DATA_LEVEL = {"s0", "s1", "s2", "s3", "s4"};
 class SecurityLabel {
 public:
-    static const char XATTR_KEY[] {"user.security"};
-    static const std::string DEFAULT_DATA_LEVEL = "s3";
-    static const std::set<std::string> DATA_LEVEL = {"s0", "s1", "s2", "s3", "s4"};
     static bool SetSecurityLabel(const std::string &path, const std::string &dataLevel)
     {
         if (DATA_LEVEL.count(dataLevel) != 1) {
@@ -43,7 +43,7 @@ public:
 
     static std::string GetSecurityLabel(const std::string &path)
     {
-        auto xattrValueSize = getxattr(path.c_str(), XATTR_KEY, NULL, 0);
+        auto xattrValueSize = getxattr(path.c_str(), XATTR_KEY, nullptr, 0);
         if (xattrValueSize == -1 || errno == ENOTSUP) {
             return "";
         }

@@ -114,9 +114,7 @@ napi_value DirentNExporter::Constructor(napi_env env, napi_callback_info info)
 
     auto direntEntity = make_unique<DirentEntity>();
     if (!NClass::SetEntityFor<DirentEntity>(env, funcArg.GetThisVar(), move(direntEntity))) {
-        stringstream ss;
-        ss << "INNER BUG. Failed to wrap entity for obj dirent";
-        UniError(EIO).ThrowErr(env, ss.str());
+        UniError(EIO).ThrowErr(env, "INNER BUG. Failed to wrap entity for obj dirent");
         return nullptr;
     }
     return funcArg.GetThisVar();

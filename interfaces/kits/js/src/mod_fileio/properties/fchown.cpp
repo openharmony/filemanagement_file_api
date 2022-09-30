@@ -79,12 +79,12 @@ napi_value Fchown::Async(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Invalid owner");
     }
 
-    auto (resGetThirdArg, group] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
+    auto [resGetThirdArg, group] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
     if (!resGetThirdArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid group");
     }
 
-    auto cbExec = [fd, owner, group](napi_env env) -> UniError {
+    auto cbExec = [fd = fd, owner = owner, group = group](napi_env env) -> UniError {
         int ret = fchown(fd, owner, group);
         if (ret == -1) {
             return UniError(errno);
