@@ -75,6 +75,7 @@ napi_value Fchmod::Async(napi_env env, napi_callback_info info)
     auto [resGetSecondArg, mode] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
     if (!resGetSecondArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid owner");
+        return nullptr;
     }
 
     auto cbExec = [fd = fd, mode = mode](napi_env env) -> UniError {

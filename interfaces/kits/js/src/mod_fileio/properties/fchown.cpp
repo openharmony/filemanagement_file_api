@@ -44,11 +44,13 @@ napi_value Fchown::Sync(napi_env env, napi_callback_info info)
     auto [resGetSecondArg, owner] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
     if (!resGetSecondArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid owner");
+        return nullptr;
     }
 
     auto [resGetThirdArg, group] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
     if (!resGetThirdArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid group");
+        return nullptr;
     }
 
     int ret = fchown(fd, owner, group);
@@ -77,11 +79,13 @@ napi_value Fchown::Async(napi_env env, napi_callback_info info)
     auto [resGetSecondArg, owner] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
     if (!resGetSecondArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid owner");
+        return nullptr;
     }
 
     auto [resGetThirdArg, group] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
     if (!resGetThirdArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid group");
+        return nullptr;
     }
 
     auto cbExec = [fd = fd, owner = owner, group = group](napi_env env) -> UniError {
