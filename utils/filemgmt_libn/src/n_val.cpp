@@ -124,6 +124,28 @@ tuple<bool, int64_t> NVal::ToInt64() const
     return make_tuple(status == napi_ok, res);
 }
 
+tuple<bool, double> NVal::ToDouble() const
+{
+    double res = 0;
+    napi_status status = napi_get_value_double(env_, val_, &res);
+    return make_tuple(status == napi_ok, res);
+}
+
+tuple<bool, vector<string>, uint32_t> NVal::ToStringArray()
+{
+    napi_status status;
+    uint32_t size;
+    status = napi_get_array_length(env_, val_, &size);
+    vector<string> stringArray;
+    napi_value result;
+    for (uint32_t i = 0; i < size; i++) {
+        status = napi_get_element(env_, val_, i, &result);
+        auto [succ, str, ignore] = NVal(env_, result).ToUTF8String();
+        stringArray.push_back(string(str.get()));
+    }
+    return make_tuple(status == napi_ok, stringArray, size);
+}
+
 tuple<bool, void *, size_t> NVal::ToArraybuffer() const
 {
     void *buf = nullptr;
