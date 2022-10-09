@@ -51,6 +51,8 @@ public:
     std::tuple<bool, int64_t> ToInt64() const;
     std::tuple<bool, void *, size_t> ToArraybuffer() const;
     std::tuple<bool, void *, size_t> ToTypedArray() const;
+    std::tuple<bool, std::vector<std::string>, uint32_t> ToStringArray();
+    std::tuple<bool, double> ToDouble() const;
 
     /* Static helpers to create js objects */
     static NVal CreateUndefined(napi_env env);

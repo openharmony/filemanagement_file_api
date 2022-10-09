@@ -18,6 +18,7 @@
 
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
+#include "n_class.h"
 #include "n_error.h"
 #include "n_exporter.h"
 #include "n_func_arg.h"
