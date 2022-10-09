@@ -377,12 +377,14 @@ napi_value PropNExporter::FchownSync(napi_env env, napi_callback_info info)
     tie(succ, owner) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid owner");
+        return nullptr;
     }
 
     int group;
     tie(succ, group) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid group");
+        return nullptr;
     }
 
     int ret = fchown(fd, owner, group);
