@@ -34,7 +34,7 @@ napi_value PropNExporterV9::ReadSync(napi_env env, napi_callback_info info)
     NFuncArg funcArg(env, info);
 
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -43,7 +43,7 @@ napi_value PropNExporterV9::ReadSync(napi_env env, napi_callback_info info)
     int fd;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid fd");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -79,7 +79,7 @@ napi_value PropNExporterV9::Read(napi_env env, napi_callback_info info)
 {
    NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -91,14 +91,14 @@ napi_value PropNExporterV9::Read(napi_env env, napi_callback_info info)
     int64_t pos;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid fd");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     tie(succ, buf, len, hasPos, pos) =
         CommonFunc::GetReadArgV9(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Failed GetReadArg");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -164,7 +164,7 @@ napi_value PropNExporterV9::Write(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -172,7 +172,7 @@ napi_value PropNExporterV9::Write(napi_env env, napi_callback_info info)
     int fd;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid fd");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -184,7 +184,7 @@ napi_value PropNExporterV9::Write(napi_env env, napi_callback_info info)
     tie(succ, bufGuard, buf, len, hasPos, position) =
         CommonFunc::GetWriteArgV9(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Failed GetWriteArg");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -231,7 +231,7 @@ napi_value PropNExporterV9::WriteSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -239,7 +239,7 @@ napi_value PropNExporterV9::WriteSync(napi_env env, napi_callback_info info)
     int fd;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid fd");
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
