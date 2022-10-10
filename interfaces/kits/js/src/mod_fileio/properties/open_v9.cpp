@@ -1,0 +1,158 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "open_v9.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <memory>
+#include <uv.h>
+
+#include "../../common/log.h"
+#include "../../common/napi/n_async/n_async_work_callback.h"
+#include "../../common/napi/n_async/n_async_work_promise.h"
+#include "../../common/napi/n_class.h"
+#include "../../common/napi/n_func_arg.h"
+#include "../../common/uni_error.h"
+#include "../common_func.h"
+
+#include "../class_file/file_entity.h"
+#include "../class_file/file_n_exporter.h"
+
+namespace OHOS {
+namespace DistributedFS {
+namespace ModuleFileIO {
+using namespace std;
+
+static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
+{
+    int mode = O_RDONLY;
+    bool succ = false;
+    if (funcArg.GetArgc() == NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
+        tie(succ, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
+        if (!succ) {
+            UniError(EINVAL).ThrowErr(env);
+            return { false, mode };
+        }
+        (void)CommonFunc::ConvertJsFlags(mode);
+    }
+    return { true, mode };
+}
+
+static NVal InstantiateFile(napi_env env, int fd, string path)
+{
+    napi_value objRAF = NClass::InstantiateClass(env, FileNExporter::className_, {});
+    if (!objRAF) {
+        UniError(EIO).ThrowErr(env);
+        return NVal();
+    }
+
+    auto rafEntity = NClass::GetEntityOf<FileEntity>(env, objRAF);
+    if (!rafEntity) {
+        UniError(EIO).ThrowErr(env);
+        return NVal();
+    }
+    auto fdg = make_unique<FDGuard>(fd);
+    rafEntity->fd_.swap(fdg);
+    rafEntity->path_ = path;
+    rafEntity->uri_ = path;
+    return { env, objRAF };
+}
+
+napi_value OpenV9::Sync(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
+        UniError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+    auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    if (!succPath) {
+        return nullptr;
+    }
+    auto [succMode, mode] = GetJsFlags(env, funcArg);
+    if (!succMode) {
+        return nullptr;
+    }
+    uv_loop_s *loop = nullptr;
+    napi_get_uv_event_loop(env, &loop);
+    uv_fs_t open_req;
+    int ret = uv_fs_open(loop, &open_req, path.get(), mode, S_IRUSR |
+        S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, NULL);
+    if (ret < 0) {
+        UniError(errno).ThrowErr(env);
+        return nullptr;
+    }
+    auto File = InstantiateFile(env, open_req.result, path.get()).val_;
+    uv_fs_req_cleanup(&open_req);
+    return File;
+}
+
+struct AsyncOpenFileArg {
+    int fd;
+    string path;
+    string uri;
+};
+
+napi_value OpenV9::Async(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
+        UniError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+    auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    if (!succPath) {
+        return nullptr;
+    }
+    auto [succMode, mode] = GetJsFlags(env, funcArg);
+    if (!succMode) {
+        return nullptr;
+    }
+    auto arg = make_shared<AsyncOpenFileArg>();
+    auto cbExec = [arg, path = string(path.get()), mode = mode](napi_env env) -> UniError {
+        uv_loop_s *loop = nullptr;
+        napi_get_uv_event_loop(env, &loop);
+        uv_fs_t open_req;
+        int ret = uv_fs_open(loop, &open_req, path.c_str(), mode, S_IRUSR |
+            S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, NULL);
+        if (ret < 0) {
+            return UniError(errno);
+        }
+        arg->fd = open_req.result;
+        arg->path = path;
+        arg->uri = path;
+        uv_fs_req_cleanup(&open_req);
+        return UniError(ERRNO_NOERR);
+    };
+    auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
+        if (err) {
+            return { env, err.GetNapiErr(env) };
+        }
+        return InstantiateFile(env, arg->fd, arg->path);
+    };
+    NVal thisVar(env, funcArg.GetThisVar());
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number))) {
+        return NAsyncWorkPromise(env, thisVar).Schedule(openV9ProcedureName, cbExec, cbCompl).val_;
+    } else {
+        int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::SECOND);
+        NVal cb(env, funcArg[cbIdx]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(openV9ProcedureName, cbExec, cbCompl).val_;
+    }
+}
+} // namespace ModuleFileIO
+} // namespace DistributedFS
+} // namespace OHOS
