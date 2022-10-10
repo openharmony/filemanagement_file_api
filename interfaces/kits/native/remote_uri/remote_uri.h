@@ -18,23 +18,32 @@
 
 #include <string>
 #include <fcntl.h>
+#include <set>
 
 namespace OHOS {
 namespace DistributedFS {
 namespace ModuleRemoteUri {
-const std::string FRAGMENT_TAG = "#";
-const std::string FD_TAG = "=";
-const std::string REMOTE_URI_TAG = "fdFromBinder";
-const std::string SCHEME_TAG = ":";
-const std::string SCHEME = "datashare";
+
+using namespace std;
+
+const string FRAGMENT_TAG = "#";
+const string FD_TAG = "=";
+const string REMOTE_URI_TAG = "fdFromBinder";
+const string SCHEME_TAG = ":";
+const string SCHEME = "datashare";
+const string ZERO_FD = "0";
+const int MAX_URI_SIZE  = 128;
 class RemoteUri {
+    static set<int>fdFromBinder;
+    static void RemoveFd(int fd);
 public:
     RemoteUri() {}
-    static bool IsRemoteUri(const std::string& path, int &fd, const int& flags = O_RDONLY);
-    static int ConvertUri(const int &fd, std::string &remoteUri);
-    static int OpenRemoteUri(const std::string &remoteUri);
+    static bool IsRemoteUri(const string& path, int &fd, const int& flags = O_RDONLY);
+    static int ConvertUri(const int &fd, string &remoteUri);
+    static int OpenRemoteUri(const string &remoteUri);
     ~RemoteUri() {}
 };
+std::set<int>RemoteUri::fdFromBinder;
 } // namespace ModuleRemoteUri
 } // namespace DistributedFS
 } // namespace OHOS
