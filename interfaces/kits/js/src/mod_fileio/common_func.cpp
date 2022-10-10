@@ -117,8 +117,8 @@ int CommonFunc::ConvertJsFlags(int &flags)
 }
 
 tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,
-    napi_value srcPath,
-    napi_value dstPath)
+                                                                               napi_value srcPath,
+                                                                               napi_value dstPath)
 {
     bool succ = false;
     unique_ptr<char[]> src;
@@ -132,7 +132,7 @@ tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(n
     if (!succ) {
         return { false, nullptr, nullptr };
     }
-    return make_tuple(succ, move(src), move(dest));
+    return make_tuple(true, move(src), move(dest));
 }
 
 tuple<bool, void *, int64_t, bool, int64_t, int> CommonFunc::GetReadArg(napi_env env,
@@ -141,13 +141,13 @@ tuple<bool, void *, int64_t, bool, int64_t, int> CommonFunc::GetReadArg(napi_env
 {
     bool succ = false;
     void *retBuf = nullptr;
-    int64_t retLen;
+    int64_t retLen = 0;
     bool posAssigned = false;
-    int64_t position;
+    int64_t position = 0;
 
     NVal txt(env, readBuf);
     void *buf = nullptr;
-    int64_t bufLen;
+    int64_t bufLen = 0;
     int offset = 0;
     tie(succ, buf, bufLen) = txt.ToArraybuffer();
     if (!succ) {
@@ -209,20 +209,18 @@ static tuple<bool, unique_ptr<char[]>, int64_t> DecodeString(napi_env env, NVal 
     }
 }
 
-// Is everything ok? Do we need to free memory? What's the three args required by fwrite? Where to start writing?
 tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetWriteArg(napi_env env,
                                                                                         napi_value argWBuf,
                                                                                         napi_value argOption)
 {
     void *retBuf = nullptr;
-    int64_t retLen;
+    int64_t retLen = 0;
     bool hasPos = false;
-    int64_t retPos;
+    int64_t retPos = 0;
 
-    /* To get write buffer */
     bool succ = false;
     void *buf = nullptr;
-    int64_t bufLen;
+    int64_t bufLen = 0;
     NVal op(env, argOption);
     NVal jsBuffer(env, argWBuf);
     unique_ptr<char[]> bufferGuard;
@@ -249,7 +247,6 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
         return { false, nullptr, nullptr, 0, hasPos, retPos };
     }
 
-    /* To parse options - Where to begin writing */
     if (op.HasProp("position")) {
         int32_t position = 0;
         tie(succ, position) = op.GetProp("position").ToInt32();
@@ -267,8 +264,7 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
 }
 
 tuple<bool, void *, int64_t, bool, int64_t> CommonFunc::GetReadArgV9(napi_env env,
-                                                                    napi_value readBuf,
-                                                                    napi_value option)
+    napi_value readBuf, napi_value option)
 {
     bool succ = false;
     int64_t retLen;
@@ -305,13 +301,12 @@ tuple<bool, void *, int64_t, bool, int64_t> CommonFunc::GetReadArgV9(napi_env en
 }
 
 tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetWriteArgV9(napi_env env,
-                                                                                         napi_value argWBuf,
-                                                                                         napi_value argOption)
+    napi_value argWBuf, napi_value argOption)
 {
     int64_t retLen;
     bool hasPos = false;
     int64_t retPos;
-    /* To get write buffer */
+    
     bool succ = false;
     void *buf = nullptr;
     int64_t bufLen;
@@ -334,7 +329,6 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
         return { false, nullptr, nullptr, 0, hasPos, retPos };
     }
 
-    /* To parse options - Where to begin writing */
     if (op.HasProp("offset")) {
         int32_t position = 0;
         tie(succ, position) = op.GetProp("offset").ToInt32();

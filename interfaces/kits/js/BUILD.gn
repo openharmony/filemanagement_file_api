@@ -118,9 +118,7 @@ ohos_shared_library("fs") {
     "src/mod_fileio/properties/prop_n_exporter_v9.cpp",
   ]
 
-  deps = [
-    "//foundation/arkui/napi:ace_napi",
-  ]
+  deps = [ "//foundation/arkui/napi:ace_napi" ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 }

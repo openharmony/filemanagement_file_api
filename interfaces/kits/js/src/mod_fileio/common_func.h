@@ -35,11 +35,9 @@ struct CommonFunc {
                                                                                                  napi_value argWBuf,
                                                                                                  napi_value argOption);
     static std::tuple<bool, std::unique_ptr<char[]>, void *, int64_t, bool, int64_t> GetWriteArgV9(napi_env env,
-                                                                                                   napi_value argWBuf,
-                                                                                                   napi_value argOption);
+        napi_value argWBuf, napi_value argOption);
     static std::tuple<bool, std::unique_ptr<char[]>, std::unique_ptr<char[]>> GetCopyPathArg(napi_env env,
-                                                                                             napi_value srcPath,
-                                                                                             napi_value dstPath);
+        napi_value srcPath, napi_value dstPath);
 };
 } // namespace ModuleFileIO
 } // namespace DistributedFS

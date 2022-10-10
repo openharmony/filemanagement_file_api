@@ -39,8 +39,7 @@ napi_value PropNExporterV9::ReadSync(napi_env env, napi_callback_info info)
     }
 
     bool succ = false;
-
-    int fd;
+    int fd = 0;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env);
@@ -48,9 +47,9 @@ napi_value PropNExporterV9::ReadSync(napi_env env, napi_callback_info info)
     }
 
     void *buf = nullptr;
-    int64_t len;
+    int64_t len = 0;
     bool hasPos = false;
-    int64_t pos;
+    int64_t pos = 0;
     tie(succ, buf, len, hasPos, pos) =
         CommonFunc::GetReadArgV9(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
@@ -75,9 +74,24 @@ struct AsyncIOReadArg {
     ssize_t lenRead { 0 };
 };
 
+static UniError ReadExec(shared_ptr<AsyncIOReadArg> arg, void *buf, size_t len, int fd, size_t position)
+{
+    if (position == (size_t)INVALID_POSITION) {
+        arg->lenRead = write(fd, buf, len);
+    } else {
+        arg->lenRead = pwrite(fd, buf, len, position);
+    }
+
+    if (arg->lenRead == -1) {
+        return UniError(errno);
+    } else {
+        return UniError(ERRNO_NOERR);
+    }
+}
+
 napi_value PropNExporterV9::Read(napi_env env, napi_callback_info info)
 {
-   NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
         UniError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -85,10 +99,10 @@ napi_value PropNExporterV9::Read(napi_env env, napi_callback_info info)
 
     bool succ = false;
     void *buf = nullptr;
-    int64_t len;
-    int fd;
+    int64_t len = 0;
+    int fd = 0;
     bool hasPos = false;
-    int64_t pos;
+    int64_t pos = 0;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env);
@@ -103,19 +117,8 @@ napi_value PropNExporterV9::Read(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncIOReadArg>();
-    auto cbExec = [arg, buf, len, fd, hasPos, pos](napi_env env) -> UniError {
-        ssize_t actLen;
-        if (hasPos) {
-            actLen = pread(fd, buf, len, pos);
-        } else {
-            actLen = read(fd, buf, len);
-        }
-        if (actLen == -1) {
-            return UniError(errno);
-        } else {
-            arg->lenRead = actLen;
-            return UniError(ERRNO_NOERR);
-        }
+    auto cbExec = [arg, buf, len, fd, pos](napi_env env) -> UniError {
+        return ReadExec(arg, buf, len, fd, pos);
     };
 
     auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
@@ -126,18 +129,17 @@ napi_value PropNExporterV9::Read(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    size_t argc = funcArg.GetArgc();
     bool hasOp = false;
-    if (argc == NARG_CNT::THREE) {
+    if (funcArg.GetArgc() == NARG_CNT::THREE) {
         NVal op = NVal(env, funcArg[NARG_POS::THIRD]);
         if (op.HasProp("offset") ||  op.HasProp("length")) {
             hasOp = true;
         }
     }
-    if (argc == NARG_CNT::TWO || (argc == NARG_CNT::THREE && hasOp)) {
+    if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE && hasOp)) {
         return NAsyncWorkPromise(env, thisVar).Schedule("FileIORead", cbExec, cbCompl).val_;
     } else {
-        int cbIdx = ((argc == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
+        int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
         NVal cb(env, funcArg[cbIdx]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule("FileIORead", cbExec, cbCompl).val_;
     }
@@ -178,8 +180,8 @@ napi_value PropNExporterV9::Write(napi_env env, napi_callback_info info)
 
     unique_ptr<char[]> bufGuard;
     void *buf = nullptr;
-    size_t len;
-    size_t position;
+    size_t len = 0;
+    size_t position = 0;
     bool hasPos = false;
     tie(succ, bufGuard, buf, len, hasPos, position) =
         CommonFunc::GetWriteArgV9(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
@@ -208,18 +210,17 @@ napi_value PropNExporterV9::Write(napi_env env, napi_callback_info info)
 
     NVal thisVar(env, funcArg.GetThisVar());
     bool hasOp = false;
-    size_t argc = funcArg.GetArgc();
-    if (argc == NARG_CNT::THREE) {
+    if (funcArg.GetArgc() == NARG_CNT::THREE) {
         NVal op = NVal(env, funcArg[NARG_POS::THIRD]);
         if (op.HasProp("offset") || op.HasProp("position") || op.HasProp("length") || op.HasProp("encoding")) {
             hasOp = true;
         }
     }
 
-    if (argc == NARG_CNT::TWO || (argc == NARG_CNT::THREE && hasOp)) {
+    if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE && hasOp)) {
         return NAsyncWorkPromise(env, thisVar).Schedule("FileIOWrite", cbExec, cbCompl).val_;
     } else {
-        int cbIdx = ((argc == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
+        int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
         NVal cb(env, funcArg[cbIdx]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule("FileIOWrite", cbExec, cbCompl).val_;
     }
@@ -244,8 +245,8 @@ napi_value PropNExporterV9::WriteSync(napi_env env, napi_callback_info info)
     }
 
     void *buf = nullptr;
-    size_t len;
-    size_t position;
+    size_t len = 0;
+    size_t position = 0;
     unique_ptr<char[]> bufGuard;
     bool hasPos = false;
     tie(succ, bufGuard, buf, len, hasPos, position) =
