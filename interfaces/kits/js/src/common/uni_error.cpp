@@ -17,6 +17,7 @@
 
 #include <cstring>
 #include <string>
+#include <unordered_map>
 
 #include "log.h"
 #include "napi/n_val.h"
@@ -24,6 +25,18 @@
 namespace OHOS {
 namespace DistributedFS {
 using namespace std;
+
+static napi_value GenerateBusinessError(napi_env env, int32_t errCode, string errMsg)
+{
+    napi_value businessError = nullptr;
+    napi_value code = nullptr;
+    napi_value msg = nullptr;
+    code = NVal::CreateInt32(env, errCode).val_;
+    msg = NVal::CreateUTF8String(env, errMsg).val_;
+    napi_create_error(env, nullptr, msg, &businessError);
+    napi_set_named_property(env, businessError, FILEIO_TAG_ERR_CODE.c_str(), code);
+    return businessError;
+}
 
 UniError::UniError() {}
 
@@ -77,7 +90,20 @@ std::string UniError::GetDefaultErrstr()
 
 napi_value UniError::GetNapiErr(napi_env env)
 {
-    return GetNapiErr(env, GetDefaultErrstr());
+    int errCode = GetErrno(codingSystem_);
+    if (errCode == ERRNO_NOERR) {
+        return nullptr;
+    }
+    int32_t code;
+    string msg;
+    if (errCodeTable.find(errCode) != errCodeTable.end()) {
+        code = errCodeTable.at(errCode).first;
+        msg = errCodeTable.at(errCode).second;
+    } else {
+        code = errCodeTable.at(-1).first;
+        msg = errCodeTable.at(-1).second;
+    }
+    return GenerateBusinessError(env, code, msg);
 }
 
 napi_value UniError::GetNapiErr(napi_env env, string errMsg)
@@ -99,13 +125,35 @@ napi_value UniError::GetNapiErr(napi_env env, string errMsg)
 
 void UniError::ThrowErr(napi_env env)
 {
-    string msg = GetDefaultErrstr();
     napi_value tmp = nullptr;
     napi_get_and_clear_last_exception(env, &tmp);
-    // Note that ace engine cannot throw errors created by napi_create_error so far
-    napi_status throwStatus = napi_throw_error(env, nullptr, msg.c_str());
+    int32_t code;
+    string msg;
+    if (errCodeTable.find(errno_) != errCodeTable.end()) {
+        code = errCodeTable.at(errno_).first;
+        msg = errCodeTable.at(errno_).second;
+    } else {
+        code = errCodeTable.at(-1).first;
+        msg = errCodeTable.at(-1).second;
+    }
+    napi_status throwStatus = napi_throw(env, GenerateBusinessError(env, code, msg));
     if (throwStatus != napi_ok) {
         HILOGE("Failed to throw an exception, %{public}d, code = %{public}s", throwStatus, msg.c_str());
+    }
+}
+
+void UniError::ThrowErr(napi_env env, int code)
+{
+    napi_value tmp = nullptr;
+    napi_get_and_clear_last_exception(env, &tmp);
+    if (errCodeTable.find(code) == errCodeTable.end()) {
+        code = -1;
+    }
+    napi_status throwStatus = napi_throw(env, GenerateBusinessError(env, errCodeTable.at(code).first,
+        errCodeTable.at(code).second));
+    if (throwStatus != napi_ok) {
+        HILOGE("Failed to throw an exception, %{public}d, code = %{public}s", throwStatus,
+            errCodeTable.at(code).second.c_str());
     }
 }
 
