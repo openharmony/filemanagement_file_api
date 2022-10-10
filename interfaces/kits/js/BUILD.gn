@@ -113,14 +113,9 @@ ohos_shared_library("fs") {
 
   sources = file_common_src
   sources += [
-    "src/mod_fileio/class_file/file_n_exporter.cpp",
-    "src/mod_fileio/class_stat_v9/stat_n_exporter_v9.cpp",
     "src/mod_fileio/common_func.cpp",
     "src/mod_fileio/module_v9.cpp",
     "src/mod_fileio/properties/prop_n_exporter_v9.cpp",
-    "src/mod_fileio/properties/open_v9.cpp",
-    "src/mod_fileio/properties/stat_v9.cpp",
-    "src/mod_fileio/properties/truncate_v9.cpp",
   ]
 
   deps = [

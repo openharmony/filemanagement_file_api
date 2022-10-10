@@ -23,9 +23,6 @@
 #include <ctime>
 
 #include "../common_func.h"
-#include "open_v9.h"
-#include "stat_v9.h"
-#include "truncate_v9.h"
 
 namespace OHOS {
 namespace DistributedFS {
@@ -275,14 +272,8 @@ napi_value PropNExporterV9::WriteSync(napi_env env, napi_callback_info info)
 bool PropNExporterV9::Export()
 {
     return exports_.AddProp({
-        NVal::DeclareNapiFunction("open", OpenV9::Async),
-        NVal::DeclareNapiFunction("openSync", OpenV9::Sync),
         NVal::DeclareNapiFunction("read", Read),
         NVal::DeclareNapiFunction("readSync", ReadSync),
-        NVal::DeclareNapiFunction("stat", StatV9::Async),
-        NVal::DeclareNapiFunction("statSync", StatV9::Sync),
-        NVal::DeclareNapiFunction("truncate", TruncateV9::Async),
-        NVal::DeclareNapiFunction("truncateSync", TruncateV9::Sync),
         NVal::DeclareNapiFunction("write", Write),
         NVal::DeclareNapiFunction("writeSync", WriteSync),
     });
