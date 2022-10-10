@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -256,6 +256,87 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
     }
 
     return { true, move(bufferGuard), retBuf, retLen, hasPos, retPos };
+}
+
+tuple<bool, void *, int64_t, bool, int64_t> CommonFunc::GetReadArgV9(napi_env env,
+                                                                     napi_value readBuf,
+                                                                     napi_value option)
+{
+    bool succ = false;
+    int64_t retLen;
+    bool posAssigned = false;
+    int64_t position;
+
+    NVal txt(env, readBuf);
+    void *buf = nullptr;
+    int64_t bufLen;
+    tie(succ, buf, bufLen) = txt.ToArraybuffer();
+    if (!succ) {
+        UniError(EINVAL).ThrowErr(env, "Invalid read buffer, expect arraybuffer");
+        return { false, nullptr, 0, posAssigned, position };
+    }
+    NVal op = NVal(env, option);
+    tie(succ, retLen) = GetActualLen(env, bufLen, 0, op);
+    if (!succ) {
+        return { false, nullptr, 0, posAssigned, position };
+    }
+
+    if (op.HasProp("offset")) {
+        tie(succ, position) = op.GetProp("offset").ToInt64();
+        if (succ && position >= 0) {
+            posAssigned = true;
+        } else {
+            UniError(EINVAL).ThrowErr(env, "option.offset shall be positive number");
+            return { false, nullptr, 0, posAssigned, position };
+        }
+    }
+
+    return { true, buf, retLen, posAssigned, position };
+}
+
+tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetWriteArgV9(napi_env env,
+                                                                                          napi_value argWBuf,
+                                                                                          napi_value argOption)
+{
+    int64_t retLen;
+    bool hasPos = false;
+    int64_t retPos;
+    /* To get write buffer */
+    bool succ = false;
+    void *buf = nullptr;
+    int64_t bufLen;
+    NVal op(env, argOption);
+    NVal jsBuffer(env, argWBuf);
+    unique_ptr<char[]> bufferGuard;
+    tie(succ, bufferGuard, bufLen) = DecodeString(env, jsBuffer, op.GetProp("encoding"));
+    if (!succ) {
+        tie(succ, buf, bufLen) = NVal(env, argWBuf).ToArraybuffer();
+        if (!succ) {
+            UniError(EINVAL).ThrowErr(env, "Illegal write buffer or encoding");
+            return { false, nullptr, nullptr, 0, hasPos, retPos };
+        }
+    } else {
+        buf = bufferGuard.get();
+    }
+    tie(succ, retLen) = GetActualLen(env, bufLen, 0, op);
+    if (!succ) {
+        return { false, nullptr, nullptr, 0, hasPos, retPos };
+    }
+
+    /* To parse options - Where to begin writing */
+    if (op.HasProp("offset")) {
+        int32_t position = 0;
+        tie(succ, position) = op.GetProp("offset").ToInt32();
+        if (!succ || position < 0) {
+            UniError(EINVAL).ThrowErr(env, "option.offset shall be positive number");
+            return { false, nullptr, nullptr, 0, hasPos, retPos };
+        }
+        hasPos = true;
+        retPos = position;
+    } else {
+        retPos = INVALID_POSITION;
+    }
+    return { true, move(bufferGuard), buf, retLen, hasPos, retPos };
 }
 } // namespace ModuleFileIO
 } // namespace DistributedFS

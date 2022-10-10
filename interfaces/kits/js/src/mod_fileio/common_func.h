@@ -28,9 +28,15 @@ struct CommonFunc {
     static std::tuple<bool, void *, int64_t, bool, int64_t, int> GetReadArg(napi_env env,
                                                                             napi_value readBuf,
                                                                             napi_value option);
+    static std::tuple<bool, void *, int64_t, bool, int64_t> GetReadArgV9(napi_env env,
+                                                                         napi_value readBuf,
+                                                                         napi_value option);
     static std::tuple<bool, std::unique_ptr<char[]>, void *, int64_t, bool, int64_t> GetWriteArg(napi_env env,
                                                                                                  napi_value argWBuf,
                                                                                                  napi_value argOption);
+    static std::tuple<bool, std::unique_ptr<char[]>, void *, int64_t, bool, int64_t> GetWriteArgV9(napi_env env,
+                                                                                                   napi_value argWBuf,
+                                                                                                   napi_value argOption);
     static std::tuple<bool, std::unique_ptr<char[]>, std::unique_ptr<char[]>> GetCopyPathArg(napi_env env,
                                                                                              napi_value srcPath,
                                                                                              napi_value dstPath);
