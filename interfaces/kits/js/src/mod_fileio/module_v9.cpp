@@ -17,6 +17,8 @@
 #include <vector>
 
 #include "../common/log.h"
+#include "class_file/file_n_exporter.h"
+#include "class_stat_v9/stat_n_exporter_v9.h"
 #include "properties/prop_n_exporter_v9.h"
 
 using namespace std;
@@ -28,6 +30,8 @@ static napi_value Export(napi_env env, napi_value exports)
 {
     std::vector<unique_ptr<NExporter>> products;
     products.emplace_back(make_unique<PropNExporterV9>(env, exports));
+    products.emplace_back(make_unique<FileNExporter>(env, exports));
+    products.emplace_back(make_unique<StatNExporterV9>(env, exports));
 
     for (auto &&product : products) {
         if (!product->Export()) {
