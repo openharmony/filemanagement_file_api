@@ -80,9 +80,9 @@ struct AsyncIOReadArg {
 static UniError ReadExec(shared_ptr<AsyncIOReadArg> arg, void *buf, size_t len, int fd, size_t position)
 {
     if (position == (size_t)INVALID_POSITION) {
-        arg->lenRead = write(fd, buf, len);
+        arg->lenRead = read(fd, buf, len);
     } else {
-        arg->lenRead = pwrite(fd, buf, len, position);
+        arg->lenRead = pread(fd, buf, len, position);
     }
 
     if (arg->lenRead == -1) {
