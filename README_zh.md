@@ -250,11 +250,7 @@ foundation/filemanagement/file_api
     ```
 
 
-
-
 ## 相关仓<a name="section178mcpsimp"></a>
-
-**分布式文件**
 
 - [**文件访问接口**](https://gitee.com/openharmony/filemanagement_file_api)
 - [分布式文件服务](https://gitee.com/openharmony/filemanagement_dfs_service)
