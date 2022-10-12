@@ -172,7 +172,7 @@ The I/O APIs provided by the File Api can be classified into the following types
     import fileio from '@ohos.fileio';
     
     try {
-        var ss = fileio.Stream.createStreamSync("tmp", "r")
+        var ss = fileio.createStreamSync("tmp", "r")
         buf = new ArrayBuffer(4096)
         ss.readSync(buf)
         console.log(String.fromCharCode.apply(null, new Uint8Array(buf)))
@@ -195,7 +195,7 @@ The I/O APIs provided by the File Api can be classified into the following types
     
     try {
         let openedStream
-        fileio.Stream.createStream("test.txt", "r")
+        fileio.createStream("test.txt", "r")
             .then(function (ss) {
                 openedStream = ss;
                 return ss.read(new ArrayBuffer(4096))
@@ -227,7 +227,7 @@ The I/O APIs provided by the File Api can be classified into the following types
     import fileio from '@ohos.fileio';
     
     try {
-        fileio.Stream.createStream("./testdir/test_stream.txt", "r", function (err, ss) {
+        fileio.createStream("./testdir/test_stream.txt", "r", function (err, ss) {
             if (!err) {
                 ss.read(new ArrayBuffer(4096), {}, function (err, buf, readLen) {
                     if (!err) {
@@ -250,30 +250,6 @@ The I/O APIs provided by the File Api can be classified into the following types
     ```
 
 
--   Asynchronous programming model: Legacy
-
-    All APIs in the  **@system.file**  module are implemented as the legacy asynchronous model. When calling such an API, you need to implement three callbacks \(including  **success**,  **fail**, and  **complete**\) to be invoked when the execution is successful, fails, or is complete, respectively. If the input parameters are correct, the API calls the  **success**  or  **fail**  callback based on whether the asynchronous task is successful after the task execution is complete, and finally calls the  **complete**  callback.
-
-    The following example asynchronously checks whether the file pointed to by the specified URI exists and provides three callbacks to print the check result:
-
-    ```
-    import file from '@system.file'
-    
-    file.access({
-        uri: 'internal://app/test.txt',
-        success: function() {
-            console.log('call access success.');
-        },
-        fail: function(data, code) {
-            console.error('call fail callback fail, code: ' + code + ', data: ' + data);
-        },
-        complete: function () {
-            console.log('call access finally.');
-        }
-    });
-    
-    console.log("file access tested done")
-    ```
 
 
 ## Repositories Involved<a name="section178mcpsimp"></a>
