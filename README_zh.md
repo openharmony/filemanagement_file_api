@@ -172,7 +172,7 @@ foundation/filemanagement/file_api
     import fileio from '@ohos.fileio';
 
     try {
-        var ss = fileio.Stream.createStreamSync("tmp", "r")
+        var ss = fileio.createStreamSync("tmp", "r")
         buf = new ArrayBuffer(4096)
         ss.readSync(buf)
         console.log(String.fromCharCode.apply(null, new Uint8Array(buf)))
@@ -195,7 +195,7 @@ foundation/filemanagement/file_api
 
     try {
         let openedStream
-        fileio.Stream.createStream("test.txt", "r")
+        fileio.createStream("test.txt", "r")
             .then(function (ss) {
                 openedStream = ss;
                 return ss.read(new ArrayBuffer(4096))
@@ -227,7 +227,7 @@ foundation/filemanagement/file_api
     import fileio from '@ohos.fileio';
 
     try {
-        fileio.Stream.createStream("./testdir/test_stream.txt", "r", function (err, ss) {
+        fileio.createStream("./testdir/test_stream.txt", "r", function (err, ss) {
             if (!err) {
                 ss.read(new ArrayBuffer(4096), {}, function (err, buf, readLen) {
                     if (!err) {
@@ -250,30 +250,6 @@ foundation/filemanagement/file_api
     ```
 
 
--   异步编程模型：Legacy
-
-    @system.file 模块中的所有接口都实现为 Legacy 异步模型。用户在调用这些接口的时候，需要提供 success、fail 及 complete 三个回调。在正确提供参数的情况下，当异步任务完成后，接口会根据是否成功，分别调用 success 回调或 fail 回调，并最终调用 complete 回调。
-
-    下例异步判断 URI 所指向的文件是否存在，并相应提供三个回调用于打印判断结果。
-
-    ```
-    import file from '@system.file'
-
-    file.access({
-        uri: 'internal://app/test.txt',
-        success: function() {
-            console.log('call access success.');
-        },
-        fail: function(data, code) {
-            console.error('call fail callback fail, code: ' + code + ', data: ' + data);
-        },
-        complete: function () {
-            console.log('call access finally.');
-        }
-    });
-
-    console.log("file access tested done")
-    ```
 
 
 ## 相关仓<a name="section178mcpsimp"></a>
