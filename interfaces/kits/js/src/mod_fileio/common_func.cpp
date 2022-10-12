@@ -40,12 +40,10 @@ static tuple<bool, void *, int> GetActualBuf(napi_env env, void *rawBuf, int64_t
     if (op.HasProp("offset")) {
         tie(succ, opOffset) = op.GetProp("offset").ToInt64();
         if (!succ || opOffset < 0) {
-            HILOGE("Invalid option.offset, positive integer is desired");
-            UniError(EINVAL).ThrowErr(env);
+            UniError(EINVAL).ThrowErr(env, "Invalid option.offset, positive integer is desired");
             return { false, nullptr, opOffset };
         } else if (opOffset > bufLen) {
-            HILOGE("Invalid option.offset, buffer limit exceeded");
-            UniError(EINVAL).ThrowErr(env);
+            UniError(EINVAL).ThrowErr(env, "Invalid option.offset, buffer limit exceeded");
             return { false, nullptr, opOffset };
         } else {
             realBuf = static_cast<uint8_t *>(rawBuf) + opOffset;
@@ -66,13 +64,40 @@ static tuple<bool, size_t> GetActualLen(napi_env env, int64_t bufLen, int64_t bu
         int64_t opLength;
         tie(succ, opLength) = op.GetProp("length").ToInt64();
         if (!succ) {
+            UniError(EINVAL).ThrowErr(env, "Invalid option.length, expect integer");
+            return { false, 0 };
+        }
+        if (opLength < 0) {
+            retLen = bufLen - bufOff;
+        } else if (opLength > bufLen - bufOff) {
+            UniError(EINVAL).ThrowErr(env, "Invalid option.length, buffer limit exceeded");
+            return { false, 0 };
+        } else {
+            retLen = opLength;
+        }
+    } else {
+        retLen = bufLen - bufOff;
+    }
+
+    return { true, retLen };
+}
+
+static tuple<bool, size_t> GetActualLenV9(napi_env env, int64_t bufLen, int64_t bufOff, NVal op)
+{
+    bool succ = false;
+    int64_t retLen;
+
+    if (op.HasProp("length")) {
+        int64_t opLength;
+        tie(succ, opLength) = op.GetProp("length").ToInt64();
+        if (!succ) {
             HILOGE("Invalid option.length, expect integer");
             UniError(EINVAL).ThrowErr(env);
             return { false, 0 };
         }
         if (opLength < 0) {
             retLen = bufLen - bufOff;
-        } else if (opLength + bufOff > bufLen) {
+        } else if (opLength > bufLen - bufOff) {
             HILOGE("Invalid option.length, buffer limit exceeded");
             UniError(EINVAL).ThrowErr(env);
             return { false, 0 };
@@ -151,8 +176,7 @@ tuple<bool, void *, int64_t, bool, int64_t, int> CommonFunc::GetReadArg(napi_env
     int offset = 0;
     tie(succ, buf, bufLen) = txt.ToArraybuffer();
     if (!succ) {
-        HILOGE("Invalid read buffer, expect arraybuffer");
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL).ThrowErr(env, "Invalid read buffer, expect arraybuffer");
         return { false, nullptr, 0, posAssigned, position, offset };
     }
 
@@ -173,8 +197,7 @@ tuple<bool, void *, int64_t, bool, int64_t, int> CommonFunc::GetReadArg(napi_env
         if (succ && position >= 0) {
             posAssigned = true;
         } else {
-            HILOGE("option.position shall be positive number");
-            UniError(EINVAL).ThrowErr(env);
+            UniError(EINVAL).ThrowErr(env, "option.position shall be positive number");
             return { false, nullptr, 0, posAssigned, position, offset };
         }
     }
@@ -228,8 +251,7 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
     if (!succ) {
         tie(succ, buf, bufLen) = NVal(env, argWBuf).ToArraybuffer();
         if (!succ) {
-            HILOGE("Illegal write buffer or encoding");
-            UniError(EINVAL).ThrowErr(env);
+            UniError(EINVAL).ThrowErr(env, "Illegal write buffer or encoding");
             return { false, nullptr, nullptr, 0, hasPos, retPos };
         }
     } else {
@@ -251,8 +273,7 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
         int32_t position = 0;
         tie(succ, position) = op.GetProp("position").ToInt32();
         if (!succ || position < 0) {
-            HILOGE("option.position shall be positive number");
-            UniError(EINVAL).ThrowErr(env);
+            UniError(EINVAL).ThrowErr(env, "option.position shall be positive number");
             return { false, nullptr, nullptr, 0, hasPos, retPos };
         }
         hasPos = true;
@@ -281,7 +302,7 @@ tuple<bool, void *, int64_t, bool, int64_t> CommonFunc::GetReadArgV9(napi_env en
         return { false, nullptr, 0, posAssigned, position };
     }
     NVal op = NVal(env, option);
-    tie(succ, retLen) = GetActualLen(env, bufLen, 0, op);
+    tie(succ, retLen) = GetActualLenV9(env, bufLen, 0, op);
     if (!succ) {
         return { false, nullptr, 0, posAssigned, position };
     }
@@ -324,7 +345,7 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
     } else {
         buf = bufferGuard.get();
     }
-    tie(succ, retLen) = GetActualLen(env, bufLen, 0, op);
+    tie(succ, retLen) = GetActualLenV9(env, bufLen, 0, op);
     if (!succ) {
         return { false, nullptr, nullptr, 0, hasPos, retPos };
     }

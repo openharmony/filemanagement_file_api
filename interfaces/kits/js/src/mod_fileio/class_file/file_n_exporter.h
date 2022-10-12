@@ -29,11 +29,7 @@ public:
     std::string GetClassName() override;
 
     static napi_value Constructor(napi_env env, napi_callback_info cbinfo);
-
     static napi_value GetFD(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetPath(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetUri(napi_env env, napi_callback_info cbinfo);
-
     FileNExporter(napi_env env, napi_value exports);
     ~FileNExporter() override;
 };

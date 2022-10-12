@@ -61,7 +61,7 @@ napi_value SetSecurityLabel(napi_env env, napi_callback_info info)
     auto cbExec = [pathString, dataLevelString](napi_env env) -> UniError {
         bool ret = SecurityLabel::SetSecurityLabel(pathString, dataLevelString);
         if (!ret) {
-            return UniError(-1);
+            return UniError(errno);
         } else {
             return UniError(ERRNO_NOERR);
         }
@@ -116,7 +116,7 @@ napi_value SetSecurityLabelSync(napi_env env, napi_callback_info info)
 
     bool ret = SecurityLabel::SetSecurityLabel(path.get(), dataLevel.get());
     if (!ret) {
-        return UniError(-1).GetNapiErr(env);
+        return UniError(errno).GetNapiErr(env);
     }
 
     return NVal::CreateUndefined(env).val_;

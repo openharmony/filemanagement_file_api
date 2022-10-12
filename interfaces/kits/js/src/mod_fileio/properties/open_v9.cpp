@@ -67,7 +67,7 @@ static NVal InstantiateFile(napi_env env, int fd, string path)
     auto fdg = make_unique<FDGuard>(fd);
     rafEntity->fd_.swap(fdg);
     rafEntity->path_ = path;
-    rafEntity->uri_ = path;
+    rafEntity->uri_ = "";
     return { env, objRAF };
 }
 
@@ -133,7 +133,7 @@ napi_value OpenV9::Async(napi_env env, napi_callback_info info)
         }
         arg->fd = open_req.result;
         arg->path = path;
-        arg->uri = path;
+        arg->uri = "";
         uv_fs_req_cleanup(&open_req);
         return UniError(ERRNO_NOERR);
     };
