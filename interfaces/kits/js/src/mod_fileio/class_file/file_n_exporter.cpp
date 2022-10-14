@@ -62,34 +62,6 @@ napi_value FileNExporter::GetFD(napi_env env, napi_callback_info info)
     return NVal::CreateInt32(env, rafEntity->fd_.get()->GetFD()).val_;
 }
 
-napi_value FileNExporter::GetPath(napi_env env, napi_callback_info info)
-{
-    NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
-    auto rafEntity = GetFileEntity(env, funcArg.GetThisVar());
-    if (!rafEntity) {
-        return nullptr;
-    }
-    return NVal::CreateUTF8String(env, rafEntity->path_).val_;
-}
-
-napi_value FileNExporter::GetUri(napi_env env, napi_callback_info info)
-{
-    NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
-    auto rafEntity = GetFileEntity(env, funcArg.GetThisVar());
-    if (!rafEntity) {
-        return nullptr;
-    }
-    return NVal::CreateUTF8String(env, rafEntity->uri_).val_;
-}
-
 napi_value FileNExporter::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -110,7 +82,6 @@ bool FileNExporter::Export()
 {
     vector<napi_property_descriptor> props = {
         NVal::DeclareNapiGetter("fd", GetFD),
-        NVal::DeclareNapiGetter("path", GetPath),
     };
 
     string className = GetClassName();
