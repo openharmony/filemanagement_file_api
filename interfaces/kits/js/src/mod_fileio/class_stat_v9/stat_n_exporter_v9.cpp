@@ -297,7 +297,7 @@ string StatNExporterV9::GetClassName()
 
 StatNExporterV9::StatNExporterV9(napi_env env, napi_value exports) : NExporter(env, exports) {}
 
-// StatNExporterV9::~StatNExporterV9() {}
+StatNExporterV9::~StatNExporterV9() {}
 } // namespace ModuleFileIO
 } // namespace DistributedFS
 } // namespace OHOS

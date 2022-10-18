@@ -49,7 +49,7 @@ public:
     static napi_value GetCtime(napi_env env, napi_callback_info cbinfo);
 
     StatNExporterV9(napi_env env, napi_value exports);
-    ~StatNExporterV9() = default;
+    ~StatNExporterV9() override;
 };
 } // namespace ModuleFileIO
 } // namespace DistributedFS

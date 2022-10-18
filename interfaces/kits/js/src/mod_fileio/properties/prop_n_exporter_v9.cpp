@@ -79,7 +79,7 @@ struct AsyncIOReadArg {
 
 static UniError ReadExec(shared_ptr<AsyncIOReadArg> arg, void *buf, size_t len, int fd, size_t position)
 {
-    if (position == (size_t)INVALID_POSITION) {
+    if (position == static_cast<size_t>(INVALID_POSITION)) {
         arg->lenRead = read(fd, buf, len);
     } else {
         arg->lenRead = pread(fd, buf, len, position);
@@ -152,7 +152,7 @@ napi_value PropNExporterV9::Read(napi_env env, napi_callback_info info)
 
 UniError PropNExporterV9::WriteExec(shared_ptr<AsyncIOWrtieArg> arg, void *buf, size_t len, int fd, size_t position)
 {
-    if (position == (size_t)INVALID_POSITION) {
+    if (position == static_cast<size_t>(INVALID_POSITION)) {
         arg->actLen = write(fd, buf, len);
     } else {
         arg->actLen = pwrite(fd, buf, len, position);
@@ -259,7 +259,7 @@ napi_value PropNExporterV9::WriteSync(napi_env env, napi_callback_info info)
     }
 
     ssize_t writeLen;
-    if (position == (size_t)INVALID_POSITION) {
+    if (position == static_cast<size_t>(INVALID_POSITION)) {
         writeLen = write(fd, buf, len);
     } else {
         writeLen = pwrite(fd, buf, len, position);
