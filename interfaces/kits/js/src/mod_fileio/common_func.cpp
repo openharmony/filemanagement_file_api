@@ -32,6 +32,27 @@ namespace DistributedFS {
 namespace ModuleFileIO {
 using namespace std;
 
+void InitOpenMode(napi_env env, napi_value exports)
+{
+    char propertyName[] = "OpenMode";
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("READ_ONLY", NVal::CreateInt32(env, RDONLY).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("WRITE_ONLY", NVal::CreateInt32(env, WRONLY).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("READ_WRITE", NVal::CreateInt32(env, RDWR).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("CREATE", NVal::CreateInt32(env, CREATE).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("TRUNC", NVal::CreateInt32(env, TRUNC).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("APPEND", NVal::CreateInt32(env, APPEND).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("NONBLOCK", NVal::CreateInt32(env, NONBLOCK).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("DIR", NVal::CreateInt32(env, DIRECTORY).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("NOFOLLOW", NVal::CreateInt32(env, NOFOLLOW).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("SYNC", NVal::CreateInt32(env, SYNC).val_),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
 static tuple<bool, void *, int> GetActualBuf(napi_env env, void *rawBuf, int64_t bufLen, NVal op)
 {
     bool succ = false;
