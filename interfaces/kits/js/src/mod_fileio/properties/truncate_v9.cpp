@@ -122,14 +122,13 @@ napi_value TruncateV9::Async(napi_env env, napi_callback_info info)
             return NVal::CreateUndefined(env);
         }
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO && NVal(env,
         funcArg[NARG_POS::SECOND]).TypeIs(napi_number))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureTruncateName, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_TRUNCATE_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureTruncateName, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_TRUNCATE_NAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO

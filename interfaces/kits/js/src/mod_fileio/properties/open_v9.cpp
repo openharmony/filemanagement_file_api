@@ -146,11 +146,11 @@ napi_value OpenV9::Async(napi_env env, napi_callback_info info)
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
         NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(openV9ProcedureName, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_OPEN_NAME, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::SECOND);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(openV9ProcedureName, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_OPEN_NAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO
