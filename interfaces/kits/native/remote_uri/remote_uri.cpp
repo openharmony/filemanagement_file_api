@@ -89,7 +89,7 @@ bool RemoteUri::IsRemoteUri(const string& path, int &fd, const int& flags)
 int RemoteUri::ConvertUri(const int &fd, string &remoteUri)
 {
     if (fd < 0) {
-        return EINVAL;
+        return -EINVAL;
     }
 
     if (fdFromBinder.size() == MAX_URI_SIZE) {
