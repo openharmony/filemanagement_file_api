@@ -55,6 +55,9 @@
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/native/remote_uri"
             }
           }
+        ],
+        "test": [
+          "//foundation/filemanagement/file_api/interfaces/test/unittest:unittest"
         ]
       }
     }
