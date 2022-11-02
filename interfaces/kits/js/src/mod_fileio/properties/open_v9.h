@@ -26,7 +26,7 @@ public:
     static napi_value Async(napi_env env, napi_callback_info info);
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
-const std::string openV9ProcedureName = "FILEIO_OPEN_V9";
+const std::string PROCEDURE_OPEN_NAME = "FileIOOpenV9";
 } // namespace ModuleFileIO
 } // namespace DistributedFS
 } // namespace OHOS

@@ -29,7 +29,7 @@ public:
     static napi_value Sync(napi_env env, napi_callback_info info);
     static napi_value Async(napi_env env, napi_callback_info info);
 };
-const std::string procedureTruncateName = "FILEIO_TRUNCATE_V9";
+const std::string PROCEDURE_TRUNCATE_NAME = "FileIOTruncateV9";
 } // namespace ModuleFileIO
 } // namespace DistributedFS
 } // namespace OHOS
