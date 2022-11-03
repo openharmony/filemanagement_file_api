@@ -23,6 +23,19 @@ namespace DistributedFS {
 namespace ModuleFileIO {
 constexpr int64_t INVALID_POSITION = std::numeric_limits<decltype(INVALID_POSITION)>::max();
 
+constexpr int RDONLY = 00;
+constexpr int WRONLY = 01;
+constexpr int RDWR = 02;
+constexpr int CREATE = 0100;
+constexpr int TRUNC = 01000;
+constexpr int APPEND = 02000;
+constexpr int NONBLOCK = 04000;
+constexpr int DIRECTORY = 0200000;
+constexpr int NOFOLLOW = 0400000;
+constexpr int SYNC = 04010000;
+
+void InitOpenMode(napi_env env, napi_value exports);
+
 struct CommonFunc {
     static int ConvertJsFlags(int &flags);
     static std::tuple<bool, void *, int64_t, bool, int64_t, int> GetReadArg(napi_env env,
