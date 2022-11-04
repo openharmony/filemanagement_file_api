@@ -80,6 +80,7 @@ napi_value OpenV9::Sync(napi_env env, napi_callback_info info)
     }
     auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succPath) {
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
@@ -115,6 +116,7 @@ napi_value OpenV9::Async(napi_env env, napi_callback_info info)
     }
     auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succPath) {
+        UniError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
