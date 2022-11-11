@@ -26,7 +26,7 @@ namespace DistributedFS {
 constexpr int ERRNO_NOERR = 0;
 constexpr int FILEIO_SYS_CAP_TAG = 13900000;
 const std::string FILEIO_TAG_ERR_CODE = "code";
-const std::string FILEIO_TAG_ERR_MSG = "msg";
+const std::string FILEIO_TAG_ERR_MSG = "message";
 
 enum ELegacy {
     ELEGACY_INVAL = 202,
