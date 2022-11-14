@@ -40,7 +40,7 @@ static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
 {
     int mode = O_RDONLY;
     bool succ = false;
-    if (funcArg.GetArgc() == NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
+    if (funcArg.GetArgc() >= NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
         tie(succ, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
         if (!succ) {
             UniError(EINVAL).ThrowErr(env);
