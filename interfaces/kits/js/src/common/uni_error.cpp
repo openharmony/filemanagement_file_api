@@ -35,6 +35,7 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errCode, string er
     msg = NVal::CreateUTF8String(env, errMsg).val_;
     napi_create_error(env, nullptr, msg, &businessError);
     napi_set_named_property(env, businessError, FILEIO_TAG_ERR_CODE.c_str(), code);
+    napi_set_named_property(env, businessError, FILEIO_TAG_ERR_MSG.c_str(), msg);
     return businessError;
 }
 
