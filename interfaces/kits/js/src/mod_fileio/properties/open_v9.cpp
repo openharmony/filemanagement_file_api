@@ -64,7 +64,7 @@ static NVal InstantiateFile(napi_env env, int fd, string path)
         UniError(EIO).ThrowErr(env);
         return NVal();
     }
-    auto fdg = make_unique<FDGuard>(fd);
+    auto fdg = make_unique<FDGuard>(fd, false);
     rafEntity->fd_.swap(fdg);
     rafEntity->path_ = path;
     rafEntity->uri_ = "";
