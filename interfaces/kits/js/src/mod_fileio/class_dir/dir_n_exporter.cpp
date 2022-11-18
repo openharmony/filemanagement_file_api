@@ -60,6 +60,7 @@ napi_value DirNExporter::CloseSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    lock_guard(dirEntity->lock_);
     dirEntity->dir_.reset();
     return nullptr;
 }
@@ -84,6 +85,7 @@ napi_value DirNExporter::Close(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [dirEntity](napi_env env) -> UniError {
+        lock_guard(dirEntity->lock_);
         DIR *dir = dirEntity->dir_.release();
         int ret = closedir(dir);
         if (ret == -1) {
