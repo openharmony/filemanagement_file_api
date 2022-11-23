@@ -510,7 +510,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     bool hasOp = false;
     if (argc == NARG_CNT::THREE) {
         NVal op = NVal(env, funcArg[NARG_POS::THIRD]);
-        if (op.HasProp("offset") || op.HasProp("position") || op.HasProp("length")) {
+        if (op.HasProp("offset") || op.HasProp("position") || op.HasProp("length")|| !op.TypeIs(napi_function)) {
             hasOp = true;
         }
     }
@@ -589,7 +589,8 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
     size_t argc = funcArg.GetArgc();
     if (argc == NARG_CNT::THREE) {
         NVal op = NVal(env, funcArg[NARG_POS::THIRD]);
-        if (op.HasProp("offset") || op.HasProp("position") || op.HasProp("length") || op.HasProp("encoding")) {
+        if (op.HasProp("offset") || op.HasProp("position") || op.HasProp("length") ||
+            op.HasProp("encoding") || !op.TypeIs(napi_function)) {
             hasOp = true;
         }
     }

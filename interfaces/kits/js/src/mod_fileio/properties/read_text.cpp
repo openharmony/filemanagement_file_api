@@ -65,6 +65,10 @@ static tuple<bool, ssize_t, bool, ssize_t, unique_ptr<char[]>, bool> GetReadText
         hasOp = true;
     }
 
+    if (!op.TypeIs(napi_function)) {
+        hasOp = true;
+    }
+
     return { true, position, hasLen, len, move(encoding), hasOp };
 }
 
