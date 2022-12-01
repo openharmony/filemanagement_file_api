@@ -52,6 +52,7 @@ public:
     std::tuple<bool, void *, size_t> ToArraybuffer() const;
     std::tuple<bool, void *, size_t> ToTypedArray() const;
     std::tuple<bool, std::vector<std::string>, uint32_t> ToStringArray();
+    std::tuple<bool, uint64_t, bool> ToUint64() const;
     std::tuple<bool, double> ToDouble() const;
 
     /* Static helpers to create js objects */
@@ -63,6 +64,7 @@ public:
     static NVal CreateUTF8String(napi_env env, std::string str);
     static NVal CreateUTF8String(napi_env env, const char *str, ssize_t len);
     static NVal CreateUint8Array(napi_env env, void *buf, size_t bufLen);
+    static NVal CreateArrayString(napi_env env, std::vector<std::string> strs);
     static std::tuple<NVal, void *> CreateArrayBuffer(napi_env env, size_t len);
 
     /* SHOULD ONLY BE USED FOR OBJECT */
