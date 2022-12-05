@@ -32,6 +32,8 @@ const string REMOTE_URI_TAG = "fdFromBinder";
 const string SCHEME_TAG = ":";
 const string SCHEME = "datashare";
 const string ZERO_FD = "0";
+const string MEDIA = "media";
+const string PATH_SYMBOL = "/";
 const int MAX_URI_SIZE  = 128;
 class RemoteUri {
     static set<int>fdFromBinder;
@@ -41,6 +43,7 @@ public:
     static bool IsRemoteUri(const string& path, int &fd, const int& flags = O_RDONLY);
     static int ConvertUri(const int &fd, string &remoteUri);
     static int OpenRemoteUri(const string &remoteUri);
+    static bool IsMediaUri(const string &path);
     ~RemoteUri() {}
 };
 std::set<int>RemoteUri::fdFromBinder;

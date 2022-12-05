@@ -27,6 +27,10 @@
 #include "../../common/napi/n_func_arg.h"
 #include "../../common/uni_error.h"
 #include "../common_func.h"
+#include "datashare_helper.h"
+#include "napi_base_context.h"
+#include "remote_uri.h"
+#include "ability.h"
 
 #include "../class_file/file_entity.h"
 #include "../class_file/file_n_exporter.h"
@@ -71,6 +75,25 @@ static NVal InstantiateFile(napi_env env, int fd, string path)
     return { env, objRAF };
 }
 
+static int OpenFileByDatashare(napi_env env, napi_value argv, string path)
+{
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
+    int fd = -1;
+    sptr<FileIoToken> remote = new IRemoteStub<FileIoToken>();
+    if (remote == nullptr) {
+        UniError(errno).ThrowErr(env);
+        return fd;
+    }
+
+    dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
+    Uri uri(path);
+    fd = dataShareHelper->OpenFile(uri, MEDIA_FILEMODE_READONLY);
+    if (fd == -1) {
+        UniError(errno).ThrowErr(env);
+    }
+    return fd;
+}
+
 napi_value OpenV9::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -85,6 +108,15 @@ napi_value OpenV9::Sync(napi_env env, napi_callback_info info)
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
     if (!succMode) {
+        return nullptr;
+    }
+    if (DistributedFS::ModuleRemoteUri::RemoteUri::IsMediaUri(path.get())) {
+        auto fd = OpenFileByDatashare(env, funcArg[NARG_POS::FIRST], path.get());
+        if (fd >= 0) {
+            auto File = InstantiateFile(env, fd, path.get()).val_;
+            return File;
+        }
+        UniError(errno).ThrowErr(env);
         return nullptr;
     }
     uv_loop_s *loop = nullptr;
@@ -124,7 +156,18 @@ napi_value OpenV9::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto arg = make_shared<AsyncOpenFileArg>();
-    auto cbExec = [arg, path = string(path.get()), mode = mode](napi_env env) -> UniError {
+    auto argv = funcArg[NARG_POS::FIRST];
+    auto cbExec = [arg, argv, path = string(path.get()), mode = mode](napi_env env) -> UniError {
+        if (DistributedFS::ModuleRemoteUri::RemoteUri::IsMediaUri(path)) {
+            auto fd = OpenFileByDatashare(env, argv, path);
+            if (fd >= 0) {
+                arg->fd = fd;
+                arg->path = path;
+                arg->uri = "";
+                return UniError(ERRNO_NOERR);
+            }
+            return UniError(errno);
+        }
         uv_loop_s *loop = nullptr;
         napi_get_uv_event_loop(env, &loop);
         uv_fs_t open_req;
