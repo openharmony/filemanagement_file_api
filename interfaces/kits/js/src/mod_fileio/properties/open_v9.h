@@ -16,6 +16,7 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_PROPERTIES_OPEN_V9_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_PROPERTIES_OPEN_V9_H
 
+#include "iremote_broker.h"
 #include "../../common/napi/uni_header.h"
 
 namespace OHOS {
@@ -26,7 +27,18 @@ public:
     static napi_value Async(napi_env env, napi_callback_info info);
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
+
+class FileIoToken : public IRemoteBroker {
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.fileio.open");
+
+    FileIoToken() = default;
+    virtual ~FileIoToken() noexcept = default;
+};
+
 const std::string PROCEDURE_OPEN_NAME = "FileIOOpenV9";
+const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
+const std::string MEDIA_FILEMODE_READONLY = "r";
 } // namespace ModuleFileIO
 } // namespace DistributedFS
 } // namespace OHOS

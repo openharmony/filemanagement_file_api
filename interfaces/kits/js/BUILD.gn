@@ -123,9 +123,24 @@ ohos_shared_library("fs") {
     "src/mod_fileio/properties/truncate_v9.cpp",
   ]
 
-  deps = [ "//foundation/arkui/napi:ace_napi" ]
+  deps = [
+    "//foundation/arkui/napi:ace_napi",
+    "//foundation/filemanagement/file_api/interfaces/kits/native:remote_uri_native",
+  ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:napi_base_context",
+    "ability_runtime:static_subscriber_extension",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
 }
 
 ohos_shared_library("file") {
