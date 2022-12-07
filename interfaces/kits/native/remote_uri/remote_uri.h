@@ -19,6 +19,7 @@
 #include <string>
 #include <fcntl.h>
 #include <set>
+#include "uri.h"
 
 namespace OHOS {
 namespace DistributedFS {
@@ -32,18 +33,18 @@ const string REMOTE_URI_TAG = "fdFromBinder";
 const string SCHEME_TAG = ":";
 const string SCHEME = "datashare";
 const string ZERO_FD = "0";
-const string MEDIA = "media";
+const string MEDIA = "/media/";
 const string PATH_SYMBOL = "/";
 const int MAX_URI_SIZE  = 128;
-class RemoteUri {
+class RemoteUri : public OHOS::Uri {
     static set<int>fdFromBinder;
     static void RemoveFd(int fd);
 public:
-    RemoteUri() {}
+    explicit RemoteUri(const std::string& uriString): Uri(uriString) {}
     static bool IsRemoteUri(const string& path, int &fd, const int& flags = O_RDONLY);
     static int ConvertUri(const int &fd, string &remoteUri);
     static int OpenRemoteUri(const string &remoteUri);
-    static bool IsMediaUri(const string &path);
+    static bool IsMediaUri(const string &uriString);
     ~RemoteUri() {}
 };
 std::set<int>RemoteUri::fdFromBinder;
