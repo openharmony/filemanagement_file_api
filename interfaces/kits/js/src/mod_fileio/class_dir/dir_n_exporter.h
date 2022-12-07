@@ -20,6 +20,8 @@
 
 #include "../../common/napi/n_exporter.h"
 
+static constexpr int DIR_BUFF_LEN = 25;
+
 namespace OHOS {
 namespace DistributedFS {
 namespace ModuleFileIO {

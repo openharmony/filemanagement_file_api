@@ -171,10 +171,31 @@ napi_value DirNExporter::Read(napi_env env, napi_callback_info info)
     auto cbExec = [arg, dir, dirEntity](napi_env env) -> UniError {
         struct dirent tmpDirent;
         lock_guard(dirEntity->lock_);
+        char dirBuff[DIR_BUFF_LEN];
+        (void)memset_s(dirBuff, DIR_BUFF_LEN, 0x00, DIR_BUFF_LEN);
+
+        if (EOK == memcpy_s(dirBuff, DIR_BUFF_LEN, dir, DIR_BUFF_LEN - 1)) {
+            HILOGE("[0]struct DIR member fd =  %{public}02x-%{public}02x-%{public}02x-%{public}02x,"
+                   "buf_pos = %{public}02x-%{public}02x-%{public}02x-%{public}02x,"
+                   "buf_end = %{public}02x-%{public}02x-%{public}02x-%{public}02x",
+                   dirBuff[8], dirBuff[9], dirBuff[10], dirBuff[11], dirBuff[12], dirBuff[13], dirBuff[14],
+                   dirBuff[15], dirBuff[16], dirBuff[17], dirBuff[18], dirBuff[19]);
+        }
         errno = 0;
         dirent *res = nullptr;
         do {
             res = readdir(dir);
+            if (res != nullptr) {
+                HILOGE("res filelength = %{public}u, type = %{public}d", res->d_reclen, res->d_type);
+            }
+
+            if (EOK == memcpy_s(dirBuff, DIR_BUFF_LEN, dir, DIR_BUFF_LEN - 1)) {
+                HILOGE("struct DIR member fd = %{public}02x-%{public}02x-%{public}02x-%{public}02x,"
+                       "buf_pos = %{public}02x-%{public}02x-%{public}02x-%{public}02x,"
+                       "buf_end = %{public}02x-%{public}02x-%{public}02x-%{public}02x",
+                       dirBuff[8], dirBuff[9], dirBuff[10], dirBuff[11], dirBuff[12], dirBuff[13],
+                       dirBuff[14], dirBuff[15], dirBuff[16], dirBuff[17], dirBuff[18], dirBuff[19]);
+            }
             if (res == nullptr && errno) {
                 return UniError(errno);
             } else if (res == nullptr) {
@@ -205,6 +226,9 @@ napi_value DirNExporter::Read(napi_env env, napi_callback_info info)
 
 napi_value DirNExporter::ReadSync(napi_env env, napi_callback_info info)
 {
+    char dirBuff[DIR_BUFF_LEN];
+    (void)memset_s(dirBuff, DIR_BUFF_LEN, 0x00, DIR_BUFF_LEN);
+
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
@@ -216,6 +240,14 @@ napi_value DirNExporter::ReadSync(napi_env env, napi_callback_info info)
         UniError(EBADF).ThrowErr(env, "Dir has been closed yet");
         return nullptr;
     }
+    DIR *dir = dirEntity->dir_.get();
+    if (EOK == memcpy_s(dirBuff, DIR_BUFF_LEN, dir, DIR_BUFF_LEN -1)) {
+        HILOGE("[0]struct DIR member fd =  %{public}02x-%{public}02x-%{public}02x-%{public}02x,"
+               "buf_pos = %{public}02x-%{public}02x-%{public}02x-%{public}02x,"
+               "buf_end = %{public}02x-%{public}02x-%{public}02x-%{public}02x",
+               dirBuff[8], dirBuff[9], dirBuff[10], dirBuff[11], dirBuff[12], dirBuff[13],
+               dirBuff[14], dirBuff[15], dirBuff[16], dirBuff[17], dirBuff[18], dirBuff[19]);
+    }
 
     struct dirent tmpDirent;
     {
@@ -223,7 +255,19 @@ napi_value DirNExporter::ReadSync(napi_env env, napi_callback_info info)
         errno = 0;
         dirent *res = nullptr;
         do {
-            res = readdir(dirEntity->dir_.get());
+            res = readdir(dir);
+            if (res != nullptr) {
+                HILOGE("res filelength = %{public}u, type = %{public}d", res->d_reclen, res->d_type);
+            }
+
+            if (EOK == memcpy_s(dirBuff, DIR_BUFF_LEN, dir, DIR_BUFF_LEN - 1)) {
+                HILOGE("struct DIR member fd = %{public}02x-%{public}02x-%{public}02x-%{public}02x,"
+                       "buf_pos = %{public}02x-%{public}02x-%{public}02x-%{public}02x,"
+                       "buf_end = %{public}02x-%{public}02x-%{public}02x-%{public}02x",
+                       dirBuff[8], dirBuff[9], dirBuff[10], dirBuff[11], dirBuff[12], dirBuff[13],
+                       dirBuff[14], dirBuff[15], dirBuff[16], dirBuff[17], dirBuff[18], dirBuff[19]);
+            }
+
             if (res == nullptr && errno) {
                 UniError(errno).ThrowErr(env);
                 return nullptr;
