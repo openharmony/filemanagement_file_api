@@ -42,6 +42,7 @@ public:
     ~DirNExporter() override;
 };
 const std::string listfileProcedureName = "fileioDirListFile";
+constexpr int DIR_BUFF_LEN = 25;
 } // namespace ModuleFileIO
 } // namespace DistributedFS
 } // namespace OHOS

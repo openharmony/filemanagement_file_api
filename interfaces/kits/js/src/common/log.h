@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace DistributedFS {
 #ifndef FILE_SUBSYSTEM_DEBUG_LOCAL
-static constexpr int FILEIO_DOMAIN_ID = 0;
+static constexpr int FILEIO_DOMAIN_ID = 0xD004388;
 static constexpr OHOS::HiviewDFX::HiLogLabel FILEIO_LABEL = { LOG_CORE, FILEIO_DOMAIN_ID, "file_api" };
 
 #ifdef HILOGD
