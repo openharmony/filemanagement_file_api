@@ -116,7 +116,7 @@ napi_value StatNExporter::GetIno(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return NVal::CreateInt64(env, statEntity->stat_.st_ino).val_;
+    return NVal::CreateBigInt64(env, statEntity->stat_.st_ino).val_;
 }
 
 napi_value StatNExporter::GetMode(napi_env env, napi_callback_info info)
