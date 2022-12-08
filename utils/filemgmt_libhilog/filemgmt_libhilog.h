@@ -43,6 +43,10 @@ static constexpr HiviewDFX::HiLogLabel FILEMGMT_LOG_LABEL = {LOG_CORE, LOG_DOMAI
     HiviewDFX::HiLog::Level(FILEMGMT_LOG_LABEL, "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, \
                             __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
+#ifdef HILOGD
+#undef HILOGD
+#endif
+
 #ifdef HILOGF
 #undef HILOGF
 #endif
