@@ -20,14 +20,13 @@
 
 #include "../../common/napi/n_exporter.h"
 
-static constexpr int DIR_BUFF_LEN = 25;
-
 namespace OHOS {
 namespace DistributedFS {
 namespace ModuleFileIO {
 class DirNExporter final : public NExporter {
 public:
     inline static const std::string className_ = "Dir";
+    constexpr int DIR_BUFF_LEN = 25;
 
     bool Export() override;
     std::string GetClassName() override;
