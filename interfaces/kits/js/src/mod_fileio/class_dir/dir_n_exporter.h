@@ -26,7 +26,6 @@ namespace ModuleFileIO {
 class DirNExporter final : public NExporter {
 public:
     inline static const std::string className_ = "Dir";
-    constexpr int DIR_BUFF_LEN = 25;
 
     bool Export() override;
     std::string GetClassName() override;
@@ -43,6 +42,7 @@ public:
     ~DirNExporter() override;
 };
 const std::string listfileProcedureName = "fileioDirListFile";
+constexpr int DIR_BUFF_LEN = 25;
 } // namespace ModuleFileIO
 } // namespace DistributedFS
 } // namespace OHOS
