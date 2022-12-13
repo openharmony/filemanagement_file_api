@@ -29,6 +29,7 @@ ohos_shared_library("remote_uri_native") {
   public_configs = [ ":remote_uri_config" ]
 
   external_deps = [
+    "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "ipc:ipc_core",

@@ -28,7 +28,6 @@
 #include "../../common/uni_error.h"
 #include "../common_func.h"
 #include "datashare_helper.h"
-#include "napi_base_context.h"
 #include "remote_uri.h"
 #include "ability.h"
 
@@ -81,16 +80,12 @@ static int OpenFileByDatashare(napi_env env, napi_value argv, string path)
     int fd = -1;
     sptr<FileIoToken> remote = new IRemoteStub<FileIoToken>();
     if (remote == nullptr) {
-        UniError(errno).ThrowErr(env);
-        return fd;
+        return ENOMEM;
     }
 
     dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
     Uri uri(path);
     fd = dataShareHelper->OpenFile(uri, MEDIA_FILEMODE_READONLY);
-    if (fd == -1) {
-        UniError(errno).ThrowErr(env);
-    }
     return fd;
 }
 
@@ -116,7 +111,7 @@ napi_value OpenV9::Sync(napi_env env, napi_callback_info info)
             auto File = InstantiateFile(env, fd, path.get()).val_;
             return File;
         }
-        UniError(errno).ThrowErr(env);
+        UniError(-1).ThrowErr(env);
         return nullptr;
     }
     uv_loop_s *loop = nullptr;
@@ -166,7 +161,7 @@ napi_value OpenV9::Async(napi_env env, napi_callback_info info)
                 arg->uri = "";
                 return UniError(ERRNO_NOERR);
             }
-            return UniError(errno);
+            return UniError(-1);
         }
         uv_loop_s *loop = nullptr;
         napi_get_uv_event_loop(env, &loop);
