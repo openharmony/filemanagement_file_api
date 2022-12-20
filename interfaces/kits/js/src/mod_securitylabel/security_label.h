@@ -23,7 +23,7 @@
 #include <sys/xattr.h>
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleSecurityLabel {
 const char XATTR_KEY[] = {"user.security"};
 const std::string DEFAULT_DATA_LEVEL = "s3";
@@ -66,6 +66,6 @@ public:
     }
 };
 } // namespace ModuleSecurityLabel
-} // namespace FileIO
+} // namespace FileManagement
 } // namespace OHOS
 #endif

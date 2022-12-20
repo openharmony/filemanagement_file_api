@@ -19,7 +19,7 @@
 #include <tuple>
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleStatfs {
 using namespace FileManagement::LibN;
 
@@ -515,5 +515,5 @@ napi_value GetTotalBytes(napi_env env, napi_callback_info info)
     return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
 }
 } // namespace ModuleStatfs
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS

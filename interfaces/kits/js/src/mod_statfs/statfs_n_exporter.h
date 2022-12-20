@@ -17,9 +17,10 @@
 #define STATFS_N_EXPORTER_H
 
 #include "filemgmt_libn.h"
+#include "filemgmt_libhilog.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleStatfs {
 napi_value GetFrSizeSync(napi_env env, napi_callback_info info);
 napi_value GetFrSize(napi_env env, napi_callback_info info);
@@ -42,6 +43,6 @@ napi_value GetFreeBytes(napi_env env, napi_callback_info info);
 napi_value GetTotalBytesSync(napi_env env, napi_callback_info info);
 napi_value GetTotalBytes(napi_env env, napi_callback_info info);
 } // namespace ModuleStatfs
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS
 #endif // STATFS_N_EXPORTER_H
