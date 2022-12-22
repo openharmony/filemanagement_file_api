@@ -203,7 +203,9 @@ napi_value DirNExporter::Read(napi_env env, napi_callback_info info)
             } else if (string(res->d_name) == "." || string(res->d_name) == "..") {
                 continue;
             } else {
-                tmpDirent = *res;
+                if (EOK != memcpy_s(&tmpDirent, sizeof(dirent), res, res->d_reclen)) {
+                    return UniError(errno);
+                }
                 break;
             }
         } while (true);
@@ -276,7 +278,10 @@ napi_value DirNExporter::ReadSync(napi_env env, napi_callback_info info)
             } else if (string(res->d_name) == "." || string(res->d_name) == "..") {
                 continue;
             } else {
-                tmpDirent = *res;
+                if (EOK != memcpy_s(&tmpDirent, sizeof(dirent), res, res->d_reclen)) {
+                    UniError(errno).ThrowErr(env);
+                    return nullptr;
+                }
                 break;
             }
         } while (true);
