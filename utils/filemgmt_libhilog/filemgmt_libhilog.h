@@ -22,15 +22,9 @@
 
 namespace OHOS {
 namespace FileManagement {
-#ifndef LOG_DOMAIN
-#define LOG_DOMAIN 0xD004388
-#endif
 
-#ifndef LOG_TAG
-#define LOG_TAG "file_api"
-#endif
-
-static constexpr HiviewDFX::HiLogLabel FILEMGMT_LOG_LABEL = {LOG_CORE, LOG_DOMAIN, LOG_TAG};
+static constexpr int FILEFS_LOG_DOMAIN = 0xD004388;
+static constexpr HiviewDFX::HiLogLabel FILEMGMT_LOG_LABEL = {LOG_CORE, FILEFS_LOG_DOMAIN, "file_api"};
 
 #if defined __FILE_NAME__
 #define FILEMGMT_FILE_NAME __FILE_NAME__

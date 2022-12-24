@@ -24,10 +24,10 @@
 #include <uv.h>
 
 #include "../common_func.h"
-
+#include "class_file/file_entity.h"
+#include "class_file/file_n_exporter.h"
 #include "filemgmt_libn.h"
-#include "../class_file/file_entity.h"
-#include "../class_file/file_n_exporter.h"
+#include "open.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -266,6 +266,8 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
 bool PropNExporter::Export()
 {
     return exports_.AddProp({
+        NVal::DeclareNapiFunction("open", Open::Async),
+        NVal::DeclareNapiFunction("openSync", Open::Sync),
         NVal::DeclareNapiFunction("read", Read),
         NVal::DeclareNapiFunction("readSync", ReadSync),
         NVal::DeclareNapiFunction("write", Write),
