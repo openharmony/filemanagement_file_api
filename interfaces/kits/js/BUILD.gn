@@ -92,8 +92,8 @@ ohos_shared_library("fileio") {
   deps = [
     "//foundation/arkui/napi:ace_napi",
     "//foundation/filemanagement/file_api/interfaces/kits/native:remote_uri_native",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
@@ -165,7 +165,7 @@ ohos_shared_library("file") {
   deps = [
     "${aafwk_kits_path}/ability/native:abilitykit_native",
     "//foundation/arkui/napi:ace_napi",
-    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bounds_checking_function:libsec_shared",
   ]
 
   external_deps = [
