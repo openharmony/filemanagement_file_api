@@ -201,10 +201,10 @@ const std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_CONNECT, { USER_FILE_SERVICE_SYS_CAP_TAG + E_CONNECT,
         "Fail to connect file access extension ability" } },
     { E_PERMISSION, { E_PERMISSION, "Permission verification failed" } },
-    { E_PERMISSION_SYS, { E_PERMISSION, "The caller is not a system application" } },
-    { E_PARAMS, { E_PERMISSION, "The input parameter is invalid" } },
-    { E_DEVICENOTSUPPORT, { E_PERMISSION, "The device doesn't support this api" } },
-    { E_OSNOTSUPPORT, { E_PERMISSION, "The os doesn't support this api" } },
+    { E_PERMISSION_SYS, { E_PERMISSION_SYS, "The caller is not a system application" } },
+    { E_PARAMS, { E_PARAMS, "The input parameter is invalid" } },
+    { E_DEVICENOTSUPPORT, { E_DEVICENOTSUPPORT, "The device doesn't support this api" } },
+    { E_OSNOTSUPPORT, { E_OSNOTSUPPORT, "The os doesn't support this api" } },
 };
 
 class NError {
