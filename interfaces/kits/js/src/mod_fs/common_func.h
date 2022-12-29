@@ -16,11 +16,13 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_COMMON_FUNC_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_COMMON_FUNC_H
 
-#include "../common/napi/uni_header.h"
+#include "fd_guard.h"
+#include "n_val.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
+
 constexpr int64_t INVALID_POSITION = std::numeric_limits<decltype(INVALID_POSITION)>::max();
 constexpr int RDONLY = 00;
 constexpr int WRONLY = 01;
@@ -32,6 +34,12 @@ constexpr int NONBLOCK = 04000;
 constexpr int DIRECTORY = 0200000;
 constexpr int NOFOLLOW = 0400000;
 constexpr int SYNC = 04010000;
+
+struct FileInfo {
+    bool isPath = false;
+    std::unique_ptr<char[]> path;
+    FDGuard fdg;
+};
 
 void InitOpenMode(napi_env env, napi_value exports);
 
