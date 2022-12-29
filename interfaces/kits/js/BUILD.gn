@@ -92,8 +92,8 @@ ohos_shared_library("fileio") {
   deps = [
     "//foundation/arkui/napi:ace_napi",
     "//foundation/filemanagement/file_api/interfaces/kits/native:remote_uri_native",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
@@ -106,26 +106,32 @@ ohos_shared_library("fs") {
   relative_install_dir = "module/file"
 
   include_dirs = [
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/file_helper",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
+    "${src_path}/common/file_helper",
+    "${src_path}/mod_fs",
+    "${utils_path}/filemgmt_libn/include",
+    "${utils_path}/filemgmt_libn/include/n_async",
+    "//third_party/libuv/include",
   ]
 
-  sources = file_common_src
-  sources += [
-    "src/mod_fileio/class_file/file_n_exporter.cpp",
-    "src/mod_fileio/class_stat_v9/stat_n_exporter_v9.cpp",
-    "src/mod_fileio/common_func.cpp",
-    "src/mod_fileio/module_v9.cpp",
-    "src/mod_fileio/properties/open_v9.cpp",
-    "src/mod_fileio/properties/prop_n_exporter_v9.cpp",
-    "src/mod_fileio/properties/stat_v9.cpp",
-    "src/mod_fileio/properties/truncate_v9.cpp",
+  sources = [
+    "src/common/file_helper/fd_guard.cpp",
+    "src/mod_fs/class_file/file_n_exporter.cpp",
+    "src/mod_fs/class_stat/stat_n_exporter.cpp",
+    "src/mod_fs/class_stream/flush.cpp",
+    "src/mod_fs/class_stream/stream_n_exporter.cpp",
+    "src/mod_fs/common_func.cpp",
+    "src/mod_fs/module.cpp",
+    "src/mod_fs/properties/lstat.cpp",
+    "src/mod_fs/properties/open.cpp",
+    "src/mod_fs/properties/prop_n_exporter.cpp",
+    "src/mod_fs/properties/stat.cpp",
+    "src/mod_fs/properties/symlink.cpp",
+    "src/mod_fs/properties/truncate.cpp",
   ]
 
   deps = [
-    "//foundation/arkui/napi:ace_napi",
-    "//foundation/filemanagement/file_api/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
   ]
 
   external_deps = [
@@ -134,8 +140,34 @@ ohos_shared_library("fs") {
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
-    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+  ]
+}
+
+ohos_shared_library("hash") {
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+
+  relative_install_dir = "module/file"
+
+  include_dirs = [
+    "${src_path}/common/file_helper",
+    "${utils_path}/filemgmt_libn/include",
+    "${utils_path}/filemgmt_libhilog",
+  ]
+
+  sources = [
+    "src/common/file_helper/fd_guard.cpp",
+    "src/common/file_helper/hash_file.cpp",
+    "src/mod_hash/hash.cpp",
+    "src/mod_hash/module.cpp",
+  ]
+
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+    "//third_party/bounds_checking_function:libsec_shared",
+    "//third_party/openssl:libcrypto_shared",
   ]
 }
 
@@ -165,7 +197,7 @@ ohos_shared_library("file") {
   deps = [
     "${aafwk_kits_path}/ability/native:abilitykit_native",
     "//foundation/arkui/napi:ace_napi",
-    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bounds_checking_function:libsec_shared",
   ]
 
   external_deps = [
@@ -189,52 +221,54 @@ ohos_shared_library("statfs") {
     "//foundation/filemanagement/file_api/utils/filemgmt_libhilog",
     "//foundation/filemanagement/file_api/utils/filemgmt_libn",
   ]
+}
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+ohos_shared_library("statvfs") {
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+
+  relative_install_dir = "module/file"
+
+  sources = [
+    "src/mod_statvfs/statvfs_n_exporter.cpp",
+    "src/mod_statvfs/statvfs_napi.cpp",
+  ]
+
+  deps = [
+    "//foundation/filemanagement/file_api/utils/filemgmt_libhilog",
+    "//foundation/filemanagement/file_api/utils/filemgmt_libn",
+  ]
 }
 
 ohos_shared_library("environment") {
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
-  relative_install_dir = "module"
-
-  include_dirs = [
-    "//foundation/arkui/napi/interfaces/kits",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
-    "//third_party/node/src",
-  ]
+  relative_install_dir = "module/file"
 
   sources = [
-    "src/common/napi/n_async/n_async_work_callback.cpp",
-    "src/common/napi/n_async/n_async_work_promise.cpp",
-    "src/common/napi/n_async/n_ref.cpp",
-    "src/common/napi/n_func_arg.cpp",
-    "src/common/napi/n_val.cpp",
-    "src/common/uni_error.cpp",
     "src/mod_environment/environment_n_exporter.cpp",
     "src/mod_environment/environment_napi.cpp",
   ]
 
-  deps = [ "//foundation/arkui/napi:ace_napi" ]
+  deps = [
+    "//foundation/filemanagement/file_api/utils/filemgmt_libhilog",
+    "//foundation/filemanagement/file_api/utils/filemgmt_libn",
+  ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "access_token:libtokenid_sdk",
+    "ipc:ipc_core",
+  ]
 }
 
 ohos_shared_library("securitylabel") {
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
-  relative_install_dir = "module"
+  relative_install_dir = "module/file"
 
   cflags = [ "-Wno-format" ]
-
-  include_dirs = [
-    "//foundation/arkui/napi/interfaces/kits",
-    "//foundation/arkui/ace_engine/frameworks/base/utils",
-    "//foundation/arkui/ace_engine/frameworks",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
-  ]
 
   sources = file_common_src
   sources += [
@@ -242,9 +276,10 @@ ohos_shared_library("securitylabel") {
     "src/mod_securitylabel/securitylabel_napi.cpp",
   ]
 
-  deps = [ "//foundation/arkui/napi:ace_napi" ]
-
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  deps = [
+    "//foundation/filemanagement/file_api/utils/filemgmt_libhilog",
+    "//foundation/filemanagement/file_api/utils/filemgmt_libn",
+  ]
 }
 
 ohos_shared_library("document") {
@@ -282,7 +317,9 @@ group("build_kits_js") {
     ":file",
     ":fileio",
     ":fs",
+    ":hash",
     ":securitylabel",
     ":statfs",
+    ":statvfs",
   ]
 }

@@ -13,3 +13,6 @@
 
 aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/native"
 aafwk_path = "${aafwk_kits_path}/frameworks/kits"
+file_api_path = "//foundation/filemanagement/file_api"
+src_path = "${file_api_path}/interfaces/kits/js/src"
+utils_path = "${file_api_path}/utils"
