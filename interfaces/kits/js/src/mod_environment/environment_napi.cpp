@@ -14,11 +14,9 @@
  */
 
 #include "environment_n_exporter.h"
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleEnvironment {
 /***********************************************
  * Module export and register
@@ -35,5 +33,5 @@ napi_value EnvironmentExport(napi_env env, napi_value exports)
 
 NAPI_MODULE(environment, EnvironmentExport)
 } // namespace ModuleEnvironment
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS

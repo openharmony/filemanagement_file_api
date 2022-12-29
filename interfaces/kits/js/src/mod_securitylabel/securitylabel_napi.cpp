@@ -13,13 +13,10 @@
  * limitations under the License.
  */
 
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
-
 #include "securitylabel_n_exporter.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleSecurityLabel {
 /***********************************************
  * Module export and register
@@ -38,5 +35,5 @@ napi_value SecurityLabelExport(napi_env env, napi_value exports)
 
 NAPI_MODULE(securitylabel, SecurityLabelExport)
 } // namespace ModuleSecurityLabel
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS

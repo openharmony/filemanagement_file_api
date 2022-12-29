@@ -193,48 +193,57 @@ ohos_shared_library("statfs") {
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 }
 
+ohos_shared_library("statvfs") {
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+
+  relative_install_dir = "module/file"
+
+  sources = [
+    "src/mod_statvfs/statvfs_n_exporter.cpp",
+    "src/mod_statvfs/statvfs_napi.cpp",
+  ]
+
+  deps = [
+    "//foundation/filemanagement/file_api/utils/filemgmt_libhilog",
+    "//foundation/filemanagement/file_api/utils/filemgmt_libn",
+  ]
+
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+}
+
 ohos_shared_library("environment") {
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
-  relative_install_dir = "module"
+  relative_install_dir = "module/file"
 
-  include_dirs = [
-    "//foundation/arkui/napi/interfaces/kits",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
-    "//third_party/node/src",
-  ]
+  include_dirs = [ "//third_party/node/src" ]
 
   sources = [
-    "src/common/napi/n_async/n_async_work_callback.cpp",
-    "src/common/napi/n_async/n_async_work_promise.cpp",
-    "src/common/napi/n_async/n_ref.cpp",
-    "src/common/napi/n_func_arg.cpp",
-    "src/common/napi/n_val.cpp",
-    "src/common/uni_error.cpp",
     "src/mod_environment/environment_n_exporter.cpp",
     "src/mod_environment/environment_napi.cpp",
   ]
 
-  deps = [ "//foundation/arkui/napi:ace_napi" ]
+  deps = [
+    "//foundation/filemanagement/file_api/utils/filemgmt_libhilog",
+    "//foundation/filemanagement/file_api/utils/filemgmt_libn",
+  ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "access_token:libtokenid_sdk",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
 }
 
 ohos_shared_library("securitylabel") {
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
-  relative_install_dir = "module"
+  relative_install_dir = "module/file"
 
   cflags = [ "-Wno-format" ]
-
-  include_dirs = [
-    "//foundation/arkui/napi/interfaces/kits",
-    "//foundation/arkui/ace_engine/frameworks/base/utils",
-    "//foundation/arkui/ace_engine/frameworks",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
-  ]
 
   sources = file_common_src
   sources += [
@@ -242,7 +251,10 @@ ohos_shared_library("securitylabel") {
     "src/mod_securitylabel/securitylabel_napi.cpp",
   ]
 
-  deps = [ "//foundation/arkui/napi:ace_napi" ]
+  deps = [
+    "//foundation/filemanagement/file_api/utils/filemgmt_libhilog",
+    "//foundation/filemanagement/file_api/utils/filemgmt_libn",
+  ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 }
@@ -284,5 +296,6 @@ group("build_kits_js") {
     ":fs",
     ":securitylabel",
     ":statfs",
+    ":statvfs",
   ]
 }
