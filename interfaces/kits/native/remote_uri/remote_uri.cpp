@@ -28,55 +28,17 @@ namespace ModuleRemoteUri {
 
 using namespace std;
 
-bool RemoteUri::IsMediaUri(const string &path)
+bool RemoteUri::IsMediaUri(const string &uriString)
 {
-    string::size_type posDataShare = path.find(SCHEME_TAG);
-    if (posDataShare == string::npos) {
-        return false;
+    RemoteUri remoteUri = RemoteUri(uriString);
+    string scheme = remoteUri.GetScheme();
+    string path = remoteUri.GetPath();
+    std::size_t len = MEDIA.length();
+    if (path.length() > len) {
+        string media = path.substr(0, len);
+        return scheme == SCHEME && media == MEDIA;
     }
-    string scheme = path.substr(0, posDataShare);
-    if (scheme != SCHEME) {
-        return false;
-    }
-
-    string::size_type pathSlashPos = path.find(PATH_SYMBOL);
-    if (pathSlashPos == string::npos) {
-        return false;
-    }
-
-    string pathNoScheme = path.substr(pathSlashPos);
-    if (pathNoScheme.empty() || pathNoScheme.length() <= MEDIA.length()) {
-        return false;
-    }
-
-    char s1 = pathNoScheme[0];
-    char s2 = pathNoScheme[1];
-    if (s1 != PATH_SYMBOL[0] || s2 != PATH_SYMBOL[0]) {
-        return false;
-    }
-    
-    string str = pathNoScheme.substr(2);
-    if (str.find(PATH_SYMBOL) == string::npos) {
-        return false;
-    }
-
-    int position = str.find_first_of(PATH_SYMBOL);
-    int len = position + 1;
-    if (str.length() == len) {
-        return false;
-    }
-
-    string s = str.substr(len);
-    if (s.empty() || s.length() < MEDIA.length()) {
-        return false;
-    }
-
-    string media = str.substr(len, MEDIA.length());
-    if (media != MEDIA) {
-        return false;
-    }
-
-    return true;
+    return false;
 }
 
 static bool IsAllDigits(string fdStr)
