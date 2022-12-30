@@ -237,6 +237,13 @@ NVal NVal::CreateUndefined(napi_env env)
     return {env, res};
 }
 
+NVal NVal::CreateBigInt64(napi_env env, int64_t val)
+{
+    napi_value res = nullptr;
+    napi_create_bigint_int64(env, val, &res);
+    return { env, res };
+}
+
 NVal NVal::CreateInt64(napi_env env, int64_t val)
 {
     napi_value res = nullptr;
