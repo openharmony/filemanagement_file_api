@@ -16,6 +16,7 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_ENTITY_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_ENTITY_H
 
+#include <iostream>
 #include <unistd.h>
 
 #include "fd_guard.h"
@@ -24,7 +25,7 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 struct FileEntity {
-    std::unique_ptr<FDGuard> fd_ = { nullptr };
+    std::unique_ptr<DistributedFS::FDGuard> fd_ = { nullptr };
     std::string path_;
     std::string uri_;
 };
