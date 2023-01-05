@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include "statfs_n_exporter.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleStatfs {
 /***********************************************
  * Module export and register
@@ -33,5 +33,5 @@ napi_value StatfsExport(napi_env env, napi_value exports)
 
 NAPI_MODULE(statfs, StatfsExport)
 } // namespace ModuleStatfs
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,23 @@
  * limitations under the License.
  */
 
-#include "securitylabel_n_exporter.h"
+#include "statvfs_n_exporter.h"
 
 namespace OHOS {
 namespace FileManagement {
-namespace ModuleSecurityLabel {
-/***********************************************
- * Module export and register
- ***********************************************/
-napi_value SecurityLabelExport(napi_env env, napi_value exports)
+namespace ModuleStatvfs {
+
+napi_value StatvfsExport(napi_env env, napi_value exports)
 {
     static napi_property_descriptor desc[] = {
-        DECLARE_NAPI_FUNCTION("setSecurityLabel", SetSecurityLabel),
-        DECLARE_NAPI_FUNCTION("setSecurityLabelSync", SetSecurityLabelSync),
-        DECLARE_NAPI_FUNCTION("getSecurityLabel", GetSecurityLabel),
-        DECLARE_NAPI_FUNCTION("getSecurityLabelSync", GetSecurityLabelSync),
+        DECLARE_NAPI_FUNCTION("getFreeSize", GetFreeSize),
+        DECLARE_NAPI_FUNCTION("getTotalSize", GetTotalSize),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }
 
-NAPI_MODULE(securitylabel, SecurityLabelExport)
-} // namespace ModuleSecurityLabel
+NAPI_MODULE(statvfs, StatvfsExport)
+} // namespace ModuleStatvfs
 } // namespace FileManagement
 } // namespace OHOS

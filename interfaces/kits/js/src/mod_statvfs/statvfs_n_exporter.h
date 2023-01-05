@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef SECURITYLABEL_N_EXPORTER_H
-#define SECURITYLABEL_N_EXPORTER_H
+#ifndef STATVFS_N_EXPORTER_H
+#define STATVFS_N_EXPORTER_H
 
 #include "filemgmt_libn.h"
+#include "filemgmt_libhilog.h"
 
 namespace OHOS {
 namespace FileManagement {
-namespace ModuleSecurityLabel {
-napi_value SetSecurityLabel(napi_env env, napi_callback_info info);
-napi_value SetSecurityLabelSync(napi_env env, napi_callback_info info);
-napi_value GetSecurityLabel(napi_env env, napi_callback_info info);
-napi_value GetSecurityLabelSync(napi_env env, napi_callback_info info);
-} // namespace ModuleSecurityLabel
+namespace ModuleStatvfs {
+napi_value GetFreeSizeSync(napi_env env, napi_callback_info info);
+napi_value GetFreeSize(napi_env env, napi_callback_info info);
+
+napi_value GetTotalSizeSync(napi_env env, napi_callback_info info);
+napi_value GetTotalSize(napi_env env, napi_callback_info info);
+} // namespace ModuleStatvfs
 } // namespace FileManagement
 } // namespace OHOS
-#endif // SECURITYLABEL_N_EXPORTER_H
+#endif // STATVFS_N_EXPORTER_H

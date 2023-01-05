@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,13 @@
 #include <string>
 
 namespace OHOS {
+namespace FileManagement {
 #ifndef LOG_DOMAIN
-#define LOG_DOMAIN 0xD001600
+#define LOG_DOMAIN 0xD004388
 #endif
 
 #ifndef LOG_TAG
-#define LOG_TAG "FileManagement"
+#define LOG_TAG "file_api"
 #endif
 
 static constexpr HiviewDFX::HiLogLabel FILEMGMT_LOG_LABEL = {LOG_CORE, LOG_DOMAIN, LOG_TAG};
@@ -42,11 +43,28 @@ static constexpr HiviewDFX::HiLogLabel FILEMGMT_LOG_LABEL = {LOG_CORE, LOG_DOMAI
     HiviewDFX::HiLog::Level(FILEMGMT_LOG_LABEL, "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, \
                             __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
+#ifdef HILOGF
+#undef HILOGF
+#endif
+
+#ifdef HILOGE
+#undef HILOGE
+#endif
+
+#ifdef HILOGW
+#undef HILOGW
+#endif
+
+#ifdef HILOGI
+#undef HILOGI
+#endif
+
 #define HILOGD(fmt, ...) FILEMGMT_PRINT_LOG(Debug, fmt, ##__VA_ARGS__)
 #define HILOGI(fmt, ...) FILEMGMT_PRINT_LOG(Info, fmt, ##__VA_ARGS__)
 #define HILOGW(fmt, ...) FILEMGMT_PRINT_LOG(Warn, fmt, ##__VA_ARGS__)
 #define HILOGE(fmt, ...) FILEMGMT_PRINT_LOG(Error, fmt, ##__VA_ARGS__)
 #define HILOGF(fmt, ...) FILEMGMT_PRINT_LOG(Fatal, fmt, ##__VA_ARGS__)
+} // namespace FileManagement
 } // namespace OHOS
 
 #endif // FILEMGMT_LIBHILOG_H

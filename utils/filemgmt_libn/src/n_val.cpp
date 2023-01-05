@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,6 +131,14 @@ tuple<bool, double> NVal::ToDouble() const
     return make_tuple(status == napi_ok, res);
 }
 
+tuple<bool, uint64_t, bool> NVal::ToUint64() const
+{
+    uint64_t res = 0;
+    bool lossless = false;
+    napi_status status = napi_get_value_bigint_uint64(env_, val_, &res, &lossless);
+    return make_tuple(status == napi_ok, res, lossless);
+}
+
 tuple<bool, vector<string>, uint32_t> NVal::ToStringArray()
 {
     napi_status status;
@@ -229,6 +237,13 @@ NVal NVal::CreateUndefined(napi_env env)
     return {env, res};
 }
 
+NVal NVal::CreateBigInt64(napi_env env, int64_t val)
+{
+    napi_value res = nullptr;
+    napi_create_bigint_int64(env, val, &res);
+    return { env, res };
+}
+
 NVal NVal::CreateInt64(napi_env env, int64_t val)
 {
     napi_value res = nullptr;
@@ -280,6 +295,18 @@ NVal NVal::CreateUint8Array(napi_env env, void *buf, size_t bufLen)
     napi_value output_array = nullptr;
     napi_create_typedarray(env, napi_uint8_array, bufLen, output_buffer, 0, &output_array);
     return {env, output_array};
+}
+
+NVal NVal::CreateArrayString(napi_env env, vector<string> strs)
+{
+    napi_value res = nullptr;
+    napi_create_array(env, &res);
+    for (size_t i = 0; i < strs.size(); i++) {
+        napi_value filename;
+        napi_create_string_utf8(env, strs[i].c_str(), strs[i].length(), &filename);
+        napi_set_element(env, res, i, filename);
+    }
+    return {env, res};
 }
 
 tuple<NVal, void *> NVal::CreateArrayBuffer(napi_env env, size_t len)
