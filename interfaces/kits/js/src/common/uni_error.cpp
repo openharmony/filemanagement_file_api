@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,9 @@ UniError::UniError() {}
 UniError::UniError(ELegacy eLegacy) : errno_(eLegacy), codingSystem_(ERR_CODE_SYSTEM_LEGACY) {}
 
 UniError::UniError(int ePosix) : errno_(ePosix), codingSystem_(ERR_CODE_SYSTEM_POSIX) {}
+
+UniError::UniError(int ePosix, bool throwCode) : errno_(ePosix), codingSystem_(ERR_CODE_SYSTEM_POSIX),
+    throwCode_(throwCode) {}
 
 UniError::operator bool() const
 {
@@ -95,6 +98,9 @@ napi_value UniError::GetNapiErr(napi_env env)
     if (errCode == ERRNO_NOERR) {
         return nullptr;
     }
+    if (!throwCode_) {
+        return GetNapiErr(env, GetDefaultErrstr());
+    }
     int32_t code;
     string msg;
     if (errCodeTable.find(errCode) != errCodeTable.end()) {
@@ -109,15 +115,9 @@ napi_value UniError::GetNapiErr(napi_env env)
 
 napi_value UniError::GetNapiErr(napi_env env, string errMsg)
 {
-    int errCode = GetErrno(codingSystem_);
-    if (errCode == ERRNO_NOERR) {
-        return nullptr;
-    }
-    napi_value code = NVal::CreateUTF8String(env, to_string(errCode)).val_;
     napi_value msg = NVal::CreateUTF8String(env, errMsg).val_;
-
     napi_value res = nullptr;
-    napi_status createRes = napi_create_error(env, code, msg, &res);
+    napi_status createRes = napi_create_error(env, nullptr, msg, &res);
     if (createRes) {
         HILOGE("Failed to create an exception, msg = %{public}s", errMsg.c_str());
     }
@@ -130,6 +130,7 @@ void UniError::ThrowErr(napi_env env)
     napi_get_and_clear_last_exception(env, &tmp);
     int32_t code;
     string msg;
+    napi_status throwStatus = napi_ok;
     if (errCodeTable.find(errno_) != errCodeTable.end()) {
         code = errCodeTable.at(errno_).first;
         msg = errCodeTable.at(errno_).second;
@@ -137,7 +138,12 @@ void UniError::ThrowErr(napi_env env)
         code = errCodeTable.at(-1).first;
         msg = errCodeTable.at(-1).second;
     }
-    napi_status throwStatus = napi_throw(env, GenerateBusinessError(env, code, msg));
+    if (!throwCode_) {
+        throwStatus = napi_throw_error(env, nullptr, msg.c_str());
+    } else {
+        throwStatus = napi_throw(env, GenerateBusinessError(env, code, msg));
+    }
+    
     if (throwStatus != napi_ok) {
         HILOGE("Failed to throw an exception, %{public}d, code = %{public}s", throwStatus, msg.c_str());
     }
