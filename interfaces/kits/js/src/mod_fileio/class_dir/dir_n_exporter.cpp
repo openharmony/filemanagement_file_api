@@ -59,6 +59,7 @@ napi_value DirNExporter::CloseSync(napi_env env, napi_callback_info info)
         UniError(EBADF).ThrowErr(env, "Dir has been closed yet");
         return nullptr;
     }
+
     lock_guard(dirEntity->lock_);
     dirEntity->dir_.reset();
     return nullptr;

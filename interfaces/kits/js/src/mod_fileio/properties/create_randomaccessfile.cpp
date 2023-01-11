@@ -140,15 +140,15 @@ napi_value CreateRandomAccessFile::Sync(napi_env env, napi_callback_info info)
         }
         uv_loop_s *loop = nullptr;
         napi_get_uv_event_loop(env, &loop);
-        uv_fs_t open_req;
-        int ret = uv_fs_open(loop, &open_req, fileInfo.path.get(), flags, S_IRUSR |
+        uv_fs_t openReq;
+        int ret = uv_fs_open(loop, &openReq, fileInfo.path.get(), flags, S_IRUSR |
             S_IWUSR | S_IRGRP | S_IWGRP, NULL);
         if (ret < 0) {
             UniError(errno).ThrowErr(env);
             return nullptr;
         }
-        fileInfo.fdg.SetFD(open_req.result, false);
-        uv_fs_req_cleanup(&open_req);
+        fileInfo.fdg.SetFD(openReq.result, false);
+        uv_fs_req_cleanup(&openReq);
     }
     return InstantiateRandomAccessFile(env, fileInfo.fdg.GetFD(), fp).val_;
 }
@@ -179,14 +179,14 @@ napi_value CreateRandomAccessFile::Async(napi_env env, napi_callback_info info)
         if (fileInfo->isPath) {
             uv_loop_s *loop = nullptr;
             napi_get_uv_event_loop(env, &loop);
-            uv_fs_t open_req;
-            int ret = uv_fs_open(loop, &open_req, fileInfo->path.get(), flags, S_IRUSR |
+            uv_fs_t openReq;
+            int ret = uv_fs_open(loop, &openReq, fileInfo->path.get(), flags, S_IRUSR |
                 S_IWUSR | S_IRGRP | S_IWGRP, NULL);
             if (ret < 0) {
                 return UniError(errno);
             }
-            fileInfo->fdg.SetFD(open_req.result, false);
-            uv_fs_req_cleanup(&open_req);
+            fileInfo->fdg.SetFD(openReq.result, false);
+            uv_fs_req_cleanup(&openReq);
         }
         arg->fd = fileInfo->fdg.GetFD();
         arg->fp = fp;
