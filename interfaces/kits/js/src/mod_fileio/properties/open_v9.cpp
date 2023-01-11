@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
     if (funcArg.GetArgc() >= NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
         tie(succ, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
         if (!succ) {
-            UniError(EINVAL).ThrowErr(env);
+            UniError(EINVAL, true).ThrowErr(env);
             return { false, mode };
         }
         (void)CommonFunc::ConvertJsFlags(mode);
@@ -55,13 +55,13 @@ static NVal InstantiateFile(napi_env env, int fd, string path)
 {
     napi_value objRAF = NClass::InstantiateClass(env, FileNExporter::className_, {});
     if (!objRAF) {
-        UniError(EIO).ThrowErr(env);
+        UniError(EIO, true).ThrowErr(env);
         return NVal();
     }
 
     auto rafEntity = NClass::GetEntityOf<FileEntity>(env, objRAF);
     if (!rafEntity) {
-        UniError(EIO).ThrowErr(env);
+        UniError(EIO, true).ThrowErr(env);
         return NVal();
     }
     auto fdg = make_unique<FDGuard>(fd, false);
@@ -75,12 +75,12 @@ napi_value OpenV9::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
     auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succPath) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
@@ -93,7 +93,7 @@ napi_value OpenV9::Sync(napi_env env, napi_callback_info info)
     int ret = uv_fs_open(loop, &open_req, path.get(), mode, S_IRUSR |
         S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, NULL);
     if (ret < 0) {
-        UniError(errno).ThrowErr(env);
+        UniError(errno, true).ThrowErr(env);
         return nullptr;
     }
     auto File = InstantiateFile(env, open_req.result, path.get()).val_;
@@ -111,12 +111,12 @@ napi_value OpenV9::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
     auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succPath) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
@@ -131,7 +131,7 @@ napi_value OpenV9::Async(napi_env env, napi_callback_info info)
         int ret = uv_fs_open(loop, &open_req, path.c_str(), mode, S_IRUSR |
             S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, NULL);
         if (ret < 0) {
-            return UniError(errno);
+            return UniError(errno, true);
         }
         arg->fd = open_req.result;
         arg->path = path;

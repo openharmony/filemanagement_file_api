@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,11 +38,11 @@ static FileEntity *GetFileEntity(napi_env env, napi_value raf_entity)
 {
     auto rafEntity = NClass::GetEntityOf<FileEntity>(env, raf_entity);
     if (!rafEntity) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
     if (!rafEntity->fd_) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
     return rafEntity;
@@ -52,7 +52,7 @@ napi_value FileNExporter::GetFD(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
     auto rafEntity = GetFileEntity(env, funcArg.GetThisVar());
@@ -66,13 +66,13 @@ napi_value FileNExporter::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
     auto rafEntity = make_unique<FileEntity>();
     if (!NClass::SetEntityFor<FileEntity>(env, funcArg.GetThisVar(), move(rafEntity))) {
-        UniError(EIO).ThrowErr(env);
+        UniError(EIO, true).ThrowErr(env);
         return nullptr;
     }
     return funcArg.GetThisVar();
@@ -90,12 +90,12 @@ bool FileNExporter::Export()
     tie(succ, classValue) = NClass::DefineClass(exports_.env_, className,
         FileNExporter::Constructor, move(props));
     if (!succ) {
-        UniError(EIO).ThrowErr(exports_.env_);
+        UniError(EIO, true).ThrowErr(exports_.env_);
         return false;
     }
     succ = NClass::SaveClass(exports_.env_, className, classValue);
     if (!succ) {
-        UniError(EIO).ThrowErr(exports_.env_);
+        UniError(EIO, true).ThrowErr(exports_.env_);
         return false;
     }
 
