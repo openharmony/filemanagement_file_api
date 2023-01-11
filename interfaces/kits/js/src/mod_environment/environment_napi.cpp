@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,9 @@
  */
 
 #include "environment_n_exporter.h"
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleEnvironment {
 /***********************************************
  * Module export and register
@@ -35,5 +33,5 @@ napi_value EnvironmentExport(napi_env env, napi_value exports)
 
 NAPI_MODULE(environment, EnvironmentExport)
 } // namespace ModuleEnvironment
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS

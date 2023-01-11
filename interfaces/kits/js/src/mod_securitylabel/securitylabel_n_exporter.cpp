@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,24 +18,21 @@
 #include <singleton.h>
 #include <tuple>
 
-#include "../common/napi/n_class.h"
-#include "../common/napi/n_func_arg.h"
-#include "../common/napi/n_val.h"
-#include "../common/uni_error.h"
-#include "n_async_work_callback.h"
-#include "n_async_work_promise.h"
+#include "filemgmt_libhilog.h"
 #include "security_label.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleSecurityLabel {
+using namespace OHOS::FileManagement::LibN;
 using namespace std;
 
 napi_value SetSecurityLabel(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(static_cast<int>(NARG_CNT::TWO), static_cast<int>(NARG_CNT::THREE))) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -44,34 +41,34 @@ napi_value SetSecurityLabel(napi_env env, napi_callback_info info)
     std::unique_ptr<char []> dataLevel;
     tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8String();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid path");
+        HILOGE("Invalid path");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     tie(succ, dataLevel, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::SECOND)]).ToUTF8String();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid dataLevel");
+        HILOGE("Invalid dataLevel");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    std::string pathString(path.get());
     std::string dataLevelString(dataLevel.get());
     if (DATA_LEVEL.find(dataLevelString) == DATA_LEVEL.end()) {
-        UniError(EINVAL).ThrowErr(env, "Invalid Argument of dataLevelEnum");
+        HILOGE("Invalid Argument of dataLevelEnum");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [pathString, dataLevelString](napi_env env) -> UniError {
+    auto cbExec = [pathString = string(path.get()), dataLevelString]() -> NError {
         bool ret = SecurityLabel::SetSecurityLabel(pathString, dataLevelString);
         if (!ret) {
-            return UniError(errno);
-        } else {
-            return UniError(ERRNO_NOERR);
+            return NError(errno);
         }
+        return NError(ERRNO_NOERR);
     };
-    auto cbComplete = [](napi_env env, UniError err) -> NVal {
+    auto cbComplete = [](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
-        } else {
-            return NVal::CreateUndefined(env);
         }
+        return NVal::CreateUndefined(env);
     };
     static const std::string procedureName = "SetSecurityLabel";
     NVal thisVar(env, funcArg.GetThisVar());
@@ -79,18 +76,16 @@ napi_value SetSecurityLabel(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[static_cast<int>(NARG_POS::THIRD)]);
-        if (cb.TypeIs(napi_function)) {
-            return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
-        }
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
     }
-    return NVal::CreateUndefined(env).val_;
 }
 
 napi_value SetSecurityLabelSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(static_cast<int>(NARG_CNT::TWO), static_cast<int>(NARG_CNT::THREE))) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -99,24 +94,28 @@ napi_value SetSecurityLabelSync(napi_env env, napi_callback_info info)
     std::unique_ptr<char []> dataLevel;
     tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8String();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid path");
+        HILOGE("Invalid path");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     tie(succ, dataLevel, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::SECOND)]).ToUTF8String();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid dataLevel");
+        HILOGE("Invalid dataLevel");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     if (DATA_LEVEL.find(dataLevel.get()) == DATA_LEVEL.end()) {
-        UniError(EINVAL).ThrowErr(env, "Invalid Argument of dataLevelEnum");
+        HILOGE("Invalid Argument of dataLevelEnum");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     bool ret = SecurityLabel::SetSecurityLabel(path.get(), dataLevel.get());
     if (!ret) {
-        return UniError(errno).GetNapiErr(env);
+        NError(errno).ThrowErr(env);
+        return nullptr;
     }
 
     return NVal::CreateUndefined(env).val_;
@@ -126,7 +125,8 @@ napi_value GetSecurityLabel(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(static_cast<int>(NARG_CNT::ONE), static_cast<int>(NARG_CNT::TWO))) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -134,16 +134,17 @@ napi_value GetSecurityLabel(napi_env env, napi_callback_info info)
     std::unique_ptr<char []> path;
     tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8String();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid path");
+        HILOGE("Invalid path");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     auto result = std::make_shared<string>();
     std::string pathString(path.get());
-    auto cbExec = [pathString, result](napi_env env) -> UniError {
+    auto cbExec = [pathString = move(pathString), result]() -> NError {
         *result = SecurityLabel::GetSecurityLabel(pathString);
-        return UniError(ERRNO_NOERR);
+        return NError(ERRNO_NOERR);
     };
-    auto cbComplete = [result](napi_env env, UniError err) -> NVal {
+    auto cbComplete = [result](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
@@ -167,7 +168,8 @@ napi_value GetSecurityLabelSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(static_cast<int>(NARG_CNT::ONE), static_cast<int>(NARG_CNT::TWO))) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -175,7 +177,8 @@ napi_value GetSecurityLabelSync(napi_env env, napi_callback_info info)
     std::unique_ptr<char []> path;
     tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8String();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Invalid path");
+        HILOGE("Invalid path");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -183,5 +186,5 @@ napi_value GetSecurityLabelSync(napi_env env, napi_callback_info info)
     return NVal::CreateUTF8String(env, result).val_;
 }
 } // namespace ModuleSecurityLabel
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS

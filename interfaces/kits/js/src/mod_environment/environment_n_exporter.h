@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,14 @@
 #ifndef ENVIRONMENT_N_EXPORTER_H
 #define ENVIRONMENT_N_EXPORTER_H
 
-#include "../common/napi/n_exporter.h"
+#include "filemgmt_libn.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleEnvironment {
 napi_value GetStorageDataDir(napi_env env, napi_callback_info info);
 napi_value GetUserDataDir(napi_env env, napi_callback_info info);
 } // namespace ModuleEnvironment
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS
 #endif // ENVIRONMENT_N_EXPORTER_H
