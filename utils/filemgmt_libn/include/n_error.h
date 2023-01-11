@@ -77,7 +77,8 @@ enum ErrCodeSuffixOfFileIO {
     E_BADFD,
     E_RESTART,
     E_DQUOT,
-    E_UKERR
+    E_UKERR,
+    E_NOLCK
 };
 
 enum ErrCodeSuffixOfUserFileManager {
@@ -163,6 +164,7 @@ const std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
     { ERESTART, { FILEIO_SYS_CAP_TAG + E_RESTART, "Interrupted system call should be restarted" } },
     { EDQUOT, { FILEIO_SYS_CAP_TAG + E_DQUOT, "Quota exceeded" } },
     { UNKROWN_ERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
+    { ENOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { FILEIO_SYS_CAP_TAG + E_PERM, { FILEIO_SYS_CAP_TAG + E_PERM, "Operation not permitted" } },
     { FILEIO_SYS_CAP_TAG + E_NOENT, { FILEIO_SYS_CAP_TAG + E_NOENT, "No such file or directory" } },
     { FILEIO_SYS_CAP_TAG + E_SRCH, { FILEIO_SYS_CAP_TAG + E_SRCH, "No such process" } },
@@ -206,6 +208,7 @@ const std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
         "Interrupted system call should be restarted" } },
     { FILEIO_SYS_CAP_TAG + E_DQUOT, { FILEIO_SYS_CAP_TAG + E_DQUOT, "Quota exceeded" } },
     { FILEIO_SYS_CAP_TAG + E_UKERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
+    { FILEIO_SYS_CAP_TAG + E_NOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME, { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME,
         "Invalid display name" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_URIM, { USER_FILE_MANAGER_SYS_CAP_TAG + E_URIM, "Invalid uri" } },

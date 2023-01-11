@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,14 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_ENTITY_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_ENTITY_H
 
+#include <cinttypes>
 #include <iostream>
+#include <sys/file.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "fd_guard.h"
+#include "filemgmt_libhilog.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -28,6 +32,20 @@ struct FileEntity {
     std::unique_ptr<DistributedFS::FDGuard> fd_ = { nullptr };
     std::string path_;
     std::string uri_;
+
+    virtual ~FileEntity()
+    {
+        int32_t fd = fd_.get()->GetFD();
+        int ret = flock(fd, LOCK_UN);
+        if (ret == 0) {
+            struct stat buf;
+            if (fstat(fd, &buf) == 0) {
+                HILOGI("Unlock succeeded inode = %{public}" PRIu64, buf.st_ino);
+            } else {
+                HILOGI("Failed to get inode number");
+            }
+        }
+    }
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement
