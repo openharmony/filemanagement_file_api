@@ -34,9 +34,9 @@ namespace DistributedFS {
 namespace ModuleFileIO {
 using namespace std;
 
-static DirentEntity *GetDirentEntity(napi_env env, napi_callback_info info)
+static DirentEntity *GetDirentEntity(napi_env env, napi_callback_info cbinfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbinfo);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
@@ -50,9 +50,9 @@ static DirentEntity *GetDirentEntity(napi_env env, napi_callback_info info)
     return direntEntity;
 }
 
-static napi_value CheckDirentDType(napi_env env, napi_callback_info info, unsigned char dType)
+static napi_value CheckDirentDType(napi_env env, napi_callback_info cbinfo, unsigned char dType)
 {
-    DirentEntity *direntEntity = GetDirentEntity(env, info);
+    DirentEntity *direntEntity = GetDirentEntity(env, cbinfo);
     if (!direntEntity) {
         return nullptr;
     }
@@ -60,53 +60,53 @@ static napi_value CheckDirentDType(napi_env env, napi_callback_info info, unsign
     return NVal::CreateBool(env, direntEntity->dirent_.d_type == dType).val_;
 }
 
-napi_value DirentNExporter::isBlockDevice(napi_env env, napi_callback_info info)
+napi_value DirentNExporter::isBlockDevice(napi_env env, napi_callback_info cbinfo)
 {
-    return CheckDirentDType(env, info, DT_BLK);
+    return CheckDirentDType(env, cbinfo, DT_BLK);
 }
 
-napi_value DirentNExporter::isCharacterDevice(napi_env env, napi_callback_info info)
+napi_value DirentNExporter::isCharacterDevice(napi_env env, napi_callback_info cbinfo)
 {
-    return CheckDirentDType(env, info, DT_CHR);
+    return CheckDirentDType(env, cbinfo, DT_CHR);
 }
 
-napi_value DirentNExporter::isDirectory(napi_env env, napi_callback_info info)
+napi_value DirentNExporter::isDirectory(napi_env env, napi_callback_info cbinfo)
 {
-    return CheckDirentDType(env, info, DT_DIR);
+    return CheckDirentDType(env, cbinfo, DT_DIR);
 }
 
-napi_value DirentNExporter::isFIFO(napi_env env, napi_callback_info info)
+napi_value DirentNExporter::isFIFO(napi_env env, napi_callback_info cbinfo)
 {
-    return CheckDirentDType(env, info, DT_FIFO);
+    return CheckDirentDType(env, cbinfo, DT_FIFO);
 }
 
-napi_value DirentNExporter::isFile(napi_env env, napi_callback_info info)
+napi_value DirentNExporter::isFile(napi_env env, napi_callback_info cbinfo)
 {
-    return CheckDirentDType(env, info, DT_REG);
+    return CheckDirentDType(env, cbinfo, DT_REG);
 }
 
-napi_value DirentNExporter::isSocket(napi_env env, napi_callback_info info)
+napi_value DirentNExporter::isSocket(napi_env env, napi_callback_info cbinfo)
 {
-    return CheckDirentDType(env, info, DT_SOCK);
+    return CheckDirentDType(env, cbinfo, DT_SOCK);
 }
 
-napi_value DirentNExporter::isSymbolicLink(napi_env env, napi_callback_info info)
+napi_value DirentNExporter::isSymbolicLink(napi_env env, napi_callback_info cbinfo)
 {
-    return CheckDirentDType(env, info, DT_LNK);
+    return CheckDirentDType(env, cbinfo, DT_LNK);
 }
 
-napi_value DirentNExporter::GetName(napi_env env, napi_callback_info info)
+napi_value DirentNExporter::GetName(napi_env env, napi_callback_info cbinfo)
 {
-    DirentEntity *direntEntity = GetDirentEntity(env, info);
+    DirentEntity *direntEntity = GetDirentEntity(env, cbinfo);
     if (!direntEntity) {
         return nullptr;
     }
     return NVal::CreateUTF8String(env, direntEntity->dirent_.d_name).val_;
 }
 
-napi_value DirentNExporter::Constructor(napi_env env, napi_callback_info info)
+napi_value DirentNExporter::Constructor(napi_env env, napi_callback_info cbinfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbinfo);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
