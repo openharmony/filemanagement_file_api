@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,7 +37,7 @@ napi_value PropNExporterV9::ReadSync(napi_env env, napi_callback_info info)
     NFuncArg funcArg(env, info);
 
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -45,7 +45,7 @@ napi_value PropNExporterV9::ReadSync(napi_env env, napi_callback_info info)
     int fd = 0;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -66,7 +66,7 @@ napi_value PropNExporterV9::ReadSync(napi_env env, napi_callback_info info)
         actLen = read(fd, buf, len);
     }
     if (actLen == -1) {
-        UniError(errno).ThrowErr(env);
+        UniError(errno, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -86,7 +86,7 @@ static UniError ReadExec(shared_ptr<AsyncIOReadArg> arg, void *buf, size_t len, 
     }
 
     if (arg->lenRead == -1) {
-        return UniError(errno);
+        return UniError(errno, true);
     } else {
         return UniError(ERRNO_NOERR);
     }
@@ -96,7 +96,7 @@ napi_value PropNExporterV9::Read(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -108,14 +108,14 @@ napi_value PropNExporterV9::Read(napi_env env, napi_callback_info info)
     int64_t pos = 0;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
     tie(succ, buf, len, hasPos, pos) =
         CommonFunc::GetReadArgV9(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -159,7 +159,7 @@ UniError PropNExporterV9::WriteExec(shared_ptr<AsyncIOWrtieArg> arg, void *buf, 
     }
 
     if (arg->actLen == -1) {
-        return UniError(errno);
+        return UniError(errno, true);
     } else {
         return UniError(ERRNO_NOERR);
     }
@@ -169,7 +169,7 @@ napi_value PropNExporterV9::Write(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -177,7 +177,7 @@ napi_value PropNExporterV9::Write(napi_env env, napi_callback_info info)
     int fd;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -189,7 +189,7 @@ napi_value PropNExporterV9::Write(napi_env env, napi_callback_info info)
     tie(succ, bufGuard, buf, len, hasPos, position) =
         CommonFunc::GetWriteArgV9(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -236,7 +236,7 @@ napi_value PropNExporterV9::WriteSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -244,7 +244,7 @@ napi_value PropNExporterV9::WriteSync(napi_env env, napi_callback_info info)
     int fd;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -267,7 +267,7 @@ napi_value PropNExporterV9::WriteSync(napi_env env, napi_callback_info info)
     }
 
     if (writeLen == -1) {
-        UniError(errno).ThrowErr(env);
+        UniError(errno, true).ThrowErr(env);
         return nullptr;
     }
 
