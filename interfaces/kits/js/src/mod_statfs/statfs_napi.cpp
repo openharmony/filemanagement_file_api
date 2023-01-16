@@ -16,7 +16,7 @@
 #include "statfs_n_exporter.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleStatfs {
 /***********************************************
  * Module export and register
@@ -33,5 +33,5 @@ napi_value StatfsExport(napi_env env, napi_value exports)
 
 NAPI_MODULE(statfs, StatfsExport)
 } // namespace ModuleStatfs
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS

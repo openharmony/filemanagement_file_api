@@ -69,7 +69,7 @@ napi_value Flush::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto cbExec = [streamEntity, env = env]() -> NError {
+    auto cbExec = [streamEntity]() -> NError {
         int ret = fflush(streamEntity->fp.get());
         if (ret < 0) {
             HILOGE("Failed to fflush file in the stream");

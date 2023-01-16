@@ -87,11 +87,11 @@ napi_value Hash::Async(napi_env env, napi_callback_info info)
         int ret = EIO;
         string &res = *arg;
         if (algType == HASH_ALGORITHM_TYPE_MD5) {
-            tie(ret, res) = HashFile::HashWithMD5(fpath);
+            tie(ret, res) = DistributedFS::HashFile::HashWithMD5(fpath);
         } else if (algType == HASH_ALGORITHM_TYPE_SHA1) {
-            tie(ret, res) = HashFile::HashWithSHA1(fpath);
+            tie(ret, res) = DistributedFS::HashFile::HashWithSHA1(fpath);
         } else if (algType == HASH_ALGORITHM_TYPE_SHA256) {
-            tie(ret, res) = HashFile::HashWithSHA256(fpath);
+            tie(ret, res) = DistributedFS::HashFile::HashWithSHA256(fpath);
         }
         return NError(ret);
     };

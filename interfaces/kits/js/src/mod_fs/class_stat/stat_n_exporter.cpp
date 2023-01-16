@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,41 +13,33 @@
  * limitations under the License.
  */
 
-#include "stat_n_exporter_v9.h"
-#include "../../common/napi/n_async/n_async_work_callback.h"
-#include "../../common/napi/n_async/n_async_work_promise.h"
+#include "stat_entity.h"
+#include "stat_n_exporter.h"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
-#include <sstream>
+#include <securec.h>
 
-#include "securec.h"
+#include "filemgmt_libhilog.h"
 
-#include "../../common/log.h"
-#include "../../common/napi/n_class.h"
-#include "../../common/napi/n_func_arg.h"
-#include "../../common/uni_error.h"
-#include "stat_entity_v9.h"
-
-namespace OHOS {
-namespace DistributedFS {
-namespace ModuleFileIO {
+namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
-
-constexpr int S_PERMISSION = 00000777;
+using namespace OHOS::FileManagement::LibN;
 
 static napi_value CheckStatMode(napi_env env, napi_callback_info info, mode_t mode)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
+        HILOGE("Failed to get stat entity");
         return nullptr;
     }
 
@@ -55,202 +47,204 @@ static napi_value CheckStatMode(napi_env env, napi_callback_info info, mode_t mo
     return NVal::CreateBool(env, check).val_;
 }
 
-napi_value StatNExporterV9::IsBlockDevice(napi_env env, napi_callback_info info)
+napi_value StatNExporter::IsBlockDevice(napi_env env, napi_callback_info info)
 {
     return CheckStatMode(env, info, S_IFBLK);
 }
 
-napi_value StatNExporterV9::IsCharacterDevice(napi_env env, napi_callback_info info)
+napi_value StatNExporter::IsCharacterDevice(napi_env env, napi_callback_info info)
 {
     return CheckStatMode(env, info, S_IFCHR);
 }
 
-napi_value StatNExporterV9::IsDirectory(napi_env env, napi_callback_info info)
+napi_value StatNExporter::IsDirectory(napi_env env, napi_callback_info info)
 {
     return CheckStatMode(env, info, S_IFDIR);
 }
 
-napi_value StatNExporterV9::IsFIFO(napi_env env, napi_callback_info info)
+napi_value StatNExporter::IsFIFO(napi_env env, napi_callback_info info)
 {
     return CheckStatMode(env, info, S_IFIFO);
 }
 
-napi_value StatNExporterV9::IsFile(napi_env env, napi_callback_info info)
+napi_value StatNExporter::IsFile(napi_env env, napi_callback_info info)
 {
     return CheckStatMode(env, info, S_IFREG);
 }
 
-napi_value StatNExporterV9::IsSocket(napi_env env, napi_callback_info info)
+napi_value StatNExporter::IsSocket(napi_env env, napi_callback_info info)
 {
     return CheckStatMode(env, info, S_IFSOCK);
 }
 
-napi_value StatNExporterV9::IsSymbolicLink(napi_env env, napi_callback_info info)
+napi_value StatNExporter::IsSymbolicLink(napi_env env, napi_callback_info info)
 {
     return CheckStatMode(env, info, S_IFLNK);
 }
 
-napi_value StatNExporterV9::GetIno(napi_env env, napi_callback_info info)
+napi_value StatNExporter::GetIno(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
+        HILOGE("Failed to get stat entity");
         return nullptr;
     }
 
-    return NVal::CreateInt64(env, statEntity->stat_.st_ino).val_;
+    return NVal::CreateBigInt64(env, statEntity->stat_.st_ino).val_;
 }
 
-napi_value StatNExporterV9::GetMode(napi_env env, napi_callback_info info)
+napi_value StatNExporter::GetMode(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
+        HILOGE("Failed to get stat entity");
         return nullptr;
     }
 
     return NVal::CreateInt64(env, statEntity->stat_.st_mode & S_PERMISSION).val_;
 }
 
-napi_value StatNExporterV9::GetUid(napi_env env, napi_callback_info info)
+napi_value StatNExporter::GetUid(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
+        HILOGE("Failed to get stat entity");
         return nullptr;
     }
 
     return NVal::CreateInt64(env, statEntity->stat_.st_uid).val_;
 }
 
-napi_value StatNExporterV9::GetGid(napi_env env, napi_callback_info info)
+napi_value StatNExporter::GetGid(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
+        HILOGE("Failed to get stat entity");
         return nullptr;
     }
 
     return NVal::CreateInt64(env, statEntity->stat_.st_gid).val_;
 }
 
-napi_value StatNExporterV9::GetSize(napi_env env, napi_callback_info info)
+napi_value StatNExporter::GetSize(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
+        HILOGE("Failed to get stat entity");
         return nullptr;
     }
 
     return NVal::CreateInt64(env, statEntity->stat_.st_size).val_;
 }
 
-napi_value StatNExporterV9::GetBlksize(napi_env env, napi_callback_info info)
+napi_value StatNExporter::GetAtime(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
-        return nullptr;
-    }
-
-    return NVal::CreateInt64(env, statEntity->stat_.st_blksize).val_;
-}
-
-napi_value StatNExporterV9::GetAtime(napi_env env, napi_callback_info info)
-{
-    NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
-        return nullptr;
-    }
-
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
-    if (!statEntity) {
+        HILOGE("Failed to get stat entity");
         return nullptr;
     }
 
     return NVal::CreateInt64(env, statEntity->stat_.st_atim.tv_sec).val_;
 }
 
-napi_value StatNExporterV9::GetMtime(napi_env env, napi_callback_info info)
+napi_value StatNExporter::GetMtime(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
+        HILOGE("Failed to get stat entity");
         return nullptr;
     }
 
     return NVal::CreateInt64(env, statEntity->stat_.st_mtim.tv_sec).val_;
 }
 
-napi_value StatNExporterV9::GetCtime(napi_env env, napi_callback_info info)
+napi_value StatNExporter::GetCtime(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, funcArg.GetThisVar());
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
+        HILOGE("Failed to get stat entity");
         return nullptr;
     }
 
     return NVal::CreateInt64(env, statEntity->stat_.st_ctim.tv_sec).val_;
 }
 
-napi_value StatNExporterV9::Constructor(napi_env env, napi_callback_info info)
+napi_value StatNExporter::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    unique_ptr<StatEntityV9> statEntity = make_unique<StatEntityV9>();
-    if (!NClass::SetEntityFor<StatEntityV9>(env, funcArg.GetThisVar(), move(statEntity))) {
-        UniError(EIO, true).ThrowErr(env);
+    unique_ptr<StatEntity> statEntity = make_unique<StatEntity>();
+    if (!NClass::SetEntityFor<StatEntity>(env, funcArg.GetThisVar(), move(statEntity))) {
+        HILOGE("Failed to set stat entity");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     return funcArg.GetThisVar();
 }
 
-bool StatNExporterV9::Export()
+bool StatNExporter::Export()
 {
     vector<napi_property_descriptor> props = {
         NVal::DeclareNapiFunction("isBlockDevice", IsBlockDevice),
@@ -266,7 +260,6 @@ bool StatNExporterV9::Export()
         NVal::DeclareNapiGetter("uid", GetUid),
         NVal::DeclareNapiGetter("gid", GetGid),
         NVal::DeclareNapiGetter("size", GetSize),
-        NVal::DeclareNapiGetter("blksize", GetBlksize),
         NVal::DeclareNapiGetter("atime", GetAtime),
         NVal::DeclareNapiGetter("mtime", GetMtime),
         NVal::DeclareNapiGetter("ctime", GetCtime),
@@ -275,29 +268,29 @@ bool StatNExporterV9::Export()
     string className = GetClassName();
     bool succ = false;
     napi_value classValue = nullptr;
-    tie(succ, classValue) = NClass::DefineClass(exports_.env_, className, StatNExporterV9::Constructor,
+    tie(succ, classValue) = NClass::DefineClass(exports_.env_, className, StatNExporter::Constructor,
         std::move(props));
     if (!succ) {
-        UniError(EIO, true).ThrowErr(exports_.env_);
+        HILOGE("Failed to define class");
+        NError(EIO).ThrowErr(exports_.env_);
         return false;
     }
     succ = NClass::SaveClass(exports_.env_, className, classValue);
     if (!succ) {
-        UniError(EIO, true).ThrowErr(exports_.env_);
+        HILOGE("Failed to save class");
+        NError(EIO).ThrowErr(exports_.env_);
         return false;
     }
 
     return exports_.AddProp(className, classValue);
 }
 
-string StatNExporterV9::GetClassName()
+string StatNExporter::GetClassName()
 {
-    return StatNExporterV9::className_;
+    return StatNExporter::className_;
 }
 
-StatNExporterV9::StatNExporterV9(napi_env env, napi_value exports) : NExporter(env, exports) {}
+StatNExporter::StatNExporter(napi_env env, napi_value exports) : NExporter(env, exports) {}
 
-StatNExporterV9::~StatNExporterV9() {}
-} // namespace ModuleFileIO
-} // namespace DistributedFS
-} // namespace OHOS
+StatNExporter::~StatNExporter() {}
+} // namespace OHOS::FileManagement::ModuleFileIO

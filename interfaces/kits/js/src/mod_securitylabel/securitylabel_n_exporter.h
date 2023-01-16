@@ -16,16 +16,16 @@
 #ifndef SECURITYLABEL_N_EXPORTER_H
 #define SECURITYLABEL_N_EXPORTER_H
 
-#include "../common/napi/n_exporter.h"
+#include "filemgmt_libn.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleSecurityLabel {
 napi_value SetSecurityLabel(napi_env env, napi_callback_info info);
 napi_value SetSecurityLabelSync(napi_env env, napi_callback_info info);
 napi_value GetSecurityLabel(napi_env env, napi_callback_info info);
 napi_value GetSecurityLabelSync(napi_env env, napi_callback_info info);
 } // namespace ModuleSecurityLabel
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS
 #endif // SECURITYLABEL_N_EXPORTER_H

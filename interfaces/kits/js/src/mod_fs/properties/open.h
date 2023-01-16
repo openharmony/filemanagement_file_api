@@ -13,23 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_ENTITY_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_H
 
-#include <iostream>
-#include <unistd.h>
-
-#include "fd_guard.h"
+#include "iremote_broker.h"
+#include "../../common/napi/uni_header.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-struct FileEntity {
-    std::unique_ptr<DistributedFS::FDGuard> fd_ = { nullptr };
-    std::string path_;
-    std::string uri_;
+class Open final {
+public:
+    static napi_value Async(napi_env env, napi_callback_info info);
+    static napi_value Sync(napi_env env, napi_callback_info info);
 };
+
+class FileIoToken : public IRemoteBroker {
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.fileio.open");
+
+    FileIoToken() = default;
+    virtual ~FileIoToken() noexcept = default;
+};
+
+const std::string PROCEDURE_OPEN_NAME = "FileIOOpen";
+const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
+const std::string MEDIA_FILEMODE_READONLY = "r";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_ENTITY_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_H

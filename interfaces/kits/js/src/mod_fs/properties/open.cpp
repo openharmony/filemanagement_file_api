@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "open_v9.h"
+#include "open.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -20,24 +20,20 @@
 #include <memory>
 #include <uv.h>
 
-#include "../../common/log.h"
-#include "../../common/napi/n_async/n_async_work_callback.h"
-#include "../../common/napi/n_async/n_async_work_promise.h"
-#include "../../common/napi/n_class.h"
-#include "../../common/napi/n_func_arg.h"
-#include "../../common/uni_error.h"
 #include "../common_func.h"
-#include "datashare_helper.h"
-#include "remote_uri.h"
 #include "ability.h"
-
-#include "../class_file/file_entity.h"
-#include "../class_file/file_n_exporter.h"
+#include "class_file/file_entity.h"
+#include "class_file/file_n_exporter.h"
+#include "datashare_helper.h"
+#include "filemgmt_libhilog.h"
+#include "filemgmt_libn.h"
+#include "remote_uri.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
+using namespace OHOS::FileManagement::LibN;
 
 static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
 {
@@ -46,7 +42,8 @@ static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
     if (funcArg.GetArgc() >= NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
         tie(succ, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
         if (!succ) {
-            UniError(EINVAL, true).ThrowErr(env);
+            HILOGE("Invalid mode");
+            NError(EINVAL).ThrowErr(env);
             return { false, mode };
         }
         (void)CommonFunc::ConvertJsFlags(mode);
@@ -54,31 +51,38 @@ static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
     return { true, mode };
 }
 
-static NVal InstantiateFile(napi_env env, int fd, string path)
+static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
 {
-    napi_value objRAF = NClass::InstantiateClass(env, FileNExporter::className_, {});
-    if (!objRAF) {
-        UniError(EIO, true).ThrowErr(env);
+    napi_value objFile = NClass::InstantiateClass(env, FileNExporter::className_, {});
+    if (!objFile) {
+        HILOGE("Failed to instantiate class");
+        NError(EIO).ThrowErr(env);
         return NVal();
     }
 
-    auto rafEntity = NClass::GetEntityOf<FileEntity>(env, objRAF);
-    if (!rafEntity) {
-        UniError(EIO, true).ThrowErr(env);
+    auto fileEntity = NClass::GetEntityOf<FileEntity>(env, objFile);
+    if (!fileEntity) {
+        HILOGE("Failed to get fileEntity");
+        NError(EIO).ThrowErr(env);
         return NVal();
     }
-    auto fdg = make_unique<FDGuard>(fd, false);
-    rafEntity->fd_.swap(fdg);
-    rafEntity->path_ = path;
-    rafEntity->uri_ = "";
-    return { env, objRAF };
+    auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+    fileEntity->fd_.swap(fdg);
+    if (isUri) {
+        fileEntity->path_ = "";
+        fileEntity->uri_ = pathOrUri;
+    } else {
+        fileEntity->path_ = pathOrUri;
+        fileEntity->uri_ = "";
+    }
+    return { env, objFile };
 }
 
 static int OpenFileByDatashare(napi_env env, napi_value argv, string path)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
     int fd = -1;
-    sptr<FileIoToken> remote = new IRemoteStub<FileIoToken>();
+    sptr<FileIoToken> remote = new (std::nothrow) IRemoteStub<FileIoToken>();
     if (remote == nullptr) {
         return ENOMEM;
     }
@@ -89,43 +93,45 @@ static int OpenFileByDatashare(napi_env env, napi_value argv, string path)
     return fd;
 }
 
-napi_value OpenV9::Sync(napi_env env, napi_callback_info info)
+napi_value Open::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succPath) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Invalid path");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
     if (!succMode) {
+        HILOGE("Invalid mode");
         return nullptr;
     }
     if (DistributedFS::ModuleRemoteUri::RemoteUri::IsMediaUri(path.get())) {
         auto fd = OpenFileByDatashare(env, funcArg[NARG_POS::FIRST], path.get());
         if (fd >= 0) {
-            auto File = InstantiateFile(env, fd, path.get()).val_;
-            return File;
+            auto file = InstantiateFile(env, fd, path.get(), true).val_;
+            return file;
         }
-        UniError(-1, true).ThrowErr(env);
+        HILOGE("Failed to open file by Datashare");
+        NError(-1).ThrowErr(env);
         return nullptr;
     }
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(env, &loop);
-    uv_fs_t open_req;
-    int ret = uv_fs_open(loop, &open_req, path.get(), mode, S_IRUSR |
+    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> open_req = { new uv_fs_t, uv_fs_req_cleanup };
+    int ret = uv_fs_open(uv_default_loop(), open_req.get(), path.get(), mode, S_IRUSR |
         S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, NULL);
     if (ret < 0) {
-        UniError(errno, true).ThrowErr(env);
+        HILOGE("Failed to open file for libuv error %{public}d", ret);
+        NError(errno).ThrowErr(env);
         return nullptr;
     }
-    auto File = InstantiateFile(env, open_req.result, path.get()).val_;
-    uv_fs_req_cleanup(&open_req);
-    return File;
+    auto file = InstantiateFile(env, open_req.get()->result, path.get(), false).val_;
+    return file;
 }
 
 struct AsyncOpenFileArg {
@@ -134,54 +140,61 @@ struct AsyncOpenFileArg {
     string uri;
 };
 
-napi_value OpenV9::Async(napi_env env, napi_callback_info info)
+napi_value Open::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succPath) {
-        UniError(EINVAL, true).ThrowErr(env);
+        HILOGE("Invalid path");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
     if (!succMode) {
+        HILOGE("Invalid mode");
         return nullptr;
     }
     auto arg = make_shared<AsyncOpenFileArg>();
     auto argv = funcArg[NARG_POS::FIRST];
-    auto cbExec = [arg, argv, path = string(path.get()), mode = mode](napi_env env) -> UniError {
+    auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
         if (DistributedFS::ModuleRemoteUri::RemoteUri::IsMediaUri(path)) {
             auto fd = OpenFileByDatashare(env, argv, path);
             if (fd >= 0) {
                 arg->fd = fd;
-                arg->path = path;
-                arg->uri = "";
-                return UniError(ERRNO_NOERR);
+                arg->path = "";
+                arg->uri = path;
+                return NError(ERRNO_NOERR);
             }
-            return UniError(-1, true);
+            HILOGE("Failed to open file by Datashare");
+            return NError(-1);
         }
-        uv_loop_s *loop = nullptr;
-        napi_get_uv_event_loop(env, &loop);
-        uv_fs_t open_req;
-        int ret = uv_fs_open(loop, &open_req, path.c_str(), mode, S_IRUSR |
+        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> open_req = { new uv_fs_t, uv_fs_req_cleanup };
+        int ret = uv_fs_open(uv_default_loop(), open_req.get(), path.c_str(), mode, S_IRUSR |
             S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, NULL);
         if (ret < 0) {
-            return UniError(errno, true);
+            HILOGE("Failed to open file for libuv error %{public}d", ret);
+            return NError(errno);
         }
-        arg->fd = open_req.result;
+        arg->fd = open_req.get()->result;
         arg->path = path;
         arg->uri = "";
-        uv_fs_req_cleanup(&open_req);
-        return UniError(ERRNO_NOERR);
+        return NError(ERRNO_NOERR);
     };
-    auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
+    auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return InstantiateFile(env, arg->fd, arg->path);
+        bool isUri = false;
+        if (arg->path.empty() && arg->uri.size()) {
+            isUri = true;
+            return InstantiateFile(env, arg->fd, arg->uri, isUri);
+        }
+        return InstantiateFile(env, arg->fd, arg->path, isUri);
     };
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
@@ -194,5 +207,5 @@ napi_value OpenV9::Async(napi_env env, napi_callback_info info)
     }
 }
 } // namespace ModuleFileIO
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS

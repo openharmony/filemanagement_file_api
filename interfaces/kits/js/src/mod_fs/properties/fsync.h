@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef ENVIRONMENT_N_EXPORTER_H
-#define ENVIRONMENT_N_EXPORTER_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FSYNC_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FSYNC_H
 
 #include "filemgmt_libn.h"
 
-namespace OHOS {
-namespace FileManagement {
-namespace ModuleEnvironment {
-napi_value GetStorageDataDir(napi_env env, napi_callback_info info);
-napi_value GetUserDataDir(napi_env env, napi_callback_info info);
-} // namespace ModuleEnvironment
-} // namespace FileManagement
-} // namespace OHOS
-#endif // ENVIRONMENT_N_EXPORTER_H
+namespace OHOS::FileManagement::ModuleFileIO {
+class Fsync final {
+public:
+    static napi_value Sync(napi_env env, napi_callback_info info);
+    static napi_value Async(napi_env env, napi_callback_info info);
+};
+} // namespace OHOS::FileManagement::ModuleFileIO
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FSYNC_H

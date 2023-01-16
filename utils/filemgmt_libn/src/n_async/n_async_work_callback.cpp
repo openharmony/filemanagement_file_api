@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,8 @@ static void CallbackComplete(napi_env env, napi_status status, void *data)
 NVal NAsyncWorkCallback::Schedule(string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete)
 {
     if (!ctx_->cb_ || !ctx_->cb_.Deref(env_).TypeIs(napi_function)) {
-        NError(EINVAL).ThrowErr(env_, "The callback should be a function");
+        HILOGE("The callback should be a function");
+        NError(EINVAL).ThrowErr(env_);
         return NVal();
     }
 

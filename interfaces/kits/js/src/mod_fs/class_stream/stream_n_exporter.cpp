@@ -44,7 +44,6 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    /* To get entity */
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
         HILOGE("Stream may have been closed");
@@ -148,6 +147,15 @@ struct AsyncWrtieArg {
     ~AsyncWrtieArg() = default;
 };
 
+static bool HasOption(napi_env env, napi_value optionFromJsArg)
+{
+    NVal op = NVal(env, optionFromJsArg);
+    if (op.HasProp("offset") || op.HasProp("length") || op.HasProp("encoding") || !op.TypeIs(napi_function)) {
+        return true;
+    }
+    return false;
+}
+
 napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -175,17 +183,12 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
     }
 
     shared_ptr<AsyncWrtieArg> arg;
-    if (bufGuard) {
-        arg = make_shared<AsyncWrtieArg>(move(bufGuard));
-    } else {
-        arg = make_shared<AsyncWrtieArg>(NVal(env, funcArg[NARG_POS::FIRST]));
-    }
+    arg = make_shared<AsyncWrtieArg>(move(bufGuard));
 
-    auto cbExec = [arg, buf = buf, len = len, filp, hasOffset = hasOffset, offset = offset, env = env]() -> NError {
+    auto cbExec = [arg, buf = buf, len = len, filp, hasOffset = hasOffset, offset = offset]() -> NError {
         int ret = fseek(filp, offset, SEEK_SET);
         if (hasOffset && (ret < 0)) {
             HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
-            NError(errno).ThrowErr(env);
             return NError(errno);
         }
         arg->actLen = fwrite(buf, 1, len, filp);
@@ -206,10 +209,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
     NVal thisVar(env, funcArg.GetThisVar());
     bool hasOp = false;
     if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        NVal op = NVal(env, funcArg[NARG_POS::SECOND]);
-        if (op.HasProp("offset") || op.HasProp("length") || op.HasProp("encoding") || !op.TypeIs(napi_function)) {
-            hasOp = true;
-        }
+        hasOp = HasOption(env, funcArg[NARG_POS::SECOND]);
     }
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO && hasOp)) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STREAM_WRITE_NAME, cbExec, cbCompl).val_;
@@ -223,7 +223,6 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
 struct AsyncReadArg {
     size_t lenRead { 0 };
     NRef refReadBuf;
-    int offset { 0 };
 
     explicit AsyncReadArg(NVal jsReadBuf) : refReadBuf(jsReadBuf) {}
     ~AsyncReadArg() = default;
@@ -238,7 +237,6 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    /* To get entity */
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
         HILOGE("Stream may have been closed");
@@ -257,11 +255,10 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
-    auto cbExec = [arg, buf = buf, len = len, filp, hasOffset = hasOffset, offset = offset, env = env]() -> NError {
+    auto cbExec = [arg, buf = buf, len = len, filp, hasOffset = hasOffset, offset = offset]() -> NError {
         int ret = fseek(filp, offset, SEEK_SET);
         if (hasOffset && (ret < 0)) {
             HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
-            NError(errno).ThrowErr(env);
             return NError(errno);
         }
         size_t actLen = fread(buf, 1, len, filp);
@@ -270,7 +267,6 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
             return NError(errno);
         } else {
             arg->lenRead = actLen;
-            arg->offset = offset;
             return NError(ERRNO_NOERR);
         }
     };
@@ -285,10 +281,7 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
     NVal thisVar(env, funcArg.GetThisVar());
     bool hasOp = false;
     if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        NVal op = NVal(env, funcArg[NARG_POS::SECOND]);
-        if (op.HasProp("offset") || op.HasProp("length")|| !op.TypeIs(napi_function)) {
-            hasOp = true;
-        }
+        hasOp = HasOption(env, funcArg[NARG_POS::SECOND]);
     }
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO && hasOp)) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STREAM_READ_NAME, cbExec, cbCompl).val_;

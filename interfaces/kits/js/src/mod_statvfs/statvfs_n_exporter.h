@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef ENVIRONMENT_N_EXPORTER_H
-#define ENVIRONMENT_N_EXPORTER_H
+#ifndef STATVFS_N_EXPORTER_H
+#define STATVFS_N_EXPORTER_H
 
 #include "filemgmt_libn.h"
+#include "filemgmt_libhilog.h"
 
 namespace OHOS {
 namespace FileManagement {
-namespace ModuleEnvironment {
-napi_value GetStorageDataDir(napi_env env, napi_callback_info info);
-napi_value GetUserDataDir(napi_env env, napi_callback_info info);
-} // namespace ModuleEnvironment
+namespace ModuleStatvfs {
+napi_value GetFreeSizeSync(napi_env env, napi_callback_info info);
+napi_value GetFreeSize(napi_env env, napi_callback_info info);
+
+napi_value GetTotalSizeSync(napi_env env, napi_callback_info info);
+napi_value GetTotalSize(napi_env env, napi_callback_info info);
+} // namespace ModuleStatvfs
 } // namespace FileManagement
 } // namespace OHOS
-#endif // ENVIRONMENT_N_EXPORTER_H
+#endif // STATVFS_N_EXPORTER_H

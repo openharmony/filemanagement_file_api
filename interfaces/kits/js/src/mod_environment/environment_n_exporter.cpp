@@ -17,31 +17,40 @@
 
 #include <string>
 
-#include "../common/napi/n_async/n_async_work_callback.h"
-#include "../common/napi/n_async/n_async_work_promise.h"
-#include "../common/napi/n_class.h"
-#include "../common/napi/n_func_arg.h"
-#include "../common/napi/n_val.h"
-#include "../common/uni_error.h"
+#include "filemgmt_libhilog.h"
+#include "ipc_skeleton.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
-namespace DistributedFS {
+namespace FileManagement {
 namespace ModuleEnvironment {
+using namespace OHOS::FileManagement::LibN;
 namespace {
     const std::string STORAGE_DATA_PATH = "/data";
+    bool IsSystemApp()
+    {
+        uint64_t fullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
+        return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+    }
 }
+
 napi_value GetStorageDataDir(napi_env env, napi_callback_info info)
 {
+    if (!IsSystemApp()) {
+        NError(E_PERMISSION_SYS).ThrowErr(env);
+        return nullptr;
+    }
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO, NARG_CNT::ONE)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto cbExec = [](napi_env env) -> UniError {
-        return UniError(ERRNO_NOERR);
+    auto cbExec = []() -> NError {
+        return NError(ERRNO_NOERR);
     };
-    auto cbComplete = [](napi_env env, UniError err) -> NVal {
+    auto cbComplete = [](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
@@ -65,18 +74,23 @@ int GetUserId()
 
 napi_value GetUserDataDir(napi_env env, napi_callback_info info)
 {
+    if (!IsSystemApp()) {
+        NError(E_PERMISSION_SYS).ThrowErr(env);
+        return nullptr;
+    }
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO, NARG_CNT::ONE)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto userDataPath = std::make_shared<std::string>();
-    auto cbExec = [userDataPath](napi_env env) -> UniError {
+    auto cbExec = [userDataPath]() -> NError {
         (*userDataPath).append("/storage/media/").append(std::to_string(GetUserId())).append("/local");
-        return UniError(ERRNO_NOERR);
+        return NError(ERRNO_NOERR);
     };
-    auto cbComplete = [userDataPath](napi_env env, UniError err) -> NVal {
+    auto cbComplete = [userDataPath](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
@@ -93,5 +107,5 @@ napi_value GetUserDataDir(napi_env env, napi_callback_info info)
     return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
 }
 } // namespace ModuleEnvironment
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS
