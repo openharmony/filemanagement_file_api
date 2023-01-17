@@ -117,6 +117,8 @@ ohos_shared_library("fs") {
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/class_file/file_n_exporter.cpp",
     "src/mod_fs/class_stat/stat_n_exporter.cpp",
+    "src/mod_fs/class_stream/flush.cpp",
+    "src/mod_fs/class_stream/stream_n_exporter.cpp",
     "src/mod_fs/common_func.cpp",
     "src/mod_fs/module.cpp",
     "src/mod_fs/properties/lstat.cpp",
