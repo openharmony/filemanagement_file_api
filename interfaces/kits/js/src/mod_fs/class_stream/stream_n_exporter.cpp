@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cinttypes>
 #include <memory>
 #include <securec.h>
 #include <sstream>
@@ -69,7 +70,7 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
 
     size_t actLen = fread(buf, 1, len, filp);
     if ((actLen < 0) && ferror(filp)) {
-        HILOGE("Invalid buffer size and pointer, actlen: %{public}d", actLen);
+        HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
         NError(errno).ThrowErr(env);
     }
 
@@ -129,7 +130,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info info)
 
     size_t writeLen = fwrite(buf, 1, len, filp);
     if (writeLen < 0) {
-        HILOGE("Failed to fwrite with len, writeLen: %{public}d, len: %{public}lld", writeLen, len);
+        HILOGE("Failed to fwrite with len, writeLen: %{public}zu, len: %{public}" PRId64, writeLen, len);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -193,7 +194,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
         }
         arg->actLen = fwrite(buf, 1, len, filp);
         if ((arg->actLen < 0) && ferror(filp)) {
-            HILOGE("Invalid buffer size and pointer, actlen: %{public}d", arg->actLen);
+            HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", arg->actLen);
             return NError(errno);
         }
         return NError(ERRNO_NOERR);
@@ -263,7 +264,7 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
         }
         size_t actLen = fread(buf, 1, len, filp);
         if ((actLen < 0) && ferror(filp)) {
-            HILOGE("Invalid buffer size and pointer, actlen: %{public}d", actLen);
+            HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
             return NError(errno);
         } else {
             arg->lenRead = actLen;
