@@ -97,6 +97,7 @@ ohos_shared_library("fileio") {
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
 ohos_shared_library("fs") {
@@ -169,6 +170,7 @@ ohos_shared_library("hash") {
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/openssl:libcrypto_shared",
   ]
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
 ohos_shared_library("file") {
