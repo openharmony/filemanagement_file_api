@@ -38,7 +38,6 @@ using namespace OHOS::FileManagement::LibN;
 napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
@@ -69,9 +68,10 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
     }
 
     size_t actLen = fread(buf, 1, len, filp);
-    if ((actLen < 0) && ferror(filp)) {
+    if (actLen != static_cast<size_t>(len) && ferror(filp)) {
         HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
         NError(errno).ThrowErr(env);
+        return nullptr;
     }
 
     return NVal::CreateInt64(env, actLen).val_;
@@ -80,7 +80,6 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
 napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
@@ -94,6 +93,7 @@ napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     streamEntity->fp.reset();
+
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -129,7 +129,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info info)
     }
 
     size_t writeLen = fwrite(buf, 1, len, filp);
-    if (writeLen < 0) {
+    if (writeLen != len && ferror(filp)) {
         HILOGE("Failed to fwrite with len, writeLen: %{public}zu, len: %{public}" PRId64, writeLen, len);
         NError(errno).ThrowErr(env);
         return nullptr;
@@ -137,16 +137,6 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info info)
 
     return NVal::CreateInt64(env, writeLen).val_;
 }
-
-struct AsyncWrtieArg {
-    NRef refWriteArrayBuf;
-    unique_ptr<char[]> guardWriteStr;
-    size_t actLen { 0 };
-
-    explicit AsyncWrtieArg(NVal refWriteArrayBuf) : refWriteArrayBuf(refWriteArrayBuf) {}
-    explicit AsyncWrtieArg(unique_ptr<char[]> &&guardWriteStr) : guardWriteStr(move(guardWriteStr)) {}
-    ~AsyncWrtieArg() = default;
-};
 
 static bool HasOption(napi_env env, napi_value optionFromJsArg)
 {
@@ -183,9 +173,12 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<AsyncWrtieArg> arg;
-    arg = make_shared<AsyncWrtieArg>(move(bufGuard));
-
+    auto arg = make_shared<AsyncWrtieArg>(move(bufGuard));
+    if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [arg, buf = buf, len = len, filp, hasOffset = hasOffset, offset = offset]() -> NError {
         int ret = fseek(filp, offset, SEEK_SET);
         if (hasOffset && (ret < 0)) {
@@ -193,7 +186,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
             return NError(errno);
         }
         arg->actLen = fwrite(buf, 1, len, filp);
-        if ((arg->actLen < 0) && ferror(filp)) {
+        if ((arg->actLen != static_cast<size_t>(len)) && ferror(filp)) {
             HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", arg->actLen);
             return NError(errno);
         }
@@ -220,14 +213,6 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_STREAM_WRITE_NAME, cbExec, cbCompl).val_;
     }
 }
-
-struct AsyncReadArg {
-    size_t lenRead { 0 };
-    NRef refReadBuf;
-
-    explicit AsyncReadArg(NVal jsReadBuf) : refReadBuf(jsReadBuf) {}
-    ~AsyncReadArg() = default;
-};
 
 napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
 {
@@ -256,6 +241,11 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
+    if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [arg, buf = buf, len = len, filp, hasOffset = hasOffset, offset = offset]() -> NError {
         int ret = fseek(filp, offset, SEEK_SET);
         if (hasOffset && (ret < 0)) {
@@ -263,7 +253,7 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
             return NError(errno);
         }
         size_t actLen = fread(buf, 1, len, filp);
-        if ((actLen < 0) && ferror(filp)) {
+        if (actLen != static_cast<size_t>(len) && ferror(filp)) {
             HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
             return NError(errno);
         } else {

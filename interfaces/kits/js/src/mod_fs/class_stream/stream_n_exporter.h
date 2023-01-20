@@ -43,6 +43,24 @@ public:
     ~StreamNExporter() override;
 };
 
+struct AsyncReadArg {
+    size_t lenRead { 0 };
+    NRef refReadBuf;
+
+    explicit AsyncReadArg(NVal jsReadBuf) : refReadBuf(jsReadBuf) {}
+    ~AsyncReadArg() = default;
+};
+
+struct AsyncWrtieArg {
+    NRef refWriteArrayBuf;
+    std::unique_ptr<char[]> guardWriteStr;
+    size_t actLen { 0 };
+
+    explicit AsyncWrtieArg(NVal refWriteArrayBuf) : refWriteArrayBuf(refWriteArrayBuf) {}
+    explicit AsyncWrtieArg(std::unique_ptr<char[]> &&guardWriteStr) : guardWriteStr(std::move(guardWriteStr)) {}
+    ~AsyncWrtieArg() = default;
+};
+
 const std::string PROCEDURE_STREAM_WRITE_NAME = "FileIOStreamWrite";
 const std::string PROCEDURE_STREAM_READ_NAME = "FileIOStreamRead";
 const std::string PROCEDURE_STREAM_CLOSE_NAME = "FileIOStreamClose";
