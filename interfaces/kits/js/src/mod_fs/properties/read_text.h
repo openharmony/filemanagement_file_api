@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_SYMLINK_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_SYMLINK_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_READ_TEXT_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_READ_TEXT_H
 
 #include "filemgmt_libn.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-class Symlink final {
+using namespace OHOS::FileManagement::LibN;
+class ReadText final {
 public:
     static napi_value Async(napi_env env, napi_callback_info info);
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
 
-const std::string PROCEDURE_SYMLINK_NAME = "FileIOSymLink";
+struct AsyncReadTextArg {
+    NRef _refReadBuf;
+    std::string buffer;
+    ssize_t len = 0;
+
+    explicit AsyncReadTextArg(NVal refReadBuf) : _refReadBuf(refReadBuf){};
+    ~AsyncReadTextArg() = default;
+};
+
+const std::string PROCEDURE_READTEXT_NAME = "FileIOReadText";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_SYMLINK_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_READ_TEXT_H
