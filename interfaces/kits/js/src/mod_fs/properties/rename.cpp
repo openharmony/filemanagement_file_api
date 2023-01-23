@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "symlink.h"
+#include "rename.h"
 
 #include <cstring>
-#include <fcntl.h>
 #include <tuple>
 #include <unistd.h>
 
@@ -29,22 +28,7 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-static tuple<bool, string, string> GetSymlinkArg(napi_env env, const NFuncArg &funcArg)
-{
-    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
-    if (!resGetFirstArg) {
-        return { false, "", "" };
-    }
-
-    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
-    if (!resGetSecondArg) {
-        return { false, "", "" };
-    }
-
-    return { true, src.get(), dest.get() };
-}
-
-napi_value Symlink::Sync(napi_env env, napi_callback_info info)
+napi_value Rename::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO)) {
@@ -53,23 +37,30 @@ napi_value Symlink::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetSymlinkArg, oldPath, newPath] = GetSymlinkArg(env, funcArg);
-    if (!resGetSymlinkArg) {
-        HILOGE("Failed to get symlink arguments");
+    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    if (!resGetFirstArg) {
+        HILOGE("Invalid src");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> symlink_req =
-        {new uv_fs_t, CommonFunc::fs_req_cleanup};
-    if (!symlink_req) {
+    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
+    if (!resGetSecondArg) {
+        HILOGE("Invalid dest");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> rename_req =
+        { new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!rename_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
+    int ret = uv_fs_rename(nullptr, rename_req.get(), src.get(), dest.get(), nullptr);
     if (ret < 0) {
-        HILOGE("Failed to create a link for old path");
+        HILOGE("Failed to rename file with path");
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -77,7 +68,7 @@ napi_value Symlink::Sync(napi_env env, napi_callback_info info)
     return NVal::CreateUndefined(env).val_;
 }
 
-napi_value Symlink::Async(napi_env env, napi_callback_info info)
+napi_value Rename::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
@@ -86,23 +77,30 @@ napi_value Symlink::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetSymlinkArg, oldPath, newPath] = GetSymlinkArg(env, funcArg);
-    if (!resGetSymlinkArg) {
-        HILOGE("Failed to get symlink arguments");
+    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    if (!resGetFirstArg) {
+        HILOGE("Invalid src");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto cbExec = [oldPath = move(oldPath), newPath = move(newPath)]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> symlink_req =
-            {new uv_fs_t, CommonFunc::fs_req_cleanup};
-        if (!symlink_req) {
+    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
+    if (!resGetSecondArg) {
+        HILOGE("Invalid dest");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto cbExec = [opath = string(src.get()), npath = string(dest.get())]() -> NError {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> rename_req =
+            { new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!rename_req) {
             HILOGE("Failed to request heap memory.");
-            return NError(ERRNO_NOERR);
+            return NError(ENOMEM);
         }
-        int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
+        int ret = uv_fs_rename(nullptr, rename_req.get(), opath.c_str(), npath.c_str(), nullptr);
         if (ret < 0) {
-            HILOGE("Failed to create a link for old path");
+            HILOGE("Failed to rename file with path");
             return NError(errno);
         }
         return NError(ERRNO_NOERR);
@@ -118,10 +116,10 @@ napi_value Symlink::Async(napi_env env, napi_callback_info info)
     NVal thisVar(env, funcArg.GetThisVar());
     size_t argc = funcArg.GetArgc();
     if (argc == NARG_CNT::TWO) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_SYMLINK_NAME, cbExec, cbComplCallback).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_RENAME_NAME, cbExec, cbComplCallback).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_SYMLINK_NAME, cbExec, cbComplCallback).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_RENAME_NAME, cbExec, cbComplCallback).val_;
     }
 }
 } // namespace ModuleFileIO

@@ -19,8 +19,8 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
-#include "uv.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -42,7 +42,13 @@ napi_value Fsync::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> fsync_req = {new uv_fs_t, uv_fs_req_cleanup};
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fsync_req =
+        { new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!fsync_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     int ret = uv_fs_fsync(nullptr, fsync_req.get(), fd, nullptr);
     if (ret < 0) {
         HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
@@ -69,7 +75,12 @@ napi_value Fsync::Async(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [fd = fd]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> fsync_req = {new uv_fs_t, uv_fs_req_cleanup};
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fsync_req =
+            { new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!fsync_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ERRNO_NOERR);
+        }
         int ret = uv_fs_fsync(nullptr, fsync_req.get(), fd, nullptr);
         if (ret < 0) {
             HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);

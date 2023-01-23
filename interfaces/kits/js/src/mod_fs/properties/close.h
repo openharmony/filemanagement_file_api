@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_SYMLINK_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_SYMLINK_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_H
 
+#include "class_file/file_entity.h"
 #include "filemgmt_libn.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-class Symlink final {
+class Close final {
 public:
-    static napi_value Async(napi_env env, napi_callback_info info);
     static napi_value Sync(napi_env env, napi_callback_info info);
+    static napi_value Async(napi_env env, napi_callback_info info);
 };
 
-const std::string PROCEDURE_SYMLINK_NAME = "FileIOSymLink";
+struct FileStruct {
+    bool isFd = false;
+    int fd;
+    FileEntity *fileEntity;
+};
+
+const std::string PROCEDURE_CLOSE_NAME = "FileIOClose";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_SYMLINK_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_H

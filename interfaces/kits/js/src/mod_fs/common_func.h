@@ -18,6 +18,7 @@
 
 #include "fd_guard.h"
 #include "n_val.h"
+#include "uv.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -54,6 +55,7 @@ struct CommonFunc {
     static std::tuple<bool, std::unique_ptr<char[]>, std::unique_ptr<char[]>> GetCopyPathArg(napi_env env,
                                                                                              napi_value srcPath,
                                                                                              napi_value dstPath);
+    static void fs_req_cleanup(uv_fs_t* req);
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement

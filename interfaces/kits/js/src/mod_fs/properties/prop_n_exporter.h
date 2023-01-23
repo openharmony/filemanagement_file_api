@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,12 +33,30 @@ struct AsyncIOWrtieArg {
     ~AsyncIOWrtieArg() = default;
 };
 
+struct AsyncAccessArg {
+    bool isAccess = false;
+};
+
+struct AsyncIOReadArg {
+    ssize_t lenRead { 0 };
+    NRef refReadBuf;
+
+    explicit AsyncIOReadArg(NVal jsReadBuf) : refReadBuf(jsReadBuf) {}
+    ~AsyncIOReadArg() = default;
+};
+
 class PropNExporter final : public NExporter {
 public:
     inline static const std::string className_ = "__properities__";
 
+    static napi_value AccessSync(napi_env env, napi_callback_info info);
+    static napi_value MkdirSync(napi_env env, napi_callback_info info);
     static napi_value ReadSync(napi_env env, napi_callback_info info);
+    static napi_value UnlinkSync(napi_env env, napi_callback_info info);
     static napi_value WriteSync(napi_env env, napi_callback_info info);
+    static napi_value Access(napi_env env, napi_callback_info info);
+    static napi_value Unlink(napi_env env, napi_callback_info info);
+    static napi_value Mkdir(napi_env env, napi_callback_info info);
     static napi_value Read(napi_env env, napi_callback_info info);
     static napi_value Write(napi_env env, napi_callback_info info);
     static NError WriteExec(std::shared_ptr<AsyncIOWrtieArg> arg, void *buf, size_t len, int fd, size_t position);
@@ -48,6 +66,13 @@ public:
     PropNExporter(napi_env env, napi_value exports);
     ~PropNExporter() override;
 };
+
+constexpr int DIR_DEFAULT_PERM = 0770;
+const std::string PROCEDURE_ACCESS_NAME = "FileIOAccess";
+const std::string PROCEDURE_UNLINK_NAME = "FileIOUnlink";
+const std::string PROCEDURE_MKDIR_NAME = "FileIOMkdir";
+const std::string PROCEDURE_READ_NAME = "FileIORead";
+const std::string PROCEDURE_WRITE_NAME = "FileIOWrite";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
