@@ -21,7 +21,6 @@
 #include <memory>
 #include <sstream>
 #include <unistd.h>
-#include <uv.h>
 
 #include "common_func.h"
 #include "class_file/file_entity.h"
@@ -68,8 +67,9 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
     }
 
     bool isAccess = false;
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> access_req = { new uv_fs_t, uv_fs_req_cleanup };
-    if (access_req == nullptr) {
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> access_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!access_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -109,8 +109,9 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [path = string(tmp.get()), result]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> access_req = {new uv_fs_t, uv_fs_req_cleanup};
-        if (access_req == nullptr) {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> access_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!access_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
@@ -154,8 +155,9 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [path = string(tmp.get())]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> unlink_req = { new uv_fs_t, uv_fs_req_cleanup };
-        if (unlink_req == nullptr) {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> unlink_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!unlink_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
@@ -199,8 +201,9 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> unlink_req = { new uv_fs_t, uv_fs_req_cleanup };
-    if (unlink_req == nullptr) {
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> unlink_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!unlink_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -232,8 +235,9 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [path = string(tmp.get())]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> mkdir_req = { new uv_fs_t, uv_fs_req_cleanup };
-        if (mkdir_req == nullptr) {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!mkdir_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
@@ -277,8 +281,9 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> mkdir_req = { new uv_fs_t, uv_fs_req_cleanup };
-    if (mkdir_req == nullptr) {
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!mkdir_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -303,16 +308,22 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
+    bool succ = false;
+    int fd = 0;
+    tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
         HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [res, buf, len, hasOffset, offset] =
+    void *buf = nullptr;
+    int64_t len = 0;
+    bool hasOffset = false;
+    int64_t offset = 0;
+    tie(succ, buf, len, hasOffset, offset) =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
-    if (!res) {
+    if (!succ) {
         HILOGE("Failed to resolve buf and options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -320,8 +331,9 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
 
     ssize_t actLen;
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> read_req = { new uv_fs_t, uv_fs_req_cleanup };
-    if (read_req == nullptr) {
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!read_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -332,15 +344,16 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-    actLen = read_req.get()->result;
+    actLen = ret;
     return NVal::CreateInt64(env, actLen).val_;
 }
 
 static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, void *buf, size_t len, int fd, size_t offset)
 {
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> read_req = { new uv_fs_t, uv_fs_req_cleanup };
-    if (read_req == nullptr) {
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!read_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
     }
@@ -349,7 +362,7 @@ static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, void *buf, size_t len, in
         HILOGE("Failed to read file for %{public}d", ret);
         return NError(errno);
     }
-    arg->lenRead = read_req.get()->result;
+    arg->lenRead = ret;
     return NError(ERRNO_NOERR);
 }
 
@@ -362,23 +375,29 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
+    bool succ = false;
+    void *buf = nullptr;
+    int64_t len = 0;
+    int fd = 0;
+    bool hasOffset = false;
+    int64_t offset = 0;
+    tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
         HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [res, buf, len, hasOffset, offset] =
+    tie(succ, buf, len, hasOffset, offset) =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
-    if (!res) {
+    if (!succ) {
         HILOGE("Failed to resolve buf and options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
-    if (arg == nullptr) {
+    if (!arg) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -414,8 +433,9 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
 NError PropNExporter::WriteExec(shared_ptr<AsyncIOWrtieArg> arg, void *buf, size_t len, int fd, size_t offset)
 {
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> write_req = { new uv_fs_t, uv_fs_req_cleanup };
-    if (write_req == nullptr) {
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> write_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!write_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
     }
@@ -424,7 +444,7 @@ NError PropNExporter::WriteExec(shared_ptr<AsyncIOWrtieArg> arg, void *buf, size
         HILOGE("Failed to write file for %{public}d", ret);
         return NError(errno);
     }
-    arg->actLen = write_req.get()->result;
+    arg->actLen = ret;
     return NError(ERRNO_NOERR);
 }
 
@@ -437,23 +457,30 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
+    bool succ = false;
+    int fd;
+    tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
         HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [res, bufGuard, buf, len, hasOffset, offset] =
+    unique_ptr<char[]> bufGuard;
+    void *buf = nullptr;
+    size_t len = 0;
+    size_t offset = 0;
+    bool hasOffset = false;
+    tie(succ, bufGuard, buf, len, hasOffset, offset) =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
-    if (!res) {
+    if (!succ) {
         HILOGE("Failed to resolve buf and options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto arg = make_shared<AsyncIOWrtieArg>(move(bufGuard));
-    if (arg == nullptr) {
+    if (!arg) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -497,24 +524,32 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
+    bool succ = false;
+    int fd;
+    tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ) {
         HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [res, bufGuard, buf, len, hasOffset, offset] =
+    void *buf = nullptr;
+    size_t len = 0;
+    size_t offset = 0;
+    unique_ptr<char[]> bufGuard;
+    bool hasOffset = false;
+    tie(succ, bufGuard, buf, len, hasOffset, offset) =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
-    if (!res) {
+    if (!succ) {
         HILOGE("Failed to resolve buf and options");
         return nullptr;
     }
 
     ssize_t writeLen;
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> write_req = { new uv_fs_t, uv_fs_req_cleanup };
-    if (write_req == nullptr) {
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> write_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!write_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -525,7 +560,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-    writeLen = write_req.get()->result;
+    writeLen = ret;
     return NVal::CreateInt64(env, writeLen).val_;
 }
 

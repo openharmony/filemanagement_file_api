@@ -18,8 +18,8 @@
 #include <cstring>
 #include <tuple>
 #include <unistd.h>
-#include <uv.h>
 
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -51,8 +51,9 @@ napi_value Rename::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> rename_req = { new uv_fs_t, uv_fs_req_cleanup };
-    if (rename_req == nullptr) {
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> rename_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!rename_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -91,8 +92,9 @@ napi_value Rename::Async(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [opath = string(src.get()), npath = string(dest.get())]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> rename_req = { new uv_fs_t, uv_fs_req_cleanup };
-        if (rename_req == nullptr) {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> rename_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!rename_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }

@@ -93,6 +93,7 @@ napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     streamEntity->fp.reset();
+    (void)NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
 
     return NVal::CreateUndefined(env).val_;
 }
@@ -174,7 +175,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncWrtieArg>(move(bufGuard));
-    if (arg == nullptr) {
+    if (!arg) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -241,7 +242,7 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
-    if (arg == nullptr) {
+    if (!arg) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -309,7 +310,8 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info info)
         }
     };
 
-    auto cbCompl = [](napi_env env, NError err) -> NVal {
+    auto cbCompl = [arg = funcArg.GetThisVar()](napi_env env, NError err) -> NVal {
+        (void)NClass::RemoveEntityOfFinal<StreamEntity>(env, arg);
         if (err) {
             return { env, err.GetNapiErr(env) };
         } else {

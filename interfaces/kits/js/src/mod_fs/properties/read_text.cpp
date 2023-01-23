@@ -19,7 +19,6 @@
 #include <sys/stat.h>
 #include <tuple>
 #include <unistd.h>
-#include <uv.h>
 
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
@@ -80,7 +79,12 @@ static NError ReadTextAsync(const std::string path, std::shared_ptr<AsyncReadTex
 {
     OHOS::DistributedFS::FDGuard sfd;
     struct stat statbf;
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> open_req = { new uv_fs_t, uv_fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!open_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ERRNO_NOERR);
+    }
     int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), O_RDONLY,
                          S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
     if (ret < 0) {
@@ -88,7 +92,7 @@ static NError ReadTextAsync(const std::string path, std::shared_ptr<AsyncReadTex
         return NError(errno);
     }
 
-    sfd.SetFD(open_req.get()->result);
+    sfd.SetFD(ret);
     if (sfd.GetFD() < 0) {
         HILOGE("Failed to open file by path");
         return NError(errno);
@@ -106,7 +110,12 @@ static NError ReadTextAsync(const std::string path, std::shared_ptr<AsyncReadTex
     len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     string buffer(len, '\0');
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), len);
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> read_req = { new uv_fs_t, uv_fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!read_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ERRNO_NOERR);
+    }
     arg->len = uv_fs_read(nullptr, read_req.get(), sfd.GetFD(), &readbuf, 1, offset, nullptr);
     if (arg->len < 0) {
         HILOGE("Failed to read file by fd: %{public}d", sfd.GetFD());
@@ -139,7 +148,13 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     }
 
     OHOS::DistributedFS::FDGuard sfd;
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> open_req = { new uv_fs_t, uv_fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!open_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     int ret = uv_fs_open(nullptr, open_req.get(), path.get(), O_RDONLY,
                          S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
     if (ret < 0) {
@@ -147,7 +162,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-    sfd.SetFD(open_req.get()->result);
+    sfd.SetFD(ret);
     struct stat statbf;
     if ((!sfd) || (fstat(sfd.GetFD(), &statbf) < 0)) {
         HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
@@ -156,7 +171,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     }
 
     if (offset > statbf.st_size) {
-        HILOGE("Invalid offset: %{public}d", offset);
+        HILOGE("Invalid offset: %{public}zd", offset);
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -164,7 +179,13 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     string buffer(len, '\0');
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), len);
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> read_req = { new uv_fs_t, uv_fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!read_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     ret = uv_fs_read(nullptr, read_req.get(), sfd.GetFD(), &readbuf, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to read file by fd: %{public}d", sfd.GetFD());
