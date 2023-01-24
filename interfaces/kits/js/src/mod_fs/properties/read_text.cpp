@@ -79,8 +79,8 @@ static NError ReadTextAsync(const std::string path, std::shared_ptr<AsyncReadTex
 {
     OHOS::DistributedFS::FDGuard sfd;
     struct stat statbf;
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req =
-        { new uv_fs_t, CommonFunc::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ERRNO_NOERR);
@@ -110,8 +110,8 @@ static NError ReadTextAsync(const std::string path, std::shared_ptr<AsyncReadTex
     len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     string buffer(len, '\0');
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), len);
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req =
-        { new uv_fs_t, CommonFunc::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ERRNO_NOERR);
@@ -148,8 +148,8 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     }
 
     OHOS::DistributedFS::FDGuard sfd;
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req =
-        { new uv_fs_t, CommonFunc::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
@@ -171,7 +171,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     }
 
     if (offset > statbf.st_size) {
-        HILOGE("Invalid offset: %{public}d", offset);
+        HILOGE("Invalid offset: %{public}zd", offset);
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -179,8 +179,8 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     string buffer(len, '\0');
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), len);
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req =
-        { new uv_fs_t, CommonFunc::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);

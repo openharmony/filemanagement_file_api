@@ -64,8 +64,8 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
         }
     }
     if (fileInfo.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req =
-            { new uv_fs_t, CommonFunc::fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
             NError(ENOMEM).ThrowErr(env);
@@ -77,8 +77,8 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
             NError(errno).ThrowErr(env);
             return nullptr;
         }
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req =
-            { new uv_fs_t, CommonFunc::fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!ftruncate_req) {
             HILOGE("Failed to request heap memory.");
             NError(ENOMEM).ThrowErr(env);
@@ -91,8 +91,8 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
             return nullptr;
         }
     } else {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req =
-            { new uv_fs_t, CommonFunc::fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!ftruncate_req) {
             HILOGE("Failed to request heap memory.");
             NError(ENOMEM).ThrowErr(env);

@@ -68,14 +68,15 @@ public:
         return status == napi_ok;
     }
 
-    template <class T> static T *RemoveEntityOfFinal(napi_env env, napi_value objStat) {
-        if(!env || !objStat) {
+    template <class T> static T *RemoveEntityOfFinal(napi_env env, napi_value objStat)
+    {
+        if (!env || !objStat) {
             HILOGD("Empty input: env %d,obj %d", env == nullptr, objStat == nullptr);
             return nullptr;
         }
         T *t = nullptr;
         napi_status status = napi_remove_wrap(env, objStat, (void **)&t);
-        if(status != napi_ok) {
+        if (status != napi_ok) {
             HILOGD("Cannot umwrap for pointer: %d", status);
             return nullptr;
         }

@@ -122,7 +122,8 @@ int CommonFunc::ConvertJsFlags(int &flags)
     return flagsABI;
 }
 
-void CommonFunc::fs_req_cleanup(uv_fs_t* req) {
+void CommonFunc::fs_req_cleanup(uv_fs_t* req)
+{
     uv_fs_req_cleanup(req);
     if (req) {
         delete req;

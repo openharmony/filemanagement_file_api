@@ -34,8 +34,8 @@ using namespace OHOS::FileManagement::LibN;
 
 static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 {
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> copyfile_req =
-        { new uv_fs_t, CommonFunc::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> copyfile_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!copyfile_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ERRNO_NOERR);
@@ -52,8 +52,8 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
 {
     if (srcFile.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req =
-            { new uv_fs_t, CommonFunc::fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ERRNO_NOERR);
@@ -74,8 +74,8 @@ static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
     }
 
     if (destFile.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req =
-            { new uv_fs_t, CommonFunc::fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ERRNO_NOERR);
@@ -88,8 +88,8 @@ static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
         destFile.fdg.SetFD(ret, true);
     }
 
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendfile_req =
-        { new uv_fs_t, CommonFunc::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendfile_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!sendfile_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ERRNO_NOERR);

@@ -41,8 +41,8 @@ napi_value Mkdtemp::Sync(napi_env env, napi_callback_info info)
     }
 
     string path = tmp.get();
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req =
-        { new uv_fs_t, CommonFunc::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!mkdtemp_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
@@ -76,8 +76,8 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
 
     auto arg = make_shared<string>();
     auto cbExec = [path = tmp.get(), arg]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req =
-            { new uv_fs_t, CommonFunc::fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!mkdtemp_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ERRNO_NOERR);
