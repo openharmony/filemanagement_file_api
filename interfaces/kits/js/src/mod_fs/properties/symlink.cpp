@@ -19,8 +19,8 @@
 #include <fcntl.h>
 #include <tuple>
 #include <unistd.h>
-#include <uv.h>
 
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -60,7 +60,13 @@ napi_value Symlink::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> symlink_req = {new uv_fs_t, uv_fs_req_cleanup};
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> symlink_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!symlink_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
     if (ret < 0) {
         HILOGE("Failed to create a link for old path");
@@ -88,7 +94,12 @@ napi_value Symlink::Async(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [oldPath = move(oldPath), newPath = move(newPath)]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> symlink_req = {new uv_fs_t, uv_fs_req_cleanup};
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> symlink_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!symlink_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ERRNO_NOERR);
+        }
         int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
         if (ret < 0) {
             HILOGE("Failed to create a link for old path");

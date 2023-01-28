@@ -18,8 +18,8 @@
 #include <cstring>
 #include <tuple>
 #include <unistd.h>
-#include <uv.h>
 
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -73,7 +73,13 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
     }
 
     if (fileStruct.isFd) {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> close_req = { new uv_fs_t, uv_fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!close_req) {
+            HILOGE("Failed to request heap memory.");
+            NError(ENOMEM).ThrowErr(env);
+            return nullptr;
+        }
         int ret = uv_fs_close(nullptr, close_req.get(), fileStruct.fd, nullptr);
         if (ret < 0) {
             HILOGE("Failed to close file with fd: %{public}d, ret: %{public}d", fileStruct.fd, ret);
@@ -83,6 +89,7 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
     } else {
         fileStruct.fileEntity->fd_.reset();
     }
+    (void)NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg.GetThisVar());
 
     return NVal::CreateUndefined(env).val_;
 }
@@ -105,7 +112,12 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
 
     auto cbExec = [fileStruct = fileStruct]() -> NError {
         if (fileStruct.isFd) {
-            std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> close_req = { new uv_fs_t, uv_fs_req_cleanup };
+            std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
+                new uv_fs_t, CommonFunc::fs_req_cleanup };
+            if (!close_req) {
+                HILOGE("Failed to request heap memory.");
+                return NError(ERRNO_NOERR);
+            }
             int ret = uv_fs_close(nullptr, close_req.get(), fileStruct.fd, nullptr);
             if (ret < 0) {
                 HILOGE("Failed to close file with ret: %{public}d", ret);
@@ -117,7 +129,8 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
         return NError(ERRNO_NOERR);
     };
 
-    auto cbComplete = [](napi_env env, NError err) -> NVal {
+    auto cbComplete = [arg = funcArg.GetThisVar()](napi_env env, NError err) -> NVal {
+        (void)NClass::RemoveEntityOfFinal<FileEntity>(env, arg);
         if (err) {
             return { env, err.GetNapiErr(env) };
         } else {

@@ -18,7 +18,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
-#include <uv.h>
 
 #include "../common_func.h"
 #include "ability.h"
@@ -122,15 +121,21 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         NError(-1).ThrowErr(env);
         return nullptr;
     }
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> open_req = { new uv_fs_t, uv_fs_req_cleanup };
-    int ret = uv_fs_open(uv_default_loop(), open_req.get(), path.get(), mode, S_IRUSR |
-        S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, NULL);
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!open_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
+    int ret = uv_fs_open(nullptr, open_req.get(), path.get(), mode, S_IRUSR |
+        S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
     if (ret < 0) {
         HILOGE("Failed to open file for libuv error %{public}d", ret);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-    auto file = InstantiateFile(env, open_req.get()->result, path.get(), false).val_;
+    auto file = InstantiateFile(env, ret, path.get(), false).val_;
     return file;
 }
 
@@ -173,14 +178,19 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             HILOGE("Failed to open file by Datashare");
             return NError(-1);
         }
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> open_req = { new uv_fs_t, uv_fs_req_cleanup };
-        int ret = uv_fs_open(uv_default_loop(), open_req.get(), path.c_str(), mode, S_IRUSR |
-            S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, NULL);
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!open_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ERRNO_NOERR);
+        }
+        int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode, S_IRUSR |
+            S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
         if (ret < 0) {
             HILOGE("Failed to open file for libuv error %{public}d", ret);
             return NError(errno);
         }
-        arg->fd = open_req.get()->result;
+        arg->fd = ret;
         arg->path = path;
         arg->uri = "";
         return NError(ERRNO_NOERR);

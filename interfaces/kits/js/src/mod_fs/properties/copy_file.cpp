@@ -22,8 +22,8 @@
 #include <sys/types.h>
 #include <tuple>
 #include <unistd.h>
-#include <uv.h>
 
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -34,7 +34,12 @@ using namespace OHOS::FileManagement::LibN;
 
 static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 {
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> copyfile_req = { new uv_fs_t, uv_fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> copyfile_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!copyfile_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ERRNO_NOERR);
+    }
     int ret = uv_fs_copyfile(nullptr, copyfile_req.get(), srcFile.path.get(), destFile.path.get(),
                              UV_FS_COPYFILE_FICLONE, nullptr);
     if (ret < 0) {
@@ -47,14 +52,19 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
 {
     if (srcFile.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> open_req = { new uv_fs_t, uv_fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!open_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ERRNO_NOERR);
+        }
         int ret = uv_fs_open(nullptr, open_req.get(), srcFile.path.get(), O_RDONLY,
                              S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
         if (ret < 0) {
             HILOGE("Failed to open srcFile with ret: %{public}d", ret);
             return NError(errno);
         }
-        srcFile.fdg.SetFD(open_req.get()->result, true);
+        srcFile.fdg.SetFD(ret, true);
     }
 
     struct stat statbf;
@@ -64,16 +74,26 @@ static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
     }
 
     if (destFile.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> open_req = { new uv_fs_t, uv_fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!open_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ERRNO_NOERR);
+        }
         int ret = uv_fs_open(nullptr, open_req.get(), destFile.path.get(), O_RDWR | O_CREAT, statbf.st_mode, nullptr);
         if (ret < 0) {
             HILOGE("Failed to open destFile with ret: %{public}d", ret);
             return NError(errno);
         }
-        destFile.fdg.SetFD(open_req.get()->result, true);
+        destFile.fdg.SetFD(ret, true);
     }
 
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> sendfile_req = { new uv_fs_t, uv_fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendfile_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!sendfile_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ERRNO_NOERR);
+    }
     int ret = uv_fs_sendfile(nullptr, sendfile_req.get(), srcFile.fdg.GetFD(), destFile.fdg.GetFD(), 0,
                              statbf.st_size, nullptr);
     if (ret < 0) {

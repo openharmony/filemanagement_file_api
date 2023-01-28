@@ -15,8 +15,7 @@
 
 #include "mkdtemp.h"
 
-#include <uv.h>
-
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -42,7 +41,13 @@ napi_value Mkdtemp::Sync(napi_env env, napi_callback_info info)
     }
 
     string path = tmp.get();
-    std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> mkdtemp_req = { new uv_fs_t, uv_fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!mkdtemp_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), const_cast<char *>(path.c_str()), nullptr);
     if (ret < 0) {
         HILOGE("Failed to create a temporary directory with path: %{public}s", path.c_str());
@@ -71,7 +76,12 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
 
     auto arg = make_shared<string>();
     auto cbExec = [path = tmp.get(), arg]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> mkdtemp_req = { new uv_fs_t, uv_fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!mkdtemp_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ERRNO_NOERR);
+        }
         int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), const_cast<char *>(path), nullptr);
         if (ret < 0) {
             HILOGE("Failed to create a temporary directory with path: %{public}s", path);
