@@ -129,6 +129,7 @@ ohos_shared_library("fs") {
     "src/mod_fs/properties/fsync.cpp",
     "src/mod_fs/properties/lstat.cpp",
     "src/mod_fs/properties/mkdtemp.cpp",
+    "src/mod_fs/properties/move.cpp",
     "src/mod_fs/properties/open.cpp",
     "src/mod_fs/properties/prop_n_exporter.cpp",
     "src/mod_fs/properties/read_text.cpp",
