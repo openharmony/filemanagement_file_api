@@ -156,7 +156,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     }
 
     if (offset > statbf.st_size) {
-        HILOGE("Invalid offset: %{public}d", offset);
+        HILOGE("Invalid offset: %{public}zd", offset);
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
