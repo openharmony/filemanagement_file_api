@@ -21,7 +21,6 @@
 
 #include "../common_func.h"
 #include "filemgmt_libhilog.h"
-#include "uv.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -65,22 +64,40 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
         }
     }
     if (fileInfo.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> open_req = { new uv_fs_t, uv_fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!open_req) {
+            HILOGE("Failed to request heap memory.");
+            NError(ENOMEM).ThrowErr(env);
+            return nullptr;
+        }
         int ret = uv_fs_open(nullptr, open_req.get(), fileInfo.path.get(), O_RDWR,
                              S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
         if (ret < 0) {
             NError(errno).ThrowErr(env);
             return nullptr;
         }
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> ftruncate_req = { new uv_fs_t, uv_fs_req_cleanup };
-        ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), open_req.get()->result, truncateLen, nullptr);
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!ftruncate_req) {
+            HILOGE("Failed to request heap memory.");
+            NError(ENOMEM).ThrowErr(env);
+            return nullptr;
+        }
+        ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), ret, truncateLen, nullptr);
         if (ret < 0) {
             HILOGE("Failed to truncate file by path");
             NError(errno).ThrowErr(env);
             return nullptr;
         }
     } else {
-        std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*> ftruncate_req = { new uv_fs_t, uv_fs_req_cleanup };
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!ftruncate_req) {
+            HILOGE("Failed to request heap memory.");
+            NError(ENOMEM).ThrowErr(env);
+            return nullptr;
+        }
         int ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), fileInfo.fdg.GetFD(), truncateLen, nullptr);
         if (ret < 0) {
             HILOGE("Failed to truncate file by fd");
@@ -113,23 +130,35 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
         }
     }
     auto cbExec = [fileInfo = make_shared<FileInfo>(move(fileInfo)), truncateLen, env = env]() -> NError {
-        using uv_fs_unique_ptr_type = std::unique_ptr<uv_fs_t, decltype(uv_fs_req_cleanup)*>;
+        using uv_fs_unique_ptr_type = std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*>;
         if (fileInfo->isPath) {
-            uv_fs_unique_ptr_type open_req = { new uv_fs_t, uv_fs_req_cleanup };
-            int ret = uv_fs_open(uv_default_loop(), open_req.get(), fileInfo->path.get(), O_RDWR,
+            uv_fs_unique_ptr_type open_req = { new uv_fs_t, CommonFunc::fs_req_cleanup };
+            if (!open_req) {
+                HILOGE("Failed to request heap memory.");
+                return NError(ERRNO_NOERR);
+            }
+            int ret = uv_fs_open(nullptr, open_req.get(), fileInfo->path.get(), O_RDWR,
                                  S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
             if (ret < 0) {
                 return NError(errno);
             }
-            uv_fs_unique_ptr_type ftruncate_req = { new uv_fs_t, uv_fs_req_cleanup };
-            ret = uv_fs_ftruncate(uv_default_loop(), ftruncate_req.get(), open_req.get()->result, truncateLen, nullptr);
+            uv_fs_unique_ptr_type ftruncate_req = { new uv_fs_t, CommonFunc::fs_req_cleanup };
+            if (!ftruncate_req) {
+                HILOGE("Failed to request heap memory.");
+                return NError(ERRNO_NOERR);
+            }
+            ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), ret, truncateLen, nullptr);
             if (ret < 0) {
                 HILOGE("Failed to truncate file by path");
                 return NError(errno);
             }
         } else {
-            uv_fs_unique_ptr_type ftruncate_req = { new uv_fs_t, uv_fs_req_cleanup };
-            int ret = uv_fs_ftruncate(uv_default_loop(), ftruncate_req.get(), fileInfo->fdg.GetFD(), truncateLen, nullptr);
+            uv_fs_unique_ptr_type ftruncate_req = { new uv_fs_t, CommonFunc::fs_req_cleanup };
+            if (!ftruncate_req) {
+                HILOGE("Failed to request heap memory.");
+                return NError(ERRNO_NOERR);
+            }
+            int ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), fileInfo->fdg.GetFD(), truncateLen, nullptr);
             if (ret < 0) {
                 HILOGE("Failed to truncate file by fd");
                 return NError(errno);

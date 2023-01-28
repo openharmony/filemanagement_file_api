@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-#include "fsync.h"
-
-#include <cstring>
-#include <tuple>
-#include <unistd.h>
+#include "mkdtemp.h"
 
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
 
-namespace OHOS::FileManagement::ModuleFileIO {
+namespace OHOS {
+namespace FileManagement {
+namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-napi_value Fsync::Sync(napi_env env, napi_callback_info info)
+napi_value Mkdtemp::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE)) {
@@ -35,30 +33,32 @@ napi_value Fsync::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
+    auto [resGetFirstArg, tmp, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!resGetFirstArg) {
-        HILOGE("Invalid fd");
+        HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fsync_req = {
+    string path = tmp.get();
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!fsync_req) {
+    if (!mkdtemp_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    int ret = uv_fs_fsync(nullptr, fsync_req.get(), fd, nullptr);
+    int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), const_cast<char *>(path.c_str()), nullptr);
     if (ret < 0) {
-        HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
+        HILOGE("Failed to create a temporary directory with path: %{public}s", path.c_str());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-    return NVal::CreateUndefined(env).val_;
+
+    return NVal::CreateUTF8String(env, mkdtemp_req->path).val_;
 }
 
-napi_value Fsync::Async(napi_env env, napi_callback_info info)
+napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
@@ -67,38 +67,40 @@ napi_value Fsync::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
+    auto [resGetFirstArg, tmp, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!resGetFirstArg) {
-        HILOGE("Invalid fd");
+        HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto cbExec = [fd = fd]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fsync_req = {
+    auto arg = make_shared<string>();
+    auto cbExec = [path = tmp.get(), arg]() -> NError {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!fsync_req) {
+        if (!mkdtemp_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ERRNO_NOERR);
         }
-        int ret = uv_fs_fsync(nullptr, fsync_req.get(), fd, nullptr);
+        int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), const_cast<char *>(path), nullptr);
         if (ret < 0) {
-            HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
+            HILOGE("Failed to create a temporary directory with path: %{public}s", path);
             return NError(errno);
         } else {
+            *arg = mkdtemp_req->path;
             return NError(ERRNO_NOERR);
         }
     };
 
-    auto cbComplete = [](napi_env env, NError err) -> NVal {
+    auto cbComplete = [arg](napi_env env, NError err) -> NVal {
         if (err) {
-            return {env, err.GetNapiErr(env)};
+            return { env, err.GetNapiErr(env) };
         } else {
-            return NVal::CreateUndefined(env);
+            return NVal::CreateUTF8String(env, *arg);
         }
     };
 
-    const string procedureName = "FileIOFsync";
+    const string procedureName = "FileIOmkdtemp";
     size_t argc = funcArg.GetArgc();
     NVal thisVar(env, funcArg.GetThisVar());
     if (argc == NARG_CNT::ONE) {
@@ -108,4 +110,6 @@ napi_value Fsync::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
     }
 }
-} // namespace OHOS::FileManagement::ModuleFileIO
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
