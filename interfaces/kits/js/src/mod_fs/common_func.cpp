@@ -131,6 +131,22 @@ void CommonFunc::fs_req_cleanup(uv_fs_t* req)
     }
 }
 
+string CommonFunc::GetModeFromFlags(int flags)
+{
+    const string RDONLY = "r";
+    const string WRONLY = "w";
+    const string APPEND = "a";
+    const string TRUNC = "t";
+    string mode = RDONLY;
+    mode += (((flags & O_RDWR) == O_RDWR) ? WRONLY : "");
+    mode = (((flags & O_WRONLY) == O_WRONLY) ? WRONLY : mode);
+    if (mode != RDONLY) {
+        mode += ((flags & O_TRUNC) ? TRUNC : "");
+        mode += ((flags & O_APPEND) ? APPEND : "");
+    }
+    return mode;
+}
+
 tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,
                                                                                napi_value srcPath,
                                                                                napi_value dstPath)
