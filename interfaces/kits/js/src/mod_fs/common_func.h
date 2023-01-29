@@ -56,6 +56,7 @@ struct CommonFunc {
                                                                                              napi_value srcPath,
                                                                                              napi_value dstPath);
     static void fs_req_cleanup(uv_fs_t* req);
+    static std::string GetModeFromFlags(int flags);
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement
