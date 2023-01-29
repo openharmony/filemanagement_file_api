@@ -31,6 +31,7 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
+#ifdef __MUSL__
 static NError RmDirent(const string &fpath)
 {
     std::filesystem::path strToPath(fpath);
@@ -42,6 +43,53 @@ static NError RmDirent(const string &fpath)
 
     return NError(ERRNO_NOERR);
 }
+
+#else
+static NError RmDirent(const string &fpath)
+{
+    if (rmdir(fpath.c_str()) == 0) {
+        return NError(ERRNO_NOERR);
+    }
+    auto dir = opendir(fpath.c_str());
+    if (!dir) {
+        return NError(errno);
+    }
+    struct dirent* entry = readdir(dir);
+    while (entry) {
+        if (strncmp(entry->d_name, ".", strlen(".")) == 0 ||
+            strncmp(entry->d_name, "..", strlen("..")) == 0) {
+            entry = readdir(dir);
+            continue;
+        }
+        struct stat fileInformation;
+        string filePath = fpath + '/';
+        filePath.insert(filePath.length(), entry->d_name);
+        if (stat(filePath.c_str(), &fileInformation) != 0) {
+            closedir(dir);
+            HILOGE("Failed to close directory");
+            return NError(errno);
+        }
+        if ((fileInformation.st_mode & S_IFMT) == S_IFDIR) {
+            auto err = RmDirent(filePath);
+            if (err) {
+                closedir(dir);
+                return err;
+            }
+        } else {
+            if (unlink(filePath.c_str()) != 0) {
+                closedir(dir);
+                return NError(errno);
+            }
+        }
+        entry = readdir(dir);
+    }
+    closedir(dir);
+    if (rmdir(fpath.c_str()) != 0) {
+        return NError(errno);
+    }
+    return NError(ERRNO_NOERR);
+}
+#endif
 
 napi_value Rmdirent::Sync(napi_env env, napi_callback_info info)
 {
