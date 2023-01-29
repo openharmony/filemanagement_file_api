@@ -186,5 +186,5 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
             return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_TRUNCATE_NAME, cbExec, cbCompl).val_;
         }
     }
-}    
+}
 } // namespace OHOS::FileManagement::ModuleFileIO
