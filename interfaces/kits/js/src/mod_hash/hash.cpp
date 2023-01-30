@@ -57,7 +57,7 @@ static tuple<bool, unique_ptr<char[]>, HASH_ALGORITHM_TYPE, bool> GetHashArgs(na
         return { false, nullptr, HASH_ALGORITHM_TYPE_UNSUPPORTED, isPromise };
     }
 
-    if (funcArg.GetArgc() == NARG_CNT::THREE && !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function)) {
+    if (funcArg.GetArgc() == NARG_CNT::THREE && !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function)) {
         HILOGE("Invalid callback");
         NError(EINVAL).ThrowErr(env);
         return { false, nullptr, HASH_ALGORITHM_TYPE_UNSUPPORTED, isPromise };
@@ -104,13 +104,12 @@ napi_value Hash::Async(napi_env env, napi_callback_info info)
         return { NVal::CreateUTF8String(env, *arg) };
     };
 
-    const string procedureName = "FileIOHash";
     NVal thisVar(env, funcArg.GetThisVar());
     if (isPromise) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_HASH_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_HASH_NAME, cbExec, cbComplete).val_;
     }
 }
 

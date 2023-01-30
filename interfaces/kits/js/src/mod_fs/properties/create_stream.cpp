@@ -20,6 +20,7 @@
 
 #include "class_stream/stream_entity.h"
 #include "class_stream/stream_n_exporter.h"
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -27,26 +28,6 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
-
-static NVal InstantiateStream(napi_env env, unique_ptr<FILE, decltype(&fclose)> fp)
-{
-    napi_value objStream = NClass::InstantiateClass(env, StreamNExporter::className_, {});
-    if (!objStream) {
-        HILOGE("INNER BUG. Cannot instantiate stream");
-        NError(EIO).ThrowErr(env);
-        return NVal();
-    }
-
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, objStream);
-    if (!streamEntity) {
-        HILOGE("Cannot instantiate stream because of void entity");
-        NError(EIO).ThrowErr(env);
-        return NVal();
-    }
-
-    streamEntity->fp.swap(fp);
-    return { env, objStream };
-}
 
 static tuple<bool, string, string> GetCreateStreamArgs(napi_env env, const NFuncArg &funcArg)
 {
@@ -86,7 +67,7 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return InstantiateStream(env, move(fp)).val_;
+    return CommonFunc::InstantiateStream(env, move(fp)).val_;
 }
 
 napi_value CreateStream::Async(napi_env env, napi_callback_info info)
@@ -105,7 +86,7 @@ napi_value CreateStream::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncCreateStreamArg>();
-    if (arg == nullptr) {
+    if (!arg) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -123,7 +104,7 @@ napi_value CreateStream::Async(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return InstantiateStream(env, move(arg->fp));
+        return CommonFunc::InstantiateStream(env, move(arg->fp));
     };
 
     NVal thisVar(env, funcArg.GetThisVar());

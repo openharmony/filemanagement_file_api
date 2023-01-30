@@ -19,13 +19,12 @@
 #include <cstring>
 #include <memory>
 
-#include "../common_func.h"
 #include "ability.h"
 #include "class_file/file_entity.h"
 #include "class_file/file_n_exporter.h"
+#include "common_func.h"
 #include "datashare_helper.h"
 #include "filemgmt_libhilog.h"
-#include "filemgmt_libn.h"
 #include "remote_uri.h"
 
 namespace OHOS {
@@ -82,7 +81,7 @@ static int OpenFileByDatashare(napi_env env, napi_value argv, string path)
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
     int fd = -1;
     sptr<FileIoToken> remote = new (std::nothrow) IRemoteStub<FileIoToken>();
-    if (remote == nullptr) {
+    if (!remote) {
         return ENOMEM;
     }
 
@@ -129,7 +128,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     int ret = uv_fs_open(nullptr, open_req.get(), path.get(), mode, S_IRUSR |
-        S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
+        S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
         HILOGE("Failed to open file for libuv error %{public}d", ret);
         NError(errno).ThrowErr(env);
@@ -185,7 +184,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             return NError(ERRNO_NOERR);
         }
         int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode, S_IRUSR |
-            S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
+            S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
         if (ret < 0) {
             HILOGE("Failed to open file for libuv error %{public}d", ret);
             return NError(errno);
