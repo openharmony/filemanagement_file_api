@@ -46,6 +46,8 @@ void InitOpenMode(napi_env env, napi_value exports);
 
 struct CommonFunc {
     static int ConvertJsFlags(int &flags);
+    static LibN::NVal InstantiateStat(napi_env env, struct stat &buf);
+    static LibN::NVal InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp);
     static std::tuple<bool, void *, int64_t, bool, int64_t> GetReadArg(napi_env env,
                                                                        napi_value readBuf,
                                                                        napi_value option);

@@ -98,14 +98,13 @@ napi_value Fsync::Async(napi_env env, napi_callback_info info)
         }
     };
 
-    const string procedureName = "FileIOFsync";
     size_t argc = funcArg.GetArgc();
     NVal thisVar(env, funcArg.GetThisVar());
     if (argc == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_FSYNC_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_FSYNC_NAME, cbExec, cbComplete).val_;
     }
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

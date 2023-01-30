@@ -59,7 +59,6 @@ public:
     static napi_value Mkdir(napi_env env, napi_callback_info info);
     static napi_value Read(napi_env env, napi_callback_info info);
     static napi_value Write(napi_env env, napi_callback_info info);
-    static NError WriteExec(std::shared_ptr<AsyncIOWrtieArg> arg, void *buf, size_t len, int fd, size_t position);
     bool Export() override;
     std::string GetClassName() override;
 

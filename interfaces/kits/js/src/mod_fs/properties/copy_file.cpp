@@ -58,8 +58,8 @@ static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
             HILOGE("Failed to request heap memory.");
             return NError(ERRNO_NOERR);
         }
-        int ret = uv_fs_open(nullptr, open_req.get(), srcFile.path.get(), O_RDONLY,
-                             S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
+        int ret = uv_fs_open(nullptr, open_req.get(), srcFile.path.get(), O_RDWR,
+                             S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
         if (ret < 0) {
             HILOGE("Failed to open srcFile with ret: %{public}d", ret);
             return NError(errno);
@@ -94,7 +94,7 @@ static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
         HILOGE("Failed to request heap memory.");
         return NError(ERRNO_NOERR);
     }
-    int ret = uv_fs_sendfile(nullptr, sendfile_req.get(), srcFile.fdg.GetFD(), destFile.fdg.GetFD(), 0,
+    int ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFile.fdg.GetFD(), srcFile.fdg.GetFD(), 0,
                              statbf.st_size, nullptr);
     if (ret < 0) {
         HILOGE("Failed to sendfile by ret : %{public}d", ret);
@@ -116,8 +116,9 @@ static tuple<bool, int, bool> ParseJsModeAndProm(napi_env env, const NFuncArg& f
         hasMode = true;
     }
 
+    bool succ = false;
     if (hasMode) {
-        auto [succ, mode] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
+        tie(succ, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
         if (!succ) {
             return { false, mode, promise };
         }
@@ -159,7 +160,7 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
     }
 
     auto [succMode, mode, unused] = ParseJsModeAndProm(env, funcArg);
-    if (!succMode) {
+    if (!succMode || mode) {
         HILOGE("Failed to convert mode to int32");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -199,7 +200,7 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
     }
 
     auto [succMode, mode, promise] = ParseJsModeAndProm(env, funcArg);
-    if (!succMode) {
+    if (!succMode || mode) {
         HILOGE("Failed to convert mode to int32");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
