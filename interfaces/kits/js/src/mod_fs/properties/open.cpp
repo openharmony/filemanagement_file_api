@@ -40,7 +40,8 @@ static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
     bool succ = false;
     if (funcArg.GetArgc() >= NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
         tie(succ, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-        if (!succ) {
+        int invalidMode = (O_WRONLY | O_RDWR);
+        if (!succ || ((mode & invalidMode) == invalidMode)) {
             HILOGE("Invalid mode");
             NError(EINVAL).ThrowErr(env);
             return { false, mode };
@@ -77,7 +78,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
     return { env, objFile };
 }
 
-static int OpenFileByDatashare(napi_env env, napi_value argv, string path)
+static int OpenFileByDatashare(napi_env env, napi_value argv, string path, int flags)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
     int fd = -1;
@@ -88,7 +89,7 @@ static int OpenFileByDatashare(napi_env env, napi_value argv, string path)
 
     dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
     Uri uri(path);
-    fd = dataShareHelper->OpenFile(uri, MEDIA_FILEMODE_READONLY);
+    fd = dataShareHelper->OpenFile(uri, CommonFunc::GetModeFromFlags(flags));
     return fd;
 }
 
@@ -112,7 +113,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     if (DistributedFS::ModuleRemoteUri::RemoteUri::IsMediaUri(path.get())) {
-        auto fd = OpenFileByDatashare(env, funcArg[NARG_POS::FIRST], path.get());
+        auto fd = OpenFileByDatashare(env, funcArg[NARG_POS::FIRST], path.get(), mode);
         if (fd >= 0) {
             auto file = InstantiateFile(env, fd, path.get(), true).val_;
             return file;
@@ -168,7 +169,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     auto argv = funcArg[NARG_POS::FIRST];
     auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
         if (DistributedFS::ModuleRemoteUri::RemoteUri::IsMediaUri(path)) {
-            auto fd = OpenFileByDatashare(env, argv, path);
+            auto fd = OpenFileByDatashare(env, argv, path, mode);
             if (fd >= 0) {
                 arg->fd = fd;
                 arg->path = "";
