@@ -59,9 +59,12 @@ static tuple<bool, int> ParseJsFP(napi_env env, napi_value FPFromJs)
 static tuple<bool, void*, size_t, bool, size_t, size_t> GetRAFReadArg(napi_env env,
     napi_value ReadBuf, napi_value option)
 {
-    bool succ = false, hasPos = false;
+    bool succ = false;
+    bool hasPos = false;
     void *buf = nullptr;
-    size_t len, pos, offset;
+    size_t len = 0;
+    size_t pos = 0;
+    size_t offset = 0;
     tie(succ, buf, len, hasPos, pos, offset) = CommonFunc::GetReadArg(env, ReadBuf, option);
     if (!succ) {
         return { false, nullptr, 0, false, 0, 0 };
@@ -72,9 +75,11 @@ static tuple<bool, void*, size_t, bool, size_t, size_t> GetRAFReadArg(napi_env e
 static tuple<bool, void *, size_t, bool, size_t> GetRAFWriteArg(napi_env env,
     napi_value WriteBuf, napi_value option)
 {
-    bool succ = false, hasPos = false;
+    bool succ = false;
+    bool hasPos = false;
     void *buf = nullptr;
-    size_t len, pos;
+    size_t len = 0;
+    size_t pos = 0;
     tie(succ, ignore, buf, len, hasPos, pos) = CommonFunc::GetWriteArg(env, WriteBuf, option);
     if (!succ) {
         return  { false, nullptr, 0, false, 0 };
@@ -187,19 +192,17 @@ struct AsyncIOReadArg {
     ~AsyncIOReadArg() = default;
 };
 
-napi_value RandomAccessFileNExporter::Read(napi_env env, napi_callback_info info)
+static napi_value ReadExec(napi_env env, NFuncArg &funcArg)
 {
-    NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
-        return nullptr;
-    }
     auto rafEntity = GetRAFEntity(env, funcArg.GetThisVar());
     if (!rafEntity) {
         return nullptr;
     }
-    bool succ = false, hasPos = false;
-    size_t len, pos, offset;
+    bool succ = false;
+    bool hasPos = false;
+    size_t len = 0;
+    size_t pos = 0;
+    size_t offset = 0;
     void* buf = nullptr;
     tie(succ, buf, len, hasPos, pos, offset) = GetRAFReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
@@ -218,7 +221,6 @@ napi_value RandomAccessFileNExporter::Read(napi_env env, napi_callback_info info
         rafEntity->fpointer += actLen;
         return UniError(ERRNO_NOERR);
     };
-
     auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
@@ -243,6 +245,17 @@ napi_value RandomAccessFileNExporter::Read(napi_env env, napi_callback_info info
     }
 }
 
+napi_value RandomAccessFileNExporter::Read(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
+        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        return nullptr;
+    }
+
+    return ReadExec(env, funcArg);
+}
+
 napi_value RandomAccessFileNExporter::WriteSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -256,9 +269,11 @@ napi_value RandomAccessFileNExporter::WriteSync(napi_env env, napi_callback_info
         return nullptr;
     }
 
-    bool succ = false, hasPos = false;
+    bool succ = false;
+    bool hasPos = false;
     void *buf = nullptr;
-    size_t len, pos;
+    size_t len = 0;
+    size_t pos = 0;
     tie(succ, buf, len, hasPos, pos) = GetRAFWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid buffer/options");
@@ -297,9 +312,11 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
     if (!rafEntity) {
         return nullptr;
     }
-    bool succ = false, hasPos = false;
+    bool succ = false;
+    bool hasPos = false;
     void *buf = nullptr;
-    size_t len, pos;
+    size_t len = 0;
+    size_t pos = 0;
     tie(succ, buf, len, hasPos, pos) = GetRAFWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid buffer/options");
