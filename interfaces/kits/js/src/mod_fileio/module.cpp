@@ -23,7 +23,6 @@
 #include "class_randomaccessfile/randomaccessfile_n_exporter.h"
 #include "class_stat/stat_n_exporter.h"
 #include "class_stream/stream_n_exporter.h"
-#include "class_watcher/watcher_n_exporter.h"
 #include "properties/prop_n_exporter.h"
 
 using namespace std;
@@ -40,7 +39,6 @@ static napi_value Export(napi_env env, napi_value exports)
     products.emplace_back(make_unique<RandomAccessFileNExporter>(env, exports));
     products.emplace_back(make_unique<StatNExporter>(env, exports));
     products.emplace_back(make_unique<StreamNExporter>(env, exports));
-    products.emplace_back(make_unique<WatcherNExporter>(env, exports));
     products.emplace_back(make_unique<Constants>(env, exports));
 
     for (auto &&product : products) {

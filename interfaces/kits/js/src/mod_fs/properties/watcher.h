@@ -15,21 +15,12 @@
 
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_PROPERTIES_WATCHER_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_PROPERTIES_WATCHER_H
+#include "filemgmt_libn.h"
+namespace OHOS::FileManagement::ModuleFileIO {
 
-#include <uv.h>
-#include "../../common/napi/n_val.h"
-
-namespace OHOS {
-namespace DistributedFS {
-namespace ModuleFileIO {
 class Watcher final {
 public:
     static napi_value CreateWatcher(napi_env env, napi_callback_info info);
-
-private:
-    static void RunCommand(uv_fs_event_t *handle, const char *filename, int events, int status);
 };
-} // namespace ModuleFileIO
-} // namespace DistributedFS
-} // namespace OHOS
+} // namespace OHOS::FileManagement::ModuleFileIO
 #endif

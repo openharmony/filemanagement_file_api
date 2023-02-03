@@ -13,5 +13,8 @@
 
 group("unittest") {
   testonly = true
-  deps = [ "remote_uri:remote_uri_test" ]
+  deps = [ 
+    "remote_uri:remote_uri_test",
+    "file_watcher:file_watcher_test"
+  ]
 }

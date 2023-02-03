@@ -15,27 +15,43 @@
 
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_N_EXPORTER_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_N_EXPORTER_H
-
-#include "../../common/napi/n_exporter.h"
-
-namespace OHOS {
-namespace DistributedFS {
-namespace ModuleFileIO {
+#include <sys/inotify.h>
+#include <memory>
+#include "watcher_entity.h"
+#include "file_watcher.h"
+#include "filemgmt_libn.h"
+namespace OHOS::FileManagement::ModuleFileIO {
+using namespace OHOS::FileManagement::LibN;
 class WatcherNExporter final : public NExporter {
 public:
+    class JSCallbackContext {
+    public:
+        JSCallbackContext() {}
+        ~JSCallbackContext() {}
+
+    public:
+        napi_env env_;
+        napi_ref ref_;
+        std::string fileName_;
+        uint32_t event_;
+        napi_async_work work_;
+    };
+
     inline static const std::string className_ = "Watcher";
 
     bool Export() override;
     std::string GetClassName() override;
 
     static napi_value Constructor(napi_env env, napi_callback_info info);
+    static napi_value Start(napi_env env, napi_callback_info info);
     static napi_value Stop(napi_env env, napi_callback_info info);
-    static napi_value StopSync(napi_env env, napi_callback_info info);
+    static void WatcherCallback(napi_env env, napi_ref callback, const std::string &fileName, const uint32_t &event);
 
     WatcherNExporter(napi_env env, napi_value exports);
     ~WatcherNExporter() override;
+
+private:
+    static std::shared_ptr<FileWatcher> watcherPtr_;
 };
-} // namespace ModuleFileIO
-} // namespace DistributedFS
-} // namespace OHOS
+} // namespace OHOS::FileManagement::ModuleFileIO
 #endif

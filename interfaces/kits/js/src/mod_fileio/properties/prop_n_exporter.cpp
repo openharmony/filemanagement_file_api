@@ -20,7 +20,8 @@
 #include <memory>
 #include <sstream>
 #include <unistd.h>
-
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "../common_func.h"
 #include "chmod.h"
 #include "chown.h"
@@ -52,7 +53,7 @@
 #include "stat.h"
 #include "symlink.h"
 #include "truncate.h"
-#include "watcher.h"
+
 
 namespace OHOS {
 namespace DistributedFS {
@@ -687,7 +688,6 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),
         NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
-        NVal::DeclareNapiFunction("createWatcher", Watcher::CreateWatcher),
         NVal::DeclareNapiFunction("fchmod", Fchmod::Async),
         NVal::DeclareNapiFunction("fchmodSync", Fchmod::Sync),
         NVal::DeclareNapiFunction("fchown", Fchown::Async),

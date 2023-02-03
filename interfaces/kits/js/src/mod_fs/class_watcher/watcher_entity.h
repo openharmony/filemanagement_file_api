@@ -15,39 +15,23 @@
 
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_ENTITY_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_ENTITY_H
+#include <vector>
+#include <string>
+#include <memory>
+#include "filemgmt_libn.h"
+namespace OHOS::FileManagement::ModuleFileIO {
 
-#include <uv.h>
-
-#include "../../common/napi/uni_header.h"
-
-namespace OHOS {
-namespace DistributedFS {
-namespace ModuleFileIO {
-class WatcherHandleDeleter {
-public:
-    void operator()(uv_fs_event_t *ptr)
-    {
-        if (ptr == nullptr) {
-            return;
-        }
-
-        uv_fs_event_stop(ptr);
-        uv_handle_t *handle = reinterpret_cast<uv_handle_t *>(ptr);
-        uv_close(handle, [](uv_handle_t *handle) { delete handle; });
-    }
-};
-
-struct WatcherInforArg {
-    int events = 0;
+struct WatcherInfoArg {
+    std::string filename;
+    std::vector<uint32_t> events;
+    int fd;
+    int wd;
     napi_env env = nullptr;
     napi_ref ref = nullptr;
 };
 
 struct WatcherEntity {
-    std::unique_ptr<WatcherInforArg> data_;
-    std::unique_ptr<uv_fs_event_t, WatcherHandleDeleter> fsEventReq_;
+    std::shared_ptr<WatcherInfoArg> data_;
 };
-} // namespace ModuleFileIO
-} // namespace DistributedFS
-} // namespace OHOS
+} // namespace OHOS::FileManagement::ModuleFileIO namespace OHOS
 #endif

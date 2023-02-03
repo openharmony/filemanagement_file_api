@@ -131,6 +131,14 @@ tuple<bool, double> NVal::ToDouble() const
     return make_tuple(status == napi_ok, res);
 }
 
+tuple<bool, uint32_t> NVal::ToUint32() const
+{
+    uint32_t res = 0;
+    napi_status status = napi_get_value_uint32(env_, val_, &res);
+    return make_tuple(status == napi_ok, res);
+}
+
+
 tuple<bool, uint64_t, bool> NVal::ToUint64() const
 {
     uint64_t res = 0;
@@ -152,6 +160,21 @@ tuple<bool, vector<string>, uint32_t> NVal::ToStringArray()
         stringArray.push_back(string(str.get()));
     }
     return make_tuple(status == napi_ok, stringArray, size);
+}
+
+tuple<bool, vector<uint32_t>, uint32_t> NVal::ToUint32Array()
+{
+    napi_status status;
+    uint32_t size;
+    status = napi_get_array_length(env_, val_, &size);
+    vector<uint32_t> uint32Array;
+    napi_value result;
+    for (uint32_t i = 0; i < size; i++) {
+        status = napi_get_element(env_, val_, i, &result);
+        auto [succ, uint32] = NVal(env_, result).ToUint32();
+        uint32Array.push_back(uint32);
+    }
+    return make_tuple(status == napi_ok, uint32Array, size);
 }
 
 tuple<bool, void *, size_t> NVal::ToArraybuffer() const
@@ -255,6 +278,13 @@ NVal NVal::CreateInt32(napi_env env, int32_t val)
 {
     napi_value res = nullptr;
     napi_create_int32(env, val, &res);
+    return {env, res};
+}
+
+NVal NVal::CreateUint32(napi_env env, int32_t val)
+{
+    napi_value res = nullptr;
+    napi_create_uint32(env, val, &res);
     return {env, res};
 }
 
