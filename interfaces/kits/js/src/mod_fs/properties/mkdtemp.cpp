@@ -50,7 +50,7 @@ napi_value Mkdtemp::Sync(napi_env env, napi_callback_info info)
     }
     int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), const_cast<char *>(path.c_str()), nullptr);
     if (ret < 0) {
-        HILOGE("Failed to create a temporary directory with path: %{public}s", path.c_str());
+        HILOGE("Failed to create a temporary directory with path");
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -75,16 +75,16 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<string>();
-    auto cbExec = [path = tmp.get(), arg]() -> NError {
+    auto cbExec = [path = string(tmp.get()), arg]() -> NError {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!mkdtemp_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ERRNO_NOERR);
         }
-        int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), const_cast<char *>(path), nullptr);
+        int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
-            HILOGE("Failed to create a temporary directory with path: %{public}s", path);
+            HILOGE("Failed to create a temporary directory with path");
             return NError(errno);
         } else {
             *arg = mkdtemp_req->path;
@@ -100,14 +100,13 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
         }
     };
 
-    const string procedureName = "FileIOmkdtemp";
     size_t argc = funcArg.GetArgc();
     NVal thisVar(env, funcArg.GetThisVar());
     if (argc == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_MKDTEMP_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_MKDTEMP_NAME, cbExec, cbComplete).val_;
     }
 }
 } // namespace ModuleFileIO

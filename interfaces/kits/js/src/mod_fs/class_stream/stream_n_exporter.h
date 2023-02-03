@@ -29,15 +29,15 @@ public:
     bool Export() override;
     std::string GetClassName() override;
 
-    static napi_value Constructor(napi_env env, napi_callback_info cbinfo);
+    static napi_value Constructor(napi_env env, napi_callback_info cbInfo);
 
-    static napi_value WriteSync(napi_env env, napi_callback_info cbinfo);
-    static napi_value ReadSync(napi_env env, napi_callback_info cbinfo);
-    static napi_value CloseSync(napi_env env, napi_callback_info cbinfo);
+    static napi_value WriteSync(napi_env env, napi_callback_info cbInfo);
+    static napi_value ReadSync(napi_env env, napi_callback_info cbInfo);
+    static napi_value CloseSync(napi_env env, napi_callback_info cbInfo);
 
-    static napi_value Write(napi_env env, napi_callback_info cbinfo);
-    static napi_value Read(napi_env env, napi_callback_info cbinfo);
-    static napi_value Close(napi_env env, napi_callback_info cbinfo);
+    static napi_value Write(napi_env env, napi_callback_info cbInfo);
+    static napi_value Read(napi_env env, napi_callback_info cbInfo);
+    static napi_value Close(napi_env env, napi_callback_info cbInfo);
 
     StreamNExporter(napi_env env, napi_value exports);
     ~StreamNExporter() override;

@@ -50,6 +50,7 @@ public:
     HashNExporter(napi_env env, napi_value exports);
     ~HashNExporter() = default;
 };
+const std::string PROCEDURE_HASH_NAME = "FileIOHash";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
