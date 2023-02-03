@@ -38,6 +38,7 @@ public:
 
 const std::string PROCEDURE_OPEN_NAME = "FileIOOpen";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
+const std::string FILE_DATA_URI = "file://";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

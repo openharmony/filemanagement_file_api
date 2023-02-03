@@ -41,6 +41,15 @@ bool RemoteUri::IsMediaUri(const string &uriString)
     return false;
 }
 
+bool RemoteUri::IsFileUri(const string &uriString, string &bundleName, string &uriPath)
+{
+    RemoteUri remoteUri = RemoteUri(uriString);
+    string scheme = remoteUri.GetScheme();
+    bundleName = remoteUri.GetAuthority();
+    uriPath = remoteUri.GetPath();
+    return scheme == SCHEME_FILE;
+}
+
 static bool IsAllDigits(string fdStr)
 {
     for (size_t i = 0; i < fdStr.size(); i++) {
