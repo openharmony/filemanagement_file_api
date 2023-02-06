@@ -108,33 +108,64 @@ void WatcherNExporter::WatcherCallback(napi_env env,
                                        const std::string &fileName,
                                        const uint32_t &event)
 {
+    uv_loop_s *loop = nullptr;
+    napi_get_uv_event_loop(env, &loop);
+    if (loop == nullptr) {
+        HILOGE("WatcherCallback loop is nullptr");
+        return;
+    }
+
+    uv_work_t *work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        HILOGE("WatcherCallback work is nullptr");
+        return;
+    }
+
     auto callbackContext = make_unique<JSCallbackContext>();
     callbackContext->env_ = env;
     callbackContext->ref_ = callback;
     callbackContext->fileName_ = fileName;
     callbackContext->event_ = event;
-    napi_value resource = nullptr;
-    napi_create_string_utf8(env, "FileIOCreateWatcher", NAPI_AUTO_LENGTH, &resource);
+    work->data = callbackContext.release();
 
-    napi_create_async_work(
-        env, nullptr, resource, [](napi_env env, void *data) {},
-        [](napi_env env, napi_status status, void *data) {
-            // JSCallbackData* jsCallbackData = (JSCallbackData*)data;
-            auto context = static_cast<JSCallbackContext *>(data);
-            napi_value jsCallback = nullptr;
-            napi_get_reference_value(env, context->ref_, &jsCallback);
-            NVal objn = NVal::CreateObject(env);
-            objn.AddProp("fileName", NVal::CreateUTF8String(env, context->fileName_).val_);
-            objn.AddProp("event", NVal::CreateUint32(env, context->event_).val_);
-            napi_value global = nullptr;
-            napi_get_global(env, &global);
-            napi_value jsObj = nullptr;
-            napi_call_function(env, global, jsCallback, 1, &(objn.val_), &jsObj);
-            napi_delete_async_work(env, context->work_);
-        },
-        static_cast<void *>(callbackContext.get()), &callbackContext->work_);
-    napi_queue_async_work(env, callbackContext->work_);
-    callbackContext.release();
+    int ret = uv_queue_work(
+        loop, work, [](uv_work_t *work) {},
+        [](uv_work_t *work, int stat) {
+            if (work == nullptr) {
+                HILOGE("uv_queue_work w is nullptr");
+                return;
+            }
+
+            JSCallbackContext *callbackContext = reinterpret_cast<JSCallbackContext *>(work->data);
+            do {
+                if (callbackContext == nullptr) {
+                    HILOGE("callbackContext is null");
+                    break;
+                }
+                napi_env env = callbackContext->env_;
+                napi_value jsCallback = nullptr;
+                napi_status status = napi_get_reference_value(env, callbackContext->ref_, &jsCallback);
+                if (status != napi_ok) {
+                    HILOGE("Create reference fail, status: %{public}d", status);
+                    break;
+                }
+                NVal objn = NVal::CreateObject(env);
+                objn.AddProp("fileName", NVal::CreateUTF8String(env, callbackContext->fileName_).val_);
+                objn.AddProp("event", NVal::CreateUint32(env, callbackContext->event_).val_);
+                napi_value retVal = nullptr;
+                status = napi_call_function(env, nullptr, jsCallback, 1, &(objn.val_), &retVal);
+                if (status != napi_ok) {
+                    HILOGE("CallJs napi_call_function fail, status: %{public}d", status);
+                    break;
+                }
+            } while (0);
+            delete callbackContext;
+            delete work;
+        });
+    if (ret != 0) {
+        HILOGE("Failed to execute libuv work queue, ret: %{public}d", ret);
+        delete work;
+    }
 }
 
 bool WatcherNExporter::Export()
