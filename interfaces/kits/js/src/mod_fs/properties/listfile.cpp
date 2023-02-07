@@ -31,7 +31,7 @@ using namespace OHOS::FileManagement::LibN;
 
 thread_local OptionArgs g_optionArgs;
 
-static bool CheckSuffix(vector<string> suffixs)
+static bool CheckSuffix(vector<string> &suffixs)
 {
     for (string suffix : suffixs) {
         if (suffix.length() <= 1 || suffix.length() > MAX_SUFFIX_LENGTH) {
@@ -106,6 +106,9 @@ static bool GetOptionParam(const NVal &argv, OptionArgs *optionArgs)
         tie(succ, optionArgs->listNum) = argv.GetProp("listNum").ToInt64();
         if (!succ) {
             HILOGE("Failed to get listNum prop.");
+            return false;
+        } else if (optionArgs->listNum < 0) {
+            HILOGE("Invalid listNum.");
             return false;
         }
     }
@@ -193,7 +196,7 @@ static bool FilterLastModifyTime(const double lastModifiedAfter, const struct di
         HILOGE("Failed to stat file.");
         return false;
     }
-    if (lastModifiedAfter >= time(&info.st_mtime)) {
+    if (lastModifiedAfter > time(&info.st_mtime)) {
         return false;
     }
     return true;
@@ -245,7 +248,7 @@ static vector<struct dirent> FileterFileRes(string path)
     int num = scandir(path.c_str(), &(namelist), FilterFunc, alphasort);
     vector<struct dirent> dirents;
     for (int i = 0; i < num; i++) {
-        dirents.push_back(*namelist[i]);
+        dirents.emplace_back(*namelist[i]);
         free(namelist[i]);
     }
     free(namelist);
@@ -258,7 +261,7 @@ static void RecursiveFunc(string path, vector<struct dirent> &dirents)
     int num = scandir(path.c_str(), &(namelist), FilterFunc, alphasort);
     for (int i = 0; i < num; i++) {
         if ((*namelist[i]).d_type == DT_REG) {
-            dirents.push_back(*namelist[i]);
+            dirents.emplace_back(*namelist[i]);
         } else if ((*(namelist)[i]).d_type == DT_DIR) {
             g_optionArgs.path += '/' + string((*namelist[i]).d_name);
             RecursiveFunc(g_optionArgs.path, dirents);
@@ -268,11 +271,11 @@ static void RecursiveFunc(string path, vector<struct dirent> &dirents)
     free(namelist);
 }
 
-static napi_value DoListFileVector2NV(napi_env env, vector<dirent> dirents)
+static napi_value DoListFileVector2NV(napi_env env, vector<dirent> &dirents)
 {
     vector<string> strs;
     for (size_t i = 0; i < dirents.size(); i++) {
-        strs.push_back(dirents[i].d_name);
+        strs.emplace_back(dirents[i].d_name);
     }
     return NVal::CreateArrayString(env, strs).val_;
 }

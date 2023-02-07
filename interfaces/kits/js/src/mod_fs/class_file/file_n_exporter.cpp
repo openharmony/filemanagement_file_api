@@ -150,7 +150,7 @@ napi_value FileNExporter::TryLock(napi_env env, napi_callback_info info)
     }
 
     bool exclusive = false;
-    if(!GetExclusive(env, funcArg, exclusive)) {
+    if (!GetExclusive(env, funcArg, exclusive)) {
         return nullptr;
     }
 
