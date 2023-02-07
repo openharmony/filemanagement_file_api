@@ -18,6 +18,7 @@
 
 #include "fd_guard.h"
 #include "n_val.h"
+#include "uv.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -45,6 +46,8 @@ void InitOpenMode(napi_env env, napi_value exports);
 
 struct CommonFunc {
     static int ConvertJsFlags(int &flags);
+    static LibN::NVal InstantiateStat(napi_env env, struct stat &buf);
+    static LibN::NVal InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp);
     static std::tuple<bool, void *, int64_t, bool, int64_t> GetReadArg(napi_env env,
                                                                        napi_value readBuf,
                                                                        napi_value option);
@@ -54,6 +57,8 @@ struct CommonFunc {
     static std::tuple<bool, std::unique_ptr<char[]>, std::unique_ptr<char[]>> GetCopyPathArg(napi_env env,
                                                                                              napi_value srcPath,
                                                                                              napi_value dstPath);
+    static void fs_req_cleanup(uv_fs_t* req);
+    static std::string GetModeFromFlags(int flags);
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement

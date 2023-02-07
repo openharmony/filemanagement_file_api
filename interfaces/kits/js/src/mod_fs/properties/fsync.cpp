@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "lstat.h"
 
-#include <memory>
+#include "fsync.h"
+
+#include <cstring>
 #include <tuple>
+#include <unistd.h>
 
-#include "class_stat/stat_entity.h"
-#include "class_stat/stat_n_exporter.h"
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
 
@@ -26,7 +26,7 @@ namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-napi_value Lstat::Sync(napi_env env, napi_callback_info info)
+napi_value Fsync::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE)) {
@@ -35,30 +35,30 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, pathPtr, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!resGetFirstArg) {
-        HILOGE("Invalid path");
+        HILOGE("Invalid fd");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    struct stat buf;
-    int ret = lstat(pathPtr.get(), &buf);
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fsync_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!fsync_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
+    int ret = uv_fs_fsync(nullptr, fsync_req.get(), fd, nullptr);
     if (ret < 0) {
-        HILOGE("Failed to get stat of file by path %{public}s", pathPtr.get());
+        HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-
-    auto stat = CommonFunc::InstantiateStat(env, buf).val_;
-    return stat;
+    return NVal::CreateUndefined(env).val_;
 }
 
-struct AsyncStatArg {
-    struct stat stat_;
-};
-
-napi_value Lstat::Async(napi_env env, napi_callback_info info)
+napi_value Fsync::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
@@ -67,39 +67,44 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, tmp, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!resGetFirstArg) {
-        HILOGE("Invalid path");
+        HILOGE("Invalid fd");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    string path = tmp.get();
-    auto arg = make_shared<AsyncStatArg>();
-    auto cbExec = [arg, path]() -> NError {
-        int ret = lstat(path.c_str(), &arg->stat_);
+    auto cbExec = [fd = fd]() -> NError {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fsync_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!fsync_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ERRNO_NOERR);
+        }
+        int ret = uv_fs_fsync(nullptr, fsync_req.get(), fd, nullptr);
         if (ret < 0) {
-            HILOGE("Failed to get stat of file by path: %{public}s, ret: %{public}d", path.c_str(), ret);
+            HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
             return NError(errno);
         } else {
             return NError(ERRNO_NOERR);
         }
     };
 
-    auto cbCompl = [arg](napi_env env, NError err) -> NVal {
+    auto cbComplete = [](napi_env env, NError err) -> NVal {
         if (err) {
-            return { env, err.GetNapiErr(env) };
+            return {env, err.GetNapiErr(env)};
+        } else {
+            return NVal::CreateUndefined(env);
         }
-        auto stat = CommonFunc::InstantiateStat(env, arg->stat_);
-        return stat;
     };
 
+    size_t argc = funcArg.GetArgc();
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_LSTAT_NAME, cbExec, cbCompl).val_;
+    if (argc == NARG_CNT::ONE) {
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_FSYNC_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_LSTAT_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_FSYNC_NAME, cbExec, cbComplete).val_;
     }
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

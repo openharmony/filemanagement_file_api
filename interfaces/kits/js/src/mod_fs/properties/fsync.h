@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDATASYNC_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDATASYNC_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FSYNC_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FSYNC_H
 
 #include "filemgmt_libn.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
-class Fdatasync final {
+class Fsync final {
 public:
     static napi_value Sync(napi_env env, napi_callback_info info);
     static napi_value Async(napi_env env, napi_callback_info info);
 };
-const std::string PROCEDURE_FDATASYNC_NAME = "FileIOFdatasync";
+const std::string PROCEDURE_FSYNC_NAME = "FileIOFsync";
 } // namespace OHOS::FileManagement::ModuleFileIO
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDATASYNC_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FSYNC_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ static napi_value CheckStatMode(napi_env env, napi_callback_info info, mode_t mo
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -94,7 +94,7 @@ napi_value StatNExporterV9::GetIno(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -110,7 +110,7 @@ napi_value StatNExporterV9::GetMode(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -126,7 +126,7 @@ napi_value StatNExporterV9::GetUid(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -142,7 +142,7 @@ napi_value StatNExporterV9::GetGid(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -158,7 +158,7 @@ napi_value StatNExporterV9::GetSize(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -174,7 +174,7 @@ napi_value StatNExporterV9::GetBlksize(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -190,7 +190,7 @@ napi_value StatNExporterV9::GetAtime(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -206,7 +206,7 @@ napi_value StatNExporterV9::GetMtime(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -222,7 +222,7 @@ napi_value StatNExporterV9::GetCtime(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
@@ -238,13 +238,13 @@ napi_value StatNExporterV9::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
 
     unique_ptr<StatEntityV9> statEntity = make_unique<StatEntityV9>();
     if (!NClass::SetEntityFor<StatEntityV9>(env, funcArg.GetThisVar(), move(statEntity))) {
-        UniError(EIO).ThrowErr(env);
+        UniError(EIO, true).ThrowErr(env);
         return nullptr;
     }
     return funcArg.GetThisVar();
@@ -278,12 +278,12 @@ bool StatNExporterV9::Export()
     tie(succ, classValue) = NClass::DefineClass(exports_.env_, className, StatNExporterV9::Constructor,
         std::move(props));
     if (!succ) {
-        UniError(EIO).ThrowErr(exports_.env_);
+        UniError(EIO, true).ThrowErr(exports_.env_);
         return false;
     }
     succ = NClass::SaveClass(exports_.env_, className, classValue);
     if (!succ) {
-        UniError(EIO).ThrowErr(exports_.env_);
+        UniError(EIO, true).ThrowErr(exports_.env_);
         return false;
     }
 

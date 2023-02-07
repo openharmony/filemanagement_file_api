@@ -21,6 +21,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "class_stat/stat_entity.h"
+#include "class_stat/stat_n_exporter.h"
+#include "class_stream/stream_entity.h"
+#include "class_stream/stream_n_exporter.h"
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
 
@@ -120,6 +124,71 @@ int CommonFunc::ConvertJsFlags(int &flags)
     flagsABI |= ((flags & USR_O_SYNC) == USR_O_SYNC) ? O_SYNC : 0;
     flags = flagsABI;
     return flagsABI;
+}
+
+NVal CommonFunc::InstantiateStat(napi_env env, struct stat &buf)
+{
+    napi_value objStat = NClass::InstantiateClass(env, StatNExporter::className_, {});
+    if (!objStat) {
+        HILOGE("Failed to instantiate stat class");
+        NError(EIO).ThrowErr(env);
+        return NVal();
+    }
+
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, objStat);
+    if (!statEntity) {
+        HILOGE("Failed to get stat entity");
+        NError(EIO).ThrowErr(env);
+        return NVal();
+    }
+
+    statEntity->stat_ = buf;
+    return { env, objStat };
+}
+
+NVal CommonFunc::InstantiateStream(napi_env env, unique_ptr<FILE, decltype(&fclose)> fp)
+{
+    napi_value objStream = NClass::InstantiateClass(env, StreamNExporter::className_, {});
+    if (!objStream) {
+        HILOGE("INNER BUG. Cannot instantiate stream");
+        NError(EIO).ThrowErr(env);
+        return NVal();
+    }
+
+    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, objStream);
+    if (!streamEntity) {
+        HILOGE("Cannot instantiate stream because of void entity");
+        NError(EIO).ThrowErr(env);
+        return NVal();
+    }
+
+    streamEntity->fp.swap(fp);
+    return { env, objStream };
+}
+
+void CommonFunc::fs_req_cleanup(uv_fs_t* req)
+{
+    uv_fs_req_cleanup(req);
+    if (req) {
+        delete req;
+        req = nullptr;
+    }
+}
+
+string CommonFunc::GetModeFromFlags(int flags)
+{
+    const string RDONLY = "r";
+    const string WRONLY = "w";
+    const string APPEND = "a";
+    const string TRUNC = "t";
+    string mode = RDONLY;
+    mode += (((flags & O_RDWR) == O_RDWR) ? WRONLY : "");
+    mode = (((flags & O_WRONLY) == O_WRONLY) ? WRONLY : mode);
+    if (mode != RDONLY) {
+        mode += ((flags & O_TRUNC) ? TRUNC : "");
+        mode += ((flags & O_APPEND) ? APPEND : "");
+    }
+    return mode;
 }
 
 tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,

@@ -16,8 +16,8 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_H
 
+#include "filemgmt_libn.h"
 #include "iremote_broker.h"
-#include "../../common/napi/uni_header.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -38,7 +38,6 @@ public:
 
 const std::string PROCEDURE_OPEN_NAME = "FileIOOpen";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
-const std::string MEDIA_FILEMODE_READONLY = "r";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

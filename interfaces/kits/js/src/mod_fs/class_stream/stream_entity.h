@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LSTAT_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LSTAT_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_STREAM_STREAM_ENTITY_H
+#define INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_STREAM_STREAM_ENTITY_H
 
-#include "filemgmt_libn.h"
-
-namespace OHOS::FileManagement::ModuleFileIO {
-class Lstat final {
-public:
-    static napi_value Async(napi_env env, napi_callback_info info);
-    static napi_value Sync(napi_env env, napi_callback_info info);
+namespace OHOS {
+namespace FileManagement {
+namespace ModuleFileIO {
+struct StreamEntity {
+    std::unique_ptr<FILE, decltype(&fclose)> fp = { nullptr, fclose };
 };
-const std::string PROCEDURE_LSTAT_NAME = "FileIOLstat";
-} // namespace OHOS::FileManagement::ModuleFileIO
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LSTAT_H
+
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
+#endif // INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_STREAM_STREAM_ENTITY_H

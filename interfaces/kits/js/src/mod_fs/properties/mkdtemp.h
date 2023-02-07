@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDATASYNC_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDATASYNC_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MKDTEMP_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MKDTEMP_H
 
 #include "filemgmt_libn.h"
 
-namespace OHOS::FileManagement::ModuleFileIO {
-class Fdatasync final {
+namespace OHOS {
+namespace FileManagement {
+namespace ModuleFileIO {
+using namespace OHOS::FileManagement::LibN;
+
+class Mkdtemp final {
 public:
     static napi_value Sync(napi_env env, napi_callback_info info);
     static napi_value Async(napi_env env, napi_callback_info info);
 };
-const std::string PROCEDURE_FDATASYNC_NAME = "FileIOFdatasync";
-} // namespace OHOS::FileManagement::ModuleFileIO
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDATASYNC_H
+const std::string PROCEDURE_MKDTEMP_NAME = "FileIOMkdtemp";
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MKDTEMP_H

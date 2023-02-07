@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,12 +48,12 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
     auto [isFd, fd] = NVal(env, pathOrFdFromJsArg).ToInt32();
     if (isFd) {
         if (fd < 0) {
-            UniError(EINVAL).ThrowErr(env);
+            UniError(EINVAL, true).ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
         }
         return { true, FileInfo { false, {}, { fd, false } } };
     }
-    UniError(EINVAL).ThrowErr(env);
+    UniError(EINVAL, true).ThrowErr(env);
     return { false, FileInfo { false, {}, {} } };
 };
 
@@ -61,7 +61,7 @@ napi_value StatV9::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
     auto [succ, fileInfo] = ParseJsFile(env, funcArg[NARG_POS::FIRST]);
@@ -72,24 +72,24 @@ napi_value StatV9::Sync(napi_env env, napi_callback_info info)
     struct stat buf;
     if (fileInfo.isPath) {
         if (stat(fileInfo.path.get(), &buf) != 0) {
-            UniError(errno).ThrowErr(env);
+            UniError(errno, true).ThrowErr(env);
             return nullptr;
         }
     } else {
         if (fstat(fileInfo.fdg.GetFD(), &buf) != 0) {
-            UniError(errno).ThrowErr(env);
+            UniError(errno, true).ThrowErr(env);
             return nullptr;
         }
     }
 
     napi_value objStat = NClass::InstantiateClass(env, StatNExporterV9::className_, {});
     if (!objStat) {
-        UniError(EIO).ThrowErr(env);
+        UniError(EIO, true).ThrowErr(env);
         return nullptr;
     }
     auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, objStat);
     if (!statEntity) {
-        UniError(EIO).ThrowErr(env);
+        UniError(EIO, true).ThrowErr(env);
         return nullptr;
     }
     statEntity->stat_ = buf;
@@ -104,7 +104,7 @@ napi_value StatV9::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
-        UniError(EINVAL).ThrowErr(env);
+        UniError(EINVAL, true).ThrowErr(env);
         return nullptr;
     }
     auto [succ, fileInfo] = ParseJsFile(env, funcArg[NARG_POS::FIRST]);
@@ -116,11 +116,11 @@ napi_value StatV9::Async(napi_env env, napi_callback_info info)
     auto cbExec = [arg, fileInfo = make_shared<FileInfo>(move(fileInfo))](napi_env env) -> UniError {
         if (fileInfo->isPath) {
             if (stat(fileInfo->path.get(), &arg->stat_) != 0) {
-                return UniError(errno);
+                return UniError(errno, true);
             }
         } else {
             if (fstat(fileInfo->fdg.GetFD(), &arg->stat_) != 0) {
-                return UniError(errno);
+                return UniError(errno, true);
             }
         }
         return UniError(ERRNO_NOERR);
@@ -131,11 +131,11 @@ napi_value StatV9::Async(napi_env env, napi_callback_info info)
         }
         napi_value objStat = NClass::InstantiateClass(env, StatNExporterV9::className_, {});
         if (!objStat) {
-            return { env, UniError(EIO).GetNapiErr(env) };
+            return { env, UniError(EIO, true).GetNapiErr(env) };
         }
         auto statEntity = NClass::GetEntityOf<StatEntityV9>(env, objStat);
         if (!statEntity) {
-            return { env, UniError(EIO).GetNapiErr(env) };
+            return { env, UniError(EIO, true).GetNapiErr(env) };
         }
         statEntity->stat_ = arg->stat_;
         return { env, objStat };

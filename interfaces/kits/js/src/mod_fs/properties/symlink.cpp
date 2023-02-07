@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,12 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
 
-namespace OHOS::FileManagement::ModuleFileIO {
+namespace OHOS {
+namespace FileManagement {
+namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
@@ -30,15 +33,11 @@ static tuple<bool, string, string> GetSymlinkArg(napi_env env, const NFuncArg &f
 {
     auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!resGetFirstArg) {
-        HILOGE("Invalid src");
-        NError(EINVAL).ThrowErr(env);
         return { false, "", "" };
     }
 
     auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
     if (!resGetSecondArg) {
-        HILOGE("Invalid dest");
-        NError(EINVAL).ThrowErr(env);
         return { false, "", "" };
     }
 
@@ -56,12 +55,21 @@ napi_value Symlink::Sync(napi_env env, napi_callback_info info)
 
     auto [resGetSymlinkArg, oldPath, newPath] = GetSymlinkArg(env, funcArg);
     if (!resGetSymlinkArg) {
+        HILOGE("Failed to get symlink arguments");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    if (symlink(oldPath.c_str(), newPath.c_str()) < 0) {
-        HILOGE("Failed to create a link for old path: %{public}s", oldPath.c_str());
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> symlink_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!symlink_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
+    int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to create a link for old path");
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -80,18 +88,24 @@ napi_value Symlink::Async(napi_env env, napi_callback_info info)
 
     auto [resGetSymlinkArg, oldPath, newPath] = GetSymlinkArg(env, funcArg);
     if (!resGetSymlinkArg) {
+        HILOGE("Failed to get symlink arguments");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto cbExec = [oldPath = move(oldPath), newPath = move(newPath)]() -> NError {
-        int ret = symlink(oldPath.c_str(), newPath.c_str());
-        if (ret < 0) {
-            HILOGE("Failed to create a link for old path: %{public}s, ret: %{public}d", oldPath.c_str(), ret);
-            return NError(errno);
-        } else {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> symlink_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!symlink_req) {
+            HILOGE("Failed to request heap memory.");
             return NError(ERRNO_NOERR);
         }
+        int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
+        if (ret < 0) {
+            HILOGE("Failed to create a link for old path");
+            return NError(errno);
+        }
+        return NError(ERRNO_NOERR);
     };
 
     auto cbComplCallback = [](napi_env env, NError err) -> NVal {
@@ -101,14 +115,15 @@ napi_value Symlink::Async(napi_env env, napi_callback_info info)
         return { NVal::CreateUndefined(env) };
     };
 
-    const string procedureName = "FileIOSymLink";
     NVal thisVar(env, funcArg.GetThisVar());
     size_t argc = funcArg.GetArgc();
     if (argc == NARG_CNT::TWO) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplCallback).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_SYMLINK_NAME, cbExec, cbComplCallback).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplCallback).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_SYMLINK_NAME, cbExec, cbComplCallback).val_;
     }
 }
-} // namespace OHOS::FileManagement::ModuleFileIO
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
