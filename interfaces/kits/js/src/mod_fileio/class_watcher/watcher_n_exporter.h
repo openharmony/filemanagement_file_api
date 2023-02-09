@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,43 +15,27 @@
 
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_N_EXPORTER_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_N_EXPORTER_H
-#include <sys/inotify.h>
-#include <memory>
-#include "watcher_entity.h"
-#include "file_watcher.h"
-#include "filemgmt_libn.h"
-namespace OHOS::FileManagement::ModuleFileIO {
-using namespace OHOS::FileManagement::LibN;
+
+#include "../../common/napi/n_exporter.h"
+
+namespace OHOS {
+namespace DistributedFS {
+namespace ModuleFileIO {
 class WatcherNExporter final : public NExporter {
 public:
-    class JSCallbackContext {
-    public:
-        JSCallbackContext() {}
-        ~JSCallbackContext() {}
-
-    public:
-        napi_env env_;
-        napi_ref ref_;
-        std::string fileName_;
-        uint32_t event_;
-        napi_async_work work_;
-    };
-
     inline static const std::string className_ = "Watcher";
 
     bool Export() override;
     std::string GetClassName() override;
 
     static napi_value Constructor(napi_env env, napi_callback_info info);
-    static napi_value Start(napi_env env, napi_callback_info info);
     static napi_value Stop(napi_env env, napi_callback_info info);
-    static void WatcherCallback(napi_env env, napi_ref callback, const std::string &fileName, const uint32_t &event);
+    static napi_value StopSync(napi_env env, napi_callback_info info);
 
     WatcherNExporter(napi_env env, napi_value exports);
     ~WatcherNExporter() override;
-
-private:
-    static std::shared_ptr<FileWatcher> watcherPtr_;
 };
-} // namespace OHOS::FileManagement::ModuleFileIO
+} // namespace ModuleFileIO
+} // namespace DistributedFS
+} // namespace OHOS
 #endif

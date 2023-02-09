@@ -52,6 +52,7 @@ ohos_shared_library("fileio") {
     "src/mod_fileio/class_stat/stat_n_exporter.cpp",
     "src/mod_fileio/class_stream/flush.cpp",
     "src/mod_fileio/class_stream/stream_n_exporter.cpp",
+    "src/mod_fileio/class_watcher/watcher_n_exporter.cpp",
     "src/mod_fileio/common_func.cpp",
     "src/mod_fileio/module.cpp",
     "src/mod_fileio/properties/chmod.cpp",
@@ -85,6 +86,7 @@ ohos_shared_library("fileio") {
     "src/mod_fileio/properties/stat.cpp",
     "src/mod_fileio/properties/symlink.cpp",
     "src/mod_fileio/properties/truncate.cpp",
+    "src/mod_fileio/properties/watcher.cpp",
   ]
 
   deps = [
