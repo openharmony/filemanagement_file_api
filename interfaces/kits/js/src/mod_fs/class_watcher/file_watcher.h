@@ -18,6 +18,7 @@
 #include <memory>
 #include <sys/inotify.h>
 #include <string>
+
 #include "watcher_entity.h"
 namespace OHOS::FileManagement::ModuleFileIO {
 using WatcherCallback = void (*)(napi_env env, napi_ref callback, const std::string &filename, const uint32_t &event);
@@ -31,13 +32,15 @@ public:
     FileWatcher();
     ~FileWatcher();
     bool InitNotify(int &fd);
-    bool StartNotify(std::shared_ptr<WatcherInfoArg> &arg);
-    bool StopNotify(std::shared_ptr<WatcherInfoArg> &arg);
-    void GetNotifyEvent(std::shared_ptr<WatcherInfoArg> &arg, WatcherCallback callback);
+    bool StartNotify(WatcherInfoArg &arg);
+    bool StopNotify(const WatcherInfoArg &arg);
+    void GetNotifyEvent(const WatcherInfoArg &arg, WatcherCallback callback);
 
 private:
-    void HandleEvent(std::shared_ptr<WatcherInfoArg> &arg, const struct inotify_event *event, WatcherCallback callback);
-    bool run_;
+    void HandleEvent(const WatcherInfoArg &arg, const struct inotify_event *event, 
+                     WatcherCallback callback);
+    static constexpr int BUF_SIZE = 1024;
+    bool run_ = false;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif

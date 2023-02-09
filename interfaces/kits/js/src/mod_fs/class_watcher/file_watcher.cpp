@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 #include "file_watcher.h"
+
 #include <unistd.h>
 #include <errno.h>
+
 #include "filemgmt_libhilog.h"
 #include "uv.h"
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace OHOS::FileManagement::LibN; 
-const int BUF_SIZE = 1024;
 FileWatcher::FileWatcher() {}
 
 FileWatcher::~FileWatcher() {}
@@ -34,56 +35,56 @@ bool FileWatcher::InitNotify(int &fd)
     return true;
 }
 
-bool FileWatcher::StartNotify(std::shared_ptr<WatcherInfoArg> &arg)
+bool FileWatcher::StartNotify(WatcherInfoArg &arg)
 {
-    int wd = 0;
-    wd = inotify_add_watch(arg->fd, arg->filename.c_str(), arg->events);
+    int wd = inotify_add_watch(arg.fd, arg.filename.c_str(), arg.events);
     if(wd == -1) {
         HILOGE("FileWatcher StartNotify fail errCode:%{public}d", errno);
         return false;
     }
-    arg->wd = wd;
+    arg.wd = wd;
     run_ = true;
     return true;
 }
 
-bool FileWatcher::StopNotify(std::shared_ptr<WatcherInfoArg> &arg)
+bool FileWatcher::StopNotify(const WatcherInfoArg &arg)
 {
     run_ = false;
-    if (inotify_rm_watch(arg->fd, arg->wd) == -1) {
+    if (inotify_rm_watch(arg.fd, arg.wd) == -1) {
         HILOGE("FileWatcher StopNotify fail errCode:%{public}d", errno);
         return false;
     }
-    close(arg->fd);
+    close(arg.fd);
     return true;
 }
 
-void FileWatcher::HandleEvent(std::shared_ptr<WatcherInfoArg> &arg,
+void FileWatcher::HandleEvent(const WatcherInfoArg &arg,
                               const struct inotify_event *event,
                               WatcherCallback callback)
 {
-    if (event->wd == arg->wd) {
-        std::string filename = arg->filename + "/" + event->name;
-        callback(arg->env, arg->ref, filename, event->mask);
+    if (event->wd != arg.wd) {
+        return;
     }
+    std::string filename = arg.filename + "/" + event->name;
+    callback(arg.env, arg.ref, filename, event->mask);
 }
 
-void FileWatcher::GetNotifyEvent(std::shared_ptr<WatcherInfoArg> &arg, WatcherCallback callback)
+void FileWatcher::GetNotifyEvent(const WatcherInfoArg &arg, WatcherCallback callback)
 {
     char buf[BUF_SIZE] = {0};
     struct inotify_event *event = nullptr;
     while (run_) {
-        int fd = arg->fd;
+        int fd = arg.fd;
         fd_set fds;
         FD_ZERO(&fds);
         FD_SET(fd, &fds);
         if (select(fd + 1, &fds, NULL, NULL, NULL) > 0) {
             int len, index = 0;
             while (((len = read(fd, &buf, sizeof(buf))) < 0) && (errno == EINTR));
-			while (index < len) {
-				event = (struct inotify_event *)(buf + index);
-				HandleEvent(arg, event, callback);
-				index += sizeof(struct inotify_event) + event->len;
+            while (index < len) {
+                event = (struct inotify_event *)(buf + index);
+                HandleEvent(arg, event, callback);
+                index += sizeof(struct inotify_event) + event->len;
 			}
         }
     }

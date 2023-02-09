@@ -18,6 +18,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+
 #include "filemgmt_libn.h"
 namespace OHOS::FileManagement::ModuleFileIO {
 
@@ -31,7 +32,7 @@ struct WatcherInfoArg {
 };
 
 struct WatcherEntity {
-    std::shared_ptr<WatcherInfoArg> data_;
+    WatcherInfoArg data_;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO namespace OHOS
 #endif

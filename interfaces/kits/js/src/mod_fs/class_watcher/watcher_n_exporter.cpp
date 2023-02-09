@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+
 #include "filemgmt_libn.h"
 #include "filemgmt_libhilog.h"
 #include "../common_func.h"
@@ -160,12 +161,10 @@ void WatcherNExporter::WatcherCallback(napi_env env,
                 }
             } while (0);
             delete callbackContext;
-            delete(work->data);
             delete work;
         });
     if (ret != 0) {
         HILOGE("Failed to execute libuv work queue, ret: %{public}d", ret);
-        delete(work->data);
         delete work;
     }
 }

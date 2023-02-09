@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "watcher.h"
+
 #include <cstring>
 #include <fcntl.h>
 #include <memory>
@@ -46,21 +47,21 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    int fd = 0;
+    int fd = -1;
     shared_ptr<FileWatcher> watcherPtr = make_shared<FileWatcher>();
     if (!watcherPtr->InitNotify(fd)) {
         NError(errno).ThrowErr(env);
         return nullptr;
     }  
 
-    shared_ptr<WatcherInfoArg> data = make_shared<WatcherInfoArg>();
-    data->events = events;
-    data->env = env;
-    data->filename = string(filename.get());
-    data->fd = fd;
+    WatcherInfoArg data;
+    data.events = events;
+    data.env = env;
+    data.filename = string(filename.get());
+    data.fd = fd;
 
     NVal val = NVal(env, funcArg[NARG_POS::THIRD]);
-    napi_create_reference(val.env_, val.val_, 1, &(data->ref));
+    napi_create_reference(val.env_, val.val_, 1, &(data.ref));
 
 
     napi_value objWatcher = NClass::InstantiateClass(env, WatcherNExporter::className_, {});
