@@ -174,7 +174,7 @@ napi_value RandomAccessFileNExporter::ReadSync(napi_env env, napi_callback_info 
         UniError(EINVAL).ThrowErr(env, "Invalid buffer/options");
         return nullptr;
     }
-    ssize_t actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
+    size_t actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
     if (actLen < 0) {
         UniError(errno).ThrowErr(env);
         return nullptr;
@@ -184,7 +184,7 @@ napi_value RandomAccessFileNExporter::ReadSync(napi_env env, napi_callback_info 
 }
 
 struct AsyncIOReadArg {
-    ssize_t lenRead { 0 };
+    size_t lenRead { 0 };
     int offset { 0 };
     NRef refReadBuf;
 
@@ -212,7 +212,7 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg)
 
     auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
     auto cbExec = [arg, buf, len, hasPos, pos, offset, rafEntity](napi_env env) -> UniError {
-        ssize_t actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
+        size_t actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
         if (actLen < 0) {
             return UniError(errno);
         }

@@ -33,13 +33,13 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
+static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
 {
-    int mode = O_RDONLY;
+    unsigned int mode = O_RDONLY;
     bool succ = false;
     if (funcArg.GetArgc() >= NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
         tie(succ, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-        int invalidMode = (O_WRONLY | O_RDWR);
+        unsigned int invalidMode = (O_WRONLY | O_RDWR);
         if (!succ || ((mode & invalidMode) == invalidMode)) {
             HILOGE("Invalid mode");
             NError(EINVAL).ThrowErr(env);
@@ -77,7 +77,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
     return { env, objFile };
 }
 
-static int OpenFileByDatashare(napi_env env, napi_value argv, string path, int flags)
+static int OpenFileByDatashare(napi_env env, napi_value argv, string path, unsigned int flags)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
     int fd = -1;
