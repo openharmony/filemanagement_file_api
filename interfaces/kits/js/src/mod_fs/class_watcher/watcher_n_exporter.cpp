@@ -160,10 +160,12 @@ void WatcherNExporter::WatcherCallback(napi_env env,
                 }
             } while (0);
             delete callbackContext;
+            delete(work->data);
             delete work;
         });
     if (ret != 0) {
         HILOGE("Failed to execute libuv work queue, ret: %{public}d", ret);
+        delete(work->data);
         delete work;
     }
 }

@@ -23,7 +23,7 @@ namespace OHOS::FileManagement::ModuleFileIO {
 
 struct WatcherInfoArg {
     std::string filename;
-    std::vector<uint32_t> events;
+    uint32_t events;
     int fd;
     int wd;
     napi_env env = nullptr;

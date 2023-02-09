@@ -37,11 +37,7 @@ bool FileWatcher::InitNotify(int &fd)
 bool FileWatcher::StartNotify(std::shared_ptr<WatcherInfoArg> &arg)
 {
     int wd = 0;
-    uint32_t watchEvent = 0;
-    for (auto event : arg->events) {
-        watchEvent = watchEvent | event;
-    }
-    wd = inotify_add_watch(arg->fd, arg->filename.c_str(), watchEvent);
+    wd = inotify_add_watch(arg->fd, arg->filename.c_str(), arg->events);
     if(wd == -1) {
         HILOGE("FileWatcher StartNotify fail errCode:%{public}d", errno);
         return false;
@@ -67,13 +63,8 @@ void FileWatcher::HandleEvent(std::shared_ptr<WatcherInfoArg> &arg,
                               WatcherCallback callback)
 {
     if (event->wd == arg->wd) {
-        for (auto watchEvent : arg->events) {
-            if (event->mask == watchEvent || watchEvent == IN_ALL_EVENTS) {
-                std::string filename = arg->filename + "/" + event->name;
-                HILOGI("FileWatcher HandleEvent fileName:%{public}s, mask:%{public}d", filename.c_str(), event->mask);
-                callback(arg->env, arg->ref, filename, event->mask);
-            }
-        }
+        std::string filename = arg->filename + "/" + event->name;
+        callback(arg->env, arg->ref, filename, event->mask);
     }
 }
 

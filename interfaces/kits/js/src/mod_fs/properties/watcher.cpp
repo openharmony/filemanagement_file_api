@@ -40,7 +40,7 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succGetEvent, events, size] = NVal(env, funcArg[NARG_POS::SECOND]).ToUint32Array();
+    auto [succGetEvent, events] = NVal(env, funcArg[NARG_POS::SECOND]).ToUint32();
     if (!succGetEvent) {
         NError(EINVAL).ThrowErr(env, "Invalid event");
         return nullptr;
