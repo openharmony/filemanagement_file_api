@@ -96,21 +96,21 @@ static tuple<bool, size_t> GetActualLen(napi_env env, int64_t bufLen, int64_t bu
     return { true, retLen };
 }
 
-int CommonFunc::ConvertJsFlags(int &flags)
+unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
 {
-    static constexpr int USR_O_RDONLY = 00;
-    static constexpr int USR_O_WRONLY = 01;
-    static constexpr int USR_O_RDWR = 02;
-    static constexpr int USR_O_CREAT = 0100;
-    static constexpr int USR_O_EXCL = 0200;
-    static constexpr int USR_O_TRUNC = 01000;
-    static constexpr int USR_O_APPEND = 02000;
-    static constexpr int USR_O_NONBLOCK = 04000;
-    static constexpr int USR_O_DIRECTORY = 0200000;
-    static constexpr int USR_O_NOFOLLOW = 0400000;
-    static constexpr int USR_O_SYNC = 04010000;
+    static constexpr unsigned int USR_O_RDONLY = 00;
+    static constexpr unsigned int USR_O_WRONLY = 01;
+    static constexpr unsigned int USR_O_RDWR = 02;
+    static constexpr unsigned int USR_O_CREAT = 0100;
+    static constexpr unsigned int USR_O_EXCL = 0200;
+    static constexpr unsigned int USR_O_TRUNC = 01000;
+    static constexpr unsigned int USR_O_APPEND = 02000;
+    static constexpr unsigned int USR_O_NONBLOCK = 04000;
+    static constexpr unsigned int USR_O_DIRECTORY = 0200000;
+    static constexpr unsigned int USR_O_NOFOLLOW = 0400000;
+    static constexpr unsigned int USR_O_SYNC = 04010000;
 
-    int flagsABI = 0;
+    unsigned int flagsABI = 0;
     flagsABI |= ((flags & USR_O_RDONLY) == USR_O_RDONLY) ? O_RDONLY : 0;
     flagsABI |= ((flags & USR_O_WRONLY) == USR_O_WRONLY) ? O_WRONLY : 0;
     flagsABI |= ((flags & USR_O_RDWR) == USR_O_RDWR) ? O_RDWR : 0;
@@ -175,7 +175,7 @@ void CommonFunc::fs_req_cleanup(uv_fs_t* req)
     }
 }
 
-string CommonFunc::GetModeFromFlags(int flags)
+string CommonFunc::GetModeFromFlags(unsigned int flags)
 {
     const string RDONLY = "r";
     const string WRONLY = "w";
