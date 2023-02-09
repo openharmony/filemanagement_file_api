@@ -85,7 +85,7 @@ void FileWatcher::GetNotifyEvent(const WatcherInfoArg &arg, WatcherCallback call
                 event = (struct inotify_event *)(buf + index);
                 HandleEvent(arg, event, callback);
                 index += sizeof(struct inotify_event) + event->len;
-			}
+            }
         }
     }
 }
