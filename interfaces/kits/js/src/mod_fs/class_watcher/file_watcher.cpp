@@ -58,7 +58,7 @@ bool FileWatcher::StopNotify(const WatcherInfoArg &arg)
     return true;
 }
 
-void FileWatcher::HandleEvent(const WatcherInfoArg &arg,
+void FileWatcher::HandleEvent(WatcherInfoArg &arg,
                               const struct inotify_event *event,
                               WatcherCallback callback)
 {
@@ -66,10 +66,10 @@ void FileWatcher::HandleEvent(const WatcherInfoArg &arg,
         return;
     }
     std::string filename = arg.filename + "/" + event->name;
-    callback(arg.env, arg.ref, filename, event->mask);
+    callback(arg.env, arg.nRef, filename, event->mask);
 }
 
-void FileWatcher::GetNotifyEvent(const WatcherInfoArg &arg, WatcherCallback callback)
+void FileWatcher::GetNotifyEvent(WatcherInfoArg &arg, WatcherCallback callback)
 {
     char buf[BUF_SIZE] = {0};
     struct inotify_event *event = nullptr;

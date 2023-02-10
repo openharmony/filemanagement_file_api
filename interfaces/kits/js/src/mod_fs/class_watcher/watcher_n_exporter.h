@@ -27,15 +27,14 @@ class WatcherNExporter final : public NExporter {
 public:
     class JSCallbackContext {
     public:
-        JSCallbackContext() {}
+        explicit JSCallbackContext(NRef &ref) : ref_(ref) {}
         ~JSCallbackContext() {}
 
     public:
         napi_env env_;
-        napi_ref ref_;
+        NRef &ref_;
         std::string fileName_;
         uint32_t event_;
-        napi_async_work work_;
     };
 
     inline static const std::string className_ = "Watcher";
@@ -46,13 +45,13 @@ public:
     static napi_value Constructor(napi_env env, napi_callback_info info);
     static napi_value Start(napi_env env, napi_callback_info info);
     static napi_value Stop(napi_env env, napi_callback_info info);
-    static void WatcherCallback(napi_env env, napi_ref callback, const std::string &fileName, const uint32_t &event);
+    static void WatcherCallback(napi_env env, NRef &callback, const std::string &fileName, const uint32_t &event);
 
     WatcherNExporter(napi_env env, napi_value exports);
     ~WatcherNExporter() override;
 
 private:
-    static std::shared_ptr<FileWatcher> watcherPtr_;
+    static std::unique_ptr<FileWatcher> watcherPtr_;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif

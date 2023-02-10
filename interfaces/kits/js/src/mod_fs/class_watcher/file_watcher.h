@@ -21,7 +21,8 @@
 
 #include "watcher_entity.h"
 namespace OHOS::FileManagement::ModuleFileIO {
-using WatcherCallback = void (*)(napi_env env, napi_ref callback, const std::string &filename, const uint32_t &event);
+using WatcherCallback = void (*)(napi_env env, LibN::NRef &callback,
+    const std::string &filename, const uint32_t &event);
 struct ErrorInfo {
     int errCode;
     std::string errMsg;
@@ -34,10 +35,10 @@ public:
     bool InitNotify(int &fd);
     bool StartNotify(WatcherInfoArg &arg);
     bool StopNotify(const WatcherInfoArg &arg);
-    void GetNotifyEvent(const WatcherInfoArg &arg, WatcherCallback callback);
+    void GetNotifyEvent(WatcherInfoArg &arg, WatcherCallback callback);
 
 private:
-    void HandleEvent(const WatcherInfoArg &arg, const struct inotify_event *event, 
+    void HandleEvent(WatcherInfoArg &arg, const struct inotify_event *event,
                      WatcherCallback callback);
     static constexpr int BUF_SIZE = 1024;
     bool run_ = false;

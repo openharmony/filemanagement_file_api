@@ -29,7 +29,7 @@ namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-std::shared_ptr<FileWatcher> WatcherNExporter::watcherPtr_;
+std::unique_ptr<FileWatcher> WatcherNExporter::watcherPtr_ = nullptr;
 napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -44,7 +44,7 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    watcherPtr_ = make_shared<FileWatcher>();
+    watcherPtr_ = make_unique<FileWatcher>();
     return funcArg.GetThisVar();
 }
 
@@ -61,7 +61,7 @@ napi_value WatcherNExporter::Stop(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env, "get watcherEntity fail");
         return nullptr;
     }
-    if (!watcherPtr_->StopNotify(watchEntity->data_)) {
+    if (!watcherPtr_->StopNotify(*(watchEntity->data_))) {
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -82,13 +82,13 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env, "get watcherEntity fail");
         return nullptr;
     }
-    if(!watcherPtr_->StartNotify(watchEntity->data_)) {
+    if(!watcherPtr_->StartNotify(*(watchEntity->data_))) {
          NError(errno).ThrowErr(env);
          return nullptr;
     }
 
     auto cbExec = [watchEntity]() -> NError {
-        watcherPtr_->GetNotifyEvent(watchEntity->data_, WatcherCallback);
+        watcherPtr_->GetNotifyEvent(*(watchEntity->data_), WatcherCallback);
         return NError(ERRNO_NOERR);
     };
 
@@ -105,7 +105,7 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
 }
 
 void WatcherNExporter::WatcherCallback(napi_env env,
-                                       napi_ref callback,
+                                       NRef &callback,
                                        const std::string &fileName,
                                        const uint32_t &event)
 {
@@ -122,12 +122,16 @@ void WatcherNExporter::WatcherCallback(napi_env env,
         return;
     }
 
-    auto callbackContext = make_unique<JSCallbackContext>();
+    if (!callback) {
+        HILOGE("Pass watcher callback fail");
+        return;
+    }
+
+    JSCallbackContext *callbackContext = new (std::nothrow) JSCallbackContext(callback);
     callbackContext->env_ = env;
-    callbackContext->ref_ = callback;
     callbackContext->fileName_ = fileName;
     callbackContext->event_ = event;
-    work->data = callbackContext.release();
+    work->data = reinterpret_cast<void *>(callbackContext);
 
     int ret = uv_queue_work(
         loop, work, [](uv_work_t *work) {},
@@ -143,18 +147,21 @@ void WatcherNExporter::WatcherCallback(napi_env env,
                     HILOGE("callbackContext is null");
                     break;
                 }
-                napi_env env = callbackContext->env_;
-                napi_value jsCallback = nullptr;
-                napi_status status = napi_get_reference_value(env, callbackContext->ref_, &jsCallback);
-                if (status != napi_ok) {
-                    HILOGE("Create reference fail, status: %{public}d", status);
+                if (!callbackContext->ref_) {
+                    HILOGE("callbackContext nref is null");
                     break;
                 }
+                napi_env env = callbackContext->env_;
+                napi_value jsCallback = callbackContext->ref_.Deref(env).val_;
+
+                napi_valuetype valueType;
+                napi_typeof(env, jsCallback, &valueType);
+
                 NVal objn = NVal::CreateObject(env);
                 objn.AddProp("fileName", NVal::CreateUTF8String(env, callbackContext->fileName_).val_);
                 objn.AddProp("event", NVal::CreateUint32(env, callbackContext->event_).val_);
                 napi_value retVal = nullptr;
-                status = napi_call_function(env, nullptr, jsCallback, 1, &(objn.val_), &retVal);
+                napi_status status = napi_call_function(env, nullptr, jsCallback, 1, &(objn.val_), &retVal);
                 if (status != napi_ok) {
                     HILOGE("CallJs napi_call_function fail, status: %{public}d", status);
                     break;
@@ -165,6 +172,7 @@ void WatcherNExporter::WatcherCallback(napi_env env,
         });
     if (ret != 0) {
         HILOGE("Failed to execute libuv work queue, ret: %{public}d", ret);
+        delete callbackContext;
         delete work;
     }
 }

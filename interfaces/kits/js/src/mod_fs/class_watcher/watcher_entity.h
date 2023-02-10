@@ -28,11 +28,14 @@ struct WatcherInfoArg {
     int fd;
     int wd;
     napi_env env = nullptr;
-    napi_ref ref = nullptr;
+    LibN::NRef nRef;
+
+    explicit WatcherInfoArg(LibN::NVal jsVal) : nRef(jsVal) {}
+    ~WatcherInfoArg() = default;
 };
 
 struct WatcherEntity {
-    WatcherInfoArg data_;
+    std::unique_ptr<WatcherInfoArg> data_;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO namespace OHOS
 #endif

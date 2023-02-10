@@ -49,21 +49,11 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     }
 
     int fd = -1;
-    shared_ptr<FileWatcher> watcherPtr = make_shared<FileWatcher>();
+    unique_ptr<FileWatcher> watcherPtr = make_unique<FileWatcher>();
     if (!watcherPtr->InitNotify(fd)) {
         NError(errno).ThrowErr(env);
         return nullptr;
-    }  
-
-    WatcherInfoArg data;
-    data.events = events;
-    data.env = env;
-    data.filename = string(filename.get());
-    data.fd = fd;
-
-    NVal val = NVal(env, funcArg[NARG_POS::THIRD]);
-    napi_create_reference(val.env_, val.val_, 1, &(data.ref));
-
+    }
 
     napi_value objWatcher = NClass::InstantiateClass(env, WatcherNExporter::className_, {});
     if (!objWatcher) {
@@ -76,7 +66,12 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env, "watcherEntity get failed");
         return nullptr;
     }
-    watcherEntity->data_ = data;
+
+    watcherEntity->data_ = std::make_unique<WatcherInfoArg>(NVal(env, funcArg[NARG_POS::THIRD]));
+    watcherEntity->data_->events = events;
+    watcherEntity->data_->env = env;
+    watcherEntity->data_->filename = string(filename.get());
+    watcherEntity->data_->fd = fd;
 
     return objWatcher;
 }
