@@ -35,9 +35,9 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
+napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info cbInfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
@@ -68,18 +68,18 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
     }
 
     size_t actLen = fread(buf, 1, len, filp);
-    if (actLen != static_cast<size_t>(len) && ferror(filp)) {
+    if ((actLen != static_cast<size_t>(len) && !feof(filp)) || ferror(filp)) {
         HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
-        NError(errno).ThrowErr(env);
+        NError(EIO).ThrowErr(env);
         return nullptr;
     }
 
     return NVal::CreateInt64(env, actLen).val_;
 }
 
-napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info info)
+napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info cbInfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
@@ -98,9 +98,9 @@ napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info info)
     return NVal::CreateUndefined(env).val_;
 }
 
-napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info info)
+napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
@@ -130,9 +130,9 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info info)
     }
 
     size_t writeLen = fwrite(buf, 1, len, filp);
-    if (writeLen != len && ferror(filp)) {
+    if (writeLen != static_cast<size_t>(len) && ferror(filp)) {
         HILOGE("Failed to fwrite with len, writeLen: %{public}zu, len: %{public}" PRId64, writeLen, len);
-        NError(errno).ThrowErr(env);
+        NError(EIO).ThrowErr(env);
         return nullptr;
     }
 
@@ -148,9 +148,9 @@ static bool HasOption(napi_env env, napi_value optionFromJsArg)
     return false;
 }
 
-napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
+napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
@@ -189,7 +189,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
         arg->actLen = fwrite(buf, 1, len, filp);
         if ((arg->actLen != static_cast<size_t>(len)) && ferror(filp)) {
             HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", arg->actLen);
-            return NError(errno);
+            return NError(EIO);
         }
         return NError(ERRNO_NOERR);
     };
@@ -215,9 +215,9 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
+napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
@@ -254,9 +254,9 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
             return NError(errno);
         }
         size_t actLen = fread(buf, 1, len, filp);
-        if (actLen != static_cast<size_t>(len) && ferror(filp)) {
+        if ((actLen != static_cast<size_t>(len) && !feof(filp)) || ferror(filp)) {
             HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
-            return NError(errno);
+            return NError(EIO);
         } else {
             arg->lenRead = actLen;
             return NError(ERRNO_NOERR);
@@ -284,9 +284,9 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value StreamNExporter::Close(napi_env env, napi_callback_info info)
+napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ZERO, NARG_CNT::ONE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
@@ -328,9 +328,9 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info info)
     }
 }
 
-napi_value StreamNExporter::Constructor(napi_env env, napi_callback_info info)
+napi_value StreamNExporter::Constructor(napi_env env, napi_callback_info cbInfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);

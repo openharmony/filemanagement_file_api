@@ -17,34 +17,14 @@
 #include <memory>
 #include <tuple>
 
-#include "../common_func.h"
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
-
-static NVal InstantiateStat(napi_env env, struct stat &buf)
-{
-    napi_value objStat = NClass::InstantiateClass(env, StatNExporter::className_, {});
-    if (!objStat) {
-        HILOGE("Failed to instantiate stat class");
-        NError(EIO).ThrowErr(env);
-        return NVal();
-    }
-
-    auto statEntity = NClass::GetEntityOf<StatEntity>(env, objStat);
-    if (!statEntity) {
-        HILOGE("Failed to get stat entity");
-        NError(EIO).ThrowErr(env);
-        return NVal();
-    }
-
-    statEntity->stat_ = buf;
-    return { env, objStat };
-}
 
 static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJsArg)
 {
@@ -94,7 +74,7 @@ napi_value Stat::Sync(napi_env env, napi_callback_info info)
         }
     }
 
-    auto stat = InstantiateStat(env, buf).val_;
+    auto stat = CommonFunc::InstantiateStat(env, buf).val_;
     return stat;
 }
 
@@ -134,7 +114,7 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        auto stat = InstantiateStat(env, arg->stat_);
+        auto stat = CommonFunc::InstantiateStat(env, arg->stat_);
         return stat;
     };
     NVal thisVar(env, funcArg.GetThisVar());

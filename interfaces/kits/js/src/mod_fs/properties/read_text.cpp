@@ -59,7 +59,7 @@ static tuple<bool, ssize_t, bool, ssize_t, unique_ptr<char[]>, bool> GetReadText
     }
 
     if (op.HasProp("encoding")) {
-        auto [succ, encoding, unuse] = op.GetProp("encoding").ToUTF8String();
+        tie(succ, encoding, ignore) = op.GetProp("encoding").ToUTF8String();
         if (!succ) {
             HILOGE("Illegal option.encoding parameter");
             return { false, offset, hasLen, len, nullptr, hasOp };
@@ -74,7 +74,7 @@ static tuple<bool, ssize_t, bool, ssize_t, unique_ptr<char[]>, bool> GetReadText
     return { true, offset, hasLen, len, move(encoding), hasOp };
 }
 
-static NError ReadTextAsync(const std::string path, std::shared_ptr<AsyncReadTextArg> arg, ssize_t offset,
+static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTextArg> arg, ssize_t offset,
                             bool hasLen, ssize_t len)
 {
     OHOS::DistributedFS::FDGuard sfd;
@@ -86,7 +86,7 @@ static NError ReadTextAsync(const std::string path, std::shared_ptr<AsyncReadTex
         return NError(ERRNO_NOERR);
     }
     int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), O_RDONLY,
-                         S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
+                         S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
         HILOGE("Failed to open file, ret: %{public}d", ret);
         return NError(errno);
@@ -156,7 +156,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     int ret = uv_fs_open(nullptr, open_req.get(), path.get(), O_RDONLY,
-                         S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH, nullptr);
+                         S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
         HILOGE("Failed to open file by ret: %{public}d", ret);
         NError(errno).ThrowErr(env);

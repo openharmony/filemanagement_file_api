@@ -103,7 +103,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
     }
 
     auto result = make_shared<AsyncAccessArg>();
-    if (result == nullptr) {
+    if (!result) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -348,9 +348,9 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
     return NVal::CreateInt64(env, actLen).val_;
 }
 
-static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, void *buf, size_t len, int fd, size_t offset)
+static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, int fd, size_t offset)
 {
-    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
+    uv_buf_t buffer = uv_buf_init(buf, len);
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
@@ -402,8 +402,9 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, buf = buf, len = len, fd = fd, offset = offset]() -> NError {
-        return ReadExec(arg, buf, len, fd, offset);
+
+    auto cbExec = [arg, buf, len, fd, offset]() -> NError {
+        return ReadExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
 
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
@@ -430,9 +431,9 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     }
 }
 
-NError PropNExporter::WriteExec(shared_ptr<AsyncIOWrtieArg> arg, void *buf, size_t len, int fd, size_t offset)
+static NError WriteExec(shared_ptr<AsyncIOWrtieArg> arg, char *buf, size_t len, int fd, size_t offset)
 {
-    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
+    uv_buf_t buffer = uv_buf_init(buf, len);
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> write_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!write_req) {
@@ -485,8 +486,9 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, buf = buf, len = len, fd = fd, offset = offset]() -> NError {
-        return WriteExec(arg, buf, len, fd, offset);
+
+    auto cbExec = [arg, buf, len, fd, offset]() -> NError {
+        return WriteExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
 
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
