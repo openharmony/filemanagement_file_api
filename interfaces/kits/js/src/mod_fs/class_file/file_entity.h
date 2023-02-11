@@ -35,6 +35,9 @@ struct FileEntity {
 
     virtual ~FileEntity()
     {
+        if (!fd_.get()) {
+            return;
+        }
         int32_t fd = fd_.get()->GetFD();
         int ret = flock(fd, LOCK_UN);
         if (ret == 0) {
