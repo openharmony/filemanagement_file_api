@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,13 +104,13 @@ static sptr<BundleMgrProxy> GetBundleMgrProxy()
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
-        HILOGE("fail to get system ability mgr.");
+        HILOGE("Failed to get system ability mgr.");
         return nullptr;
     }
 
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (!remoteObject) {
-        HILOGE("fail to get bundle manager proxy.");
+        HILOGE("Failed to get bundle manager proxy.");
         return nullptr;
     }
     return iface_cast<BundleMgrProxy>(remoteObject);
@@ -123,12 +123,12 @@ static string GetBundleNameSelf()
     
     sptr<BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
     if (!bundleMgrProxy) {
-        HILOGE("bundle mgr proxy is nullptr.");
+        HILOGE("Bundle mgr proxy is null ptr.");
         return nullptr;
     }
     string bundleName;
     if (!bundleMgrProxy->GetBundleNameForUid(uid, bundleName)) {
-        HILOGE("GetBundleNameSelf: bundleName get fail. uid is %{public}d", uid);
+        HILOGE("Failed to get bundleNameSelf. uid is %{public}d", uid);
         return nullptr;
     }
     return bundleName;
@@ -136,14 +136,11 @@ static string GetBundleNameSelf()
 
 static string GetPathFromFileUri(string path, string bundleName, int mode)
 {
-    string pathShare = "/data/storage/el2/share";
-    string modeRW = "/rw/";
-    string modeR = "/r/";
     if (bundleName != GetBundleNameSelf()) {
         if ((mode & O_WRONLY) == O_WRONLY || (mode & O_RDWR) == O_RDWR) {
-            path = pathShare + modeRW + bundleName + path;
+            path = PATH_SHARE + MODE_RW + bundleName + path;
         } else {
-            path = pathShare + modeR + bundleName + path;
+            path = PATH_SHARE + MODE_R + bundleName + path;
         }
     }
     return path;
@@ -168,7 +165,6 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         HILOGE("Invalid mode");
         return nullptr;
     }
-    string bundleName, uriPath;
     string pathStr = string(path.get());
     if (RemoteUri::IsMediaUri(pathStr)) {
         auto fd = OpenFileByDatashare(env, funcArg[NARG_POS::FIRST], pathStr, mode);
@@ -179,8 +175,9 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         HILOGE("Failed to open file by Datashare");
         NError(-1).ThrowErr(env);
         return nullptr;
-    } else if (RemoteUri::IsFileUri(pathStr, bundleName, uriPath)) {
-        pathStr = GetPathFromFileUri(uriPath, bundleName, mode);
+    } else if (RemoteUri::IsFileUri(pathStr)) {
+        RemoteUri remoteUri = RemoteUri(pathStr);
+        pathStr = GetPathFromFileUri(remoteUri.GetPath(), remoteUri.GetAuthority(), mode);
     }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -228,10 +225,9 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     auto arg = make_shared<AsyncOpenFileArg>();
     auto argv = funcArg[NARG_POS::FIRST];
     auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
-        string bundleName, uriPath;
         string pathStr = path;
         if (RemoteUri::IsMediaUri(path)) {
-            auto fd = OpenFileByDatashare(env, argv, pathStr, mode);
+            auto fd = OpenFileByDatashare(env, argv, path, mode);
             if (fd >= 0) {
                 arg->fd = fd;
                 arg->path = "";
@@ -240,8 +236,9 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             }
             HILOGE("Failed to open file by Datashare");
             return NError(-1);
-        } else if (RemoteUri::IsFileUri(path, bundleName, uriPath)) {
-            pathStr = GetPathFromFileUri(uriPath, bundleName, mode);
+        } else if (RemoteUri::IsFileUri(path)) {
+            RemoteUri remoteUri = RemoteUri(path);
+            pathStr = GetPathFromFileUri(remoteUri.GetPath(), remoteUri.GetAuthority(), mode);
         }
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
