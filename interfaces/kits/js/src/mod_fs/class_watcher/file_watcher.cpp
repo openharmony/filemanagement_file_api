@@ -14,13 +14,13 @@
  */
 #include "file_watcher.h"
 
+#include <cerrno>
 #include <unistd.h>
-#include <errno.h>
 
 #include "filemgmt_libhilog.h"
 #include "uv.h"
 namespace OHOS::FileManagement::ModuleFileIO {
-using namespace OHOS::FileManagement::LibN; 
+using namespace OHOS::FileManagement::LibN;
 FileWatcher::FileWatcher() {}
 
 FileWatcher::~FileWatcher() {}
@@ -38,7 +38,7 @@ bool FileWatcher::InitNotify(int &fd)
 bool FileWatcher::StartNotify(WatcherInfoArg &arg)
 {
     int wd = inotify_add_watch(arg.fd, arg.filename.c_str(), arg.events);
-    if(wd == -1) {
+    if (wd == -1) {
         HILOGE("FileWatcher StartNotify fail errCode:%{public}d", errno);
         return false;
     }
@@ -78,9 +78,9 @@ void FileWatcher::GetNotifyEvent(WatcherInfoArg &arg, WatcherCallback callback)
         fd_set fds;
         FD_ZERO(&fds);
         FD_SET(fd, &fds);
-        if (select(fd + 1, &fds, NULL, NULL, NULL) > 0) {
+        if (select(fd + 1, &fds, nullptr, nullptr, nullptr) > 0) {
             int len, index = 0;
-            while (((len = read(fd, &buf, sizeof(buf))) < 0) && (errno == EINTR));
+            while (((len = read(fd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
             while (index < len) {
                 event = (struct inotify_event *)(buf + index);
                 HandleEvent(arg, event, callback);

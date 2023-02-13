@@ -23,11 +23,7 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using WatcherCallback = void (*)(napi_env env, LibN::NRef &callback,
     const std::string &filename, const uint32_t &event);
-struct ErrorInfo {
-    int errCode;
-    std::string errMsg;
-};
-
+constexpr int BUF_SIZE = 1024;
 class FileWatcher {
 public:
     FileWatcher();
@@ -40,7 +36,6 @@ public:
 private:
     void HandleEvent(WatcherInfoArg &arg, const struct inotify_event *event,
                      WatcherCallback callback);
-    static constexpr int BUF_SIZE = 1024;
     bool run_ = false;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO

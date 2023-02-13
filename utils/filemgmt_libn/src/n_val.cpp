@@ -162,21 +162,6 @@ tuple<bool, vector<string>, uint32_t> NVal::ToStringArray()
     return make_tuple(status == napi_ok, stringArray, size);
 }
 
-tuple<bool, vector<uint32_t>, uint32_t> NVal::ToUint32Array()
-{
-    napi_status status;
-    uint32_t size;
-    status = napi_get_array_length(env_, val_, &size);
-    vector<uint32_t> uint32Array;
-    napi_value result;
-    for (uint32_t i = 0; i < size; i++) {
-        status = napi_get_element(env_, val_, i, &result);
-        auto [succ, uint32] = NVal(env_, result).ToUint32();
-        uint32Array.push_back(uint32);
-    }
-    return make_tuple(status == napi_ok, uint32Array, size);
-}
-
 tuple<bool, void *, size_t> NVal::ToArraybuffer() const
 {
     void *buf = nullptr;

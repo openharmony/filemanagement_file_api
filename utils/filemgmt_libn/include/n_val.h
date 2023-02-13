@@ -52,7 +52,6 @@ public:
     std::tuple<bool, void *, size_t> ToArraybuffer() const;
     std::tuple<bool, void *, size_t> ToTypedArray() const;
     std::tuple<bool, std::vector<std::string>, uint32_t> ToStringArray();
-    std::tuple<bool, std::vector<uint32_t>, uint32_t> ToUint32Array();
     std::tuple<bool, uint64_t, bool> ToUint64() const;
     std::tuple<bool, uint32_t> ToUint32() const;
     std::tuple<bool, double> ToDouble() const;
