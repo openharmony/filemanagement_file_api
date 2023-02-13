@@ -15,12 +15,10 @@
 
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_N_EXPORTER_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_N_EXPORTER_H
-#include <sys/inotify.h>
 #include <memory>
 
-#include "watcher_entity.h"
-#include "file_watcher.h"
 #include "filemgmt_libn.h"
+#include "watcher_entity.h"
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace OHOS::FileManagement::LibN;
 class WatcherNExporter final : public NExporter {
@@ -51,7 +49,6 @@ public:
     ~WatcherNExporter() override;
 
 private:
-    static std::unique_ptr<FileWatcher> watcherPtr_;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif

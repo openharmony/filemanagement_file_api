@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "file_watcher.h"
+#include "watcher_entity.h"
 
 #include <cerrno>
 #include <unistd.h>

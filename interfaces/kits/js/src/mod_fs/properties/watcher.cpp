@@ -22,7 +22,6 @@
 #include <unistd.h>
 
 #include "filemgmt_libhilog.h"
-#include "../class_watcher/file_watcher.h"
 #include "../class_watcher/watcher_entity.h"
 #include "../class_watcher/watcher_n_exporter.h"
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -73,6 +72,8 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     watcherEntity->data_->filename = string(filename.get());
     watcherEntity->data_->fd = fd;
 
+    watcherEntity->watcherPtr_ = std::move(watcherPtr);
+   
     return objWatcher;
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

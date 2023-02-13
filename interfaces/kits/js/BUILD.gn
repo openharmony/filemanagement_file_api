@@ -119,7 +119,7 @@ ohos_shared_library("fs") {
     "src/mod_fs/class_stat/stat_n_exporter.cpp",
     "src/mod_fs/class_stream/flush.cpp",
     "src/mod_fs/class_stream/stream_n_exporter.cpp",
-    "src/mod_fs/class_watcher/file_watcher.cpp",
+    "src/mod_fs/class_watcher/watcher_entity.cpp",
     "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
     "src/mod_fs/common_func.cpp",
     "src/mod_fs/module.cpp",

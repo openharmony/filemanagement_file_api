@@ -20,16 +20,15 @@
 #include <cstring>
 #include <memory>
 
+#include "../common_func.h"
 #include "filemgmt_libn.h"
 #include "filemgmt_libhilog.h"
-#include "../common_func.h"
 #include "securec.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-std::unique_ptr<FileWatcher> WatcherNExporter::watcherPtr_ = nullptr;
 napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -43,8 +42,6 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
         NError(EIO).ThrowErr(env, "INNER BUG. Failed to wrap entity for obj stat");
         return nullptr;
     }
-
-    watcherPtr_ = make_unique<FileWatcher>();
     return funcArg.GetThisVar();
 }
 
@@ -61,7 +58,7 @@ napi_value WatcherNExporter::Stop(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env, "get watcherEntity fail");
         return nullptr;
     }
-    if (!watcherPtr_->StopNotify(*(watchEntity->data_))) {
+    if (!watchEntity->watcherPtr_->StopNotify(*(watchEntity->data_))) {
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -83,13 +80,13 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    if (!watcherPtr_->StartNotify(*(watchEntity->data_))) {
-        NError(errno).ThrowErr(env);
-        return nullptr;
+    if (!watchEntity->watcherPtr_->StartNotify(*(watchEntity->data_))) {
+         NError(errno).ThrowErr(env);
+         return nullptr;
     }
 
     auto cbExec = [watchEntity]() -> NError {
-        watcherPtr_->GetNotifyEvent(*(watchEntity->data_), WatcherCallback);
+        watchEntity->watcherPtr_->GetNotifyEvent(*(watchEntity->data_), WatcherCallback);
         return NError(ERRNO_NOERR);
     };
 
