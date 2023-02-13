@@ -17,6 +17,7 @@
 
 #include <fnmatch.h>
 #include <memory>
+#include <securec.h>
 #include <string>
 #include <string_view>
 #include <sys/stat.h>
@@ -261,7 +262,10 @@ static void RecursiveFunc(string path, vector<struct dirent> &dirents)
     int num = scandir(path.c_str(), &(namelist), FilterFunc, alphasort);
     for (int i = 0; i < num; i++) {
         if ((*namelist[i]).d_type == DT_REG) {
-            dirents.emplace_back(*namelist[i]);
+            struct dirent tmpDirent;
+            if (EOK == memcpy_s(&tmpDirent, sizeof(dirent), namelist[i], namelist[i]->d_reclen)) {
+                dirents.emplace_back(tmpDirent);
+            } 
         } else if ((*(namelist)[i]).d_type == DT_DIR) {
             g_optionArgs.path += '/' + string((*namelist[i]).d_name);
             RecursiveFunc(g_optionArgs.path, dirents);
