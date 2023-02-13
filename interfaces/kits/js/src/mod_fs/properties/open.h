@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,10 @@ public:
 
 const std::string PROCEDURE_OPEN_NAME = "FileIOOpen";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
+const std::string FILE_DATA_URI = "file://";
+const std::string PATH_SHARE = "/data/storage/el2/share";
+const std::string MODE_RW = "/rw/";
+const std::string MODE_R = "/r/";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

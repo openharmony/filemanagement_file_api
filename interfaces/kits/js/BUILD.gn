@@ -149,10 +149,12 @@ ohos_shared_library("fs") {
   external_deps = [
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
 }
 
