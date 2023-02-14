@@ -249,7 +249,10 @@ static vector<struct dirent> FileterFileRes(string path)
     int num = scandir(path.c_str(), &(namelist), FilterFunc, alphasort);
     vector<struct dirent> dirents;
     for (int i = 0; i < num; i++) {
-        dirents.emplace_back(*namelist[i]);
+        struct dirent tmpDirent;
+        if (EOK == memcpy_s(&tmpDirent, sizeof(dirent), namelist[i], namelist[i]->d_reclen)) {
+            dirents.emplace_back(tmpDirent);
+        }
         free(namelist[i]);
     }
     free(namelist);
