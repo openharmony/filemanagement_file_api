@@ -81,8 +81,8 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
     }
 
     if (!watchEntity->watcherPtr_->StartNotify(*(watchEntity->data_))) {
-         NError(errno).ThrowErr(env);
-         return nullptr;
+        NError(errno).ThrowErr(env);
+        return nullptr;
     }
 
     auto cbExec = [watchEntity]() -> NError {
@@ -168,7 +168,6 @@ void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::
 
     int ret = uv_queue_work(
         loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(WatcherCallbackComplete));
-
     if (ret != 0) {
         HILOGE("Failed to execute libuv work queue, ret: %{public}d", ret);
         delete callbackContext;

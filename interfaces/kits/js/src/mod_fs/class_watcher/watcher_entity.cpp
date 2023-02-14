@@ -82,7 +82,7 @@ void FileWatcher::GetNotifyEvent(WatcherInfoArg &arg, WatcherCallback callback)
             int len, index = 0;
             while (((len = read(fd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
             while (index < len) {
-                event = (struct inotify_event *)(buf + index);
+                event = reinterpret_cast<inotify_event*>(buf + index);
                 HandleEvent(arg, event, callback);
                 index += sizeof(struct inotify_event) + event->len;
             }
