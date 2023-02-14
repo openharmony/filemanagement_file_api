@@ -54,6 +54,15 @@
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/native/remote_uri"
             }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/utils/filemgmt_libn:filemgmt_libn",
+            "header": {
+              "header_files": [
+                "filemgmt_libn.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/utils/filemgmt_libn/include"
+            }
           }
         ],
         "test": [
