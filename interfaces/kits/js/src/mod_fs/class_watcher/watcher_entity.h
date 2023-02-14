@@ -14,10 +14,10 @@
  */
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_ENTITY_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_ENTITY_H
-#include <vector>
+#include <memory>
 #include <string>
 #include <sys/inotify.h>
-#include <memory>
+#include <vector>
 
 #include "filemgmt_libn.h"
 namespace OHOS::FileManagement::ModuleFileIO {
