@@ -31,19 +31,19 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::THREE)) {
-        NError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto [succGetPath, filename, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succGetPath) {
-        NError(EINVAL).ThrowErr(env, "Invalid filename");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto [succGetEvent, events] = NVal(env, funcArg[NARG_POS::SECOND]).ToUint32();
     if (!succGetEvent) {
-        NError(EINVAL).ThrowErr(env, "Invalid event");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -56,13 +56,13 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
 
     napi_value objWatcher = NClass::InstantiateClass(env, WatcherNExporter::className_, {});
     if (!objWatcher) {
-        NError(EINVAL).ThrowErr(env, "objWatcher create failed");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto watcherEntity = NClass::GetEntityOf<WatcherEntity>(env, objWatcher);
     if (!watcherEntity) {
-        NError(EINVAL).ThrowErr(env, "watcherEntity get failed");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
