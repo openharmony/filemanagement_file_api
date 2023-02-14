@@ -15,7 +15,13 @@
 
 #include "move.h"
 
+#ifdef __MUSL__
 #include <filesystem>
+#else
+#include <securec.h>
+#include <sys/stat.h>
+#endif
+
 #include <tuple>
 #include <unistd.h>
 #include "uv.h"
@@ -28,6 +34,8 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+
+#ifdef __MUSL__
 static bool CheckDir(const string &path)
 {
     if (!filesystem::is_directory(filesystem::status(path))) {
@@ -35,6 +43,18 @@ static bool CheckDir(const string &path)
     }
     return true;
 }
+#else
+static bool CheckDir(const string &path)
+{
+    struct stat fileInformation;
+    if (EOK == stat(path.c_str(), fileInfomation)) {
+        if (fileInformation.st_mode & S_IFDIR) {
+            return true;
+        }
+    }
+    return false;
+}
+#endif
 
 static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(napi_env env, const NFuncArg& funcArg)
 {
