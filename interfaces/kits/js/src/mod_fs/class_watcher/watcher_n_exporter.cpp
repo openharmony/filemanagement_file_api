@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,10 +122,6 @@ static void WatcherCallbackComplete(uv_work_t *work, int stat)
         }
         napi_env env = callbackContext->env_;
         napi_value jsCallback = callbackContext->ref_.Deref(env).val_;
-
-        napi_valuetype valueType;
-        napi_typeof(env, jsCallback, &valueType);
-
         NVal objn = NVal::CreateObject(env);
         objn.AddProp("fileName", NVal::CreateUTF8String(env, callbackContext->fileName_).val_);
         objn.AddProp("event", NVal::CreateUint32(env, callbackContext->event_).val_);
