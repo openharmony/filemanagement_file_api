@@ -33,13 +33,13 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        NError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     unique_ptr<WatcherEntity> watcherEntity = make_unique<WatcherEntity>();
     if (!NClass::SetEntityFor<WatcherEntity>(env, funcArg.GetThisVar(), move(watcherEntity))) {
-        NError(EIO).ThrowErr(env, "INNER BUG. Failed to wrap entity for obj stat");
+        NError(EIO).ThrowErr(env);
         return nullptr;
     }
     return funcArg.GetThisVar();
@@ -49,13 +49,13 @@ napi_value WatcherNExporter::Stop(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        NError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto watchEntity = NClass::GetEntityOf<WatcherEntity>(env, funcArg.GetThisVar());
     if (!watchEntity) {
-        NError(EINVAL).ThrowErr(env, "get watcherEntity fail");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     if (!watchEntity->watcherPtr_->StopNotify(*(watchEntity->data_))) {
@@ -70,13 +70,13 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        NError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto watchEntity = NClass::GetEntityOf<WatcherEntity>(env, funcArg.GetThisVar());
     if (!watchEntity) {
-        NError(EINVAL).ThrowErr(env, "get watcherEntity fail");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -186,13 +186,13 @@ bool WatcherNExporter::Export()
     auto [resDefineClass, classValue] =
         NClass::DefineClass(exports_.env_, className, WatcherNExporter::Constructor, std::move(props));
     if (!resDefineClass) {
-        NError(EIO).ThrowErr(exports_.env_, "INNER BUG. Failed to define class");
+        NError(EIO).ThrowErr(exports_.env_);
         return false;
     }
 
     bool succ = NClass::SaveClass(exports_.env_, className, classValue);
     if (!succ) {
-        NError(EIO).ThrowErr(exports_.env_, "INNER BUG. Failed to save class");
+        NError(EIO).ThrowErr(exports_.env_);
         return false;
     }
 
