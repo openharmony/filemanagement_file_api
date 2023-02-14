@@ -34,8 +34,10 @@
 #include "fsync.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "listfile.h"
 #include "lstat.h"
 #include "mkdtemp.h"
+#include "move.h"
 #include "open.h"
 #include "read_text.h"
 #include "rename.h"
@@ -583,12 +585,16 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
         NVal::DeclareNapiFunction("fsync", Fsync::Async),
         NVal::DeclareNapiFunction("fsyncSync", Fsync::Sync),
+        NVal::DeclareNapiFunction("listFile", ListFile::Async),
+        NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
         NVal::DeclareNapiFunction("lstat", Lstat::Async),
         NVal::DeclareNapiFunction("lstatSync", Lstat::Sync),
         NVal::DeclareNapiFunction("mkdir", Mkdir),
         NVal::DeclareNapiFunction("mkdirSync", MkdirSync),
         NVal::DeclareNapiFunction("mkdtemp", Mkdtemp::Async),
         NVal::DeclareNapiFunction("mkdtempSync", Mkdtemp::Sync),
+        NVal::DeclareNapiFunction("moveFile", Move::Async),
+        NVal::DeclareNapiFunction("moveFileSync", Move::Sync),
         NVal::DeclareNapiFunction("open", Open::Async),
         NVal::DeclareNapiFunction("openSync", Open::Sync),
         NVal::DeclareNapiFunction("read", Read),
