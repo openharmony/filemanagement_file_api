@@ -39,7 +39,6 @@ using namespace OHOS::FileManagement::LibN;
 static bool CheckDir(const string &path)
 {
     if (!filesystem::is_directory(filesystem::status(path))) {
-        HILOGE("Path is not a directory");
         return false;
     }
     return true;
