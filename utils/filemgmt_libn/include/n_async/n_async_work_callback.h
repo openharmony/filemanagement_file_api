@@ -24,8 +24,10 @@ namespace LibN {
 class NAsyncWorkCallback : public NAsyncWork {
 public:
     NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb);
-    ~NAsyncWorkCallback() = default;
+    ~NAsyncWorkCallback();
     NVal Schedule(std::string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete) final;
+    void ThreadSafeSchedule(NContextCBComplete cbComplete);
+    explicit operator bool() const;
 
 private:
     NAsyncContextCallback *ctx_ = nullptr;
