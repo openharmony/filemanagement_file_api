@@ -51,8 +51,9 @@ static bool CheckDir(const string &path)
         if (fileInformation.st_mode & S_IFDIR) {
             return true;
         }
+    } else {
+        HILOGE("Failed to stat file");
     }
-    HILOGE("Path is not a directory");
     return false;
 }
 #endif
