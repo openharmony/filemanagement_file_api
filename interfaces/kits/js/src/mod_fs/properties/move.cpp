@@ -47,7 +47,7 @@ static bool CheckDir(const string &path)
 static bool CheckDir(const string &path)
 {
     struct stat fileInformation;
-    if (EOK == stat(path.c_str(), fileInformation)) {
+    if (EOK == stat(path.c_str(), &fileInformation)) {
         if (fileInformation.st_mode & S_IFDIR) {
             return true;
         }
