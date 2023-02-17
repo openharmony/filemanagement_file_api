@@ -32,7 +32,7 @@ using namespace OHOS::FileManagement::LibN;
 
 thread_local OptionArgs g_optionArgs;
 
-static bool CheckSuffix(vector<string> &suffixs)
+static bool CheckSuffix(const vector<string> &suffixs)
 {
     for (string suffix : suffixs) {
         if (suffix.length() <= 1 || suffix.length() > MAX_SUFFIX_LENGTH) {
@@ -243,7 +243,7 @@ static int32_t FilterFunc(const struct dirent *filename)
     return FILTER_DISMATCH;
 }
 
-static vector<struct dirent> FileterFileRes(string path)
+static vector<struct dirent> FileterFileRes(const string &path)
 {
     struct dirent** namelist;
     int num = scandir(path.c_str(), &(namelist), FilterFunc, alphasort);
@@ -259,7 +259,7 @@ static vector<struct dirent> FileterFileRes(string path)
     return dirents;
 }
 
-static void RecursiveFunc(string path, vector<struct dirent> &dirents)
+static void RecursiveFunc(const string &path, vector<struct dirent> &dirents)
 {
     struct dirent** namelist;
     int num = scandir(path.c_str(), &(namelist), FilterFunc, alphasort);
