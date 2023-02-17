@@ -71,8 +71,8 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
         return { false, nullptr, nullptr, 0 };
     }
     int mode = 0;
-    bool resGetThirdArg = false;
     if (funcArg.GetArgc() >= NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number)) {
+        bool resGetThirdArg = false;
         tie(resGetThirdArg, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
         if (!resGetThirdArg || (mode != MODE_FORCE_MOVE && mode != MODE_THROW_ERR)) {
             HILOGE("Invalid mode");
@@ -124,10 +124,9 @@ static int RenameFile(const string &src, const string &dest)
 
 static int MoveFile(const string &src, const string &dest, int mode)
 {
-    int ret = 0;
     if (mode == MODE_THROW_ERR) {
         uv_fs_t access_req;
-        ret = uv_fs_access(nullptr, &access_req, dest.c_str(), 0, nullptr);
+        int ret = uv_fs_access(nullptr, &access_req, dest.c_str(), 0, nullptr);
         uv_fs_req_cleanup(&access_req);
         if (ret == 0) {
             HILOGE("Failed to move file due to existing destPath with MODE_THROW_ERR.");
