@@ -138,7 +138,6 @@ tuple<bool, uint32_t> NVal::ToUint32() const
     return make_tuple(status == napi_ok, res);
 }
 
-
 tuple<bool, uint64_t, bool> NVal::ToUint64() const
 {
     uint64_t res = 0;
