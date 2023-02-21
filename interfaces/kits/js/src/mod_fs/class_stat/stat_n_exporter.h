@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,24 +29,24 @@ public:
     bool Export() override;
     std::string GetClassName() override;
 
-    static napi_value Constructor(napi_env env, napi_callback_info cbinfo);
+    static napi_value Constructor(napi_env env, napi_callback_info info);
 
-    static napi_value IsBlockDevice(napi_env env, napi_callback_info cbinfo);
-    static napi_value IsCharacterDevice(napi_env env, napi_callback_info cbinfo);
-    static napi_value IsDirectory(napi_env env, napi_callback_info cbinfo);
-    static napi_value IsFIFO(napi_env env, napi_callback_info cbinfo);
-    static napi_value IsFile(napi_env env, napi_callback_info cbinfo);
-    static napi_value IsSocket(napi_env env, napi_callback_info cbinfo);
-    static napi_value IsSymbolicLink(napi_env env, napi_callback_info cbinfo);
+    static napi_value IsBlockDevice(napi_env env, napi_callback_info info);
+    static napi_value IsCharacterDevice(napi_env env, napi_callback_info info);
+    static napi_value IsDirectory(napi_env env, napi_callback_info info);
+    static napi_value IsFIFO(napi_env env, napi_callback_info info);
+    static napi_value IsFile(napi_env env, napi_callback_info info);
+    static napi_value IsSocket(napi_env env, napi_callback_info info);
+    static napi_value IsSymbolicLink(napi_env env, napi_callback_info info);
 
-    static napi_value GetIno(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetMode(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetUid(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetGid(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetSize(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetAtime(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetMtime(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetCtime(napi_env env, napi_callback_info cbinfo);
+    static napi_value GetIno(napi_env env, napi_callback_info info);
+    static napi_value GetMode(napi_env env, napi_callback_info info);
+    static napi_value GetUid(napi_env env, napi_callback_info info);
+    static napi_value GetGid(napi_env env, napi_callback_info info);
+    static napi_value GetSize(napi_env env, napi_callback_info info);
+    static napi_value GetAtime(napi_env env, napi_callback_info info);
+    static napi_value GetMtime(napi_env env, napi_callback_info info);
+    static napi_value GetCtime(napi_env env, napi_callback_info info);
 
     StatNExporter(napi_env env, napi_value exports);
     ~StatNExporter() override;

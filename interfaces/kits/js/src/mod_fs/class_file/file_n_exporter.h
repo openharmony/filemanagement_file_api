@@ -29,11 +29,11 @@ public:
     bool Export() override;
     std::string GetClassName() override;
 
-    static napi_value Constructor(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetFD(napi_env env, napi_callback_info cbinfo);
-    static napi_value Lock(napi_env env, napi_callback_info cbinfo);
-    static napi_value TryLock(napi_env env, napi_callback_info cbinfo);
-    static napi_value UnLock(napi_env env, napi_callback_info cbinfo);
+    static napi_value Constructor(napi_env env, napi_callback_info info);
+    static napi_value GetFD(napi_env env, napi_callback_info info);
+    static napi_value Lock(napi_env env, napi_callback_info info);
+    static napi_value TryLock(napi_env env, napi_callback_info info);
+    static napi_value UnLock(napi_env env, napi_callback_info info);
     FileNExporter(napi_env env, napi_value exports);
     ~FileNExporter() override;
 };
