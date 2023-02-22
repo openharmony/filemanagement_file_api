@@ -107,24 +107,25 @@ static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
 static tuple<bool, int, bool> ParseJsModeAndProm(napi_env env, const NFuncArg& funcArg)
 {
     bool promise = false;
-    bool hasMode = false;
-    int mode = 0;
-    if (funcArg.GetArgc() == NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number)) {
-        promise = true;
-        hasMode = true;
-    } else if (funcArg.GetArgc() == NARG_CNT::FOUR) {
-        hasMode = true;
-    }
-
     bool succ = false;
-    if (hasMode) {
+    int mode = 0;
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
+        return { true, mode, true };
+    }
+    if (NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number)) {
+        if (funcArg.GetArgc() == NARG_CNT::THREE) {
+            promise = true;
+        }
         tie(succ, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
-        if (!succ) {
-            return { false, mode, promise };
+        if (succ && !mode) {
+            return { true, mode, promise };
         }
     }
+    if (NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function)) {
+        return { true, mode, promise };
+    }
 
-    return { true, mode, promise };
+    return { false, mode, promise };
 }
 
 static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
