@@ -49,6 +49,7 @@ void Watcher::RunCommand(uv_fs_event_t *handle, const char *filename, int events
         napi_get_global(information->env, &global);
         napi_value tmp = nullptr;
         napi_call_function(information->env, global, callback, argv.size(), argv.data(), &tmp);
+        napi_close_handle_scope(information->env, scope);
     }
 }
 
