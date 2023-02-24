@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,13 +87,13 @@ static tuple<bool, void *, size_t, bool, size_t> GetRAFWriteArg(napi_env env,
     return { true, buf, len, hasPos, pos };
 }
 
-static size_t DoReadRAF(napi_env env, void* buf, size_t len, int fd, size_t pos)
+static int DoReadRAF(napi_env env, void* buf, size_t len, int fd, size_t pos)
 {
     uv_loop_s *loop = nullptr;
     uv_fs_t read_req;
     napi_get_uv_event_loop(env, &loop);
     uv_buf_t iov = uv_buf_init(static_cast<char *>(buf), len);
-    size_t ret = uv_fs_read(loop, &read_req, fd, &iov, 1, pos, NULL);
+    int ret = uv_fs_read(loop, &read_req, fd, &iov, 1, pos, NULL);
     uv_fs_req_cleanup(&read_req);
     return ret;
 }
@@ -174,7 +174,7 @@ napi_value RandomAccessFileNExporter::ReadSync(napi_env env, napi_callback_info 
         UniError(EINVAL).ThrowErr(env, "Invalid buffer/options");
         return nullptr;
     }
-    ssize_t actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
+    int actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
     if (actLen < 0) {
         UniError(errno).ThrowErr(env);
         return nullptr;
@@ -184,7 +184,7 @@ napi_value RandomAccessFileNExporter::ReadSync(napi_env env, napi_callback_info 
 }
 
 struct AsyncIOReadArg {
-    ssize_t lenRead { 0 };
+    size_t lenRead { 0 };
     int offset { 0 };
     NRef refReadBuf;
 
@@ -212,7 +212,7 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg)
 
     auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
     auto cbExec = [arg, buf, len, hasPos, pos, offset, rafEntity](napi_env env) -> UniError {
-        ssize_t actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
+        int actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
         if (actLen < 0) {
             return UniError(errno);
         }

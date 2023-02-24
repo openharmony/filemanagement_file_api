@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,26 +20,33 @@
 #include <memory>
 
 #include "ability.h"
+#include "bundle_mgr_proxy.h"
 #include "class_file/file_entity.h"
 #include "class_file/file_n_exporter.h"
 #include "common_func.h"
 #include "datashare_helper.h"
 #include "filemgmt_libhilog.h"
+#include "ipc_skeleton.h"
+#include "iservice_registry.h"
 #include "remote_uri.h"
+#include "status_receiver_host.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+using namespace OHOS::DistributedFS::ModuleRemoteUri;
+using namespace OHOS::AppExecFwk;
 
-static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
+static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
 {
-    int mode = O_RDONLY;
+    unsigned int mode = O_RDONLY;
     bool succ = false;
     if (funcArg.GetArgc() >= NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
         tie(succ, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-        int invalidMode = (O_WRONLY | O_RDWR);
+        unsigned int invalidMode = (O_WRONLY | O_RDWR);
         if (!succ || ((mode & invalidMode) == invalidMode)) {
             HILOGE("Invalid mode");
             NError(EINVAL).ThrowErr(env);
@@ -77,7 +84,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
     return { env, objFile };
 }
 
-static int OpenFileByDatashare(napi_env env, napi_value argv, string path, int flags)
+static int OpenFileByDatashare(napi_env env, napi_value argv, string path, unsigned int flags)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
     int fd = -1;
@@ -90,6 +97,53 @@ static int OpenFileByDatashare(napi_env env, napi_value argv, string path, int f
     Uri uri(path);
     fd = dataShareHelper->OpenFile(uri, CommonFunc::GetModeFromFlags(flags));
     return fd;
+}
+
+static sptr<BundleMgrProxy> GetBundleMgrProxy()
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        HILOGE("Failed to get system ability mgr.");
+        return nullptr;
+    }
+
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        HILOGE("Failed to get bundle manager proxy.");
+        return nullptr;
+    }
+    return iface_cast<BundleMgrProxy>(remoteObject);
+}
+
+static string GetBundleNameSelf()
+{
+    int uid = -1;
+    uid = IPCSkeleton::GetCallingUid();
+    
+    sptr<BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (!bundleMgrProxy) {
+        HILOGE("Bundle mgr proxy is null ptr.");
+        return nullptr;
+    }
+    string bundleName;
+    if (!bundleMgrProxy->GetBundleNameForUid(uid, bundleName)) {
+        HILOGE("Failed to get bundleNameSelf. uid is %{public}d", uid);
+        return nullptr;
+    }
+    return bundleName;
+}
+
+static string GetPathFromFileUri(string path, string bundleName, int mode)
+{
+    if (bundleName != GetBundleNameSelf()) {
+        if ((mode & O_WRONLY) == O_WRONLY || (mode & O_RDWR) == O_RDWR) {
+            path = PATH_SHARE + MODE_RW + bundleName + path;
+        } else {
+            path = PATH_SHARE + MODE_R + bundleName + path;
+        }
+    }
+    return path;
 }
 
 napi_value Open::Sync(napi_env env, napi_callback_info info)
@@ -111,15 +165,19 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         HILOGE("Invalid mode");
         return nullptr;
     }
-    if (DistributedFS::ModuleRemoteUri::RemoteUri::IsMediaUri(path.get())) {
-        auto fd = OpenFileByDatashare(env, funcArg[NARG_POS::FIRST], path.get(), mode);
+    string pathStr = string(path.get());
+    if (RemoteUri::IsMediaUri(pathStr)) {
+        auto fd = OpenFileByDatashare(env, funcArg[NARG_POS::FIRST], pathStr, mode);
         if (fd >= 0) {
-            auto file = InstantiateFile(env, fd, path.get(), true).val_;
+            auto file = InstantiateFile(env, fd, pathStr, true).val_;
             return file;
         }
         HILOGE("Failed to open file by Datashare");
         NError(-1).ThrowErr(env);
         return nullptr;
+    } else if (RemoteUri::IsFileUri(pathStr)) {
+        RemoteUri remoteUri = RemoteUri(pathStr);
+        pathStr = GetPathFromFileUri(remoteUri.GetPath(), remoteUri.GetAuthority(), mode);
     }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -128,14 +186,14 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    int ret = uv_fs_open(nullptr, open_req.get(), path.get(), mode, S_IRUSR |
+    int ret = uv_fs_open(nullptr, open_req.get(), pathStr.c_str(), mode, S_IRUSR |
         S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
         HILOGE("Failed to open file for libuv error %{public}d", ret);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-    auto file = InstantiateFile(env, ret, path.get(), false).val_;
+    auto file = InstantiateFile(env, ret, pathStr, false).val_;
     return file;
 }
 
@@ -167,7 +225,8 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     auto arg = make_shared<AsyncOpenFileArg>();
     auto argv = funcArg[NARG_POS::FIRST];
     auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
-        if (DistributedFS::ModuleRemoteUri::RemoteUri::IsMediaUri(path)) {
+        string pathStr = path;
+        if (RemoteUri::IsMediaUri(path)) {
             auto fd = OpenFileByDatashare(env, argv, path, mode);
             if (fd >= 0) {
                 arg->fd = fd;
@@ -177,6 +236,9 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             }
             HILOGE("Failed to open file by Datashare");
             return NError(-1);
+        } else if (RemoteUri::IsFileUri(path)) {
+            RemoteUri remoteUri = RemoteUri(path);
+            pathStr = GetPathFromFileUri(remoteUri.GetPath(), remoteUri.GetAuthority(), mode);
         }
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -184,14 +246,14 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             HILOGE("Failed to request heap memory.");
             return NError(ERRNO_NOERR);
         }
-        int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode, S_IRUSR |
+        int ret = uv_fs_open(nullptr, open_req.get(), pathStr.c_str(), mode, S_IRUSR |
             S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
         if (ret < 0) {
             HILOGE("Failed to open file for libuv error %{public}d", ret);
             return NError(errno);
         }
         arg->fd = ret;
-        arg->path = path;
+        arg->path = pathStr;
         arg->uri = "";
         return NError(ERRNO_NOERR);
     };

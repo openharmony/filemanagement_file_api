@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@ const string FD_TAG = "=";
 const string REMOTE_URI_TAG = "fdFromBinder";
 const string SCHEME_TAG = ":";
 const string SCHEME = "datashare";
+const string SCHEME_FILE = "file";
 const string ZERO_FD = "0";
 const string MEDIA = "/media/";
 const string PATH_SYMBOL = "/";
@@ -45,6 +46,7 @@ public:
     static int ConvertUri(const int &fd, string &remoteUri);
     static int OpenRemoteUri(const string &remoteUri);
     static bool IsMediaUri(const string &uriString);
+    static bool IsFileUri(const string &uriString);
     ~RemoteUri() {}
 };
 std::set<int>RemoteUri::fdFromBinder;
