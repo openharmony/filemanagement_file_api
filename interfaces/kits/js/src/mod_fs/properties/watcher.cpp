@@ -20,15 +20,32 @@
 #include <memory>
 #include <tuple>
 #include <unistd.h>
-
+#include "ipc_skeleton.h"
 #include "filemgmt_libhilog.h"
+#include "tokenid_kit.h"
 #include "../class_watcher/watcher_entity.h"
 #include "../class_watcher/watcher_n_exporter.h"
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+
+namespace {
+    const std::string STORAGE_DATA_PATH = "/data";
+    bool IsSystemApp()
+    {
+        uint64_t fullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
+        return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+    }
+}
+
+
 napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
 {
+    if (!IsSystemApp()) {
+        NError(E_PERMISSION_SYS).ThrowErr(env);
+        return nullptr;
+    }
+
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::THREE)) {
         NError(EINVAL).ThrowErr(env);
@@ -48,7 +65,7 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     }
 
     int fd = -1;
-    unique_ptr<FileWatcher> watcherPtr = make_unique<FileWatcher>();
+    shared_ptr<FileWatcher> watcherPtr = make_shared<FileWatcher>();
     if (!watcherPtr->InitNotify(fd)) {
         NError(errno).ThrowErr(env);
         return nullptr;
@@ -72,7 +89,7 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     watcherEntity->data_->filename = string(filename.get());
     watcherEntity->data_->fd = fd;
 
-    watcherEntity->watcherPtr_ = std::move(watcherPtr);
+    watcherEntity->watcherPtr_ = watcherPtr;
    
     return objWatcher;
 }

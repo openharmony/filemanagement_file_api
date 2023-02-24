@@ -29,7 +29,7 @@ bool FileWatcher::InitNotify(int &fd)
 {
     fd = inotify_init();
     if (fd == -1) {
-        HILOGE("FileWatcher InitNotify fail errCode:%{public}d", errno);
+        HILOGE("Failed to init notify fail errCode:%{public}d", errno);
         return false;
     }
     return true;
@@ -39,7 +39,7 @@ bool FileWatcher::StartNotify(WatcherInfoArg &arg)
 {
     int wd = inotify_add_watch(arg.fd, arg.filename.c_str(), arg.events);
     if (wd == -1) {
-        HILOGE("FileWatcher StartNotify fail errCode:%{public}d", errno);
+        HILOGE("Failed to start notify fail errCode:%{public}d", errno);
         return false;
     }
     arg.wd = wd;
@@ -51,7 +51,7 @@ bool FileWatcher::StopNotify(const WatcherInfoArg &arg)
 {
     run_ = false;
     if (inotify_rm_watch(arg.fd, arg.wd) == -1) {
-        HILOGE("FileWatcher StopNotify fail errCode:%{public}d", errno);
+        HILOGE("Failed to stop notify fail errCode:%{public}d", errno);
         return false;
     }
     close(arg.fd);
@@ -65,7 +65,10 @@ void FileWatcher::HandleEvent(WatcherInfoArg &arg,
     if (event->wd != arg.wd) {
         return;
     }
-    std::string filename = arg.filename + "/" + event->name;
+    std::string filename = arg.filename;
+    if ((event->name)[0] ! = '\0') {
+        filename += event->name;
+    }
     callback(arg.env, arg.nRef, filename, event->mask, event->cookie);
 }
 

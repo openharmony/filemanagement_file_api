@@ -55,7 +55,7 @@ private:
 
 struct WatcherEntity {
     std::unique_ptr<WatcherInfoArg> data_;
-    std::unique_ptr<FileWatcher> watcherPtr_;
+    std::shared_ptr<FileWatcher> watcherPtr_;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO namespace OHOS
 #endif
