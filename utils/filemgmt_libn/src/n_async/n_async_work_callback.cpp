@@ -43,6 +43,7 @@ static void CallbackComplete(napi_env env, napi_status status, void *data)
     auto ctx = static_cast<NAsyncContextCallback *>(data);
     if (ctx == nullptr) {
         HILOGE("This pointer address is empty");
+        napi_close_handle_scope(env, scope);
         return;
     }
     if (ctx->cbComplete_ != nullptr) {
