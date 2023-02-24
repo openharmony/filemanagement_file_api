@@ -28,7 +28,7 @@ FileWatcher::~FileWatcher() {}
 bool FileWatcher::InitNotify(int &fd)
 {
     fd = inotify_init();
-    if (fd == -1) {
+    if (fd < 0) {
         HILOGE("Failed to init notify fail errCode:%{public}d", errno);
         return false;
     }
@@ -38,7 +38,7 @@ bool FileWatcher::InitNotify(int &fd)
 bool FileWatcher::StartNotify(WatcherInfoArg &arg)
 {
     int wd = inotify_add_watch(arg.fd, arg.filename.c_str(), arg.events);
-    if (wd == -1) {
+    if (wd < 0) {
         HILOGE("Failed to start notify fail errCode:%{public}d", errno);
         return false;
     }
