@@ -66,7 +66,7 @@ void FileWatcher::HandleEvent(WatcherInfoArg &arg,
         return;
     }
     std::string filename = arg.filename + "/" + event->name;
-    callback(arg.env, arg.nRef, filename, event->mask);
+    callback(arg.env, arg.nRef, filename, event->mask, event->cookie);
 }
 
 void FileWatcher::GetNotifyEvent(WatcherInfoArg &arg, WatcherCallback callback)

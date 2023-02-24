@@ -21,8 +21,11 @@
 
 #include "filemgmt_libn.h"
 namespace OHOS::FileManagement::ModuleFileIO {
-using WatcherCallback = void (*)(napi_env env, LibN::NRef &callback,
-    const std::string &filename, const uint32_t &event);
+using WatcherCallback = void (*)(napi_env env,
+                                 LibN::NRef &callback,
+                                 const std::string &filename,
+                                 const uint32_t &event,
+                                 const uint32_t &cookie);
 constexpr int BUF_SIZE = 1024;
 struct WatcherInfoArg {
     std::string filename = "";

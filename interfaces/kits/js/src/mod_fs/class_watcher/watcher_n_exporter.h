@@ -33,6 +33,7 @@ public:
         NRef &ref_;
         std::string fileName_;
         uint32_t event_;
+        uint32_t cookie_;
     };
 
     inline static const std::string className_ = "Watcher";
@@ -43,7 +44,8 @@ public:
     static napi_value Constructor(napi_env env, napi_callback_info info);
     static napi_value Start(napi_env env, napi_callback_info info);
     static napi_value Stop(napi_env env, napi_callback_info info);
-    static void WatcherCallback(napi_env env, NRef &callback, const std::string &fileName, const uint32_t &event);
+    static void WatcherCallback(napi_env env, NRef & callback, const std::string &fileName, const uint32_t &event,
+                                const uint32_t &cookie);
 
     WatcherNExporter(napi_env env, napi_value exports);
     ~WatcherNExporter() override;

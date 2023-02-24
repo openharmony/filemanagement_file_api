@@ -125,6 +125,7 @@ static void WatcherCallbackComplete(uv_work_t *work, int stat)
         NVal objn = NVal::CreateObject(env);
         objn.AddProp("fileName", NVal::CreateUTF8String(env, callbackContext->fileName_).val_);
         objn.AddProp("event", NVal::CreateUint32(env, callbackContext->event_).val_);
+        objn.AddProp("cookie", NVal::CreateUint32(env, callbackContext->cookie_).val_);
         napi_value retVal = nullptr;
         napi_status status = napi_call_function(env, nullptr, jsCallback, 1, &(objn.val_), &retVal);
         if (status != napi_ok) {
@@ -136,7 +137,8 @@ static void WatcherCallbackComplete(uv_work_t *work, int stat)
     delete work;
 }
 
-void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::string &fileName, const uint32_t &event)
+void WatcherNExporter::WatcherCallback(napi_env env, NRef & callback, const std::string &fileName,
+                                       const uint32_t &event, const uint32_t &cookie)
 {
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env, &loop);
@@ -160,6 +162,7 @@ void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::
     callbackContext->env_ = env;
     callbackContext->fileName_ = fileName;
     callbackContext->event_ = event;
+    callbackContext->cookie_ = cookie;
     work->data = reinterpret_cast<void *>(callbackContext);
 
     int ret = uv_queue_work(
