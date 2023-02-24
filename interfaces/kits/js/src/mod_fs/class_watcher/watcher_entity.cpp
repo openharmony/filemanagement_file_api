@@ -66,7 +66,7 @@ void FileWatcher::HandleEvent(WatcherInfoArg &arg,
         return;
     }
     std::string filename = arg.filename;
-    if ((event->name)[0] ! = '\0') {
+    if ((event->name)[0] != '\0') {
         filename += event->name;
     }
     callback(arg.env, arg.nRef, filename, event->mask, event->cookie);
