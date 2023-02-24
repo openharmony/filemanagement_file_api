@@ -137,7 +137,7 @@ static void WatcherCallbackComplete(uv_work_t *work, int stat)
     delete work;
 }
 
-void WatcherNExporter::WatcherCallback(napi_env env, NRef & callback, const std::string &fileName,
+void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::string &fileName,
                                        const uint32_t &event, const uint32_t &cookie)
 {
     uv_loop_s *loop = nullptr;
