@@ -38,7 +38,6 @@ namespace {
     }
 }
 
-
 napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
 {
     if (!IsSystemApp()) {
