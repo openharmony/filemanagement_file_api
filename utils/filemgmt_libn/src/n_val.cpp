@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,6 +131,13 @@ tuple<bool, double> NVal::ToDouble() const
     return make_tuple(status == napi_ok, res);
 }
 
+tuple<bool, uint32_t> NVal::ToUint32() const
+{
+    uint32_t res = 0;
+    napi_status status = napi_get_value_uint32(env_, val_, &res);
+    return make_tuple(status == napi_ok, res);
+}
+
 tuple<bool, uint64_t, bool> NVal::ToUint64() const
 {
     uint64_t res = 0;
@@ -255,6 +262,13 @@ NVal NVal::CreateInt32(napi_env env, int32_t val)
 {
     napi_value res = nullptr;
     napi_create_int32(env, val, &res);
+    return {env, res};
+}
+
+NVal NVal::CreateUint32(napi_env env, int32_t val)
+{
+    napi_value res = nullptr;
+    napi_create_uint32(env, val, &res);
     return {env, res};
 }
 

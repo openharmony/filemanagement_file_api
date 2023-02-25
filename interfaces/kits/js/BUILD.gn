@@ -119,6 +119,8 @@ ohos_shared_library("fs") {
     "src/mod_fs/class_stat/stat_n_exporter.cpp",
     "src/mod_fs/class_stream/flush.cpp",
     "src/mod_fs/class_stream/stream_n_exporter.cpp",
+    "src/mod_fs/class_watcher/watcher_entity.cpp",
+    "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
     "src/mod_fs/common_func.cpp",
     "src/mod_fs/module.cpp",
     "src/mod_fs/properties/close.cpp",
@@ -139,6 +141,7 @@ ohos_shared_library("fs") {
     "src/mod_fs/properties/stat.cpp",
     "src/mod_fs/properties/symlink.cpp",
     "src/mod_fs/properties/truncate.cpp",
+    "src/mod_fs/properties/watcher.cpp",
   ]
 
   deps = [
@@ -149,6 +152,7 @@ ohos_shared_library("fs") {
   external_deps = [
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
+    "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "data_share:datashare_common",

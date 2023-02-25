@@ -45,7 +45,7 @@
 #include "stat.h"
 #include "symlink.h"
 #include "truncate.h"
-
+#include "watcher.h"
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -615,6 +615,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("unlinkSync", UnlinkSync),
         NVal::DeclareNapiFunction("write", Write),
         NVal::DeclareNapiFunction("writeSync", WriteSync),
+        NVal::DeclareNapiFunction("createWatcher", Watcher::CreateWatcher),
     });
 }
 
