@@ -67,12 +67,12 @@ void FileWatcher::HandleEvent(WatcherInfoArg &arg, const struct inotify_event *e
     if (event->wd != arg.wd) {
         return;
     }
-    std::string filename = arg.filename;
+    std::string fileName = arg.filename;
     if (event->len > 0) {
         fileName.append(std::string("/"));
         fileName.append(std::string(event->name));
     }
-    callback(arg.env, arg.nRef, filename, event->mask, event->cookie);
+    callback(arg.env, arg.nRef, fileName, event->mask, event->cookie);
 }
 
 void FileWatcher::GetNotifyEvent(WatcherInfoArg &arg, WatcherCallback callback)
