@@ -82,6 +82,11 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    if (!NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function)) {
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
     watcherEntity->data_ = std::make_unique<WatcherInfoArg>(NVal(env, funcArg[NARG_POS::THIRD]));
     watcherEntity->data_->events = events;
     watcherEntity->data_->env = env;
