@@ -64,6 +64,9 @@ bool FileWatcher::StopNotify(const WatcherInfoArg &arg)
 
 void FileWatcher::HandleEvent(WatcherInfoArg &arg, const struct inotify_event *event, WatcherCallback callback)
 {
+    if (event->wd != arg.wd) {
+        return;
+    }
     if (event->len > 0) {
         fileName.append(std::string("/"));
         fileName.append(std::string(event->name));
