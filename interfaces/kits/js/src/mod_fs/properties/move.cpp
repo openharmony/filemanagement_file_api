@@ -190,7 +190,6 @@ napi_value Move::Async(napi_env env, napi_callback_info info)
         return { NVal::CreateUndefined(env) };
     };
 
-    
     NVal thisVar(env, funcArg.GetThisVar());
     size_t argc = funcArg.GetArgc();
     if (argc == NARG_CNT::TWO || (argc == NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number))) {
