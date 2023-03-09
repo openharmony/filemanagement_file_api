@@ -134,7 +134,7 @@ static string GetBundleNameSelf()
     return bundleName;
 }
 
-static string GetPathFromFileUri(string path, string bundleName, int mode)
+static string GetPathFromFileUri(string path, string bundleName, unsigned int mode)
 {
     if (bundleName != GetBundleNameSelf()) {
         if ((mode & O_WRONLY) == O_WRONLY || (mode & O_RDWR) == O_RDWR) {
