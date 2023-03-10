@@ -151,11 +151,9 @@ static bool GetOptionArg(napi_env env, const NFuncArg &funcArg, OptionArgs &opti
 
 static bool FilterSuffix(const vector<string>& suffixs, const struct dirent& filename)
 {
-    for (auto iter = suffixs.begin(); iter != suffixs.end(); iter++) {
-        string_view sv1(*iter);
-        string_view sv2((string(filename.d_name)).substr((string(filename.d_name)).find('.'),
-            (string(filename.d_name)).length() - 1));
-        if (sv1 != sv2) {
+    for (const auto &iter : suffixs) {
+        string suffixStr = string(filename.d_name).substr((string(filename.d_name)).rfind('.'));
+        if (iter != suffixStr) {
             return true;
         }
     }
@@ -164,8 +162,8 @@ static bool FilterSuffix(const vector<string>& suffixs, const struct dirent& fil
 
 static bool FilterDisplayname(const vector<string>& displaynames, const struct dirent& filename)
 {
-    for (auto iter = displaynames.begin(); iter != displaynames.end(); iter++) {
-        int ret = fnmatch((*iter).c_str(), filename.d_name, FNM_PATHNAME | FNM_PERIOD);
+    for (const auto &iter : displaynames) {
+        int ret = fnmatch(iter.c_str(), filename.d_name, FNM_PATHNAME | FNM_PERIOD);
         if (ret == 0) {
             return true;
         }
