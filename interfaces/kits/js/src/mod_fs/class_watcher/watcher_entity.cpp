@@ -50,6 +50,10 @@ bool FileWatcher::StartNotify(WatcherInfoArg &arg)
 bool FileWatcher::StopNotify(const WatcherInfoArg &arg)
 {
     run_ = false;
+    if (arg.events == IN_DELETE_SELF) {
+        close(arg.fd);
+        return true;
+    }
     if (inotify_rm_watch(arg.fd, arg.wd) == -1) {
         HILOGE("Failed to stop notify fail errCode:%{public}d", errno);
         return false;
@@ -58,18 +62,17 @@ bool FileWatcher::StopNotify(const WatcherInfoArg &arg)
     return true;
 }
 
-void FileWatcher::HandleEvent(WatcherInfoArg &arg,
-                              const struct inotify_event *event,
-                              WatcherCallback callback)
+void FileWatcher::HandleEvent(WatcherInfoArg &arg, const struct inotify_event *event, WatcherCallback callback)
 {
     if (event->wd != arg.wd) {
         return;
     }
-    std::string filename = arg.filename;
-    if ((event->name)[0] != '\0') {
-        filename += event->name;
+    std::string fileName = arg.filename;
+    if (event->len > 0) {
+        fileName.append(std::string("/"));
+        fileName.append(std::string(event->name));
     }
-    callback(arg.env, arg.nRef, filename, event->mask, event->cookie);
+    callback(arg.env, arg.nRef, fileName, event->mask, event->cookie);
 }
 
 void FileWatcher::GetNotifyEvent(WatcherInfoArg &arg, WatcherCallback callback)
