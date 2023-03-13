@@ -130,7 +130,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
     }
 
     size_t writeLen = fwrite(buf, 1, len, filp);
-    if (writeLen == 0 && writeLen != len) {
+    if (writeLen == 0 && writeLen != static_cast<size_t>(len)) {
         HILOGE("Failed to fwrite stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
@@ -187,7 +187,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
             return NError(errno);
         }
         arg->actLen = fwrite(buf, 1, len, filp);
-        if (arg->actLen == 0 && arg->actLen != len) {
+        if (arg->actLen == 0 && arg->actLen != static_cast<size_t>(len)) {
             HILOGE("Failed to fwrite stream");
             return NError(EIO);
         }
