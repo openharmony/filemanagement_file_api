@@ -270,8 +270,10 @@ static void RecursiveFunc(const string &path, vector<struct dirent> &dirents)
                 dirents.emplace_back(tmpDirent);
             }
         } else if ((*(namelist)[i]).d_type == DT_DIR) {
+            string pathTemp = g_optionArgs.path;
             g_optionArgs.path += '/' + string((*namelist[i]).d_name);
             RecursiveFunc(g_optionArgs.path, dirents);
+            g_optionArgs.path = pathTemp;
         }
         free(namelist[i]);
     }
