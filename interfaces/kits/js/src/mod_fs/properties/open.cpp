@@ -72,7 +72,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
         NError(EIO).ThrowErr(env);
         return NVal();
     }
-    auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+    auto fdg = make_unique<DistributedFS::FDGuard>(fd, true);
     fileEntity->fd_.swap(fdg);
     if (isUri) {
         fileEntity->path_ = "";
