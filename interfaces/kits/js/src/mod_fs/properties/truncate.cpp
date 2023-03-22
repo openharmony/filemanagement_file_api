@@ -38,7 +38,13 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
         NError(EINVAL).ThrowErr(env);
         return { false, FileInfo { false, {}, {} } };
     }
-    return { true, FileInfo { false, {}, { fd, false } } };
+    auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+    if (!fdg) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return { false, FileInfo { false, {}, {} } };
+    }
+    return { true, FileInfo { false, {}, move(fdg) } };
 };
 
 static NError TruncateCore(napi_env env, FileInfo &fileInfo, int truncateLen)
@@ -73,7 +79,7 @@ static NError TruncateCore(napi_env env, FileInfo &fileInfo, int truncateLen)
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
-        int ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), fileInfo.fdg.GetFD(), truncateLen, nullptr);
+        int ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), fileInfo.fdg->GetFD(), truncateLen, nullptr);
         if (ret < 0) {
             HILOGE("Failed to truncate file by fd");
             return NError(EINVAL);
