@@ -151,9 +151,16 @@ static bool GetOptionArg(napi_env env, const NFuncArg &funcArg, OptionArgs &opti
 
 static bool FilterSuffix(const vector<string>& suffixs, const struct dirent& filename)
 {
+    if (filename.d_type == DT_DIR) {
+        return true;
+    }
+    size_t found = string(filename.d_name).rfind('.');
+    if (found == std::string::npos) {
+        return false;
+    }
+    string suffixStr = string(filename.d_name).substr(found);
     for (const auto &iter : suffixs) {
-        string suffixStr = string(filename.d_name).substr((string(filename.d_name)).rfind('.'));
-        if (iter != suffixStr) {
+        if (iter == suffixStr) {
             return true;
         }
     }
@@ -229,19 +236,15 @@ static int32_t FilterFunc(const struct dirent *filename)
         return FILTER_DISMATCH;
     }
 
-    if (filename->d_type == DT_REG) {
-        if (g_optionArgs.countNum < g_optionArgs.listNum || g_optionArgs.listNum == 0) {
-            if (FilterResult(*filename)) {
-                return FILTER_MATCH;
-            }
+    if (g_optionArgs.countNum < g_optionArgs.listNum || g_optionArgs.listNum == 0) {
+        if ((filename->d_type == DT_DIR && g_optionArgs.recursion) || FilterResult(*filename)) {
+            return FILTER_MATCH;
         }
-    } else if (filename->d_type == DT_DIR) {
-        return FILTER_MATCH;
     }
     return FILTER_DISMATCH;
 }
 
-static vector<struct dirent> FileterFileRes(const string &path)
+static vector<struct dirent> FilterFileRes(const string &path)
 {
     struct dirent** namelist;
     int num = scandir(path.c_str(), &(namelist), FilterFunc, alphasort);
@@ -318,7 +321,7 @@ napi_value ListFile::Sync(napi_env env, napi_callback_info info)
     if (g_optionArgs.recursion) {
         RecursiveFunc(path.get(), direntsRes);
     } else {
-        direntsRes = FileterFileRes(path.get());
+        direntsRes = FilterFileRes(path.get());
     }
     g_optionArgs.Clear();
     return DoListFileVector2NV(env, direntsRes);
@@ -358,7 +361,7 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
         if (g_optionArgs.recursion) {
             RecursiveFunc(g_optionArgs.path, arg->dirents);
         } else {
-            arg->dirents = FileterFileRes(g_optionArgs.path);
+            arg->dirents = FilterFileRes(g_optionArgs.path);
         }
         g_optionArgs.Clear();
         return NError(ERRNO_NOERR);
