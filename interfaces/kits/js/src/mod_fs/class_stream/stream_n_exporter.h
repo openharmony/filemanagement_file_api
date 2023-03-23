@@ -44,7 +44,7 @@ public:
 };
 
 struct AsyncReadArg {
-    size_t lenRead { 0 };
+    size_t lenRead = 0;
     NRef refReadBuf;
 
     explicit AsyncReadArg(NVal jsReadBuf) : refReadBuf(jsReadBuf) {}
@@ -53,8 +53,8 @@ struct AsyncReadArg {
 
 struct AsyncWrtieArg {
     NRef refWriteArrayBuf;
-    std::unique_ptr<char[]> guardWriteStr;
-    size_t actLen { 0 };
+    std::unique_ptr<char[]> guardWriteStr = nullptr;
+    size_t actLen = 0;
 
     explicit AsyncWrtieArg(NVal refWriteArrayBuf) : refWriteArrayBuf(refWriteArrayBuf) {}
     explicit AsyncWrtieArg(std::unique_ptr<char[]> &&guardWriteStr) : guardWriteStr(std::move(guardWriteStr)) {}
