@@ -318,6 +318,9 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    if (!hasOffset) {
+        offset = -1;
+    }
 
     void *buf = nullptr;
     int64_t len = 0;
@@ -331,7 +334,6 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    ssize_t actLen;
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -346,8 +348,8 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-    actLen = ret;
-    return NVal::CreateInt64(env, actLen).val_;
+
+    return NVal::CreateInt64(env, ret).val_;
 }
 
 static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, int fd, size_t offset)
@@ -396,6 +398,9 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         HILOGE("Failed to resolve buf and options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
+    }
+    if (!hasOffset) {
+        offset = -1;
     }
 
     auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
@@ -481,6 +486,9 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    if (!hasOffset) {
+        offset = -1;
+    }
 
     auto arg = make_shared<AsyncIOWrtieArg>(move(bufGuard));
     if (!arg) {
@@ -548,8 +556,10 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         HILOGE("Failed to resolve buf and options");
         return nullptr;
     }
+    if (!hasOffset) {
+        offset = -1;
+    }
 
-    ssize_t writeLen;
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> write_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -564,8 +574,8 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-    writeLen = ret;
-    return NVal::CreateInt64(env, writeLen).val_;
+
+    return NVal::CreateInt64(env, ret).val_;
 }
 
 bool PropNExporter::Export()
