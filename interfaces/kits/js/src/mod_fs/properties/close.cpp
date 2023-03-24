@@ -42,11 +42,30 @@ static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
     return fileEntity;
 }
 
+static NError CloseFd(int fd)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!close_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to close file with ret: %{public}d", ret);
+        return NError(errno);
+    }
+    return NError(ERRNO_NOERR);
+}
+
 static tuple<bool, FileStruct> ParseJsOperand(napi_env env, napi_value fdOrFileFromJsArg)
 {
     auto [isFd, fd] = NVal(env, fdOrFileFromJsArg).ToInt32();
-    if (isFd) {
+    if (isFd && fd >= 0) {
         return { true, FileStruct { true, fd, nullptr } };
+    }
+    if (isFd && fd < 0) {
+        return { false, FileStruct { false, -1, nullptr } };
     }
     auto file = GetFileEntity(env, fdOrFileFromJsArg);
     if (file) {
@@ -73,23 +92,18 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
     }
 
     if (fileStruct.isFd) {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!close_req) {
-            HILOGE("Failed to request heap memory.");
-            NError(ENOMEM).ThrowErr(env);
-            return nullptr;
-        }
-        int ret = uv_fs_close(nullptr, close_req.get(), fileStruct.fd, nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to close file with fd: %{public}d, ret: %{public}d", fileStruct.fd, ret);
-            NError(errno).ThrowErr(env);
+        auto err = CloseFd(fileStruct.fd);
+        if (err) {
+            err.ThrowErr(env);
             return nullptr;
         }
     } else {
-        fileStruct.fileEntity->fd_.reset();
+        auto fp = NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg[NARG_POS::FIRST]);
+        if (!fp) {
+            NError(EINVAL).ThrowErr(env);
+            return nullptr;
+        }
     }
-    (void)NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg.GetThisVar());
 
     return NVal::CreateUndefined(env).val_;
 }
@@ -110,27 +124,22 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    if (!fileStruct.isFd) {
+        auto fp = NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg[NARG_POS::FIRST]);
+        if (!fp) {
+            NError(EINVAL).ThrowErr(env);
+            return nullptr;
+        }
+    }
+
     auto cbExec = [fileStruct = fileStruct]() -> NError {
         if (fileStruct.isFd) {
-            std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
-                new uv_fs_t, CommonFunc::fs_req_cleanup };
-            if (!close_req) {
-                HILOGE("Failed to request heap memory.");
-                return NError(ERRNO_NOERR);
-            }
-            int ret = uv_fs_close(nullptr, close_req.get(), fileStruct.fd, nullptr);
-            if (ret < 0) {
-                HILOGE("Failed to close file with ret: %{public}d", ret);
-                return NError(errno);
-            }
-        } else {
-            fileStruct.fileEntity->fd_.reset();
+            return CloseFd(fileStruct.fd);
         }
         return NError(ERRNO_NOERR);
     };
 
-    auto cbComplete = [arg = funcArg.GetThisVar()](napi_env env, NError err) -> NVal {
-        (void)NClass::RemoveEntityOfFinal<FileEntity>(env, arg);
+    auto cbComplete = [](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         } else {
