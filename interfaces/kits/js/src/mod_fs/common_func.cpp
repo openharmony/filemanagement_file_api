@@ -67,13 +67,13 @@ void InitOpenMode(napi_env env, napi_value exports)
     }
 }
 
-static tuple<bool, size_t> GetActualLen(napi_env env, int64_t bufLen, int64_t bufOff, NVal op)
+static tuple<bool, size_t> GetActualLen(napi_env env, size_t bufLen, size_t bufOff, NVal op)
 {
     bool succ = false;
-    int64_t retLen;
+    size_t retLen = 0;
 
     if (op.HasProp("length")) {
-        int64_t opLength;
+        int64_t opLength = 0;
         tie(succ, opLength) = op.GetProp("length").ToInt64();
         if (!succ) {
             HILOGE("Invalid option.length, expect integer");
@@ -82,12 +82,12 @@ static tuple<bool, size_t> GetActualLen(napi_env env, int64_t bufLen, int64_t bu
         }
         if (opLength < 0) {
             retLen = bufLen - bufOff;
-        } else if (opLength > bufLen - bufOff) {
+        } else if (static_cast<size_t>(opLength) > bufLen - bufOff) {
             HILOGE("Invalid option.length, buffer limit exceeded");
             NError(EINVAL).ThrowErr(env);
             return { false, 0 };
         } else {
-            retLen = opLength;
+            retLen = static_cast<size_t>(opLength);
         }
     } else {
         retLen = bufLen - bufOff;
@@ -196,14 +196,14 @@ tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(n
                                                                                napi_value dstPath)
 {
     bool succ = false;
-    unique_ptr<char[]> src;
+    unique_ptr<char[]> src = nullptr;
     tie(succ, src, ignore) = NVal(env, srcPath).ToUTF8String();
     if (!succ) {
         HILOGE("Failed to convert the src path to UTF-8 string");
         return { false, nullptr, nullptr };
     }
 
-    unique_ptr<char[]> dest;
+    unique_ptr<char[]> dest = nullptr;
     tie(succ, dest, ignore) = NVal(env, dstPath).ToUTF8String();
     if (!succ) {
         HILOGE("Failed to convert the dest path to UTF-8 string");
@@ -212,11 +212,9 @@ tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(n
     return make_tuple(true, move(src), move(dest));
 }
 
-static tuple<bool, unique_ptr<char[]>, int64_t> DecodeString(napi_env env, NVal jsStr, NVal encoding)
+static tuple<bool, unique_ptr<char[]>, size_t> DecodeString(napi_env env, NVal jsStr, NVal encoding)
 {
-    unique_ptr<char[]> buf;
     if (!jsStr.TypeIs(napi_string)) {
-        HILOGE("Failed to recognize the type to a string");
         return { false, nullptr, 0 };
     }
 
@@ -225,7 +223,7 @@ static tuple<bool, unique_ptr<char[]>, int64_t> DecodeString(napi_env env, NVal 
         return jsStr.ToUTF8String();
     }
 
-    unique_ptr<char[]> encodingBuf;
+    unique_ptr<char[]> encodingBuf = nullptr;
     tie(succ, encodingBuf, ignore) = encoding.ToUTF8String();
     if (!succ) {
         return { false, nullptr, 0 };
@@ -241,20 +239,20 @@ static tuple<bool, unique_ptr<char[]>, int64_t> DecodeString(napi_env env, NVal 
     }
 }
 
-tuple<bool, void *, int64_t, bool, int64_t> CommonFunc::GetReadArg(napi_env env,
+tuple<bool, void *, size_t, bool, int64_t> CommonFunc::GetReadArg(napi_env env,
     napi_value readBuf, napi_value option)
 {
-    int64_t retLen;
-    int64_t position;
+    size_t retLen = 0;
+    int64_t position = 0;
     bool succ = false;
     bool posAssigned = false;
 
     NVal txt(env, readBuf);
     void *buf = nullptr;
-    int64_t bufLen;
+    size_t bufLen = 0;
     tie(succ, buf, bufLen) = txt.ToArraybuffer();
-    if (!succ) {
-        HILOGE("Invalid read buffer, expect arraybuffer");
+    if (!succ || bufLen > UINT_MAX) {
+        HILOGE("Invalid arraybuffer");
         NError(EINVAL).ThrowErr(env);
         return { false, nullptr, 0, posAssigned, position };
     }
@@ -279,18 +277,17 @@ tuple<bool, void *, int64_t, bool, int64_t> CommonFunc::GetReadArg(napi_env env,
     return { true, buf, retLen, posAssigned, position };
 }
 
-tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetWriteArg(napi_env env,
+tuple<bool, unique_ptr<char[]>, void *, size_t, bool, int64_t> CommonFunc::GetWriteArg(napi_env env,
     napi_value argWBuf, napi_value argOption)
 {
-    int64_t retLen;
-    int64_t retPos;
-    int64_t bufLen;
+    int64_t retPos = 0;
+    size_t bufLen = 0;
     bool hasPos = false;
     bool succ = false;
     void *buf = nullptr;
     NVal op(env, argOption);
     NVal jsBuffer(env, argWBuf);
-    unique_ptr<char[]> bufferGuard;
+    unique_ptr<char[]> bufferGuard = nullptr;
     tie(succ, bufferGuard, bufLen) = DecodeString(env, jsBuffer, op.GetProp("encoding"));
     if (!succ) {
         tie(succ, buf, bufLen) = NVal(env, argWBuf).ToArraybuffer();
@@ -302,6 +299,12 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
     } else {
         buf = bufferGuard.get();
     }
+    if (bufLen > UINT_MAX) {
+        HILOGE("The Size of buffer is too large");
+        NError(EINVAL).ThrowErr(env);
+        return { false, nullptr, nullptr, 0, hasPos, retPos} ;
+    }
+    size_t retLen = 0;
     tie(succ, retLen) = GetActualLen(env, bufLen, 0, op);
     if (!succ) {
         HILOGE("Failed to get actual length");
@@ -309,8 +312,8 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
     }
 
     if (op.HasProp("offset")) {
-        int32_t position = 0;
-        tie(succ, position) = op.GetProp("offset").ToInt32();
+        int64_t position = 0;
+        tie(succ, position) = op.GetProp("offset").ToInt64();
         if (!succ || position < 0) {
             HILOGE("option.offset shall be positive number");
             NError(EINVAL).ThrowErr(env);

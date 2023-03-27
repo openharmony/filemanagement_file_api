@@ -26,7 +26,7 @@ using namespace OHOS::FileManagement::LibN;
 struct AsyncIOWrtieArg {
     NRef refWriteArrayBuf_;
     std::unique_ptr<char[]> guardWriteStr_;
-    ssize_t actLen = 0;
+    int actLen = 0;
 
     explicit AsyncIOWrtieArg(NVal refWriteArrayBuf) : refWriteArrayBuf_(refWriteArrayBuf) {}
     explicit AsyncIOWrtieArg(std::unique_ptr<char[]> &&guardWriteStr) : guardWriteStr_(move(guardWriteStr)) {}
@@ -38,7 +38,7 @@ struct AsyncAccessArg {
 };
 
 struct AsyncIOReadArg {
-    ssize_t lenRead { 0 };
+    int lenRead = 0;
     NRef refReadBuf;
 
     explicit AsyncIOReadArg(NVal jsReadBuf) : refReadBuf(jsReadBuf) {}
