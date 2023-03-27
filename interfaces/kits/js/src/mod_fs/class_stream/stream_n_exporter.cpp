@@ -300,18 +300,17 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto cbExec = [streamEntity]() -> NError {
-        auto filp = streamEntity->fp.release();
-        if (!fclose(filp)) {
-            HILOGE("Failed to close file with filp");
-            return NError(ERRNO_NOERR);
-        } else {
-            return NError(errno);
-        }
+    auto fp = NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
+    if (!fp) {
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto cbExec = []() -> NError {
+        return NError(ERRNO_NOERR);
     };
 
-    auto cbCompl = [arg = funcArg.GetThisVar()](napi_env env, NError err) -> NVal {
-        (void)NClass::RemoveEntityOfFinal<StreamEntity>(env, arg);
+    auto cbCompl = [](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         } else {
