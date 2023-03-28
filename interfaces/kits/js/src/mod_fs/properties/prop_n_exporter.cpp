@@ -313,17 +313,14 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
     bool succ = false;
     int fd = 0;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
-    if (!succ) {
+    if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    if (!hasOffset) {
-        offset = -1;
-    }
 
     void *buf = nullptr;
-    int64_t len = 0;
+    size_t len = 0;
     bool hasOffset = false;
     int64_t offset = 0;
     tie(succ, buf, len, hasOffset, offset) =
@@ -333,8 +330,11 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    if (!hasOffset) {
+        offset = -1;
+    }
 
-    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
+    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
@@ -349,10 +349,10 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return NVal::CreateInt64(env, ret).val_;
+    return NVal::CreateInt64(env, static_cast<int64_t>(ret)).val_;
 }
 
-static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, int fd, size_t offset)
+static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, int32_t fd, int64_t offset)
 {
     uv_buf_t buffer = uv_buf_init(buf, len);
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
@@ -361,7 +361,7 @@ static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, in
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
     }
-    int ret = uv_fs_read(nullptr, read_req.get(), fd, &buffer, 1, static_cast<int>(offset), nullptr);
+    int ret = uv_fs_read(nullptr, read_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to read file for %{public}d", ret);
         return NError(errno);
@@ -381,12 +381,12 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
 
     bool succ = false;
     void *buf = nullptr;
-    int64_t len = 0;
-    int fd = 0;
+    size_t len = 0;
+    int32_t fd = 0;
     bool hasOffset = false;
     int64_t offset = 0;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
-    if (!succ) {
+    if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -418,7 +418,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return { NVal::CreateInt64(env, arg->lenRead) };
+        return { NVal::CreateInt64(env, static_cast<int64_t>(arg->lenRead)) };
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
@@ -438,16 +438,16 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     }
 }
 
-static NError WriteExec(shared_ptr<AsyncIOWrtieArg> arg, char *buf, size_t len, int fd, size_t offset)
+static NError WriteExec(shared_ptr<AsyncIOWrtieArg> arg, char *buf, size_t len, int32_t fd, int64_t offset)
 {
-    uv_buf_t buffer = uv_buf_init(buf, len);
+    uv_buf_t buffer = uv_buf_init(buf, static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> write_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!write_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
     }
-    int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, static_cast<int>(offset), nullptr);
+    int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);
         return NError(errno);
@@ -466,18 +466,18 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
     }
 
     bool succ = false;
-    int fd;
+    int32_t fd = 0;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
-    if (!succ) {
+    if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    unique_ptr<char[]> bufGuard;
+    unique_ptr<char[]> bufGuard = nullptr;
     void *buf = nullptr;
     size_t len = 0;
-    size_t offset = 0;
+    int64_t offset = 0;
     bool hasOffset = false;
     tie(succ, bufGuard, buf, len, hasOffset, offset) =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
@@ -505,7 +505,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         } else {
-            return { NVal::CreateInt64(env, arg->actLen) };
+            return { NVal::CreateInt64(env, static_cast<int64_t>(arg->actLen)) };
         }
     };
 
@@ -537,9 +537,9 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
     }
 
     bool succ = false;
-    int fd;
+    int32_t fd = 0;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
-    if (!succ) {
+    if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -547,8 +547,8 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
 
     void *buf = nullptr;
     size_t len = 0;
-    size_t offset = 0;
-    unique_ptr<char[]> bufGuard;
+    int64_t offset = 0;
+    unique_ptr<char[]> bufGuard = nullptr;
     bool hasOffset = false;
     tie(succ, bufGuard, buf, len, hasOffset, offset) =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
@@ -560,7 +560,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         offset = -1;
     }
 
-    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), len);
+    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> write_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!write_req) {
@@ -568,14 +568,14 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, static_cast<int>(offset), nullptr);
+    int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
 
-    return NVal::CreateInt64(env, ret).val_;
+    return NVal::CreateInt64(env, static_cast<int64_t>(ret)).val_;
 }
 
 bool PropNExporter::Export()
