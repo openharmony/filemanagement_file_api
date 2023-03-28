@@ -38,7 +38,7 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!copyfile_req) {
         HILOGE("Failed to request heap memory.");
-        return NError(ERRNO_NOERR);
+        return NError(ENOMEM);
     }
     int ret = uv_fs_copyfile(nullptr, copyfile_req.get(), srcFile.path.get(), destFile.path.get(),
                              UV_FS_COPYFILE_FICLONE, nullptr);
@@ -49,14 +49,31 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
     return NError(ERRNO_NOERR);
 }
 
-static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
+static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& statbf)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendfile_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!sendfile_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(), 0,
+                             statbf.st_size, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to sendfile by ret : %{public}d", ret);
+        return NError(errno);
+    }
+    return NError(ERRNO_NOERR);
+}
+
+static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
 {
     if (srcFile.isPath) {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
-            return NError(ERRNO_NOERR);
+            return NError(ENOMEM);
         }
         int ret = uv_fs_open(nullptr, open_req.get(), srcFile.path.get(), O_RDWR,
                              S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
@@ -64,12 +81,16 @@ static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
             HILOGE("Failed to open srcFile with ret: %{public}d", ret);
             return NError(errno);
         }
-        srcFile.fdg.SetFD(ret, true);
+        srcFile.fdg = make_unique<DistributedFS::FDGuard>(ret, true);
+        if (!srcFile.fdg) {
+            HILOGE("Failed to request heap memory for src file descriptor.");
+            return NError(ENOMEM);
+        }
     }
 
     struct stat statbf;
-    if (fstat(srcFile.fdg.GetFD(), &statbf) < 0) {
-        HILOGE("Failed to get stat of file by fd: %{public}d", srcFile.fdg.GetFD());
+    if (fstat(srcFile.fdg->GetFD(), &statbf) < 0) {
+        HILOGE("Failed to get stat of file by fd: %{public}d", srcFile.fdg->GetFD());
         return NError(errno);
     }
 
@@ -78,30 +99,20 @@ static NError SendFileCore(FileInfo& srcFile, FileInfo& destFile)
             new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
-            return NError(ERRNO_NOERR);
+            return NError(ENOMEM);
         }
         int ret = uv_fs_open(nullptr, open_req.get(), destFile.path.get(), O_RDWR | O_CREAT, statbf.st_mode, nullptr);
         if (ret < 0) {
             HILOGE("Failed to open destFile with ret: %{public}d", ret);
             return NError(errno);
         }
-        destFile.fdg.SetFD(ret, true);
+        destFile.fdg = make_unique<DistributedFS::FDGuard>(ret, true);
+        if (!destFile.fdg) {
+            HILOGE("Failed to request heap memory for dest file descriptor.");
+            return NError(ENOMEM);
+        }
     }
-
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendfile_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!sendfile_req) {
-        HILOGE("Failed to request heap memory.");
-        return NError(ERRNO_NOERR);
-    }
-    int ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFile.fdg.GetFD(), srcFile.fdg.GetFD(), 0,
-                             statbf.st_size, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to sendfile by ret : %{public}d", ret);
-        return NError(errno);
-    }
-
-    return NError(ERRNO_NOERR);
+    return SendFileCore(srcFile, destFile, statbf);
 }
 
 static tuple<bool, int, bool> ParseJsModeAndProm(napi_env env, const NFuncArg& funcArg)
@@ -132,15 +143,16 @@ static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg
 {
     auto [isPath, path, ignore] = pathOrFdFromJsArg.ToUTF8String();
     if (isPath) {
-        return { true, FileInfo{ true, move(path), {} } };
+        return { true, FileInfo { true, move(path), {} } };
     }
 
     auto [isFd, fd] = pathOrFdFromJsArg.ToInt32();
     if (isFd) {
-        return { true, FileInfo{ false, {}, { fd, false } }};
+        auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+        return { true, FileInfo { false, {}, move(fdg) } };
     }
 
-    return { false, FileInfo{ false, {}, {} } };
+    return { false, FileInfo { false, {}, {} } };
 };
 
 napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
@@ -174,7 +186,7 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
             return nullptr;
         }
     } else {
-        auto err = SendFileCore(src, dest);
+        auto err = OpenFile(src, dest);
         if (err) {
             err.ThrowErr(env);
             return nullptr;
@@ -211,7 +223,7 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         if (para->src_.isPath && para->dest_.isPath) {
             return IsAllPath(para->src_, para->dest_);
         }
-        return SendFileCore(para->src_, para->dest_);
+        return OpenFile(para->src_, para->dest_);
     };
 
     auto cbCompl = [](napi_env env, NError err) -> NVal {

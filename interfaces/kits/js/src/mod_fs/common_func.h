@@ -38,8 +38,8 @@ constexpr int SYNC = 04010000;
 
 struct FileInfo {
     bool isPath = false;
-    std::unique_ptr<char[]> path;
-    DistributedFS::FDGuard fdg;
+    std::unique_ptr<char[]> path = { nullptr };
+    std::unique_ptr<DistributedFS::FDGuard> fdg = { nullptr };
 };
 
 void InitOpenMode(napi_env env, napi_value exports);
