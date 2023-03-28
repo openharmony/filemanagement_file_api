@@ -122,7 +122,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
         HILOGE("Failed to resolve buf and options");
         return nullptr;
     }
-    int ret = fseek(filp, offset, SEEK_SET);
+    int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
     if (hasOffset && (ret < 0)) {
         HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
         NError(errno).ThrowErr(env);
@@ -130,13 +130,13 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
     }
 
     size_t writeLen = fwrite(buf, 1, len, filp);
-    if (writeLen == 0 && writeLen != static_cast<size_t>(len)) {
+    if ((writeLen == 0) && (writeLen != len)) {
         HILOGE("Failed to fwrite stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
 
-    return NVal::CreateInt64(env, writeLen).val_;
+    return NVal::CreateInt64(env, static_cast<int64_t>(writeLen)).val_;
 }
 
 static bool HasOption(napi_env env, napi_value optionFromJsArg)
@@ -181,13 +181,13 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
     auto cbExec = [arg, buf = buf, len = len, filp, hasOffset = hasOffset, offset = offset]() -> NError {
-        int ret = fseek(filp, offset, SEEK_SET);
+        int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
         if (hasOffset && (ret < 0)) {
             HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
             return NError(errno);
         }
         arg->actLen = fwrite(buf, 1, len, filp);
-        if (arg->actLen == 0 && arg->actLen != static_cast<size_t>(len)) {
+        if ((arg->actLen == 0) && (arg->actLen != len)) {
             HILOGE("Failed to fwrite stream");
             return NError(EIO);
         }
@@ -198,7 +198,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return { NVal::CreateInt64(env, arg->actLen) };
+        return { NVal::CreateInt64(env, static_cast<int64_t>(arg->actLen)) };
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
