@@ -32,8 +32,8 @@ public:
         napi_env env_;
         NRef &ref_;
         std::string fileName_;
-        uint32_t event_;
-        uint32_t cookie_;
+        uint32_t event_ = 0;
+        uint32_t cookie_ = 0;
     };
 
     inline static const std::string className_ = "Watcher";

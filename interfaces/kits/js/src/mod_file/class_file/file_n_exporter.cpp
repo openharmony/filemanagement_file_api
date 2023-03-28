@@ -217,7 +217,7 @@ bool Mkdirs(string path)
     return true;
 }
 
-bool Rmdirs(string path)
+bool Rmdirs(const string &path)
 {
     DIR *pDir;
     struct dirent *ptr = nullptr;
@@ -264,7 +264,7 @@ void MkdirExec(napi_env env, void *data)
         path = UriToAbsolute(path);
         if (asyncCallbackInfo->recursive && Mkdirs(path)) {
             asyncCallbackInfo->result = SUCCESS;
-        } else if (mkdir((char *)path.c_str(), DIR_FAULT_PERM) != FAILED) {
+        } else if (mkdir(path.c_str(), DIR_FAULT_PERM) != FAILED) {
             asyncCallbackInfo->result = SUCCESS;
         }
     }
@@ -297,7 +297,7 @@ void RmdirExec(napi_env env, void *data)
     if (statPath == COMMON_NUM::ZERO) {
         if (asyncCallbackInfo->recursive && Rmdirs(path)) {
             asyncCallbackInfo->result = SUCCESS;
-        } else if (remove((char *)path.c_str()) != FAILED) {
+        } else if (remove(path.c_str()) != FAILED) {
             asyncCallbackInfo->result = SUCCESS;
         }
     } else if (statPath == ENOENT) {
@@ -331,7 +331,7 @@ void GetExec(napi_env env, void *data)
     asyncCallbackInfo->errorType = FILE_IO_ERROR;
     struct stat buf;
     int statPath = GetRealPath(path);
-    if (statPath == COMMON_NUM::ZERO && stat((char *)path.c_str(), &buf) == COMMON_NUM::ZERO) {
+    if (statPath == COMMON_NUM::ZERO && stat(path.c_str(), &buf) == COMMON_NUM::ZERO) {
         asyncCallbackInfo->length = buf.st_size;
         asyncCallbackInfo->lastMT = buf.st_mtime * COMMON_NUM::THOUSAND +
             (int64_t)((buf.st_mtim).tv_nsec / COMMON_NUM::MILLION);
@@ -397,7 +397,7 @@ void ListExec(napi_env env, void *data)
     int statPath = GetRealPath(path);
     if (statPath == ENOENT) {
         asyncCallbackInfo->errorType = FILE_PATH_ERROR;
-    } else if (statPath != COMMON_NUM::ZERO || stat((char *)path.c_str(), &buf) != COMMON_NUM::ZERO) {
+    } else if (statPath != COMMON_NUM::ZERO || stat(path.c_str(), &buf) != COMMON_NUM::ZERO) {
         asyncCallbackInfo->errorType = FILE_IO_ERROR;
     } else if ((buf.st_mode & S_IFMT) == S_IFREG) {
         asyncCallbackInfo->result = SUCCESS;
@@ -471,14 +471,14 @@ int FileCopy(const string& srcPath, const string& dstPath)
     if (GetRealPath(src) == 0) {
         if (GetRealPath(dest) == ENOENT) {
             FDGuard sfd;
-            sfd.SetFD(open((char *)src.c_str(), O_RDONLY));
+            sfd.SetFD(open(src.c_str(), O_RDONLY));
             struct stat attrSrc;
-            if (stat((char *)src.c_str(), &attrSrc) == FAILED) {
+            if (stat(src.c_str(), &attrSrc) == FAILED) {
                 return FILE_IO_ERROR;
             }
             dest = UriToAbsolute(dest);
             FDGuard ofd;
-            ofd.SetFD(open((char *)dest.c_str(), O_WRONLY | O_CREAT, attrSrc.st_mode));
+            ofd.SetFD(open(dest.c_str(), O_WRONLY | O_CREAT, attrSrc.st_mode));
             if (sfd.GetFD() == FAILED || ofd.GetFD() == FAILED) {
                 return FILE_IO_ERROR;
             }
@@ -486,7 +486,7 @@ int FileCopy(const string& srcPath, const string& dstPath)
             if (sendfile(ofd.GetFD(), sfd.GetFD(), nullptr, attrSrc.st_size) != FAILED) {
                 ret = SUCCESS;
             } else {
-                remove((char *)dest.c_str());
+                remove(dest.c_str());
             }
         } else if (GetRealPath(dest) == 0) {
             return (dest == src) ? SUCCESS : FILE_IO_ERROR;
@@ -504,7 +504,7 @@ int DirCopy(const string& srcPath, const string& dstPath)
     }
     if (GetRealPath(dest) == ENOENT) {
         struct stat attrSrc;
-        if (stat((char *)src.c_str(), &attrSrc) == FAILED || !S_ISDIR(attrSrc.st_mode)) {
+        if (stat(src.c_str(), &attrSrc) == FAILED || !S_ISDIR(attrSrc.st_mode)) {
             return FILE_IO_ERROR;
         }
         dest = UriToAbsolute(dest);
@@ -530,7 +530,7 @@ void CopyExec(napi_env env, void *data)
     }
 
     struct stat statbf;
-    if (stat((char *)path.c_str(), &statbf) == FAILED) {
+    if (stat(path.c_str(), &statbf) == FAILED) {
         asyncCallbackInfo->errorType = FILE_IO_ERROR;
         return;
     }
@@ -588,7 +588,7 @@ int DirMove(const string& srcPath, const string& dstPath)
     }
 
     struct stat attrSrc;
-    if (stat((char *)src.c_str(), &attrSrc) == FAILED || !S_ISDIR(attrSrc.st_mode)) {
+    if (stat(src.c_str(), &attrSrc) == FAILED || !S_ISDIR(attrSrc.st_mode)) {
         return FILE_IO_ERROR;
     }
     dest = UriToAbsolute(dest);
@@ -639,7 +639,7 @@ void MoveExec(napi_env env, void *data)
     }
 
     struct stat statbf;
-    if (stat((char *)path.c_str(), &statbf) == FAILED) {
+    if (stat(path.c_str(), &statbf) == FAILED) {
         asyncCallbackInfo->errorType = FILE_IO_ERROR;
         return;
     }
@@ -648,7 +648,7 @@ void MoveExec(napi_env env, void *data)
         int retval = FileCopy(path, pathDst);
         if (retval == SUCCESS) {
             asyncCallbackInfo->result = SUCCESS;
-            remove((char *)path.c_str());
+            remove(path.c_str());
         } else {
             asyncCallbackInfo->errorType = retval;
         }
@@ -689,7 +689,7 @@ void DeleteExec(napi_env env, void *data)
     int statPath = GetRealPath(path);
     if (statPath == ENOENT) {
         asyncCallbackInfo->errorType = FILE_PATH_ERROR;
-    } else if (statPath == COMMON_NUM::ZERO && remove((char *)path.c_str()) != FAILED) {
+    } else if (statPath == COMMON_NUM::ZERO && remove(path.c_str()) != FAILED) {
         asyncCallbackInfo->result = SUCCESS;
     } else {
         asyncCallbackInfo->errorType = FILE_IO_ERROR;
@@ -843,7 +843,7 @@ void ReadTextExec(napi_env env, void *data)
         FDGuard fdg;
         fdg.SetFD(open(path.c_str(), O_RDONLY));
         struct stat buf;
-        int result = stat((char *)path.c_str(), &buf);
+        int result = stat(path.c_str(), &buf);
         if (fdg.GetFD() != FAILED && result != FAILED) {
             auto buffer = std::make_unique<char[]>(buf.st_size + 1);
             if (buffer == nullptr) {
@@ -891,7 +891,7 @@ void ReadArrayBufferExec(napi_env env, void *data)
         FDGuard fdg;
         fdg.SetFD(open(path.c_str(), O_RDONLY));
         struct stat buf;
-        int result = stat((char *)path.c_str(), &buf);
+        int result = stat(path.c_str(), &buf);
         if (fdg.GetFD() != FAILED && result != FAILED) {
             int32_t begin = (buf.st_size < asyncCallbackInfo->position) ? buf.st_size : asyncCallbackInfo->position;
             int32_t len =
