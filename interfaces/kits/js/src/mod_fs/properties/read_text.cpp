@@ -83,7 +83,7 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
-        return NError(ERRNO_NOERR);
+        return NError(ENOMEM);
     }
     int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), O_RDONLY,
                          S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
@@ -114,7 +114,7 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
         HILOGE("Failed to request heap memory.");
-        return NError(ERRNO_NOERR);
+        return NError(ENOMEM);
     }
     arg->len = uv_fs_read(nullptr, read_req.get(), sfd.GetFD(), &readbuf, 1, offset, nullptr);
     if (arg->len < 0) {
