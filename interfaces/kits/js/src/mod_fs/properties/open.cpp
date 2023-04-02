@@ -63,6 +63,10 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
     if (!objFile) {
         HILOGE("Failed to instantiate class");
         NError(EIO).ThrowErr(env);
+        int ret = close(fd);
+        if (ret < 0) {
+            HILOGE("Failed to close fd");
+        }
         return NVal();
     }
 
@@ -70,6 +74,10 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
     if (!fileEntity) {
         HILOGE("Failed to get fileEntity");
         NError(EIO).ThrowErr(env);
+        int ret = close(fd);
+        if (ret < 0) {
+            HILOGE("Failed to close fd");
+        }
         return NVal();
     }
     auto fdg = make_unique<DistributedFS::FDGuard>(fd, true);
@@ -84,16 +92,21 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
     return { env, objFile };
 }
 
-static int OpenFileByDatashare(napi_env env, napi_value argv, string path, unsigned int flags)
+static int OpenFileByDatashare(string path, unsigned int flags)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
     int fd = -1;
     sptr<FileIoToken> remote = new (std::nothrow) IRemoteStub<FileIoToken>();
     if (!remote) {
-        return ENOMEM;
+        HILOGE("Failed to get remote object");
+        return -ENOMEM;
     }
 
     dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
+    if (!dataShareHelper) {
+        HILOGE("Failed to connect to datashare");
+        return -E_PERMISSION;
+    }
     Uri uri(path);
     fd = dataShareHelper->OpenFile(uri, CommonFunc::GetModeFromFlags(flags));
     return fd;
@@ -165,19 +178,28 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         HILOGE("Invalid mode");
         return nullptr;
     }
+    int fd = -1;
     string pathStr = string(path.get());
     if (RemoteUri::IsMediaUri(pathStr)) {
-        auto fd = OpenFileByDatashare(env, funcArg[NARG_POS::FIRST], pathStr, mode);
-        if (fd >= 0) {
-            auto file = InstantiateFile(env, fd, pathStr, true).val_;
+        int ret = OpenFileByDatashare(pathStr, mode);
+        if (ret >= 0) {
+            auto file = InstantiateFile(env, ret, pathStr, true).val_;
             return file;
         }
         HILOGE("Failed to open file by Datashare");
-        NError(-1).ThrowErr(env);
+        NError(-ret).ThrowErr(env);
         return nullptr;
     } else if (RemoteUri::IsFileUri(pathStr)) {
         RemoteUri remoteUri = RemoteUri(pathStr);
         pathStr = GetPathFromFileUri(remoteUri.GetPath(), remoteUri.GetAuthority(), mode);
+    } else if (RemoteUri::IsRemoteUri(pathStr, fd, mode)) {
+        if (fd >= 0) {
+            auto file = InstantiateFile(env, fd, pathStr, true).val_;
+            return file;
+        }
+        HILOGE("Failed to open file by RemoteUri");
+        NError(E_INVAL).ThrowErr(env);
+        return nullptr;
     }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -226,19 +248,29 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     auto argv = funcArg[NARG_POS::FIRST];
     auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
         string pathStr = path;
+        int fd = -1;
         if (RemoteUri::IsMediaUri(path)) {
-            auto fd = OpenFileByDatashare(env, argv, path, mode);
+            int ret = OpenFileByDatashare(path, mode);
+            if (ret >= 0) {
+                arg->fd = ret;
+                arg->path = "";
+                arg->uri = path;
+                return NError(ERRNO_NOERR);
+            }
+            HILOGE("Failed to open file by Datashare");
+            return NError(-ret);
+        } else if (RemoteUri::IsFileUri(path)) {
+            RemoteUri remoteUri = RemoteUri(path);
+            pathStr = GetPathFromFileUri(remoteUri.GetPath(), remoteUri.GetAuthority(), mode);
+        } else if (RemoteUri::IsRemoteUri(path, fd, mode)) {
             if (fd >= 0) {
                 arg->fd = fd;
                 arg->path = "";
                 arg->uri = path;
                 return NError(ERRNO_NOERR);
             }
-            HILOGE("Failed to open file by Datashare");
-            return NError(-1);
-        } else if (RemoteUri::IsFileUri(path)) {
-            RemoteUri remoteUri = RemoteUri(path);
-            pathStr = GetPathFromFileUri(remoteUri.GetPath(), remoteUri.GetAuthority(), mode);
+            HILOGE("Failed to open file by RemoteUri");
+            return NError(E_INVAL);
         }
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
