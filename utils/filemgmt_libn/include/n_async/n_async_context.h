@@ -35,7 +35,7 @@ public:
     NContextCBExec cbExec_;
     NContextCBComplete cbComplete_;
     napi_async_work awork_;
-    NRef thisPtr_;
+    NVal thisPtr_;
 
     NAsyncContext(NVal thisPtr)
         : err_(0), res_(NVal()), cbExec_(nullptr), cbComplete_(nullptr), awork_(nullptr), thisPtr_(thisPtr)
