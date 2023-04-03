@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "ability.h"
+#include "bundle_info.h"
 #include "bundle_mgr_proxy.h"
 #include "class_file/file_entity.h"
 #include "class_file/file_n_exporter.h"
@@ -139,12 +140,13 @@ static string GetBundleNameSelf()
         HILOGE("Bundle mgr proxy is null ptr.");
         return nullptr;
     }
-    string bundleName;
-    if (!bundleMgrProxy->GetBundleNameForUid(uid, bundleName)) {
-        HILOGE("Failed to get bundleNameSelf. uid is %{public}d", uid);
+    AppExecFwk::BundleInfo bundleInfo;
+    auto ret = bundleMgrProxy->GetBundleInfoForSelf(uid, bundleInfo);
+    if (ret != ERR_OK) {
+        HILOGE("Failed to get bundleNameSelf.");
         return nullptr;
     }
-    return bundleName;
+    return bundleInfo.name;
 }
 
 static string GetPathFromFileUri(string path, string bundleName, unsigned int mode)
