@@ -276,7 +276,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
-            return NError(ERRNO_NOERR);
+            return NError(ENOMEM);
         }
         int ret = uv_fs_open(nullptr, open_req.get(), pathStr.c_str(), mode, S_IRUSR |
             S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
