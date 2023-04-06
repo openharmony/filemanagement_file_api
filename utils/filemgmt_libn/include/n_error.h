@@ -34,6 +34,7 @@ constexpr int FILEIO_SYS_CAP_TAG = 13900000;
 constexpr int USER_FILE_MANAGER_SYS_CAP_TAG = 14000000;
 constexpr int USER_FILE_SERVICE_SYS_CAP_TAG = 14300000;
 const std::string FILEIO_TAG_ERR_CODE = "code";
+const std::string FILEIO_TAG_ERR_DATA = "data";
 
 enum ErrCodeSuffixOfFileIO {
     E_PERM = 1,
@@ -291,10 +292,12 @@ public:
     ~NError() = default;
     explicit operator bool() const;
     napi_value GetNapiErr(napi_env env);
-    napi_value GetNapiErr(napi_env env, int code);
+    napi_value GetNapiErr(napi_env env, int errCode);
+    napi_value GetNapiErrAddData(napi_env env, int errCode, napi_value data);
     void ThrowErr(napi_env env);
-    void ThrowErr(napi_env env, int code);
+    void ThrowErr(napi_env env, int errCode);
     void ThrowErr(napi_env env, std::string errMsg);
+    void ThrowErrAddData(napi_env env, int errCode, napi_value data);
 
 private:
     int errno_ = ERRNO_NOERR;
