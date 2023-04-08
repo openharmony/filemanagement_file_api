@@ -82,7 +82,7 @@ napi_value NError::GetNapiErr(napi_env env, int errCode)
     if (errCode == ERRNO_NOERR) {
         return nullptr;
     }
-    int32_t code;
+    int32_t code = 0;
     string msg;
     if (errCodeTable.find(errCode) != errCodeTable.end()) {
         code = errCodeTable.at(errCode).first;
@@ -96,9 +96,34 @@ napi_value NError::GetNapiErr(napi_env env, int errCode)
     return GenerateBusinessError(env, code, msg);
 }
 
+napi_value NError::GetNapiErrAddData(napi_env env, int errCode, napi_value data)
+{
+    if (errCode == ERRNO_NOERR) {
+        return nullptr;
+    }
+    int32_t code = 0;
+    string msg;
+    if (errCodeTable.find(errCode) != errCodeTable.end()) {
+        code = errCodeTable.at(errCode).first;
+        msg = errCodeTable.at(errCode).second;
+    } else {
+        code = errCodeTable.at(UNKROWN_ERR).first;
+        msg = errCodeTable.at(UNKROWN_ERR).second;
+    }
+    errno_ = code;
+    errMsg_ = msg;
+    napi_value businessError = GenerateBusinessError(env, code, msg);
+    napi_status status = napi_set_named_property(env, businessError, FILEIO_TAG_ERR_DATA.c_str(), data);
+    if (status != napi_ok) {
+        HILOGE("Failed to set data property on Error, error message is %{public}s", msg.c_str());
+        return nullptr;
+    }
+    return businessError;
+}
+
 void NError::ThrowErr(napi_env env, int errCode)
 {
-    int32_t code;
+    int32_t code = 0;
     string msg;
     if (errCodeTable.find(errCode) != errCodeTable.end()) {
         code = errCodeTable.at(errCode).first;
@@ -123,6 +148,32 @@ void NError::ThrowErr(napi_env env, string errMsg)
     napi_status throwStatus = napi_throw_error(env, nullptr, errMsg.c_str());
     if (throwStatus != napi_ok) {
         HILOGE("Failed to throw an Error, error message is %{public}s", errMsg.c_str());
+    }
+}
+
+void NError::ThrowErrAddData(napi_env env, int errCode, napi_value data)
+{
+    int32_t code = 0;
+    string msg;
+    if (errCodeTable.find(errCode) != errCodeTable.end()) {
+        code = errCodeTable.at(errCode).first;
+        msg = errCodeTable.at(errCode).second;
+    } else {
+        code = errCodeTable.at(UNKROWN_ERR).first;
+        msg = errCodeTable.at(UNKROWN_ERR).second;
+    }
+    errno_ = code;
+    errMsg_ = msg;
+    napi_value businessError = GenerateBusinessError(env, code, msg);
+    napi_status status = napi_set_named_property(env, businessError, FILEIO_TAG_ERR_DATA.c_str(), data);
+    if (status != napi_ok) {
+        HILOGE("Failed to set data property on Error, error message is %{public}s", msg.c_str());
+        return;
+    }
+    status = napi_throw(env, businessError);
+    if (status != napi_ok) {
+        HILOGE("Failed to throw a BusinessError, error message is %{public}s", msg.c_str());
+        return;
     }
 }
 
