@@ -38,6 +38,7 @@
 #include "lstat.h"
 #include "mkdtemp.h"
 #include "move.h"
+#include "movedir.h"
 #include "open.h"
 #include "read_text.h"
 #include "rename.h"
@@ -604,6 +605,8 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("mkdirSync", MkdirSync),
         NVal::DeclareNapiFunction("mkdtemp", Mkdtemp::Async),
         NVal::DeclareNapiFunction("mkdtempSync", Mkdtemp::Sync),
+        NVal::DeclareNapiFunction("moveDir", MoveDir::Async),
+        NVal::DeclareNapiFunction("moveDirSync", MoveDir::Sync),
         NVal::DeclareNapiFunction("moveFile", Move::Async),
         NVal::DeclareNapiFunction("moveFileSync", Move::Sync),
         NVal::DeclareNapiFunction("open", Open::Async),
