@@ -79,7 +79,7 @@ napi_value Fsync::Async(napi_env env, napi_callback_info info)
             new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!fsync_req) {
             HILOGE("Failed to request heap memory.");
-            return NError(ERRNO_NOERR);
+            return NError(ENOMEM);
         }
         int ret = uv_fs_fsync(nullptr, fsync_req.get(), fd, nullptr);
         if (ret < 0) {

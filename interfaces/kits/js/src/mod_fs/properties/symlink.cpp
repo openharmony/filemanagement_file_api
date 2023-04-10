@@ -98,7 +98,7 @@ napi_value Symlink::Async(napi_env env, napi_callback_info info)
             new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!symlink_req) {
             HILOGE("Failed to request heap memory.");
-            return NError(ERRNO_NOERR);
+            return NError(ENOMEM);
         }
         int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
         if (ret < 0) {
