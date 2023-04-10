@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AsyncCallback } from './basic'
+import { AsyncCallback } from './@ohos.base'
 
 export default document;
 
