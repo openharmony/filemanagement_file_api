@@ -57,14 +57,14 @@ napi_value GetStorageDataDir(napi_env env, napi_callback_info info)
         return NVal::CreateUTF8String(env, STORAGE_DATA_PATH);
     };
 
-    static const std::string procedureName = "GetStorageDataDir";
+    static const std::string PROCEDURE_NAME = "GetStorageDataDir";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ZERO) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::FIRST]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 int GetUserId()
@@ -97,14 +97,14 @@ napi_value GetUserDataDir(napi_env env, napi_callback_info info)
         return NVal::CreateUTF8String(env, *userDataPath);
     };
 
-    static const std::string procedureName = "GetUserDataDir";
+    static const std::string PROCEDURE_NAME = "GetUserDataDir";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ZERO) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::FIRST]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 } // namespace ModuleEnvironment
 } // namespace FileManagement
