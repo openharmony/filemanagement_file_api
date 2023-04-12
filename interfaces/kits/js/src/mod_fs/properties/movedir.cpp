@@ -67,13 +67,13 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
         return { false, nullptr, nullptr, 0 };
     }
     auto [resGetSecondArg, dest, unused] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
-    if (!resGetSecondArg || !filesystem::is_directory(filesystem::status(src.get()))) {
+    if (!resGetSecondArg || !filesystem::is_directory(filesystem::status(dest.get()))) {
         HILOGE("Invalid dest");
         return { false, nullptr, nullptr, 0 };
     }
     int mode = 0;
-    bool resGetThirdArg = false;
     if (funcArg.GetArgc() >= NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number)) {
+        bool resGetThirdArg = false;
         tie(resGetThirdArg, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
         if (!resGetThirdArg || (mode < DIRMODE_MIN || mode > DIRMODE_MAX)) {
             HILOGE("Invalid mode");
@@ -301,12 +301,8 @@ napi_value MoveDir::Sync(napi_env env, napi_callback_info info)
 
 struct MoveDirArgs {
     vector<ErrFiles> errfiles;
-    explicit MoveDirArgs()
-    {
-        errfiles = vector<ErrFiles>();
-    }
+    int errNo = 0;
     ~MoveDirArgs() = default;
-    int errNo;
 };
 
 napi_value MoveDir::Async(napi_env env, napi_callback_info info)
@@ -324,8 +320,9 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<MoveDirArgs>();
-    if (!arg) {
+    if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     auto cbExec = [srcPath = string(src.get()), destPath = string(dest.get()), mode = mode, arg]() -> NError {
