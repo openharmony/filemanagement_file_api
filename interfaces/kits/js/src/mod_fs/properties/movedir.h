@@ -46,11 +46,7 @@ public:
 struct ErrFiles {
     std::string srcFiles;
     std::string destFiles;
-    ErrFiles(std::string src, std::string dest)
-    {
-        srcFiles = src;
-        destFiles = dest;
-    }
+    ErrFiles(const std::string& src, const std::string& dest) : srcFiles(src), destFiles(dest) {}
     ~ErrFiles() = default;
 };
 
