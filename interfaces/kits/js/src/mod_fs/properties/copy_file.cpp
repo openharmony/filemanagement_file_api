@@ -44,7 +44,7 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
                              UV_FS_COPYFILE_FICLONE, nullptr);
     if (ret < 0) {
         HILOGE("Failed to copy file when all parameters are paths");
-        return NError(errno);
+        return NError(ret);
     }
     return NError(ERRNO_NOERR);
 }

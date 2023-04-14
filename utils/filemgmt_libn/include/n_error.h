@@ -129,7 +129,8 @@ enum ErrCodeSuffixOfUserFileService {
     E_REMOVE,
     E_INIT,
     E_NOTIFY,
-    E_CONNECT
+    E_CONNECT,
+    E_COUNT
 };
 
 enum ErrCodeSuffixOfDistributedFile {
@@ -336,6 +337,7 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_NOTIFY, { USER_FILE_SERVICE_SYS_CAP_TAG + E_NOTIFY, "Fail to notify agent" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_CONNECT, { USER_FILE_SERVICE_SYS_CAP_TAG + E_CONNECT,
         "Fail to connect file access extension ability" } },
+    { USER_FILE_SERVICE_SYS_CAP_TAG + E_COUNT, { USER_FILE_SERVICE_SYS_CAP_TAG + E_COUNT, "Too many records" } },
     { E_PERMISSION, { E_PERMISSION, "Permission verification failed" } },
     { E_PERMISSION_SYS, { E_PERMISSION_SYS, "The caller is not a system application" } },
     { E_PARAMS, { E_PARAMS, "The input parameter is invalid" } },
