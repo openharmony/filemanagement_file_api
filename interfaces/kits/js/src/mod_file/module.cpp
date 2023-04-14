@@ -29,7 +29,7 @@ static napi_value Export(napi_env env, napi_value exports)
     std::vector<unique_ptr<NExporter> > products;
     products.emplace_back(make_unique<FileNExporter>(env, exports));
 
-    for (auto && product : products) {
+    for (auto &&product : products) {
         if (!product->Export()) {
             HILOGE("INNER BUG. Failed to export class %{public}s for module file", product->GetClassName().c_str());
             return nullptr;
