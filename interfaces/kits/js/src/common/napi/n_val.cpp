@@ -72,6 +72,16 @@ tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF8String() const
     return make_tuple(status == napi_ok, move(str), strLen);
 }
 
+tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF8String(string_view defaultValue) const
+{
+    if (TypeIs(napi_undefined) || TypeIs(napi_function)) {
+        auto str = make_unique<char[]>(defaultValue.size() + 1);
+        copy(defaultValue.begin(), defaultValue.end(), str.get());
+        return make_tuple(true, move(str), defaultValue.size());
+    }
+    return ToUTF8String();
+}
+
 tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF16String() const
 {
 #ifdef FILE_SUBSYSTEM_DEBUG_LOCAL
@@ -110,6 +120,14 @@ tuple<bool, bool> NVal::ToBool() const
     return make_tuple(status == napi_ok, flag);
 }
 
+tuple<bool, bool> NVal::ToBool(bool defaultValue) const
+{
+    if (TypeIs(napi_undefined) || TypeIs(napi_function)) {
+        return make_tuple(true, defaultValue);
+    }
+    return ToBool();
+}
+
 tuple<bool, int32_t> NVal::ToInt32() const
 {
     int32_t res = 0;
@@ -117,11 +135,27 @@ tuple<bool, int32_t> NVal::ToInt32() const
     return make_tuple(status == napi_ok, res);
 }
 
+tuple<bool, int32_t> NVal::ToInt32(int32_t defaultValue) const
+{
+    if (TypeIs(napi_undefined) || TypeIs(napi_function)) {
+        return make_tuple(true, defaultValue);
+    }
+    return ToInt32();
+}
+
 tuple<bool, int64_t> NVal::ToInt64() const
 {
     int64_t res = 0;
     napi_status status = napi_get_value_int64(env_, val_, &res);
     return make_tuple(status == napi_ok, res);
+}
+
+tuple<bool, int64_t> NVal::ToInt64(int64_t defaultValue) const
+{
+    if (TypeIs(napi_undefined) || TypeIs(napi_function)) {
+        return make_tuple(true, defaultValue);
+    }
+    return ToInt64();
 }
 
 tuple<bool, double> NVal::ToDouble() const

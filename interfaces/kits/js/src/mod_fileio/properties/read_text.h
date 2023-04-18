@@ -25,16 +25,14 @@ namespace DistributedFS {
 namespace ModuleFileIO {
 struct AsyncReadTextArg {
     NRef _refReadBuf;
-    std::unique_ptr<char[]> buf;
-    ssize_t len = 0;
+    std::unique_ptr<char[]> buf = nullptr;
+    int64_t len = 0;
     explicit AsyncReadTextArg(NVal refReadBuf) : _refReadBuf(refReadBuf) {};
     ~AsyncReadTextArg() = default;
 };
 
 class ReadText final {
 public:
-static UniError AsyncExec(const std::string &path, std::shared_ptr<AsyncReadTextArg> arg, ssize_t position,
-        bool hasLen, ssize_t len);
     static napi_value Async(napi_env env, napi_callback_info info);
     static napi_value Sync(napi_env env, napi_callback_info info);
 };

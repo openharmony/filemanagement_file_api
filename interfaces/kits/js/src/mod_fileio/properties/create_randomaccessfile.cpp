@@ -87,15 +87,15 @@ static tuple<bool, FileInfo, size_t> ParseJsFileAndFP(napi_env env, napi_value p
 
 static tuple<bool, int> GetJsFlags(napi_env env, const NFuncArg &funcArg, FileInfo &fileInfo)
 {
-    int flags = O_RDONLY;
-    bool succ = false;
+    unsigned int flags = O_RDONLY;
     if (fileInfo.isPath) {
         if (funcArg.GetArgc() >= NARG_CNT::THREE && !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function)) {
-            tie(succ, flags) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
-            if (!succ) {
+            auto [succ, mode] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
+            if (!succ || mode < 0) {
                 UniError(EINVAL).ThrowErr(env, "Invalid flags");
                 return { false, flags };
             }
+            flags = static_cast<unsigned int>(mode);
             (void)CommonFunc::ConvertJsFlags(flags);
         }
     }

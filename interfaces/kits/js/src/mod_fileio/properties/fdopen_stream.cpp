@@ -52,7 +52,7 @@ static NVal InstantiateStream(napi_env env, unique_ptr<FILE, decltype(&fclose)> 
 static tuple<bool, int, string> GetFdopenStreamArgs(napi_env env, const NFuncArg &funcArg)
 {
     auto [resGetFirstArg, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
-    if (!resGetFirstArg) {
+    if (!resGetFirstArg || fd < 0) {
         UniError(EINVAL).ThrowErr(env, "Arg fd is required to be type integer");
         return { false, -1, "" };
     }

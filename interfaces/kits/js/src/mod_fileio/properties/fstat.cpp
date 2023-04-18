@@ -41,7 +41,7 @@ napi_value Fstat::Sync(napi_env env, napi_callback_info info)
     }
 
     auto [resGetFirstArg, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
-    if (!resGetFirstArg) {
+    if (!resGetFirstArg || fd < 0) {
         UniError(EINVAL).ThrowErr(env, "Invalid fd");
         return nullptr;
     }
@@ -81,7 +81,7 @@ napi_value Fstat::Async(napi_env env, napi_callback_info info)
     }
 
     auto [resGetFirstArg, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
-    if (!resGetFirstArg) {
+    if (!resGetFirstArg || fd < 0) {
         UniError(EINVAL).ThrowErr(env, "Invalid fd");
         return nullptr;
     }

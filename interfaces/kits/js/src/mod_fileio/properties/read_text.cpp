@@ -30,46 +30,40 @@ namespace DistributedFS {
 namespace ModuleFileIO {
 using namespace std;
 
-static tuple<bool, ssize_t, bool, ssize_t, unique_ptr<char[]>, bool> GetReadTextArg(napi_env env, napi_value argOption)
+static tuple<bool, int64_t, bool, size_t, unique_ptr<char[]>> GetReadTextArg(napi_env env, napi_value argOption)
 {
     NVal op(env, argOption);
-    ssize_t position = 0;
-    ssize_t len = 0;
+    int64_t position = -1;
+    size_t len = 0;
     bool succ = false;
-    bool hasOp = false;
     bool hasLen = false;
-    unique_ptr<char[]> encoding;
+    unique_ptr<char[]> encoding = nullptr;
 
-    if (op.HasProp("position")) {
-        tie(succ, position) = op.GetProp("position").ToInt32();
-        if (!succ) {
-            return { false, position, hasLen, len, nullptr, hasOp };
+    if (op.HasProp("position") && !op.GetProp("position").TypeIs(napi_undefined)) {
+        tie(succ, position) = op.GetProp("position").ToInt64();
+        if (!succ || position < 0) {
+            return { false, position, hasLen, len, nullptr };
         }
-        hasOp = true;
     }
 
-    if (op.HasProp("length")) {
-        tie(succ, len) = op.GetProp("length").ToInt32();
-        if (!succ) {
-            return { false, position, hasLen, len, nullptr, hasOp };
+    if (op.HasProp("length") && !op.GetProp("length").TypeIs(napi_undefined)) {
+        auto [succ, length] = op.GetProp("length").ToInt64();
+        if (!succ || length < 0 || length > UINT_MAX) {
+            return { false, position, hasLen, len, nullptr };
         }
-        hasOp = true;
+        len = static_cast<size_t>(length);
         hasLen = true;
     }
 
     if (op.HasProp("encoding")) {
-        auto [succ, encoding, unuse] = op.GetProp("encoding").ToUTF8String();
-        if (!succ) {
-            return { false, position, hasLen, len, nullptr, hasOp };
+        auto [succ, encoding, unuse] = op.GetProp("encoding").ToUTF8String("utf-8");
+        string_view encodingStr(encoding.get());
+        if (!succ || encodingStr != "utf-8") {
+            return { false, position, hasLen, len, nullptr };
         }
-        hasOp = true;
     }
 
-    if (!op.TypeIs(napi_function)) {
-        hasOp = true;
-    }
-
-    return { true, position, hasLen, len, move(encoding), hasOp };
+    return { true, position, hasLen, len, move(encoding) };
 }
 
 napi_value ReadText::Sync(napi_env env, napi_callback_info info)
@@ -86,14 +80,13 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetReadTextArg, position, hasLen, len, encoding, useless] = GetReadTextArg(env, funcArg[NARG_POS::SECOND]);
+    auto [resGetReadTextArg, position, hasLen, len, encoding] = GetReadTextArg(env, funcArg[NARG_POS::SECOND]);
     if (!resGetReadTextArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid option");
         return nullptr;
     }
 
     struct stat statbf;
-    int ret;
     FDGuard sfd;
     sfd.SetFD(open(path.get(), O_RDONLY));
     if ((!sfd) || (fstat(sfd.GetFD(), &statbf) == -1)) {
@@ -106,8 +99,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    len = !hasLen ? statbf.st_size : len;
-    len = ((len  < statbf.st_size) ? len : statbf.st_size);
+    len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     std::unique_ptr<char[]> readbuf = std::make_unique<char[]>(len + 1);
     if (readbuf == nullptr) {
         UniError(EINVAL).ThrowErr(env, "file is too large");
@@ -118,8 +110,12 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         UniError(errno).ThrowErr(env, "dfs mem error");
         return nullptr;
     }
-
-    ret = position > 0 ? pread(sfd.GetFD(), readbuf.get(), len, position) : read(sfd.GetFD(), readbuf.get(), len);
+    ssize_t ret = 0;
+    if (position >= 0) {
+        ret = pread(sfd.GetFD(), readbuf.get(), len, position);
+    } else {
+        ret = read(sfd.GetFD(), readbuf.get(), len);
+    }
     if (ret == -1) {
         UniError(EINVAL).ThrowErr(env, "Invalid read file");
         return nullptr;
@@ -128,8 +124,8 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     return NVal::CreateUTF8String(env, readbuf.get(), ret).val_;
 }
 
-UniError ReadText::AsyncExec(const std::string &path, std::shared_ptr<AsyncReadTextArg> arg, ssize_t position,
-    bool hasLen, ssize_t len)
+static UniError AsyncExec(const std::string &path, std::shared_ptr<AsyncReadTextArg> arg, int64_t position,
+    bool hasLen, size_t len)
 {
     if (arg == nullptr) {
         return UniError(ENOMEM);
@@ -137,7 +133,6 @@ UniError ReadText::AsyncExec(const std::string &path, std::shared_ptr<AsyncReadT
 
     FDGuard sfd;
     struct stat statbf;
-    arg->len = len;
     sfd.SetFD(open(path.c_str(), O_RDONLY));
     if (sfd.GetFD() == -1) {
         return UniError(EINVAL);
@@ -151,20 +146,16 @@ UniError ReadText::AsyncExec(const std::string &path, std::shared_ptr<AsyncReadT
         return UniError(EINVAL);
     }
 
-    if (!hasLen) {
-        arg->len = statbf.st_size;
-    }
-
-    arg->len = ((arg->len < statbf.st_size) ? arg->len : statbf.st_size);
-    arg->buf = std::make_unique<char[]>(arg->len);
+    len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
+    arg->buf = std::make_unique<char[]>(len);
     if (arg->buf == nullptr) {
         return UniError(ENOMEM);
     }
 
-    if (position > 0) {
-        arg->len = pread(sfd.GetFD(), arg->buf.get(), arg->len, position);
+    if (position >= 0) {
+        arg->len = pread(sfd.GetFD(), arg->buf.get(), len, position);
     } else {
-        arg->len = read(sfd.GetFD(), arg->buf.get(), arg->len);
+        arg->len = read(sfd.GetFD(), arg->buf.get(), len);
     }
 
     if (arg->len == -1) {
@@ -188,7 +179,7 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetSecondArg, position, hasLen, len, encoding, hasOp] = GetReadTextArg(env, funcArg[NARG_POS::SECOND]);
+    auto [resGetSecondArg, position, hasLen, len, encoding] = GetReadTextArg(env, funcArg[NARG_POS::SECOND]);
     if (!resGetSecondArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid option");
         return nullptr;
@@ -212,13 +203,12 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
         }
     };
 
-    size_t argc = funcArg.GetArgc();
     NVal thisVar(env, funcArg.GetThisVar());
-    if (argc == NARG_CNT::ONE || (argc == NARG_CNT::TWO && hasOp)) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule("FileIOReadText", cbExec, cbComplete).val_;
     } else {
-        int cbIdx = !hasOp ? NARG_POS::SECOND : NARG_POS::THIRD;
-        NVal cb(env, funcArg[cbIdx]);
+        NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule("FileIOReadText", cbExec, cbComplete).val_;
     }
 }

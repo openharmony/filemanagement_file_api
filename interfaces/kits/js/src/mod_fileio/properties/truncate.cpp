@@ -38,17 +38,15 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    int ret = -1;
-    if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        ret = truncate(path.get(), 0);
-    } else {
-        auto [resGetSecondArg, len] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
+    int64_t len = 0;
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
+        bool resGetSecondArg = false;
+        tie(resGetSecondArg, len) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64(len);
         if (!resGetSecondArg) {
             UniError(EINVAL).ThrowErr(env, "Invalid len");
         }
-        ret = truncate(path.get(), len);
     }
-
+    int ret = truncate(path.get(), len);
     if (ret == -1) {
         UniError(errno).ThrowErr(env);
         return nullptr;
@@ -71,15 +69,14 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    int len = 0;
-    size_t argc = funcArg.GetArgc();
-    if (argc > NARG_CNT::ONE) {
-        auto [resGetSecondArg, length] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
+    int64_t len = 0;
+    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
+        bool resGetSecondArg = false;
+        tie(resGetSecondArg, len) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64(len);
         if (!resGetSecondArg) {
             UniError(EINVAL).ThrowErr(env, "Invalid len");
             return nullptr;
         }
-        len = length;
     }
 
     auto cbExec = [path = string(path.get()), len](napi_env env) -> UniError {
@@ -100,12 +97,13 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    const string procedureName = "FileIOTruncate";
-    if (argc == NARG_CNT::ONE || (argc == NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
+    const string PROCEDURENAME = "FileIOTruncate";
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURENAME, cbExec, cbCompl).val_;
     } else {
-        NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
+        NVal cb(env, funcArg[funcArg.GetArgc() - 1]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURENAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO
