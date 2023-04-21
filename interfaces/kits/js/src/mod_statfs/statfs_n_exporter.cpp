@@ -85,14 +85,14 @@ napi_value GetFrSize(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string procedureName = "GetFrSize";
+    static const std::string PROCEDURE_NAME = "GetFrSize";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBSizeSync(napi_env env, napi_callback_info info)
@@ -154,14 +154,14 @@ napi_value GetBSize(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string procedureName = "GetBSize";
+    static const std::string PROCEDURE_NAME = "GetBSize";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBAvailSync(napi_env env, napi_callback_info info)
@@ -223,14 +223,14 @@ napi_value GetBAvail(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string procedureName = "GetBAvail";
+    static const std::string PROCEDURE_NAME = "GetBAvail";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBlocksSync(napi_env env, napi_callback_info info)
@@ -292,14 +292,14 @@ napi_value GetBlocks(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string procedureName = "GetBlocks";
+    static const std::string PROCEDURE_NAME = "GetBlocks";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBFreeSync(napi_env env, napi_callback_info info)
@@ -361,14 +361,14 @@ napi_value GetBFree(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string procedureName = "GetBFree";
+    static const std::string PROCEDURE_NAME = "GetBFree";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetFreeBytesSync(napi_env env, napi_callback_info info)
@@ -433,14 +433,14 @@ napi_value GetFreeBytes(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string procedureName = "GetFreeBytes";
+    static const std::string PROCEDURE_NAME = "GetFreeBytes";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetTotalBytesSync(napi_env env, napi_callback_info info)
@@ -505,14 +505,14 @@ napi_value GetTotalBytes(napi_env env, napi_callback_info info)
         return { NVal::CreateInt64(env, *resultSize) };
     };
 
-    static const std::string procedureName = "GetTotalBytes";
+    static const std::string PROCEDURE_NAME = "GetTotalBytes";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 } // namespace ModuleStatfs
 } // namespace FileManagement
