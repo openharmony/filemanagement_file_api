@@ -98,6 +98,11 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
             return nullptr;
         }
     } else {
+        auto err = CloseFd(fileStruct.fileEntity->fd_->GetFD());
+        if (err) {
+            err.ThrowErr(env);
+            return nullptr;
+        }
         auto fp = NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg[NARG_POS::FIRST]);
         if (!fp) {
             NError(EINVAL).ThrowErr(env);
@@ -125,6 +130,8 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
     }
 
     if (!fileStruct.isFd) {
+        fileStruct.fd = fileStruct.fileEntity->fd_->GetFD();
+        fileStruct.isFd = true;
         auto fp = NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg[NARG_POS::FIRST]);
         if (!fp) {
             NError(EINVAL).ThrowErr(env);
