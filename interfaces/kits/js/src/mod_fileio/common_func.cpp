@@ -134,30 +134,30 @@ static tuple<bool, size_t> GetActualLenV9(napi_env env, int64_t bufLen, int64_t 
 
 int CommonFunc::ConvertJsFlags(int &flags)
 {
-    static constexpr int USR_O_RDONLY = 00;
-    static constexpr int USR_O_WRONLY = 01;
-    static constexpr int USR_O_RDWR = 02;
-    static constexpr int USR_O_CREAT = 0100;
-    static constexpr int USR_O_EXCL = 0200;
-    static constexpr int USR_O_TRUNC = 01000;
-    static constexpr int USR_O_APPEND = 02000;
-    static constexpr int USR_O_NONBLOCK = 04000;
-    static constexpr int USR_O_DIRECTORY = 0200000;
-    static constexpr int USR_O_NOFOLLOW = 0400000;
-    static constexpr int USR_O_SYNC = 04010000;
+    static constexpr unsigned int usrReadOnly = 00;
+    static constexpr unsigned int usrWriteOnly = 01;
+    static constexpr unsigned int usrReadWrite = 02;
+    static constexpr unsigned int usrCreate = 0100;
+    static constexpr unsigned int usrExecuteLock = 0200;
+    static constexpr unsigned int usrTruncate = 01000;
+    static constexpr unsigned int usrAppend = 02000;
+    static constexpr unsigned int usrNoneBlock = 04000;
+    static constexpr unsigned int usrDirectory = 0200000;
+    static constexpr unsigned int usrNoFollowed = 0400000;
+    static constexpr unsigned int usrSynchronous = 04010000;
 
-    int flagsABI = 0;
-    flagsABI |= ((flags & USR_O_RDONLY) == USR_O_RDONLY) ? O_RDONLY : 0;
-    flagsABI |= ((flags & USR_O_WRONLY) == USR_O_WRONLY) ? O_WRONLY : 0;
-    flagsABI |= ((flags & USR_O_RDWR) == USR_O_RDWR) ? O_RDWR : 0;
-    flagsABI |= ((flags & USR_O_CREAT) == USR_O_CREAT) ? O_CREAT : 0;
-    flagsABI |= ((flags & USR_O_EXCL) == USR_O_EXCL) ? O_EXCL : 0;
-    flagsABI |= ((flags & USR_O_TRUNC) == USR_O_TRUNC) ? O_TRUNC : 0;
-    flagsABI |= ((flags & USR_O_APPEND) == USR_O_APPEND) ? O_APPEND : 0;
-    flagsABI |= ((flags & USR_O_NONBLOCK) == USR_O_NONBLOCK) ? O_NONBLOCK : 0;
-    flagsABI |= ((flags & USR_O_DIRECTORY) == USR_O_DIRECTORY) ? O_DIRECTORY : 0;
-    flagsABI |= ((flags & USR_O_NOFOLLOW) == USR_O_NOFOLLOW) ? O_NOFOLLOW : 0;
-    flagsABI |= ((flags & USR_O_SYNC) == USR_O_SYNC) ? O_SYNC : 0;
+    unsigned int flagsABI = 0;
+    flagsABI |= ((flags & usrReadOnly) == usrReadOnly) ? O_RDONLY : 0;
+    flagsABI |= ((flags & usrWriteOnly) == usrWriteOnly) ? O_WRONLY : 0;
+    flagsABI |= ((flags & usrReadWrite) == usrReadWrite) ? O_RDWR : 0;
+    flagsABI |= ((flags & usrCreate) == usrCreate) ? O_CREAT : 0;
+    flagsABI |= ((flags & usrExecuteLock) == usrExecuteLock) ? O_EXCL : 0;
+    flagsABI |= ((flags & usrTruncate) == usrTruncate) ? O_TRUNC : 0;
+    flagsABI |= ((flags & usrAppend) == usrAppend) ? O_APPEND : 0;
+    flagsABI |= ((flags & usrNoneBlock) == usrNoneBlock) ? O_NONBLOCK : 0;
+    flagsABI |= ((flags & usrDirectory) == usrDirectory) ? O_DIRECTORY : 0;
+    flagsABI |= ((flags & usrNoFollowed) == usrNoFollowed) ? O_NOFOLLOW : 0;
+    flagsABI |= ((flags & usrSynchronous) == usrSynchronous) ? O_SYNC : 0;
     flags = flagsABI;
     return flagsABI;
 }
