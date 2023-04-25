@@ -53,7 +53,7 @@ static bool CheckSuffix(const vector<string> &suffixs)
 static bool GetFileFilterParam(const NVal &argv, OHOS::DistributedFS::FileFilter *filter)
 {
     bool ret = false;
-    if (argv.HasProp("suffix")) {
+    if (argv.HasProp("suffix") && !argv.GetProp("suffix").TypeIs(napi_undefined)) {
         vector<string> suffixs;
         tie(ret, suffixs, ignore) = argv.GetProp("suffix").ToStringArray();
         if (!ret) {
@@ -66,7 +66,7 @@ static bool GetFileFilterParam(const NVal &argv, OHOS::DistributedFS::FileFilter
         }
         filter->SetSuffix(suffixs);
     }
-    if (argv.HasProp("displayName")) {
+    if (argv.HasProp("displayName") && !argv.GetProp("displayName").TypeIs(napi_undefined)) {
         vector<string> displayNames;
         tie(ret, displayNames, ignore) = argv.GetProp("displayName").ToStringArray();
         if (!ret) {
@@ -79,7 +79,7 @@ static bool GetFileFilterParam(const NVal &argv, OHOS::DistributedFS::FileFilter
         }
         filter->SetDisplayName(displayNames);
     }
-    if (argv.HasProp("fileSizeOver")) {
+    if (argv.HasProp("fileSizeOver") && !argv.GetProp("fileSizeOver").TypeIs(napi_undefined)) {
         int64_t fileSizeOver;
         tie(ret, fileSizeOver) = argv.GetProp("fileSizeOver").ToInt64();
         if (!ret || fileSizeOver < 0) {
@@ -88,7 +88,7 @@ static bool GetFileFilterParam(const NVal &argv, OHOS::DistributedFS::FileFilter
         }
         filter->SetFileSizeOver(fileSizeOver);
     }
-    if (argv.HasProp("lastModifiedAfter")) {
+    if (argv.HasProp("lastModifiedAfter") && !argv.GetProp("lastModifiedAfter").TypeIs(napi_undefined)) {
         double lastModifiedAfter;
         tie(ret, lastModifiedAfter) = argv.GetProp("lastModifiedAfter").ToDouble();
         if (!ret || lastModifiedAfter < 0) {
@@ -104,18 +104,15 @@ static bool GetOptionParam(const NVal &argv, OptionArgs *optionArgs)
 {
     bool succ = false;
     if (argv.HasProp("listNum")) {
-        tie(succ, optionArgs->listNum) = argv.GetProp("listNum").ToInt64();
-        if (!succ) {
-            HILOGE("Failed to get listNum prop.");
-            return false;
-        } else if (optionArgs->listNum < 0) {
-            HILOGE("Invalid listNum.");
+        tie(succ, optionArgs->listNum) = argv.GetProp("listNum").ToInt64(0);
+        if (!succ || optionArgs->listNum < 0) {
+            HILOGE("Failed to get listNum prop");
             return false;
         }
     }
 
     if (argv.HasProp("recursion")) {
-        tie(succ, optionArgs->recursion) = argv.GetProp("recursion").ToBool();
+        tie(succ, optionArgs->recursion) = argv.GetProp("recursion").ToBool(false);
         if (!succ) {
             HILOGE("Failed to get recursion prop.");
             return false;
@@ -123,11 +120,13 @@ static bool GetOptionParam(const NVal &argv, OptionArgs *optionArgs)
     }
 
     if (argv.HasProp("filter")) {
-        NVal(filterProp) = argv.GetProp("filter");
-        auto ret = GetFileFilterParam(NVal(filterProp), &optionArgs->filter);
-        if (!ret) {
-            HILOGE("Failed to get filter prop.");
-            return false;
+        NVal filterProp = argv.GetProp("filter");
+        if (!filterProp.TypeIs(napi_undefined)) {
+            auto ret = GetFileFilterParam(filterProp, &optionArgs->filter);
+            if (!ret) {
+                HILOGE("Failed to get filter prop.");
+                return false;
+            }
         }
     }
     return true;
@@ -135,18 +134,19 @@ static bool GetOptionParam(const NVal &argv, OptionArgs *optionArgs)
 
 static bool GetOptionArg(napi_env env, const NFuncArg &funcArg, OptionArgs &optionArgs, const string &path)
 {
-    auto options = NVal(env, funcArg[NARG_POS::SECOND]);
-    if (funcArg.GetArgc() >= NARG_CNT::TWO && options.TypeIs(napi_object)) {
-        if (!GetOptionParam(options, &optionArgs)) {
-            HILOGE("Invalid options");
-            return false;
-        }
-    } else if (funcArg.GetArgc() >= NARG_CNT::TWO && !options.TypeIs(napi_function)) {
-        HILOGE("Invalid options");
-        return false;
-    }
     optionArgs.path = path;
-    return true;
+    if (funcArg.GetArgc() == NARG_CNT::ONE) {
+        return true;
+    }
+    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
+        auto options = NVal(env, funcArg[NARG_POS::SECOND]);
+        if (options.TypeIs(napi_object)) {
+            return GetOptionParam(options, &optionArgs);
+        } else if (options.TypeIs(napi_undefined) || options.TypeIs(napi_function)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 static bool FilterSuffix(const vector<string>& suffixs, const struct dirent& filename)
@@ -314,6 +314,7 @@ napi_value ListFile::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     if (!GetOptionArg(env, funcArg, g_optionArgs, string(path.get()))) {
+        HILOGE("Invalid options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -345,6 +346,7 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
 
     OptionArgs optionArgsTmp = {};
     if (!GetOptionArg(env, funcArg, optionArgsTmp, string(path.get()))) {
+        HILOGE("Invalid options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -377,11 +379,10 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
     NVal thisVar(env, funcArg.GetThisVar());
 
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
-            NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_object))) {
+           !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(LIST_FILE_PRODUCE_NAME, cbExec, cbCompl).val_;
     } else {
-        int32_t cbIdx = (funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD;
-        NVal cb(env, funcArg[cbIdx]);
+        NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(LIST_FILE_PRODUCE_NAME, cbExec, cbCompl).val_;
     }
 }

@@ -67,14 +67,14 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
         return { false, nullptr, nullptr, 0 };
     }
     auto [resGetSecondArg, dest, unused] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
-    if (!resGetSecondArg || !filesystem::is_directory(filesystem::status(src.get()))) {
+    if (!resGetSecondArg || !filesystem::is_directory(filesystem::status(dest.get()))) {
         HILOGE("Invalid dest");
         return { false, nullptr, nullptr, 0 };
     }
     int mode = 0;
-    bool resGetThirdArg = false;
-    if (funcArg.GetArgc() >= NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number)) {
-        tie(resGetThirdArg, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
+    if (funcArg.GetArgc() >= NARG_CNT::THREE) {
+        bool resGetThirdArg = false;
+        tie(resGetThirdArg, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(mode);
         if (!resGetThirdArg || (mode < DIRMODE_MIN || mode > DIRMODE_MAX)) {
             HILOGE("Invalid mode");
             return { false, nullptr, nullptr, 0 };
@@ -301,12 +301,8 @@ napi_value MoveDir::Sync(napi_env env, napi_callback_info info)
 
 struct MoveDirArgs {
     vector<ErrFiles> errfiles;
-    explicit MoveDirArgs()
-    {
-        errfiles = vector<ErrFiles>();
-    }
+    int errNo = 0;
     ~MoveDirArgs() = default;
-    int errNo;
 };
 
 napi_value MoveDir::Async(napi_env env, napi_callback_info info)
@@ -324,8 +320,9 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<MoveDirArgs>();
-    if (!arg) {
+    if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     auto cbExec = [srcPath = string(src.get()), destPath = string(dest.get()), mode = mode, arg]() -> NError {
@@ -353,7 +350,7 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
 
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
-            NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number))) {
+            !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_MOVEDIR_NAME, cbExec, cbComplCallback).val_;
     } else {
         int cbIdex = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);

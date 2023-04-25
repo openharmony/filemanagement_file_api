@@ -44,11 +44,15 @@ public:
 
     /* SHOULD ONLY BE USED FOR EXPECTED TYPE */
     std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8String() const;
+    std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8String(std::string defaultValue) const;
     std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF16String() const;
     std::tuple<bool, void *> ToPointer() const;
     std::tuple<bool, bool> ToBool() const;
+    std::tuple<bool, bool> ToBool(bool defaultValue) const;
     std::tuple<bool, int32_t> ToInt32() const;
+    std::tuple<bool, int32_t> ToInt32(int32_t defaultValue) const;
     std::tuple<bool, int64_t> ToInt64() const;
+    std::tuple<bool, int64_t> ToInt64(int64_t defaultValue) const;
     std::tuple<bool, void *, size_t> ToArraybuffer() const;
     std::tuple<bool, void *, size_t> ToTypedArray() const;
     std::tuple<bool, std::vector<std::string>, uint32_t> ToStringArray();

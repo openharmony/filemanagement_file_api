@@ -115,28 +115,17 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
     return SendFileCore(srcFile, destFile, statbf);
 }
 
-static tuple<bool, int, bool> ParseJsModeAndProm(napi_env env, const NFuncArg& funcArg)
+static tuple<bool, int> ParseJsMode(napi_env env, const NFuncArg& funcArg)
 {
-    bool promise = false;
     bool succ = false;
     int mode = 0;
-    if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        return { true, mode, true };
-    }
-    if (NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number)) {
-        if (funcArg.GetArgc() == NARG_CNT::THREE) {
-            promise = true;
-        }
-        tie(succ, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
-        if (succ && !mode) {
-            return { true, mode, promise };
+    if (funcArg.GetArgc() >= NARG_CNT::THREE) {
+        tie(succ, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(mode);
+        if (!succ || mode) {
+            return { false, mode };
         }
     }
-    if (NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function)) {
-        return { true, mode, promise };
-    }
-
-    return { false, mode, promise };
+    return { true, mode };
 }
 
 static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
@@ -172,8 +161,8 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succMode, mode, unused] = ParseJsModeAndProm(env, funcArg);
-    if (!succMode || mode) {
+    auto [succMode, mode] = ParseJsMode(env, funcArg);
+    if (!succMode) {
         HILOGE("Failed to convert mode to int32");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -212,8 +201,8 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succMode, mode, promise] = ParseJsModeAndProm(env, funcArg);
-    if (!succMode || mode) {
+    auto [succMode, mode] = ParseJsMode(env, funcArg);
+    if (!succMode) {
         HILOGE("Failed to convert mode to int32");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -234,7 +223,8 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::TWO || promise) {
+    if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
+        !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_COPYFILE_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH)]);
