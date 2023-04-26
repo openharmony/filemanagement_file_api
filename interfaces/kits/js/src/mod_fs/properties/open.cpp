@@ -57,6 +57,25 @@ static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcAr
     return { true, mode };
 }
 
+static string DealWithUriWithName(string str)
+{
+    static uint32_t MEET_COUNT = 6;
+    uint32_t count = 0;
+    uint32_t index;
+    for (index = 0; index < str.length(); index++) {
+        if (str[index] == '/') {
+            count++;
+        }
+        if (count == MEET_COUNT) {
+            break;
+        }
+    }
+    if (count == MEET_COUNT) {
+        str = str.substr(0, index);
+    }
+    return str;
+}
+
 static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
 {
     napi_value objFile = NClass::InstantiateClass(env, FileNExporter::className_, {});
@@ -107,6 +126,7 @@ static int OpenFileByDatashare(string path, unsigned int flags)
         HILOGE("Failed to connect to datashare");
         return -E_PERMISSION;
     }
+    path = DealWithUriWithName(path);
     Uri uri(path);
     fd = dataShareHelper->OpenFile(uri, CommonFunc::GetModeFromFlags(flags));
     return fd;
