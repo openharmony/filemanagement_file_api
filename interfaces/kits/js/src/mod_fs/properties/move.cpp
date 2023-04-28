@@ -18,7 +18,6 @@
 #ifdef __MUSL__
 #include <filesystem>
 #else
-#include <securec.h>
 #include <sys/stat.h>
 #endif
 
@@ -47,7 +46,7 @@ static bool CheckDir(const string &path)
 static bool CheckDir(const string &path)
 {
     struct stat fileInformation;
-    if (EOK == stat(path.c_str(), &fileInformation)) {
+    if (stat(path.c_str(), &fileInformation) == 0) {
         if (fileInformation.st_mode & S_IFDIR) {
             return true;
         }

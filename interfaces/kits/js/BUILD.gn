@@ -107,6 +107,7 @@ ohos_shared_library("fs") {
   relative_install_dir = "module/file"
 
   include_dirs = [
+    "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_fs",
     "//third_party/libuv/include",
