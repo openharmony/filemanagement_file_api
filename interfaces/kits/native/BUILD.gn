@@ -12,19 +12,18 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
 
 config("remote_uri_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "include",
-    "//utils/system/safwk/native/include",
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/filemanagement/file_api/interfaces/kits/native/remote_uri",
+    "remote_uri",
   ]
 }
 
 ohos_shared_library("remote_uri_native") {
-  sources = [ "//foundation/filemanagement/file_api/interfaces/kits/native/remote_uri/remote_uri.cpp" ]
+  sources = [ "remote_uri/remote_uri.cpp" ]
 
   public_configs = [ ":remote_uri_config" ]
 

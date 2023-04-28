@@ -1,7 +1,7 @@
 {
-    "name": "file_api",
+    "name": "@ohos/file_api",
     "description": "provides the application with JS interfaces for IO",
-    "version": "3.1",
+    "version": "4.0",
     "license": "Apache License 2.0",
     "publishAs": "code-segment",
     "segment": {
@@ -19,14 +19,15 @@
       ],
       "features": [],
       "adapted_system_type": ["standard"],
-      "rom": "",
-      "ram": "",
+      "rom": "4096KB",
+      "ram": "4096KB",
       "deps": {
         "components": [
             "ability_base",
             "ability_manager",
             "appexecfwk_base",
             "appexecfwk_core",
+            "hiviewdfx",
             "want",
             "libhilog",
             "ipc_core",

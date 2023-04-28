@@ -32,10 +32,10 @@ ohos_shared_library("fileio") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "//foundation/arkui/napi/interfaces/kits",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/file_helper",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
+    "${arkui_napi_path}/interfaces/kits",
+    "src/common/file_helper",
+    "src/common/napi",
+    "src/common/napi/n_async",
     "//third_party/node/src",
     "//third_party/bounds_checking_function/include",
     "//third_party/libuv/include",
@@ -90,8 +90,8 @@ ohos_shared_library("fileio") {
   ]
 
   deps = [
-    "//foundation/arkui/napi:ace_napi",
-    "//foundation/filemanagement/file_api/interfaces/kits/native:remote_uri_native",
+    "${arkui_napi_path}:ace_napi",
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/openssl:libcrypto_shared",
   ]
@@ -193,10 +193,10 @@ ohos_shared_library("file") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "//foundation/arkui/napi/interfaces/kits",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/file_helper",
+    "${arkui_napi_path}/interfaces/kits",
+    "src/common/napi",
+    "src/common/napi/n_async",
+    "src/common/file_helper",
     "//third_party/node/src",
     "//third_party/bounds_checking_function/include",
   ]
@@ -211,7 +211,7 @@ ohos_shared_library("file") {
 
   deps = [
     "${aafwk_kits_path}/ability/native:abilitykit_native",
-    "//foundation/arkui/napi:ace_napi",
+    "${arkui_napi_path}:ace_napi",
     "//third_party/bounds_checking_function:libsec_shared",
   ]
 
@@ -292,8 +292,8 @@ ohos_shared_library("document") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "//foundation/arkui/napi/interfaces/kits",
-    "//foundation/filemanagement/file_api/interfaces/kits/js/src/common/napi/n_async",
+    "${arkui_napi_path}/interfaces/kits",
+    "src/common/napi/n_async",
     "//third_party/node/src",
   ]
 
@@ -308,7 +308,7 @@ ohos_shared_library("document") {
     "src/mod_document/document_napi.cpp",
   ]
 
-  deps = [ "//foundation/arkui/napi:ace_napi" ]
+  deps = [ "${arkui_napi_path}:ace_napi" ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 }

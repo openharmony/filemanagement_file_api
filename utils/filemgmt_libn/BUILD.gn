@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
 
 config("libn_public_config") {
   visibility = [ ":*" ]
@@ -35,8 +36,8 @@ ohos_shared_library("filemgmt_libn") {
 
   public_configs = [ ":libn_public_config" ]
   public_deps = [
-    "//foundation/arkui/napi:ace_napi",
-    "//foundation/filemanagement/file_api/utils/filemgmt_libhilog",
+    "${file_api_path}/utils/filemgmt_libhilog",
+    "${arkui_napi_path}:ace_napi",
   ]
 
   subsystem_name = "filemanagement"
