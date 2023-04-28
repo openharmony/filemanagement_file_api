@@ -47,7 +47,7 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
     return { true, FileInfo { false, {}, move(fdg) } };
 };
 
-static NError TruncateCore(napi_env env, FileInfo &fileInfo, int truncateLen)
+static NError TruncateCore(napi_env env, FileInfo &fileInfo, int64_t truncateLen)
 {
     if (fileInfo.isPath) {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
@@ -101,10 +101,10 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    int truncateLen = 0;
+    int64_t truncateLen = 0;
     if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        tie(succ, truncateLen) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64();
-        if (!succ) {
+        tie(succ, truncateLen) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64(truncateLen);
+        if (!succ || truncateLen < 0) {
             HILOGE("Invalid truncate length");
             NError(EINVAL).ThrowErr(env);
             return nullptr;
@@ -131,10 +131,10 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
     if (!succ) {
         return nullptr;
     }
-    int truncateLen = 0;
-    if (funcArg.GetArgc() > NARG_CNT::ONE && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
-        tie(succ, truncateLen) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64();
-        if (!succ) {
+    int64_t truncateLen = 0;
+    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
+        tie(succ, truncateLen) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64(truncateLen);
+        if (!succ || truncateLen < 0) {
             HILOGE("Invalid truncate length");
             NError(EINVAL).ThrowErr(env);
             return nullptr;
@@ -151,17 +151,12 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
         }
     };
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE ||
-        (funcArg.GetArgc() == NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number))) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_TRUNCATE_NAME, cbExec, cbCompl).val_;
     } else {
-        if (funcArg.GetArgc() == NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function)) {
-            NVal cb(env, funcArg[NARG_POS::SECOND]);
-            return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_TRUNCATE_NAME, cbExec, cbCompl).val_;
-        } else {
-            NVal cb(env, funcArg[NARG_POS::THIRD]);
-            return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_TRUNCATE_NAME, cbExec, cbCompl).val_;
-        }
+        NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_TRUNCATE_NAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

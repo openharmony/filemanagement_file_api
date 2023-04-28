@@ -43,19 +43,19 @@ using namespace OHOS::AppExecFwk;
 
 static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
 {
-    unsigned int mode = O_RDONLY;
-    bool succ = false;
+    unsigned int flags = O_RDONLY;
     if (funcArg.GetArgc() >= NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
-        tie(succ, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-        unsigned int invalidMode = (O_WRONLY | O_RDWR);
-        if (!succ || ((mode & invalidMode) == invalidMode)) {
+        auto [succ, mode] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
+        int32_t invalidMode = (O_WRONLY | O_RDWR);
+        if (!succ || mode < 0 || ((mode & invalidMode) == invalidMode)) {
             HILOGE("Invalid mode");
             NError(EINVAL).ThrowErr(env);
-            return { false, mode };
+            return { false, flags };
         }
-        (void)CommonFunc::ConvertJsFlags(mode);
+        flags = static_cast<unsigned int>(mode);
+        (void)CommonFunc::ConvertJsFlags(flags);
     }
-    return { true, mode };
+    return { true, flags };
 }
 
 static string DealWithUriWithName(string str)
@@ -324,7 +324,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     };
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
-        NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number))) {
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_OPEN_NAME, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::SECOND);

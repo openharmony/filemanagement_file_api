@@ -70,29 +70,18 @@ void InitOpenMode(napi_env env, napi_value exports)
 static tuple<bool, size_t> GetActualLen(napi_env env, size_t bufLen, size_t bufOff, NVal op)
 {
     bool succ = false;
-    size_t retLen = 0;
+    size_t retLen = bufLen - bufOff;
 
     if (op.HasProp("length")) {
         int64_t opLength = 0;
-        tie(succ, opLength) = op.GetProp("length").ToInt64();
-        if (!succ) {
-            HILOGE("Invalid option.length, expect integer");
+        tie(succ, opLength) = op.GetProp("length").ToInt64(static_cast<int64_t>(retLen));
+        if (!succ || opLength < 0 || static_cast<size_t>(opLength) > retLen) {
+            HILOGE("Invalid option.length");
             NError(EINVAL).ThrowErr(env);
             return { false, 0 };
         }
-        if (opLength < 0) {
-            retLen = bufLen - bufOff;
-        } else if (static_cast<size_t>(opLength) > bufLen - bufOff) {
-            HILOGE("Invalid option.length, buffer limit exceeded");
-            NError(EINVAL).ThrowErr(env);
-            return { false, 0 };
-        } else {
-            retLen = static_cast<size_t>(opLength);
-        }
-    } else {
-        retLen = bufLen - bufOff;
+        retLen = static_cast<size_t>(opLength);
     }
-
     return { true, retLen };
 }
 
@@ -217,17 +206,18 @@ static tuple<bool, unique_ptr<char[]>, size_t> DecodeString(napi_env env, NVal j
     if (!jsStr.TypeIs(napi_string)) {
         return { false, nullptr, 0 };
     }
-
-    bool succ = false;
     if (!encoding) {
         return jsStr.ToUTF8String();
     }
 
+    bool succ = false;
     unique_ptr<char[]> encodingBuf = nullptr;
-    tie(succ, encodingBuf, ignore) = encoding.ToUTF8String();
+    tie(succ, encodingBuf, ignore) = encoding.ToUTF8String("utf-8");
     if (!succ) {
+        HILOGE("Failed to convert encoding to UTF8");
         return { false, nullptr, 0 };
     }
+    
     string_view encodingStr(encodingBuf.release());
     if (encodingStr == "utf-8") {
         return jsStr.ToUTF8String();
@@ -239,13 +229,12 @@ static tuple<bool, unique_ptr<char[]>, size_t> DecodeString(napi_env env, NVal j
     }
 }
 
-tuple<bool, void *, size_t, bool, int64_t> CommonFunc::GetReadArg(napi_env env,
+tuple<bool, void *, size_t, int64_t> CommonFunc::GetReadArg(napi_env env,
     napi_value readBuf, napi_value option)
 {
     size_t retLen = 0;
-    int64_t position = 0;
+    int64_t offset = -1;
     bool succ = false;
-    bool posAssigned = false;
 
     NVal txt(env, readBuf);
     void *buf = nullptr;
@@ -254,35 +243,30 @@ tuple<bool, void *, size_t, bool, int64_t> CommonFunc::GetReadArg(napi_env env,
     if (!succ || bufLen > UINT_MAX) {
         HILOGE("Invalid arraybuffer");
         NError(EINVAL).ThrowErr(env);
-        return { false, nullptr, 0, posAssigned, position };
+        return { false, nullptr, retLen, offset };
     }
     NVal op = NVal(env, option);
     tie(succ, retLen) = GetActualLen(env, bufLen, 0, op);
     if (!succ) {
         HILOGE("Failed to get actual length");
-        return { false, nullptr, 0, posAssigned, position };
+        return { false, nullptr, retLen, offset };
     }
-
-    if (op.HasProp("offset")) {
-        tie(succ, position) = op.GetProp("offset").ToInt64();
-        if (succ && position >= 0) {
-            posAssigned = true;
-        } else {
+    if (op.HasProp("offset") && !op.GetProp("offset").TypeIs(napi_undefined)) {
+        tie(succ, offset) = op.GetProp("offset").ToInt64();
+        if (!succ || offset < 0) {
             HILOGE("option.offset shall be positive number");
             NError(EINVAL).ThrowErr(env);
-            return { false, nullptr, 0, posAssigned, position };
+            return { false, nullptr, retLen, offset };
         }
     }
-
-    return { true, buf, retLen, posAssigned, position };
+    return { true, buf, retLen, offset };
 }
 
-tuple<bool, unique_ptr<char[]>, void *, size_t, bool, int64_t> CommonFunc::GetWriteArg(napi_env env,
+tuple<bool, unique_ptr<char[]>, void *, size_t, int64_t> CommonFunc::GetWriteArg(napi_env env,
     napi_value argWBuf, napi_value argOption)
 {
-    int64_t retPos = 0;
     size_t bufLen = 0;
-    bool hasPos = false;
+    int64_t offset = -1;
     bool succ = false;
     void *buf = nullptr;
     NVal op(env, argOption);
@@ -294,7 +278,7 @@ tuple<bool, unique_ptr<char[]>, void *, size_t, bool, int64_t> CommonFunc::GetWr
         if (!succ) {
             HILOGE("Illegal write buffer or encoding");
             NError(EINVAL).ThrowErr(env);
-            return { false, nullptr, nullptr, 0, hasPos, retPos };
+            return { false, nullptr, nullptr, 0, offset };
         }
     } else {
         buf = bufferGuard.get();
@@ -302,29 +286,24 @@ tuple<bool, unique_ptr<char[]>, void *, size_t, bool, int64_t> CommonFunc::GetWr
     if (bufLen > UINT_MAX) {
         HILOGE("The Size of buffer is too large");
         NError(EINVAL).ThrowErr(env);
-        return { false, nullptr, nullptr, 0, hasPos, retPos} ;
+        return { false, nullptr, nullptr, 0, offset } ;
     }
     size_t retLen = 0;
     tie(succ, retLen) = GetActualLen(env, bufLen, 0, op);
     if (!succ) {
         HILOGE("Failed to get actual length");
-        return { false, nullptr, nullptr, 0, hasPos, retPos };
+        return { false, nullptr, nullptr, 0, offset };
     }
 
-    if (op.HasProp("offset")) {
-        int64_t position = 0;
-        tie(succ, position) = op.GetProp("offset").ToInt64();
-        if (!succ || position < 0) {
+    if (op.HasProp("offset") && !op.GetProp("offset").TypeIs(napi_undefined)) {
+        tie(succ, offset) = op.GetProp("offset").ToInt64();
+        if (!succ || offset < 0) {
             HILOGE("option.offset shall be positive number");
             NError(EINVAL).ThrowErr(env);
-            return { false, nullptr, nullptr, 0, hasPos, retPos };
+            return { false, nullptr, nullptr, 0, offset };
         }
-        hasPos = true;
-        retPos = position;
-    } else {
-        retPos = INVALID_POSITION;
     }
-    return { true, move(bufferGuard), buf, retLen, hasPos, retPos };
+    return { true, move(bufferGuard), buf, retLen, offset };
 }
 } // namespace ModuleFileIO
 } // namespace FileManagement

@@ -53,18 +53,20 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info cbInfo)
     FILE *filp = nullptr;
     filp = streamEntity->fp.get();
 
-    auto [succ, buf, len, hasOffset, offset] =
+    auto [succ, buf, len, offset] =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
         return nullptr;
     }
 
-    int ret = fseek(filp, offset, SEEK_SET);
-    if (hasOffset && (ret < 0)) {
-        HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
-        NError(errno).ThrowErr(env);
-        return nullptr;
+    if (offset >= 0) {
+        int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
+        if (ret < 0) {
+            HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
+            NError(errno).ThrowErr(env);
+            return nullptr;
+        }
     }
 
     size_t actLen = fread(buf, 1, len, filp);
@@ -116,17 +118,19 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
     FILE *filp = nullptr;
     filp = streamEntity->fp.get();
 
-    auto [succ, bufGuard, buf, len, hasOffset, offset] =
+    auto [succ, bufGuard, buf, len, offset] =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
         return nullptr;
     }
-    int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
-    if (hasOffset && (ret < 0)) {
-        HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
-        NError(errno).ThrowErr(env);
-        return nullptr;
+    if (offset >= 0) {
+        int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
+        if (ret < 0) {
+            HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
+            NError(errno).ThrowErr(env);
+            return nullptr;
+        }
     }
 
     size_t writeLen = fwrite(buf, 1, len, filp);
@@ -137,15 +141,6 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
     }
 
     return NVal::CreateInt64(env, static_cast<int64_t>(writeLen)).val_;
-}
-
-static bool HasOption(napi_env env, napi_value optionFromJsArg)
-{
-    NVal op = NVal(env, optionFromJsArg);
-    if (op.HasProp("offset") || op.HasProp("length") || op.HasProp("encoding") || !op.TypeIs(napi_function)) {
-        return true;
-    }
-    return false;
 }
 
 napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
@@ -167,7 +162,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
     FILE *filp = nullptr;
     filp = streamEntity->fp.get();
 
-    auto [succ, bufGuard, buf, len, hasOffset, offset] =
+    auto [succ, bufGuard, buf, len, offset] =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
@@ -180,11 +175,13 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, buf = buf, len = len, filp, hasOffset = hasOffset, offset = offset]() -> NError {
-        int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
-        if (hasOffset && (ret < 0)) {
-            HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
-            return NError(errno);
+    auto cbExec = [arg, buf = buf, len = len, filp, offset = offset]() -> NError {
+        if (offset >= 0) {
+            int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
+            if (ret < 0) {
+                HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
+                return NError(errno);
+            }
         }
         arg->actLen = fwrite(buf, 1, len, filp);
         if ((arg->actLen == 0) && (arg->actLen != len)) {
@@ -202,11 +199,8 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    bool hasOp = false;
-    if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        hasOp = HasOption(env, funcArg[NARG_POS::SECOND]);
-    }
-    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO && hasOp)) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STREAM_WRITE_NAME, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
@@ -233,7 +227,7 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
     FILE *filp = nullptr;
     filp = streamEntity->fp.get();
 
-    auto [succ, buf, len, hasOffset, offset] =
+    auto [succ, buf, len, offset] =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
@@ -247,11 +241,13 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, buf = buf, len = len, filp, hasOffset = hasOffset, offset = offset]() -> NError {
-        int ret = fseek(filp, offset, SEEK_SET);
-        if (hasOffset && (ret < 0)) {
-            HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
-            return NError(errno);
+    auto cbExec = [arg, buf = buf, len = len, filp, offset = offset]() -> NError {
+        if (offset >= 0) {
+            int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
+            if (ret < 0) {
+                HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
+                return NError(errno);
+            }
         }
         size_t actLen = fread(buf, 1, len, filp);
         if ((actLen != static_cast<size_t>(len) && !feof(filp)) || ferror(filp)) {
@@ -271,11 +267,8 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    bool hasOp = false;
-    if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        hasOp = HasOption(env, funcArg[NARG_POS::SECOND]);
-    }
-    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO && hasOp)) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STREAM_READ_NAME, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);

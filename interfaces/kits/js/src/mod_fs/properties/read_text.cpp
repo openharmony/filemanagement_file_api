@@ -29,53 +29,46 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-static tuple<bool, ssize_t, bool, ssize_t, unique_ptr<char[]>, bool> GetReadTextArg(napi_env env, napi_value argOption)
+static tuple<bool, int64_t, bool, int64_t, unique_ptr<char[]>> GetReadTextArg(napi_env env, napi_value argOption)
 {
     NVal op(env, argOption);
-    ssize_t offset = 0;
-    ssize_t len = 0;
+    int64_t offset = -1;
+    int64_t len = 0;
     bool succ = false;
-    bool hasOp = false;
     bool hasLen = false;
     unique_ptr<char[]> encoding;
 
-    if (op.HasProp("offset")) {
-        tie(succ, offset) = op.GetProp("offset").ToInt32();
+    if (op.HasProp("offset") && !op.GetProp("offset").TypeIs(napi_undefined)) {
+        tie(succ, offset) = op.GetProp("offset").ToInt64();
         if (!succ || offset < 0) {
             HILOGE("Illegal option.offset parameter");
-            return { false, offset, hasLen, len, nullptr, hasOp };
+            return { false, offset, hasLen, len, nullptr };
         }
-        hasOp = true;
     }
 
-    if (op.HasProp("length")) {
-        tie(succ, len) = op.GetProp("length").ToInt32();
-        if (!succ || len < 0) {
+    if (op.HasProp("length") && !op.GetProp("length").TypeIs(napi_undefined)) {
+        tie(succ, len) = op.GetProp("length").ToInt64();
+        if (!succ || len < 0 || len > UINT_MAX) {
             HILOGE("Illegal option.length parameter");
-            return { false, offset, hasLen, len, nullptr, hasOp };
+            return { false, offset, hasLen, len, nullptr };
         }
-        hasOp = true;
         hasLen = true;
     }
 
     if (op.HasProp("encoding")) {
-        tie(succ, encoding, ignore) = op.GetProp("encoding").ToUTF8String();
-        if (!succ) {
+        tie(succ, encoding, ignore) = op.GetProp("encoding").ToUTF8String("utf-8");
+        string_view encodingStr(encoding.get());
+        if (!succ || encodingStr != "utf-8") {
             HILOGE("Illegal option.encoding parameter");
-            return { false, offset, hasLen, len, nullptr, hasOp };
+            return { false, offset, hasLen, len, nullptr };
         }
-        hasOp = true;
     }
 
-    if (!op.TypeIs(napi_function)) {
-        hasOp = true;
-    }
-
-    return { true, offset, hasLen, len, move(encoding), hasOp };
+    return { true, offset, hasLen, len, move(encoding) };
 }
 
-static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTextArg> arg, ssize_t offset,
-                            bool hasLen, ssize_t len)
+static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTextArg> arg, int64_t offset,
+                            bool hasLen, int64_t len)
 {
     OHOS::DistributedFS::FDGuard sfd;
     struct stat statbf;
@@ -109,7 +102,7 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
 
     len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     string buffer(len, '\0');
-    uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), len);
+    uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
@@ -141,7 +134,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetReadTextArg, offset, hasLen, len, encoding, useless] = GetReadTextArg(env, funcArg[NARG_POS::SECOND]);
+    auto [resGetReadTextArg, offset, hasLen, len, encoding] = GetReadTextArg(env, funcArg[NARG_POS::SECOND]);
     if (!resGetReadTextArg) {
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -171,14 +164,14 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     }
 
     if (offset > statbf.st_size) {
-        HILOGE("Invalid offset: %{public}zd", offset);
+        HILOGE("Invalid offset: %{public}lld", offset);
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     string buffer(len, '\0');
-    uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), len);
+    uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
@@ -212,7 +205,7 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetSecondArg, offset, hasLen, len, encoding, hasOp] = GetReadTextArg(env, funcArg[NARG_POS::SECOND]);
+    auto [resGetSecondArg, offset, hasLen, len, encoding] = GetReadTextArg(env, funcArg[NARG_POS::SECOND]);
     if (!resGetSecondArg) {
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -231,13 +224,12 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
         }
     };
 
-    size_t argc = funcArg.GetArgc();
     NVal thisVar(env, funcArg.GetThisVar());
-    if (argc == NARG_CNT::ONE || (argc == NARG_CNT::TWO && hasOp)) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_READTEXT_NAME, cbExec, cbComplete).val_;
     } else {
-        int cbIdx = !hasOp ? NARG_POS::SECOND : NARG_POS::THIRD;
-        NVal cb(env, funcArg[cbIdx]);
+        NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_READTEXT_NAME, cbExec, cbComplete).val_;
     }
 }

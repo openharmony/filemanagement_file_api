@@ -31,7 +31,7 @@ public:
 struct AsyncReadTextArg {
     NRef _refReadBuf;
     std::string buffer;
-    ssize_t len = 0;
+    int64_t len = 0;
 
     explicit AsyncReadTextArg(NVal refReadBuf) : _refReadBuf(refReadBuf){};
     ~AsyncReadTextArg() = default;

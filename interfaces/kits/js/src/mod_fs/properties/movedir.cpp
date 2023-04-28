@@ -72,9 +72,9 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
         return { false, nullptr, nullptr, 0 };
     }
     int mode = 0;
-    if (funcArg.GetArgc() >= NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number)) {
+    if (funcArg.GetArgc() >= NARG_CNT::THREE) {
         bool resGetThirdArg = false;
-        tie(resGetThirdArg, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
+        tie(resGetThirdArg, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(mode);
         if (!resGetThirdArg || (mode < DIRMODE_MIN || mode > DIRMODE_MAX)) {
             HILOGE("Invalid mode");
             return { false, nullptr, nullptr, 0 };
@@ -350,7 +350,7 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
 
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
-            NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number))) {
+            !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_MOVEDIR_NAME, cbExec, cbComplCallback).val_;
     } else {
         int cbIdex = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);

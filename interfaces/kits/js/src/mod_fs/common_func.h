@@ -24,7 +24,6 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 
-constexpr int64_t INVALID_POSITION = std::numeric_limits<decltype(INVALID_POSITION)>::max();
 constexpr int RDONLY = 00;
 constexpr int WRONLY = 01;
 constexpr int RDWR = 02;
@@ -48,10 +47,10 @@ struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);
     static LibN::NVal InstantiateStat(napi_env env, struct stat &buf);
     static LibN::NVal InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp);
-    static std::tuple<bool, void *, size_t, bool, int64_t> GetReadArg(napi_env env,
+    static std::tuple<bool, void *, size_t, int64_t> GetReadArg(napi_env env,
                                                                        napi_value readBuf,
                                                                        napi_value option);
-    static std::tuple<bool, std::unique_ptr<char[]>, void *, size_t, bool, int64_t> GetWriteArg(napi_env env,
+    static std::tuple<bool, std::unique_ptr<char[]>, void *, size_t, int64_t> GetWriteArg(napi_env env,
                                                                                                  napi_value argWBuf,
                                                                                                  napi_value argOption);
     static std::tuple<bool, std::unique_ptr<char[]>, std::unique_ptr<char[]>> GetCopyPathArg(napi_env env,

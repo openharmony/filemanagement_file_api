@@ -323,17 +323,13 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
 
     void *buf = nullptr;
     size_t len = 0;
-    bool hasOffset = false;
-    int64_t offset = 0;
-    tie(succ, buf, len, hasOffset, offset) =
+    int64_t offset = -1;
+    tie(succ, buf, len, offset) =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
-    }
-    if (!hasOffset) {
-        offset = -1;
     }
 
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
@@ -385,8 +381,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     void *buf = nullptr;
     size_t len = 0;
     int32_t fd = 0;
-    bool hasOffset = false;
-    int64_t offset = 0;
+    int64_t offset = -1;
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
@@ -394,15 +389,12 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    tie(succ, buf, len, hasOffset, offset) =
+    tie(succ, buf, len, offset) =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
-    }
-    if (!hasOffset) {
-        offset = -1;
     }
 
     auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
@@ -424,14 +416,8 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    bool hasOp = false;
-    if (funcArg.GetArgc() == NARG_CNT::THREE) {
-        NVal op = NVal(env, funcArg[NARG_POS::THIRD]);
-        if (op.HasProp("offset") || op.HasProp("length") || !op.TypeIs(napi_function)) {
-            hasOp = true;
-        }
-    }
-    if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE && hasOp)) {
+    if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
+        !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_READ_NAME, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
@@ -479,17 +465,13 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
     unique_ptr<char[]> bufGuard = nullptr;
     void *buf = nullptr;
     size_t len = 0;
-    int64_t offset = 0;
-    bool hasOffset = false;
-    tie(succ, bufGuard, buf, len, hasOffset, offset) =
+    int64_t offset = -1;
+    tie(succ, bufGuard, buf, len, offset) =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
-    }
-    if (!hasOffset) {
-        offset = -1;
     }
 
     auto arg = make_shared<AsyncIOWrtieArg>(move(bufGuard));
@@ -512,15 +494,8 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    bool hasOp = false;
-    if (funcArg.GetArgc() == NARG_CNT::THREE) {
-        NVal op = NVal(env, funcArg[NARG_POS::THIRD]);
-        if (op.HasProp("offset") || op.HasProp("length") || op.HasProp("encoding") || !op.TypeIs(napi_function)) {
-            hasOp = true;
-        }
-    }
-
-    if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE && hasOp)) {
+    if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
+        !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_WRITE_NAME, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
@@ -549,17 +524,13 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
 
     void *buf = nullptr;
     size_t len = 0;
-    int64_t offset = 0;
+    int64_t offset = -1;
     unique_ptr<char[]> bufGuard = nullptr;
-    bool hasOffset = false;
-    tie(succ, bufGuard, buf, len, hasOffset, offset) =
+    tie(succ, bufGuard, buf, len, offset) =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
         return nullptr;
-    }
-    if (!hasOffset) {
-        offset = -1;
     }
 
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));

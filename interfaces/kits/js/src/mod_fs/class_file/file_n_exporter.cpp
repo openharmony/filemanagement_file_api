@@ -66,21 +66,16 @@ napi_value FileNExporter::GetFD(napi_env env, napi_callback_info info)
 
 static bool GetExclusive(napi_env env, NFuncArg &funcArg, bool &exclusive)
 {
-    bool succ = true;
-    if (funcArg.GetArgc() >= NARG_CNT::ONE && !(NVal(env, funcArg[NARG_POS::FIRST]).TypeIs(napi_function))) {
-        if (NVal(env, funcArg[NARG_POS::FIRST]).TypeIs(napi_boolean)) {
-            tie(succ, exclusive) = NVal(env, funcArg[NARG_POS::FIRST]).ToBool();
-            if (!succ) {
-                HILOGE("Invalid exclusive");
-                NError(EINVAL).ThrowErr(env);
-            }
-        } else {
+    if (funcArg.GetArgc() >= NARG_CNT::ONE) {
+        bool succ = false;
+        tie(succ, exclusive) = NVal(env, funcArg[NARG_POS::FIRST]).ToBool(exclusive);
+        if (!succ) {
             HILOGE("Invalid exclusive");
             NError(EINVAL).ThrowErr(env);
-            succ = false;
+            return false;
         }
     }
-    return succ;
+    return true;
 }
 
 napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
@@ -124,7 +119,7 @@ napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
 
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ZERO || (funcArg.GetArgc() == NARG_CNT::ONE &&
-        NVal(env, funcArg[NARG_POS::FIRST]).TypeIs(napi_boolean))) {
+        !NVal(env, funcArg[NARG_POS::FIRST]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_LOCK_NAME, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::FIRST);
