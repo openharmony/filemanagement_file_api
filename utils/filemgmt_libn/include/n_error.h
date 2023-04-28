@@ -131,7 +131,7 @@ enum CommonErrCode {
     E_OSNOTSUPPORT = 901
 };
 
-const std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
+static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
     { ERRNO_NOERR, { ERRNO_NOERR, "No error imformation" } },
     { EPERM, { FILEIO_SYS_CAP_TAG + E_PERM, "Operation not permitted" } },
     { ENOENT, { FILEIO_SYS_CAP_TAG + E_NOENT, "No such file or directory" } },

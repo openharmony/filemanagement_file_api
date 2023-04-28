@@ -90,15 +90,15 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     }
 
     size_t argc = funcArg.GetArgc();
+    int32_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
     if (argc != NARG_CNT::THREE) {
         size_t flagsFirst { flags };
         if ((flagsFirst & O_CREAT) || (flagsFirst & O_TMPFILE)) {
             UniError(EINVAL).ThrowErr(env, "called with O_CREAT/O_TMPFILE but no mode");
             return nullptr;
         }
-        fd = open(path.get(), flags);
+        fd = open(path.get(), flags, mode);
     } else {
-        int mode;
         tie(succ, mode) = NVal(env, funcArg.GetArg(NARG_POS::THIRD)).ToInt32();
         if (!succ) {
             UniError(EINVAL).ThrowErr(env, "Invalid mode");
@@ -119,7 +119,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     return NVal::CreateInt64(env, fd).val_;
 }
 
-static UniError DoOpenExec(const std::string& path, const int flags, const int mode, shared_ptr<int32_t> arg)
+static UniError DoOpenExec(const std::string& path, const int flags, const int32_t mode, shared_ptr<int32_t> arg)
 {
     int fd = -1;
     if (!ModuleRemoteUri::RemoteUri::IsRemoteUri(path, fd, flags)) {
@@ -157,7 +157,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
         (void)AdaptToAbi(flags);
     }
 
-    int mode = 0;
+    int32_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
     size_t argc = funcArg.GetArgc();
     if (argc == NARG_CNT::FOUR ||
         (argc == NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number))) {
