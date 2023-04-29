@@ -33,6 +33,7 @@ const string REMOTE_URI_TAG = "fdFromBinder";
 const string SCHEME_TAG = ":";
 const string SCHEME = "datashare";
 const string SCHEME_FILE = "file";
+const string MEDIALIBRARY_FILE_URI_PREFIX = "file://media";
 const string ZERO_FD = "0";
 const string MEDIA = "/media/";
 const string PATH_SYMBOL = "/";

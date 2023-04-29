@@ -30,6 +30,9 @@ using namespace std;
 
 bool RemoteUri::IsMediaUri(const string &uriString)
 {
+    if (uriString.find(MEDIALIBRARY_FILE_URI_PREFIX) != string::npos) {
+        return true;
+    }
     RemoteUri remoteUri = RemoteUri(uriString);
     string scheme = remoteUri.GetScheme();
     string path = remoteUri.GetPath();
