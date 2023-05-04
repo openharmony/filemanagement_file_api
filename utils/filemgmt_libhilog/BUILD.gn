@@ -22,7 +22,8 @@ config("log_public_config") {
 
 ohos_shared_library("filemgmt_libhilog") {
   public_configs = [ ":log_public_config" ]
-  public_deps = [ "${hiviewdfx_hilog_path}/interfaces/native/innerkits:libhilog" ]
+  public_deps =
+      [ "${hiviewdfx_hilog_path}/interfaces/native/innerkits:libhilog" ]
 
   subsystem_name = "filemanagement"
   part_name = "file_api"

@@ -36,8 +36,8 @@ ohos_shared_library("filemgmt_libn") {
 
   public_configs = [ ":libn_public_config" ]
   public_deps = [
-    "${file_api_path}/utils/filemgmt_libhilog",
     "${arkui_napi_path}:ace_napi",
+    "${file_api_path}/utils/filemgmt_libhilog",
   ]
 
   subsystem_name = "filemanagement"
