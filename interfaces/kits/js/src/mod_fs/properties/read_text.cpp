@@ -14,6 +14,7 @@
  */
 #include "read_text.h"
 
+#include <cinttypes>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <tuple>
@@ -163,7 +164,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     }
 
     if (offset > statbf.st_size) {
-        HILOGE("Invalid offset: %{public}lld", offset);
+        HILOGE("Invalid offset: %{public}" PRIu64, offset);
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
