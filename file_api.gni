@@ -18,4 +18,3 @@ src_path = "${file_api_path}/interfaces/kits/js/src"
 utils_path = "${file_api_path}/utils"
 hiviewdfx_hilog_path = "//base/hiviewdfx/hilog"
 arkui_napi_path = "//foundation/arkui/napi"
-
