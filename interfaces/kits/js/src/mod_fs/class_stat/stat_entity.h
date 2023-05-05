@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,11 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_STAT_STAT_ENTITY_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_STAT_STAT_ENTITY_H
 
-#include <sys/stat.h>
+#include "uv.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 struct StatEntity {
-    struct stat stat_;
+    uv_stat_t stat_;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_STAT_STAT_ENTITY_H

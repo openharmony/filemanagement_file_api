@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,7 +115,7 @@ unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
     return flagsABI;
 }
 
-NVal CommonFunc::InstantiateStat(napi_env env, struct stat &buf)
+NVal CommonFunc::InstantiateStat(napi_env env, uv_stat_t &buf)
 {
     napi_value objStat = NClass::InstantiateClass(env, StatNExporter::className_, {});
     if (!objStat) {
@@ -217,7 +217,7 @@ static tuple<bool, unique_ptr<char[]>, size_t> DecodeString(napi_env env, NVal j
         HILOGE("Failed to convert encoding to UTF8");
         return { false, nullptr, 0 };
     }
-    
+
     string_view encodingStr(encodingBuf.release());
     if (encodingStr == "utf-8") {
         return jsStr.ToUTF8String();

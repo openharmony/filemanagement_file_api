@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,7 @@ void InitOpenMode(napi_env env, napi_value exports);
 
 struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);
-    static LibN::NVal InstantiateStat(napi_env env, struct stat &buf);
+    static LibN::NVal InstantiateStat(napi_env env, uv_stat_t &buf);
     static LibN::NVal InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp);
     static std::tuple<bool, void *, size_t, int64_t> GetReadArg(napi_env env,
                                                                        napi_value readBuf,
