@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
-#include <securec.h>
 
 #include "filemgmt_libhilog.h"
 
@@ -187,7 +186,7 @@ napi_value StatNExporter::GetAtime(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return NVal::CreateInt64(env, statEntity->stat_.st_atim.tv_sec).val_;
+    return NVal::CreateInt64(env, static_cast<int64_t>(statEntity->stat_.st_atim.tv_sec)).val_;
 }
 
 napi_value StatNExporter::GetMtime(napi_env env, napi_callback_info info)
@@ -205,7 +204,7 @@ napi_value StatNExporter::GetMtime(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return NVal::CreateInt64(env, statEntity->stat_.st_mtim.tv_sec).val_;
+    return NVal::CreateInt64(env, static_cast<int64_t>(statEntity->stat_.st_mtim.tv_sec)).val_;
 }
 
 napi_value StatNExporter::GetCtime(napi_env env, napi_callback_info info)
@@ -223,7 +222,7 @@ napi_value StatNExporter::GetCtime(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return NVal::CreateInt64(env, statEntity->stat_.st_ctim.tv_sec).val_;
+    return NVal::CreateInt64(env, static_cast<int64_t>(statEntity->stat_.st_ctim.tv_sec)).val_;
 }
 
 napi_value StatNExporter::Constructor(napi_env env, napi_callback_info info)

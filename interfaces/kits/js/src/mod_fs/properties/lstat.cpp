@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,21 +42,23 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    struct stat buf;
-    int ret = lstat(pathPtr.get(), &buf);
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> lstat_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!lstat_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
+    int ret = uv_fs_lstat(nullptr, lstat_req.get(), pathPtr.get(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to get stat of file by path %{public}s", pathPtr.get());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
 
-    auto stat = CommonFunc::InstantiateStat(env, buf).val_;
+    auto stat = CommonFunc::InstantiateStat(env, lstat_req->statbuf).val_;
     return stat;
 }
-
-struct AsyncStatArg {
-    struct stat stat_;
-};
 
 napi_value Lstat::Async(napi_env env, napi_callback_info info)
 {
@@ -75,13 +77,20 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
     }
 
     string path = tmp.get();
-    auto arg = make_shared<AsyncStatArg>();
+    auto arg = make_shared<StatEntity>();
     auto cbExec = [arg, path]() -> NError {
-        int ret = lstat(path.c_str(), &arg->stat_);
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> lstat_req = {
+            new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!lstat_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ENOMEM);
+        }
+        int ret = uv_fs_lstat(nullptr, lstat_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
             HILOGE("Failed to get stat of file by path: %{public}s, ret: %{public}d", path.c_str(), ret);
             return NError(errno);
         } else {
+            arg->stat_ = lstat_req->statbuf;
             return NError(ERRNO_NOERR);
         }
     };
