@@ -27,6 +27,11 @@ namespace OHOS {
 namespace FileManagement {
 namespace LibN {
 
+#ifdef IOS_PLATFORM
+constexpr int EBADR = 53;
+constexpr int EBADFD = 77;
+constexpr int ERESTART = 85;
+#endif
 constexpr int UNKROWN_ERR = -1;
 constexpr int ERRNO_NOERR = 0;
 constexpr int STORAGE_SERVICE_SYS_CAP_TAG = 13600000;

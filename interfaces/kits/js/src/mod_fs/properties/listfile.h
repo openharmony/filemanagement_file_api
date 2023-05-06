@@ -17,7 +17,7 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_H
 
 #include "filemgmt_libn.h"
-#include "../../common/file_filter.h"
+#include "file_filter.h"
 
 #include <dirent.h>
 

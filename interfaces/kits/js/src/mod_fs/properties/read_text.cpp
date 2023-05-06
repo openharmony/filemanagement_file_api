@@ -15,7 +15,6 @@
 #include "read_text.h"
 
 #include <fcntl.h>
-#include <securec.h>
 #include <sys/stat.h>
 #include <tuple>
 #include <unistd.h>
