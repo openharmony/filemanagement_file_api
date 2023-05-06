@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,28 +65,32 @@ napi_value Stat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    struct stat buf;
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!stat_req) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     if (fileInfo.isPath) {
-        if (stat(fileInfo.path.get(), &buf) < 0) {
+        int ret = uv_fs_stat(nullptr, stat_req.get(), fileInfo.path.get(), nullptr);
+        if (ret < 0) {
             HILOGE("Failed to stat file with path");
             NError(errno).ThrowErr(env);
             return nullptr;
         }
     } else {
-        if (fstat(fileInfo.fdg->GetFD(), &buf) < 0) {
+        int ret = uv_fs_fstat(nullptr, stat_req.get(), fileInfo.fdg->GetFD(), nullptr);
+        if (ret < 0) {
             HILOGE("Failed to stat file with fd");
             NError(errno).ThrowErr(env);
             return nullptr;
         }
     }
 
-    auto stat = CommonFunc::InstantiateStat(env, buf).val_;
+    auto stat = CommonFunc::InstantiateStat(env, stat_req->statbuf).val_;
     return stat;
 }
-
-struct AsyncStatArg {
-    struct stat stat_;
-};
 
 napi_value Stat::Async(napi_env env, napi_callback_info info)
 {
@@ -101,19 +105,28 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncStatArg>();
+    auto arg = make_shared<StatEntity>();
     auto cbExec = [arg, fileInfo = make_shared<FileInfo>(move(fileInfo))]() -> NError {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
+            new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!stat_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ENOMEM);
+        }
         if (fileInfo->isPath) {
-            if (stat(fileInfo->path.get(), &arg->stat_) < 0) {
+            int ret = uv_fs_stat(nullptr, stat_req.get(), fileInfo->path.get(), nullptr);
+            if (ret < 0) {
                 HILOGE("Failed to stat file with path");
                 return NError(errno);
             }
         } else {
-            if (fstat(fileInfo->fdg->GetFD(), &arg->stat_) < 0) {
+            int ret = uv_fs_fstat(nullptr, stat_req.get(), fileInfo->fdg->GetFD(), nullptr);
+            if (ret < 0) {
                 HILOGE("Failed to stat file with fd");
                 return NError(errno);
             }
         }
+        arg->stat_ = stat_req->statbuf;
         return NError(ERRNO_NOERR);
     };
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
