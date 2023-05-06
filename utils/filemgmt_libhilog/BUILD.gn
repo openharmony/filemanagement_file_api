@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
 
 config("log_public_config") {
   visibility = [ ":*" ]
@@ -22,7 +23,7 @@ config("log_public_config") {
 ohos_shared_library("filemgmt_libhilog") {
   public_configs = [ ":log_public_config" ]
   public_deps =
-      [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog" ]
+      [ "${hiviewdfx_hilog_path}/interfaces/native/innerkits:libhilog" ]
 
   subsystem_name = "filemanagement"
   part_name = "file_api"

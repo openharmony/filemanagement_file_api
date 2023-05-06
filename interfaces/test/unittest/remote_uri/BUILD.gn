@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
 
 ohos_unittest("remote_uri_test") {
   module_out_path = "filemanagement/file_api"
@@ -22,19 +23,18 @@ ohos_unittest("remote_uri_test") {
 
   include_dirs = [
     "include",
-    "//utils/system/safwk/native/include",
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/filemanagement/file_api/interfaces/kits/native/remote_uri",
+    "${file_api_path}/interfaces/kits/native/remote_uri",
   ]
 
   deps = [
-    "//foundation/filemanagement/file_api/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
+    "c_utils:utilsbase",
     "ipc:ipc_core",
   ]
 }
