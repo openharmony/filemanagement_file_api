@@ -27,6 +27,7 @@
 #include "class_file/file_n_exporter.h"
 #include "close.h"
 #include "copy_file.h"
+#include "copydir.h"
 #include "create_stream.h"
 #include "fdatasync.h"
 #include "fdopen_stream.h"
@@ -558,6 +559,8 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("accessSync", AccessSync),
         NVal::DeclareNapiFunction("close", Close::Async),
         NVal::DeclareNapiFunction("closeSync", Close::Sync),
+        NVal::DeclareNapiFunction("copyDir", CopyDir::Async),
+        NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
         NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
         NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),

@@ -125,6 +125,7 @@ ohos_shared_library("fs") {
     "src/mod_fs/module.cpp",
     "src/mod_fs/properties/close.cpp",
     "src/mod_fs/properties/copy_file.cpp",
+    "src/mod_fs/properties/copydir.cpp",
     "src/mod_fs/properties/create_stream.cpp",
     "src/mod_fs/properties/fdatasync.cpp",
     "src/mod_fs/properties/fdopen_stream.cpp",
