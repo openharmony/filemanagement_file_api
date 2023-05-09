@@ -120,6 +120,12 @@ static void WatcherCallbackComplete(uv_work_t *work, int stat)
             HILOGE("Failed to get nref reference");
             break;
         }
+        napi_handle_scope scope = nullptr;
+        napi_status status = napi_open_handle_scope(callbackContext->env_, &scope);
+        if (status != napi_ok) {
+            HILOGE("Failed to open handle scope, status: %{public}d", status);
+            break;
+        }
         napi_env env = callbackContext->env_;
         napi_value jsCallback = callbackContext->ref_.Deref(env).val_;
         NVal objn = NVal::CreateObject(env);
@@ -127,10 +133,13 @@ static void WatcherCallbackComplete(uv_work_t *work, int stat)
         objn.AddProp("event", NVal::CreateUint32(env, callbackContext->event_).val_);
         objn.AddProp("cookie", NVal::CreateUint32(env, callbackContext->cookie_).val_);
         napi_value retVal = nullptr;
-        napi_status status = napi_call_function(env, nullptr, jsCallback, 1, &(objn.val_), &retVal);
+        status = napi_call_function(env, nullptr, jsCallback, 1, &(objn.val_), &retVal);
         if (status != napi_ok) {
             HILOGE("Failed to call napi_call_function, status: %{public}d", status);
-            break;
+        }
+        status = napi_close_handle_scope(callbackContext->env_, scope);
+        if (status != napi_ok) {
+            HILOGE("Failed to close handle scope, status: %{public}d", status);
         }
     } while (0);
     delete callbackContext;
