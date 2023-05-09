@@ -318,8 +318,7 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    auto arg = make_shared<MoveDirArgs>();
+    auto arg = std::shared_ptr<MoveDirArgs>(new (std::nothrow) MoveDirArgs());
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);

@@ -87,7 +87,6 @@ static tuple<bool, size_t> GetActualLen(napi_env env, size_t bufLen, size_t bufO
 
 unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
 {
-    static constexpr unsigned int usrReadOnly = 00;
     static constexpr unsigned int usrWriteOnly = 01;
     static constexpr unsigned int usrReadWrite = 02;
     static constexpr unsigned int usrCreate = 0100;
@@ -99,8 +98,8 @@ unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
     static constexpr unsigned int usrNoFollowed = 0400000;
     static constexpr unsigned int usrSynchronous = 04010000;
 
+    // default value is usrReadOnly 00
     unsigned int flagsABI = 0;
-    flagsABI |= ((flags & usrReadOnly) == usrReadOnly) ? O_RDONLY : 0;
     flagsABI |= ((flags & usrWriteOnly) == usrWriteOnly) ? O_WRONLY : 0;
     flagsABI |= ((flags & usrReadWrite) == usrReadWrite) ? O_RDWR : 0;
     flagsABI |= ((flags & usrCreate) == usrCreate) ? O_CREAT : 0;
