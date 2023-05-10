@@ -31,12 +31,12 @@ public:
 
 class ListFileArgs {
 public:
-    std::vector<dirent> dirents;
-    explicit ListFileArgs()
-    {
-        dirents = std::vector<dirent>();
-    }
-    ~ListFileArgs() = default;
+    std::vector<std::string> dirents;
+};
+
+struct NameListArg {
+    struct dirent** namelist = { nullptr };
+    int direntNum = 0;
 };
 
 struct OptionArgs {
