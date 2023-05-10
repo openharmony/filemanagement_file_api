@@ -76,10 +76,6 @@ tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF8String(string defaultValue) 
 {
     if (TypeIs(napi_undefined) || TypeIs(napi_function)) {
         unique_ptr<char[]> str = make_unique<char[]>(defaultValue.size() + 1);
-        if (str == nullptr) {
-            HILOGE("Failed to request heap memory");
-            return { false, nullptr, 0 };
-        }
         copy(defaultValue.begin(), defaultValue.end(), str.get());
         str[defaultValue.size()] = '\0';
         return make_tuple(true, move(str), defaultValue.size());

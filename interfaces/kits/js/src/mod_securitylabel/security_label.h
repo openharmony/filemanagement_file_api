@@ -51,9 +51,6 @@ public:
             return DEFAULT_DATA_LEVEL;
         }
         std::unique_ptr<char[]> xattrValue = std::make_unique<char[]>((long)xattrValueSize + 1);
-        if (xattrValue == nullptr) {
-            return "";
-        }
 
         xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize);
         if (xattrValueSize == -1 || errno == ENOTSUP) {

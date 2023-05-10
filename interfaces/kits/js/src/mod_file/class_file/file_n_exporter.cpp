@@ -846,10 +846,6 @@ void ReadTextExec(napi_env env, void *data)
         int result = stat(path.c_str(), &buf);
         if (fdg.GetFD() != FAILED && result != FAILED) {
             auto buffer = std::make_unique<char[]>(buf.st_size + 1);
-            if (buffer == nullptr) {
-                UniError(ENOMEM).ThrowErr(env);
-                return;
-            }
             if (read(fdg.GetFD(), buffer.get(), buf.st_size) != FAILED) {
                 asyncCallbackInfo->result = SUCCESS;
                 asyncCallbackInfo->contents = std::string(buffer.get());
@@ -897,10 +893,6 @@ void ReadArrayBufferExec(napi_env env, void *data)
             int32_t len =
                 (asyncCallbackInfo->length == COMMON_NUM::ZERO) ? (buf.st_size - begin) : asyncCallbackInfo->length;
             auto buffer = std::make_unique<char[]>(len + 1);
-            if (buffer == nullptr) {
-                UniError(ENOMEM).ThrowErr(env);
-                return;
-            }
             lseek(fdg.GetFD(), begin, SEEK_CUR);
             if (read(fdg.GetFD(), buffer.get(), len) != FAILED) {
                 asyncCallbackInfo->result = SUCCESS;
