@@ -170,11 +170,6 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
     }
 
     auto arg = make_shared<AsyncWrtieArg>(move(bufGuard));
-    if (!arg) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
-    }
     auto cbExec = [arg, buf = buf, len = len, filp, offset = offset]() -> NError {
         if (offset >= 0) {
             int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
@@ -236,11 +231,6 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
     }
 
     auto arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
-    if (!arg) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
-    }
     auto cbExec = [arg, buf = buf, len = len, filp, offset = offset]() -> NError {
         if (offset >= 0) {
             int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);

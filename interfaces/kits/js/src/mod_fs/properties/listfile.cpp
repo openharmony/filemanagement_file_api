@@ -352,11 +352,6 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<ListFileArgs>();
-    if (!arg) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
-    }
 
     auto cbExec = [arg, optionArgsTmp]() -> NError {
         g_optionArgs = optionArgsTmp;

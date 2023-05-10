@@ -40,11 +40,6 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
             return { false, FileInfo { false, {}, {} } };
         }
         auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
-        if (!fdg) {
-            HILOGE("Failed to request heap memory.");
-            NError(ENOMEM).ThrowErr(env);
-            return { false, FileInfo { false, {}, {} } };
-        }
         return { true, FileInfo { false, {}, move(fdg) } };
     }
     HILOGE("Invalid parameter");

@@ -86,11 +86,6 @@ napi_value CreateStream::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncCreateStreamArg>();
-    if (!arg) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
-    }
     auto cbExec = [arg, argPath = move(argPath), argMode = move(argMode)]() -> NError {
         arg->fp = { fopen(argPath.c_str(), argMode.c_str()), fclose };
         if (!arg->fp) {

@@ -81,10 +81,6 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
             return NError(errno);
         }
         srcFile.fdg = make_unique<DistributedFS::FDGuard>(ret, true);
-        if (!srcFile.fdg) {
-            HILOGE("Failed to request heap memory for src file descriptor.");
-            return NError(ENOMEM);
-        }
     }
 
     struct stat statbf;
@@ -106,10 +102,6 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
             return NError(errno);
         }
         destFile.fdg = make_unique<DistributedFS::FDGuard>(ret, true);
-        if (!destFile.fdg) {
-            HILOGE("Failed to request heap memory for dest file descriptor.");
-            return NError(ENOMEM);
-        }
     }
     return SendFileCore(srcFile, destFile, statbf);
 }
