@@ -100,7 +100,14 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
         }
         return NVal();
     }
-    auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+    unique_ptr<DistributedFS::FDGuard> fdg;
+    try {
+        fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return NVal();
+    }
     fileEntity->fd_.swap(fdg);
     if (isUri) {
         fileEntity->path_ = "";
@@ -266,7 +273,14 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
         HILOGE("Invalid mode");
         return nullptr;
     }
-    auto arg = make_shared<AsyncOpenFileArg>();
+    shared_ptr<AsyncOpenFileArg> arg;
+    try {
+        arg = make_shared<AsyncOpenFileArg>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto argv = funcArg[NARG_POS::FIRST];
     auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
         string pathStr = path;

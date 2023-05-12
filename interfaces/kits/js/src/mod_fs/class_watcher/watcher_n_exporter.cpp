@@ -37,7 +37,14 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    unique_ptr<WatcherEntity> watcherEntity = make_unique<WatcherEntity>();
+    unique_ptr<WatcherEntity> watcherEntity;
+    try {
+        watcherEntity = make_unique<WatcherEntity>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     if (!NClass::SetEntityFor<WatcherEntity>(env, funcArg.GetThisVar(), move(watcherEntity))) {
         NError(EIO).ThrowErr(env);
         return nullptr;

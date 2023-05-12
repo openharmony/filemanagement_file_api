@@ -74,7 +74,14 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<string>();
+    shared_ptr<string> arg;
+    try {
+        arg = make_shared<string>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [path = string(tmp.get()), arg]() -> NError {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };

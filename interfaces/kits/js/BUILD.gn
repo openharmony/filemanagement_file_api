@@ -163,6 +163,8 @@ ohos_shared_library("fs") {
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
+
+  use_exceptions = true
 }
 
 ohos_shared_library("hash") {

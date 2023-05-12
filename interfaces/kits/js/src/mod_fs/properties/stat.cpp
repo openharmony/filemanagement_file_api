@@ -39,7 +39,14 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
             NError(EINVAL).ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
         }
-        auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+        unique_ptr<DistributedFS::FDGuard> fdg;
+        try {
+            fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+        } catch (const bad_alloc &) {
+            HILOGE("Failed to request heap memory.");
+            NError(ENOMEM).ThrowErr(env);
+            return { false, FileInfo { false, {}, {} } };
+        }
         return { true, FileInfo { false, {}, move(fdg) } };
     }
     HILOGE("Invalid parameter");
@@ -100,7 +107,14 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<StatEntity>();
+    shared_ptr<StatEntity> arg;
+    try {
+        arg = make_shared<StatEntity>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [arg, fileInfo = make_shared<FileInfo>(move(fileInfo))]() -> NError {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
             new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };

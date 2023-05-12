@@ -169,7 +169,14 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncWrtieArg>(move(bufGuard));
+    shared_ptr<AsyncWrtieArg> arg;
+    try {
+        arg = make_shared<AsyncWrtieArg>(move(bufGuard));
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [arg, buf = buf, len = len, filp, offset = offset]() -> NError {
         if (offset >= 0) {
             int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
@@ -230,7 +237,14 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
+    shared_ptr<AsyncReadArg> arg;
+    try {
+        arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [arg, buf = buf, len = len, filp, offset = offset]() -> NError {
         if (offset >= 0) {
             int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
@@ -319,7 +333,14 @@ napi_value StreamNExporter::Constructor(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    unique_ptr<StreamEntity> streamEntity = make_unique<StreamEntity>();
+    unique_ptr<StreamEntity> streamEntity;
+    try {
+        streamEntity = make_unique<StreamEntity>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     if (!NClass::SetEntityFor<StreamEntity>(env, funcArg.GetThisVar(), move(streamEntity))) {
         HILOGE("INNER BUG. Failed to wrap entity for obj stream");
         NError(EIO).ThrowErr(env);

@@ -351,8 +351,14 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<ListFileArgs>();
-
+    shared_ptr<ListFileArgs> arg;
+    try {
+        arg = make_shared<ListFileArgs>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [arg, optionArgsTmp]() -> NError {
         g_optionArgs = optionArgsTmp;
         if (g_optionArgs.recursion) {

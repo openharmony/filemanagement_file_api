@@ -277,7 +277,14 @@ napi_value CopyDir::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<CopyDirArgs>();
+    shared_ptr<CopyDirArgs> arg;
+    try {
+        arg = make_shared<CopyDirArgs>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [srcPath = string(src.get()), destPath = string(dest.get()), mode = mode, arg]() -> NError {
         arg->errNo = CopyDirFunc(srcPath, destPath, mode, arg->errfiles);
         if (arg->errNo) {
