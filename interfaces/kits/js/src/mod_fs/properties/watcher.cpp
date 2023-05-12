@@ -64,7 +64,14 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     }
 
     int fd = -1;
-    shared_ptr<FileWatcher> watcherPtr = make_shared<FileWatcher>();
+    shared_ptr<FileWatcher> watcherPtr;
+    try {
+        watcherPtr = make_shared<FileWatcher>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     if (!watcherPtr->InitNotify(fd)) {
         NError(errno).ThrowErr(env);
         return nullptr;
@@ -87,7 +94,13 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    watcherEntity->data_ = std::make_unique<WatcherInfoArg>(NVal(env, funcArg[NARG_POS::THIRD]));
+    try {
+        watcherEntity->data_ = make_unique<WatcherInfoArg>(NVal(env, funcArg[NARG_POS::THIRD]));
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     watcherEntity->data_->events = events;
     watcherEntity->data_->env = env;
     watcherEntity->data_->filename = string(filename.get());

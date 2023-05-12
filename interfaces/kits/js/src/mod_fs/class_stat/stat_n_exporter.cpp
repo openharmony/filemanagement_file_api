@@ -234,7 +234,14 @@ napi_value StatNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    unique_ptr<StatEntity> statEntity = make_unique<StatEntity>();
+    unique_ptr<StatEntity> statEntity;
+    try {
+        statEntity = make_unique<StatEntity>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     if (!NClass::SetEntityFor<StatEntity>(env, funcArg.GetThisVar(), move(statEntity))) {
         HILOGE("Failed to set stat entity");
         NError(EINVAL).ThrowErr(env);

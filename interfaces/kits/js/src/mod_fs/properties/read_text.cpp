@@ -211,7 +211,14 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncReadTextArg>(NVal(env, funcArg.GetThisVar()));
+    shared_ptr<AsyncReadTextArg> arg;
+    try {
+        arg = make_shared<AsyncReadTextArg>(NVal(env, funcArg.GetThisVar()));
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [path = string(path.get()), arg, offset = offset, hasLen = hasLen, len = len]() -> NError {
         return ReadTextAsync(path, arg, offset, hasLen, len);
     };

@@ -107,7 +107,14 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto result = make_shared<AsyncAccessArg>();
+    shared_ptr<AsyncAccessArg> result;
+    try {
+        result = make_shared<AsyncAccessArg>();
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [path = string(tmp.get()), result]() -> NError {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> access_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -393,8 +400,14 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
-
+    shared_ptr<AsyncIOReadArg> arg;
+    try {
+        arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [arg, buf, len, fd, offset]() -> NError {
         return ReadExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
@@ -465,8 +478,14 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncIOWrtieArg>(move(bufGuard));
-
+    shared_ptr<AsyncIOWrtieArg> arg;
+    try {
+        arg = make_shared<AsyncIOWrtieArg>(move(bufGuard));
+    } catch (const bad_alloc &) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [arg, buf, len, fd, offset]() -> NError {
         return WriteExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
