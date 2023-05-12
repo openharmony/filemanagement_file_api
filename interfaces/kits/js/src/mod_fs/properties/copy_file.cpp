@@ -80,10 +80,8 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
             HILOGE("Failed to open srcFile with ret: %{public}d", ret);
             return NError(errno);
         }
-        try {
-            srcFile.fdg = make_unique<DistributedFS::FDGuard>(ret, true);
-        } catch (const bad_alloc &) {
-            HILOGE("Failed to request heap memory.");
+        srcFile.fdg = CreateUniquePtr<DistributedFS::FDGuard>(ret, true);
+        if (srcFile.fdg == nullptr) {
             return NError(ENOMEM);
         }
     }
@@ -106,10 +104,8 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
             HILOGE("Failed to open destFile with ret: %{public}d", ret);
             return NError(errno);
         }
-        try {
-            destFile.fdg = make_unique<DistributedFS::FDGuard>(ret, true);
-        } catch (const bad_alloc &) {
-            HILOGE("Failed to request heap memory.");
+        destFile.fdg = CreateUniquePtr<DistributedFS::FDGuard>(ret, true);
+        if (destFile.fdg == nullptr) {
             return NError(ENOMEM);
         }
     }
@@ -138,13 +134,10 @@ static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg
 
     auto [isFd, fd] = pathOrFdFromJsArg.ToInt32();
     if (isFd) {
-        unique_ptr<DistributedFS::FDGuard> fdg;
-        try {
-            fdg = make_unique<DistributedFS::FDGuard>(fd, false);
-        } catch (const bad_alloc &) {
-            HILOGE("Failed to request heap memory.");
+        unique_ptr<DistributedFS::FDGuard> fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+        if (fdg == nullptr) {
             NError(ENOMEM).ThrowErr(env);
-            return { false, FileInfo { false, {}, {} } };    return { false, FileInfo { false, {}, {} } };
+            return { false, FileInfo { false, {}, {} } };
         }
         return { true, FileInfo { false, {}, move(fdg) } };
     }
@@ -216,11 +209,8 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<Para> para;
-    try {
-        para = make_shared<Para>(move(src), move(dest));
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<Para> para = CreateSharedPtr<Para>(move(src), move(dest));
+    if (para == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

@@ -39,11 +39,8 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
             NError(EINVAL).ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
         }
-        unique_ptr<DistributedFS::FDGuard> fdg;
-        try {
-            fdg = make_unique<DistributedFS::FDGuard>(fd, false);
-        } catch (const bad_alloc &) {
-            HILOGE("Failed to request heap memory.");
+        unique_ptr<DistributedFS::FDGuard> fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+        if (fdg == nullptr) {
             NError(ENOMEM).ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
         }
@@ -106,12 +103,8 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
     if (!succ) {
         return nullptr;
     }
-
-    shared_ptr<StatEntity> arg;
-    try {
-        arg = make_shared<StatEntity>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<StatEntity> arg = CreateSharedPtr<StatEntity>();
+    if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

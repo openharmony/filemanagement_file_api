@@ -100,11 +100,8 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
         }
         return NVal();
     }
-    unique_ptr<DistributedFS::FDGuard> fdg;
-    try {
-        fdg = make_unique<DistributedFS::FDGuard>(fd, false);
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    unique_ptr<DistributedFS::FDGuard> fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+    if (fdg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return NVal();
     }
@@ -273,11 +270,8 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
         HILOGE("Invalid mode");
         return nullptr;
     }
-    shared_ptr<AsyncOpenFileArg> arg;
-    try {
-        arg = make_shared<AsyncOpenFileArg>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<AsyncOpenFileArg> arg = CreateSharedPtr<AsyncOpenFileArg>();
+    if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

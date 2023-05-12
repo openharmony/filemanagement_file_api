@@ -21,6 +21,7 @@
 #include <cstring>
 #include <memory>
 
+#include "common_func.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -234,11 +235,8 @@ napi_value StatNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    unique_ptr<StatEntity> statEntity;
-    try {
-        statEntity = make_unique<StatEntity>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    unique_ptr<StatEntity> statEntity = CreateUniquePtr<StatEntity>();
+    if (statEntity == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

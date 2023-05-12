@@ -74,11 +74,8 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<string> arg;
-    try {
-        arg = make_shared<string>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<string> arg = CreateSharedPtr<string>();
+    if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

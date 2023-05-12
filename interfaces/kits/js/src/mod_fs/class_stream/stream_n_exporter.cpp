@@ -169,11 +169,8 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    shared_ptr<AsyncWrtieArg> arg;
-    try {
-        arg = make_shared<AsyncWrtieArg>(move(bufGuard));
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<AsyncWrtieArg> arg = CreateSharedPtr<AsyncWrtieArg>(move(bufGuard));
+    if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -237,11 +234,8 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    shared_ptr<AsyncReadArg> arg;
-    try {
-        arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<AsyncReadArg> arg = CreateSharedPtr<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
+    if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -333,11 +327,8 @@ napi_value StreamNExporter::Constructor(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    unique_ptr<StreamEntity> streamEntity;
-    try {
-        streamEntity = make_unique<StreamEntity>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    unique_ptr<StreamEntity> streamEntity = CreateUniquePtr<StreamEntity>();
+    if (streamEntity == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

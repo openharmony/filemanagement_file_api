@@ -38,11 +38,8 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
         NError(EINVAL).ThrowErr(env);
         return { false, FileInfo { false, {}, {} } };
     }
-    unique_ptr<DistributedFS::FDGuard> fdg;
-    try {
-        fdg = make_unique<DistributedFS::FDGuard>(fd, false);
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    unique_ptr<DistributedFS::FDGuard> fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+    if (fdg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return { false, FileInfo { false, {}, {} } };
     }

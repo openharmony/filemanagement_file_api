@@ -77,11 +77,8 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
     }
 
     string path = tmp.get();
-    shared_ptr<StatEntity> arg;
-    try {
-        arg = make_shared<StatEntity>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<StatEntity> arg = CreateSharedPtr<StatEntity>();
+    if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

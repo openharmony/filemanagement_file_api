@@ -195,11 +195,8 @@ napi_value FileNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    unique_ptr<FileEntity> rafEntity;
-    try {
-        rafEntity = make_unique<FileEntity>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    unique_ptr<FileEntity> rafEntity = CreateUniquePtr<FileEntity>();
+    if (rafEntity == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

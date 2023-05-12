@@ -107,11 +107,8 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<AsyncAccessArg> result;
-    try {
-        result = make_shared<AsyncAccessArg>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<AsyncAccessArg> result = CreateSharedPtr<AsyncAccessArg>();
+    if (result == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -400,11 +397,8 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<AsyncIOReadArg> arg;
-    try {
-        arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<AsyncIOReadArg> arg = CreateSharedPtr<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
+    if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -478,11 +472,8 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<AsyncIOWrtieArg> arg;
-    try {
-        arg = make_shared<AsyncIOWrtieArg>(move(bufGuard));
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<AsyncIOWrtieArg> arg = CreateSharedPtr<AsyncIOWrtieArg>(move(bufGuard));
+    if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

@@ -20,6 +20,7 @@
 #include <memory>
 #include <tuple>
 #include <unistd.h>
+#include "common_func.h"
 #include "ipc_skeleton.h"
 #include "filemgmt_libhilog.h"
 #include "tokenid_kit.h"
@@ -64,11 +65,8 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     }
 
     int fd = -1;
-    shared_ptr<FileWatcher> watcherPtr;
-    try {
-        watcherPtr = make_shared<FileWatcher>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<FileWatcher> watcherPtr = CreateSharedPtr<FileWatcher>();
+    if (watcherPtr == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -93,11 +91,8 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    try {
-        watcherEntity->data_ = make_unique<WatcherInfoArg>(NVal(env, funcArg[NARG_POS::THIRD]));
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    watcherEntity->data_ = CreateUniquePtr<WatcherInfoArg>(NVal(env, funcArg[NARG_POS::THIRD]));
+    if (watcherEntity->data_ == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

@@ -37,11 +37,8 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    unique_ptr<WatcherEntity> watcherEntity;
-    try {
-        watcherEntity = make_unique<WatcherEntity>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    unique_ptr<WatcherEntity> watcherEntity = CreateUniquePtr<WatcherEntity>();
+    if (watcherEntity == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

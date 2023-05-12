@@ -277,11 +277,8 @@ napi_value CopyDir::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<CopyDirArgs> arg;
-    try {
-        arg = make_shared<CopyDirArgs>();
-    } catch (const bad_alloc &) {
-        HILOGE("Failed to request heap memory.");
+    shared_ptr<CopyDirArgs> arg = CreateSharedPtr<CopyDirArgs>();
+    if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
