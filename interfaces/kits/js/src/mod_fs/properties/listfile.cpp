@@ -17,7 +17,6 @@
 
 #include <fnmatch.h>
 #include <memory>
-#include <securec.h>
 #include <string>
 #include <string_view>
 #include <sys/stat.h>
@@ -80,7 +79,7 @@ static bool GetFileFilterParam(const NVal &argv, OHOS::DistributedFS::FileFilter
         filter->SetDisplayName(displayNames);
     }
     if (argv.HasProp("fileSizeOver") && !argv.GetProp("fileSizeOver").TypeIs(napi_undefined)) {
-        int64_t fileSizeOver;
+        int64_t fileSizeOver = 0;
         tie(ret, fileSizeOver) = argv.GetProp("fileSizeOver").ToInt64();
         if (!ret || fileSizeOver < 0) {
             HILOGE("Failed to get fileSizeOver prop.");
@@ -89,7 +88,7 @@ static bool GetFileFilterParam(const NVal &argv, OHOS::DistributedFS::FileFilter
         filter->SetFileSizeOver(fileSizeOver);
     }
     if (argv.HasProp("lastModifiedAfter") && !argv.GetProp("lastModifiedAfter").TypeIs(napi_undefined)) {
-        double lastModifiedAfter;
+        double lastModifiedAfter = 0;
         tie(ret, lastModifiedAfter) = argv.GetProp("lastModifiedAfter").ToDouble();
         if (!ret || lastModifiedAfter < 0) {
             HILOGE("Failed to get lastModifiedAfter prop.");
@@ -149,7 +148,7 @@ static bool GetOptionArg(napi_env env, const NFuncArg &funcArg, OptionArgs &opti
     return false;
 }
 
-static bool FilterSuffix(const vector<string>& suffixs, const struct dirent& filename)
+static bool FilterSuffix(const vector<string> &suffixs, const struct dirent &filename)
 {
     if (filename.d_type == DT_DIR) {
         return true;
@@ -167,7 +166,7 @@ static bool FilterSuffix(const vector<string>& suffixs, const struct dirent& fil
     return false;
 }
 
-static bool FilterDisplayname(const vector<string>& displaynames, const struct dirent& filename)
+static bool FilterDisplayname(const vector<string> &displaynames, const struct dirent &filename)
 {
     for (const auto &iter : displaynames) {
         int ret = fnmatch(iter.c_str(), filename.d_name, FNM_PATHNAME | FNM_PERIOD);
@@ -178,7 +177,7 @@ static bool FilterDisplayname(const vector<string>& displaynames, const struct d
     return false;
 }
 
-static bool FilterFilesizeOver(const int64_t fFileSizeOver, const struct dirent& filename)
+static bool FilterFilesizeOver(const int64_t fFileSizeOver, const struct dirent &filename)
 {
     struct stat info;
     string stPath = (g_optionArgs.path + '/' + string(filename.d_name));
@@ -193,7 +192,7 @@ static bool FilterFilesizeOver(const int64_t fFileSizeOver, const struct dirent&
     return true;
 }
 
-static bool FilterLastModifyTime(const double lastModifiedAfter, const struct dirent& filename)
+static bool FilterLastModifyTime(const double lastModifiedAfter, const struct dirent &filename)
 {
     struct stat info;
     string stPath = g_optionArgs.path + '/' + string(filename.d_name);
@@ -244,59 +243,71 @@ static int32_t FilterFunc(const struct dirent *filename)
     return FILTER_DISMATCH;
 }
 
-static vector<struct dirent> FilterFileRes(const string &path)
+static void Deleter(struct NameListArg *arg)
 {
-    struct dirent** namelist;
-    int num = scandir(path.c_str(), &(namelist), FilterFunc, alphasort);
-    vector<struct dirent> dirents;
-    for (int i = 0; i < num; i++) {
-        struct dirent tmpDirent;
-        if (EOK == memcpy_s(&tmpDirent, sizeof(dirent), namelist[i], namelist[i]->d_reclen)) {
-            dirents.emplace_back(tmpDirent);
-        }
-        free(namelist[i]);
+    for (int i = 0; i < arg->direntNum; i++) {
+        delete (arg->namelist)[i];
+        (arg->namelist)[i] = nullptr;
     }
-    free(namelist);
-    return dirents;
 }
 
-static void RecursiveFunc(const string &path, vector<struct dirent> &dirents)
+static int FilterFileRes(const string &path, vector<string> &dirents)
 {
-    struct dirent** namelist;
-    int num = scandir(path.c_str(), &(namelist), FilterFunc, alphasort);
+    unique_ptr<struct NameListArg, decltype(Deleter)*> pNameList = { new (nothrow) struct NameListArg, Deleter };
+    if (!pNameList) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    int num = scandir(path.c_str(), &(pNameList->namelist), FilterFunc, alphasort);
+    if (num < 0) {
+        HILOGE("Failed to scan dir");
+        return errno;
+    }
+    pNameList->direntNum = num;
     for (int i = 0; i < num; i++) {
-        if ((*namelist[i]).d_type == DT_REG) {
-            struct dirent tmpDirent;
-            if (EOK == memcpy_s(&tmpDirent, sizeof(dirent), namelist[i], namelist[i]->d_reclen)) {
-                dirents.emplace_back(tmpDirent);
-            }
-        } else if ((*(namelist)[i]).d_type == DT_DIR) {
+        dirents.emplace_back(pNameList->namelist[i]->d_name);
+    }
+    return ERRNO_NOERR;
+}
+
+static int RecursiveFunc(const string &path, vector<string> &dirents)
+{
+    unique_ptr<struct NameListArg, decltype(Deleter)*> pNameList = { new (nothrow) struct NameListArg, Deleter };
+    if (!pNameList) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    int num = scandir(path.c_str(), &(pNameList->namelist), FilterFunc, alphasort);
+    if (num < 0) {
+        HILOGE("Failed to scan dir");
+        return errno;
+    }
+    pNameList->direntNum = num;
+    for (int i = 0; i < num; i++) {
+        if ((*(pNameList->namelist[i])).d_type == DT_REG) {
+            dirents.emplace_back(path + '/' + pNameList->namelist[i]->d_name);
+        } else if ((*(pNameList->namelist[i])).d_type == DT_DIR) {
             string pathTemp = g_optionArgs.path;
-            g_optionArgs.path += '/' + string((*namelist[i]).d_name);
-            RecursiveFunc(g_optionArgs.path, dirents);
+            g_optionArgs.path += '/' + string((*(pNameList->namelist[i])).d_name);
+            int ret = RecursiveFunc(g_optionArgs.path, dirents);
+            if (ret != ERRNO_NOERR) {
+                return ret;
+            }
             g_optionArgs.path = pathTemp;
         }
-        free(namelist[i]);
     }
-    free(namelist);
+    return ERRNO_NOERR;
 }
 
-static napi_value DoListFileVector2NV(napi_env env, vector<dirent> &dirents)
+static napi_value DoListFileVector2NV(napi_env env, const string &path, vector<string> &dirents)
 {
-    vector<string> strs;
-    for (size_t i = 0; i < dirents.size(); i++) {
-        strs.emplace_back(dirents[i].d_name);
+    if (g_optionArgs.recursion) {
+        for (size_t i = 0; i < dirents.size(); i++) {
+            dirents[i] = dirents[i].substr(path.length());
+        }
     }
-    return NVal::CreateArrayString(env, strs).val_;
-}
-
-static NVal DoListFileCompile(napi_env env, NError err, shared_ptr<ListFileArgs> arg)
-{
-    if (err) {
-        return { env, err.GetNapiErr(env) };
-    } else {
-        return { env, DoListFileVector2NV(env, arg->dirents) };
-    }
+    g_optionArgs.Clear();
+    return NVal::CreateArrayString(env, dirents).val_;
 }
 
 napi_value ListFile::Sync(napi_env env, napi_callback_info info)
@@ -318,14 +329,15 @@ napi_value ListFile::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    vector<struct dirent> direntsRes;
-    if (g_optionArgs.recursion) {
-        RecursiveFunc(path.get(), direntsRes);
-    } else {
-        direntsRes = FilterFileRes(path.get());
+    vector<string> direntsRes;
+    int ret = 0;
+    g_optionArgs.recursion ? ret = RecursiveFunc(path.get(), direntsRes) :
+        ret = FilterFileRes(path.get(), direntsRes);
+    if (ret) {
+        NError(ret).ThrowErr(env);
+        return nullptr;
     }
-    g_optionArgs.Clear();
-    return DoListFileVector2NV(env, direntsRes);
+    return DoListFileVector2NV(env, string(path.get()), direntsRes);
 }
 
 napi_value ListFile::Async(napi_env env, napi_callback_info info)
@@ -360,20 +372,17 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
 
     auto cbExec = [arg, optionArgsTmp]() -> NError {
         g_optionArgs = optionArgsTmp;
-        if (g_optionArgs.recursion) {
-            RecursiveFunc(g_optionArgs.path, arg->dirents);
-        } else {
-            arg->dirents = FilterFileRes(g_optionArgs.path);
-        }
-        g_optionArgs.Clear();
-        return NError(ERRNO_NOERR);
+        int ret = 0;
+        ret = g_optionArgs.recursion ? RecursiveFunc(g_optionArgs.path, arg->dirents) :
+            FilterFileRes(g_optionArgs.path, arg->dirents);
+        return ret ? NError(ret) : NError(ERRNO_NOERR);
     };
 
-    auto cbCompl = [arg](napi_env env, NError err) -> NVal {
+    auto cbCompl = [arg, path = string(path.get())](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return DoListFileCompile(env, err, arg);
+        return { env, DoListFileVector2NV(env, path, arg->dirents) };
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
