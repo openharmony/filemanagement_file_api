@@ -109,6 +109,11 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     len = !hasLen ? statbf.st_size : len;
     len = ((len  < statbf.st_size) ? len : statbf.st_size);
     std::unique_ptr<char[]> readbuf = std::make_unique<char[]>(len + 1);
+    if (readbuf == nullptr) {
+        UniError(EINVAL).ThrowErr(env, "file is too large");
+        return nullptr;
+    }
+
     if (memset_s(readbuf.get(), len + 1, 0, len + 1) != EOK) {
         UniError(errno).ThrowErr(env, "dfs mem error");
         return nullptr;
@@ -152,6 +157,9 @@ UniError ReadText::AsyncExec(const std::string &path, std::shared_ptr<AsyncReadT
 
     arg->len = ((arg->len < statbf.st_size) ? arg->len : statbf.st_size);
     arg->buf = std::make_unique<char[]>(arg->len);
+    if (arg->buf == nullptr) {
+        return UniError(ENOMEM);
+    }
 
     if (position > 0) {
         arg->len = pread(sfd.GetFD(), arg->buf.get(), arg->len, position);
@@ -187,6 +195,9 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = make_shared<AsyncReadTextArg>(NVal(env, funcArg.GetThisVar()));
+    if (arg == nullptr) {
+        return nullptr;
+    }
 
     auto cbExec =
         [path = string(path.get()), arg, position = position, hasLen = hasLen, len = len](napi_env env) -> UniError {
