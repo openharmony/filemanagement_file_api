@@ -44,7 +44,7 @@ using namespace OHOS::AppExecFwk;
 static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
 {
     unsigned int flags = O_RDONLY;
-    if (funcArg.GetArgc() >= NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
+    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
         auto [succ, mode] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
         int32_t invalidMode = (O_WRONLY | O_RDWR);
         if (!succ || mode < 0 || ((mode & invalidMode) == invalidMode)) {
@@ -197,7 +197,6 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
     if (!succMode) {
-        HILOGE("Invalid mode");
         return nullptr;
     }
     int fd = -1;
@@ -263,7 +262,6 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
     if (!succMode) {
-        HILOGE("Invalid mode");
         return nullptr;
     }
     auto arg = make_shared<AsyncOpenFileArg>();
