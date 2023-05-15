@@ -31,6 +31,7 @@
 #include "create_stream.h"
 #include "fdatasync.h"
 #include "fdopen_stream.h"
+#include "file_utils.h"
 #include "filemgmt_libn.h"
 #include "fsync.h"
 #include "js_native_api.h"
@@ -107,7 +108,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<AsyncAccessArg> result = CreateSharedPtr<AsyncAccessArg>();
+    auto result = CreateSharedPtr<AsyncAccessArg>();
     if (result == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -397,7 +398,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<AsyncIOReadArg> arg = CreateSharedPtr<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
+    auto arg = CreateSharedPtr<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
     if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -472,7 +473,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<AsyncIOWrtieArg> arg = CreateSharedPtr<AsyncIOWrtieArg>(move(bufGuard));
+    auto arg = CreateSharedPtr<AsyncIOWrtieArg>(move(bufGuard));
     if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;

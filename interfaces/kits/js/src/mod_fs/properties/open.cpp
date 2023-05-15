@@ -26,6 +26,7 @@
 #include "class_file/file_n_exporter.h"
 #include "common_func.h"
 #include "datashare_helper.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -100,7 +101,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
         }
         return NVal();
     }
-    unique_ptr<DistributedFS::FDGuard> fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+    auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return NVal();
@@ -270,7 +271,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
         HILOGE("Invalid mode");
         return nullptr;
     }
-    shared_ptr<AsyncOpenFileArg> arg = CreateSharedPtr<AsyncOpenFileArg>();
+    auto arg = CreateSharedPtr<AsyncOpenFileArg>();
     if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;

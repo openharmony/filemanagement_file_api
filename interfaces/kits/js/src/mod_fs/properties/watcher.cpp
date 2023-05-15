@@ -20,8 +20,8 @@
 #include <memory>
 #include <tuple>
 #include <unistd.h>
-#include "common_func.h"
 #include "ipc_skeleton.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "tokenid_kit.h"
 #include "../class_watcher/watcher_entity.h"
@@ -37,6 +37,22 @@ namespace {
         uint64_t fullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
         return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
     }
+}
+
+static tuple<shared_ptr<FileWatcher>, napi_value, NError> CreateAndCheckForWatcherEntity(napi_env env, int fd)
+{
+    auto watcherPtr = CreateSharedPtr<FileWatcher>();
+    if (watcherPtr == nullptr) {
+        return {nullptr, nullptr, NError(ENOMEM)};
+    }
+    if (!watcherPtr->InitNotify(fd)) {
+        return {watcherPtr, nullptr, NError(errno)};
+    }
+    napi_value objWatcher = NClass::InstantiateClass(env, WatcherNExporter::className_, {});
+    if (!objWatcher) {
+        return {watcherPtr, nullptr, NError(EINVAL)};
+    }
+    return {watcherPtr, objWatcher, NError(ERRNO_NOERR)};
 }
 
 napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
@@ -65,19 +81,9 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     }
 
     int fd = -1;
-    shared_ptr<FileWatcher> watcherPtr = CreateSharedPtr<FileWatcher>();
-    if (watcherPtr == nullptr) {
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
-    }
-    if (!watcherPtr->InitNotify(fd)) {
-        NError(errno).ThrowErr(env);
-        return nullptr;
-    }
-
-    napi_value objWatcher = NClass::InstantiateClass(env, WatcherNExporter::className_, {});
-    if (!objWatcher) {
-        NError(EINVAL).ThrowErr(env);
+    auto [watcherPtr, objWatcher, err] = CreateAndCheckForWatcherEntity(env, fd);
+    if (watcherPtr == nullptr || !objWatcher) {
+        err.ThrowErr(env);
         return nullptr;
     }
 

@@ -22,6 +22,7 @@
 #include <memory>
 #include <sys/file.h>
 
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
 #include "../common_func.h"
@@ -195,7 +196,7 @@ napi_value FileNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    unique_ptr<FileEntity> rafEntity = CreateUniquePtr<FileEntity>();
+    auto rafEntity = CreateUniquePtr<FileEntity>();
     if (rafEntity == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;

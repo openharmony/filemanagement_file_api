@@ -25,6 +25,7 @@
 #include "class_stat/stat_n_exporter.h"
 #include "class_stream/stream_entity.h"
 #include "class_stream/stream_n_exporter.h"
+#include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
 
 namespace OHOS {

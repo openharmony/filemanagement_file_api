@@ -20,6 +20,7 @@
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -39,7 +40,7 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
             NError(EINVAL).ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
         }
-        unique_ptr<DistributedFS::FDGuard> fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+        auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
         if (fdg == nullptr) {
             NError(ENOMEM).ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
@@ -50,6 +51,24 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
     NError(EINVAL).ThrowErr(env);
     return { false, FileInfo { false, {}, {} } };
 };
+
+static NError CheckFsStat(const FileInfo &fileInfo, uv_fs_t* req)
+{
+    if (fileInfo.isPath) {
+        int ret = uv_fs_stat(nullptr, req, fileInfo.path.get(), nullptr);
+        if (ret < 0) {
+            HILOGE("Failed to stat file with path");
+            return NError(errno);
+        }
+    } else {
+        int ret = uv_fs_fstat(nullptr, req, fileInfo.fdg->GetFD(), nullptr);
+        if (ret < 0) {
+            HILOGE("Failed to stat file with fd");
+            return NError(errno);
+        }
+    }
+    return NError(ERRNO_NOERR);
+}
 
 napi_value Stat::Sync(napi_env env, napi_callback_info info)
 {
@@ -71,20 +90,10 @@ napi_value Stat::Sync(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    if (fileInfo.isPath) {
-        int ret = uv_fs_stat(nullptr, stat_req.get(), fileInfo.path.get(), nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to stat file with path");
-            NError(errno).ThrowErr(env);
-            return nullptr;
-        }
-    } else {
-        int ret = uv_fs_fstat(nullptr, stat_req.get(), fileInfo.fdg->GetFD(), nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to stat file with fd");
-            NError(errno).ThrowErr(env);
-            return nullptr;
-        }
+    auto err = CheckFsStat(fileInfo, stat_req.get());
+    if (err) {
+        err.ThrowErr(env);
+        return nullptr;
     }
 
     auto stat = CommonFunc::InstantiateStat(env, stat_req->statbuf).val_;
@@ -103,7 +112,7 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
     if (!succ) {
         return nullptr;
     }
-    shared_ptr<StatEntity> arg = CreateSharedPtr<StatEntity>();
+    auto arg = CreateSharedPtr<StatEntity>();
     if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -115,18 +124,9 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
-        if (fileInfo->isPath) {
-            int ret = uv_fs_stat(nullptr, stat_req.get(), fileInfo->path.get(), nullptr);
-            if (ret < 0) {
-                HILOGE("Failed to stat file with path");
-                return NError(errno);
-            }
-        } else {
-            int ret = uv_fs_fstat(nullptr, stat_req.get(), fileInfo->fdg->GetFD(), nullptr);
-            if (ret < 0) {
-                HILOGE("Failed to stat file with fd");
-                return NError(errno);
-            }
+        auto err = CheckFsStat(*fileInfo, stat_req.get());
+        if (err) {
+            return err;
         }
         arg->stat_ = stat_req->statbuf;
         return NError(ERRNO_NOERR);

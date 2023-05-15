@@ -17,8 +17,9 @@
 
 #include <string>
 
-#include "n_error.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "n_error.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -67,7 +68,11 @@ tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF8String() const
     }
 
     size_t bufLen = strLen + 1;
-    unique_ptr<char[]> str = make_unique<char[]>(bufLen);
+    auto str = CreateUniquePtr<char[]>(bufLen);
+    if (str == nullptr) {
+        NError(ENOMEM).ThrowErr(env_);
+        return {false, nullptr, 0};
+    }
     status = napi_get_value_string_utf8(env_, val_, str.get(), bufLen, &strLen);
     return make_tuple(status == napi_ok, move(str), strLen);
 }
@@ -75,10 +80,10 @@ tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF8String() const
 tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF8String(string defaultValue) const
 {
     if (TypeIs(napi_undefined) || TypeIs(napi_function)) {
-        unique_ptr<char[]> str = make_unique<char[]>(defaultValue.size() + 1);
+        auto str = CreateUniquePtr<char[]>(defaultValue.size() + 1);
         if (str == nullptr) {
-            HILOGE("Failed to request heap memory");
-            return { false, nullptr, 0 };
+            NError(ENOMEM).ThrowErr(env_);
+            return {false, nullptr, 0};
         }
         copy(defaultValue.begin(), defaultValue.end(), str.get());
         str[defaultValue.size()] = '\0';
@@ -96,7 +101,11 @@ tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF16String() const
         return {false, nullptr, 0};
     }
 
-    auto str = make_unique<char16_t[]>(++strLen);
+    auto str = CreateUniquePtr<char16_t[]>(++strLen);
+    if (str == nullptr) {
+        NError(ENOMEM).ThrowErr(env_);
+        return {false, nullptr, 0};
+    }
     status = napi_get_value_string_utf16(env_, val_, str.get(), strLen, nullptr);
     if (status != napi_ok) {
         return {false, nullptr, 0};

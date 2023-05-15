@@ -16,6 +16,7 @@
 #include "mkdtemp.h"
 
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -74,7 +75,7 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<string> arg = CreateSharedPtr<string>();
+    auto arg = CreateSharedPtr<string>();
     if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;

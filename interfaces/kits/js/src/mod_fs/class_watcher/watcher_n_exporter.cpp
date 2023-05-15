@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "../common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libn.h"
 #include "filemgmt_libhilog.h"
 #include "securec.h"
@@ -37,7 +38,7 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    unique_ptr<WatcherEntity> watcherEntity = CreateUniquePtr<WatcherEntity>();
+    auto watcherEntity = CreateUniquePtr<WatcherEntity>();
     if (watcherEntity == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;

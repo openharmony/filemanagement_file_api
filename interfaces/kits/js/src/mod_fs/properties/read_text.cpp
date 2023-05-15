@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -210,7 +211,7 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    shared_ptr<AsyncReadTextArg> arg = CreateSharedPtr<AsyncReadTextArg>(NVal(env, funcArg.GetThisVar()));
+    auto arg = CreateSharedPtr<AsyncReadTextArg>(NVal(env, funcArg.GetThisVar()));
     if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;

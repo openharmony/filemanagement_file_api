@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -134,7 +135,7 @@ static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg
 
     auto [isFd, fd] = pathOrFdFromJsArg.ToInt32();
     if (isFd) {
-        unique_ptr<DistributedFS::FDGuard> fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+        auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
         if (fdg == nullptr) {
             NError(ENOMEM).ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
@@ -209,7 +210,7 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<Para> para = CreateSharedPtr<Para>(move(src), move(dest));
+    auto para = CreateSharedPtr<Para>(move(src), move(dest));
     if (para == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;

@@ -17,7 +17,6 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_COMMON_FUNC_H
 
 #include "fd_guard.h"
-#include "filemgmt_libhilog.h"
 #include "n_val.h"
 #include "uv.h"
 
@@ -60,33 +59,6 @@ struct CommonFunc {
     static void fs_req_cleanup(uv_fs_t* req);
     static std::string GetModeFromFlags(unsigned int flags);
 };
-
-template<typename T, typename... Args>
-std::shared_ptr<T> CreateSharedPtr(Args&&... args)
-{
-    std::shared_ptr<T> sPtr = nullptr;
-    try {
-        sPtr = std::make_shared<T>(std::forward<Args>(args)...);
-    } catch (const std::bad_alloc&) {
-        HILOGE("Failed to request heap memory.");
-        return nullptr;
-    }
-    return sPtr;
-};
-
-template<typename T, typename... Args>
-std::unique_ptr<T> CreateUniquePtr(Args&&... args)
-{
-    std::unique_ptr<T> uPtr = nullptr;
-    try {
-        uPtr = std::make_unique<T>(std::forward<Args>(args)...);
-    } catch (const std::bad_alloc&) {
-        HILOGE("Failed to request heap memory.");
-        return nullptr;
-    }
-    return uPtr;
-}
-
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

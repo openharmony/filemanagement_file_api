@@ -24,7 +24,7 @@
 #include <thread>
 #include <tuple>
 
-#include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -352,7 +352,7 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    shared_ptr<ListFileArgs> arg = CreateSharedPtr<ListFileArgs>();
+    auto arg = CreateSharedPtr<ListFileArgs>();
     if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;

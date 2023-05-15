@@ -21,7 +21,7 @@
 #include <cstring>
 #include <memory>
 
-#include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -235,7 +235,7 @@ napi_value StatNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    unique_ptr<StatEntity> statEntity = CreateUniquePtr<StatEntity>();
+    auto statEntity = CreateUniquePtr<StatEntity>();
     if (statEntity == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;

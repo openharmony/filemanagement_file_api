@@ -20,6 +20,7 @@
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -77,7 +78,7 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
     }
 
     string path = tmp.get();
-    shared_ptr<StatEntity> arg = CreateSharedPtr<StatEntity>();
+    auto arg = CreateSharedPtr<StatEntity>();
     if (arg == nullptr) {
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
