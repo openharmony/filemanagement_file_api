@@ -41,5 +41,6 @@ ohos_shared_library("filemgmt_libn") {
   ]
 
   subsystem_name = "filemanagement"
+  innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"
 }

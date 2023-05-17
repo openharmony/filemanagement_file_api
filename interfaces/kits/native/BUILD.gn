@@ -34,6 +34,7 @@ ohos_shared_library("remote_uri_native") {
     "ipc:ipc_core",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"
   subsystem_name = "filemanagement"
 }
