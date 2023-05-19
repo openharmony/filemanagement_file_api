@@ -159,12 +159,13 @@ struct NameListArg {
     int num;
 };
 
-static void Deletor(struct NameListArg *arg)
+static void Deleter(struct NameListArg *arg)
 {
     for (int i = 0; i < arg->num; i++) {
-        delete (arg->namelist)[i];
+        free((arg->namelist)[i]);
         (arg->namelist)[i] = nullptr;
     }
+    free(arg->namelist);
 }
 
 static int MoveSubDir(const string &srcPath, const string &destPath, const int mode,
@@ -181,7 +182,7 @@ static int MoveSubDir(const string &srcPath, const string &destPath, const int m
 static int RecurMoveDir(const string &srcPath, const string &destPath, const int mode,
     vector<struct ErrFiles> &errfiles)
 {
-    unique_ptr<struct NameListArg, decltype(Deletor)*> ptr = {new struct NameListArg, Deletor};
+    unique_ptr<struct NameListArg, decltype(Deleter)*> ptr = {new struct NameListArg, Deleter};
     if (!ptr) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
