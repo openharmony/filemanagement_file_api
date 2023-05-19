@@ -92,12 +92,13 @@ struct NameList {
     int direntNum = 0;
 };
 
-static void Deletor(struct NameList *arg)
+static void Deleter(struct NameList *arg)
 {
     for (int i = 0; i < arg->direntNum; i++) {
-        delete (arg->namelist)[i];
+        free((arg->namelist)[i]);
         (arg->namelist)[i] = nullptr;
     }
+    free(arg->namelist);
 }
 
 static int CopyFile(const string &src, const string &dest)
@@ -144,7 +145,7 @@ static int FilterFunc(const struct dirent *filename)
 
 static int RecurCopyDir(const string &srcPath, const string &destPath, vector<struct ConflictFiles> &errfiles)
 {
-    unique_ptr<struct NameList, decltype(Deletor)*> pNameList = {new (nothrow) struct NameList, Deletor};
+    unique_ptr<struct NameList, decltype(Deleter)*> pNameList = {new (nothrow) struct NameList, Deleter};
     if (pNameList == nullptr) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
