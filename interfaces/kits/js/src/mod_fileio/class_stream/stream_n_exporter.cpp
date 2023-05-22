@@ -41,7 +41,6 @@ using namespace std;
 napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
@@ -59,22 +58,21 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
     }
 
     void *buf = nullptr;
-    int64_t len;
-    bool hasPos = false;
-    int64_t pos;
-    tie(succ, buf, len, hasPos, pos, ignore) =
+    size_t len = 0;
+    int64_t pos = -1;
+    tie(succ, buf, len, pos, ignore) =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         return nullptr;
     }
 
-    if (hasPos && (fseek(filp, pos, SEEK_SET) == -1)) {
+    if (pos >= 0 && (fseek(filp, static_cast<long>(pos), SEEK_SET) == -1)) {
         UniError(errno).ThrowErr(env);
         return nullptr;
     }
 
     size_t actLen = fread(buf, 1, len, filp);
-    if (actLen != static_cast<size_t>(len) && ferror(filp)) {
+    if ((actLen != len && !feof(filp)) || ferror(filp)) {
         UniError(errno).ThrowErr(env);
     }
 
@@ -84,7 +82,6 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
 napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
@@ -118,22 +115,21 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info info)
     }
 
     void *buf = nullptr;
-    size_t len;
-    size_t position;
-    unique_ptr<char[]> bufGuard;
-    bool hasPos = false;
-    tie(succ, bufGuard, buf, len, hasPos, position) =
+    size_t len = 0;
+    int64_t position = -1;
+    unique_ptr<char[]> bufGuard = nullptr;
+    tie(succ, bufGuard, buf, len, position) =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         return nullptr;
     }
-    if (hasPos && (fseek(filp, position, SEEK_SET) == -1)) {
+    if (position >= 0 && (fseek(filp, static_cast<long>(position), SEEK_SET) == -1)) {
         UniError(errno).ThrowErr(env);
         return nullptr;
     }
 
     size_t writeLen = fwrite(buf, 1, len, filp);
-    if (writeLen != len) {
+    if ((writeLen == 0) && (writeLen != len)) {
         UniError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -143,7 +139,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info info)
 
 struct AsyncWrtieArg {
     NRef refWriteArrayBuf;
-    unique_ptr<char[]> guardWriteStr;
+    unique_ptr<char[]> guardWriteStr = nullptr;
     size_t actLen { 0 };
 
     explicit AsyncWrtieArg(NVal refWriteArrayBuf) : refWriteArrayBuf(refWriteArrayBuf) {}
@@ -161,8 +157,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
 
     bool succ = false;
     FILE *filp = nullptr;
-    bool hasPosition = false;
-    size_t position;
+    int64_t position = -1;
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
         UniError(EBADF).ThrowErr(env, "Stream may has been closed");
@@ -170,29 +165,23 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
     }
     filp = streamEntity->fp.get();
 
-    unique_ptr<char[]> bufGuard;
+    unique_ptr<char[]> bufGuard = nullptr;
     void *buf = nullptr;
-    size_t len;
-    tie(succ, bufGuard, buf, len, hasPosition, position) =
+    size_t len = 0;
+    tie(succ, bufGuard, buf, len, position) =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         return nullptr;
     }
 
-    shared_ptr<AsyncWrtieArg> arg;
-    if (bufGuard) {
-        arg = make_shared<AsyncWrtieArg>(move(bufGuard));
-    } else {
-        arg = make_shared<AsyncWrtieArg>(NVal(env, funcArg[NARG_POS::FIRST]));
-    }
-
-    auto cbExec = [arg, buf, len, filp, hasPosition, position](napi_env env) -> UniError {
-        if (hasPosition && (fseek(filp, position, SEEK_SET) == -1)) {
+    auto arg = make_shared<AsyncWrtieArg>(move(bufGuard));
+    auto cbExec = [arg, buf, len, filp, position](napi_env env) -> UniError {
+        if (position >= 0 && (fseek(filp, static_cast<long>(position), SEEK_SET) == -1)) {
             UniError(errno).ThrowErr(env);
             return UniError(errno);
         }
         arg->actLen = fwrite(buf, 1, len, filp);
-        if (arg->actLen != static_cast<size_t>(len) && ferror(filp)) {
+        if ((arg->actLen == 0) && (arg->actLen != len)) {
             return UniError(errno);
         }
         return UniError(ERRNO_NOERR);
@@ -206,10 +195,12 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() != NARG_CNT::THREE) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule("FileIOStreamWrite", cbExec, cbCompl).val_;
     } else {
-        NVal cb(env, funcArg[NARG_POS::THIRD]);
+        int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
+        NVal cb(env, funcArg[cbIdx]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule("FileIOStreamWrite", cbExec, cbCompl).val_;
     }
 
@@ -219,7 +210,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
 struct AsyncReadArg {
     size_t lenRead { 0 };
     NRef refReadBuf;
-    int offset { 0 };
+    int64_t offset { 0 };
 
     explicit AsyncReadArg(NVal jsReadBuf) : refReadBuf(jsReadBuf) {}
     ~AsyncReadArg() = default;
@@ -234,36 +225,33 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
     }
 
     /* To get entity */
-    FILE *filp = nullptr;
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
         UniError(EBADF).ThrowErr(env, "Stream may have been closed");
         return nullptr;
-    } else {
-        filp = streamEntity->fp.get();
     }
+    FILE *filp = nullptr;
+    filp = streamEntity->fp.get();
 
     bool succ = false;
     void *buf = nullptr;
-    int64_t len;
-    bool hasPosition = false;
-    size_t position;
-    int offset;
-    tie(succ, buf, len, hasPosition, position, offset) =
+    size_t len = 0;
+    int64_t position = -1;
+    int64_t offset = 0;
+    tie(succ, buf, len, position, offset) =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
-        UniError(EINVAL).ThrowErr(env, "Failed GetReadArg");
         return nullptr;
     }
 
     auto arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
-    auto cbExec = [arg, buf, position, filp, len, hasPosition, offset](napi_env env) -> UniError {
-        if (hasPosition && (fseek(filp, position, SEEK_SET) == -1)) {
+    auto cbExec = [arg, buf, position, filp, len, offset](napi_env env) -> UniError {
+        if (position >= 0 && (fseek(filp, static_cast<long>(position), SEEK_SET) == -1)) {
             UniError(errno).ThrowErr(env);
             return UniError(errno);
         }
         size_t actLen = fread(buf, 1, len, filp);
-        if (actLen != static_cast<size_t>(len) && ferror(filp)) {
+        if ((actLen != len && !feof(filp)) || ferror(filp)) {
             return UniError(errno);
         } else {
             arg->lenRead = actLen;
@@ -286,10 +274,11 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() != NARG_CNT::THREE) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule("FileIOStreamRead", cbExec, cbCompl).val_;
     } else {
-        NVal cb(env, funcArg[NARG_POS::THIRD]);
+        NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule("FileIOStreamRead", cbExec, cbCompl).val_;
     }
 

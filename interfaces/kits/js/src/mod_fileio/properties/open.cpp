@@ -23,41 +23,12 @@
 #include "../../common/napi/n_async/n_async_work_callback.h"
 #include "../../common/napi/n_async/n_async_work_promise.h"
 #include "../../common/napi/n_func_arg.h"
+#include "../common_func.h"
 
 namespace OHOS {
 namespace DistributedFS {
 namespace ModuleFileIO {
 using namespace std;
-
-int AdaptToAbi(int &flags)
-{
-    static constexpr int USR_O_RDONLY = 00;
-    static constexpr int USR_O_WRONLY = 01;
-    static constexpr int USR_O_RDWR = 02;
-    static constexpr int USR_O_CREAT = 0100;
-    static constexpr int USR_O_EXCL = 0200;
-    static constexpr int USR_O_TRUNC = 01000;
-    static constexpr int USR_O_APPEND = 02000;
-    static constexpr int USR_O_NONBLOCK = 04000;
-    static constexpr int USR_O_DIRECTORY = 0200000;
-    static constexpr int USR_O_NOFOLLOW = 0400000;
-    static constexpr int USR_O_SYNC = 04010000;
-
-    int flagsABI = 0;
-    flagsABI |= ((flags & USR_O_RDONLY) == USR_O_RDONLY) ? O_RDONLY : 0;
-    flagsABI |= ((flags & USR_O_WRONLY) == USR_O_WRONLY) ? O_WRONLY : 0;
-    flagsABI |= ((flags & USR_O_RDWR) == USR_O_RDWR) ? O_RDWR : 0;
-    flagsABI |= ((flags & USR_O_CREAT) == USR_O_CREAT) ? O_CREAT : 0;
-    flagsABI |= ((flags & USR_O_EXCL) == USR_O_EXCL) ? O_EXCL : 0;
-    flagsABI |= ((flags & USR_O_TRUNC) == USR_O_TRUNC) ? O_TRUNC : 0;
-    flagsABI |= ((flags & USR_O_APPEND) == USR_O_APPEND) ? O_APPEND : 0;
-    flagsABI |= ((flags & USR_O_NONBLOCK) == USR_O_NONBLOCK) ? O_NONBLOCK : 0;
-    flagsABI |= ((flags & USR_O_DIRECTORY) == USR_O_DIRECTORY) ? O_DIRECTORY : 0;
-    flagsABI |= ((flags & USR_O_NOFOLLOW) == USR_O_NOFOLLOW) ? O_NOFOLLOW : 0;
-    flagsABI |= ((flags & USR_O_SYNC) == USR_O_SYNC) ? O_SYNC : 0;
-    flags = flagsABI;
-    return flagsABI;
-}
 
 napi_value Open::Sync(napi_env env, napi_callback_info info)
 {
@@ -68,45 +39,44 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     }
 
     bool succ = false;
-    unique_ptr<char[]> path;
+    unique_ptr<char[]> path = nullptr;
     tie(succ, path, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
     }
 
-    int flags = O_RDONLY;
+    unsigned int flags = O_RDONLY;
     if (funcArg.GetArgc() >= NARG_CNT::TWO) {
-        tie(succ, flags) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-        if (!succ) {
+        auto [succ, authFlags] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
+        if (!succ || authFlags < 0) {
             UniError(EINVAL).ThrowErr(env, "Invalid flags");
             return nullptr;
         }
+        flags = static_cast<unsigned int>(authFlags);
+        (void)CommonFunc::ConvertJsFlags(flags);
     }
-    (void)AdaptToAbi(flags);
+
     int fd = -1;
     if (ModuleRemoteUri::RemoteUri::IsRemoteUri(path.get(), fd, flags)) {
         return NVal::CreateInt64(env, fd).val_;
     }
 
-    size_t argc = funcArg.GetArgc();
     int32_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
-    if (argc != NARG_CNT::THREE) {
+    if (funcArg.GetArgc() != NARG_CNT::THREE) {
         size_t flagsFirst { flags };
         if ((flagsFirst & O_CREAT) || (flagsFirst & O_TMPFILE)) {
             UniError(EINVAL).ThrowErr(env, "called with O_CREAT/O_TMPFILE but no mode");
             return nullptr;
         }
-        fd = open(path.get(), flags, mode);
     } else {
-        tie(succ, mode) = NVal(env, funcArg.GetArg(NARG_POS::THIRD)).ToInt32();
+        tie(succ, mode) = NVal(env, funcArg.GetArg(NARG_POS::THIRD)).ToInt32(mode);
         if (!succ) {
             UniError(EINVAL).ThrowErr(env, "Invalid mode");
             return nullptr;
         }
-        fd = open(path.get(), flags, mode);
     }
-
+    fd = open(path.get(), flags, mode);
     if (fd == -1) {
         if (errno == ENAMETOOLONG) {
             UniError(errno).ThrowErr(env, "Filename too long");
@@ -119,7 +89,8 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     return NVal::CreateInt64(env, fd).val_;
 }
 
-static UniError DoOpenExec(const std::string& path, const int flags, const int32_t mode, shared_ptr<int32_t> arg)
+static UniError DoOpenExec(const std::string& path, const unsigned int flags, const int32_t mode,
+    shared_ptr<int32_t> arg)
 {
     int fd = -1;
     if (!ModuleRemoteUri::RemoteUri::IsRemoteUri(path, fd, flags)) {
@@ -147,21 +118,21 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    int flags = O_RDONLY;
-    if (funcArg.GetArgc() >= NARG_CNT::TWO && !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function)) {
-        tie(succ, flags) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-        if (!succ) {
+    size_t argc = funcArg.GetArgc();
+    unsigned int flags = O_RDONLY;
+    if (argc >= NARG_CNT::TWO) {
+        auto [succ, authFlags] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
+        if (!succ || authFlags < 0) {
             UniError(EINVAL).ThrowErr(env, "Invalid flags");
             return nullptr;
         }
-        (void)AdaptToAbi(flags);
+        flags = static_cast<unsigned int>(authFlags);
+        (void)CommonFunc::ConvertJsFlags(flags);
     }
 
     int32_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
-    size_t argc = funcArg.GetArgc();
-    if (argc == NARG_CNT::FOUR ||
-        (argc == NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number))) {
-        tie(succ, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
+    if (argc >= NARG_CNT::THREE) {
+        tie(succ, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(mode);
         if (!succ) {
             UniError(EINVAL).ThrowErr(env, "Invalid mode");
             return nullptr;
@@ -184,8 +155,9 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (argc == NARG_CNT::ONE || (argc == NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) ||
-        (argc == NARG_CNT::THREE && (NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number)))) {
+    if (argc == NARG_CNT::ONE || (argc == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function)) || (argc == NARG_CNT::THREE &&
+        !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule("FileIOOpen", cbExec, cbComplCallback).val_;
     } else {
         NVal cb(env, funcArg[argc - 1]);

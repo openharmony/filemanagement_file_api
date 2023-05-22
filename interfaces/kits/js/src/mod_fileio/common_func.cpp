@@ -53,17 +53,17 @@ void InitOpenMode(napi_env env, napi_value exports)
     napi_set_named_property(env, exports, propertyName, obj);
 }
 
-static tuple<bool, void *, int> GetActualBuf(napi_env env, void *rawBuf, int64_t bufLen, NVal op)
+static tuple<bool, void *, int64_t> GetActualBuf(napi_env env, void *rawBuf, size_t bufLen, NVal op)
 {
     bool succ = false;
     void *realBuf = nullptr;
     int64_t opOffset = 0;
     if (op.HasProp("offset")) {
-        tie(succ, opOffset) = op.GetProp("offset").ToInt64();
+        tie(succ, opOffset) = op.GetProp("offset").ToInt64(opOffset);
         if (!succ || opOffset < 0) {
             UniError(EINVAL).ThrowErr(env, "Invalid option.offset, positive integer is desired");
             return { false, nullptr, opOffset };
-        } else if (opOffset > bufLen) {
+        } else if (opOffset > static_cast<int64_t>(bufLen)) {
             UniError(EINVAL).ThrowErr(env, "Invalid option.offset, buffer limit exceeded");
             return { false, nullptr, opOffset };
         } else {
@@ -76,30 +76,20 @@ static tuple<bool, void *, int> GetActualBuf(napi_env env, void *rawBuf, int64_t
     return { true, realBuf, opOffset };
 }
 
-static tuple<bool, size_t> GetActualLen(napi_env env, int64_t bufLen, int64_t bufOff, NVal op)
+static tuple<bool, size_t> GetActualLen(napi_env env, size_t bufLen, size_t bufOff, NVal op)
 {
     bool succ = false;
-    int64_t retLen;
+    size_t retLen = bufLen - bufOff;
 
     if (op.HasProp("length")) {
-        int64_t opLength;
-        tie(succ, opLength) = op.GetProp("length").ToInt64();
-        if (!succ) {
-            UniError(EINVAL).ThrowErr(env, "Invalid option.length, expect integer");
+        int64_t opLength = 0;
+        tie(succ, opLength) = op.GetProp("length").ToInt64(static_cast<int64_t>(retLen));
+        if (!succ || opLength < 0 || static_cast<size_t>(opLength) > retLen) {
+            UniError(EINVAL).ThrowErr(env, "Invalid option.length");
             return { false, 0 };
         }
-        if (opLength < 0) {
-            retLen = bufLen - bufOff;
-        } else if (opLength > bufLen - bufOff) {
-            UniError(EINVAL).ThrowErr(env, "Invalid option.length, buffer limit exceeded");
-            return { false, 0 };
-        } else {
-            retLen = opLength;
-        }
-    } else {
-        retLen = bufLen - bufOff;
+        retLen = static_cast<size_t>(opLength);
     }
-
     return { true, retLen };
 }
 
@@ -132,32 +122,31 @@ static tuple<bool, size_t> GetActualLenV9(napi_env env, int64_t bufLen, int64_t 
     return { true, retLen };
 }
 
-int CommonFunc::ConvertJsFlags(int &flags)
+unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
 {
-    static constexpr int USR_O_RDONLY = 00;
-    static constexpr int USR_O_WRONLY = 01;
-    static constexpr int USR_O_RDWR = 02;
-    static constexpr int USR_O_CREAT = 0100;
-    static constexpr int USR_O_EXCL = 0200;
-    static constexpr int USR_O_TRUNC = 01000;
-    static constexpr int USR_O_APPEND = 02000;
-    static constexpr int USR_O_NONBLOCK = 04000;
-    static constexpr int USR_O_DIRECTORY = 0200000;
-    static constexpr int USR_O_NOFOLLOW = 0400000;
-    static constexpr int USR_O_SYNC = 04010000;
+    static constexpr unsigned int usrWriteOnly = 01;
+    static constexpr unsigned int usrReadWrite = 02;
+    static constexpr unsigned int usrCreate = 0100;
+    static constexpr unsigned int usrExecuteLock = 0200;
+    static constexpr unsigned int usrTruncate = 01000;
+    static constexpr unsigned int usrAppend = 02000;
+    static constexpr unsigned int usrNoneBlock = 04000;
+    static constexpr unsigned int usrDirectory = 0200000;
+    static constexpr unsigned int usrNoFollowed = 0400000;
+    static constexpr unsigned int usrSynchronous = 04010000;
 
-    int flagsABI = 0;
-    flagsABI |= ((flags & USR_O_RDONLY) == USR_O_RDONLY) ? O_RDONLY : 0;
-    flagsABI |= ((flags & USR_O_WRONLY) == USR_O_WRONLY) ? O_WRONLY : 0;
-    flagsABI |= ((flags & USR_O_RDWR) == USR_O_RDWR) ? O_RDWR : 0;
-    flagsABI |= ((flags & USR_O_CREAT) == USR_O_CREAT) ? O_CREAT : 0;
-    flagsABI |= ((flags & USR_O_EXCL) == USR_O_EXCL) ? O_EXCL : 0;
-    flagsABI |= ((flags & USR_O_TRUNC) == USR_O_TRUNC) ? O_TRUNC : 0;
-    flagsABI |= ((flags & USR_O_APPEND) == USR_O_APPEND) ? O_APPEND : 0;
-    flagsABI |= ((flags & USR_O_NONBLOCK) == USR_O_NONBLOCK) ? O_NONBLOCK : 0;
-    flagsABI |= ((flags & USR_O_DIRECTORY) == USR_O_DIRECTORY) ? O_DIRECTORY : 0;
-    flagsABI |= ((flags & USR_O_NOFOLLOW) == USR_O_NOFOLLOW) ? O_NOFOLLOW : 0;
-    flagsABI |= ((flags & USR_O_SYNC) == USR_O_SYNC) ? O_SYNC : 0;
+    // default value is usrReadOnly 00
+    unsigned int flagsABI = 0;
+    flagsABI |= ((flags & usrWriteOnly) == usrWriteOnly) ? O_WRONLY : 0;
+    flagsABI |= ((flags & usrReadWrite) == usrReadWrite) ? O_RDWR : 0;
+    flagsABI |= ((flags & usrCreate) == usrCreate) ? O_CREAT : 0;
+    flagsABI |= ((flags & usrExecuteLock) == usrExecuteLock) ? O_EXCL : 0;
+    flagsABI |= ((flags & usrTruncate) == usrTruncate) ? O_TRUNC : 0;
+    flagsABI |= ((flags & usrAppend) == usrAppend) ? O_APPEND : 0;
+    flagsABI |= ((flags & usrNoneBlock) == usrNoneBlock) ? O_NONBLOCK : 0;
+    flagsABI |= ((flags & usrDirectory) == usrDirectory) ? O_DIRECTORY : 0;
+    flagsABI |= ((flags & usrNoFollowed) == usrNoFollowed) ? O_NOFOLLOW : 0;
+    flagsABI |= ((flags & usrSynchronous) == usrSynchronous) ? O_SYNC : 0;
     flags = flagsABI;
     return flagsABI;
 }
@@ -181,69 +170,63 @@ tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(n
     return make_tuple(true, move(src), move(dest));
 }
 
-tuple<bool, void *, int64_t, bool, int64_t, int> CommonFunc::GetReadArg(napi_env env,
-                                                                        napi_value readBuf,
-                                                                        napi_value option)
+tuple<bool, void *, size_t, int64_t, int64_t> CommonFunc::GetReadArg(napi_env env,
+                                                                     napi_value readBuf,
+                                                                     napi_value option)
 {
     bool succ = false;
     void *retBuf = nullptr;
-    int64_t retLen = 0;
-    bool posAssigned = false;
-    int64_t position = 0;
+    size_t retLen = 0;
+    int64_t position = -1;
 
     NVal txt(env, readBuf);
     void *buf = nullptr;
-    int64_t bufLen = 0;
-    int offset = 0;
+    size_t bufLen = 0;
+    int64_t offset = 0;
     tie(succ, buf, bufLen) = txt.ToArraybuffer();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid read buffer, expect arraybuffer");
-        return { false, nullptr, 0, posAssigned, position, offset };
+        return { false, nullptr, 0, position, offset };
     }
 
-    NVal op = NVal(env, option);
+    NVal op(env, option);
     tie(succ, retBuf, offset) = GetActualBuf(env, buf, bufLen, op);
     if (!succ) {
-        return { false, nullptr, 0, posAssigned, position, offset };
+        return { false, nullptr, 0, position, offset };
     }
 
     int64_t bufOff = static_cast<uint8_t *>(retBuf) - static_cast<uint8_t *>(buf);
     tie(succ, retLen) = GetActualLen(env, bufLen, bufOff, op);
     if (!succ) {
-        return { false, nullptr, 0, posAssigned, position, offset };
+        return { false, nullptr, 0, position, offset };
     }
 
-    if (op.HasProp("position")) {
+    if (op.HasProp("position") && !op.GetProp("position").TypeIs(napi_undefined)) {
         tie(succ, position) = op.GetProp("position").ToInt64();
-        if (succ && position >= 0) {
-            posAssigned = true;
-        } else {
+        if (!succ || position < 0) {
             UniError(EINVAL).ThrowErr(env, "option.position shall be positive number");
-            return { false, nullptr, 0, posAssigned, position, offset };
+            return { false, nullptr, 0, position, offset };
         }
     }
 
-    return { true, retBuf, retLen, posAssigned, position, offset };
+    return { true, retBuf, retLen, position, offset };
 }
 
-static tuple<bool, unique_ptr<char[]>, int64_t> DecodeString(napi_env env, NVal jsStr, NVal encoding)
+static tuple<bool, unique_ptr<char[]>, size_t> DecodeString(napi_env env, NVal jsStr, NVal encoding)
 {
-    unique_ptr<char[]> buf;
+    unique_ptr<char[]> buf = nullptr;
     if (!jsStr.TypeIs(napi_string)) {
         return { false, nullptr, 0 };
     }
-
-    bool succ = false;
     if (!encoding) {
         return jsStr.ToUTF8String();
     }
 
-    unique_ptr<char[]> encodingBuf;
-    tie(succ, encodingBuf, ignore) = encoding.ToUTF8String();
+    auto [succ, encodingBuf, ignore] = encoding.ToUTF8String("utf-8");
     if (!succ) {
         return { false, nullptr, 0 };
     }
-    string encodingStr(encodingBuf.release());
+    string_view encodingStr(encodingBuf.release());
     if (encodingStr == "utf-8") {
         return jsStr.ToUTF8String();
     } else if (encodingStr == "utf-16") {
@@ -253,27 +236,25 @@ static tuple<bool, unique_ptr<char[]>, int64_t> DecodeString(napi_env env, NVal 
     }
 }
 
-tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetWriteArg(napi_env env,
-                                                                                        napi_value argWBuf,
-                                                                                        napi_value argOption)
+tuple<bool, unique_ptr<char[]>, void *, size_t, int64_t> CommonFunc::GetWriteArg(napi_env env,
+                                                                                 napi_value argWBuf,
+                                                                                 napi_value argOption)
 {
     void *retBuf = nullptr;
-    int64_t retLen = 0;
-    bool hasPos = false;
-    int64_t retPos = 0;
-
+    size_t retLen = 0;
+    int64_t position = -1;
     bool succ = false;
     void *buf = nullptr;
-    int64_t bufLen = 0;
+    size_t bufLen = 0;
     NVal op(env, argOption);
     NVal jsBuffer(env, argWBuf);
-    unique_ptr<char[]> bufferGuard;
+    unique_ptr<char[]> bufferGuard = nullptr;
     tie(succ, bufferGuard, bufLen) = DecodeString(env, jsBuffer, op.GetProp("encoding"));
     if (!succ) {
         tie(succ, buf, bufLen) = NVal(env, argWBuf).ToArraybuffer();
         if (!succ) {
             UniError(EINVAL).ThrowErr(env, "Illegal write buffer or encoding");
-            return { false, nullptr, nullptr, 0, hasPos, retPos };
+            return { false, nullptr, nullptr, 0, position };
         }
     } else {
         buf = bufferGuard.get();
@@ -281,28 +262,23 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
 
     tie(succ, retBuf, ignore) = GetActualBuf(env, buf, bufLen, op);
     if (!succ) {
-        return { false, nullptr, nullptr, 0, hasPos, retPos };
+        return { false, nullptr, nullptr, 0, position };
     }
 
     int64_t bufOff = static_cast<uint8_t *>(retBuf) - static_cast<uint8_t *>(buf);
     tie(succ, retLen) = GetActualLen(env, bufLen, bufOff, op);
     if (!succ) {
-        return { false, nullptr, nullptr, 0, hasPos, retPos };
+        return { false, nullptr, nullptr, 0, position };
     }
 
-    if (op.HasProp("position")) {
-        int32_t position = 0;
-        tie(succ, position) = op.GetProp("position").ToInt32();
+    if (op.HasProp("position") && !op.GetProp("position").TypeIs(napi_undefined)) {
+        tie(succ, position) = op.GetProp("position").ToInt64();
         if (!succ || position < 0) {
             UniError(EINVAL).ThrowErr(env, "option.position shall be positive number");
-            return { false, nullptr, nullptr, 0, hasPos, retPos };
+            return { false, nullptr, nullptr, 0, position };
         }
-        hasPos = true;
-        retPos = position;
-    } else {
-        retPos = INVALID_POSITION;
     }
-    return { true, move(bufferGuard), retBuf, retLen, hasPos, retPos };
+    return { true, move(bufferGuard), retBuf, retLen, position };
 }
 
 tuple<bool, void *, int64_t, bool, int64_t> CommonFunc::GetReadArgV9(napi_env env,

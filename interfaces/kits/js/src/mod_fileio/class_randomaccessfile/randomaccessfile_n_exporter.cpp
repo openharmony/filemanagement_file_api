@@ -56,38 +56,36 @@ static tuple<bool, int> ParseJsFP(napi_env env, napi_value FPFromJs)
     return { succ, fp };
 }
 
-static tuple<bool, void*, size_t, bool, size_t, size_t> GetRAFReadArg(napi_env env,
+static tuple<bool, void*, size_t, int64_t, int64_t> GetRAFReadArg(napi_env env,
     napi_value ReadBuf, napi_value option)
 {
     bool succ = false;
-    bool hasPos = false;
     void *buf = nullptr;
     size_t len = 0;
-    size_t pos = 0;
-    size_t offset = 0;
-    tie(succ, buf, len, hasPos, pos, offset) = CommonFunc::GetReadArg(env, ReadBuf, option);
+    int64_t pos = -1;
+    int64_t offset = 0;
+    tie(succ, buf, len, pos, offset) = CommonFunc::GetReadArg(env, ReadBuf, option);
     if (!succ) {
-        return { false, nullptr, 0, false, 0, 0 };
+        return { false, nullptr, 0, 0, 0 };
     }
-    return { true, buf, len, hasPos, pos, offset };
+    return { true, buf, len, pos, offset };
 }
 
-static tuple<bool, void *, size_t, bool, size_t> GetRAFWriteArg(napi_env env,
+static tuple<bool, void *, size_t, int64_t> GetRAFWriteArg(napi_env env,
     napi_value WriteBuf, napi_value option)
 {
     bool succ = false;
-    bool hasPos = false;
     void *buf = nullptr;
     size_t len = 0;
-    size_t pos = 0;
-    tie(succ, ignore, buf, len, hasPos, pos) = CommonFunc::GetWriteArg(env, WriteBuf, option);
+    int64_t pos = -1;
+    tie(succ, ignore, buf, len, pos) = CommonFunc::GetWriteArg(env, WriteBuf, option);
     if (!succ) {
-        return  { false, nullptr, 0, false, 0 };
+        return  { false, nullptr, 0, 0 };
     }
-    return { true, buf, len, hasPos, pos };
+    return { true, buf, len, pos };
 }
 
-static int DoReadRAF(napi_env env, void* buf, size_t len, int fd, size_t pos)
+static int DoReadRAF(napi_env env, void* buf, size_t len, int fd, int64_t pos)
 {
     uv_loop_s *loop = nullptr;
     uv_fs_t read_req;
@@ -98,7 +96,7 @@ static int DoReadRAF(napi_env env, void* buf, size_t len, int fd, size_t pos)
     return ret;
 }
 
-static size_t DoWriteRAF(napi_env env, void* buf, size_t len, int fd, size_t pos)
+static size_t DoWriteRAF(napi_env env, void* buf, size_t len, int fd, int64_t pos)
 {
     uv_loop_s *loop = nullptr;
     uv_fs_t write_req;
@@ -168,7 +166,7 @@ napi_value RandomAccessFileNExporter::ReadSync(napi_env env, napi_callback_info 
     if (!rafEntity) {
         return nullptr;
     }
-    auto [succ, buf, len, hasPos, pos, ignore] =
+    auto [succ, buf, len, pos, ignore] =
         GetRAFReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid buffer/options");
@@ -185,7 +183,7 @@ napi_value RandomAccessFileNExporter::ReadSync(napi_env env, napi_callback_info 
 
 struct AsyncIOReadArg {
     size_t lenRead { 0 };
-    int offset { 0 };
+    int64_t offset { 0 };
     NRef refReadBuf;
 
     explicit AsyncIOReadArg(NVal jsReadBuf) : refReadBuf(jsReadBuf) {}
@@ -199,19 +197,18 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg)
         return nullptr;
     }
     bool succ = false;
-    bool hasPos = false;
     size_t len = 0;
-    size_t pos = 0;
-    size_t offset = 0;
+    int64_t pos = -1;
+    int64_t offset = 0;
     void* buf = nullptr;
-    tie(succ, buf, len, hasPos, pos, offset) = GetRAFReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
+    tie(succ, buf, len, pos, offset) = GetRAFReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid buffer/options");
         return nullptr;
     }
 
     auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
-    auto cbExec = [arg, buf, len, hasPos, pos, offset, rafEntity](napi_env env) -> UniError {
+    auto cbExec = [arg, buf, len, pos, offset, rafEntity](napi_env env) -> UniError {
         int actLen = DoReadRAF(env, buf, len, rafEntity->fd_.get()->GetFD(), rafEntity->fpointer + pos);
         if (actLen < 0) {
             return UniError(errno);
@@ -270,16 +267,15 @@ napi_value RandomAccessFileNExporter::WriteSync(napi_env env, napi_callback_info
     }
 
     bool succ = false;
-    bool hasPos = false;
     void *buf = nullptr;
     size_t len = 0;
-    size_t pos = 0;
-    tie(succ, buf, len, hasPos, pos) = GetRAFWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
+    int64_t pos = -1;
+    tie(succ, buf, len, pos) = GetRAFWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid buffer/options");
         return nullptr;
     }
-    if (hasPos) {
+    if (pos >= 0) {
         pos = rafEntity->fpointer + pos;
     } else {
         pos = rafEntity->fpointer;
@@ -313,16 +309,15 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
         return nullptr;
     }
     bool succ = false;
-    bool hasPos = false;
     void *buf = nullptr;
     size_t len = 0;
-    size_t pos = 0;
-    tie(succ, buf, len, hasPos, pos) = GetRAFWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
+    int64_t pos = -1;
+    tie(succ, buf, len, pos) = GetRAFWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid buffer/options");
         return nullptr;
     }
-    if (hasPos) {
+    if (pos >= 0) {
         pos = rafEntity->fpointer + pos;
     } else {
         pos = rafEntity->fpointer;
