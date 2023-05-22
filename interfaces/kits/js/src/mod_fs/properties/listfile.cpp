@@ -246,9 +246,10 @@ static int32_t FilterFunc(const struct dirent *filename)
 static void Deleter(struct NameListArg *arg)
 {
     for (int i = 0; i < arg->direntNum; i++) {
-        delete (arg->namelist)[i];
+        free((arg->namelist)[i]);
         (arg->namelist)[i] = nullptr;
     }
+    free(arg->namelist);
 }
 
 static int FilterFileRes(const string &path, vector<string> &dirents)
