@@ -50,7 +50,7 @@ static bool CheckSuffix(const vector<string> &suffixs)
     return true;
 }
 
-static bool GetFileFilterParam(const NVal &argv, OHOS::DistributedFS::FileFilter *filter)
+static bool GetFileFilterParam(const NVal &argv, FileFilter *filter)
 {
     bool ret = false;
     if (argv.HasProp("suffix") && !argv.GetProp("suffix").TypeIs(napi_undefined)) {
@@ -180,6 +180,9 @@ static bool FilterDisplayname(const vector<string> &displaynames, const struct d
 
 static bool FilterFilesizeOver(const int64_t fFileSizeOver, const struct dirent &filename)
 {
+    if (fFileSizeOver < 0) {
+        return true;
+    }
     struct stat info;
     string stPath = (g_optionArgs.path + '/' + string(filename.d_name));
     int32_t res = stat(stPath.c_str(), &info);
@@ -187,14 +190,17 @@ static bool FilterFilesizeOver(const int64_t fFileSizeOver, const struct dirent 
         HILOGE("Failed to stat file.");
         return false;
     }
-    if (fFileSizeOver > info.st_size) {
-        return false;
+    if (info.st_size > fFileSizeOver) {
+        return true;
     }
-    return true;
+    return false;
 }
 
 static bool FilterLastModifyTime(const double lastModifiedAfter, const struct dirent &filename)
 {
+    if (lastModifiedAfter < 0) {
+        return true;
+    }
     struct stat info;
     string stPath = g_optionArgs.path + '/' + string(filename.d_name);
     int32_t res = stat(stPath.c_str(), &info);
@@ -202,10 +208,10 @@ static bool FilterLastModifyTime(const double lastModifiedAfter, const struct di
         HILOGE("Failed to stat file.");
         return false;
     }
-    if (lastModifiedAfter > static_cast<double>(info.st_mtime)) {
-        return false;
+    if (static_cast<double>(info.st_mtime) > lastModifiedAfter) {
+        return true;
     }
-    return true;
+    return false;
 }
 
 static bool FilterResult(const struct dirent &filename)
@@ -219,11 +225,11 @@ static bool FilterResult(const struct dirent &filename)
         return false;
     }
     int64_t fFileSizeOver = g_optionArgs.filter.GetFileSizeOver();
-    if (!FilterFilesizeOver(fFileSizeOver, filename) && fFileSizeOver > 0) {
+    if (!FilterFilesizeOver(fFileSizeOver, filename)) {
         return false;
     }
     double fLastModifiedAfter = g_optionArgs.filter.GetLastModifiedAfter();
-    if (!FilterLastModifyTime(fLastModifiedAfter, filename) && fLastModifiedAfter > 0) {
+    if (!FilterLastModifyTime(fLastModifiedAfter, filename)) {
         return false;
     }
     g_optionArgs.countNum++;
