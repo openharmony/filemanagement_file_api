@@ -37,25 +37,21 @@ napi_value Ftruncate::Sync(napi_env env, napi_callback_info info)
     }
 
     auto [resGetFirstArg, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
-    if (!resGetFirstArg) {
+    if (!resGetFirstArg || fd < 0) {
         UniError(EINVAL).ThrowErr(env, "Invalid fd");
         return nullptr;
     }
 
-    int ret = -1;
-    if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        ret = ftruncate(fd, 0);
-    } else {
-        int len;
+    int64_t len = 0;
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
         bool succ = false;
-        tie(succ, len) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
+        tie(succ, len) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64(len);
         if (!succ) {
             UniError(EINVAL).ThrowErr(env, "Invalid len");
             return nullptr;
         }
-        ret = ftruncate(fd, len);
     }
-
+    int ret = ftruncate(fd, len);
     if (ret == -1) {
         UniError(errno).ThrowErr(env);
         return nullptr;
@@ -73,20 +69,19 @@ napi_value Ftruncate::Async(napi_env env, napi_callback_info info)
     }
 
     auto [resGetFirstArg, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
-    if (!resGetFirstArg) {
+    if (!resGetFirstArg || fd < 0) {
         UniError(EINVAL).ThrowErr(env, "Invalid fd");
         return nullptr;
     }
 
-    int len = 0;
-    size_t argc = funcArg.GetArgc();
-    if (argc > NARG_CNT::ONE) {
-        auto [resGetSecondArg, length] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
+    int64_t len = 0;
+    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
+        bool resGetSecondArg = false;
+        tie(resGetSecondArg, len) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64(len);
         if (!resGetSecondArg) {
             UniError(EINVAL).ThrowErr(env, "Invalid len");
             return nullptr;
         }
-        len = length;
     }
 
     auto cbExec = [fd = fd, len = len](napi_env env) -> UniError {
@@ -106,13 +101,14 @@ napi_value Ftruncate::Async(napi_env env, napi_callback_info info)
         }
     };
 
-    const string procedureName = "fileIOFtruncate";
+    const string PROCEDURENAME = "fileIOFtruncate";
     NVal thisVar(env, funcArg.GetThisVar());
-    if (argc == NARG_CNT::ONE || (argc == NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURENAME, cbExec, cbComplete).val_;
     } else {
-        NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
+        NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURENAME, cbExec, cbComplete).val_;
     }
 }
 } // namespace ModuleFileIO

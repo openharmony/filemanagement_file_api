@@ -39,20 +39,18 @@ constexpr int COPY_BLOCK_SIZE = 4096;
 
 struct FileInfo {
     bool isPath = false;
-    unique_ptr<char[]> path;
+    unique_ptr<char[]> path = nullptr;
     FDGuard fdg;
 };
 
 static UniError CopyFileCore(FileInfo &srcFile, FileInfo &destFile)
 {
-    int res = EINVAL;
     if (srcFile.isPath) {
-        srcFile.fdg.SetFD(open(srcFile.path.get(), O_RDONLY), true);
-        res = errno;
-    }
-
-    if (!srcFile.fdg) {
-        return UniError(res);
+        int ret = open(srcFile.path.get(), O_RDONLY);
+        if (ret < 0) {
+            return UniError(errno);
+        }
+        srcFile.fdg.SetFD(ret, true);
     }
 
     struct stat statbf;
@@ -61,12 +59,11 @@ static UniError CopyFileCore(FileInfo &srcFile, FileInfo &destFile)
     }
 
     if (destFile.isPath) {
-        destFile.fdg.SetFD(open(destFile.path.get(), O_WRONLY | O_CREAT, statbf.st_mode), true);
-        res = errno;
-    }
-
-    if (!destFile.fdg) {
-        return UniError(res);
+        int ret = open(destFile.path.get(), O_WRONLY | O_CREAT, statbf.st_mode);
+        if (ret < 0) {
+            return UniError(errno);
+        }
+        destFile.fdg.SetFD(ret, true);
     }
 
     auto copyBuf = make_unique<char[]>(COPY_BLOCK_SIZE);
@@ -89,27 +86,17 @@ static UniError CopyFileCore(FileInfo &srcFile, FileInfo &destFile)
     return UniError(ERRNO_NOERR);
 }
 
-static tuple<bool, int, bool> ParseJsModeAndProm(napi_env env, const NFuncArg &funcArg)
+static tuple<bool, int32_t> ParseJsModeAndProm(napi_env env, const NFuncArg &funcArg)
 {
     bool succ = false;
-    bool promise = false;
-    bool hasMode = false;
-    int mode = 0;
-    if (funcArg.GetArgc() == NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_number)) {
-        promise = true;
-        hasMode = true;
-    } else if (funcArg.GetArgc() == NARG_CNT::FOUR) {
-        hasMode = true;
-    }
-
-    if (hasMode) {
-        tie(succ, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
-        if (!succ) {
-            return {false, mode, promise};
+    int32_t mode = 0;
+    if (funcArg.GetArgc() >= NARG_CNT::THREE) {
+        tie(succ, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(mode);
+        if (!succ || mode) {
+            return { false, mode };
         }
     }
-
-    return {true, mode, promise};
+    return { true, mode };
 }
 
 static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
@@ -120,7 +107,7 @@ static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg
     }
 
     auto [isFd, fd] = pathOrFdFromJsArg.ToInt32();
-    if (isFd) {
+    if (isFd && fd > 0) {
         return {true, FileInfo{false, {}, {fd, false}}};
     }
 
@@ -142,7 +129,7 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succMode, mode, unused] = ParseJsModeAndProm(env, funcArg);
+    auto [succMode, mode] = ParseJsModeAndProm(env, funcArg);
     if (!succMode) {
         UniError(EINVAL).ThrowErr(env, "Invalid mode");
         return nullptr;
@@ -184,7 +171,7 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succMode, mode, promise] = ParseJsModeAndProm(env, funcArg);
+    auto [succMode, mode] = ParseJsModeAndProm(env, funcArg);
     if (!succMode) {
         UniError(EINVAL).ThrowErr(env, "Invalid mode");
         return nullptr;
@@ -204,13 +191,14 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         return {NVal::CreateUndefined(env)};
     };
     
-    const string procedureName = "FileIOCopyFile";
+    const string PROCEDURENAME = "FileIOCopyFile";
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::TWO || promise) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
+    if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
+        !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURENAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH)]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURENAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO

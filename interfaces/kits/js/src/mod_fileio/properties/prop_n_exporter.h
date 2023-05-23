@@ -26,7 +26,7 @@ namespace DistributedFS {
 namespace ModuleFileIO {
 struct AsyncIOWrtieArg {
     NRef refWriteArrayBuf_;
-    std::unique_ptr<char[]> guardWriteStr_;
+    std::unique_ptr<char[]> guardWriteStr_ = nullptr;
     ssize_t actLen = 0;
 
     explicit AsyncIOWrtieArg(NVal refWriteArrayBuf) : refWriteArrayBuf_(refWriteArrayBuf) {}
@@ -53,7 +53,6 @@ public:
     static napi_value Mkdir(napi_env env, napi_callback_info info);
     static napi_value Read(napi_env env, napi_callback_info info);
     static napi_value Write(napi_env env, napi_callback_info info);
-    static UniError WriteExec(std::shared_ptr<AsyncIOWrtieArg> arg, void *buf, size_t len, int fd, size_t position);
     bool Export() override;
     std::string GetClassName() override;
 
