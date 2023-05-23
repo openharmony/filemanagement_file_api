@@ -28,7 +28,6 @@ std::shared_ptr<T> CreateSharedPtr(Args&&... args)
     try {
         sPtr = std::make_shared<T>(std::forward<Args>(args)...);
     } catch (const std::bad_alloc&) {
-        HILOGE("Failed to request heap memory.");
         return nullptr;
     }
     return sPtr;
@@ -41,7 +40,6 @@ std::unique_ptr<T> CreateUniquePtr(Args&&... args)
     try {
         uPtr = std::make_unique<T>(std::forward<Args>(args)...);
     } catch (const std::bad_alloc&) {
-        HILOGE("Failed to request heap memory.");
         return nullptr;
     }
     return uPtr;

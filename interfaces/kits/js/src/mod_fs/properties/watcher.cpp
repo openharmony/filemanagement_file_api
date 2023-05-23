@@ -43,6 +43,7 @@ static tuple<shared_ptr<FileWatcher>, napi_value, NError> CreateAndCheckForWatch
 {
     auto watcherPtr = CreateSharedPtr<FileWatcher>();
     if (watcherPtr == nullptr) {
+        HILOGE("Failed to request heap memory.");
         return {nullptr, nullptr, NError(ENOMEM)};
     }
     if (!watcherPtr->InitNotify(fd)) {
@@ -99,6 +100,7 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     }
     watcherEntity->data_ = CreateUniquePtr<WatcherInfoArg>(NVal(env, funcArg[NARG_POS::THIRD]));
     if (watcherEntity->data_ == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

@@ -198,6 +198,7 @@ napi_value FileNExporter::Constructor(napi_env env, napi_callback_info info)
 
     auto rafEntity = CreateUniquePtr<FileEntity>();
     if (rafEntity == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

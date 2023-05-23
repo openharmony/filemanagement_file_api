@@ -213,6 +213,7 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
     }
     auto arg = CreateSharedPtr<AsyncReadTextArg>(NVal(env, funcArg.GetThisVar()));
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

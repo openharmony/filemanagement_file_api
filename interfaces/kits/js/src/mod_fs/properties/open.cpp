@@ -103,6 +103,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
     }
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return NVal();
     }
@@ -271,6 +272,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     }
     auto arg = CreateSharedPtr<AsyncOpenFileArg>();
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

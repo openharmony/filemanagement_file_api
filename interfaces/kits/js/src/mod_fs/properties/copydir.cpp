@@ -281,6 +281,7 @@ napi_value CopyDir::Async(napi_env env, napi_callback_info info)
 
     auto arg = CreateSharedPtr<CopyDirArgs>();
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

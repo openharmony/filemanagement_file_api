@@ -88,6 +88,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
 
     shared_ptr<AsyncFdopenStreamArg> arg = CreateSharedPtr<AsyncFdopenStreamArg>();
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

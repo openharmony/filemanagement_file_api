@@ -110,6 +110,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
 
     auto result = CreateSharedPtr<AsyncAccessArg>();
     if (result == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -400,6 +401,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
 
     auto arg = CreateSharedPtr<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -475,6 +477,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
 
     auto arg = CreateSharedPtr<AsyncIOWrtieArg>(move(bufGuard));
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

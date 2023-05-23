@@ -237,6 +237,7 @@ napi_value StatNExporter::Constructor(napi_env env, napi_callback_info info)
 
     auto statEntity = CreateUniquePtr<StatEntity>();
     if (statEntity == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

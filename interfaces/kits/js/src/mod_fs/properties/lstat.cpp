@@ -61,6 +61,24 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
     return stat;
 }
 
+static NError LstatExec(shared_ptr<StatEntity> arg, string path)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> lstat_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!lstat_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_lstat(nullptr, lstat_req.get(), path.c_str(), nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to get stat of file by path: %{public}s, ret: %{public}d", path.c_str(), ret);
+        return NError(errno);
+    } else {
+        arg->stat_ = lstat_req->statbuf;
+        return NError(ERRNO_NOERR);
+    }
+}
+
 napi_value Lstat::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -80,24 +98,12 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
     string path = tmp.get();
     auto arg = CreateSharedPtr<StatEntity>();
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     auto cbExec = [arg, path]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> lstat_req = {
-            new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!lstat_req) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
-        }
-        int ret = uv_fs_lstat(nullptr, lstat_req.get(), path.c_str(), nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to get stat of file by path: %{public}s, ret: %{public}d", path.c_str(), ret);
-            return NError(errno);
-        } else {
-            arg->stat_ = lstat_req->statbuf;
-            return NError(ERRNO_NOERR);
-        }
+        return LstatExec(arg, path);
     };
 
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {

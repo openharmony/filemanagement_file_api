@@ -59,6 +59,24 @@ napi_value Mkdtemp::Sync(napi_env env, napi_callback_info info)
     return NVal::CreateUTF8String(env, mkdtemp_req->path).val_;
 }
 
+static NError MkdTempExec(shared_ptr<string> arg, string path)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!mkdtemp_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), path.c_str(), nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to create a temporary directory with path");
+        return NError(errno);
+    } else {
+        *arg = mkdtemp_req->path;
+        return NError(ERRNO_NOERR);
+    }
+}
+
 napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -77,26 +95,13 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
 
     auto arg = CreateSharedPtr<string>();
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     auto cbExec = [path = string(tmp.get()), arg]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!mkdtemp_req) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
-        }
-        int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), path.c_str(), nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to create a temporary directory with path");
-            return NError(errno);
-        } else {
-            *arg = mkdtemp_req->path;
-            return NError(ERRNO_NOERR);
-        }
+        return MkdTempExec(arg, path);
     };
-
     auto cbComplete = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };

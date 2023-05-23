@@ -172,6 +172,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
 
     auto arg = CreateSharedPtr<AsyncWrtieArg>(move(bufGuard));
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -237,6 +238,7 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
 
     auto arg = CreateSharedPtr<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -330,6 +332,7 @@ napi_value StreamNExporter::Constructor(napi_env env, napi_callback_info cbInfo)
 
     auto streamEntity = CreateUniquePtr<StreamEntity>();
     if (streamEntity == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }

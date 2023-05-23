@@ -322,6 +322,7 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
     }
     auto arg = CreateSharedPtr<MoveDirArgs>();
     if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
