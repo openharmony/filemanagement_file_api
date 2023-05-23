@@ -38,6 +38,7 @@ constexpr int STORAGE_SERVICE_SYS_CAP_TAG = 13600000;
 constexpr int FILEIO_SYS_CAP_TAG = 13900000;
 constexpr int USER_FILE_MANAGER_SYS_CAP_TAG = 14000000;
 constexpr int USER_FILE_SERVICE_SYS_CAP_TAG = 14300000;
+constexpr int DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG = 22400000;
 const std::string FILEIO_TAG_ERR_CODE = "code";
 const std::string FILEIO_TAG_ERR_DATA = "data";
 
@@ -126,6 +127,12 @@ enum ErrCodeSuffixOfUserFileService {
     E_INIT,
     E_NOTIFY,
     E_CONNECT
+};
+
+enum ErrCodeSuffixOfDistributedFile {
+    E_CLOUD_NOT_READY = 1,
+    E_NETWORK_ERR,
+    E_BATTERY_WARNING
 };
 
 enum CommonErrCode {
@@ -287,6 +294,12 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { E_PARAMS, { E_PARAMS, "The input parameter is invalid" } },
     { E_DEVICENOTSUPPORT, { E_DEVICENOTSUPPORT, "The device doesn't support this api" } },
     { E_OSNOTSUPPORT, { E_OSNOTSUPPORT, "The os doesn't support this api" } },
+    { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG + E_CLOUD_NOT_READY, { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG +
+        E_CLOUD_NOT_READY, "Cloud status not ready" } },
+    { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG + E_NETWORK_ERR, { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG +
+        E_NETWORK_ERR, "Network unavailable" } },
+    { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG + E_BATTERY_WARNING, { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG +
+        E_BATTERY_WARNING, "Battery level warning" } },
 };
 
 class NError {
