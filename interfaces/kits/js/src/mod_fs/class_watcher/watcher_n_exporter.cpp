@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "../common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libn.h"
 #include "filemgmt_libhilog.h"
 #include "securec.h"
@@ -37,7 +38,12 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    unique_ptr<WatcherEntity> watcherEntity = make_unique<WatcherEntity>();
+    auto watcherEntity = CreateUniquePtr<WatcherEntity>();
+    if (watcherEntity == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     if (!NClass::SetEntityFor<WatcherEntity>(env, funcArg.GetThisVar(), move(watcherEntity))) {
         NError(EIO).ThrowErr(env);
         return nullptr;

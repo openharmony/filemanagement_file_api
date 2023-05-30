@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -38,8 +39,8 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
         NError(EINVAL).ThrowErr(env);
         return { false, FileInfo { false, {}, {} } };
     }
-    auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
-    if (!fdg) {
+    auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+    if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return { false, FileInfo { false, {}, {} } };

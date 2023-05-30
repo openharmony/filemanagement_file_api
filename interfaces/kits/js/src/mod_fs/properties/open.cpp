@@ -26,6 +26,7 @@
 #include "class_file/file_n_exporter.h"
 #include "common_func.h"
 #include "datashare_helper.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -100,7 +101,12 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
         }
         return NVal();
     }
-    auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+    auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+    if (fdg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return NVal();
+    }
     fileEntity->fd_.swap(fdg);
     if (isUri) {
         fileEntity->path_ = "";
@@ -264,7 +270,12 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     if (!succMode) {
         return nullptr;
     }
-    auto arg = make_shared<AsyncOpenFileArg>();
+    auto arg = CreateSharedPtr<AsyncOpenFileArg>();
+    if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto argv = funcArg[NARG_POS::FIRST];
     auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
         string pathStr = path;

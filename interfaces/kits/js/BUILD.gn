@@ -110,6 +110,7 @@ ohos_shared_library("fs") {
     "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_fs",
+    "${utils_path}/common/include",
     "//third_party/libuv/include",
   ]
 
@@ -163,6 +164,8 @@ ohos_shared_library("fs") {
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
+
+  use_exceptions = true
 }
 
 ohos_shared_library("hash") {

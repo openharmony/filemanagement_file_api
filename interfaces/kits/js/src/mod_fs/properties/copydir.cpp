@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "uv.h"
 
@@ -60,8 +61,8 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseAndCheckJsO
         return { false, nullptr, nullptr, 0 };
     }
     int mode = 0;
-    bool resGetThirdArg = false;
     if (funcArg.GetArgc() >= NARG_CNT::THREE) {
+        bool resGetThirdArg = false;
         tie(resGetThirdArg, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(mode);
         if (!resGetThirdArg || (mode < COPYMODE_MIN || mode > COPYMODE_MAX)) {
             HILOGE("Invalid mode");
@@ -278,7 +279,7 @@ napi_value CopyDir::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<CopyDirArgs>();
+    auto arg = CreateSharedPtr<CopyDirArgs>();
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);

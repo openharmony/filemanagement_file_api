@@ -25,6 +25,7 @@
 #include <string>
 
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "flush.h"
 #include "stream_entity.h"
@@ -169,8 +170,8 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncWrtieArg>(move(bufGuard));
-    if (!arg) {
+    auto arg = CreateSharedPtr<AsyncWrtieArg>(move(bufGuard));
+    if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -235,8 +236,8 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
-    if (!arg) {
+    auto arg = CreateSharedPtr<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
+    if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -329,7 +330,12 @@ napi_value StreamNExporter::Constructor(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    unique_ptr<StreamEntity> streamEntity = make_unique<StreamEntity>();
+    auto streamEntity = CreateUniquePtr<StreamEntity>();
+    if (streamEntity == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     if (!NClass::SetEntityFor<StreamEntity>(env, funcArg.GetThisVar(), move(streamEntity))) {
         HILOGE("INNER BUG. Failed to wrap entity for obj stream");
         NError(EIO).ThrowErr(env);

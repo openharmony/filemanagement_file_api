@@ -31,6 +31,7 @@
 #include "create_stream.h"
 #include "fdatasync.h"
 #include "fdopen_stream.h"
+#include "file_utils.h"
 #include "filemgmt_libn.h"
 #include "fsync.h"
 #include "js_native_api.h"
@@ -107,8 +108,8 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto result = make_shared<AsyncAccessArg>();
-    if (!result) {
+    auto result = CreateSharedPtr<AsyncAccessArg>();
+    if (result == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -398,13 +399,12 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
-    if (!arg) {
+    auto arg = CreateSharedPtr<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
+    if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-
     auto cbExec = [arg, buf, len, fd, offset]() -> NError {
         return ReadExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
@@ -475,13 +475,12 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncIOWrtieArg>(move(bufGuard));
-    if (!arg) {
+    auto arg = CreateSharedPtr<AsyncIOWrtieArg>(move(bufGuard));
+    if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-
     auto cbExec = [arg, buf, len, fd, offset]() -> NError {
         return WriteExec(arg, static_cast<char *>(buf), len, fd, offset);
     };

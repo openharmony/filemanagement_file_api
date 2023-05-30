@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "uv.h"
 
@@ -319,8 +320,7 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    auto arg = make_shared<MoveDirArgs>();
+    auto arg = CreateSharedPtr<MoveDirArgs>();
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);

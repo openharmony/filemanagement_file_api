@@ -23,6 +23,7 @@
 #include <thread>
 #include <tuple>
 
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -364,13 +365,12 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<ListFileArgs>();
-    if (!arg) {
+    auto arg = CreateSharedPtr<ListFileArgs>();
+    if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-
     auto cbExec = [arg, optionArgsTmp]() -> NError {
         g_optionArgs = optionArgsTmp;
         int ret = 0;

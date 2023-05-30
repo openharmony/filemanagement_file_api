@@ -20,6 +20,7 @@ config("libn_public_config") {
   include_dirs = [
     "include",
     "include/n_async",
+    "${utils_path}/common/include",
   ]
 }
 
@@ -39,6 +40,8 @@ ohos_shared_library("filemgmt_libn") {
     "${arkui_napi_path}:ace_napi",
     "${file_api_path}/utils/filemgmt_libhilog",
   ]
+
+  use_exceptions = true
 
   subsystem_name = "filemanagement"
   part_name = "file_api"

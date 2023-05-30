@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -210,8 +211,12 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    auto arg = make_shared<AsyncReadTextArg>(NVal(env, funcArg.GetThisVar()));
+    auto arg = CreateSharedPtr<AsyncReadTextArg>(NVal(env, funcArg.GetThisVar()));
+    if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     auto cbExec = [path = string(path.get()), arg, offset = offset, hasLen = hasLen, len = len]() -> NError {
         return ReadTextAsync(path, arg, offset, hasLen, len);
     };

@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -80,9 +81,9 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
             HILOGE("Failed to open srcFile with ret: %{public}d", ret);
             return NError(errno);
         }
-        srcFile.fdg = make_unique<DistributedFS::FDGuard>(ret, true);
-        if (!srcFile.fdg) {
-            HILOGE("Failed to request heap memory for src file descriptor.");
+        srcFile.fdg = CreateUniquePtr<DistributedFS::FDGuard>(ret, true);
+        if (srcFile.fdg == nullptr) {
+            HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
     }
@@ -105,9 +106,9 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
             HILOGE("Failed to open destFile with ret: %{public}d", ret);
             return NError(errno);
         }
-        destFile.fdg = make_unique<DistributedFS::FDGuard>(ret, true);
-        if (!destFile.fdg) {
-            HILOGE("Failed to request heap memory for dest file descriptor.");
+        destFile.fdg = CreateUniquePtr<DistributedFS::FDGuard>(ret, true);
+        if (destFile.fdg == nullptr) {
+            HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
     }
@@ -136,7 +137,12 @@ static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg
 
     auto [isFd, fd] = pathOrFdFromJsArg.ToInt32();
     if (isFd) {
-        auto fdg = make_unique<DistributedFS::FDGuard>(fd, false);
+        auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+        if (fdg == nullptr) {
+            HILOGE("Failed to request heap memory.");
+            NError(ENOMEM).ThrowErr(env);
+            return { false, FileInfo { false, {}, {} } };
+        }
         return { true, FileInfo { false, {}, move(fdg) } };
     }
 
@@ -207,7 +213,13 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto cbExec = [para = make_shared<Para>(move(src), move(dest))]() -> NError {
+    auto para = CreateSharedPtr<Para>(move(src), move(dest));
+    if (para == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
+    auto cbExec = [para]() -> NError {
         if (para->src_.isPath && para->dest_.isPath) {
             return IsAllPath(para->src_, para->dest_);
         }

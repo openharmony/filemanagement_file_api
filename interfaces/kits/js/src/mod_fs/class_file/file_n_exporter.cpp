@@ -22,6 +22,7 @@
 #include <memory>
 #include <sys/file.h>
 
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
 #include "../common_func.h"
@@ -195,7 +196,12 @@ napi_value FileNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto rafEntity = make_unique<FileEntity>();
+    auto rafEntity = CreateUniquePtr<FileEntity>();
+    if (rafEntity == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
     if (!NClass::SetEntityFor<FileEntity>(env, funcArg.GetThisVar(), move(rafEntity))) {
         HILOGE("Failed to set file entity");
         NError(EIO).ThrowErr(env);
