@@ -26,5 +26,6 @@ ohos_shared_library("filemgmt_libhilog") {
       [ "${hiviewdfx_hilog_path}/interfaces/native/innerkits:libhilog" ]
 
   subsystem_name = "filemanagement"
+  innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"
 }
