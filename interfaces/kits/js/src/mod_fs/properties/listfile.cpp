@@ -202,7 +202,7 @@ static bool FilterLastModifyTime(const double lastModifiedAfter, const struct di
         HILOGE("Failed to stat file.");
         return false;
     }
-    if (lastModifiedAfter > time(&info.st_mtime)) {
+    if (lastModifiedAfter > static_cast<double>(info.st_mtime)) {
         return false;
     }
     return true;
@@ -301,14 +301,13 @@ static int RecursiveFunc(const string &path, vector<string> &dirents)
     return ERRNO_NOERR;
 }
 
-static napi_value DoListFileVector2NV(napi_env env, const string &path, vector<string> &dirents)
+static napi_value DoListFileVector2NV(napi_env env, const string &path, vector<string> &dirents, bool recursion)
 {
-    if (g_optionArgs.recursion) {
+    if (recursion) {
         for (size_t i = 0; i < dirents.size(); i++) {
             dirents[i] = dirents[i].substr(path.length());
         }
     }
-    g_optionArgs.Clear();
     return NVal::CreateArrayString(env, dirents).val_;
 }
 
@@ -333,13 +332,14 @@ napi_value ListFile::Sync(napi_env env, napi_callback_info info)
     }
     vector<string> direntsRes;
     int ret = 0;
-    g_optionArgs.recursion ? ret = RecursiveFunc(path.get(), direntsRes) :
-        ret = FilterFileRes(path.get(), direntsRes);
+    ret = g_optionArgs.recursion ? RecursiveFunc(path.get(), direntsRes) : FilterFileRes(path.get(), direntsRes);
     if (ret) {
         NError(ret).ThrowErr(env);
         return nullptr;
     }
-    return DoListFileVector2NV(env, string(path.get()), direntsRes);
+    auto res = DoListFileVector2NV(env, string(path.get()), direntsRes, g_optionArgs.recursion);
+    g_optionArgs.Clear();
+    return res;
 }
 
 napi_value ListFile::Async(napi_env env, napi_callback_info info)
@@ -376,14 +376,15 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
         int ret = 0;
         ret = g_optionArgs.recursion ? RecursiveFunc(g_optionArgs.path, arg->dirents) :
             FilterFileRes(g_optionArgs.path, arg->dirents);
+        g_optionArgs.Clear();
         return ret ? NError(ret) : NError(ERRNO_NOERR);
     };
 
-    auto cbCompl = [arg, path = string(path.get())](napi_env env, NError err) -> NVal {
+    auto cbCompl = [arg, optionArgsTmp, path = string(path.get())](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return { env, DoListFileVector2NV(env, path, arg->dirents) };
+        return { env, DoListFileVector2NV(env, path, arg->dirents, optionArgsTmp.recursion) };
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
