@@ -53,7 +53,7 @@ static NError CloseFd(int fd)
     int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
     if (ret < 0) {
         HILOGE("Failed to close file with ret: %{public}d", ret);
-        return NError(errno);
+        return NError(ret);
     }
     return NError(ERRNO_NOERR);
 }

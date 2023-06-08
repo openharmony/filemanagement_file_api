@@ -81,9 +81,9 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     int ret = uv_fs_access(nullptr, access_req.get(), path.get(), 0, nullptr);
-    if (ret < 0 && errno != ENOENT) {
+    if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
         HILOGE("Failed to access file by path");
-        NError(errno).ThrowErr(env);
+        NError(ret).ThrowErr(env);
         return nullptr;
     }
     if (ret == 0) {
@@ -125,7 +125,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         if (ret == 0) {
             result->isAccess = true;
         }
-        return (ret < 0 && errno != ENOENT) ? NError(errno) : NError(ERRNO_NOERR);
+        return (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) ? NError(ret) : NError(ERRNO_NOERR);
     };
 
     auto cbComplete = [result](napi_env env, NError err) -> NVal {
@@ -170,7 +170,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
         int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
             HILOGE("Failed to unlink with path");
-            return NError(errno);
+            return NError(ret);
         }
         return NError(ERRNO_NOERR);
     };
@@ -217,7 +217,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.get(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to unlink with path");
-        NError(errno).ThrowErr(env);
+        NError(ret).ThrowErr(env);
         return nullptr;
     }
 
@@ -250,7 +250,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
         int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
         if (ret < 0) {
             HILOGE("Failed to create directory");
-            return NError(errno);
+            return NError(ret);
         }
         return NError(ERRNO_NOERR);
     };
@@ -297,7 +297,7 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
     int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.get(), DIR_DEFAULT_PERM, nullptr);
     if (ret < 0) {
         HILOGE("Failed to create directory");
-        NError(errno).ThrowErr(env);
+        NError(ret).ThrowErr(env);
         return nullptr;
     }
 
@@ -345,7 +345,7 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
     int ret = uv_fs_read(nullptr, read_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to read file for %{public}d", ret);
-        NError(errno).ThrowErr(env);
+        NError(ret).ThrowErr(env);
         return nullptr;
     }
 
@@ -364,7 +364,7 @@ static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, in
     int ret = uv_fs_read(nullptr, read_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to read file for %{public}d", ret);
-        return NError(errno);
+        return NError(ret);
     }
     arg->lenRead = ret;
     return NError(ERRNO_NOERR);
@@ -439,7 +439,7 @@ static NError WriteExec(shared_ptr<AsyncIOWrtieArg> arg, char *buf, size_t len, 
     int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);
-        return NError(errno);
+        return NError(ret);
     }
     arg->actLen = ret;
     return NError(ERRNO_NOERR);
@@ -544,7 +544,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
     int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);
-        NError(errno).ThrowErr(env);
+        NError(ret).ThrowErr(env);
         return nullptr;
     }
 

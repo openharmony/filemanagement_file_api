@@ -89,7 +89,7 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
     uv_fs_req_cleanup(&copyfile_req);
     if (ret < 0) {
         HILOGE("Failed to move file using copyfile interface.");
-        return errno;
+        return ret;
     }
     uv_fs_t unlink_req;
     ret = uv_fs_unlink(nullptr, &unlink_req, src.c_str(), nullptr);
@@ -100,7 +100,7 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
             HILOGE("Failed to unlink dest file");
         }
         uv_fs_req_cleanup(&unlink_req);
-        return errno;
+        return ret;
     }
     uv_fs_req_cleanup(&unlink_req);
     return ERRNO_NOERR;
@@ -111,12 +111,12 @@ static int RenameFile(const string &src, const string &dest)
     int ret = 0;
     uv_fs_t rename_req;
     ret = uv_fs_rename(nullptr, &rename_req, src.c_str(), dest.c_str(), nullptr);
-    if (ret < 0 && errno == EXDEV) {
+    if (ret < 0 && (string_view(uv_err_name(ret)) != "EXDEV")) {
         return CopyAndDeleteFile(src, dest);
     }
     if (ret < 0) {
         HILOGE("Failed to move file using rename syscall.");
-        return errno;
+        return ret;
     }
     return ERRNO_NOERR;
 }
@@ -131,9 +131,9 @@ static int MoveFile(const string &src, const string &dest, int mode)
             HILOGE("Failed to move file due to existing destPath with MODE_THROW_ERR.");
             return EEXIST;
         }
-        if (ret < 0 && errno != ENOENT) {
+        if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
             HILOGE("Failed to access destPath with MODE_THROW_ERR.");
-            return errno;
+            return ret;
         }
     }
     return RenameFile(src, dest);
