@@ -142,7 +142,7 @@ tuple<bool, uint64_t, bool> NVal::ToUint64() const
 tuple<bool, vector<string>, uint32_t> NVal::ToStringArray()
 {
     napi_status status;
-    uint32_t size;
+    uint32_t size = 0;
     status = napi_get_array_length(env_, val_, &size);
     vector<string> stringArray;
     napi_value result;
