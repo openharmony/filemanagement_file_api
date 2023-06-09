@@ -39,7 +39,7 @@ namespace {
     }
 }
 
-static tuple<shared_ptr<FileWatcher>, napi_value, NError> CreateAndCheckForWatcherEntity(napi_env env, int fd)
+static tuple<shared_ptr<FileWatcher>, napi_value, NError> CreateAndCheckForWatcherEntity(napi_env env, int& fd)
 {
     auto watcherPtr = CreateSharedPtr<FileWatcher>();
     if (watcherPtr == nullptr) {
