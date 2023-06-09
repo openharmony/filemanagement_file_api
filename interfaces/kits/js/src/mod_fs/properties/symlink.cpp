@@ -70,7 +70,7 @@ napi_value Symlink::Sync(napi_env env, napi_callback_info info)
     int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
     if (ret < 0) {
         HILOGE("Failed to create a link for old path");
-        NError(errno).ThrowErr(env);
+        NError(ret).ThrowErr(env);
         return nullptr;
     }
 
@@ -103,7 +103,7 @@ napi_value Symlink::Async(napi_env env, napi_callback_info info)
         int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
         if (ret < 0) {
             HILOGE("Failed to create a link for old path");
-            return NError(errno);
+            return NError(ret);
         }
         return NError(ERRNO_NOERR);
     };

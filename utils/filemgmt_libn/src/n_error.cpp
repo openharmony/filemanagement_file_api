@@ -19,6 +19,7 @@
 
 #include "filemgmt_libhilog.h"
 #include "n_val.h"
+#include "uv.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -46,16 +47,29 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errCode, string er
     return businessError;
 }
 
+static int ConvertUVCode2ErrCode(int errCode)
+{
+    if (errCode >= 0) {
+        return errCode;
+    }
+    auto uvCode = string_view(uv_err_name(errCode));
+    if (uvCode2ErrCodeTable.find(uvCode) != uvCode2ErrCodeTable.end()) {
+        return uvCode2ErrCodeTable.at(uvCode);
+    }
+    return UNKROWN_ERR;
+}
+
 NError::NError() {}
 
 NError::NError(int errCode)
 {
-    if (errCodeTable.find(errCode) != errCodeTable.end()) {
-        errno_ = errCodeTable.at(errCode).first;
-        errMsg_ = errCodeTable.at(errCode).second;
+    int genericCode = ConvertUVCode2ErrCode(errCode);
+    if (errCodeTable.find(genericCode) != errCodeTable.end()) {
+        errno_ = errCodeTable.at(genericCode).first;
+        errMsg_ = errCodeTable.at(genericCode).second;
     } else {
-        errno_ = errCode;
-        errMsg_ = "Unknown error";
+        errno_ = errCodeTable.at(UNKROWN_ERR).first;
+        errMsg_ = errCodeTable.at(UNKROWN_ERR).second;
     }
 }
 

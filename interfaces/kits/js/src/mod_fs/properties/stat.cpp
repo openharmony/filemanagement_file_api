@@ -59,13 +59,13 @@ static NError CheckFsStat(const FileInfo &fileInfo, uv_fs_t* req)
         int ret = uv_fs_stat(nullptr, req, fileInfo.path.get(), nullptr);
         if (ret < 0) {
             HILOGE("Failed to stat file with path");
-            return NError(errno);
+            return NError(ret);
         }
     } else {
         int ret = uv_fs_fstat(nullptr, req, fileInfo.fdg->GetFD(), nullptr);
         if (ret < 0) {
             HILOGE("Failed to stat file with fd");
-            return NError(errno);
+            return NError(ret);
         }
     }
     return NError(ERRNO_NOERR);

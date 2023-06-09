@@ -60,7 +60,7 @@ static NError TruncateCore(napi_env env, FileInfo &fileInfo, int64_t truncateLen
         int ret = uv_fs_open(nullptr, open_req.get(), fileInfo.path.get(), O_RDWR,
                              S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
         if (ret < 0) {
-            return NError(errno);
+            return NError(ret);
         }
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -71,7 +71,7 @@ static NError TruncateCore(napi_env env, FileInfo &fileInfo, int64_t truncateLen
         ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), ret, truncateLen, nullptr);
         if (ret < 0) {
             HILOGE("Failed to truncate file by path");
-            return NError(errno);
+            return NError(ret);
         }
     } else {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {

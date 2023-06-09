@@ -52,7 +52,7 @@ napi_value Mkdtemp::Sync(napi_env env, napi_callback_info info)
     int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), const_cast<char *>(path.c_str()), nullptr);
     if (ret < 0) {
         HILOGE("Failed to create a temporary directory with path");
-        NError(errno).ThrowErr(env);
+        NError(ret).ThrowErr(env);
         return nullptr;
     }
 
@@ -70,7 +70,7 @@ static NError MkdTempExec(shared_ptr<string> arg, string path)
     int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to create a temporary directory with path");
-        return NError(errno);
+        return NError(ret);
     } else {
         *arg = mkdtemp_req->path;
         return NError(ERRNO_NOERR);

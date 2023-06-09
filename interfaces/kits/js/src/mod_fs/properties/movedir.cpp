@@ -120,7 +120,7 @@ static int RenameFile(const string &src, const string &dest, const int mode)
     uv_fs_t rename_req;
     int res = uv_fs_rename(nullptr, &rename_req, src.c_str(), dest.c_str(), nullptr);
     uv_fs_req_cleanup(&rename_req);
-    if (res < 0 && errno == EXDEV) {
+    if (res < 0 && (string_view(uv_err_name(res)) == "EXDEV")) {
         HILOGE("Failed to rename file due to EXDEV");
         return CopyAndDeleteFile(src, dest);
     }
@@ -144,7 +144,7 @@ static int RenameDir(const string &src, const string &dest, const int mode, vect
     uv_fs_t rename_req;
     int ret = uv_fs_rename(nullptr, &rename_req, src.c_str(), dest.c_str(), nullptr);
     uv_fs_req_cleanup(&rename_req);
-    if (ret < 0 && errno == EXDEV) {
+    if (ret < 0 && (string_view(uv_err_name(ret)) == "EXDEV")) {
         HILOGE("Failed to rename file due to EXDEV");
         return RecurMoveDir(src, dest, mode, errfiles);
     }
