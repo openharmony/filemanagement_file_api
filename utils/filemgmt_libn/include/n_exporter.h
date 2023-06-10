@@ -31,7 +31,11 @@ public:
     NExporter(napi_env env, napi_value exports) : exports_(env, exports) {};
     virtual ~NExporter() = default;
     virtual bool Export() = 0;
+#ifdef WIN_PLATFORM
+    virtual std::string GetNExporterName() = 0;
+#else
     virtual std::string GetClassName() = 0;
+#endif
 
 protected:
     NVal exports_;

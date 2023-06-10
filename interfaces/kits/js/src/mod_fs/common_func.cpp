@@ -23,8 +23,10 @@
 
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
+#ifndef WIN_PLATFORM
 #include "class_stream/stream_entity.h"
 #include "class_stream/stream_n_exporter.h"
+#endif
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
 
@@ -38,16 +40,16 @@ void InitOpenMode(napi_env env, napi_value exports)
 {
     char propertyName[] = "OpenMode";
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("READ_ONLY", NVal::CreateInt32(env, RDONLY).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("WRITE_ONLY", NVal::CreateInt32(env, WRONLY).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("READ_WRITE", NVal::CreateInt32(env, RDWR).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("CREATE", NVal::CreateInt32(env, CREATE).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("TRUNC", NVal::CreateInt32(env, TRUNC).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("APPEND", NVal::CreateInt32(env, APPEND).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("NONBLOCK", NVal::CreateInt32(env, NONBLOCK).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("DIR", NVal::CreateInt32(env, DIRECTORY).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("NOFOLLOW", NVal::CreateInt32(env, NOFOLLOW).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("SYNC", NVal::CreateInt32(env, SYNC).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("READ_ONLY", NVal::CreateInt32(env, USR_READ_ONLY).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("WRITE_ONLY", NVal::CreateInt32(env, USR_WRITE_ONLY).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("READ_WRITE", NVal::CreateInt32(env, USR_RDWR).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("CREATE", NVal::CreateInt32(env, USR_CREATE).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("TRUNC", NVal::CreateInt32(env, USR_TRUNC).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("APPEND", NVal::CreateInt32(env, USR_APPEND).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("NONBLOCK", NVal::CreateInt32(env, USR_NONBLOCK).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("DIR", NVal::CreateInt32(env, USR_DIRECTORY).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("NOFOLLOW", NVal::CreateInt32(env, USR_NOFOLLOW).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("SYNC", NVal::CreateInt32(env, USR_SYNC).val_),
     };
     napi_value obj = nullptr;
     napi_status status = napi_create_object(env, &obj);
@@ -74,7 +76,11 @@ static tuple<bool, size_t> GetActualLen(napi_env env, size_t bufLen, size_t bufO
 
     if (op.HasProp("length")) {
         int64_t opLength = 0;
+    #ifdef WIN_PLATFORM
+        tie(succ, opLength) = op.GetPropValue("length").ToInt64(static_cast<int64_t>(retLen));
+    #else
         tie(succ, opLength) = op.GetProp("length").ToInt64(static_cast<int64_t>(retLen));
+    #endif
         if (!succ || opLength < 0 || static_cast<size_t>(opLength) > retLen) {
             HILOGE("Invalid option.length");
             NError(EINVAL).ThrowErr(env);
@@ -87,29 +93,17 @@ static tuple<bool, size_t> GetActualLen(napi_env env, size_t bufLen, size_t bufO
 
 unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
 {
-    static constexpr unsigned int usrWriteOnly = 01;
-    static constexpr unsigned int usrReadWrite = 02;
-    static constexpr unsigned int usrCreate = 0100;
-    static constexpr unsigned int usrExecuteLock = 0200;
-    static constexpr unsigned int usrTruncate = 01000;
-    static constexpr unsigned int usrAppend = 02000;
-    static constexpr unsigned int usrNoneBlock = 04000;
-    static constexpr unsigned int usrDirectory = 0200000;
-    static constexpr unsigned int usrNoFollowed = 0400000;
-    static constexpr unsigned int usrSynchronous = 04010000;
-
     // default value is usrReadOnly 00
     unsigned int flagsABI = 0;
-    flagsABI |= ((flags & usrWriteOnly) == usrWriteOnly) ? O_WRONLY : 0;
-    flagsABI |= ((flags & usrReadWrite) == usrReadWrite) ? O_RDWR : 0;
-    flagsABI |= ((flags & usrCreate) == usrCreate) ? O_CREAT : 0;
-    flagsABI |= ((flags & usrExecuteLock) == usrExecuteLock) ? O_EXCL : 0;
-    flagsABI |= ((flags & usrTruncate) == usrTruncate) ? O_TRUNC : 0;
-    flagsABI |= ((flags & usrAppend) == usrAppend) ? O_APPEND : 0;
-    flagsABI |= ((flags & usrNoneBlock) == usrNoneBlock) ? O_NONBLOCK : 0;
-    flagsABI |= ((flags & usrDirectory) == usrDirectory) ? O_DIRECTORY : 0;
-    flagsABI |= ((flags & usrNoFollowed) == usrNoFollowed) ? O_NOFOLLOW : 0;
-    flagsABI |= ((flags & usrSynchronous) == usrSynchronous) ? O_SYNC : 0;
+    flagsABI |= ((flags & USR_WRITE_ONLY) == USR_WRITE_ONLY) ? WRONLY : 0;
+    flagsABI |= ((flags & USR_RDWR) == USR_RDWR) ? RDWR : 0;
+    flagsABI |= ((flags & USR_CREATE) == USR_CREATE) ? CREATE : 0;
+    flagsABI |= ((flags & USR_TRUNC) == USR_TRUNC) ? TRUNC : 0;
+    flagsABI |= ((flags & USR_APPEND) == USR_APPEND) ? APPEND : 0;
+    flagsABI |= ((flags & USR_NONBLOCK) == USR_NONBLOCK) ? NONBLOCK : 0;
+    flagsABI |= ((flags & USR_DIRECTORY) == USR_DIRECTORY) ? DIRECTORY : 0;
+    flagsABI |= ((flags & USR_NOFOLLOW) == USR_NOFOLLOW) ? NOFOLLOW : 0;
+    flagsABI |= ((flags & USR_SYNC) == USR_SYNC) ? SYNC : 0;
     flags = flagsABI;
     return flagsABI;
 }
@@ -134,6 +128,7 @@ NVal CommonFunc::InstantiateStat(napi_env env, uv_stat_t &buf)
     return { env, objStat };
 }
 
+#ifndef WIN_PLATFORM
 NVal CommonFunc::InstantiateStream(napi_env env, unique_ptr<FILE, decltype(&fclose)> fp)
 {
     napi_value objStream = NClass::InstantiateClass(env, StreamNExporter::className_, {});
@@ -153,6 +148,7 @@ NVal CommonFunc::InstantiateStream(napi_env env, unique_ptr<FILE, decltype(&fclo
     streamEntity->fp.swap(fp);
     return { env, objStream };
 }
+#endif
 
 void CommonFunc::fs_req_cleanup(uv_fs_t* req)
 {
@@ -250,8 +246,13 @@ tuple<bool, void *, size_t, int64_t> CommonFunc::GetReadArg(napi_env env,
         HILOGE("Failed to get actual length");
         return { false, nullptr, retLen, offset };
     }
+    #ifdef WIN_PLATFORM
+    if (op.HasProp("offset") && !op.GetPropValue("offset").TypeIs(napi_undefined)) {
+        tie(succ, offset) = op.GetPropValue("offset").ToInt64();
+    #else
     if (op.HasProp("offset") && !op.GetProp("offset").TypeIs(napi_undefined)) {
         tie(succ, offset) = op.GetProp("offset").ToInt64();
+    #endif
         if (!succ || offset < 0) {
             HILOGE("option.offset shall be positive number");
             NError(EINVAL).ThrowErr(env);
@@ -271,7 +272,11 @@ tuple<bool, unique_ptr<char[]>, void *, size_t, int64_t> CommonFunc::GetWriteArg
     NVal op(env, argOption);
     NVal jsBuffer(env, argWBuf);
     unique_ptr<char[]> bufferGuard = nullptr;
+#ifdef WIN_PLATFORM
+    tie(succ, bufferGuard, bufLen) = DecodeString(env, jsBuffer, op.GetPropValue("encoding"));
+#else
     tie(succ, bufferGuard, bufLen) = DecodeString(env, jsBuffer, op.GetProp("encoding"));
+#endif
     if (!succ) {
         tie(succ, buf, bufLen) = NVal(env, argWBuf).ToArraybuffer();
         if (!succ) {
@@ -294,8 +299,13 @@ tuple<bool, unique_ptr<char[]>, void *, size_t, int64_t> CommonFunc::GetWriteArg
         return { false, nullptr, nullptr, 0, offset };
     }
 
+#ifdef WIN_PLATFORM
+    if (op.HasProp("offset") && !op.GetPropValue("offset").TypeIs(napi_undefined)) {
+        tie(succ, offset) = op.GetPropValue("offset").ToInt64();
+#else
     if (op.HasProp("offset") && !op.GetProp("offset").TypeIs(napi_undefined)) {
         tie(succ, offset) = op.GetProp("offset").ToInt64();
+#endif
         if (!succ || offset < 0) {
             HILOGE("option.offset shall be positive number");
             NError(EINVAL).ThrowErr(env);

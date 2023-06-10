@@ -60,7 +60,11 @@ public:
     static napi_value Read(napi_env env, napi_callback_info info);
     static napi_value Write(napi_env env, napi_callback_info info);
     bool Export() override;
+#ifdef WIN_PLATFORM
+    std::string GetNExporterName() override;
+#else
     std::string GetClassName() override;
+#endif
 
     PropNExporter(napi_env env, napi_value exports);
     ~PropNExporter() override;

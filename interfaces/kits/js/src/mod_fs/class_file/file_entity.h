@@ -32,7 +32,7 @@ struct FileEntity {
     std::unique_ptr<DistributedFS::FDGuard> fd_ = { nullptr };
     std::string path_;
     std::string uri_;
-
+#ifndef WIN_PLATFORM
     virtual ~FileEntity()
     {
         if (!fd_.get()) {
@@ -49,6 +49,7 @@ struct FileEntity {
             }
         }
     }
+#endif
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement

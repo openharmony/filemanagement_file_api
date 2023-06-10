@@ -26,29 +26,32 @@
 #include "class_file/file_entity.h"
 #include "class_file/file_n_exporter.h"
 #include "close.h"
-#include "copy_file.h"
-#include "copydir.h"
-#include "create_stream.h"
 #include "fdatasync.h"
-#include "fdopen_stream.h"
 #include "file_utils.h"
 #include "filemgmt_libn.h"
 #include "fsync.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
-#include "listfile.h"
 #include "lstat.h"
 #include "mkdtemp.h"
-#include "move.h"
-#include "movedir.h"
 #include "open.h"
-#include "read_text.h"
 #include "rename.h"
 #include "rmdirent.h"
 #include "stat.h"
-#include "symlink.h"
 #include "truncate.h"
+
+#ifndef WIN_PLATFORM
+#include "copy_file.h"
+#include "copydir.h"
+#include "create_stream.h"
+#include "fdopen_stream.h"
+#include "listfile.h"
+#include "move.h"
+#include "movedir.h"
+#include "read_text.h"
+#include "symlink.h"
 #include "watcher.h"
+#endif
 
 namespace OHOS {
 namespace FileManagement {
@@ -558,55 +561,61 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("accessSync", AccessSync),
         NVal::DeclareNapiFunction("close", Close::Async),
         NVal::DeclareNapiFunction("closeSync", Close::Sync),
-        NVal::DeclareNapiFunction("copyDir", CopyDir::Async),
-        NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
-        NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
-        NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
-        NVal::DeclareNapiFunction("createStream", CreateStream::Async),
-        NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
         NVal::DeclareNapiFunction("fdatasync", Fdatasync::Async),
         NVal::DeclareNapiFunction("fdatasyncSync", Fdatasync::Sync),
-        NVal::DeclareNapiFunction("fdopenStream", FdopenStream::Async),
-        NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
         NVal::DeclareNapiFunction("fsync", Fsync::Async),
         NVal::DeclareNapiFunction("fsyncSync", Fsync::Sync),
-        NVal::DeclareNapiFunction("listFile", ListFile::Async),
-        NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
         NVal::DeclareNapiFunction("lstat", Lstat::Async),
         NVal::DeclareNapiFunction("lstatSync", Lstat::Sync),
         NVal::DeclareNapiFunction("mkdir", Mkdir),
         NVal::DeclareNapiFunction("mkdirSync", MkdirSync),
         NVal::DeclareNapiFunction("mkdtemp", Mkdtemp::Async),
         NVal::DeclareNapiFunction("mkdtempSync", Mkdtemp::Sync),
-        NVal::DeclareNapiFunction("moveDir", MoveDir::Async),
-        NVal::DeclareNapiFunction("moveDirSync", MoveDir::Sync),
-        NVal::DeclareNapiFunction("moveFile", Move::Async),
-        NVal::DeclareNapiFunction("moveFileSync", Move::Sync),
         NVal::DeclareNapiFunction("open", Open::Async),
         NVal::DeclareNapiFunction("openSync", Open::Sync),
         NVal::DeclareNapiFunction("read", Read),
         NVal::DeclareNapiFunction("readSync", ReadSync),
-        NVal::DeclareNapiFunction("readText", ReadText::Async),
-        NVal::DeclareNapiFunction("readTextSync", ReadText::Sync),
         NVal::DeclareNapiFunction("rename", Rename::Async),
         NVal::DeclareNapiFunction("renameSync", Rename::Sync),
         NVal::DeclareNapiFunction("rmdir", Rmdirent::Async),
         NVal::DeclareNapiFunction("rmdirSync", Rmdirent::Sync),
         NVal::DeclareNapiFunction("stat", Stat::Async),
         NVal::DeclareNapiFunction("statSync", Stat::Sync),
-        NVal::DeclareNapiFunction("symlink", Symlink::Async),
-        NVal::DeclareNapiFunction("symlinkSync", Symlink::Sync),
         NVal::DeclareNapiFunction("truncate", Truncate::Async),
         NVal::DeclareNapiFunction("truncateSync", Truncate::Sync),
         NVal::DeclareNapiFunction("unlink", Unlink),
         NVal::DeclareNapiFunction("unlinkSync", UnlinkSync),
         NVal::DeclareNapiFunction("write", Write),
         NVal::DeclareNapiFunction("writeSync", WriteSync),
+    #ifndef WIN_PLATFORM
+        NVal::DeclareNapiFunction("copyDir", CopyDir::Async),
+        NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
+        NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
+        NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
+        NVal::DeclareNapiFunction("createStream", CreateStream::Async),
+        NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
+        NVal::DeclareNapiFunction("fdopenStream", FdopenStream::Async),
+        NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
+        NVal::DeclareNapiFunction("listFile", ListFile::Async),
+        NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
+        NVal::DeclareNapiFunction("moveDir", MoveDir::Async),
+        NVal::DeclareNapiFunction("moveDirSync", MoveDir::Sync),
+        NVal::DeclareNapiFunction("moveFile", Move::Async),
+        NVal::DeclareNapiFunction("moveFileSync", Move::Sync),
+        NVal::DeclareNapiFunction("readText", ReadText::Async),
+        NVal::DeclareNapiFunction("readTextSync", ReadText::Sync),
+        NVal::DeclareNapiFunction("symlink", Symlink::Async),
+        NVal::DeclareNapiFunction("symlinkSync", Symlink::Sync),
         NVal::DeclareNapiFunction("createWatcher", Watcher::CreateWatcher),
+    #endif
     });
 }
 
+#ifdef WIN_PLATFORM
+string PropNExporter::GetNExporterName()
+#else
 string PropNExporter::GetClassName()
+#endif
 {
     return PropNExporter::className_;
 }

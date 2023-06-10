@@ -238,7 +238,11 @@ bool NVal::HasProp(string propName) const
     return (status == napi_ok) && res;
 }
 
+#ifdef WIN_PLATFORM
+NVal NVal::GetPropValue(string propName) const
+#else
 NVal NVal::GetProp(string propName) const
+#endif
 {
     if (!HasProp(propName)) {
         return {env_, nullptr};

@@ -270,7 +270,11 @@ bool StatNExporter::Export()
         NVal::DeclareNapiGetter("ctime", GetCtime),
     };
 
+#ifdef WIN_PLATFORM
+    string className = GetNExporterName();
+#else
     string className = GetClassName();
+#endif
     bool succ = false;
     napi_value classValue = nullptr;
     tie(succ, classValue) = NClass::DefineClass(exports_.env_, className, StatNExporter::Constructor,
@@ -290,7 +294,11 @@ bool StatNExporter::Export()
     return exports_.AddProp(className, classValue);
 }
 
+#ifdef WIN_PLATFORM
+string StatNExporter::GetNExporterName()
+#else
 string StatNExporter::GetClassName()
+#endif
 {
     return StatNExporter::className_;
 }

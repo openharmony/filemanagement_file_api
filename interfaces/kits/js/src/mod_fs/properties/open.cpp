@@ -19,28 +19,32 @@
 #include <cstring>
 #include <memory>
 
-#include "ability.h"
-#include "bundle_info.h"
-#include "bundle_mgr_proxy.h"
 #include "class_file/file_entity.h"
 #include "class_file/file_n_exporter.h"
 #include "common_func.h"
-#include "datashare_helper.h"
-#include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "file_utils.h"
+#ifndef WIN_PLATFORM
+#include "ability.h"
+#include "bundle_info.h"
+#include "bundle_mgr_proxy.h"
+#include "datashare_helper.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "remote_uri.h"
 #include "status_receiver_host.h"
 #include "system_ability_definition.h"
+#endif
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+#ifndef WIN_PLATFORM
 using namespace OHOS::DistributedFS::ModuleRemoteUri;
 using namespace OHOS::AppExecFwk;
+#endif
 
 static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
 {
@@ -57,25 +61,6 @@ static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcAr
         (void)CommonFunc::ConvertJsFlags(flags);
     }
     return { true, flags };
-}
-
-static string DealWithUriWithName(string str)
-{
-    static uint32_t MEET_COUNT = 6;
-    uint32_t count = 0;
-    uint32_t index;
-    for (index = 0; index < str.length(); index++) {
-        if (str[index] == '/') {
-            count++;
-        }
-        if (count == MEET_COUNT) {
-            break;
-        }
-    }
-    if (count == MEET_COUNT) {
-        str = str.substr(0, index);
-    }
-    return str;
 }
 
 static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
@@ -116,6 +101,26 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
         fileEntity->uri_ = "";
     }
     return { env, objFile };
+}
+
+#ifndef WIN_PLATFORM
+static string DealWithUriWithName(string str)
+{
+    static uint32_t MEET_COUNT = 6;
+    uint32_t count = 0;
+    uint32_t index;
+    for (index = 0; index < str.length(); index++) {
+        if (str[index] == '/') {
+            count++;
+        }
+        if (count == MEET_COUNT) {
+            break;
+        }
+    }
+    if (count == MEET_COUNT) {
+        str = str.substr(0, index);
+    }
+    return str;
 }
 
 static int OpenFileByDatashare(string path, unsigned int flags)
@@ -186,6 +191,7 @@ static string GetPathFromFileUri(string path, string bundleName, unsigned int mo
     }
     return path;
 }
+#endif
 
 napi_value Open::Sync(napi_env env, napi_callback_info info)
 {
@@ -207,6 +213,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     }
     int fd = -1;
     string pathStr = string(path.get());
+#ifndef WIN_PLATFORM
     if (RemoteUri::IsMediaUri(pathStr)) {
         int ret = OpenFileByDatashare(pathStr, mode);
         if (ret >= 0) {
@@ -228,6 +235,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         NError(E_INVAL).ThrowErr(env);
         return nullptr;
     }
+#endif
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
@@ -279,6 +287,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     auto argv = funcArg[NARG_POS::FIRST];
     auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
         string pathStr = path;
+    #ifndef WIN_PLATFORM
         int fd = -1;
         if (RemoteUri::IsMediaUri(path)) {
             int ret = OpenFileByDatashare(path, mode);
@@ -303,6 +312,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             HILOGE("Failed to open file by RemoteUri");
             return NError(E_INVAL);
         }
+    #endif
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
