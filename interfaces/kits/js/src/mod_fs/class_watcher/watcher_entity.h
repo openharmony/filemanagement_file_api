@@ -12,25 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_WATCHER_WATCHER_ENTITY_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_WATCHER_WATCHER_ENTITY_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_WATCHER_WATCHER_ENTITY_H
+
 #include <memory>
+#include <mutex>
 #include <string>
 #include <sys/inotify.h>
-#include <vector>
+#include <unordered_map>
+#include <unordered_set>
+#include <uv.h>
 
 #include "filemgmt_libn.h"
+#include "singleton.h"
 namespace OHOS::FileManagement::ModuleFileIO {
 using WatcherCallback = void (*)(napi_env env,
                                  LibN::NRef &callback,
                                  const std::string &filename,
                                  const uint32_t &event,
                                  const uint32_t &cookie);
+
 constexpr int BUF_SIZE = 1024;
 struct WatcherInfoArg {
-    std::string filename = "";
+    std::string fileName = "";
     uint32_t events = 0;
-    int fd = -1;
     int wd = -1;
     napi_env env = nullptr;
     LibN::NRef nRef;
@@ -38,24 +43,38 @@ struct WatcherInfoArg {
     ~WatcherInfoArg() = default;
 };
 
-class FileWatcher {
+class FileWatcher : public Singleton<FileWatcher> {
 public:
     FileWatcher();
     ~FileWatcher();
-    bool InitNotify(int &fd);
-    bool StartNotify(WatcherInfoArg &arg);
-    bool StopNotify(const WatcherInfoArg &arg);
-    void GetNotifyEvent(WatcherInfoArg &arg, WatcherCallback callback);
+
+    FileWatcher(FileWatcher const &) = delete;
+    void operator=(FileWatcher const &) = delete;
+
+    int32_t GetNotifyId();
+    bool InitNotify();
+    int StartNotify(std::shared_ptr<WatcherInfoArg> arg);
+    int StopNotify(std::shared_ptr<WatcherInfoArg> arg);
+    void GetNotifyEvent(WatcherCallback callback);
+    bool AddWatcherInfo(const std::string &fileName, std::shared_ptr<WatcherInfoArg> arg);
+    bool CheckEventValid(const uint32_t &event);
+private:
+    uint32_t RemoveWatcherInfo(std::shared_ptr<WatcherInfoArg> arg);
+    std::tuple<bool, int> CheckEventWatched(const std::string &fileName, const uint32_t &event);
+    void NotifyEvent(const struct inotify_event *event, WatcherCallback callback);
+    int CloseNotifyFd();
+    int NotifyToWatchNewEvents(const std::string &fileName, const int &wd, const uint32_t &watchEvents);
 
 private:
-    void HandleEvent(WatcherInfoArg &arg, const struct inotify_event *event,
-                     WatcherCallback callback);
+    static std::mutex watchMutex_;
     bool run_ = false;
+    int32_t notifyFd_ = -1;
+    std::unordered_set<std::shared_ptr<WatcherInfoArg>> watcherInfoSet_;
+    std::unordered_map<std::string, std::pair<int, uint32_t>> wdFileNameMap_;
 };
 
 struct WatcherEntity {
-    std::unique_ptr<WatcherInfoArg> data_;
-    std::shared_ptr<FileWatcher> watcherPtr_;
+    std::shared_ptr<WatcherInfoArg> data_;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO namespace OHOS
 #endif
