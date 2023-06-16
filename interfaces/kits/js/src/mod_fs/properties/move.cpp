@@ -111,7 +111,7 @@ static int RenameFile(const string &src, const string &dest)
     int ret = 0;
     uv_fs_t rename_req;
     ret = uv_fs_rename(nullptr, &rename_req, src.c_str(), dest.c_str(), nullptr);
-    if (ret < 0 && (string_view(uv_err_name(ret)) != "EXDEV")) {
+    if (ret < 0 && (string_view(uv_err_name(ret)) == "EXDEV")) {
         return CopyAndDeleteFile(src, dest);
     }
     if (ret < 0) {
