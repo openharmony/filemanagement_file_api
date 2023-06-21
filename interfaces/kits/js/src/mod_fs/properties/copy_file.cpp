@@ -35,7 +35,7 @@ using namespace OHOS::FileManagement::LibN;
 static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> copyfile_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!copyfile_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
@@ -52,7 +52,7 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& statbf)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendfile_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!sendfile_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
@@ -66,50 +66,71 @@ static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& sta
     return NError(ERRNO_NOERR);
 }
 
+static NError TruncateCore(const FileInfo& fileInfo)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
+        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!ftruncate_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), fileInfo.fdg->GetFD(), 0, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to truncate dstFile with ret: %{public}d", ret);
+        return NError(ret);
+    }
+    return NError(ERRNO_NOERR);
+}
+
+static NError OpenCore(FileInfo& fileInfo, const int flags, const int mode)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!open_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_open(nullptr, open_req.get(), fileInfo.path.get(), flags, mode, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to open srcFile with ret: %{public}d", ret);
+        return NError(ret);
+    }
+    fileInfo.fdg = CreateUniquePtr<DistributedFS::FDGuard>(ret, true);
+    if (fileInfo.fdg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    return NError(ERRNO_NOERR);
+}
+
 static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
 {
     if (srcFile.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!open_req) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
-        }
-        int ret = uv_fs_open(nullptr, open_req.get(), srcFile.path.get(), O_RDWR,
-                             S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to open srcFile with ret: %{public}d", ret);
-            return NError(errno);
-        }
-        srcFile.fdg = CreateUniquePtr<DistributedFS::FDGuard>(ret, true);
-        if (srcFile.fdg == nullptr) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
+        auto openResult = OpenCore(srcFile, UV_FS_O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+        if (openResult) {
+            return openResult;
         }
     }
-
     struct stat statbf;
     if (fstat(srcFile.fdg->GetFD(), &statbf) < 0) {
         HILOGE("Failed to get stat of file by fd: %{public}d", srcFile.fdg->GetFD());
         return NError(errno);
     }
-
     if (destFile.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!open_req) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
+        auto openResult = OpenCore(destFile, UV_FS_O_RDWR | UV_FS_O_CREAT |
+            UV_FS_O_TRUNC, statbf.st_mode);
+        if (openResult) {
+            return openResult;
         }
-        int ret = uv_fs_open(nullptr, open_req.get(), destFile.path.get(), O_RDWR | O_CREAT, statbf.st_mode, nullptr);
+    } else {
+        auto truncateResult = TruncateCore(destFile);
+        if (truncateResult) {
+            return truncateResult;
+        }
+        auto ret = lseek(destFile.fdg->GetFD(), 0, SEEK_SET);
         if (ret < 0) {
-            HILOGE("Failed to open destFile with ret: %{public}d", ret);
+            HILOGE("Failed to lseek destFile, errno: %{public}d", errno);
             return NError(errno);
-        }
-        destFile.fdg = CreateUniquePtr<DistributedFS::FDGuard>(ret, true);
-        if (destFile.fdg == nullptr) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
         }
     }
     return SendFileCore(srcFile, destFile, statbf);
