@@ -215,12 +215,12 @@ ohos_shared_library("file") {
   ]
 
   deps = [
-    "${aafwk_kits_path}/ability/native:abilitykit_native",
     "${arkui_napi_path}:ace_napi",
     "//third_party/bounds_checking_function:libsec_shared",
   ]
 
   external_deps = [
+    "ability_runtime:abilitykit_native",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
