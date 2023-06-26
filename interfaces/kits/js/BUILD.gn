@@ -96,7 +96,7 @@ ohos_shared_library("fileio") {
     "//third_party/openssl:libcrypto_shared",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ "hilog:libhilog" ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
@@ -231,7 +231,7 @@ ohos_shared_library("file") {
     "ability_runtime:abilitykit_native",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
 }
 
@@ -323,7 +323,7 @@ ohos_shared_library("document") {
 
   deps = [ "${arkui_napi_path}:ace_napi" ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ "hilog:libhilog" ]
 }
 
 group("build_kits_js") {
