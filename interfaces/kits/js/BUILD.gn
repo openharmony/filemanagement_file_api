@@ -118,54 +118,62 @@ ohos_shared_library("fs") {
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/class_file/file_n_exporter.cpp",
     "src/mod_fs/class_stat/stat_n_exporter.cpp",
-    "src/mod_fs/class_stream/flush.cpp",
-    "src/mod_fs/class_stream/stream_n_exporter.cpp",
-    "src/mod_fs/class_watcher/watcher_entity.cpp",
-    "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
     "src/mod_fs/common_func.cpp",
     "src/mod_fs/module.cpp",
     "src/mod_fs/properties/close.cpp",
-    "src/mod_fs/properties/copy_file.cpp",
-    "src/mod_fs/properties/copydir.cpp",
-    "src/mod_fs/properties/create_stream.cpp",
     "src/mod_fs/properties/fdatasync.cpp",
-    "src/mod_fs/properties/fdopen_stream.cpp",
     "src/mod_fs/properties/fsync.cpp",
-    "src/mod_fs/properties/listfile.cpp",
     "src/mod_fs/properties/lstat.cpp",
     "src/mod_fs/properties/mkdtemp.cpp",
-    "src/mod_fs/properties/move.cpp",
-    "src/mod_fs/properties/movedir.cpp",
     "src/mod_fs/properties/open.cpp",
     "src/mod_fs/properties/prop_n_exporter.cpp",
-    "src/mod_fs/properties/read_text.cpp",
     "src/mod_fs/properties/rename.cpp",
     "src/mod_fs/properties/rmdirent.cpp",
     "src/mod_fs/properties/stat.cpp",
-    "src/mod_fs/properties/symlink.cpp",
     "src/mod_fs/properties/truncate.cpp",
-    "src/mod_fs/properties/watcher.cpp",
   ]
 
-  deps = [
-    "${file_api_path}/interfaces/kits/native:remote_uri_native",
-    "${utils_path}/filemgmt_libn:filemgmt_libn",
-  ]
+  cflags_cc = [ "-std=c++17" ]
 
-  external_deps = [
-    "ability_base:zuri",
-    "ability_runtime:abilitykit_native",
-    "access_token:libtokenid_sdk",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "data_share:datashare_common",
-    "data_share:datashare_consumer",
-    "ipc:ipc_core",
-    "samgr:samgr_proxy",
-  ]
+  deps = [ "${utils_path}/filemgmt_libn:filemgmt_libn" ]
 
   use_exceptions = true
+
+  if (use_mingw_win) {
+    defines = [ "WIN_PLATFORM" ]
+  }
+
+  if (!use_mingw_win && !use_mac) {
+    sources += [
+      "src/mod_fs/class_stream/flush.cpp",
+      "src/mod_fs/class_stream/stream_n_exporter.cpp",
+      "src/mod_fs/class_watcher/watcher_entity.cpp",
+      "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
+      "src/mod_fs/properties/copy_file.cpp",
+      "src/mod_fs/properties/copydir.cpp",
+      "src/mod_fs/properties/create_stream.cpp",
+      "src/mod_fs/properties/fdopen_stream.cpp",
+      "src/mod_fs/properties/listfile.cpp",
+      "src/mod_fs/properties/move.cpp",
+      "src/mod_fs/properties/movedir.cpp",
+      "src/mod_fs/properties/read_text.cpp",
+      "src/mod_fs/properties/symlink.cpp",
+      "src/mod_fs/properties/watcher.cpp",
+    ]
+    external_deps = [
+      "ability_base:zuri",
+      "ability_runtime:abilitykit_native",
+      "access_token:libtokenid_sdk",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
+      "data_share:datashare_common",
+      "data_share:datashare_consumer",
+      "ipc:ipc_core",
+      "samgr:samgr_proxy",
+    ]
+    deps += [ "${file_api_path}/interfaces/kits/native:remote_uri_native" ]
+  }
 }
 
 ohos_shared_library("hash") {

@@ -35,6 +35,12 @@ ohos_shared_library("filemgmt_libn") {
     "src/n_val.cpp",
   ]
 
+  cflags_cc = [ "-std=c++17" ]
+
+  if (use_mingw_win) {
+    defines = [ "WIN_PLATFORM" ]
+  }
+
   public_configs = [ ":libn_public_config" ]
   public_deps = [
     "${arkui_napi_path}:ace_napi",

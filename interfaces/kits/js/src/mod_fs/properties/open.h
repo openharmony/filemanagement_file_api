@@ -17,7 +17,9 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_H
 
 #include "filemgmt_libn.h"
+#ifndef WIN_PLATFORM
 #include "iremote_broker.h"
+#endif
 
 namespace OHOS {
 namespace FileManagement {
@@ -28,6 +30,7 @@ public:
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
 
+#ifndef WIN_PLATFORM
 class FileIoToken : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.fileio.open");
@@ -35,6 +38,7 @@ public:
     FileIoToken() = default;
     virtual ~FileIoToken() noexcept = default;
 };
+#endif
 
 const std::string PROCEDURE_OPEN_NAME = "FileIOOpen";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";

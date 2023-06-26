@@ -27,10 +27,13 @@ namespace OHOS {
 namespace FileManagement {
 namespace LibN {
 
-#ifdef IOS_PLATFORM
+#if (defined IOS_PLATFORM) || (defined WIN_PLATFORM)
 constexpr int EBADR = 53;
 constexpr int EBADFD = 77;
 constexpr int ERESTART = 85;
+#endif
+#ifdef WIN_PLATFORM
+constexpr int EDQUOT = 122;
 #endif
 constexpr int UNKROWN_ERR = -1;
 constexpr int ERRNO_NOERR = 0;

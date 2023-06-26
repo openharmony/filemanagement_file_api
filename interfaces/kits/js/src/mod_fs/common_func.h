@@ -24,16 +24,27 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 
-constexpr int RDONLY = 00;
-constexpr int WRONLY = 01;
-constexpr int RDWR = 02;
-constexpr int CREATE = 0100;
-constexpr int TRUNC = 01000;
-constexpr int APPEND = 02000;
-constexpr int NONBLOCK = 04000;
-constexpr int DIRECTORY = 0200000;
-constexpr int NOFOLLOW = 0400000;
-constexpr int SYNC = 04010000;
+constexpr int RDONLY = UV_FS_O_RDONLY;
+constexpr int WRONLY = UV_FS_O_WRONLY;
+constexpr int RDWR = UV_FS_O_RDWR;
+constexpr int CREATE = UV_FS_O_CREAT;
+constexpr int TRUNC = UV_FS_O_TRUNC;
+constexpr int APPEND = UV_FS_O_APPEND;
+constexpr int NONBLOCK = UV_FS_O_NONBLOCK;
+constexpr int DIRECTORY = UV_FS_O_DIRECTORY;
+constexpr int NOFOLLOW = UV_FS_O_NOFOLLOW;
+constexpr int SYNC = UV_FS_O_SYNC;
+
+constexpr unsigned int USR_READ_ONLY = 00;
+constexpr unsigned int USR_WRITE_ONLY = 01;
+constexpr unsigned int USR_RDWR = 02;
+constexpr unsigned int USR_CREATE = 0100;
+constexpr unsigned int USR_TRUNC = 01000;
+constexpr unsigned int USR_APPEND = 02000;
+constexpr unsigned int USR_NONBLOCK = 04000;
+constexpr unsigned int USR_DIRECTORY = 0200000;
+constexpr unsigned int USR_NOFOLLOW = 0400000;
+constexpr unsigned int USR_SYNC = 04010000;
 
 struct FileInfo {
     bool isPath = false;
@@ -46,7 +57,9 @@ void InitOpenMode(napi_env env, napi_value exports);
 struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);
     static LibN::NVal InstantiateStat(napi_env env, uv_stat_t &buf);
+#ifndef WIN_PLATFORM
     static LibN::NVal InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp);
+#endif
     static std::tuple<bool, void *, size_t, int64_t> GetReadArg(napi_env env,
                                                                        napi_value readBuf,
                                                                        napi_value option);

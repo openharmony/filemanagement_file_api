@@ -18,3 +18,7 @@ file_api_path = "//foundation/filemanagement/file_api"
 hiviewdfx_hilog_path = "//base/hiviewdfx/hilog"
 src_path = "${file_api_path}/interfaces/kits/js/src"
 utils_path = "${file_api_path}/utils"
+
+use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
+          "${current_os}_${current_cpu}" == "mac_arm64"
+use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"

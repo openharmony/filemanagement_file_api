@@ -65,6 +65,7 @@ napi_value FileNExporter::GetFD(napi_env env, napi_callback_info info)
     return NVal::CreateInt32(env, rafEntity->fd_.get()->GetFD()).val_;
 }
 
+#ifndef WIN_PLATFORM
 static bool GetExclusive(napi_env env, NFuncArg &funcArg, bool &exclusive)
 {
     if (funcArg.GetArgc() >= NARG_CNT::ONE) {
@@ -186,6 +187,7 @@ napi_value FileNExporter::UnLock(napi_env env, napi_callback_info info)
     }
     return NVal::CreateUndefined(env).val_;
 }
+#endif
 
 napi_value FileNExporter::Constructor(napi_env env, napi_callback_info info)
 {
@@ -214,12 +216,18 @@ bool FileNExporter::Export()
 {
     vector<napi_property_descriptor> props = {
         NVal::DeclareNapiGetter("fd", GetFD),
+#ifndef WIN_PLATFORM
         NVal::DeclareNapiFunction("lock", Lock),
         NVal::DeclareNapiFunction("tryLock", TryLock),
         NVal::DeclareNapiFunction("unlock", UnLock),
+#endif
     };
 
+#ifdef WIN_PLATFORM
+    string className = GetNExporterName();
+#else
     string className = GetClassName();
+#endif
     bool succ = false;
     napi_value classValue = nullptr;
     tie(succ, classValue) = NClass::DefineClass(exports_.env_, className,
@@ -239,7 +247,11 @@ bool FileNExporter::Export()
     return exports_.AddProp(className, classValue);
 }
 
+#ifdef WIN_PLATFORM
+string FileNExporter::GetNExporterName()
+#else
 string FileNExporter::GetClassName()
+#endif
 {
     return FileNExporter::className_;
 }

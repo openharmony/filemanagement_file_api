@@ -20,8 +20,10 @@
 
 #include "class_file/file_n_exporter.h"
 #include "class_stat/stat_n_exporter.h"
+#ifndef WIN_PLATFORM
 #include "class_stream/stream_n_exporter.h"
 #include "class_watcher/watcher_n_exporter.h"
+#endif
 #include "filemgmt_libhilog.h"
 #include "properties/prop_n_exporter.h"
 
@@ -37,15 +39,21 @@ static napi_value Export(napi_env env, napi_value exports)
     products.emplace_back(make_unique<PropNExporter>(env, exports));
     products.emplace_back(make_unique<FileNExporter>(env, exports));
     products.emplace_back(make_unique<StatNExporter>(env, exports));
+#ifndef WIN_PLATFORM
     products.emplace_back(make_unique<StreamNExporter>(env, exports));
     products.emplace_back(make_unique<WatcherNExporter>(env, exports));
-
+#endif
     for (auto &&product : products) {
+#ifdef WIN_PLATFORM
+        string nExporterName = product->GetNExporterName();
+#else
+        string nExporterName = product->GetClassName();
+#endif
         if (!product->Export()) {
-            HILOGE("INNER BUG. Failed to export class %{public}s for module fileio", product->GetClassName().c_str());
+            HILOGE("INNER BUG. Failed to export class %{public}s for module fileio", nExporterName.c_str());
             return nullptr;
         } else {
-            HILOGI("Class %{public}s for module fileio has been exported", product->GetClassName().c_str());
+            HILOGI("Class %{public}s for module fileio has been exported", nExporterName.c_str());
         }
     }
     return exports;

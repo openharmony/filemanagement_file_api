@@ -27,7 +27,12 @@ public:
     inline static const std::string className_ = "Stat";
 
     bool Export() override;
+#ifdef WIN_PLATFORM
+    inline static const int S_IFSOCK = 0140000;
+    std::string GetNExporterName() override;
+#else
     std::string GetClassName() override;
+#endif
 
     static napi_value Constructor(napi_env env, napi_callback_info info);
 

@@ -76,7 +76,11 @@ public:
 
     /* SHOULD ONLY BE USED FOR OBJECT */
     bool HasProp(std::string propName) const;
+#ifdef WIN_PLATFORM
+    NVal GetPropValue(std::string propName) const;
+#else
     NVal GetProp(std::string propName) const;
+#endif
     bool AddProp(std::vector<napi_property_descriptor> &&propVec) const;
     bool AddProp(std::string propName, napi_value nVal) const;
 
