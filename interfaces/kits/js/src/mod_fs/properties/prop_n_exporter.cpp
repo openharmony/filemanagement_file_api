@@ -587,7 +587,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("unlinkSync", UnlinkSync),
         NVal::DeclareNapiFunction("write", Write),
         NVal::DeclareNapiFunction("writeSync", WriteSync),
-    #ifndef WIN_PLATFORM
+#ifndef WIN_PLATFORM
         NVal::DeclareNapiFunction("copyDir", CopyDir::Async),
         NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
         NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
@@ -607,7 +607,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("symlink", Symlink::Async),
         NVal::DeclareNapiFunction("symlinkSync", Symlink::Sync),
         NVal::DeclareNapiFunction("createWatcher", Watcher::CreateWatcher),
-    #endif
+#endif
     });
 }
 

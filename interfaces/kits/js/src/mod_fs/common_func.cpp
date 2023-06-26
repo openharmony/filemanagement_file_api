@@ -76,11 +76,11 @@ static tuple<bool, size_t> GetActualLen(napi_env env, size_t bufLen, size_t bufO
 
     if (op.HasProp("length")) {
         int64_t opLength = 0;
-    #ifdef WIN_PLATFORM
+#ifdef WIN_PLATFORM
         tie(succ, opLength) = op.GetPropValue("length").ToInt64(static_cast<int64_t>(retLen));
-    #else
+#else
         tie(succ, opLength) = op.GetProp("length").ToInt64(static_cast<int64_t>(retLen));
-    #endif
+#endif
         if (!succ || opLength < 0 || static_cast<size_t>(opLength) > retLen) {
             HILOGE("Invalid option.length");
             NError(EINVAL).ThrowErr(env);
@@ -246,13 +246,13 @@ tuple<bool, void *, size_t, int64_t> CommonFunc::GetReadArg(napi_env env,
         HILOGE("Failed to get actual length");
         return { false, nullptr, retLen, offset };
     }
-    #ifdef WIN_PLATFORM
+#ifdef WIN_PLATFORM
     if (op.HasProp("offset") && !op.GetPropValue("offset").TypeIs(napi_undefined)) {
         tie(succ, offset) = op.GetPropValue("offset").ToInt64();
-    #else
+#else
     if (op.HasProp("offset") && !op.GetProp("offset").TypeIs(napi_undefined)) {
         tie(succ, offset) = op.GetProp("offset").ToInt64();
-    #endif
+#endif
         if (!succ || offset < 0) {
             HILOGE("option.offset shall be positive number");
             NError(EINVAL).ThrowErr(env);

@@ -44,11 +44,11 @@ static napi_value Export(napi_env env, napi_value exports)
     products.emplace_back(make_unique<WatcherNExporter>(env, exports));
 #endif
     for (auto &&product : products) {
-    #ifdef WIN_PLATFORM
+#ifdef WIN_PLATFORM
         string nExporterName = product->GetNExporterName();
-    #else
+#else
         string nExporterName = product->GetClassName();
-    #endif
+#endif
         if (!product->Export()) {
             HILOGE("INNER BUG. Failed to export class %{public}s for module fileio", nExporterName.c_str());
             return nullptr;

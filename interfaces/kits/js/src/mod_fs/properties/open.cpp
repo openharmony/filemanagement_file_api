@@ -287,7 +287,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     auto argv = funcArg[NARG_POS::FIRST];
     auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
         string pathStr = path;
-    #ifndef WIN_PLATFORM
+#ifndef WIN_PLATFORM
         int fd = -1;
         if (RemoteUri::IsMediaUri(path)) {
             int ret = OpenFileByDatashare(path, mode);
@@ -312,7 +312,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             HILOGE("Failed to open file by RemoteUri");
             return NError(E_INVAL);
         }
-    #endif
+#endif
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {

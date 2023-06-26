@@ -216,11 +216,11 @@ bool FileNExporter::Export()
 {
     vector<napi_property_descriptor> props = {
         NVal::DeclareNapiGetter("fd", GetFD),
-    #ifndef WIN_PLATFORM
+#ifndef WIN_PLATFORM
         NVal::DeclareNapiFunction("lock", Lock),
         NVal::DeclareNapiFunction("tryLock", TryLock),
         NVal::DeclareNapiFunction("unlock", UnLock),
-    #endif
+#endif
     };
 
 #ifdef WIN_PLATFORM
