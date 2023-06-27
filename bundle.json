@@ -14,6 +14,7 @@
       "subsystem": "filemanagement",
       "syscap": [
         "SystemCapability.FileManagement.File.FileIO",
+        "SystemCapability.FileManagement.File.FileIO.Lite",
         "SystemCapability.FileManagement.File.Environment",
         "SystemCapability.FileManagement.File.DistributedFile"
       ],
