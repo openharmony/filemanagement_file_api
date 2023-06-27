@@ -35,11 +35,11 @@ static tuple<bool, int64_t, bool, size_t, unique_ptr<char[]>> GetReadTextArg(nap
     NVal op(env, argOption);
     int64_t position = -1;
     size_t len = 0;
-    bool succ = false;
     bool hasLen = false;
     unique_ptr<char[]> encoding = nullptr;
 
     if (op.HasProp("position") && !op.GetProp("position").TypeIs(napi_undefined)) {
+        bool succ = false;
         tie(succ, position) = op.GetProp("position").ToInt64();
         if (!succ || position < 0) {
             return { false, position, hasLen, len, nullptr };

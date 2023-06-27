@@ -48,8 +48,8 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
 
     unsigned int flags = O_RDONLY;
     if (funcArg.GetArgc() >= NARG_CNT::TWO) {
-        auto [succ, authFlags] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
-        if (!succ || authFlags < 0) {
+        auto [succGetFlags, authFlags] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
+        if (!succGetFlags || authFlags < 0) {
             UniError(EINVAL).ThrowErr(env, "Invalid flags");
             return nullptr;
         }

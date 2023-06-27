@@ -200,9 +200,9 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
 
     int32_t mode = MODE_RUO_RWX;
     if (funcArg.GetArgc() >= NARG_CNT::TWO) {
-        bool succ = false;
-        tie(succ, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(mode);
-        if (!succ || mode < 0) {
+        bool succGetMode = false;
+        tie(succGetMode, mode) = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(mode);
+        if (!succGetMode || mode < 0) {
             UniError(EINVAL).ThrowErr(env, "Invalid mode");
             return nullptr;
         }

@@ -59,7 +59,7 @@ napi_value Mkdtemp::Sync(napi_env env, napi_callback_info info)
     return NVal::CreateUTF8String(env, mkdtemp_req->path).val_;
 }
 
-static NError MkdTempExec(shared_ptr<string> arg, string path)
+static NError MkdTempExec(shared_ptr<string> arg, const string &path)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdtemp_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };

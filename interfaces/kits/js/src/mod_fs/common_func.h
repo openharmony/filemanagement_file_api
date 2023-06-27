@@ -56,7 +56,7 @@ void InitOpenMode(napi_env env, napi_value exports);
 
 struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);
-    static LibN::NVal InstantiateStat(napi_env env, uv_stat_t &buf);
+    static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf);
 #ifndef WIN_PLATFORM
     static LibN::NVal InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp);
 #endif
