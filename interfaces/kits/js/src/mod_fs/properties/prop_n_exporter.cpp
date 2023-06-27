@@ -40,7 +40,7 @@
 #include "stat.h"
 #include "truncate.h"
 
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "copy_file.h"
 #include "copydir.h"
 #include "create_stream.h"
@@ -587,7 +587,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("unlinkSync", UnlinkSync),
         NVal::DeclareNapiFunction("write", Write),
         NVal::DeclareNapiFunction("writeSync", WriteSync),
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
         NVal::DeclareNapiFunction("copyDir", CopyDir::Async),
         NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
         NVal::DeclareNapiFunction("copyFile", CopyFile::Async),

@@ -36,9 +36,11 @@ ohos_shared_library("filemgmt_libn") {
   ]
 
   cflags_cc = [ "-std=c++17" ]
-
   if (use_mingw_win) {
     defines = [ "WIN_PLATFORM" ]
+  }
+  if (use_mac) {
+    defines = [ "IOS_PLATFORM" ]
   }
 
   public_configs = [ ":libn_public_config" ]

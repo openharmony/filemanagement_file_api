@@ -142,6 +142,9 @@ ohos_shared_library("fs") {
   if (use_mingw_win) {
     defines = [ "WIN_PLATFORM" ]
   }
+  if (use_mac) {
+    defines = [ "IOS_PLATFORM" ]
+  }
 
   if (!use_mingw_win && !use_mac) {
     sources += [

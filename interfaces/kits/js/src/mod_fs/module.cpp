@@ -20,7 +20,7 @@
 
 #include "class_file/file_n_exporter.h"
 #include "class_stat/stat_n_exporter.h"
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "class_stream/stream_n_exporter.h"
 #include "class_watcher/watcher_n_exporter.h"
 #endif
@@ -39,7 +39,7 @@ static napi_value Export(napi_env env, napi_value exports)
     products.emplace_back(make_unique<PropNExporter>(env, exports));
     products.emplace_back(make_unique<FileNExporter>(env, exports));
     products.emplace_back(make_unique<StatNExporter>(env, exports));
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     products.emplace_back(make_unique<StreamNExporter>(env, exports));
     products.emplace_back(make_unique<WatcherNExporter>(env, exports));
 #endif
