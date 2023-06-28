@@ -61,7 +61,7 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
     return stat;
 }
 
-static NError LstatExec(shared_ptr<StatEntity> arg, string path)
+static NError LstatExec(shared_ptr<StatEntity> arg, const string &path)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> lstat_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };

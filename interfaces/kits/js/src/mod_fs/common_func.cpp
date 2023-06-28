@@ -108,7 +108,7 @@ unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
     return flagsABI;
 }
 
-NVal CommonFunc::InstantiateStat(napi_env env, uv_stat_t &buf)
+NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf)
 {
     napi_value objStat = NClass::InstantiateClass(env, StatNExporter::className_, {});
     if (!objStat) {

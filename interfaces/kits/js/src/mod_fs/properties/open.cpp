@@ -106,18 +106,18 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 static string DealWithUriWithName(string str)
 {
-    static uint32_t MEET_COUNT = 6;
+    static uint32_t meetCount = 6;
     uint32_t count = 0;
     uint32_t index;
     for (index = 0; index < str.length(); index++) {
         if (str[index] == '/') {
             count++;
         }
-        if (count == MEET_COUNT) {
+        if (count == meetCount) {
             break;
         }
     }
-    if (count == MEET_COUNT) {
+    if (count == meetCount) {
         str = str.substr(0, index);
     }
     return str;
