@@ -24,7 +24,7 @@
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
 #include "file_utils.h"
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "ability.h"
 #include "bundle_info.h"
 #include "bundle_mgr_proxy.h"
@@ -41,7 +41,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 using namespace OHOS::DistributedFS::ModuleRemoteUri;
 using namespace OHOS::AppExecFwk;
 #endif
@@ -103,7 +103,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
     return { env, objFile };
 }
 
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 static string DealWithUriWithName(string str)
 {
     static uint32_t MEET_COUNT = 6;
@@ -211,9 +211,9 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     if (!succMode) {
         return nullptr;
     }
-    int fd = -1;
     string pathStr = string(path.get());
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    int fd = -1;
     if (RemoteUri::IsMediaUri(pathStr)) {
         int ret = OpenFileByDatashare(pathStr, mode);
         if (ret >= 0) {
@@ -287,7 +287,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     auto argv = funcArg[NARG_POS::FIRST];
     auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
         string pathStr = path;
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
         int fd = -1;
         if (RemoteUri::IsMediaUri(path)) {
             int ret = OpenFileByDatashare(path, mode);

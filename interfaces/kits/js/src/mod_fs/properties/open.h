@@ -17,7 +17,7 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_H
 
 #include "filemgmt_libn.h"
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "iremote_broker.h"
 #endif
 
@@ -30,7 +30,7 @@ public:
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
 
-#ifndef WIN_PLATFORM
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 class FileIoToken : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.fileio.open");
