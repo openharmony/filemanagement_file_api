@@ -39,15 +39,17 @@ struct NameListArg {
     int direntNum = 0;
 };
 
+constexpr int DEFAULT_SIZE = -1;
+constexpr int DEFAULT_MODIFY_AFTER = -1;
 struct OptionArgs {
-    OHOS::DistributedFS::FileFilter filter = { {}, {}, {}, 0, 0, false, false };
+    FileFilter filter = { {}, {}, {}, DEFAULT_SIZE, DEFAULT_MODIFY_AFTER, false, false };
     int listNum = 0;
     int countNum = 0;
     bool recursion = false;
     std::string path = "";
     void Clear()
     {
-        filter = { {}, {}, {}, 0, 0, false, false };
+        filter = { {}, {}, {}, DEFAULT_SIZE, DEFAULT_MODIFY_AFTER, false, false };
         listNum = 0;
         countNum = 0;
         recursion = false;
