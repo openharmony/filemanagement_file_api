@@ -36,7 +36,7 @@ static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
         return nullptr;
     }
     if (!fileEntity->fd_) {
-        HILOGE("The fd of entity is not exist");
+        HILOGE("The fd of rafEntity is not exist");
         return nullptr;
     }
     return fileEntity;
