@@ -43,6 +43,7 @@
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "copy_file.h"
 #include "copydir.h"
+#include "create_randomaccessfile.h"
 #include "create_stream.h"
 #include "fdopen_stream.h"
 #include "listfile.h"
@@ -592,6 +593,8 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
         NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
         NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
+        NVal::DeclareNapiFunction("createRandomAccessFile", CreateRandomAccessFile::Async),
+        NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),
         NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
         NVal::DeclareNapiFunction("fdopenStream", FdopenStream::Async),
