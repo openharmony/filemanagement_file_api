@@ -90,13 +90,15 @@ ohos_shared_library("fileio") {
   ]
 
   deps = [
-    "${arkui_napi_path}:ace_napi",
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/openssl:libcrypto_shared",
   ]
 
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
@@ -135,7 +137,10 @@ ohos_shared_library("fs") {
 
   cflags_cc = [ "-std=c++17" ]
 
-  deps = [ "${utils_path}/filemgmt_libn:filemgmt_libn" ]
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
 
   use_exceptions = true
 
@@ -145,6 +150,11 @@ ohos_shared_library("fs") {
   if (use_mac) {
     defines = [ "IOS_PLATFORM" ]
   }
+
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
 
   if (!use_mingw_win && !use_mac) {
     sources += [
@@ -163,7 +173,7 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/symlink.cpp",
       "src/mod_fs/properties/watcher.cpp",
     ]
-    external_deps = [
+    external_deps += [
       "ability_base:zuri",
       "ability_runtime:abilitykit_native",
       "access_token:libtokenid_sdk",
@@ -195,9 +205,15 @@ ohos_shared_library("hash") {
   ]
 
   deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/openssl:libcrypto_shared",
+  ]
+
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
   ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
@@ -225,16 +241,14 @@ ohos_shared_library("file") {
     "src/mod_file/module.cpp",
   ]
 
-  deps = [
-    "${arkui_napi_path}:ace_napi",
-    "//third_party/bounds_checking_function:libsec_shared",
-  ]
+  deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
 
   external_deps = [
     "ability_runtime:abilitykit_native",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "napi:ace_napi",
   ]
 }
 
@@ -249,7 +263,15 @@ ohos_shared_library("statfs") {
     "src/mod_statfs/statfs_napi.cpp",
   ]
 
-  deps = [ "${utils_path}/filemgmt_libn:filemgmt_libn" ]
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
+
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
 }
 
 ohos_shared_library("statvfs") {
@@ -263,7 +285,15 @@ ohos_shared_library("statvfs") {
     "src/mod_statvfs/statvfs_napi.cpp",
   ]
 
-  deps = [ "${utils_path}/filemgmt_libn:filemgmt_libn" ]
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
+
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
 }
 
 ohos_shared_library("environment") {
@@ -277,11 +307,16 @@ ohos_shared_library("environment") {
     "src/mod_environment/environment_napi.cpp",
   ]
 
-  deps = [ "${utils_path}/filemgmt_libn:filemgmt_libn" ]
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
 
   external_deps = [
     "access_token:libtokenid_sdk",
+    "hilog:libhilog",
     "ipc:ipc_core",
+    "napi:ace_napi",
   ]
 }
 
@@ -298,7 +333,17 @@ ohos_shared_library("securitylabel") {
     "src/mod_securitylabel/securitylabel_napi.cpp",
   ]
 
-  deps = [ "${utils_path}/filemgmt_libn:filemgmt_libn" ]
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
+
+  external_deps = [
+    "access_token:libtokenid_sdk",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
 }
 
 ohos_shared_library("document") {
@@ -324,9 +369,10 @@ ohos_shared_library("document") {
     "src/mod_document/document_napi.cpp",
   ]
 
-  deps = [ "${arkui_napi_path}:ace_napi" ]
-
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
 }
 
 group("build_kits_js") {

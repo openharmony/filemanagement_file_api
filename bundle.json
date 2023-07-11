@@ -69,6 +69,15 @@
               ],
               "header_base": "//foundation/filemanagement/file_api/utils/filemgmt_libn/include"
             }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/utils/filemgmt_libhilog:filemgmt_libhilog",
+            "header": {
+              "header_files": [
+                "filemgmt_libhilog.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/utils/filemgmt_libhilog"
+            }
           }
         ],
         "test": [
