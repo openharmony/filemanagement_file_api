@@ -213,7 +213,7 @@ static tuple<bool, unique_ptr<char[]>, size_t> DecodeString(napi_env env, NVal j
         return { false, nullptr, 0 };
     }
 
-    string_view encodingStr(encodingBuf.release());
+    string_view encodingStr(encodingBuf.get());
     if (encodingStr == "utf-8") {
         return jsStr.ToUTF8String();
     } else if (encodingStr == "utf-16") {
