@@ -71,6 +71,7 @@ struct CommonFunc {
                                                                                              napi_value dstPath);
     static void fs_req_cleanup(uv_fs_t* req);
     static std::string GetModeFromFlags(unsigned int flags);
+    static bool CheckPublicDirPath(const std::string &path);
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement

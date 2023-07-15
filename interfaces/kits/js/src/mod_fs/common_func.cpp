@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
@@ -35,6 +36,12 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+
+namespace {
+    const std::vector<std::string> PUBLIC_DIR_PATHS = {
+        "/Documents"
+    };
+}
 
 void InitOpenMode(napi_env env, napi_value exports)
 {
@@ -173,6 +180,16 @@ string CommonFunc::GetModeFromFlags(unsigned int flags)
         mode += ((flags & O_APPEND) ? APPEND : "");
     }
     return mode;
+}
+
+bool CommonFunc::CheckPublicDirPath(const std::string &sandboxPath)
+{
+    for (const std::string &path : PUBLIC_DIR_PATHS) {
+        if (sandboxPath.find(path) == 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,

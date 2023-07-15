@@ -104,24 +104,6 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-static string DealWithUriWithName(string str)
-{
-    static uint32_t meetCount = 6;
-    uint32_t count = 0;
-    uint32_t index;
-    for (index = 0; index < str.length(); index++) {
-        if (str[index] == '/') {
-            count++;
-        }
-        if (count == meetCount) {
-            break;
-        }
-    }
-    if (count == meetCount) {
-        str = str.substr(0, index);
-    }
-    return str;
-}
 
 static int OpenFileByDatashare(string path, unsigned int flags)
 {
@@ -138,7 +120,6 @@ static int OpenFileByDatashare(string path, unsigned int flags)
         HILOGE("Failed to connect to datashare");
         return -E_PERMISSION;
     }
-    path = DealWithUriWithName(path);
     Uri uri(path);
     fd = dataShareHelper->OpenFile(uri, CommonFunc::GetModeFromFlags(flags));
     return fd;
@@ -182,7 +163,7 @@ static string GetBundleNameSelf()
 
 static string GetPathFromFileUri(string path, string bundleName, unsigned int mode)
 {
-    if (bundleName != GetBundleNameSelf()) {
+    if (CommonFunc::CheckPublicDirPath(path) || bundleName != GetBundleNameSelf()) {
         if ((mode & O_WRONLY) == O_WRONLY || (mode & O_RDWR) == O_RDWR) {
             path = PATH_SHARE + MODE_RW + bundleName + path;
         } else {
