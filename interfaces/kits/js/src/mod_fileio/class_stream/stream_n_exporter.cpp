@@ -93,6 +93,8 @@ napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     streamEntity->fp.reset();
+    (void)NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
+
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -299,13 +301,14 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto cbExec = [streamEntity](napi_env env) -> UniError {
-        auto filp = streamEntity->fp.release();
-        if (!fclose(filp)) {
-            return UniError(ERRNO_NOERR);
-        } else {
-            return UniError(errno);
-        }
+    auto fp = NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
+    if (!fp) {
+        UniError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto cbExec = [](napi_env env) -> UniError {
+        return UniError(ERRNO_NOERR);
     };
 
     auto cbCompl = [](napi_env env, UniError err) -> NVal {
