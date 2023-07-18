@@ -14,15 +14,6 @@
 import("//build/ohos.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
-label_hilog = "${hiviewdfx_hilog_path}/interfaces/native/innerkits:libhilog"
-if (use_mac) {
-  label_hilog =
-      "${hiviewdfx_hilog_path}/interfaces/native/innerkits:libhilog_mac"
-} else if (use_mingw_win) {
-  label_hilog =
-      "${hiviewdfx_hilog_path}/interfaces/native/innerkits:libhilog_windows"
-}
-
 config("log_public_config") {
   visibility = [ ":*" ]
 
@@ -31,7 +22,8 @@ config("log_public_config") {
 
 ohos_shared_library("filemgmt_libhilog") {
   public_configs = [ ":log_public_config" ]
-  public_deps = [ label_hilog ]
+
+  external_deps = [ "hilog:libhilog" ]
 
   subsystem_name = "filemanagement"
   innerapi_tags = [ "platformsdk" ]
