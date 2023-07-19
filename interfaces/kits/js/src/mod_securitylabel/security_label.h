@@ -35,7 +35,11 @@ public:
         if (DATA_LEVEL.count(dataLevel) != 1) {
             return false;
         }
+#ifdef IOS_PLATFORM
+        if (setxattr(path.c_str(), XATTR_KEY, dataLevel.c_str(), dataLevel.size(), 0, 0) < 0) {
+#else
         if (setxattr(path.c_str(), XATTR_KEY, dataLevel.c_str(), dataLevel.size(), 0) < 0) {
+#endif
             return false;
         }
         return true;
@@ -43,7 +47,11 @@ public:
 
     static std::string GetSecurityLabel(const std::string &path)
     {
+#ifdef IOS_PLATFORM
+        auto xattrValueSize = getxattr(path.c_str(), XATTR_KEY, nullptr, 0, 0, 0);
+#else
         auto xattrValueSize = getxattr(path.c_str(), XATTR_KEY, nullptr, 0);
+#endif
         if (xattrValueSize == -1 || errno == ENOTSUP) {
             return "";
         }
@@ -54,8 +62,11 @@ public:
         if (xattrValue == nullptr) {
             return "";
         }
-
+#ifdef IOS_PLATFORM
+        xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize, 0, 0);
+#else
         xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize);
+#endif
         if (xattrValueSize == -1 || errno == ENOTSUP) {
             return "";
         }
