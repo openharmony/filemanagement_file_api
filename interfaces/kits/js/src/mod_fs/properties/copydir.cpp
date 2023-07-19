@@ -25,7 +25,6 @@
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
-#include "uv.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -33,7 +32,8 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-static int RecurCopyDir(const string &srcPath, const string &destPath, vector<struct ConflictFiles> &errfiles);
+static int RecurCopyDir(const string &srcPath, const string &destPath, const int mode,
+    vector<struct ConflictFiles> &errfiles);
 
 static bool AllowToCopy(const string &src, const string &dest)
 {
@@ -74,16 +74,11 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseAndCheckJsO
 
 static int MakeDir(const string &path)
 {
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
-        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (mkdir_req == nullptr) {
-        HILOGE("Failed to request heap memory.");
-        return ENOMEM;
-    }
-    int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), COPYDIR_DEFAULT_PERM, nullptr);
-    if (ret != 0) {
-        HILOGE("Failed to create directory");
-        return ret;
+    filesystem::path destDir(path);
+    std::error_code errCode;
+    if (!filesystem::create_directory(destDir, errCode)) {
+        HILOGE("Failed to create directory, error code: %{public}d", errCode.value());
+        return errCode.value();
     }
     return ERRNO_NOERR;
 }
@@ -92,6 +87,17 @@ struct NameList {
     struct dirent** namelist = { nullptr };
     int direntNum = 0;
 };
+
+static int RemoveFile(const string& destPath)
+{
+    filesystem::path destFile(destPath);
+    std::error_code errCode;
+    if (!filesystem::remove(destFile, errCode)) {
+        HILOGE("Failed to remove file with path, error code: %{public}d", errCode.value());
+        return errCode.value();
+    }
+    return ERRNO_NOERR;
+}
 
 static void Deleter(struct NameList *arg)
 {
@@ -102,29 +108,27 @@ static void Deleter(struct NameList *arg)
     free(arg->namelist);
 }
 
-static int CopyFile(const string &src, const string &dest)
+static int CopyFile(const string &src, const string &dest, const int mode)
 {
-    if (filesystem::exists(dest)) {
-        HILOGE("Failed to copy file due to existing destPath with throw err");
-        return EEXIST;
+    filesystem::path dstPath(dest);
+    if (filesystem::exists(dstPath)) {
+        int ret = (mode == DIRMODE_FILE_COPY_THROW_ERR) ? EEXIST : RemoveFile(dest);
+        if (ret) {
+            HILOGE("Failed to copy file due to existing destPath with throw err");
+            return ret;
+        }
     }
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> copyfile_req = {
-        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (copyfile_req == nullptr) {
-        HILOGE("Failed to request heap memory.");
-        return ENOMEM;
-    }
-
-    int ret = uv_fs_copyfile(nullptr, copyfile_req.get(), src.c_str(), dest.c_str(),
-                             UV_FS_COPYFILE_EXCL, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to move file using copyfile interface");
-        return -ret;
+    filesystem::path srcPath(src);
+    std::error_code errCode;
+    if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
+        HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
+        return errCode.value();
     }
     return ERRNO_NOERR;
 }
 
-static int CopySubDir(const string &srcPath, const string &destPath, vector<struct ConflictFiles> &errfiles)
+static int CopySubDir(const string &srcPath, const string &destPath, const int mode,
+    vector<struct ConflictFiles> &errfiles)
 {
     if (!filesystem::exists(destPath)) {
         int res = MakeDir(destPath);
@@ -133,7 +137,7 @@ static int CopySubDir(const string &srcPath, const string &destPath, vector<stru
             return res;
         }
     }
-    return RecurCopyDir(srcPath, destPath, errfiles);
+    return RecurCopyDir(srcPath, destPath, mode, errfiles);
 }
 
 static int FilterFunc(const struct dirent *filename)
@@ -144,7 +148,8 @@ static int FilterFunc(const struct dirent *filename)
     return MATCH;
 }
 
-static int RecurCopyDir(const string &srcPath, const string &destPath, vector<struct ConflictFiles> &errfiles)
+static int RecurCopyDir(const string &srcPath, const string &destPath, const int mode,
+    vector<struct ConflictFiles> &errfiles)
 {
     unique_ptr<struct NameList, decltype(Deleter)*> pNameList = {new (nothrow) struct NameList, Deleter};
     if (pNameList == nullptr) {
@@ -158,7 +163,7 @@ static int RecurCopyDir(const string &srcPath, const string &destPath, vector<st
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
             string srcTemp = srcPath + '/' + string((pNameList->namelist[i])->d_name);
             string destTemp = destPath + '/' + string((pNameList->namelist[i])->d_name);
-            int res = CopySubDir(srcTemp, destTemp, errfiles);
+            int res = CopySubDir(srcTemp, destTemp, mode, errfiles);
             if (res == ERRNO_NOERR) {
                 continue;
             }
@@ -166,14 +171,14 @@ static int RecurCopyDir(const string &srcPath, const string &destPath, vector<st
         } else {
             string src = srcPath + '/' + string((pNameList->namelist[i])->d_name);
             string dest = destPath + '/' + string((pNameList->namelist[i])->d_name);
-            int res = CopyFile(src, dest);
+            int res = CopyFile(src, dest, mode);
             if (res == EEXIST) {
                 errfiles.emplace_back(src, dest);
                 continue;
             } else if (res == ERRNO_NOERR) {
                 continue;
             } else {
-                HILOGE("Failed to copy file");
+                HILOGE("Failed to copy file for error %{public}d", res);
                 return res;
             }
         }
@@ -196,17 +201,7 @@ static int CopyDirFunc(const string &src, const string &dest, const int mode, ve
             return res;
         }
     }
-    if (mode == DIRMODE_FILE_COPY_REPLACE) {
-        std::error_code error_code;
-        filesystem::copy(src, destStr, filesystem::copy_options::overwrite_existing |
-            filesystem::copy_options::recursive, error_code);
-        if (error_code.value() != ERRNO_NOERR) {
-            HILOGE("Failed to copy file");
-            return error_code.value();
-        }
-        return ERRNO_NOERR;
-    }
-    int res = RecurCopyDir(src, destStr, errfiles);
+    int res = RecurCopyDir(src, destStr, mode, errfiles);
     if (!errfiles.empty() && res == ERRNO_NOERR) {
         return EEXIST;
     }

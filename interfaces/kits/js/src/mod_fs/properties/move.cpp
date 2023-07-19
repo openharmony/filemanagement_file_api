@@ -84,6 +84,15 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
 static int CopyAndDeleteFile(const string &src, const string &dest)
 {
     int ret = 0;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    filesystem::path srcPath(src);
+    filesystem::path dstPath(dest);
+    error_code errCode;
+    if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
+        HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
+        return errCode.value();
+    }
+#else
     uv_fs_t copyfile_req;
     ret = uv_fs_copyfile(nullptr, &copyfile_req, src.c_str(), dest.c_str(), MODE_FORCE_MOVE, nullptr);
     uv_fs_req_cleanup(&copyfile_req);
@@ -91,6 +100,7 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
         HILOGE("Failed to move file using copyfile interface.");
         return ret;
     }
+#endif
     uv_fs_t unlink_req;
     ret = uv_fs_unlink(nullptr, &unlink_req, src.c_str(), nullptr);
     if (ret < 0) {

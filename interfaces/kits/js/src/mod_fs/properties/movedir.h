@@ -29,6 +29,7 @@ constexpr int DIRMODE_MAX = 3;
 
 constexpr int FILE_DISMATCH = 0;
 constexpr int FILE_MATCH = 1;
+constexpr int MOVEDIR_DEFAULT_PERM = 0770;
 
 enum ModeOfMoveDir {
     DIRMODE_DIRECTORY_THROW_ERR = 0,
