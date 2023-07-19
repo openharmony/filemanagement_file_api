@@ -20,9 +20,10 @@
 #include <memory>
 #include <tuple>
 #include <unistd.h>
-#include "ipc_skeleton.h"
+
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "../class_watcher/watcher_entity.h"
 #include "../class_watcher/watcher_n_exporter.h"
@@ -31,7 +32,6 @@ using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
 namespace {
-    const std::string STORAGE_DATA_PATH = "/data";
     bool IsSystemApp()
     {
         uint64_t fullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
@@ -39,78 +39,98 @@ namespace {
     }
 }
 
-static tuple<shared_ptr<FileWatcher>, napi_value, NError> CreateAndCheckForWatcherEntity(napi_env env, int& fd)
+static tuple<napi_value, int32_t> CreateAndCheckForWatcherEntity(napi_env env)
 {
-    auto watcherPtr = CreateSharedPtr<FileWatcher>();
-    if (watcherPtr == nullptr) {
-        HILOGE("Failed to request heap memory.");
-        return {nullptr, nullptr, NError(ENOMEM)};
-    }
-    if (!watcherPtr->InitNotify(fd)) {
-        return {watcherPtr, nullptr, NError(errno)};
+    if (FileWatcher::GetInstance().GetNotifyId() < 0 && !FileWatcher::GetInstance().InitNotify()) {
+        HILOGE("Failed to get notifyId or initnotify fail");
+        return {nullptr, errno};
     }
     napi_value objWatcher = NClass::InstantiateClass(env, WatcherNExporter::className_, {});
     if (!objWatcher) {
-        return {watcherPtr, nullptr, NError(EINVAL)};
+        HILOGE("Failed to instantiate watcher");
+        return {nullptr, EIO};
     }
-    return {watcherPtr, objWatcher, NError(ERRNO_NOERR)};
+    return {objWatcher, ERRNO_NOERR};
 }
 
-napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
+shared_ptr<WatcherInfoArg> ParseParam(const napi_env &env, const napi_callback_info &info, int32_t &errCode)
 {
-    if (!IsSystemApp()) {
-        NError(E_PERMISSION_SYS).ThrowErr(env);
-        return nullptr;
-    }
-
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::THREE)) {
-        NError(EINVAL).ThrowErr(env);
+        HILOGE("Failed to get param.");
+        errCode = EINVAL;
         return nullptr;
     }
 
     auto [succGetPath, filename, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succGetPath) {
-        NError(EINVAL).ThrowErr(env);
+        HILOGE("Failed to get watcher path.");
+        errCode = EINVAL;
         return nullptr;
     }
 
-    auto [succGetEvent, events] = NVal(env, funcArg[NARG_POS::SECOND]).ToUint32();
-    if (!succGetEvent) {
-        NError(EINVAL).ThrowErr(env);
+    auto [succGetEvent, events] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
+    if (!succGetEvent || events <= 0 || !FileWatcher::GetInstance().CheckEventValid(events)) {
+        HILOGE("Failed to get watcher event.");
+        errCode = EINVAL;
         return nullptr;
     }
 
-    int fd = -1;
-    auto [watcherPtr, objWatcher, err] = CreateAndCheckForWatcherEntity(env, fd);
-    if (watcherPtr == nullptr || !objWatcher) {
-        err.ThrowErr(env);
+    if (!NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function)) {
+        HILOGE("Failed to get callback");
+        errCode = EINVAL;
+        return nullptr;
+    }
+    auto infoArg = CreateSharedPtr<WatcherInfoArg>(NVal(env, funcArg[NARG_POS::THIRD]));
+    if (infoArg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        errCode = ENOMEM;
+        return nullptr;
+    }
+    infoArg->events = events;
+    infoArg->env = env;
+    infoArg->fileName = string(filename.get());
+
+    return infoArg;
+}
+
+napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
+{
+    if (!IsSystemApp()) {
+        HILOGE("The hap is not system app.");
+        NError(E_PERMISSION_SYS).ThrowErr(env);
+        return nullptr;
+    }
+
+    int errCode = 0;
+    auto infoArg = ParseParam(env, info, errCode);
+    if (errCode != 0) {
+        HILOGE("Failed to parse param");
+        NError(errCode).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto [objWatcher, err] = CreateAndCheckForWatcherEntity(env);
+    if (!objWatcher) {
+        HILOGE("Failed to create watcher entity.");
+        NError(err).ThrowErr(env);
         return nullptr;
     }
 
     auto watcherEntity = NClass::GetEntityOf<WatcherEntity>(env, objWatcher);
     if (!watcherEntity) {
+        HILOGE("Failed to get WatcherEntity.");
+        NError(EIO).ThrowErr(env);
+        return nullptr;
+    }
+    watcherEntity->data_ = infoArg;
+
+    bool ret = FileWatcher::GetInstance().AddWatcherInfo(infoArg->fileName, infoArg);
+    if (!ret) {
+        HILOGE("Failed to add watcher info.");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    if (!NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function)) {
-        NError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
-    watcherEntity->data_ = CreateUniquePtr<WatcherInfoArg>(NVal(env, funcArg[NARG_POS::THIRD]));
-    if (watcherEntity->data_ == nullptr) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
-    }
-    watcherEntity->data_->events = events;
-    watcherEntity->data_->env = env;
-    watcherEntity->data_->filename = string(filename.get());
-    watcherEntity->data_->fd = fd;
-
-    watcherEntity->watcherPtr_ = watcherPtr;
-   
     return objWatcher;
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

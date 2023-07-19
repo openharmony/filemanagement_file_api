@@ -34,6 +34,7 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Failed to get param.");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -45,6 +46,7 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
     if (!NClass::SetEntityFor<WatcherEntity>(env, funcArg.GetThisVar(), move(watcherEntity))) {
+        HILOGE("Failed to set watcherEntity.");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -55,20 +57,23 @@ napi_value WatcherNExporter::Stop(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Failed to get param when stop.");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto watchEntity = NClass::GetEntityOf<WatcherEntity>(env, funcArg.GetThisVar());
     if (!watchEntity) {
+        HILOGE("Failed to get watcherEntity when stop.");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    if (!watchEntity->watcherPtr_->StopNotify(*(watchEntity->data_))) {
-        NError(errno).ThrowErr(env);
+    int ret = FileWatcher::GetInstance().StopNotify(watchEntity->data_);
+    if (ret != ERRNO_NOERR) {
+        HILOGE("Failed to stopNotify errno:%{public}d", errno);
+        NError(ret).ThrowErr(env);
         return nullptr;
     }
-    
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -76,28 +81,33 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Failed to get param when start.");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto watchEntity = NClass::GetEntityOf<WatcherEntity>(env, funcArg.GetThisVar());
     if (!watchEntity) {
+        HILOGE("Failed to get watcherEntity when start.");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    if (!watchEntity->watcherPtr_->StartNotify(*(watchEntity->data_))) {
-        NError(errno).ThrowErr(env);
+    int ret = FileWatcher::GetInstance().StartNotify(watchEntity->data_);
+    if (ret != ERRNO_NOERR) {
+        HILOGE("Failed to startNotify.");
+        NError(ret).ThrowErr(env);
         return nullptr;
     }
 
-    auto cbExec = [watchEntity]() -> NError {
-        watchEntity->watcherPtr_->GetNotifyEvent(*(watchEntity->data_), WatcherCallback);
+    auto cbExec = []() -> NError {
+        FileWatcher::GetInstance().GetNotifyEvent(WatcherCallback);
         return NError(ERRNO_NOERR);
     };
 
     auto cbCompl = [](napi_env env, NError err) -> NVal {
         if (err) {
+            HILOGE("Failed to execute complete.");
             return {env, err.GetNapiErr(env)};
         }
         return {NVal::CreateUndefined(env)};
@@ -169,7 +179,7 @@ void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::
     }
 
     if (!callback) {
-        HILOGE("Failed to pass watcher callback");
+        HILOGE("Failed to parse watcher callback");
         return;
     }
 
@@ -200,12 +210,14 @@ bool WatcherNExporter::Export()
     auto [resDefineClass, classValue] =
         NClass::DefineClass(exports_.env_, className, WatcherNExporter::Constructor, std::move(props));
     if (!resDefineClass) {
+        HILOGE("Failed to DefineClass");
         NError(EIO).ThrowErr(exports_.env_);
         return false;
     }
 
     bool succ = NClass::SaveClass(exports_.env_, className, classValue);
     if (!succ) {
+        HILOGE("Failed to SaveClass");
         NError(EIO).ThrowErr(exports_.env_);
         return false;
     }
