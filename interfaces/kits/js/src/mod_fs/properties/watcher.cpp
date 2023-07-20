@@ -23,21 +23,11 @@
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
-#include "ipc_skeleton.h"
-#include "tokenid_kit.h"
 #include "../class_watcher/watcher_entity.h"
 #include "../class_watcher/watcher_n_exporter.h"
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
-
-namespace {
-    bool IsSystemApp()
-    {
-        uint64_t fullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
-        return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
-    }
-}
 
 static tuple<napi_value, int32_t> CreateAndCheckForWatcherEntity(napi_env env)
 {
@@ -96,12 +86,6 @@ shared_ptr<WatcherInfoArg> ParseParam(const napi_env &env, const napi_callback_i
 
 napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
 {
-    if (!IsSystemApp()) {
-        HILOGE("The hap is not system app.");
-        NError(E_PERMISSION_SYS).ThrowErr(env);
-        return nullptr;
-    }
-
     int errCode = 0;
     auto infoArg = ParseParam(env, info, errCode);
     if (errCode != 0) {
