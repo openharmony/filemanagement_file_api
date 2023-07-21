@@ -31,18 +31,18 @@ public:
     bool Export() override;
     std::string GetClassName() override;
 
-    static napi_value Constructor(napi_env env, napi_callback_info cbinfo);
+    static napi_value Constructor(napi_env env, napi_callback_info info);
 
-    static napi_value SetFilePointerSync(napi_env env, napi_callback_info cbinfo);
-    static napi_value WriteSync(napi_env env, napi_callback_info cbinfo);
-    static napi_value ReadSync(napi_env env, napi_callback_info cbinfo);
-    static napi_value CloseSync(napi_env env, napi_callback_info cbinfo);
+    static napi_value SetFilePointerSync(napi_env env, napi_callback_info info);
+    static napi_value WriteSync(napi_env env, napi_callback_info info);
+    static napi_value ReadSync(napi_env env, napi_callback_info info);
+    static napi_value CloseSync(napi_env env, napi_callback_info info);
 
-    static napi_value Write(napi_env env, napi_callback_info cbinfo);
-    static napi_value Read(napi_env env, napi_callback_info cbinfo);
+    static napi_value Write(napi_env env, napi_callback_info info);
+    static napi_value Read(napi_env env, napi_callback_info info);
 
-    static napi_value GetFD(napi_env env, napi_callback_info cbinfo);
-    static napi_value GetFPointer(napi_env env, napi_callback_info cbinfo);
+    static napi_value GetFD(napi_env env, napi_callback_info info);
+    static napi_value GetFPointer(napi_env env, napi_callback_info info);
 
     RandomAccessFileNExporter(napi_env env, napi_value exports);
     ~RandomAccessFileNExporter() override;
