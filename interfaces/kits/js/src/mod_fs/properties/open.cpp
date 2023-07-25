@@ -163,14 +163,16 @@ static string GetBundleNameSelf()
 
 static string GetPathFromFileUri(string path, string bundleName, unsigned int mode)
 {
-    if (CommonFunc::CheckPublicDirPath(path) || bundleName != GetBundleNameSelf()) {
+    string decodePath = CommonFunc::Decode(path);
+    HILOGD("open path: %{private}s decodePath: %{private}s", path.c_str(), decodePath.c_str());
+    if (CommonFunc::CheckPublicDirPath(decodePath) || bundleName != GetBundleNameSelf()) {
         if ((mode & O_WRONLY) == O_WRONLY || (mode & O_RDWR) == O_RDWR) {
-            path = PATH_SHARE + MODE_RW + bundleName + path;
+            decodePath = PATH_SHARE + MODE_RW + bundleName + decodePath;
         } else {
-            path = PATH_SHARE + MODE_R + bundleName + path;
+            decodePath = PATH_SHARE + MODE_R + bundleName + decodePath;
         }
     }
-    return path;
+    return decodePath;
 }
 #endif
 

@@ -72,6 +72,7 @@ struct CommonFunc {
     static void fs_req_cleanup(uv_fs_t* req);
     static std::string GetModeFromFlags(unsigned int flags);
     static bool CheckPublicDirPath(const std::string &path);
+    static std::string Decode(const std::string &uri);
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement

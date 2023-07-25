@@ -17,6 +17,7 @@
 
 #include <dirent.h>
 #include <fcntl.h>
+#include <sstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -168,16 +169,16 @@ void CommonFunc::fs_req_cleanup(uv_fs_t* req)
 
 string CommonFunc::GetModeFromFlags(unsigned int flags)
 {
-    const string RDONLY = "r";
-    const string WRONLY = "w";
-    const string APPEND = "a";
-    const string TRUNC = "t";
-    string mode = RDONLY;
-    mode += (((flags & O_RDWR) == O_RDWR) ? WRONLY : "");
-    mode = (((flags & O_WRONLY) == O_WRONLY) ? WRONLY : mode);
-    if (mode != RDONLY) {
-        mode += ((flags & O_TRUNC) ? TRUNC : "");
-        mode += ((flags & O_APPEND) ? APPEND : "");
+    const string readMode = "r";
+    const string writeMode = "w";
+    const string appendMode = "a";
+    const string truncMode = "t";
+    string mode = readMode;
+    mode += (((flags & O_RDWR) == O_RDWR) ? writeMode : "");
+    mode = (((flags & O_WRONLY) == O_WRONLY) ? writeMode : mode);
+    if (mode != readMode) {
+        mode += ((flags & O_TRUNC) ? truncMode : "");
+        mode += ((flags & O_APPEND) ? appendMode : "");
     }
     return mode;
 }
@@ -190,6 +191,27 @@ bool CommonFunc::CheckPublicDirPath(const std::string &sandboxPath)
         }
     }
     return false;
+}
+
+string CommonFunc::Decode(const std::string &uri)
+{
+    std::ostringstream outPutStream;
+    const int32_t encodeLen = 2;
+    size_t index = 0;
+    while (index < uri.length()) {
+        if (uri[index] == '%') {
+            int hex = 0;
+            std::istringstream inputStream(uri.substr(index + 1, encodeLen));
+            inputStream >> std::hex >> hex;
+            outPutStream << static_cast<char>(hex);
+            index += encodeLen + 1;
+        } else {
+            outPutStream << uri[index];
+            index++;
+        }
+    }
+
+    return outPutStream.str();
 }
 
 tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,
