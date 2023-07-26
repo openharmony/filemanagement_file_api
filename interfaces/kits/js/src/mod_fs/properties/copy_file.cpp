@@ -57,11 +57,24 @@ static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& sta
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
     }
-    int ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(), 0,
-                             statbf.st_size, nullptr);
+    int64_t offset = 0;
+    size_t size = static_cast<size_t>(statbf.st_size);
+    int ret = 0;
+    while (size > MAX_SIZE) {
+        ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
+            offset, MAX_SIZE, nullptr);
+        if (ret < 0) {
+            HILOGE("Failed to sendfile by ret : %{public}d", ret);
+            return NError(ret);
+        }
+        offset += MAX_SIZE;
+        size -= MAX_SIZE;
+    }
+    ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
+        offset, size, nullptr);
     if (ret < 0) {
         HILOGE("Failed to sendfile by ret : %{public}d", ret);
-        return NError(errno);
+        return NError(ret);
     }
     return NError(ERRNO_NOERR);
 }
