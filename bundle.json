@@ -62,6 +62,15 @@
             }
           },
           {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/rust:rust_file",
+            "header": {
+              "header_files": [
+                "rust_file.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/rust/include"
+            }
+          },
+          {
             "name": "//foundation/filemanagement/file_api/utils/filemgmt_libn:filemgmt_libn",
             "header": {
               "header_files": [
