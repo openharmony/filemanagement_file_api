@@ -232,7 +232,7 @@ void FileWatcher::NotifyEvent(const struct inotify_event *event, WatcherCallback
         if (event->len > 0) {
             fileName += "/" + string(event->name);
         }
-        callback(iter->env, iter->nRef, fileName, event->mask, event->cookie);
+        callback(iter->env, iter->nRef, fileName, event->mask & IN_ALL_EVENTS, event->cookie);
     }
 }
 
