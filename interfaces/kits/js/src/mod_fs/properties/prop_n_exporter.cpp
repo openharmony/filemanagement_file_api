@@ -45,6 +45,7 @@
 #include "copydir.h"
 #include "create_randomaccessfile.h"
 #include "create_stream.h"
+#include "dup.h"
 #include "fdopen_stream.h"
 #include "listfile.h"
 #include "move.h"
@@ -597,6 +598,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),
         NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
+        NVal::DeclareNapiFunction("dup", Dup::Sync),
         NVal::DeclareNapiFunction("fdopenStream", FdopenStream::Async),
         NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
         NVal::DeclareNapiFunction("listFile", ListFile::Async),

@@ -167,6 +167,7 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/copydir.cpp",
       "src/mod_fs/properties/create_randomaccessfile.cpp",
       "src/mod_fs/properties/create_stream.cpp",
+      "src/mod_fs/properties/dup.cpp",
       "src/mod_fs/properties/fdopen_stream.cpp",
       "src/mod_fs/properties/listfile.cpp",
       "src/mod_fs/properties/move.cpp",
