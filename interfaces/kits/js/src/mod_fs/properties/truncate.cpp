@@ -82,8 +82,8 @@ static NError TruncateCore(napi_env env, FileInfo &fileInfo, int64_t truncateLen
         }
         int ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), fileInfo.fdg->GetFD(), truncateLen, nullptr);
         if (ret < 0) {
-            HILOGE("Failed to truncate file by fd");
-            return NError(EINVAL);
+            HILOGE("Failed to truncate file by fd for libuv error %{public}d", ret);
+            return NError(ret);
         }
     }
     return NError(ERRNO_NOERR);
