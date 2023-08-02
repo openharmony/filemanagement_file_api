@@ -35,7 +35,8 @@
             "hilog",
             "ipc",
             "napi",
-            "samgr"
+            "samgr",
+            "app_file_service"
         ],
         "third_party": [
             "bounds_checking_function",

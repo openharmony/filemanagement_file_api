@@ -179,6 +179,7 @@ ohos_shared_library("fs") {
       "ability_base:zuri",
       "ability_runtime:abilitykit_native",
       "access_token:libtokenid_sdk",
+      "app_file_service:fileuri_native",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
