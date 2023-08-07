@@ -21,6 +21,7 @@
 #include <cstring>
 #include <memory>
 #include <sys/file.h>
+#include <tuple>
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -66,6 +67,22 @@ napi_value FileNExporter::GetFD(napi_env env, napi_callback_info info)
 }
 
 #ifndef WIN_PLATFORM
+static tuple<int, unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*>> RealPathCore(const string &srcPath)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> realpath_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!realpath_req) {
+        HILOGE("Failed to request heap memory.");
+        return { ENOMEM, move(realpath_req)};
+    }
+    int ret = uv_fs_realpath(nullptr, realpath_req.get(), srcPath.c_str(), nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to realpath, ret: %{public}d, path: %{public}s", ret, srcPath.c_str());
+        return { ret, move(realpath_req)};
+    }
+    return { ERRNO_NOERR, move(realpath_req) };
+}
+
 static bool GetExclusive(napi_env env, NFuncArg &funcArg, bool &exclusive)
 {
     if (funcArg.GetArgc() >= NARG_CNT::ONE) {
@@ -78,6 +95,55 @@ static bool GetExclusive(napi_env env, NFuncArg &funcArg, bool &exclusive)
         }
     }
     return true;
+}
+
+napi_value FileNExporter::GetPath(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+    auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
+    if (!fileEntity) {
+        HILOGE("Failed to get file entity");
+        return nullptr;
+    }
+    auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
+    if (realPathRes != ERRNO_NOERR) {
+        NError(realPathRes).ThrowErr(env);
+        return nullptr;
+    }
+    return NVal::CreateUTF8String(env, string(static_cast<const char *>(realPath->ptr))).val_;
+}
+
+napi_value FileNExporter::GetName(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+    auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
+    if (!fileEntity) {
+        HILOGE("Failed to get file entity");
+        return nullptr;
+    }
+    auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
+    if (realPathRes != ERRNO_NOERR) {
+        NError(realPathRes).ThrowErr(env);
+        return nullptr;
+    }
+    string path = string(static_cast<const char *>(realPath->ptr));
+    auto pos = path.find_last_of('/');
+    if (pos == string::npos) {
+        HILOGE("Failed to split filename from path, path: %{public}s", path.c_str());
+        NError(ENOENT).ThrowErr(env);
+        return nullptr;
+    }
+    return NVal::CreateUTF8String(env, path.substr(pos + 1)).val_;
 }
 
 napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
@@ -217,6 +283,8 @@ bool FileNExporter::Export()
     vector<napi_property_descriptor> props = {
         NVal::DeclareNapiGetter("fd", GetFD),
 #ifndef WIN_PLATFORM
+        NVal::DeclareNapiGetter("path", GetPath),
+        NVal::DeclareNapiGetter("name", GetName),
         NVal::DeclareNapiFunction("lock", Lock),
         NVal::DeclareNapiFunction("tryLock", TryLock),
         NVal::DeclareNapiFunction("unlock", UnLock),
