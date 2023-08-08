@@ -26,11 +26,14 @@
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
 #ifndef WIN_PLATFORM
+#include "class_file/file_entity.h"
+#include "class_file/file_n_exporter.h"
 #include "class_stream/stream_entity.h"
 #include "class_stream/stream_n_exporter.h"
 #endif
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
+#include "file_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -137,6 +140,40 @@ NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf)
 }
 
 #ifndef WIN_PLATFORM
+NVal CommonFunc::InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
+{
+    napi_value objFile = NClass::InstantiateClass(env, FileNExporter::className_, {});
+    if (!objFile) {
+        HILOGE("Failed to instantiate class");
+        NError(EIO).ThrowErr(env);
+        close(fd);
+        return NVal();
+    }
+
+    auto fileEntity = NClass::GetEntityOf<FileEntity>(env, objFile);
+    if (!fileEntity) {
+        HILOGE("Failed to get fileEntity");
+        NError(EIO).ThrowErr(env);
+        close(fd);
+        return NVal();
+    }
+    auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+    if (fdg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return NVal();
+    }
+    fileEntity->fd_.swap(fdg);
+    if (isUri) {
+        fileEntity->path_ = "";
+        fileEntity->uri_ = pathOrUri;
+    } else {
+        fileEntity->path_ = pathOrUri;
+        fileEntity->uri_ = "";
+    }
+    return { env, objFile };
+}
+
 NVal CommonFunc::InstantiateStream(napi_env env, unique_ptr<FILE, decltype(&fclose)> fp)
 {
     napi_value objStream = NClass::InstantiateClass(env, StreamNExporter::className_, {});
