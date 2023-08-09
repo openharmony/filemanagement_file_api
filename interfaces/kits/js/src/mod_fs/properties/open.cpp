@@ -161,18 +161,18 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     string uriType = uri.GetScheme();
     string uriPath = uri.GetPath();
     if (uriType == SCHEME_FILE) {
-        if (bundleName == MEDIA && uriPath.find(".") == string::npos) {
-            int ret = OpenFileByDatashare(pathStr, mode);
+        AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
+        pathStr = fileUri.GetRealPath();
+        if ((bundleName == MEDIA && pathStr.find(".") == string::npos) ||
+            access(pathStr.c_str(), F_OK) != 0) {
+            int ret = OpenFileByDatashare(uri.ToString(), mode);
             if (ret >= 0) {
-                auto file = InstantiateFile(env, ret, pathStr, true).val_;
+                auto file = InstantiateFile(env, ret, uri.ToString(), true).val_;
                 return file;
             }
             HILOGE("Failed to open file by Datashare");
             NError(-ret).ThrowErr(env);
             return nullptr;
-        } else {
-            AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
-            pathStr = fileUri.GetRealPath();
         }
     } else if (uriType == DATASHARE) {
         // datashare:////#fdFromBinder=xx
@@ -221,7 +221,10 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, string path, unsigne
     string uriType = uri.GetScheme();
     string uriPath = uri.GetPath();
     if (uriType == SCHEME_FILE) {
-        if (bundleName == MEDIA && uriPath.find(".") == string::npos) {
+        AppFileService::ModuleFileUri::FileUri fileUri(path);
+        pathStr = fileUri.GetRealPath();
+        if ((bundleName == MEDIA && pathStr.find(".") == string::npos) ||
+            access(pathStr.c_str(), F_OK) != 0) {
             int ret = OpenFileByDatashare(path, mode);
             if (ret >= 0) {
                 arg->fd = ret;
@@ -231,9 +234,6 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, string path, unsigne
             }
             HILOGE("Failed to open file by Datashare");
             return NError(-ret);
-        } else {
-            AppFileService::ModuleFileUri::FileUri fileUri(path);
-            pathStr = fileUri.GetRealPath();
         }
     } else if (uriType == DATASHARE) {
         // datashare:////#fdFromBinder=xx
