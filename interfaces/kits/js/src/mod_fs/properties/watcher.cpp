@@ -77,7 +77,7 @@ shared_ptr<WatcherInfoArg> ParseParam(const napi_env &env, const napi_callback_i
         errCode = ENOMEM;
         return nullptr;
     }
-    infoArg->events = events;
+    infoArg->events = static_cast<uint32_t>(events);
     infoArg->env = env;
     infoArg->fileName = string(filename.get());
 

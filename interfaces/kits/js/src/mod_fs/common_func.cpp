@@ -140,7 +140,7 @@ NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf)
 }
 
 #ifndef WIN_PLATFORM
-NVal CommonFunc::InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
+NVal CommonFunc::InstantiateFile(napi_env env, int fd, const string &pathOrUri, bool isUri)
 {
     napi_value objFile = NClass::InstantiateClass(env, FileNExporter::className_, {});
     if (!objFile) {

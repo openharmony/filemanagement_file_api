@@ -17,6 +17,7 @@
 #include <cerrno>
 #include <cstdint>
 #include <unistd.h>
+#include <algorithm>
 
 #include "filemgmt_libhilog.h"
 #include "uv.h"
@@ -161,7 +162,7 @@ void FileWatcher::GetNotifyEvent(WatcherCallback callback)
             HILOGE("Failed to run Listener Thread because notifyFd_:%{public}d", notifyFd_);
             break;
         }
-        if (select(notifyFd_ + 1, &fds, nullptr, nullptr, 0) > 0) {
+        if (select(notifyFd_ + 1, &fds, nullptr, nullptr, nullptr) > 0) {
             int len, index = 0;
             while (((len = read(notifyFd_, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
             while (index < len) {
@@ -213,11 +214,12 @@ void FileWatcher::NotifyEvent(const struct inotify_event *event, WatcherCallback
 {
     lock_guard<mutex> lock(watchMutex_);
     string tempFileName;
-    for (const auto &iter : wdFileNameMap_) {
-        if (iter.second.first == event->wd) {
-            tempFileName = iter.first;
-            break;
-        }
+    auto found = find_if(wdFileNameMap_.begin(), wdFileNameMap_.end(),
+        [event](const pair<std::string, std::pair<int, uint32_t>> &iter) {
+            return iter.second.first == event->wd;
+    });
+    if (found != wdFileNameMap_.end()) {
+        tempFileName = found->first;
     }
 
     for (const auto &iter : watcherInfoSet_) {

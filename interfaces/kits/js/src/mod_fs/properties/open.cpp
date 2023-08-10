@@ -115,7 +115,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 
-static int OpenFileByDatashare(string path, unsigned int flags)
+static int OpenFileByDatashare(const string &path, unsigned int flags)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
     int fd = -1;
@@ -212,9 +212,9 @@ struct AsyncOpenFileArg {
     string uri;
 };
 
-static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, string path, unsigned int mode, napi_env env)
+static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, unsigned int mode, napi_env env)
 {
-    string pathStr = path;
+    string pStr = path;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     Uri uri(path);
     string bundleName = uri.GetAuthority();
@@ -222,9 +222,9 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, string path, unsigne
     string uriPath = uri.GetPath();
     if (uriType == SCHEME_FILE) {
         AppFileService::ModuleFileUri::FileUri fileUri(path);
-        pathStr = fileUri.GetRealPath();
-        if ((bundleName == MEDIA && pathStr.find(".") == string::npos) ||
-            access(pathStr.c_str(), F_OK) != 0) {
+        pStr = fileUri.GetRealPath();
+        if ((bundleName == MEDIA && pStr.find(".") == string::npos) ||
+            access(pStr.c_str(), F_OK) != 0) {
             int ret = OpenFileByDatashare(path, mode);
             if (ret >= 0) {
                 arg->fd = ret;
@@ -251,20 +251,18 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, string path, unsigne
     }
 #endif
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup
-    };
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
     }
-    int ret = uv_fs_open(nullptr, open_req.get(), pathStr.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP,
-        nullptr);
+    int ret = uv_fs_open(nullptr, open_req.get(), pStr.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
         HILOGE("Failed to open file for libuv error %{public}d", ret);
         return NError(ret);
     }
     arg->fd = ret;
-    arg->path = pathStr;
+    arg->path = pStr;
     arg->uri = "";
     return NError(ERRNO_NOERR);
 }
