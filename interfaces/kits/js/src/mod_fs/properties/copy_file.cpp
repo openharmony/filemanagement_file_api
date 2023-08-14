@@ -17,6 +17,7 @@
 
 #include <cstring>
 #include <fcntl.h>
+#include <filesystem>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <tuple>
@@ -34,6 +35,15 @@ using namespace OHOS::FileManagement::LibN;
 
 static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 {
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    filesystem::path srcPath(string(srcFile.path.get()));
+    filesystem::path dstPath(string(destFile.path.get()));
+    error_code errCode;
+    if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
+        HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
+        return NError(errCode.value());
+    }
+#else
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> copyfile_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!copyfile_req) {
@@ -44,8 +54,9 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
                              UV_FS_COPYFILE_FICLONE, nullptr);
     if (ret < 0) {
         HILOGE("Failed to copy file when all parameters are paths");
-        return NError(errno);
+        return NError(ret);
     }
+#endif
     return NError(ERRNO_NOERR);
 }
 

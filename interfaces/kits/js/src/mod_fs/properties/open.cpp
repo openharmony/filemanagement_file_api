@@ -163,8 +163,8 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     if (uriType == SCHEME_FILE) {
         AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
         pathStr = fileUri.GetRealPath();
-        if ((bundleName == MEDIA && pathStr.find(".") == string::npos) ||
-            access(pathStr.c_str(), F_OK) != 0) {
+        if (bundleName == MEDIA && (pathStr.find(".") == string::npos ||
+            access(pathStr.c_str(), F_OK) != 0)) {
             int ret = OpenFileByDatashare(uri.ToString(), mode);
             if (ret >= 0) {
                 auto file = InstantiateFile(env, ret, uri.ToString(), true).val_;
@@ -223,8 +223,8 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
     if (uriType == SCHEME_FILE) {
         AppFileService::ModuleFileUri::FileUri fileUri(path);
         pStr = fileUri.GetRealPath();
-        if ((bundleName == MEDIA && pStr.find(".") == string::npos) ||
-            access(pStr.c_str(), F_OK) != 0) {
+        if (bundleName == MEDIA && (pStr.find(".") == string::npos ||
+            access(pStr.c_str(), F_OK) != 0)) {
             int ret = OpenFileByDatashare(path, mode);
             if (ret >= 0) {
                 arg->fd = ret;
