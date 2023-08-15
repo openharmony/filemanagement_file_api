@@ -22,7 +22,7 @@ use std::ffi::CString;
 use std::ptr::null_mut;
 
 #[no_mangle]
-pub unsafe extern "C" fn readLines(path: *const c_char) -> *mut StringVector {
+pub unsafe extern "C" fn ReadLines(path: *const c_char) -> *mut StringVector {
     match read_lines(path) {
         Ok(sv) => sv,
         Err(e) => {
@@ -33,7 +33,7 @@ pub unsafe extern "C" fn readLines(path: *const c_char) -> *mut StringVector {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn nextLine(lines: *mut StringVector) -> *mut Str {
+pub unsafe extern "C" fn NextLine(lines: *mut StringVector) -> *mut Str {
     match next_line(lines) {
         Ok(s) => s,
         Err(e) => {
@@ -44,14 +44,14 @@ pub unsafe extern "C" fn nextLine(lines: *mut StringVector) -> *mut Str {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn stringVectorFree(lines: *mut StringVector) {
+pub unsafe extern "C" fn StringVectorFree(lines: *mut StringVector) {
     if !lines.is_null() {
         let _ = Box::from_raw(lines);
     }
 }
 
 #[no_mangle]
-pub extern "C" fn lseek(fd: i32, offset: i64, pos: SeekPos) {
+pub extern "C" fn Lseek(fd: i32, offset: i64, pos: SeekPos) {
     match seek(fd, offset, pos) {
         Ok(_) => {}
         Err(e) => unsafe {
@@ -61,7 +61,7 @@ pub extern "C" fn lseek(fd: i32, offset: i64, pos: SeekPos) {
 }
 
 #[no_mangle]
-pub extern "C" fn mkdirs(path: *const c_char, mode: MakeDirectionMode) {
+pub extern "C" fn Mkdirs(path: *const c_char, mode: MakeDirectionMode) {
     match create_dir(path, mode) {
         Ok(_) => {}
         Err(e) => unsafe { error_control(e) },
@@ -69,7 +69,7 @@ pub extern "C" fn mkdirs(path: *const c_char, mode: MakeDirectionMode) {
 }
 
 #[no_mangle]
-pub extern "C" fn getParent(fd: i32) -> *mut Str {
+pub extern "C" fn GetParent(fd: i32) -> *mut Str {
     match get_parent(fd) {
         Ok(str) => str,
         Err(e) => {
@@ -82,7 +82,7 @@ pub extern "C" fn getParent(fd: i32) -> *mut Str {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn parentFree(str: *mut Str) {
+pub unsafe extern "C" fn ParentFree(str: *mut Str) {
     if !str.is_null() {
         let string = Box::from_raw(str);
         let _ = CString::from_raw(string.str as *mut c_char);

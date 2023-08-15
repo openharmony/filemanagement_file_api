@@ -38,9 +38,9 @@ typedef void StringVector;
  * @param       End     Sets the offset from th tail of the file.
  */
 enum SeekPos {
-    Start,
-    Current,
-    End
+    START,
+    CURRENT,
+    END
 };
 
 /**
@@ -50,8 +50,8 @@ enum SeekPos {
  * @param       Multiple Creates a multi-level directory.
  */
 enum MakeDirectionMode {
-    Single,
-    Multiple
+    SINGLE,
+    MULTIPLE
 };
 
 /**
@@ -76,7 +76,7 @@ typedef struct {
  * 3.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-StringVector* readLines(char* path);
+StringVector* ReadLines(char* path);
 
 /**
  * @ingroup     rust
@@ -90,7 +90,7 @@ StringVector* readLines(char* path);
  * 2.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-Str* nextLine(StringVector* lines);
+Str* NextLine(StringVector* lines);
 
 /**
  * @ingroup     rust
@@ -98,7 +98,7 @@ Str* nextLine(StringVector* lines);
  * @param       lines   pointer to `StringVector`.
  * @li          rust_file.h:The file where the interface is located.
  */
-void stringVectorFree(StringVector* lines);
+void StringVectorFree(StringVector* lines);
 
 /**
  * @ingroup     rust
@@ -111,7 +111,7 @@ void stringVectorFree(StringVector* lines);
  * 2.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-void lseek(int fd, long long offset, enum SeekPos pos);
+void Lseek(int fd, long long offset, enum SeekPos pos);
 
 /**
  * @ingroup     rust
@@ -123,7 +123,7 @@ void lseek(int fd, long long offset, enum SeekPos pos);
  * 2.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-void mkdirs(char* path, enum MakeDirectionMode mode);
+void Mkdirs(char* path, enum MakeDirectionMode mode);
 
 /**
  * @ingroup     rust
@@ -135,7 +135,7 @@ void mkdirs(char* path, enum MakeDirectionMode mode);
  * 1.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-Str* getParent(int fd);
+Str* GetParent(int fd);
 
 /**
  * @ingroup     rust
@@ -143,7 +143,7 @@ Str* getParent(int fd);
  * @param       lines   pointer to `Str`.
  * @li          rust_file.h:The file where the interface is located.
  */
-void parentFree(Str* str);
+void ParentFree(Str* str);
 
 #ifdef __cplusplus
 #if __cplusplus
