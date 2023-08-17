@@ -34,6 +34,7 @@
 #include "remote_uri.h"
 #include "status_receiver_host.h"
 #include "system_ability_definition.h"
+#include "file_uri.h"
 #endif
 
 namespace OHOS {
@@ -45,6 +46,15 @@ using namespace OHOS::FileManagement::LibN;
 using namespace OHOS::DistributedFS::ModuleRemoteUri;
 using namespace OHOS::AppExecFwk;
 #endif
+
+const std::string PROCEDURE_OPEN_NAME = "FileIOOpen";
+const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
+const std::string FILE_DATA_URI = "file://";
+const std::string PATH_SHARE = "/data/storage/el2/share";
+const std::string MODE_RW = "/rw/";
+const std::string MODE_R = "/r/";
+const std::string MEDIA = "media";
+const std::string DATASHARE = "datashare";
 
 static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
 {
@@ -104,26 +114,8 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-static string DealWithUriWithName(string str)
-{
-    static uint32_t meetCount = 6;
-    uint32_t count = 0;
-    uint32_t index;
-    for (index = 0; index < str.length(); index++) {
-        if (str[index] == '/') {
-            count++;
-        }
-        if (count == meetCount) {
-            break;
-        }
-    }
-    if (count == meetCount) {
-        str = str.substr(0, index);
-    }
-    return str;
-}
 
-static int OpenFileByDatashare(string path, unsigned int flags)
+static int OpenFileByDatashare(const string &path, unsigned int flags)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
     int fd = -1;
@@ -138,58 +130,9 @@ static int OpenFileByDatashare(string path, unsigned int flags)
         HILOGE("Failed to connect to datashare");
         return -E_PERMISSION;
     }
-    path = DealWithUriWithName(path);
     Uri uri(path);
     fd = dataShareHelper->OpenFile(uri, CommonFunc::GetModeFromFlags(flags));
     return fd;
-}
-
-static sptr<BundleMgrProxy> GetBundleMgrProxy()
-{
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        HILOGE("Failed to get system ability mgr.");
-        return nullptr;
-    }
-
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (!remoteObject) {
-        HILOGE("Failed to get bundle manager proxy.");
-        return nullptr;
-    }
-    return iface_cast<BundleMgrProxy>(remoteObject);
-}
-
-static string GetBundleNameSelf()
-{
-    int uid = -1;
-    uid = IPCSkeleton::GetCallingUid();
-    
-    sptr<BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
-    if (!bundleMgrProxy) {
-        HILOGE("Bundle mgr proxy is null ptr.");
-        return nullptr;
-    }
-    AppExecFwk::BundleInfo bundleInfo;
-    auto ret = bundleMgrProxy->GetBundleInfoForSelf(uid, bundleInfo);
-    if (ret != ERR_OK) {
-        HILOGE("Failed to get bundleNameSelf.");
-        return nullptr;
-    }
-    return bundleInfo.name;
-}
-
-static string GetPathFromFileUri(string path, string bundleName, unsigned int mode)
-{
-    if (bundleName != GetBundleNameSelf()) {
-        if ((mode & O_WRONLY) == O_WRONLY || (mode & O_RDWR) == O_RDWR) {
-            path = PATH_SHARE + MODE_RW + bundleName + path;
-        } else {
-            path = PATH_SHARE + MODE_R + bundleName + path;
-        }
-    }
-    return path;
 }
 #endif
 
@@ -213,27 +156,36 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     }
     string pathStr = string(path.get());
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    int fd = -1;
-    if (RemoteUri::IsMediaUri(pathStr)) {
-        int ret = OpenFileByDatashare(pathStr, mode);
-        if (ret >= 0) {
-            auto file = InstantiateFile(env, ret, pathStr, true).val_;
-            return file;
+    Uri uri(pathStr);
+    string bundleName = uri.GetAuthority();
+    string uriType = uri.GetScheme();
+    string uriPath = uri.GetPath();
+    if (uriType == SCHEME_FILE) {
+        AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
+        pathStr = fileUri.GetRealPath();
+        if (bundleName == MEDIA && (pathStr.find(".") == string::npos ||
+            access(pathStr.c_str(), F_OK) != 0)) {
+            int ret = OpenFileByDatashare(uri.ToString(), mode);
+            if (ret >= 0) {
+                auto file = InstantiateFile(env, ret, uri.ToString(), true).val_;
+                return file;
+            }
+            HILOGE("Failed to open file by Datashare");
+            NError(-ret).ThrowErr(env);
+            return nullptr;
         }
-        HILOGE("Failed to open file by Datashare");
-        NError(-ret).ThrowErr(env);
-        return nullptr;
-    } else if (RemoteUri::IsFileUri(pathStr)) {
-        RemoteUri remoteUri = RemoteUri(pathStr);
-        pathStr = GetPathFromFileUri(remoteUri.GetPath(), remoteUri.GetAuthority(), mode);
-    } else if (RemoteUri::IsRemoteUri(pathStr, fd, mode)) {
-        if (fd >= 0) {
-            auto file = InstantiateFile(env, fd, pathStr, true).val_;
-            return file;
+    } else if (uriType == DATASHARE) {
+        // datashare:////#fdFromBinder=xx
+        int fd = -1;
+        if (RemoteUri::IsRemoteUri(pathStr, fd, mode)) {
+            if (fd >= 0) {
+                auto file = InstantiateFile(env, fd, pathStr, true).val_;
+                return file;
+            }
+            HILOGE("Failed to open file by RemoteUri");
+            NError(E_INVAL).ThrowErr(env);
+            return nullptr;
         }
-        HILOGE("Failed to open file by RemoteUri");
-        NError(E_INVAL).ThrowErr(env);
-        return nullptr;
     }
 #endif
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
@@ -260,6 +212,61 @@ struct AsyncOpenFileArg {
     string uri;
 };
 
+static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, unsigned int mode, napi_env env)
+{
+    string pStr = path;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    Uri uri(path);
+    string bundleName = uri.GetAuthority();
+    string uriType = uri.GetScheme();
+    string uriPath = uri.GetPath();
+    if (uriType == SCHEME_FILE) {
+        AppFileService::ModuleFileUri::FileUri fileUri(path);
+        pStr = fileUri.GetRealPath();
+        if (bundleName == MEDIA && (pStr.find(".") == string::npos ||
+            access(pStr.c_str(), F_OK) != 0)) {
+            int ret = OpenFileByDatashare(path, mode);
+            if (ret >= 0) {
+                arg->fd = ret;
+                arg->path = "";
+                arg->uri = path;
+                return NError(ERRNO_NOERR);
+            }
+            HILOGE("Failed to open file by Datashare");
+            return NError(-ret);
+        }
+    } else if (uriType == DATASHARE) {
+        // datashare:////#fdFromBinder=xx
+        int fd = -1;
+        if (RemoteUri::IsRemoteUri(path, fd, mode)) {
+            if (fd >= 0) {
+                arg->fd = fd;
+                arg->path = "";
+                arg->uri = path;
+                return NError(ERRNO_NOERR);
+            }
+            HILOGE("Failed to open file by RemoteUri");
+            return NError(E_INVAL);
+        }
+    }
+#endif
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!open_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_open(nullptr, open_req.get(), pStr.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to open file for libuv error %{public}d", ret);
+        return NError(ret);
+    }
+    arg->fd = ret;
+    arg->path = pStr;
+    arg->uri = "";
+    return NError(ERRNO_NOERR);
+}
+
 napi_value Open::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -284,51 +291,8 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto argv = funcArg[NARG_POS::FIRST];
-    auto cbExec = [arg, argv, path = string(path.get()), mode = mode, env = env]() -> NError {
-        string pathStr = path;
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-        int fd = -1;
-        if (RemoteUri::IsMediaUri(path)) {
-            int ret = OpenFileByDatashare(path, mode);
-            if (ret >= 0) {
-                arg->fd = ret;
-                arg->path = "";
-                arg->uri = path;
-                return NError(ERRNO_NOERR);
-            }
-            HILOGE("Failed to open file by Datashare");
-            return NError(-ret);
-        } else if (RemoteUri::IsFileUri(path)) {
-            RemoteUri remoteUri = RemoteUri(path);
-            pathStr = GetPathFromFileUri(remoteUri.GetPath(), remoteUri.GetAuthority(), mode);
-        } else if (RemoteUri::IsRemoteUri(path, fd, mode)) {
-            if (fd >= 0) {
-                arg->fd = fd;
-                arg->path = "";
-                arg->uri = path;
-                return NError(ERRNO_NOERR);
-            }
-            HILOGE("Failed to open file by RemoteUri");
-            return NError(E_INVAL);
-        }
-#endif
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!open_req) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
-        }
-        int ret = uv_fs_open(nullptr, open_req.get(), pathStr.c_str(), mode, S_IRUSR |
-            S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to open file for libuv error %{public}d", ret);
-            return NError(ret);
-        }
-        arg->fd = ret;
-        arg->path = pathStr;
-        arg->uri = "";
-        return NError(ERRNO_NOERR);
+    auto cbExec = [arg, path = string(path.get()), mode = mode, env = env]() -> NError {
+        return AsyncCbExec(arg, path, mode, env);
     };
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {

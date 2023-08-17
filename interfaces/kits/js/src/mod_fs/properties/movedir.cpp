@@ -26,7 +26,6 @@
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
-#include "uv.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -49,15 +48,29 @@ static tuple<bool, bool> JudgeExistAndEmpty(const string &path)
     return { false, false };
 }
 
-static bool RmDirectory(const string &path)
+static int RmDirectory(const string &path)
 {
     filesystem::path pathName(path);
-    uintmax_t num = filesystem::remove_all(pathName);
-    if (!num || filesystem::exists(pathName)) {
-        HILOGE("Failed to rmdir path");
-        return false;
+    if (filesystem::exists(pathName)) {
+        std::error_code errCode;
+        (void)filesystem::remove_all(pathName, errCode);
+        if (errCode.value() != 0) {
+            HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
+            return errCode.value();
+        }
     }
-    return true;
+    return ERRNO_NOERR;
+}
+
+static int RemovePath(const string& pathStr)
+{
+    filesystem::path pathTarget(pathStr);
+    std::error_code errCode;
+    if (!filesystem::remove(pathTarget, errCode)) {
+        HILOGE("Failed to remove file or directory, error code: %{public}d", errCode.value());
+        return errCode.value();
+    }
+    return ERRNO_NOERR;
 }
 
 static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(napi_env env, const NFuncArg& funcArg)
@@ -86,49 +99,40 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
 
 static int CopyAndDeleteFile(const string &src, const string &dest)
 {
-    uv_fs_t copyfile_req;
-    int ret = uv_fs_copyfile(nullptr, &copyfile_req, src.c_str(), dest.c_str(), UV_FS_COPYFILE_FICLONE_FORCE, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to move file using copyfile interface");
-        return -ret;
-    }
-    uv_fs_req_cleanup(&copyfile_req);
-    uv_fs_t unlink_req;
-    int unlinkSrcRes = uv_fs_unlink(nullptr, &unlink_req, src.c_str(), nullptr);
-    if (unlinkSrcRes < 0) {
-        HILOGE("Failed to unlink src file because errno number is: %{public}d", unlinkSrcRes);
-        int unlinkDestRes = uv_fs_unlink(nullptr, &unlink_req, dest.c_str(), nullptr);
-        if (unlinkDestRes < 0) {
-            HILOGE("Failed to unlink dest file because errno number is: %{public}d", unlinkDestRes);
+    filesystem::path dstPath(dest);
+    if (filesystem::exists(dstPath)) {
+        int removeRes = RemovePath(dest);
+        if (removeRes != 0) {
+            HILOGE("Failed to remove dest file");
+            return removeRes;
         }
-        uv_fs_req_cleanup(&unlink_req);
-        return -unlinkSrcRes;
     }
-    uv_fs_req_cleanup(&unlink_req);
-    return ERRNO_NOERR;
+    filesystem::path srcPath(src);
+    std::error_code errCode;
+    if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
+        HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
+        return errCode.value();
+    }
+    return RemovePath(src);
 }
 
 static int RenameFile(const string &src, const string &dest, const int mode)
 {
-    if (mode == DIRMODE_FILE_THROW_ERR || mode == DIRMODE_DIRECTORY_THROW_ERR) {
-        auto [fileExist, ignore] = JudgeExistAndEmpty(dest);
-        if (fileExist) {
+    filesystem::path dstPath(dest);
+    if (mode == DIRMODE_FILE_THROW_ERR) {
+        if (filesystem::exists(dstPath)) {
             HILOGE("Failed to move file due to existing destPath with throw err");
             return EEXIST;
         }
     }
-    uv_fs_t rename_req;
-    int res = uv_fs_rename(nullptr, &rename_req, src.c_str(), dest.c_str(), nullptr);
-    uv_fs_req_cleanup(&rename_req);
-    if (res < 0 && (string_view(uv_err_name(res)) == "EXDEV")) {
+    filesystem::path srcPath(src);
+    std::error_code errCode;
+    filesystem::rename(srcPath, dstPath, errCode);
+    if (errCode.value() == EXDEV) {
         HILOGE("Failed to rename file due to EXDEV");
         return CopyAndDeleteFile(src, dest);
     }
-    if (res < 0) {
-        HILOGE("Failed to move file using rename syscall");
-        return -res;
-    }
-    return ERRNO_NOERR;
+    return errCode.value();
 }
 
 static int32_t FilterFunc(const struct dirent *filename)
@@ -141,16 +145,26 @@ static int32_t FilterFunc(const struct dirent *filename)
 
 static int RenameDir(const string &src, const string &dest, const int mode, vector<struct ErrFiles> &errfiles)
 {
-    uv_fs_t rename_req;
-    int ret = uv_fs_rename(nullptr, &rename_req, src.c_str(), dest.c_str(), nullptr);
-    uv_fs_req_cleanup(&rename_req);
-    if (ret < 0 && (string_view(uv_err_name(ret)) == "EXDEV")) {
-        HILOGE("Failed to rename file due to EXDEV");
+    filesystem::path destPath(dest);
+    if (!filesystem::exists(destPath)) {
+        filesystem::path srcPath(src);
+        std::error_code errCode;
+        filesystem::rename(srcPath, destPath, errCode);
+        if (errCode.value() == EXDEV) {
+            HILOGE("Failed to rename file due to EXDEV");
+            if (filesystem::create_directory(destPath, errCode)) {
+                return RecurMoveDir(src, dest, mode, errfiles);
+            } else {
+                HILOGE("Failed to create directory, error code: %{public}d", errCode.value());
+                return errCode.value();
+            }
+        }
+        if (errCode.value() != 0) {
+            HILOGE("Failed to rename file, error code: %{public}d", errCode.value());
+            return errCode.value();
+        }
+    } else {
         return RecurMoveDir(src, dest, mode, errfiles);
-    }
-    if (ret < 0) {
-        HILOGE("Failed to move file using rename syscall");
-        return -ret;
     }
     return ERRNO_NOERR;
 }
@@ -169,17 +183,6 @@ static void Deleter(struct NameListArg *arg)
     free(arg->namelist);
 }
 
-static int MoveSubDir(const string &srcPath, const string &destPath, const int mode,
-    vector<struct ErrFiles> &errfiles)
-{
-    auto [fileExist, ignore] = JudgeExistAndEmpty(destPath);
-    if (fileExist) {
-        return RecurMoveDir(srcPath, destPath, mode, errfiles);
-    } else {
-        return RenameDir(srcPath, destPath, mode, errfiles);
-    }
-}
-
 static int RecurMoveDir(const string &srcPath, const string &destPath, const int mode,
     vector<struct ErrFiles> &errfiles)
 {
@@ -195,11 +198,18 @@ static int RecurMoveDir(const string &srcPath, const string &destPath, const int
         if ((ptr->namelist[i])->d_type == DT_DIR) {
             string srcTemp = srcPath + '/' + string((ptr->namelist[i])->d_name);
             string destTemp = destPath + '/' + string((ptr->namelist[i])->d_name);
-            int res = MoveSubDir(srcTemp, destTemp, mode, errfiles);
-            if (res == ERRNO_NOERR) {
+            size_t size = errfiles.size();
+            int res = RenameDir(srcTemp, destTemp, mode, errfiles);
+            if (res != ERRNO_NOERR) {
+                return res;
+            }
+            if (size != errfiles.size()) {
                 continue;
             }
-            return res;
+            res = RemovePath(srcTemp);
+            if (res) {
+                return res;
+            }
         } else {
             string src = srcPath + '/' + string((ptr->namelist[i])->d_name);
             string dest = destPath + '/' + string((ptr->namelist[i])->d_name);
@@ -207,10 +217,9 @@ static int RecurMoveDir(const string &srcPath, const string &destPath, const int
             if (res == EEXIST && mode == DIRMODE_FILE_THROW_ERR) {
                 errfiles.emplace_back(src, dest);
                 continue;
-            } else if (res == ERRNO_NOERR) {
-                continue;
-            } else {
-                HILOGE("Failed to rename file");
+            }
+            if (res != ERRNO_NOERR) {
+                HILOGE("Failed to rename file for error %{public}d", res);
                 return res;
             }
         }
@@ -229,29 +238,30 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode, ve
     auto [destStrExist, destStrEmpty] = JudgeExistAndEmpty(destStr);
     if (destStrExist && !destStrEmpty) {
         if (mode == DIRMODE_DIRECTORY_REPLACE) {
-            if (!RmDirectory(destStr)) {
-                return ENOTEMPTY;
+            int removeRes = RmDirectory(destStr);
+            if (removeRes) {
+                HILOGE("Failed to remove dest directory in DIRMODE_DIRECTORY_REPLACE");
+                return removeRes;
             }
-            return RenameDir(src, destStr, mode, errfiles);
         }
         if (mode == DIRMODE_DIRECTORY_THROW_ERR) {
+            HILOGE("Failed to move directory in DIRMODE_DIRECTORY_THROW_ERR");
             return ENOTEMPTY;
         }
-        int res = RecurMoveDir(src, destStr, mode, errfiles);
-        if (res == ERRNO_NOERR && mode == DIRMODE_FILE_REPLACE) {
-            if (!RmDirectory(src)) {
-                HILOGE("Failed to rm src dir with DIRMODE_FILE_REPLACE");
-                return ENOTEMPTY;
-            }
-        } else if (mode == DIRMODE_FILE_THROW_ERR) {
+    }
+    int res = RenameDir(src, destStr, mode, errfiles);
+    if (res == ERRNO_NOERR) {
+        if (mode == DIRMODE_FILE_THROW_ERR && errfiles.size() != 0) {
             HILOGE("Failed to movedir with some conflicted files");
             return EEXIST;
         }
-        return res;
-    } else {
-        return RenameDir(src, destStr, mode, errfiles);
+        int removeRes = RmDirectory(src);
+        if (removeRes) {
+            HILOGE("Failed to remove src directory");
+            return removeRes;
+        }
     }
-    return ERRNO_NOERR;
+    return res;
 }
 
 static napi_value GetErrData(napi_env env, vector<struct ErrFiles> &errfiles)

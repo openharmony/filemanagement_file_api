@@ -36,7 +36,7 @@ public:
 
     Para(FileInfo src, FileInfo dest) : src_(move(src)), dest_(move(dest)){};
 };
-
+constexpr size_t MAX_SIZE = 0x7ffff000;
 const string PROCEDURE_COPYFILE_NAME = "FileIOCopyFile";
 } // namespace ModuleFileIO
 } // namespace FileManagement

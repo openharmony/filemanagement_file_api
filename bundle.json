@@ -35,7 +35,8 @@
             "hilog",
             "ipc",
             "napi",
-            "samgr"
+            "samgr",
+            "app_file_service"
         ],
         "third_party": [
             "bounds_checking_function",
@@ -62,12 +63,30 @@
             }
           },
           {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/rust:rust_file",
+            "header": {
+              "header_files": [
+                "rust_file.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/rust/include"
+            }
+          },
+          {
             "name": "//foundation/filemanagement/file_api/utils/filemgmt_libn:filemgmt_libn",
             "header": {
               "header_files": [
                 "filemgmt_libn.h"
               ],
               "header_base": "//foundation/filemanagement/file_api/utils/filemgmt_libn/include"
+            }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/utils/filemgmt_libhilog:filemgmt_libhilog",
+            "header": {
+              "header_files": [
+                "filemgmt_libhilog.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/utils/filemgmt_libhilog"
             }
           }
         ],

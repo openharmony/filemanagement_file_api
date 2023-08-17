@@ -17,6 +17,7 @@
 
 #include <cstring>
 #include <fcntl.h>
+#include <filesystem>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <tuple>
@@ -34,6 +35,15 @@ using namespace OHOS::FileManagement::LibN;
 
 static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 {
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    filesystem::path srcPath(string(srcFile.path.get()));
+    filesystem::path dstPath(string(destFile.path.get()));
+    error_code errCode;
+    if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
+        HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
+        return NError(errCode.value());
+    }
+#else
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> copyfile_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!copyfile_req) {
@@ -46,6 +56,7 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
         HILOGE("Failed to copy file when all parameters are paths");
         return NError(ret);
     }
+#endif
     return NError(ERRNO_NOERR);
 }
 
@@ -57,11 +68,24 @@ static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& sta
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
     }
-    int ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(), 0,
-                             statbf.st_size, nullptr);
+    int64_t offset = 0;
+    size_t size = static_cast<size_t>(statbf.st_size);
+    int ret = 0;
+    while (size > MAX_SIZE) {
+        ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
+            offset, MAX_SIZE, nullptr);
+        if (ret < 0) {
+            HILOGE("Failed to sendfile by ret : %{public}d", ret);
+            return NError(ret);
+        }
+        offset += MAX_SIZE;
+        size -= MAX_SIZE;
+    }
+    ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
+        offset, size, nullptr);
     if (ret < 0) {
         HILOGE("Failed to sendfile by ret : %{public}d", ret);
-        return NError(errno);
+        return NError(ret);
     }
     return NError(ERRNO_NOERR);
 }

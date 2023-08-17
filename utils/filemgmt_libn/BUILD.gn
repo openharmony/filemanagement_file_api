@@ -44,9 +44,12 @@ ohos_shared_library("filemgmt_libn") {
   }
 
   public_configs = [ ":libn_public_config" ]
-  public_deps = [
-    "${arkui_napi_path}:ace_napi",
-    "${file_api_path}/utils/filemgmt_libhilog",
+
+  deps = [ "${utils_path}/filemgmt_libhilog:filemgmt_libhilog" ]
+
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
   ]
 
   use_exceptions = true

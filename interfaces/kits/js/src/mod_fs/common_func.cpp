@@ -17,24 +17,35 @@
 
 #include <dirent.h>
 #include <fcntl.h>
+#include <sstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
 #ifndef WIN_PLATFORM
+#include "class_file/file_entity.h"
+#include "class_file/file_n_exporter.h"
 #include "class_stream/stream_entity.h"
 #include "class_stream/stream_n_exporter.h"
 #endif
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
+#include "file_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+
+namespace {
+    const std::vector<std::string> PUBLIC_DIR_PATHS = {
+        "/Documents"
+    };
+}
 
 void InitOpenMode(napi_env env, napi_value exports)
 {
@@ -129,6 +140,40 @@ NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf)
 }
 
 #ifndef WIN_PLATFORM
+NVal CommonFunc::InstantiateFile(napi_env env, int fd, const string &pathOrUri, bool isUri)
+{
+    napi_value objFile = NClass::InstantiateClass(env, FileNExporter::className_, {});
+    if (!objFile) {
+        HILOGE("Failed to instantiate class");
+        NError(EIO).ThrowErr(env);
+        close(fd);
+        return NVal();
+    }
+
+    auto fileEntity = NClass::GetEntityOf<FileEntity>(env, objFile);
+    if (!fileEntity) {
+        HILOGE("Failed to get fileEntity");
+        NError(EIO).ThrowErr(env);
+        close(fd);
+        return NVal();
+    }
+    auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
+    if (fdg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return NVal();
+    }
+    fileEntity->fd_.swap(fdg);
+    if (isUri) {
+        fileEntity->path_ = "";
+        fileEntity->uri_ = pathOrUri;
+    } else {
+        fileEntity->path_ = pathOrUri;
+        fileEntity->uri_ = "";
+    }
+    return { env, objFile };
+}
+
 NVal CommonFunc::InstantiateStream(napi_env env, unique_ptr<FILE, decltype(&fclose)> fp)
 {
     napi_value objStream = NClass::InstantiateClass(env, StreamNExporter::className_, {});
@@ -161,18 +206,49 @@ void CommonFunc::fs_req_cleanup(uv_fs_t* req)
 
 string CommonFunc::GetModeFromFlags(unsigned int flags)
 {
-    const string RDONLY = "r";
-    const string WRONLY = "w";
-    const string APPEND = "a";
-    const string TRUNC = "t";
-    string mode = RDONLY;
-    mode += (((flags & O_RDWR) == O_RDWR) ? WRONLY : "");
-    mode = (((flags & O_WRONLY) == O_WRONLY) ? WRONLY : mode);
-    if (mode != RDONLY) {
-        mode += ((flags & O_TRUNC) ? TRUNC : "");
-        mode += ((flags & O_APPEND) ? APPEND : "");
+    const string readMode = "r";
+    const string writeMode = "w";
+    const string appendMode = "a";
+    const string truncMode = "t";
+    string mode = readMode;
+    mode += (((flags & O_RDWR) == O_RDWR) ? writeMode : "");
+    mode = (((flags & O_WRONLY) == O_WRONLY) ? writeMode : mode);
+    if (mode != readMode) {
+        mode += ((flags & O_TRUNC) ? truncMode : "");
+        mode += ((flags & O_APPEND) ? appendMode : "");
     }
     return mode;
+}
+
+bool CommonFunc::CheckPublicDirPath(const std::string &sandboxPath)
+{
+    for (const std::string &path : PUBLIC_DIR_PATHS) {
+        if (sandboxPath.find(path) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+string CommonFunc::Decode(const std::string &uri)
+{
+    std::ostringstream outPutStream;
+    const int32_t encodeLen = 2;
+    size_t index = 0;
+    while (index < uri.length()) {
+        if (uri[index] == '%') {
+            int hex = 0;
+            std::istringstream inputStream(uri.substr(index + 1, encodeLen));
+            inputStream >> std::hex >> hex;
+            outPutStream << static_cast<char>(hex);
+            index += encodeLen + 1;
+        } else {
+            outPutStream << uri[index];
+            index++;
+        }
+    }
+
+    return outPutStream.str();
 }
 
 tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,
