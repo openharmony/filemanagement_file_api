@@ -129,7 +129,12 @@ enum ErrCodeSuffixOfUserFileService {
     E_REMOVE,
     E_INIT,
     E_NOTIFY,
-    E_CONNECT
+    E_CONNECT,
+    E_CALLBACK_AND_URI_HAS_NOT_RELATIONS,
+    E_CALLBACK_IS_NOT_REGISTER,
+    E_CAN_NOT_FIND_URI,
+    E_DO_NOT_HAVE_PARENT,
+    E_LOAD_SA
 };
 
 enum ErrCodeSuffixOfDistributedFile {
@@ -336,6 +341,17 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_NOTIFY, { USER_FILE_SERVICE_SYS_CAP_TAG + E_NOTIFY, "Fail to notify agent" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_CONNECT, { USER_FILE_SERVICE_SYS_CAP_TAG + E_CONNECT,
         "Fail to connect file access extension ability" } },
+    { USER_FILE_SERVICE_SYS_CAP_TAG + E_CALLBACK_AND_URI_HAS_NOT_RELATIONS, { USER_FILE_SERVICE_SYS_CAP_TAG +
+        E_CALLBACK_AND_URI_HAS_NOT_RELATIONS,
+        "The uri has no relationship with the callback and cannot be unregistered" } },
+    { USER_FILE_SERVICE_SYS_CAP_TAG + E_CALLBACK_IS_NOT_REGISTER, { USER_FILE_SERVICE_SYS_CAP_TAG +
+        E_CALLBACK_IS_NOT_REGISTER, "Cannot unregister the callback that has not been registered" } },
+    { USER_FILE_SERVICE_SYS_CAP_TAG + E_CAN_NOT_FIND_URI, { USER_FILE_SERVICE_SYS_CAP_TAG + E_CAN_NOT_FIND_URI,
+        "Can not find registered uri" } },
+    { USER_FILE_SERVICE_SYS_CAP_TAG + E_DO_NOT_HAVE_PARENT, { USER_FILE_SERVICE_SYS_CAP_TAG + E_DO_NOT_HAVE_PARENT,
+        "Do not have parent uri" } },
+    { USER_FILE_SERVICE_SYS_CAP_TAG + E_LOAD_SA, { USER_FILE_SERVICE_SYS_CAP_TAG + E_LOAD_SA,
+        "Fail to load system ability" } },
     { E_PERMISSION, { E_PERMISSION, "Permission verification failed" } },
     { E_PERMISSION_SYS, { E_PERMISSION_SYS, "The caller is not a system application" } },
     { E_PARAMS, { E_PARAMS, "The input parameter is invalid" } },
