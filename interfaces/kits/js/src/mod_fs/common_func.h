@@ -58,7 +58,7 @@ struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);
     static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf);
 #ifndef WIN_PLATFORM
-    static LibN::NVal InstantiateFile(napi_env env, int fd, std::string pathOrUri, bool isUri);
+    static LibN::NVal InstantiateFile(napi_env env, int fd, const std::string &pathOrUri, bool isUri);
     static LibN::NVal InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp);
 #endif
     static std::tuple<bool, void *, size_t, int64_t> GetReadArg(napi_env env,
@@ -72,7 +72,7 @@ struct CommonFunc {
                                                                                              napi_value dstPath);
     static void fs_req_cleanup(uv_fs_t* req);
     static std::string GetModeFromFlags(unsigned int flags);
-    static bool CheckPublicDirPath(const std::string &path);
+    static bool CheckPublicDirPath(const std::string &sandboxPath);
     static std::string Decode(const std::string &uri);
 };
 } // namespace ModuleFileIO
