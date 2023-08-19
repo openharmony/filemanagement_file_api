@@ -54,6 +54,7 @@ const std::string PATH_SHARE = "/data/storage/el2/share";
 const std::string MODE_RW = "/rw/";
 const std::string MODE_R = "/r/";
 const std::string MEDIA = "media";
+const std::string DOCS = "docs";
 const std::string DATASHARE = "datashare";
 
 static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
@@ -163,8 +164,8 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     if (uriType == SCHEME_FILE) {
         AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
         pathStr = fileUri.GetRealPath();
-        if (bundleName == MEDIA && (pathStr.find(".") == string::npos ||
-            access(pathStr.c_str(), F_OK) != 0)) {
+        if ((bundleName == MEDIA || bundleName == DOCS) &&
+            access(pathStr.c_str(), F_OK) != 0) {
             int ret = OpenFileByDatashare(uri.ToString(), mode);
             if (ret >= 0) {
                 auto file = InstantiateFile(env, ret, uri.ToString(), true).val_;
@@ -223,8 +224,8 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
     if (uriType == SCHEME_FILE) {
         AppFileService::ModuleFileUri::FileUri fileUri(path);
         pStr = fileUri.GetRealPath();
-        if (bundleName == MEDIA && (pStr.find(".") == string::npos ||
-            access(pStr.c_str(), F_OK) != 0)) {
+        if ((bundleName == MEDIA || bundleName == DOCS) &&
+            access(pStr.c_str(), F_OK) != 0) {
             int ret = OpenFileByDatashare(path, mode);
             if (ret >= 0) {
                 arg->fd = ret;
