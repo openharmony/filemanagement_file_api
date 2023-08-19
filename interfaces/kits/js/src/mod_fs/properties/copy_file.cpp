@@ -71,21 +71,22 @@ static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& sta
     int64_t offset = 0;
     size_t size = static_cast<size_t>(statbf.st_size);
     int ret = 0;
-    while (size > MAX_SIZE) {
+    while (size > 0) {
         ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
             offset, MAX_SIZE, nullptr);
         if (ret < 0) {
             HILOGE("Failed to sendfile by ret : %{public}d", ret);
             return NError(ret);
         }
-        offset += MAX_SIZE;
-        size -= MAX_SIZE;
+        offset += static_cast<int64_t>(ret);
+        size -= static_cast<size_t>(ret);
+        if (ret == 0) {
+            break;
+        }
     }
-    ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
-        offset, size, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to sendfile by ret : %{public}d", ret);
-        return NError(ret);
+    if (size != 0) {
+        HILOGE("The execution of the sendfile task was terminated, remaining file size %{public}zu", size);
+        return NError(EIO);
     }
     return NError(ERRNO_NOERR);
 }
