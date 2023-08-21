@@ -266,7 +266,7 @@ static int FilterFileRes(const string &path, vector<string> &dirents)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int num = scandir(path.c_str(), &(pNameList->namelist), FilterFunc, alphasort);
+    int num = scandir(path.c_str(), &(pNameList->namelist), FilterFunc, nullptr);
     if (num < 0) {
         HILOGE("Failed to scan dir");
         return errno;
@@ -285,7 +285,7 @@ static int RecursiveFunc(const string &path, vector<string> &dirents)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int num = scandir(path.c_str(), &(pNameList->namelist), FilterFunc, alphasort);
+    int num = scandir(path.c_str(), &(pNameList->namelist), FilterFunc, nullptr);
     if (num < 0) {
         HILOGE("Failed to scan dir");
         return errno;
