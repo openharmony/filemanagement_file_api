@@ -134,7 +134,8 @@ enum ErrCodeSuffixOfUserFileService {
     E_CALLBACK_IS_NOT_REGISTER,
     E_CAN_NOT_FIND_URI,
     E_DO_NOT_HAVE_PARENT,
-    E_LOAD_SA
+    E_LOAD_SA,
+    E_COUNT
 };
 
 enum ErrCodeSuffixOfDistributedFile {
@@ -352,6 +353,7 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         "Do not have parent uri" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_LOAD_SA, { USER_FILE_SERVICE_SYS_CAP_TAG + E_LOAD_SA,
         "Fail to load system ability" } },
+    { USER_FILE_SERVICE_SYS_CAP_TAG + E_COUNT, { USER_FILE_SERVICE_SYS_CAP_TAG + E_COUNT, "Too many records" } },
     { E_PERMISSION, { E_PERMISSION, "Permission verification failed" } },
     { E_PERMISSION_SYS, { E_PERMISSION_SYS, "The caller is not a system application" } },
     { E_PARAMS, { E_PARAMS, "The input parameter is invalid" } },
