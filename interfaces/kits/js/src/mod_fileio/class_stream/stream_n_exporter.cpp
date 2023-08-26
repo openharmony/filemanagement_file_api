@@ -139,14 +139,14 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info info)
     return NVal::CreateInt64(env, writeLen).val_;
 }
 
-struct AsyncWrtieArg {
+struct AsyncWriteArg {
     NRef refWriteArrayBuf;
     unique_ptr<char[]> guardWriteStr = nullptr;
     size_t actLen { 0 };
 
-    explicit AsyncWrtieArg(NVal refWriteArrayBuf) : refWriteArrayBuf(refWriteArrayBuf) {}
-    explicit AsyncWrtieArg(unique_ptr<char[]> &&guardWriteStr) : guardWriteStr(move(guardWriteStr)) {}
-    ~AsyncWrtieArg() = default;
+    explicit AsyncWriteArg(NVal refWriteArrayBuf) : refWriteArrayBuf(refWriteArrayBuf) {}
+    explicit AsyncWriteArg(unique_ptr<char[]> &&guardWriteStr) : guardWriteStr(move(guardWriteStr)) {}
+    ~AsyncWriteArg() = default;
 };
 
 napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
@@ -176,7 +176,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto arg = make_shared<AsyncWrtieArg>(move(bufGuard));
+    auto arg = make_shared<AsyncWriteArg>(move(bufGuard));
     auto cbExec = [arg, buf, len, filp, position](napi_env env) -> UniError {
         if (position >= 0 && (fseek(filp, static_cast<long>(position), SEEK_SET) == -1)) {
             UniError(errno).ThrowErr(env);

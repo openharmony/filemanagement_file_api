@@ -51,14 +51,14 @@ struct AsyncReadArg {
     ~AsyncReadArg() = default;
 };
 
-struct AsyncWrtieArg {
+struct AsyncWriteArg {
     NRef refWriteArrayBuf;
     std::unique_ptr<char[]> guardWriteStr = nullptr;
     size_t actLen = 0;
 
-    explicit AsyncWrtieArg(NVal refWriteArrayBuf) : refWriteArrayBuf(refWriteArrayBuf) {}
-    explicit AsyncWrtieArg(std::unique_ptr<char[]> &&guardWriteStr) : guardWriteStr(std::move(guardWriteStr)) {}
-    ~AsyncWrtieArg() = default;
+    explicit AsyncWriteArg(NVal refWriteArrayBuf) : refWriteArrayBuf(refWriteArrayBuf) {}
+    explicit AsyncWriteArg(std::unique_ptr<char[]> &&guardWriteStr) : guardWriteStr(std::move(guardWriteStr)) {}
+    ~AsyncWriteArg() = default;
 };
 
 const std::string PROCEDURE_STREAM_WRITE_NAME = "FileIOStreamWrite";
