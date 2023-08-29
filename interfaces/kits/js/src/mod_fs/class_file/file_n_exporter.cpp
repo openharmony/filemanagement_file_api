@@ -167,6 +167,10 @@ napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [exclusive, fileEntity]() -> NError {
+        if (!fileEntity || !fileEntity->fd_.get()) {
+            HILOGE("File has been closed in Lock cbExec possibly");
+            return NError(EIO);
+        }
         int ret = 0;
         auto mode = exclusive ? LOCK_EX : LOCK_SH;
         ret = flock(fileEntity->fd_.get()->GetFD(), mode);

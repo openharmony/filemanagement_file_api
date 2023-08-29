@@ -190,6 +190,10 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnti
     }
     offset = CalculateOffset(offset, rafEntity->filePointer);
     auto cbExec = [env, arg, buf, len, offset, rafEntity]() -> NError {
+        if (!rafEntity || !rafEntity->fd.get()) {
+            HILOGE("RandomAccessFile has been closed in read cbExec possibly");
+            return NError(EIO);
+        }
         int actLen = DoReadRAF(env, buf, len, rafEntity->fd.get()->GetFD(), offset);
         if (actLen < 0) {
             return NError(actLen);
@@ -293,6 +297,10 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
     }
     offset = CalculateOffset(offset, rafEntity->filePointer);
     auto cbExec = [env, arg, buf, len, fd = rafEntity->fd.get()->GetFD(), offset, rafEntity]() -> NError {
+        if (!rafEntity || !rafEntity->fd.get()) {
+            HILOGE("RandomAccessFile has been closed in write cbExec possibly");
+            return NError(EIO);
+        }
         int writeLen = DoWriteRAF(env, buf, len, fd, offset);
         if (writeLen < 0) {
             HILOGE("Failed to write file for %{public}d", writeLen);
