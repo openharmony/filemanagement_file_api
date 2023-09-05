@@ -39,7 +39,7 @@ napi_value Flush::Sync(napi_env env, napi_callback_info info)
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Stream may has been closed");
+        HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -64,12 +64,16 @@ napi_value Flush::Async(napi_env env, napi_callback_info info)
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Stream may has been closed");
+        HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
 
     auto cbExec = [streamEntity]() -> NError {
+        if (!streamEntity || !streamEntity->fp) {
+            HILOGE("Stream has been closed in flush cbExec possibly");
+            return NError(EIO);
+        }
         int ret = fflush(streamEntity->fp.get());
         if (ret < 0) {
             HILOGE("Failed to fflush file in the stream");

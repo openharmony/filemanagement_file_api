@@ -36,6 +36,18 @@ using namespace OHOS::FileManagement::LibN;
 static int RecurMoveDir(const string &srcPath, const string &destPath, const int mode,
     vector<struct ErrFiles> &errfiles);
 
+static tuple<bool, bool> JudgeExistAndEmpty(const string &path)
+{
+    filesystem::path pathName(path);
+    if (filesystem::exists(pathName)) {
+        if (filesystem::is_empty(pathName)) {
+            return { true, true };
+        }
+        return { true, false };
+    }
+    return { false, false };
+}
+
 static int RmDirectory(const string &path)
 {
     filesystem::path pathName(path);
@@ -223,8 +235,8 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode, ve
     }
     string dirName = string(src).substr(found);
     string destStr = dest + dirName;
-    filesystem::path dstPath(destStr);
-    if (filesystem::exists(dstPath)) {
+    auto [destStrExist, destStrEmpty] = JudgeExistAndEmpty(destStr);
+    if (destStrExist && !destStrEmpty) {
         if (mode == DIRMODE_DIRECTORY_REPLACE) {
             int removeRes = RmDirectory(destStr);
             if (removeRes) {
@@ -233,6 +245,7 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode, ve
             }
         }
         if (mode == DIRMODE_DIRECTORY_THROW_ERR) {
+            HILOGE("Failed to move directory in DIRMODE_DIRECTORY_THROW_ERR");
             return ENOTEMPTY;
         }
     }

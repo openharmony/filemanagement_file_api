@@ -47,7 +47,7 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info cbInfo)
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Stream may have been closed");
+        HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -91,7 +91,7 @@ napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info cbInfo)
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Stream may have been closed yet");
+        HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -112,7 +112,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Stream may has been closed");
+        HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -144,25 +144,8 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
     return NVal::CreateInt64(env, static_cast<int64_t>(writeLen)).val_;
 }
 
-napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
+static napi_value WriteExec(napi_env env, NFuncArg &funcArg, StreamEntity *streamEntity)
 {
-    NFuncArg funcArg(env, cbInfo);
-    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
-        HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
-
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
-    if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Stream may has been closed");
-        NError(EIO).ThrowErr(env);
-        return nullptr;
-    }
-
-    FILE *filp = nullptr;
-    filp = streamEntity->fp.get();
-
     auto [succ, bufGuard, buf, len, offset] =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
@@ -170,21 +153,25 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto arg = CreateSharedPtr<AsyncWrtieArg>(move(bufGuard));
+    auto arg = CreateSharedPtr<AsyncWriteArg>(move(bufGuard));
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, buf = buf, len = len, filp, offset = offset]() -> NError {
+    auto cbExec = [arg, buf = buf, len = len, streamEntity, offset = offset]() -> NError {
+        if (!streamEntity || !streamEntity->fp.get()) {
+            HILOGE("Stream has been closed in write cbExec possibly");
+            return NError(EIO);
+        }
         if (offset >= 0) {
-            int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
+            int ret = fseek(streamEntity->fp.get(), static_cast<long>(offset), SEEK_SET);
             if (ret < 0) {
                 HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
                 return NError(errno);
             }
         }
-        arg->actLen = fwrite(buf, 1, len, filp);
+        arg->actLen = fwrite(buf, 1, len, streamEntity->fp.get());
         if ((arg->actLen == 0) && (arg->actLen != len)) {
             HILOGE("Failed to fwrite stream");
             return NError(EIO);
@@ -210,7 +197,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
     }
 }
 
-napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
+napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
 {
     NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
@@ -221,13 +208,15 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Stream may have been closed");
+        HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
-    FILE *filp = nullptr;
-    filp = streamEntity->fp.get();
+    return WriteExec(env, funcArg, streamEntity);
+}
 
+static napi_value ReadExec(napi_env env, NFuncArg &funcArg, StreamEntity *streamEntity)
+{
     auto [succ, buf, len, offset] =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
@@ -242,16 +231,20 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, buf = buf, len = len, filp, offset = offset]() -> NError {
+    auto cbExec = [arg, buf = buf, len = len, streamEntity, offset = offset]() -> NError {
+        if (!streamEntity || !streamEntity->fp.get()) {
+            HILOGE("Stream has been closed in read cbExec possibly");
+            return NError(EIO);
+        }
         if (offset >= 0) {
-            int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
+            int ret = fseek(streamEntity->fp.get(), static_cast<long>(offset), SEEK_SET);
             if (ret < 0) {
                 HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
                 return NError(errno);
             }
         }
-        size_t actLen = fread(buf, 1, len, filp);
-        if ((actLen != static_cast<size_t>(len) && !feof(filp)) || ferror(filp)) {
+        size_t actLen = fread(buf, 1, len, streamEntity->fp.get());
+        if ((actLen != static_cast<size_t>(len) && !feof(streamEntity->fp.get())) || ferror(streamEntity->fp.get())) {
             HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
             return NError(EIO);
         } else {
@@ -278,6 +271,24 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
     }
 }
 
+napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
+{
+    NFuncArg funcArg(env, cbInfo);
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    if (!streamEntity || !streamEntity->fp) {
+        HILOGE("Failed to get entity of Stream");
+        NError(EIO).ThrowErr(env);
+        return nullptr;
+    }
+    return ReadExec(env, funcArg, streamEntity);
+}
+
 napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
 {
     NFuncArg funcArg(env, cbInfo);
@@ -289,7 +300,7 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Stream may has been closed");
+        HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
