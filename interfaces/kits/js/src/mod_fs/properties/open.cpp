@@ -171,7 +171,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
                 auto file = InstantiateFile(env, ret, uri.ToString(), true).val_;
                 return file;
             }
-            HILOGE("Failed to open file by Datashare");
+            HILOGE("Failed to open file by Datashare error %{public}d", ret);
             NError(-ret).ThrowErr(env);
             return nullptr;
         }
@@ -199,9 +199,24 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     int ret = uv_fs_open(nullptr, open_req.get(), pathStr.c_str(), mode, S_IRUSR |
         S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+        if (bundleName == MEDIA) {
+            ret = OpenFileByDatashare(uri.ToString(), mode);
+            if (ret < 0) {
+                HILOGE("Failed to open file by Datashare error %{public}d", ret);
+                NError(-ret).ThrowErr(env);
+                return nullptr;
+            }
+        } else {
+            HILOGE("Failed to open file for libuv error %{public}d", ret);
+            NError(ret).ThrowErr(env);
+            return nullptr;
+        }
+#else
         HILOGE("Failed to open file for libuv error %{public}d", ret);
         NError(ret).ThrowErr(env);
         return nullptr;
+#endif
     }
     auto file = InstantiateFile(env, ret, pathStr, false).val_;
     return file;
@@ -233,7 +248,7 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
                 arg->uri = path;
                 return NError(ERRNO_NOERR);
             }
-            HILOGE("Failed to open file by Datashare");
+            HILOGE("Failed to open file by Datashare error %{public}d", ret);
             return NError(-ret);
         }
     } else if (uriType == DATASHARE) {
@@ -259,8 +274,21 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
     }
     int ret = uv_fs_open(nullptr, open_req.get(), pStr.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+        if (bundleName == MEDIA) {
+            ret = OpenFileByDatashare(path, mode);
+            if (ret < 0) {
+                HILOGE("Failed to open file by Datashare error %{public}d", ret);
+                return NError(-ret);
+            }
+        } else {
+            HILOGE("Failed to open file for libuv error %{public}d", ret);
+            return NError(ret);
+        }
+#else
         HILOGE("Failed to open file for libuv error %{public}d", ret);
         return NError(ret);
+#endif
     }
     arg->fd = ret;
     arg->path = pStr;
