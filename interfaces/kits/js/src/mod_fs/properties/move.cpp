@@ -83,7 +83,17 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
 
 static int CopyAndDeleteFile(const string &src, const string &dest)
 {
-    int ret = 0;
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!stat_req) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    int ret = uv_fs_stat(nullptr, stat_req.get(), src.c_str(), nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to stat srcPath");
+        return ret;
+    }
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     filesystem::path dstPath(dest);
     std::error_code errCode;
@@ -120,6 +130,18 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
         return ret;
     }
     uv_fs_req_cleanup(&unlink_req);
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> utime_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!utime_req) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    ret = uv_fs_utime(nullptr, utime_req.get(), dest.c_str(), stat_req->statbuf.st_atim.tv_sec,
+        stat_req->statbuf.st_mtim.tv_sec, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to utime dstPath");
+        return ret;
+    }
     return ERRNO_NOERR;
 }
 
