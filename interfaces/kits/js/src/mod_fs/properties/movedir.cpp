@@ -130,8 +130,9 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    ret = uv_fs_utime(nullptr, utime_req.get(), dstPath.c_str(), stat_req->statbuf.st_atim.tv_sec,
-        stat_req->statbuf.st_mtim.tv_sec, nullptr);
+    double atime = static_cast<double>(stat_req->statbuf.st_atim.tv_sec) + static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / ns;
+    double mtime = static_cast<double>(stat_req->statbuf.st_mtim.tv_sec) + static_cast<double>(stat_req->statbuf.st_mtim.tv_nsec) / ns;
+    ret = uv_fs_utime(nullptr, utime_req.get(), dstPath.c_str(), atime, mtime, nullptr);
     if (ret < 0) {
         HILOGE("Failed to utime dstPath");
         return ret;
@@ -255,6 +256,10 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode, ve
     size_t found = string(src).rfind('/');
     if (found == std::string::npos) {
         return EINVAL;
+    }
+    if (access(src.c_str(), W_OK) != 0) {
+        HILOGE("Failed to move src directory due to doesn't exist or hasn't write permission");
+        return errno;
     }
     string dirName = string(src).substr(found);
     string destStr = dest + dirName;

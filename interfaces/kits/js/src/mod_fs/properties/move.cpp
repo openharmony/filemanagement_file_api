@@ -89,14 +89,14 @@ static int ChangeTime(const string &path, uv_fs_t *stat_req)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int ret = uv_fs_utime(nullptr, utime_req.get(), path.c_str(), stat_req->statbuf.st_atim.tv_sec,
-        stat_req->statbuf.st_mtim.tv_sec, nullptr);
+    double atime = static_cast<double>(stat_req->statbuf.st_atim.tv_sec) + static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / nanosecond;
+    double mtime = static_cast<double>(stat_req->statbuf.st_mtim.tv_sec) + static_cast<double>(stat_req->statbuf.st_mtim.tv_nsec) / nanosecond;
+    int ret = uv_fs_utime(nullptr, utime_req.get(), path.c_str(), atime, mtime, nullptr);
     if (ret < 0) {
         HILOGE("Failed to utime dstPath");
     }
     return ret;
 }
-
 static int CopyAndDeleteFile(const string &src, const string &dest)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
