@@ -99,6 +99,17 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
 
 static int CopyAndDeleteFile(const string &src, const string &dest)
 {
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!stat_req) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    int ret = uv_fs_stat(nullptr, stat_req.get(), src.c_str(), nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to stat srcPath");
+        return ret;
+    }
     filesystem::path dstPath(dest);
     if (filesystem::exists(dstPath)) {
         int removeRes = RemovePath(dest);
@@ -112,6 +123,19 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
     if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
         HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
         return errCode.value();
+    }
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> utime_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!utime_req) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    double atime = static_cast<double>(stat_req->statbuf.st_atim.tv_sec) + static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / ns;
+    double mtime = static_cast<double>(stat_req->statbuf.st_mtim.tv_sec) + static_cast<double>(stat_req->statbuf.st_mtim.tv_nsec) / ns;
+    ret = uv_fs_utime(nullptr, utime_req.get(), dstPath.c_str(), atime, mtime, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to utime dstPath");
+        return ret;
     }
     return RemovePath(src);
 }
