@@ -85,9 +85,15 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
 {
     int ret = 0;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    filesystem::path srcPath(src);
     filesystem::path dstPath(dest);
-    error_code errCode;
+    std::error_code errCode;
+    if (filesystem::exists(dstPath)) {
+        if (!filesystem::remove(dstPath, errCode)) {
+            HILOGE("Failed to remove dest file, error code: %{public}d", errCode.value());
+            return errCode.value();
+        }
+    }
+    filesystem::path srcPath(src);
     if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
         HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
         return errCode.value();
@@ -105,9 +111,10 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
     ret = uv_fs_unlink(nullptr, &unlink_req, src.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to unlink src file");
-        ret = uv_fs_unlink(nullptr, &unlink_req, dest.c_str(), nullptr);
-        if (ret < 0) {
+        int result = uv_fs_unlink(nullptr, &unlink_req, dest.c_str(), nullptr);
+        if (result < 0) {
             HILOGE("Failed to unlink dest file");
+            return result;
         }
         uv_fs_req_cleanup(&unlink_req);
         return ret;
@@ -133,9 +140,17 @@ static int RenameFile(const string &src, const string &dest)
 
 static int MoveFile(const string &src, const string &dest, int mode)
 {
+    uv_fs_t access_req;
+    int ret = uv_fs_access(nullptr, &access_req, src.c_str(), W_OK, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to move src file due to doesn't exist or hasn't write permission");
+        uv_fs_req_cleanup(&access_req);
+        return ret;
+    }
+    uv_fs_req_cleanup(&access_req);
     if (mode == MODE_THROW_ERR) {
         uv_fs_t access_req;
-        int ret = uv_fs_access(nullptr, &access_req, dest.c_str(), 0, nullptr);
+        ret = uv_fs_access(nullptr, &access_req, dest.c_str(), 0, nullptr);
         uv_fs_req_cleanup(&access_req);
         if (ret == 0) {
             HILOGE("Failed to move file due to existing destPath with MODE_THROW_ERR.");
