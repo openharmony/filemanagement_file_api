@@ -130,8 +130,10 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    double atime = static_cast<double>(stat_req->statbuf.st_atim.tv_sec) + static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / ns;
-    double mtime = static_cast<double>(stat_req->statbuf.st_mtim.tv_sec) + static_cast<double>(stat_req->statbuf.st_mtim.tv_nsec) / ns;
+    double atime = static_cast<double>(stat_req->statbuf.st_atim.tv_sec) +
+        static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / NS;
+    double mtime = static_cast<double>(stat_req->statbuf.st_mtim.tv_sec) +
+        static_cast<double>(stat_req->statbuf.st_mtim.tv_nsec) / NS;
     ret = uv_fs_utime(nullptr, utime_req.get(), dstPath.c_str(), atime, mtime, nullptr);
     if (ret < 0) {
         HILOGE("Failed to utime dstPath");
