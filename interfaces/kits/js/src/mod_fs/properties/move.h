@@ -30,6 +30,7 @@ public:
 };
 constexpr int MODE_FORCE_MOVE = 0;
 constexpr int MODE_THROW_ERR = 1;
+const double NANOSECOND = 1e9;
 const std::string PROCEDURE_MOVE_NAME = "FileIOMove";
 } // namespace ModuleFileIO
 } // namespace FileManagement
