@@ -23,7 +23,9 @@ napi_value StatvfsExport(napi_env env, napi_value exports)
 {
     static napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("getFreeSize", GetFreeSize),
+        DECLARE_NAPI_FUNCTION("getFreeSizeSync", GetFreeSizeSync),
         DECLARE_NAPI_FUNCTION("getTotalSize", GetTotalSize),
+        DECLARE_NAPI_FUNCTION("getTotalSizeSync", GetTotalSizeSync),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
