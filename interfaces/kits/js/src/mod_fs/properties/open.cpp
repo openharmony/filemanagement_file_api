@@ -137,6 +137,25 @@ static int OpenFileByDatashare(const string &path, unsigned int flags)
 }
 #endif
 
+static void OpenByMediaUri(const string &path, unsigned int mode, int &ret)
+{
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    Uri uri(path);
+    string bundleName = uri.GetAuthority();
+    if (bundleName == MEDIA) {
+        ret = OpenFileByDatashare(uri.ToString(), mode);
+        if (ret < 0) {
+            HILOGE("Failed to open file by Datashare error %{public}d", ret);
+            ret = -ret;
+        }
+    } else {
+        HILOGE("Failed to open file for libuv error %{public}d", ret);
+    }
+#else
+    HILOGE("Failed to open file for libuv error %{public}d", ret);
+#endif
+}
+
 napi_value Open::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -164,8 +183,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     if (uriType == SCHEME_FILE) {
         AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
         pathStr = fileUri.GetRealPath();
-        if ((bundleName == MEDIA || bundleName == DOCS) &&
-            access(pathStr.c_str(), F_OK) != 0) {
+        if ((bundleName == MEDIA || bundleName == DOCS) && access(pathStr.c_str(), F_OK) != 0) {
             int ret = OpenFileByDatashare(uri.ToString(), mode);
             if (ret >= 0) {
                 auto file = InstantiateFile(env, ret, uri.ToString(), true).val_;
@@ -189,8 +207,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         }
     }
 #endif
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = { new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
@@ -199,24 +216,9 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     int ret = uv_fs_open(nullptr, open_req.get(), pathStr.c_str(), mode, S_IRUSR |
         S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-        if (bundleName == MEDIA) {
-            ret = OpenFileByDatashare(uri.ToString(), mode);
-            if (ret < 0) {
-                HILOGE("Failed to open file by Datashare error %{public}d", ret);
-                NError(-ret).ThrowErr(env);
-                return nullptr;
-            }
-        } else {
-            HILOGE("Failed to open file for libuv error %{public}d", ret);
-            NError(ret).ThrowErr(env);
-            return nullptr;
-        }
-#else
-        HILOGE("Failed to open file for libuv error %{public}d", ret);
+        OpenByMediaUri(pathStr, mode, ret);
         NError(ret).ThrowErr(env);
         return nullptr;
-#endif
     }
     auto file = InstantiateFile(env, ret, pathStr, false).val_;
     return file;
@@ -239,8 +241,7 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
     if (uriType == SCHEME_FILE) {
         AppFileService::ModuleFileUri::FileUri fileUri(path);
         pStr = fileUri.GetRealPath();
-        if ((bundleName == MEDIA || bundleName == DOCS) &&
-            access(pStr.c_str(), F_OK) != 0) {
+        if ((bundleName == MEDIA || bundleName == DOCS) && access(pStr.c_str(), F_OK) != 0) {
             int ret = OpenFileByDatashare(path, mode);
             if (ret >= 0) {
                 arg->fd = ret;
@@ -266,29 +267,15 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
         }
     }
 #endif
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = { new uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
     }
     int ret = uv_fs_open(nullptr, open_req.get(), pStr.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-        if (bundleName == MEDIA) {
-            ret = OpenFileByDatashare(path, mode);
-            if (ret < 0) {
-                HILOGE("Failed to open file by Datashare error %{public}d", ret);
-                return NError(-ret);
-            }
-        } else {
-            HILOGE("Failed to open file for libuv error %{public}d", ret);
-            return NError(ret);
-        }
-#else
-        HILOGE("Failed to open file for libuv error %{public}d", ret);
+        OpenByMediaUri(pStr, mode, ret);
         return NError(ret);
-#endif
     }
     arg->fd = ret;
     arg->path = pStr;
