@@ -24,14 +24,6 @@ extern "C" {
 
 /**
  * @ingroup     rust
- * @brief       Structure for storing file information by line.
- * @attention   Calls the `stringVectorFree` interface to release the instance.
- */
-typedef void StringVector;
-
-
-/**
- * @ingroup     rust
  * @brief       Enumeration of `lseek` interface to seek within a file.
  * @param       Start   Sets the offset from the head of the file.
  * @param       Current Sets the offset from the current position.
@@ -66,39 +58,31 @@ typedef struct {
 
 /**
  * @ingroup     rust
- * @brief       Reads the content of a file in a path and split it by line.
+ * @brief       Gets a iterator to read the content of a file in a path and split it by line.
  * @param       path    file path.
  * @retval      NULL    Fails to read the file, stores error information from errno.
- * @retval      !NULL   Reads the file successfully, valid `StringVector` pointer.
+ * @retval      !NULL   Reads the file successfully, valid reader iterator pointer.
  * @attention
  * 1.The return value needs to be released by calling the `stringVectorFree` method.
  * 2.The input `path` must be in valid UTF-8 format.
  * 3.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-StringVector* ReadLines(char* path);
+void* ReaderIterator(char* path);
 
 /**
  * @ingroup     rust
- * @brief       Gets a line of content from `StringVector`.
- * @param       lines   pointer to `StringVector`.
- * @retval      NULL and error stored in errno  Invalid pointer to `StringVector`.
- * @retval      NULL and no error in errno      Gets the last line of content in the `StringVector`.
+ * @brief       Reads a line from the reader iterator.
+ * @param       iter   pointer to reader iterator.
+ * @retval      NULL and error stored in errno  Invalid pointer to iterator.
+ * @retval      NULL and no error in errno      Gets the last line of content from the iterator.
  * @retval      !NULL                           Valid `Str` pointer, Gets a line of content successfully.
  * @attention
  * 1.The input `lines` must be a valid pointer to `StringVector`.
  * 2.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-Str* NextLine(StringVector* lines);
-
-/**
- * @ingroup     rust
- * @brief       Releases the memory that the `StringVector` pointer points to.
- * @param       lines   pointer to `StringVector`.
- * @li          rust_file.h:The file where the interface is located.
- */
-void StringVectorFree(StringVector* lines);
+Str* NextLine(void* iter);
 
 /**
  * @ingroup     rust
@@ -143,7 +127,7 @@ Str* GetParent(int fd);
  * @param       lines   pointer to `Str`.
  * @li          rust_file.h:The file where the interface is located.
  */
-void ParentFree(Str* str);
+void StrFree(Str* str);
 
 #ifdef __cplusplus
 #if __cplusplus

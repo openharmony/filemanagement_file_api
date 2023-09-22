@@ -14,16 +14,16 @@
  */
 
 use crate::adapter::{
-    create_dir, error_control, get_parent, next_line, read_lines, seek, MakeDirectionMode, SeekPos,
-    Str, StringVector,
+    create_dir, error_control, get_parent, next_line, reader_iterator, seek, MakeDirectionMode,
+    SeekPos, Str,
 };
-use libc::c_char;
+use libc::{c_char, c_void};
 use std::ffi::CString;
 use std::ptr::null_mut;
 
 #[no_mangle]
-pub unsafe extern "C" fn ReadLines(path: *const c_char) -> *mut StringVector {
-    match read_lines(path) {
+pub unsafe extern "C" fn ReaderIterator(path: *const c_char) -> *mut c_void {
+    match reader_iterator(path) {
         Ok(sv) => sv,
         Err(e) => {
             error_control(e);
@@ -33,20 +33,13 @@ pub unsafe extern "C" fn ReadLines(path: *const c_char) -> *mut StringVector {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn NextLine(lines: *mut StringVector) -> *mut Str {
-    match next_line(lines) {
+pub unsafe extern "C" fn NextLine(iter: *mut c_void) -> *mut Str {
+    match next_line(iter) {
         Ok(s) => s,
         Err(e) => {
             error_control(e);
             null_mut()
         }
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn StringVectorFree(lines: *mut StringVector) {
-    if !lines.is_null() {
-        let _ = Box::from_raw(lines);
     }
 }
 
@@ -82,9 +75,9 @@ pub extern "C" fn GetParent(fd: i32) -> *mut Str {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ParentFree(str: *mut Str) {
+pub unsafe extern "C" fn StrFree(str: *mut Str) {
     if !str.is_null() {
         let string = Box::from_raw(str);
-        let _ = CString::from_raw(string.str as *mut c_char);
+        let _ = CString::from_raw(string.str);
     }
 }

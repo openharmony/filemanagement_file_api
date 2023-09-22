@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-use libc::{__errno_location, c_char, c_uint};
+use libc::{__errno_location, c_char, c_uint, c_void};
 use std::ffi::{CStr, CString};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Error, ErrorKind, Seek, SeekFrom};
@@ -44,16 +44,9 @@ pub enum MakeDirectionMode {
 #[repr(C)]
 pub struct Str {
     /// C string.
-    pub str: *const c_char,
+    pub str: *mut c_char,
     /// The length of string.
     pub len: c_uint,
-}
-
-/// Structure for storing file information by line.
-#[derive(Debug, Default)]
-pub struct StringVector {
-    pub(crate) vec: Vec<String>,
-    pub(crate) len: usize,
 }
 
 pub(crate) unsafe fn error_control(err: Error) {
@@ -66,12 +59,12 @@ pub(crate) unsafe fn error_control(err: Error) {
             ErrorKind::PermissionDenied => *errno_pos = 13,
             ErrorKind::AlreadyExists => *errno_pos = 17,
             ErrorKind::InvalidInput => *errno_pos = 22,
-            _ => unreachable!("Unexpected error type"),
+            _ => *errno_pos = 13900042,
         }
     }
 }
 
-pub(crate) unsafe fn read_lines(path: *const c_char) -> Result<*mut StringVector, Error> {
+pub(crate) unsafe fn reader_iterator(path: *const c_char) -> Result<*mut c_void, Error> {
     if path.is_null() {
         return Err(Error::new(ErrorKind::InvalidInput, "Invalid input"));
     }
@@ -82,31 +75,24 @@ pub(crate) unsafe fn read_lines(path: *const c_char) -> Result<*mut StringVector
             return Err(Error::new(ErrorKind::InvalidInput, "Invalid input"));
         }
     };
-    let mut lines = StringVector::default();
     let file = File::open(path)?;
-    let mut reader = BufReader::new(file);
-    loop {
-        let mut line = String::new();
-        let len = reader.read_line(&mut line)?;
-        if len > 0 {
-            lines.vec.push(line);
-        } else {
-            return Ok(Box::into_raw(Box::new(lines)));
-        }
-    }
+    let reader = BufReader::new(file);
+    Ok(Box::into_raw(Box::new(reader)) as *mut c_void)
 }
 
-pub(crate) unsafe fn next_line(lines: *mut StringVector) -> Result<*mut Str, Error> {
-    if lines.is_null() {
+pub(crate) unsafe fn next_line(iter: *mut c_void) -> Result<*mut Str, Error> {
+    if iter.is_null() {
         return Err(Error::new(ErrorKind::InvalidInput, "Invalid input"));
     }
-    let lines = &mut *lines;
-    let cnt = lines.len;
-    if cnt < lines.vec.len() {
-        let line = lines.vec[cnt].as_ptr() as *const c_char;
-        let len = lines.vec[cnt].len() as c_uint;
-        let item = Str { str: line, len };
-        lines.len += 1;
+    let reader = &mut *(iter as *mut BufReader<File>);
+    let mut line = String::new();
+    let len = reader.read_line(&mut line)? as c_uint;
+    if len > 0 {
+        let line = CString::new(line).unwrap();
+        let item = Str {
+            str: line.into_raw(),
+            len,
+        };
         Ok(Box::into_raw(Box::new(item)))
     } else {
         Ok(null_mut())
@@ -156,7 +142,7 @@ pub(crate) fn get_parent(fd: i32) -> Result<*mut Str, Error> {
                 let par_path = CString::new(str).unwrap();
                 let len = par_path.as_bytes().len() as c_uint;
                 let item = Str {
-                    str: par_path.into_raw() as *const c_char,
+                    str: par_path.into_raw(),
                     len,
                 };
                 return Ok(Box::into_raw(Box::new(item)));
