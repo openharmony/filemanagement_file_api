@@ -175,9 +175,7 @@ static int MoveFile(const string &src, const string &dest, int mode)
         uv_fs_req_cleanup(&access_req);
         return ret;
     }
-    uv_fs_req_cleanup(&access_req);
     if (mode == MODE_THROW_ERR) {
-        uv_fs_t access_req;
         ret = uv_fs_access(nullptr, &access_req, dest.c_str(), 0, nullptr);
         uv_fs_req_cleanup(&access_req);
         if (ret == 0) {
@@ -188,6 +186,8 @@ static int MoveFile(const string &src, const string &dest, int mode)
             HILOGE("Failed to access destPath with MODE_THROW_ERR.");
             return ret;
         }
+    } else {
+        uv_fs_req_cleanup(&access_req);
     }
     return RenameFile(src, dest);
 }
