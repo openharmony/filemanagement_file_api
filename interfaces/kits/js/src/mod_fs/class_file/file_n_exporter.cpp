@@ -77,7 +77,7 @@ static tuple<int, unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*>> Re
     }
     int ret = uv_fs_realpath(nullptr, realpath_req.get(), srcPath.c_str(), nullptr);
     if (ret < 0) {
-        HILOGE("Failed to realpath, ret: %{public}d, path: %{public}s", ret, srcPath.c_str());
+        HILOGE("Failed to realpath, ret: %{public}d", ret);
         return { ret, move(realpath_req)};
     }
     return { ERRNO_NOERR, move(realpath_req) };
@@ -139,7 +139,7 @@ napi_value FileNExporter::GetName(napi_env env, napi_callback_info info)
     string path = string(static_cast<const char *>(realPath->ptr));
     auto pos = path.find_last_of('/');
     if (pos == string::npos) {
-        HILOGE("Failed to split filename from path, path: %{public}s", path.c_str());
+        HILOGE("Failed to split filename from path");
         NError(ENOENT).ThrowErr(env);
         return nullptr;
     }
