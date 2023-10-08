@@ -17,7 +17,7 @@ use crate::adapter::{
     create_dir, error_control, get_parent, next_line, reader_iterator, seek, MakeDirectionMode,
     SeekPos, Str,
 };
-use libc::{c_char, c_void};
+use libc::{c_char, c_longlong, c_void};
 use std::ffi::CString;
 use std::ptr::null_mut;
 
@@ -44,11 +44,12 @@ pub unsafe extern "C" fn NextLine(iter: *mut c_void) -> *mut Str {
 }
 
 #[no_mangle]
-pub extern "C" fn Lseek(fd: i32, offset: i64, pos: SeekPos) {
+pub extern "C" fn Lseek(fd: i32, offset: i64, pos: SeekPos) -> c_longlong {
     match seek(fd, offset, pos) {
-        Ok(_) => {}
+        Ok(pos) => pos as c_longlong,
         Err(e) => unsafe {
             error_control(e);
+            -1
         },
     }
 }

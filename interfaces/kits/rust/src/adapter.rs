@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+use hilog_rust::{error, hilog, HiLogLabel, LogType};
 use libc::{__errno_location, c_char, c_uint, c_void};
 use std::ffi::{CStr, CString};
 use std::fs::File;
@@ -22,6 +23,12 @@ use std::os::unix::io::{FromRawFd, RawFd};
 use std::path::PathBuf;
 use std::ptr::null_mut;
 use std::{fs, mem};
+
+const LOG_LABEL: HiLogLabel = HiLogLabel {
+    log_type: LogType::LogCore,
+    domain: 0xD004388,
+    tag: "file_api",
+};
 
 /// Enumeration of `lseek` interface to seek within a file.
 #[repr(C)]
@@ -59,7 +66,11 @@ pub(crate) unsafe fn error_control(err: Error) {
             ErrorKind::PermissionDenied => *errno_pos = 13,
             ErrorKind::AlreadyExists => *errno_pos = 17,
             ErrorKind::InvalidInput => *errno_pos = 22,
-            _ => *errno_pos = 13900042,
+            ErrorKind::InvalidData => *errno_pos = 61,
+            _ => {
+                *errno_pos = 13900042;
+                error!(LOG_LABEL, "Unknown error is : {}", @public(err));
+            }
         }
     }
 }
@@ -99,17 +110,17 @@ pub(crate) unsafe fn next_line(iter: *mut c_void) -> Result<*mut Str, Error> {
     }
 }
 
-pub(crate) fn seek(fd: i32, offset: i64, pos: SeekPos) -> Result<(), Error> {
+pub(crate) fn seek(fd: i32, offset: i64, pos: SeekPos) -> Result<u64, Error> {
     let mut file = unsafe { File::from_raw_fd(fd as RawFd) };
 
-    match pos {
-        SeekPos::Start => file.seek(SeekFrom::Start(offset as u64))?,
-        SeekPos::Current => file.seek(SeekFrom::Current(offset))?,
-        SeekPos::End => file.seek(SeekFrom::End(offset))?,
+    let new_pos = match pos {
+        SeekPos::Start => file.seek(SeekFrom::Start(offset as u64)),
+        SeekPos::Current => file.seek(SeekFrom::Current(offset)),
+        SeekPos::End => file.seek(SeekFrom::End(offset)),
     };
 
     mem::forget(file);
-    Ok(())
+    new_pos
 }
 
 pub(crate) fn create_dir(path: *const c_char, mode: MakeDirectionMode) -> Result<(), Error> {

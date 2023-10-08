@@ -90,12 +90,14 @@ Str* NextLine(void* iter);
  * @param       fd      file descriptor.
  * @param       offset  seek offset.
  * @param       pos     seek position.
+ * @retval      >=0     the resulting offset location.
+ * @retval      -1      error occurs.
  * @attention
  * 1.It can fail because it may involve flushing a buffer or seek to a negative offset.
  * 2.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-void Lseek(int fd, long long offset, enum SeekPos pos);
+long long int Lseek(int fd, long long offset, enum SeekPos pos);
 
 /**
  * @ingroup     rust
