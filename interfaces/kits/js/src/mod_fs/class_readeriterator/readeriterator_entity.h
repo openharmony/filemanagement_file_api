@@ -16,12 +16,6 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ENTITY_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ENTITY_H
 
-#include <cinttypes>
-#include <iostream>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {

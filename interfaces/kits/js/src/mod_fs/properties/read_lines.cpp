@@ -99,13 +99,18 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
     }
 
     auto arg = std::make_shared<ReaderIteratorArg>();
-    auto cbExec = [arg = arg, path = tmp.get()]() -> NError {
+    auto cbExec = [arg, path = tmp.get()]() -> NError {
         arg->iterator = ::ReaderIterator(path);
-        GetFileSize(string(path), arg->offset);
         if (errno != 0) {
-            HILOGE("Failed to ReadLines");
+            HILOGE("Failed to read lines of the file");
             return NError(errno);
         }
+        int ret = GetFileSize(string(path), arg->offset);
+        if (ret != 0) {
+            HILOGE("Failed to get size of the file");
+            return NError(ret);
+        }
+        
         return NError(ERRNO_NOERR);
     };
 
@@ -142,8 +147,8 @@ napi_value ReadLines::Sync(napi_env env, napi_callback_info info)
     }
 
     void *iterator = ::ReaderIterator(path.get());
-    if (errno != 0) {
-        HILOGE("Failed to ReadLinesSync");
+    if (errno != 0 || iterator == nullptr) {
+        HILOGE("Failed to read lines of the file");
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -151,7 +156,7 @@ napi_value ReadLines::Sync(napi_env env, napi_callback_info info)
     int64_t offset = 0;
     int ret = GetFileSize(string(path.get()), offset);
     if (ret != 0) {
-        HILOGE("Failed to get file size");
+        HILOGE("Failed to get size of the file");
         return nullptr;
     }
 
