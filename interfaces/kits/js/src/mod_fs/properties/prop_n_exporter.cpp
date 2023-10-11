@@ -32,14 +32,17 @@
 #include "fsync.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "lseek.h"
 #include "lstat.h"
 #include "mkdtemp.h"
 #include "open.h"
 #include "read_lines.h"
 #include "rename.h"
 #include "rmdirent.h"
+#include "rust_file.h"
 #include "stat.h"
 #include "truncate.h"
+#include "utimes.h"
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "copy_file.h"
@@ -234,7 +237,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
 napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -246,18 +249,37 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    auto cbExec = [path = string(tmp.get())]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!mkdir_req) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
+    bool singleLevel = true;
+    bool recursionMode = false;
+    if (funcArg.GetArgc() >= NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_boolean)) {
+        singleLevel = false;
+        auto [success, recursion] = NVal(env, funcArg[NARG_POS::SECOND]).ToBool(false);
+        if (!success) {
+            HILOGE("Invalid recursion mode");
+            NError(EINVAL).ThrowErr(env);
+            return nullptr;
         }
-        int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to create directory");
-            return NError(ret);
+        recursionMode = recursion;
+    }
+
+    auto cbExec = [path = string(tmp.get()), recursionMode, singleLevel]() -> NError {
+        if (singleLevel) {
+            std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
+                new uv_fs_t, CommonFunc::fs_req_cleanup };
+            if (!mkdir_req) {
+                HILOGE("Failed to request heap memory.");
+                return NError(ENOMEM);
+            }
+            int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
+            if (ret < 0) {
+                HILOGE("Failed to create directory");
+                return NError(ret);
+            }
+        } else {
+            ::Mkdirs(const_cast<char*>(path.c_str()), static_cast<MakeDirectionMode>(recursionMode));
+            if (errno != 0){
+                return NError(errno);
+            }
         }
         return NError(ERRNO_NOERR);
     };
@@ -270,10 +292,12 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE) {
+
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_MKDIR_NAME, cbExec, cbCompl).val_;
     } else {
-        NVal cb(env, funcArg[NARG_POS::SECOND]);
+        NVal cb(env, funcArg[funcArg.GetArgc() - 1]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_MKDIR_NAME, cbExec, cbCompl).val_;
     }
 }
@@ -281,7 +305,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
 napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -294,20 +318,33 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!mkdir_req) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
+    if (funcArg.GetArgc() == NARG_CNT::ONE) {
+        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
+            new uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!mkdir_req) {
+            HILOGE("Failed to request heap memory.");
+            NError(ENOMEM).ThrowErr(env);
+            return nullptr;
+        }
+        int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.get(), DIR_DEFAULT_PERM, nullptr);
+        if (ret < 0) {
+            HILOGE("Failed to create directory");
+            NError(ret).ThrowErr(env);
+            return nullptr;
+        }
+    } else {
+        auto [success, recursion] = NVal(env, funcArg[NARG_POS::SECOND]).ToBool(false);
+        if (!success) {
+            HILOGE("Invalid recursion mode");
+            NError(EINVAL).ThrowErr(env);
+            return nullptr;
+        }
+        ::Mkdirs(const_cast<char*>(path.get()), static_cast<MakeDirectionMode>(recursion));
+        if (errno != 0){
+            NError(errno).ThrowErr(env);
+            return nullptr;
+        }
     }
-    int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.get(), DIR_DEFAULT_PERM, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to create directory");
-        NError(ret).ThrowErr(env);
-        return nullptr;
-    }
-
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -569,6 +606,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("fdatasyncSync", Fdatasync::Sync),
         NVal::DeclareNapiFunction("fsync", Fsync::Async),
         NVal::DeclareNapiFunction("fsyncSync", Fsync::Sync),
+        NVal::DeclareNapiFunction("lseek", Lseek::Sync),
         NVal::DeclareNapiFunction("lstat", Lstat::Async),
         NVal::DeclareNapiFunction("lstatSync", Lstat::Sync),
         NVal::DeclareNapiFunction("mkdir", Mkdir),
@@ -589,6 +627,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("truncateSync", Truncate::Sync),
         NVal::DeclareNapiFunction("unlink", Unlink),
         NVal::DeclareNapiFunction("unlinkSync", UnlinkSync),
+        NVal::DeclareNapiFunction("utimes", Utimes::Sync),
         NVal::DeclareNapiFunction("write", Write),
         NVal::DeclareNapiFunction("writeSync", WriteSync),
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
