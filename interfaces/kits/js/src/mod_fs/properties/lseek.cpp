@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "lseek.h"
+
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -28,21 +29,21 @@ napi_value Lseek::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
-        HILOGE("Lseek, Number of arguments unmatched");
+        HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
     auto [succGetFd, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succGetFd || fd < 0) {
-        HILOGE("Lseek, Invalid fd from JS first argument");
+        HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     
     auto [succGetOffset, offset] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64();
     if (!succGetOffset) {
-        HILOGE("Lseek, Invalid offset from JS second argument");
+        HILOGE("Invalid offset from JS second argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -53,7 +54,7 @@ napi_value Lseek::Sync(napi_env env, napi_callback_info info)
     } else if (funcArg.GetArgc() == NARG_CNT::THREE) {
         auto [succGetWhence, whence] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(SeekPos::START);
         if (!succGetWhence || whence < SeekPos::START || whence > SeekPos::END) {
-            HILOGE("Lseek, Invalid whence from JS third argument");
+            HILOGE("Invalid whence from JS third argument");
             NError(EINVAL).ThrowErr(env);
             return nullptr;
         }
@@ -61,9 +62,9 @@ napi_value Lseek::Sync(napi_env env, napi_callback_info info)
     }
     
     if (pos < 0) {
-        HILOGE("Failed to Lseek");
+        HILOGE("Failed to lseek");
         NError(errno).ThrowErr(env);
-		return nullptr;
+        return nullptr;
     }
 
     return NVal::CreateInt64(env, pos).val_;
