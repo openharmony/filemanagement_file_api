@@ -52,7 +52,7 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
     }
     int ret = uv_fs_lstat(nullptr, lstat_req.get(), pathPtr.get(), nullptr);
     if (ret < 0) {
-        HILOGE("Failed to get stat of file by path %{public}s", pathPtr.get());
+        HILOGE("Failed to get stat of file, ret: %{public}d", ret);
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -71,7 +71,7 @@ static NError LstatExec(shared_ptr<StatEntity> arg, const string &path)
     }
     int ret = uv_fs_lstat(nullptr, lstat_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
-        HILOGE("Failed to get stat of file by path: %{public}s, ret: %{public}d", path.c_str(), ret);
+        HILOGE("Failed to get stat of file, ret: %{public}d", ret);
         return NError(ret);
     } else {
         arg->stat_ = lstat_req->statbuf;
