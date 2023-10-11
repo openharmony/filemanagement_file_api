@@ -109,6 +109,7 @@ ohos_shared_library("fs") {
   relative_install_dir = "module/file"
 
   include_dirs = [
+    "${file_api_path}/interfaces/kits/rust/include",
     "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_fs",
@@ -120,6 +121,7 @@ ohos_shared_library("fs") {
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/class_file/file_n_exporter.cpp",
     "src/mod_fs/class_stat/stat_n_exporter.cpp",
+    "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
     "src/mod_fs/common_func.cpp",
     "src/mod_fs/module.cpp",
     "src/mod_fs/properties/close.cpp",
@@ -140,6 +142,7 @@ ohos_shared_library("fs") {
   deps = [
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
   ]
 
   use_exceptions = true
@@ -174,6 +177,7 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/lseek.cpp",
       "src/mod_fs/properties/move.cpp",
       "src/mod_fs/properties/movedir.cpp",
+      "src/mod_fs/properties/read_lines.cpp",
       "src/mod_fs/properties/read_text.cpp",
       "src/mod_fs/properties/symlink.cpp",
       "src/mod_fs/properties/watcher.cpp",
