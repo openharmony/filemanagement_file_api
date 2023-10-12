@@ -13,10 +13,12 @@
 
 import("//build/ohos.gni")
 
-ohos_rust_shared_library("rust_file") {
-  crate_type = "dylib"
+ohos_rust_shared_ffi("rust_file") {
+  crate_type = "cdylib"
   part_name = "file_api"
   subsystem_name = "filemanagement"
   sources = [ "src/lib.rs" ]
+  crate_name = "rust_file"
   deps = [ "//third_party/rust/crates/libc:lib" ]
+  external_deps = [ "hilog:hilog_rust" ]
 }

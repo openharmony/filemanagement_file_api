@@ -36,7 +36,8 @@
             "ipc",
             "napi",
             "samgr",
-            "app_file_service"
+            "app_file_service",
+            "build_framework"
         ],
         "third_party": [
             "bounds_checking_function",
