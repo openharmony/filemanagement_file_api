@@ -84,9 +84,9 @@ void InitWhenceType(napi_env env, napi_value exports)
 {
     char propertyName[] = "WhenceType";
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("SEEK_SET ", NVal::CreateInt32(env, FS_SEEK_SET).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("SEEK_CUR", NVal::CreateInt32(env, FS_SEEK_CUR).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("SEEK_END", NVal::CreateInt32(env, FS_SEEK_END).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("SEEK_SET", NVal::CreateInt32(env, SEEK_SET).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("SEEK_CUR", NVal::CreateInt32(env, SEEK_CUR).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("SEEK_END", NVal::CreateInt32(env, SEEK_END).val_),
     };
     napi_value obj = nullptr;
     napi_status status = napi_create_object(env, &obj);
