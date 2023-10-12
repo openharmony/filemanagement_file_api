@@ -29,10 +29,27 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
+static tuple<bool, unique_ptr<char[]>> GetReadLinesArg(napi_env env, napi_value argOption)
+{
+    NVal option(env, argOption);
+    unique_ptr<char[]> encoding;
+
+    if (option.HasProp("encoding")) {
+        bool succ = false;
+        tie(succ, encoding, ignore) = option.GetProp("encoding").ToUTF8String("utf-8");
+        string_view encodingStr(encoding.get());
+        if (!succ || encodingStr != "utf-8") {
+            HILOGE("Illegal option.encoding parameter");
+            return { false, nullptr };
+        }
+    }
+
+    return { true, move(encoding) };
+}
+
 static int GetFileSize(const string &path, int64_t &offset) {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-
     if (!stat_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -85,28 +102,42 @@ struct ReaderIteratorArg
 napi_value ReadLines::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [succ, tmp, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
-    if (!succ) {
+    auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    if (!succPath) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto arg = std::make_shared<ReaderIteratorArg>();
-    auto cbExec = [arg, path = tmp.get()]() -> NError {
+    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
+        auto [succOption, encoding] = GetReadLinesArg(env, funcArg[NARG_POS::SECOND]);
+        if (!succOption) {
+            HILOGE("Invalid encoding from JS first argument");
+            NError(EINVAL).ThrowErr(env);
+            return nullptr; 
+        }
+    }
+
+    auto arg = CreateSharedPtr<ReaderIteratorArg>();
+    if (arg == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
+    auto cbExec = [arg, path = path.get()]() -> NError {
         arg->iterator = ::ReaderIterator(path);
-        if (errno != 0) {
+        if (arg->iterator == nullptr) {
             HILOGE("Failed to read lines of the file");
             return NError(errno);
         }
-        int ret = GetFileSize(string(path), arg->offset);
-        if (ret != 0) {
+        int ret = GetFileSize(path, arg->offset);
+        if (ret < 0) {
             HILOGE("Failed to get size of the file");
             return NError(ret);
         }
@@ -122,10 +153,11 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_READLINES_NAME, cbExec, cbCompl).val_;
     } else {
-        NVal cb(env, funcArg[NARG_POS::SECOND]);
+        NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_READLINES_NAME, cbExec, cbCompl).val_;
     }
 }
@@ -133,28 +165,37 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
 napi_value ReadLines::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
-    if (!succ) {
+    auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    if (!succPath) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
+        auto [succOption, encoding] = GetReadLinesArg(env, funcArg[NARG_POS::SECOND]);
+        if (!succOption) {
+            HILOGE("Invalid encoding from JS first argument");
+            NError(EINVAL).ThrowErr(env);
+            return nullptr; 
+        }
+    }
+
     void *iterator = ::ReaderIterator(path.get());
-    if (errno != 0 || iterator == nullptr) {
+    if (iterator == nullptr) {
         HILOGE("Failed to read lines of the file");
         NError(errno).ThrowErr(env);
         return nullptr;
     }
 
     int64_t offset = 0;
-    int ret = GetFileSize(string(path.get()), offset);
+    int ret = GetFileSize(path.get(), offset);
     if (ret != 0) {
         HILOGE("Failed to get size of the file");
         return nullptr;
