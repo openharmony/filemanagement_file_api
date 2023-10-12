@@ -15,9 +15,9 @@
 
 #include "readeriterator_n_exporter.h"
 
-#include "readeriterator_entity.h"
 #include "filemgmt_libhilog.h"
 #include "file_utils.h"
+#include "readeriterator_entity.h"
 #include "rust_file.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -58,6 +58,7 @@ napi_value ReaderIteratorNExporter::Next(napi_env env, napi_callback_info info)
     auto readerIteratorEntity = NClass::GetEntityOf<ReaderIteratorEntity>(env, funcArg.GetThisVar());
     if (!readerIteratorEntity) {
         HILOGE("Failed to get reader iterator entity");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -77,6 +78,7 @@ napi_value ReaderIteratorNExporter::Next(napi_env env, napi_callback_info info)
         objReaderIteratorResult.AddProp("value", NVal::CreateUTF8String(env, "").val_);
     }
     StrFree(str);
+    (void)NClass::RemoveEntityOfFinal<ReaderIteratorEntity>(env, funcArg.GetThisVar());
 
     return objReaderIteratorResult.val_;
 }

@@ -16,8 +16,8 @@
 
 #include <unistd.h>
 
-#include "class_readeriterator/readeriterator_n_exporter.h"
 #include "class_readeriterator/readeriterator_entity.h"
+#include "class_readeriterator/readeriterator_n_exporter.h"
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -133,7 +133,7 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
     auto cbExec = [arg, path = path.get()]() -> NError {
         arg->iterator = ::ReaderIterator(path);
         if (arg->iterator == nullptr) {
-            HILOGE("Failed to read lines of the file");
+            HILOGE("Failed to read lines of the file, error:%{public}d", errno);
             return NError(errno);
         }
         int ret = GetFileSize(path, arg->offset);
@@ -189,7 +189,7 @@ napi_value ReadLines::Sync(napi_env env, napi_callback_info info)
 
     void *iterator = ::ReaderIterator(path.get());
     if (iterator == nullptr) {
-        HILOGE("Failed to read lines of the file");
+        HILOGE("Failed to read lines of the file, error:%{public}d", errno);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
