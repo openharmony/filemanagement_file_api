@@ -61,7 +61,7 @@ napi_value Lseek::Sync(napi_env env, napi_callback_info info)
 
     int64_t ret = ::Lseek(fd, offset, whence);
     if (ret < 0) {
-        HILOGE("Failed to lseek");
+        HILOGE("Failed to lseek, error:%{public}d", errno);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
