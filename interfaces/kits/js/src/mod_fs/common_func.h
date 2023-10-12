@@ -24,6 +24,10 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 
+constexpr int FS_SEEK_SET = 0;
+constexpr int FS_SEEK_CUR = 1;
+constexpr int FS_SEEK_END = 2;
+
 constexpr int RDONLY = UV_FS_O_RDONLY;
 constexpr int WRONLY = UV_FS_O_WRONLY;
 constexpr int RDWR = UV_FS_O_RDWR;
@@ -53,6 +57,7 @@ struct FileInfo {
 };
 
 void InitOpenMode(napi_env env, napi_value exports);
+void InitWhenceType(napi_env env, napi_value exports);
 
 struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);

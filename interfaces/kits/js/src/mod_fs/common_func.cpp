@@ -80,6 +80,32 @@ void InitOpenMode(napi_env env, napi_value exports)
     }
 }
 
+void InitWhenceType(napi_env env, napi_value exports)
+{
+    char propertyName[] = "WhenceType";
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("SEEK_SET ", NVal::CreateInt32(env, FS_SEEK_SET).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("SEEK_CUR", NVal::CreateInt32(env, FS_SEEK_CUR).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("SEEK_END", NVal::CreateInt32(env, FS_SEEK_END).val_),
+    };
+    napi_value obj = nullptr;
+    napi_status status = napi_create_object(env, &obj);
+    if (status != napi_ok) {
+        HILOGE("Failed to create object at initializing whenceType");
+        return;
+    }
+    status = napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    if (status != napi_ok) {
+        HILOGE("Failed to set properties of character at initializing whenceType");
+        return;
+    }
+    status = napi_set_named_property(env, exports, propertyName, obj);
+    if (status != napi_ok) {
+        HILOGE("Failed to set direction property at initializing whenceType");
+        return;
+    }
+}
+
 static tuple<bool, size_t> GetActualLen(napi_env env, size_t bufLen, size_t bufOff, NVal op)
 {
     bool succ = false;

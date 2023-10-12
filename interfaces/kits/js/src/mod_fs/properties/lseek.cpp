@@ -48,26 +48,25 @@ napi_value Lseek::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    int64_t pos = 0;
-    if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        pos = ::Lseek(fd, offset, SeekPos::START);
-    } else if (funcArg.GetArgc() == NARG_CNT::THREE) {
-        auto [succGetWhence, whence] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(SeekPos::START);
-        if (!succGetWhence || whence < SeekPos::START || whence > SeekPos::END) {
+    SeekPos whence = SeekPos::START;
+    if (funcArg.GetArgc() == NARG_CNT::THREE) {
+        auto [succGetWhence, pos] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(SeekPos::START);
+        if (!succGetWhence || pos < SeekPos::START || pos > SeekPos::END) {
             HILOGE("Invalid whence from JS third argument");
             NError(EINVAL).ThrowErr(env);
             return nullptr;
         }
-        pos = ::Lseek(fd, offset, static_cast<SeekPos>(whence));
+        whence = static_cast<SeekPos>(pos);
     }
-    
-    if (pos < 0) {
+
+    int64_t ret = ::Lseek(fd, offset, whence);
+    if (ret < 0) {
         HILOGE("Failed to lseek");
         NError(errno).ThrowErr(env);
         return nullptr;
     }
 
-    return NVal::CreateInt64(env, pos).val_;
+    return NVal::CreateInt64(env, ret).val_;
 }
 
 } // ModuleFileIO
