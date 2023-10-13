@@ -138,7 +138,6 @@ ohos_shared_library("fs") {
   cflags_cc = [ "-std=c++17" ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
   ]
@@ -158,9 +157,7 @@ ohos_shared_library("fs") {
   ]
 
   if (!use_mingw_win && !use_mac) {
-    include_dirs += [
-      "${file_api_path}/interfaces/kits/rust/include",
-    ]
+    include_dirs += [ "${file_api_path}/interfaces/kits/rust/include" ]
     sources += [
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
       "src/mod_fs/class_stream/flush.cpp",
@@ -195,8 +192,8 @@ ohos_shared_library("fs") {
       "samgr:samgr_proxy",
     ]
     deps += [
-    "${file_api_path}/interfaces/kits/native:remote_uri_native",
-    "${file_api_path}/interfaces/kits/rust:rust_file",
+      "${file_api_path}/interfaces/kits/native:remote_uri_native",
+      "${file_api_path}/interfaces/kits/rust:rust_file",
     ]
   }
 }
