@@ -120,7 +120,6 @@ ohos_shared_library("fs") {
   sources = [
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/class_file/file_n_exporter.cpp",
-    "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
     "src/mod_fs/class_stat/stat_n_exporter.cpp",
     "src/mod_fs/common_func.cpp",
     "src/mod_fs/module.cpp",
@@ -135,7 +134,6 @@ ohos_shared_library("fs") {
     "src/mod_fs/properties/rmdirent.cpp",
     "src/mod_fs/properties/stat.cpp",
     "src/mod_fs/properties/truncate.cpp",
-    "src/mod_fs/properties/utimes.cpp",
   ]
 
   cflags_cc = [ "-std=c++17" ]
@@ -177,7 +175,6 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/lseek.cpp",
       "src/mod_fs/properties/move.cpp",
       "src/mod_fs/properties/movedir.cpp",
-      "src/mod_fs/properties/read_lines.cpp",
       "src/mod_fs/properties/read_text.cpp",
       "src/mod_fs/properties/symlink.cpp",
       "src/mod_fs/properties/watcher.cpp",
@@ -192,7 +189,6 @@ ohos_shared_library("fs") {
       "c_utils:utils",
       "data_share:datashare_common",
       "data_share:datashare_consumer",
-      "hilog:hilog_rust",
       "ipc:ipc_core",
       "samgr:samgr_proxy",
     ]
