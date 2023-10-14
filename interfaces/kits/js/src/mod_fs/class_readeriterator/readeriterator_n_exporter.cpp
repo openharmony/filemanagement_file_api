@@ -41,7 +41,7 @@ napi_value ReaderIteratorNExporter::Constructor(napi_env env, napi_callback_info
     }
     if (!NClass::SetEntityFor<ReaderIteratorEntity>(env, funcArg.GetThisVar(), move(readerIteratorEntity))) {
         HILOGE("Failed to set reader iterator entity");
-        NError(EINVAL).ThrowErr(env);
+        NError(UNKROWN_ERR).ThrowErr(env);
         return nullptr;
     }
     return funcArg.GetThisVar();
@@ -58,27 +58,27 @@ napi_value ReaderIteratorNExporter::Next(napi_env env, napi_callback_info info)
     auto readerIteratorEntity = NClass::GetEntityOf<ReaderIteratorEntity>(env, funcArg.GetThisVar());
     if (!readerIteratorEntity) {
         HILOGE("Failed to get reader iterator entity");
-        NError(EINVAL).ThrowErr(env);
+        NError(UNKROWN_ERR).ThrowErr(env);
         return nullptr;
     }
 
     Str *str = NextLine(readerIteratorEntity->iterator);
     if (str == nullptr && readerIteratorEntity->offset != 0) {
-        HILOGE("Failed to get next line");
+        HILOGE("Failed to get next line, error:%{public}d", errno);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
 
     NVal objReaderIteratorResult = NVal::CreateObject(env);
-    objReaderIteratorResult.AddProp("done", NVal::CreateBool(env, readerIteratorEntity->offset == 0).val_);
+    objReaderIteratorResult.AddProp("done", NVal::CreateBool(env, (readerIteratorEntity->offset == 0)).val_);
     if (str != nullptr) {
         objReaderIteratorResult.AddProp("value", NVal::CreateUTF8String(env, str->str, str->len).val_);
         readerIteratorEntity->offset -= str->len;
     } else {
         objReaderIteratorResult.AddProp("value", NVal::CreateUTF8String(env, "").val_);
+        (void)NClass::RemoveEntityOfFinal<ReaderIteratorEntity>(env, funcArg.GetThisVar());
     }
     StrFree(str);
-    (void)NClass::RemoveEntityOfFinal<ReaderIteratorEntity>(env, funcArg.GetThisVar());
 
     return objReaderIteratorResult.val_;
 }

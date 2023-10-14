@@ -109,7 +109,6 @@ ohos_shared_library("fs") {
   relative_install_dir = "module/file"
 
   include_dirs = [
-    "${file_api_path}/interfaces/kits/rust/include",
     "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_fs",
@@ -120,7 +119,6 @@ ohos_shared_library("fs") {
   sources = [
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/class_file/file_n_exporter.cpp",
-    "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
     "src/mod_fs/class_stat/stat_n_exporter.cpp",
     "src/mod_fs/common_func.cpp",
     "src/mod_fs/module.cpp",
@@ -140,7 +138,6 @@ ohos_shared_library("fs") {
   cflags_cc = [ "-std=c++17" ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
   ]
@@ -163,6 +160,7 @@ ohos_shared_library("fs") {
     include_dirs += [ "${file_api_path}/interfaces/kits/rust/include" ]
     sources += [
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
+      "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
       "src/mod_fs/class_stream/flush.cpp",
       "src/mod_fs/class_stream/stream_n_exporter.cpp",
       "src/mod_fs/class_watcher/watcher_entity.cpp",

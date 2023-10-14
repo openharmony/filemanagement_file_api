@@ -29,25 +29,22 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-static tuple<bool, unique_ptr<char[]>> GetReadLinesArg(napi_env env, napi_value argOption)
+static int CheckOptionArg(napi_env env, napi_value argOption)
 {
     NVal option(env, argOption);
-    unique_ptr<char[]> encoding;
-
     if (option.HasProp("encoding")) {
-        bool succ = false;
-        tie(succ, encoding, ignore) = option.GetProp("encoding").ToUTF8String("utf-8");
+        auto [succ, encoding, ignore] = option.GetProp("encoding").ToUTF8String("utf-8");
         string_view encodingStr(encoding.get());
         if (!succ || encodingStr != "utf-8") {
-            HILOGE("Illegal option.encoding parameter");
-            return { false, nullptr };
+            return EINVAL;
         }
     }
 
-    return { true, move(encoding) };
+    return ERRNO_NOERR;
 }
 
-static int GetFileSize(const string &path, int64_t &offset) {
+static int GetFileSize(const string &path, int64_t &offset)
+{
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!stat_req) {
@@ -61,7 +58,7 @@ static int GetFileSize(const string &path, int64_t &offset) {
         return ret;
     }
 
-    offset = stat_req->statbuf.st_size;
+    offset = static_cast<int64_t>(stat_req->statbuf.st_size);
     return ERRNO_NOERR;
 }
 
@@ -83,21 +80,35 @@ static NVal InstantiateReaderIterator(napi_env env, void *iterator, int64_t offs
     auto readerIteratorEntity = NClass::GetEntityOf<ReaderIteratorEntity>(env, objReaderIterator);
     if (!readerIteratorEntity) {
         HILOGE("Failed to get readerIteratorEntity");
-        NError(EIO).ThrowErr(env);
+        NError(UNKROWN_ERR).ThrowErr(env);
         return NVal();
     }
 
     readerIteratorEntity->iterator = iterator;
     readerIteratorEntity->offset = offset;
-
     return { env, objReaderIterator };
 }
 
-struct ReaderIteratorArg
-{
+struct ReaderIteratorArg {
     void *iterator = nullptr;
     int64_t offset = 0;
 };
+
+static NError AsyncExec(ReaderIteratorArg &readerIterator, char *pathStr)
+{
+    readerIterator.iterator = ::ReaderIterator(pathStr);
+    if (readerIterator.iterator == nullptr) {
+        HILOGE("Failed to read lines of the file, error: %{public}d", errno);
+        return NError(errno);
+    }
+    int ret = GetFileSize(pathStr, readerIterator.offset);
+    if (ret < 0) {
+        HILOGE("Failed to get size of the file");
+        return NError(ret);
+    }
+
+    return NError(ERRNO_NOERR);
+}
 
 napi_value ReadLines::Async(napi_env env, napi_callback_info info)
 {
@@ -116,11 +127,11 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
     }
 
     if (funcArg.GetArgc() >= NARG_CNT::TWO) {
-        auto [succOption, encoding] = GetReadLinesArg(env, funcArg[NARG_POS::SECOND]);
-        if (!succOption) {
-            HILOGE("Invalid encoding from JS first argument");
-            NError(EINVAL).ThrowErr(env);
-            return nullptr; 
+        int ret = CheckOptionArg(env, funcArg[NARG_POS::SECOND]);
+        if (ret) {
+            HILOGE("Invalid option.encoding parameter");
+            NError(ret).ThrowErr(env);
+            return nullptr;
         }
     }
 
@@ -131,18 +142,7 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [arg, path = path.get()]() -> NError {
-        arg->iterator = ::ReaderIterator(path);
-        if (arg->iterator == nullptr) {
-            HILOGE("Failed to read lines of the file, error:%{public}d", errno);
-            return NError(errno);
-        }
-        int ret = GetFileSize(path, arg->offset);
-        if (ret < 0) {
-            HILOGE("Failed to get size of the file");
-            return NError(ret);
-        }
-        
-        return NError(ERRNO_NOERR);
+        return AsyncExec(*arg, path);
     };
 
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
@@ -179,17 +179,17 @@ napi_value ReadLines::Sync(napi_env env, napi_callback_info info)
     }
 
     if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        auto [succOption, encoding] = GetReadLinesArg(env, funcArg[NARG_POS::SECOND]);
-        if (!succOption) {
-            HILOGE("Invalid encoding from JS first argument");
-            NError(EINVAL).ThrowErr(env);
-            return nullptr; 
+        int ret = CheckOptionArg(env, funcArg[NARG_POS::SECOND]);
+        if (ret) {
+            HILOGE("Invalid option.encoding parameter");
+            NError(ret).ThrowErr(env);
+            return nullptr;
         }
     }
 
-    void *iterator = ::ReaderIterator(path.get());
+    auto iterator = ::ReaderIterator(path.get());
     if (iterator == nullptr) {
-        HILOGE("Failed to read lines of the file, error:%{public}d", errno);
+        HILOGE("Failed to read lines of the file, error: %{public}d", errno);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
