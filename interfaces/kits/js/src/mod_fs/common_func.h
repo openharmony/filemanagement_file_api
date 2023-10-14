@@ -53,6 +53,7 @@ struct FileInfo {
 };
 
 void InitOpenMode(napi_env env, napi_value exports);
+void InitWhenceType(napi_env env, napi_value exports);
 
 struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);

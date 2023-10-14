@@ -36,6 +36,7 @@ namespace ModuleFileIO {
 static napi_value Export(napi_env env, napi_value exports)
 {
     InitOpenMode(env, exports);
+    InitWhenceType(env, exports);
     std::vector<unique_ptr<NExporter>> products;
     products.emplace_back(make_unique<PropNExporter>(env, exports));
     products.emplace_back(make_unique<FileNExporter>(env, exports));

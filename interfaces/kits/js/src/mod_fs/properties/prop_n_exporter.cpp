@@ -48,6 +48,7 @@
 #include "dup.h"
 #include "fdopen_stream.h"
 #include "listfile.h"
+#include "lseek.h"
 #include "move.h"
 #include "movedir.h"
 #include "read_text.h"
@@ -603,6 +604,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
         NVal::DeclareNapiFunction("listFile", ListFile::Async),
         NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
+        NVal::DeclareNapiFunction("lseek", Lseek::Sync),
         NVal::DeclareNapiFunction("moveDir", MoveDir::Async),
         NVal::DeclareNapiFunction("moveDirSync", MoveDir::Sync),
         NVal::DeclareNapiFunction("moveFile", Move::Async),

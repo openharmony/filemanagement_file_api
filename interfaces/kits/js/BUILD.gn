@@ -157,6 +157,7 @@ ohos_shared_library("fs") {
   ]
 
   if (!use_mingw_win && !use_mac) {
+    include_dirs += [ "${file_api_path}/interfaces/kits/rust/include" ]
     sources += [
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
       "src/mod_fs/class_stream/flush.cpp",
@@ -170,6 +171,7 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/dup.cpp",
       "src/mod_fs/properties/fdopen_stream.cpp",
       "src/mod_fs/properties/listfile.cpp",
+      "src/mod_fs/properties/lseek.cpp",
       "src/mod_fs/properties/move.cpp",
       "src/mod_fs/properties/movedir.cpp",
       "src/mod_fs/properties/read_text.cpp",
@@ -189,7 +191,10 @@ ohos_shared_library("fs") {
       "ipc:ipc_core",
       "samgr:samgr_proxy",
     ]
-    deps += [ "${file_api_path}/interfaces/kits/native:remote_uri_native" ]
+    deps += [
+      "${file_api_path}/interfaces/kits/native:remote_uri_native",
+      "${file_api_path}/interfaces/kits/rust:rust_file",
+    ]
   }
 }
 
