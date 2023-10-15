@@ -22,6 +22,7 @@
 #include "class_stat/stat_n_exporter.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "class_randomaccessfile/randomaccessfile_n_exporter.h"
+#include "class_readeriterator/readeriterator_n_exporter.h"
 #include "class_stream/stream_n_exporter.h"
 #include "class_watcher/watcher_n_exporter.h"
 #endif
@@ -43,6 +44,7 @@ static napi_value Export(napi_env env, napi_value exports)
     products.emplace_back(make_unique<StatNExporter>(env, exports));
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     products.emplace_back(make_unique<RandomAccessFileNExporter>(env, exports));
+    products.emplace_back(make_unique<ReaderIteratorNExporter>(env, exports));
     products.emplace_back(make_unique<StreamNExporter>(env, exports));
     products.emplace_back(make_unique<WatcherNExporter>(env, exports));
 #endif

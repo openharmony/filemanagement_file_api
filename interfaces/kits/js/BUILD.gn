@@ -160,6 +160,7 @@ ohos_shared_library("fs") {
     include_dirs += [ "${file_api_path}/interfaces/kits/rust/include" ]
     sources += [
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
+      "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
       "src/mod_fs/class_stream/flush.cpp",
       "src/mod_fs/class_stream/stream_n_exporter.cpp",
       "src/mod_fs/class_watcher/watcher_entity.cpp",
@@ -174,6 +175,7 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/lseek.cpp",
       "src/mod_fs/properties/move.cpp",
       "src/mod_fs/properties/movedir.cpp",
+      "src/mod_fs/properties/read_lines.cpp",
       "src/mod_fs/properties/read_text.cpp",
       "src/mod_fs/properties/symlink.cpp",
       "src/mod_fs/properties/watcher.cpp",
