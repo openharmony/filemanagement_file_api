@@ -51,6 +51,7 @@
 #include "lseek.h"
 #include "move.h"
 #include "movedir.h"
+#include "read_lines.h"
 #include "read_text.h"
 #include "symlink.h"
 #include "watcher.h"
@@ -609,6 +610,8 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("moveDirSync", MoveDir::Sync),
         NVal::DeclareNapiFunction("moveFile", Move::Async),
         NVal::DeclareNapiFunction("moveFileSync", Move::Sync),
+        NVal::DeclareNapiFunction("readLines", ReadLines::Async),
+        NVal::DeclareNapiFunction("readLinesSync", ReadLines::Sync),
         NVal::DeclareNapiFunction("readText", ReadText::Async),
         NVal::DeclareNapiFunction("readTextSync", ReadText::Sync),
         NVal::DeclareNapiFunction("symlink", Symlink::Async),
