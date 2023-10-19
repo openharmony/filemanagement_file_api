@@ -104,12 +104,14 @@ long long int Lseek(int fd, long long offset, enum SeekPos pos);
  * @brief       Creates a new directory at the given path.
  * @param       path    direction path.
  * @param       mode    creating ways.
+ * @retval      0       Created successfully.
+ * @retval      -1      Creation failed.
  * @attention
  * 1.The input `path` must be in valid UTF-8 format.
  * 2.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-void Mkdirs(char* path, enum MakeDirectionMode mode);
+int Mkdirs(char* path, enum MakeDirectionMode mode);
 
 /**
  * @ingroup     rust
