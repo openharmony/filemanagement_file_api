@@ -23,11 +23,13 @@
 #include <sys/file.h>
 #include <tuple>
 
-#include "file_uri.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
 #include "../common_func.h"
+#ifndef WIN_PLATFORM
+#include "file_uri.h"
+#endif
 
 namespace OHOS {
 namespace FileManagement {
@@ -145,6 +147,41 @@ napi_value FileNExporter::GetName(napi_env env, napi_callback_info info)
         return nullptr;
     }
     return NVal::CreateUTF8String(env, path.substr(pos + 1)).val_;
+}
+
+napi_value FileNExporter::GetParent(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+    auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
+    if (!fileEntity) {
+        HILOGE("Failed to get file entity");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    string path(fileEntity->path_);
+    if (fileEntity->uri_.length() != 0) {
+        AppFileService::ModuleFileUri::FileUri fileUri(fileEntity->uri_);
+        path = fileUri.GetRealPath();
+    }
+    auto [realPathRes, realPath] = RealPathCore(path);
+    if (realPathRes != ERRNO_NOERR) {
+        NError(realPathRes).ThrowErr(env);
+        return nullptr;
+    }
+    path = string(static_cast<const char *>(realPath->ptr));
+    auto pos = path.find_last_of('/');
+    if (pos == string::npos) {
+        HILOGE("Failed to split filename from path");
+        NError(ENOENT).ThrowErr(env);
+        return nullptr;
+    }
+    return NVal::CreateUTF8String(env, path.substr(0, pos)).val_;
 }
 
 napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
@@ -281,43 +318,6 @@ napi_value FileNExporter::Constructor(napi_env env, napi_callback_info info)
         return nullptr;
     }
     return funcArg.GetThisVar();
-}
-
-napi_value FileNExporter::GetParent(napi_env env, napi_callback_info info)
-{
-    NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
-        HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
-    auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
-    if (!fileEntity) {
-        HILOGE("Failed to get file entity");
-        return nullptr;
-    }
-
-    string path = "";
-    if (fileEntity->path_.length() != 0) {
-        auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
-        if (realPathRes != ERRNO_NOERR) {
-            NError(realPathRes).ThrowErr(env);
-            return nullptr;
-            }
-        path = string(static_cast<const char *>(realPath->ptr));
-    } else {
-        AppFileService::ModuleFileUri::FileUri fileUri(fileEntity->uri_);
-        string path = fileUri.GetRealPath();
-    }
-    auto pos = path.find_last_of('/');
-    if (pos == string::npos) {
-        HILOGE("Failed to split filename from path, path: %{public}s", path.c_str());
-        NError(ENOENT).ThrowErr(env);
-        return nullptr;
-    }
-    string parentPath = path.substr(0, pos);
-    HILOGE("parentPath is : %{public}s", parentPath.c_str());
-    return NVal::CreateUTF8String(env, parentPath).val_;
 }
 
 bool FileNExporter::Export()

@@ -33,10 +33,10 @@ public:
     std::string GetClassName() override;
     static napi_value GetPath(napi_env env, napi_callback_info info);
     static napi_value GetName(napi_env env, napi_callback_info info);
+    static napi_value GetParent(napi_env env, napi_callback_info info);
     static napi_value Lock(napi_env env, napi_callback_info info);
     static napi_value TryLock(napi_env env, napi_callback_info info);
     static napi_value UnLock(napi_env env, napi_callback_info info);
-    static napi_value GetParent(napi_env env, napi_callback_info info);
 #endif
     static napi_value Constructor(napi_env env, napi_callback_info info);
     static napi_value GetFD(napi_env env, napi_callback_info info);
