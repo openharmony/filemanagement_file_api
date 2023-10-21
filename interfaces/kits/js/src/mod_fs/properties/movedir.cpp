@@ -97,8 +97,8 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
     return { true, move(src), move(dest), mode };
 }
 
-static int RestoreDirMtime(const string &srcPath, const string &destPath)
-{    
+static int RestoreTime(const string &srcPath, const string &destPath)
+{
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!stat_req) {
@@ -108,7 +108,7 @@ static int RestoreDirMtime(const string &srcPath, const string &destPath)
     int ret = uv_fs_stat(nullptr, stat_req.get(), srcPath.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to stat srcPath");
-		return ret;
+        return ret;
     }
     double atime = static_cast<double>(stat_req->statbuf.st_atim.tv_sec) +
         static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / NS;
@@ -144,7 +144,7 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
         HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
         return errCode.value();
     }
-    int ret = RestoreDirMtime(srcPath, dstPath);
+    int ret = RestoreTime(srcPath, dstPath);
     if (ret) {
         HILOGE("Failed to utime dstPath");
         return ret;
@@ -179,16 +179,15 @@ static int32_t FilterFunc(const struct dirent *filename)
     return FILE_MATCH;
 }
 
-static int RenameDir(const string &src, const string &dest, const int mode, vector<struct ErrFiles> &errfiles) {
+static int RenameDir(const string &src, const string &dest, const int mode, vector<struct ErrFiles> &errfiles)
+{
     filesystem::path destPath(dest);
     if (filesystem::exists(destPath)) {
         return RecurMoveDir(src, dest, mode, errfiles);
     }
-    
     filesystem::path srcPath(src);
     std::error_code errCode;
     filesystem::rename(srcPath, destPath, errCode);
-    
     if (errCode.value() == EXDEV) {
         HILOGE("Failed to rename file due to EXDEV");
         if (!filesystem::create_directory(destPath, errCode)) {
@@ -196,21 +195,19 @@ static int RenameDir(const string &src, const string &dest, const int mode, vect
             return errCode.value();
         }
         
-        int ret = RestoreDirMtime(srcPath, destPath);
+        int ret = RestoreTime(srcPath, destPath);
         if (ret) {
             HILOGE("Failed to utime dstPath");
+            return ret;
         }
-        return ret;
+        return RecurMoveDir(src, dest, mode, errfiles);
     }
-    
     if (errCode.value() != 0) {
         HILOGE("Failed to rename file, error code: %{public}d", errCode.value());
         return errCode.value();
     }
-
     return ERRNO_NOERR;
 }
-
 
 struct NameListArg {
     struct dirent** namelist;
