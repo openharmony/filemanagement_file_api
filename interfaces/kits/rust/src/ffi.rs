@@ -17,7 +17,7 @@ use crate::adapter::{
     create_dir, error_control, get_parent, next_line, reader_iterator, seek, MakeDirectionMode,
     SeekPos, Str,
 };
-use libc::{c_char, c_longlong, c_void};
+use libc::{c_char, c_int, c_longlong, c_void};
 use std::ffi::CString;
 use std::ptr::null_mut;
 
@@ -55,10 +55,13 @@ pub extern "C" fn Lseek(fd: i32, offset: i64, pos: SeekPos) -> c_longlong {
 }
 
 #[no_mangle]
-pub extern "C" fn Mkdirs(path: *const c_char, mode: MakeDirectionMode) {
+pub extern "C" fn Mkdirs(path: *const c_char, mode: MakeDirectionMode) -> c_int {
     match create_dir(path, mode) {
-        Ok(_) => {}
-        Err(e) => unsafe { error_control(e) },
+        Ok(_) => 0,
+        Err(e) => unsafe {
+            error_control(e);
+            -1
+        },
     }
 }
 
