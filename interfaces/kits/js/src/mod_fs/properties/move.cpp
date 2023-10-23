@@ -90,9 +90,9 @@ static int ChangeTime(const string &path, uv_fs_t *stat_req)
         return ENOMEM;
     }
     double atime = static_cast<double>(stat_req->statbuf.st_atim.tv_sec) +
-        static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / NANOSECOND;
+        static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / NS;
     double mtime = static_cast<double>(stat_req->statbuf.st_mtim.tv_sec) +
-        static_cast<double>(stat_req->statbuf.st_mtim.tv_nsec) / NANOSECOND;
+        static_cast<double>(stat_req->statbuf.st_mtim.tv_nsec) / NS;
     int ret = uv_fs_utime(nullptr, utime_req.get(), path.c_str(), atime, mtime, nullptr);
     if (ret < 0) {
         HILOGE("Failed to utime dstPath");

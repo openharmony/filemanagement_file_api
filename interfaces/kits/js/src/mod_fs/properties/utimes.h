@@ -13,25 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MOVE_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MOVE_H
-
-#include <string>
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_UTIMES_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_UTIMES_H
 
 #include "filemgmt_libn.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-class Move final {
+
+class Utimes final {
 public:
     static napi_value Sync(napi_env env, napi_callback_info info);
-    static napi_value Async(napi_env env, napi_callback_info info);
 };
-constexpr int MODE_FORCE_MOVE = 0;
-constexpr int MODE_THROW_ERR = 1;
-const std::string PROCEDURE_MOVE_NAME = "FileIOMove";
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_UTIMES_H

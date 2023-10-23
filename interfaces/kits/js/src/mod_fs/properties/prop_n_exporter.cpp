@@ -39,6 +39,7 @@
 #include "rmdirent.h"
 #include "stat.h"
 #include "truncate.h"
+#include "utimes.h"
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "copy_file.h"
@@ -589,6 +590,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("truncateSync", Truncate::Sync),
         NVal::DeclareNapiFunction("unlink", Unlink),
         NVal::DeclareNapiFunction("unlinkSync", UnlinkSync),
+        NVal::DeclareNapiFunction("utimes", Utimes::Sync),
         NVal::DeclareNapiFunction("write", Write),
         NVal::DeclareNapiFunction("writeSync", WriteSync),
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
