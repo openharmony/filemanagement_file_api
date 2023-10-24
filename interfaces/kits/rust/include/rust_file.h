@@ -111,7 +111,7 @@ long long int Lseek(int fd, long long offset, enum SeekPos pos);
  * 2.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-int Mkdirs(char* path, enum MakeDirectionMode mode);
+int Mkdirs(const char* path, enum MakeDirectionMode mode);
 
 /**
  * @ingroup     rust
