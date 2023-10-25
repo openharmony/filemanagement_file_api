@@ -358,10 +358,10 @@ bool FileNExporter::Export()
     return exports_.AddProp(className, classValue);
 }
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-string FileNExporter::GetClassName()
-#else
+#ifdef WIN_PLATFORM
 string FileNExporter::GetNExporterName()
+#else
+string FileNExporter::GetClassName()
 #endif
 {
     return FileNExporter::className_;
