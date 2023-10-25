@@ -334,10 +334,10 @@ bool FileNExporter::Export()
 #endif
     };
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    string className = GetClassName();
-#else
+#ifdef WIN_PLATFORM
     string className = GetNExporterName();
+#else
+    string className = GetClassName();
 #endif
     bool succ = false;
     napi_value classValue = nullptr;
