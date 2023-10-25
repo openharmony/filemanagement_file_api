@@ -54,6 +54,7 @@
 #include "movedir.h"
 #include "read_lines.h"
 #include "read_text.h"
+#include "rust_file.h"
 #include "symlink.h"
 #include "watcher.h"
 #endif
@@ -232,37 +233,67 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     return NVal::CreateUndefined(env).val_;
 }
 
+static int MkdirCore(const string &path)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!mkdir_req) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    return uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
+}
+
+static NError MkdirExec(const string &path, bool recursion, bool hasOption)
+{
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    if (hasOption) {
+        if (::Mkdirs(path.c_str(), static_cast<MakeDirectionMode>(recursion)) < 0) {
+            HILOGE("Failed to create directories, error: %{public}d", errno);
+            return NError(errno);
+        }
+        return NError(ERRNO_NOERR);
+    }
+#endif
+    int ret = MkdirCore(path);
+    if (ret) {
+        HILOGE("Failed to create directory");
+        return NError(ret);
+    }
+    return NError(ERRNO_NOERR);
+}
+
 napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     auto [succ, tmp, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succ) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    auto cbExec = [path = string(tmp.get())]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!mkdir_req) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
+    bool recursion = false;
+    bool hasOption = false;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
+        NVal option(env, funcArg[NARG_POS::SECOND]);
+        if (!option.TypeIs(napi_function)) {
+            tie(hasOption, recursion) = option.ToBool(false);
+            if (!hasOption) {
+                NError(EINVAL).ThrowErr(env);
+                return nullptr;
+            }
         }
-        int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to create directory");
-            return NError(ret);
-        }
-        return NError(ERRNO_NOERR);
+    }
+#endif
+    auto cbExec = [path = string(tmp.get()), recursion, hasOption]() -> NError {
+        return MkdirExec(path, recursion, hasOption);
     };
-
     auto cbCompl = [](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
@@ -271,10 +302,11 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
+        !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_MKDIR_NAME, cbExec, cbCompl).val_;
     } else {
-        NVal cb(env, funcArg[NARG_POS::SECOND]);
+        NVal cb(env, funcArg[funcArg.GetArgc() - 1]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_MKDIR_NAME, cbExec, cbCompl).val_;
     }
 }
@@ -282,7 +314,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
 napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -294,21 +326,30 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!mkdir_req) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
+        auto [success, recursion] = NVal(env, funcArg[NARG_POS::SECOND]).ToBool(false);
+        if (!success) {
+            HILOGE("Invalid recursion mode");
+            NError(EINVAL).ThrowErr(env);
+            return nullptr;
+        }
+        MakeDirectionMode recursionMode = SINGLE;
+        recursionMode = static_cast<MakeDirectionMode>(recursion);
+        if (::Mkdirs(path.get(), recursionMode) < 0) {
+            HILOGE("Failed to create directories, error: %{public}d", errno);
+            NError(errno).ThrowErr(env);
+            return nullptr;
+        }
+        return NVal::CreateUndefined(env).val_;
     }
-    int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.get(), DIR_DEFAULT_PERM, nullptr);
-    if (ret < 0) {
+#endif
+    int ret = MkdirCore(path.get());
+    if (ret) {
         HILOGE("Failed to create directory");
         NError(ret).ThrowErr(env);
         return nullptr;
     }
-
     return NVal::CreateUndefined(env).val_;
 }
 
