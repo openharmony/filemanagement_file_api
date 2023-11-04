@@ -183,6 +183,7 @@ ohos_shared_library("fs") {
     ]
     external_deps += [
       "ability_base:zuri",
+      "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
       "access_token:libtokenid_sdk",
       "app_file_service:fileuri_native",
