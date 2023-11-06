@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (C) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,20 +14,20 @@
 import("//build/test.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
-ohos_unittest("remote_uri_test") {
+group("unittest") {
+  testonly = true
+  deps = [ ":filemgmt_libn_test" ]
+}
+
+ohos_unittest("filemgmt_libn_test") {
   module_out_path = "filemanagement/file_api"
+  include_dirs = [ "./include" ]
 
-  resource_config_file = "../resource/ohos_test.xml"
-
-  sources = [ "remote_uri_test.cpp" ]
-
-  include_dirs = [
-    "include",
-    "${file_api_path}/interfaces/kits/native/remote_uri",
-  ]
+  sources = [ "./src/n_class_test.cpp" ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -35,6 +35,8 @@ ohos_unittest("remote_uri_test") {
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "c_utils:utilsbase",
+    "hilog:libhilog",
     "ipc:ipc_core",
+    "napi:ace_napi",
   ]
 }
