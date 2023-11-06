@@ -73,7 +73,7 @@ napi_value ReaderIteratorNExporter::Next(napi_env env, napi_callback_info info)
     objReaderIteratorResult.AddProp("done", NVal::CreateBool(env, (readerIteratorEntity->offset == 0)).val_);
     if (str != nullptr) {
         objReaderIteratorResult.AddProp("value", NVal::CreateUTF8String(env, str->str, str->len).val_);
-        readerIteratorEntity->offset -= str->len;
+        readerIteratorEntity->offset -= static_cast<int64_t>(str->len);
     } else {
         objReaderIteratorResult.AddProp("value", NVal::CreateUTF8String(env, "").val_);
         (void)NClass::RemoveEntityOfFinal<ReaderIteratorEntity>(env, funcArg.GetThisVar());

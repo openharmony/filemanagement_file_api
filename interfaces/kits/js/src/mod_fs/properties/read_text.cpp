@@ -37,7 +37,7 @@ static tuple<bool, int64_t, bool, int64_t, unique_ptr<char[]>> GetReadTextArg(na
     int64_t len = 0;
     bool succ = false;
     bool hasLen = false;
-    unique_ptr<char[]> encoding;
+    unique_ptr<char[]> encoding { new char[]{ "utf-8" } };
 
     if (op.HasProp("offset") && !op.GetProp("offset").TypeIs(napi_undefined)) {
         tie(succ, offset) = op.GetProp("offset").ToInt64();
