@@ -79,11 +79,7 @@ static tuple<int, unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*>> Re
         return { ENOMEM, move(realpath_req)};
     }
     int ret = uv_fs_realpath(nullptr, realpath_req.get(), srcPath.c_str(), nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to realpath, ret: %{public}d", ret);
-        return { ret, move(realpath_req)};
-    }
-    return { ERRNO_NOERR, move(realpath_req) };
+    return { ret, move(realpath_req) };
 }
 
 static bool GetExclusive(napi_env env, NFuncArg &funcArg, bool &exclusive)
@@ -111,10 +107,16 @@ napi_value FileNExporter::GetPath(napi_env env, napi_callback_info info)
     auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
     if (!fileEntity) {
         HILOGE("Failed to get file entity");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
+    }
+    if (fileEntity->uri_.length() != 0) {
+        AppFileService::ModuleFileUri::FileUri fileUri(fileEntity->uri_);
+        return NVal::CreateUTF8String(env, fileUri.GetPath()).val_;
     }
     auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
     if (realPathRes != ERRNO_NOERR) {
+        HILOGE("Failed to get real path, ret: %{public}d", realPathRes);
         NError(realPathRes).ThrowErr(env);
         return nullptr;
     }
@@ -132,14 +134,20 @@ napi_value FileNExporter::GetName(napi_env env, napi_callback_info info)
     auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
     if (!fileEntity) {
         HILOGE("Failed to get file entity");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
+    }
+    if (fileEntity->uri_.length() != 0) {
+        AppFileService::ModuleFileUri::FileUri fileUri(fileEntity->uri_);
+        return NVal::CreateUTF8String(env, fileUri.GetName()).val_;
     }
     auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
     if (realPathRes != ERRNO_NOERR) {
+        HILOGE("Failed to get real path, ret: %{public}d", realPathRes);
         NError(realPathRes).ThrowErr(env);
         return nullptr;
     }
-    string path = string(static_cast<const char *>(realPath->ptr));
+    string path(static_cast<const char *>(realPath->ptr));
     auto pos = path.find_last_of('/');
     if (pos == string::npos) {
         HILOGE("Failed to split filename from path");
@@ -167,14 +175,16 @@ napi_value FileNExporter::GetParent(napi_env env, napi_callback_info info)
     string path(fileEntity->path_);
     if (fileEntity->uri_.length() != 0) {
         AppFileService::ModuleFileUri::FileUri fileUri(fileEntity->uri_);
-        path = fileUri.GetRealPath();
+        path = fileUri.GetPath();
+    } else {
+        auto [realPathRes, realPath] = RealPathCore(path);
+        if (realPathRes) {
+            HILOGE("Failed to get real path, ret: %{public}d", realPathRes);
+            NError(realPathRes).ThrowErr(env);
+            return nullptr;
+        }
+        path = static_cast<const char *>(realPath->ptr);
     }
-    auto [realPathRes, realPath] = RealPathCore(path);
-    if (realPathRes != ERRNO_NOERR) {
-        NError(realPathRes).ThrowErr(env);
-        return nullptr;
-    }
-    path = string(static_cast<const char *>(realPath->ptr));
     auto pos = path.find_last_of('/');
     if (pos == string::npos) {
         HILOGE("Failed to split filename from path");
