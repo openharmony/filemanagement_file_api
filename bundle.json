@@ -37,7 +37,8 @@
             "napi",
             "samgr",
             "app_file_service",
-            "build_framework"
+            "build_framework",
+            "os_account"
         ],
         "third_party": [
             "bounds_checking_function",
