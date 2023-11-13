@@ -42,14 +42,19 @@ struct NameListArg {
 constexpr int DEFAULT_SIZE = -1;
 constexpr int DEFAULT_MODIFY_AFTER = -1;
 struct OptionArgs {
-    FileFilter filter = { {}, {}, {}, DEFAULT_SIZE, DEFAULT_MODIFY_AFTER, false, false };
+    FileFilter filter = FileFilterBuilder()
+        .SetFileSizeOver(DEFAULT_SIZE)
+        .SetLastModifiedAfter(DEFAULT_MODIFY_AFTER)
+        .Build();
     int listNum = 0;
     int countNum = 0;
     bool recursion = false;
     std::string path = "";
     void Clear()
     {
-        filter = { {}, {}, {}, DEFAULT_SIZE, DEFAULT_MODIFY_AFTER, false, false };
+        filter.FilterClear();
+        filter.SetFileSizeOver(DEFAULT_SIZE);
+        filter.SetLastModifiedAfter(DEFAULT_MODIFY_AFTER);
         listNum = 0;
         countNum = 0;
         recursion = false;
