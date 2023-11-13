@@ -35,7 +35,6 @@
 #include "status_receiver_host.h"
 #include "system_ability_definition.h"
 #include "file_uri.h"
-#include "ability_manager_client.h"
 #endif
 
 namespace OHOS {
@@ -57,8 +56,6 @@ const std::string MODE_R = "/r/";
 const std::string MEDIA = "media";
 const std::string DOCS = "docs";
 const std::string DATASHARE = "datashare";
-const std::string SCHEME_BROKER = "content";
-constexpr uint32_t MAX_WANT_FLAG = 4;
 
 static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcArg)
 {
@@ -177,26 +174,12 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, unsi
     return { ret, uriStr };
 }
 
-static tuple<int, string> OpenFileByBroker(const Uri &uri, uint32_t mode)
-{
-    uint32_t flag = (mode % MAX_WANT_FLAG) > 0 ?
-        AAFwk::Want::FLAG_AUTH_READ_URI_PERMISSION :
-        AAFwk::Want::FLAG_AUTH_WRITE_URI_PERMISSION;
-    int ret = AAFwk::AbilityManagerClient::GetInstance()->OpenFile(uri, flag);
-    if (ret < 0) {
-        HILOGE("Failed to open file by Broker error %{public}d", ret);
-    }
-    return { ret, uri.ToString() };
-}
-
 static tuple<int, string> OpenFileByUri(const string &path, unsigned int mode)
 {
     Uri uri(path);
     string uriType = uri.GetScheme();
     if (uriType == SCHEME_FILE) {
         return OpenByFileDataUri(uri, path, mode);
-    } else if (uriType == SCHEME_BROKER) {
-        return OpenFileByBroker(uri, mode);
     } else if (uriType == DATASHARE) {
         // datashare:////#fdFromBinder=xx
         int fd = -1;
