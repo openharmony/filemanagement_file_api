@@ -21,7 +21,7 @@
 #include <string_view>
 #include <tuple>
 #include <unistd.h>
-#include <deque>
+#include <vector>
 
 #include "common_func.h"
 #include "file_utils.h"
@@ -34,7 +34,7 @@ using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
 static int RecurMoveDir(const string &srcPath, const string &destPath, const int mode,
-    deque<struct ErrFiles> &errfiles);
+    vector<struct ErrFiles> &errfiles);
 
 static tuple<bool, bool> JudgeExistAndEmpty(const string &path)
 {
@@ -152,17 +152,13 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
     return RemovePath(src);
 }
 
-static int RenameFile(const string &src, const string &dest, const int mode, deque<struct ErrFiles> &errfiles)
+static int RenameFile(const string &src, const string &dest, const int mode)
 {
     filesystem::path dstPath(dest);
-    if (filesystem::exists(dstPath)) {
-        if (filesystem::is_directory(dstPath)) {
-            errfiles.emplace_front(src, dest);
-            return ERRNO_NOERR;
-        }
-        if (mode == DIRMODE_FILE_THROW_ERR) {
-            errfiles.emplace_back(src, dest);
-            return ERRNO_NOERR;
+    if (mode == DIRMODE_FILE_THROW_ERR) {
+        if (filesystem::exists(dstPath)) {
+            HILOGE("Failed to move file due to existing destPath with throw err");
+            return EEXIST;
         }
     }
     filesystem::path srcPath(src);
@@ -183,7 +179,7 @@ static int32_t FilterFunc(const struct dirent *filename)
     return FILE_MATCH;
 }
 
-static int RenameDir(const string &src, const string &dest, const int mode, deque<struct ErrFiles> &errfiles)
+static int RenameDir(const string &src, const string &dest, const int mode, vector<struct ErrFiles> &errfiles)
 {
     filesystem::path destPath(dest);
     if (filesystem::exists(destPath)) {
@@ -198,6 +194,7 @@ static int RenameDir(const string &src, const string &dest, const int mode, dequ
             HILOGE("Failed to create directory, error code: %{public}d", errCode.value());
             return errCode.value();
         }
+        
         int ret = RestoreTime(srcPath, destPath);
         if (ret) {
             HILOGE("Failed to utime dstPath");
@@ -227,14 +224,8 @@ static void Deleter(struct NameListArg *arg)
 }
 
 static int RecurMoveDir(const string &srcPath, const string &destPath, const int mode,
-    deque<struct ErrFiles> &errfiles)
+    vector<struct ErrFiles> &errfiles)
 {
-    filesystem::path dpath(destPath);
-    if (!filesystem::is_directory(dpath)) {
-        errfiles.emplace_front(srcPath, destPath);
-        return ERRNO_NOERR;
-    }
-
     unique_ptr<struct NameListArg, decltype(Deleter)*> ptr = {new struct NameListArg, Deleter};
     if (!ptr) {
         HILOGE("Failed to request heap memory.");
@@ -262,7 +253,11 @@ static int RecurMoveDir(const string &srcPath, const string &destPath, const int
         } else {
             string src = srcPath + '/' + string((ptr->namelist[i])->d_name);
             string dest = destPath + '/' + string((ptr->namelist[i])->d_name);
-            int res = RenameFile(src, dest, mode, errfiles);
+            int res = RenameFile(src, dest, mode);
+            if (res == EEXIST && mode == DIRMODE_FILE_THROW_ERR) {
+                errfiles.emplace_back(src, dest);
+                continue;
+            }
             if (res != ERRNO_NOERR) {
                 HILOGE("Failed to rename file for error %{public}d", res);
                 return res;
@@ -272,7 +267,7 @@ static int RecurMoveDir(const string &srcPath, const string &destPath, const int
     return ERRNO_NOERR;
 }
 
-static int MoveDirFunc(const string &src, const string &dest, const int mode, deque<struct ErrFiles> &errfiles)
+static int MoveDirFunc(const string &src, const string &dest, const int mode, vector<struct ErrFiles> &errfiles)
 {
     size_t found = string(src).rfind('/');
     if (found == std::string::npos) {
@@ -300,7 +295,7 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode, de
     }
     int res = RenameDir(src, destStr, mode, errfiles);
     if (res == ERRNO_NOERR) {
-        if (!errfiles.empty()) {
+        if (mode == DIRMODE_FILE_THROW_ERR && errfiles.size() != 0) {
             HILOGE("Failed to movedir with some conflicted files");
             return EEXIST;
         }
@@ -313,7 +308,7 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode, de
     return res;
 }
 
-static napi_value GetErrData(napi_env env, deque<struct ErrFiles> &errfiles)
+static napi_value GetErrData(napi_env env, vector<struct ErrFiles> &errfiles)
 {
     napi_value res = nullptr;
     napi_status status = napi_create_array(env, &res);
@@ -321,12 +316,11 @@ static napi_value GetErrData(napi_env env, deque<struct ErrFiles> &errfiles)
         HILOGE("Failed to create array");
         return nullptr;
     }
-    size_t index = 0;
-    for (auto &iter : errfiles) {
+    for (size_t i = 0; i < errfiles.size(); i++) {
         NVal obj = NVal::CreateObject(env);
-        obj.AddProp("srcFile", NVal::CreateUTF8String(env, iter.srcFiles).val_);
-        obj.AddProp("destFile", NVal::CreateUTF8String(env, iter.destFiles).val_);
-        status = napi_set_element(env, res, index++, obj.val_);
+        obj.AddProp("srcFile", NVal::CreateUTF8String(env, errfiles[i].srcFiles).val_);
+        obj.AddProp("destFile", NVal::CreateUTF8String(env, errfiles[i].destFiles).val_);
+        status = napi_set_element(env, res, i, obj.val_);
         if (status != napi_ok) {
             HILOGE("Failed to set element on data");
             return nullptr;
@@ -349,9 +343,9 @@ napi_value MoveDir::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    deque<struct ErrFiles> errfiles = {};
+    vector<struct ErrFiles> errfiles = {};
     int ret = MoveDirFunc(src.get(), dest.get(), mode, errfiles);
-    if (ret == EEXIST) {
+    if (ret == EEXIST && mode == DIRMODE_FILE_THROW_ERR) {
         NError(ret).ThrowErrAddData(env, EEXIST, GetErrData(env, errfiles));
         return nullptr;
     } else if (ret) {
@@ -362,7 +356,7 @@ napi_value MoveDir::Sync(napi_env env, napi_callback_info info)
 }
 
 struct MoveDirArgs {
-    deque<ErrFiles> errfiles;
+    vector<ErrFiles> errfiles;
     int errNo = 0;
     ~MoveDirArgs() = default;
 };
@@ -395,7 +389,7 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
     };
 
     auto cbComplCallback = [arg, mode = mode](napi_env env, NError err) -> NVal {
-        if (arg->errNo == EEXIST) {
+        if (arg->errNo == EEXIST && mode == DIRMODE_FILE_THROW_ERR) {
             napi_value data = err.GetNapiErr(env);
             napi_status status = napi_set_named_property(env, data, FILEIO_TAG_ERR_DATA.c_str(),
                 GetErrData(env, arg->errfiles));
