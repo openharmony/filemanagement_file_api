@@ -31,76 +31,12 @@ using namespace std;
 
 napi_value Chmod::Sync(napi_env env, napi_callback_info info)
 {
-    NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::TWO)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
-        return nullptr;
-    }
-
-    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
-    if (!resGetFirstArg) {
-        UniError(EINVAL).ThrowErr(env, "Invalid path");
-        return nullptr;
-    }
-
-    auto [resGetSecondArg, mode] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-    if (!resGetSecondArg) {
-        UniError(EINVAL).ThrowErr(env, "Invalid mode");
-        return nullptr;
-    }
-
-    if (chmod(path.get(), mode) == -1) {
-        UniError(errno).ThrowErr(env);
-        return nullptr;
-    }
-
     return NVal::CreateUndefined(env).val_;
 }
 
 napi_value Chmod::Async(napi_env env, napi_callback_info info)
 {
-    NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
-        return nullptr;
-    }
-
-    auto [resGetFirstArg, tmp, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
-    if (!resGetFirstArg) {
-        UniError(EINVAL).ThrowErr(env, "Invalid path");
-        return nullptr;
-    }
-
-    auto [resGetSecondArg, mode] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-    if (!resGetSecondArg) {
-        UniError(EINVAL).ThrowErr(env, "Invalid mode");
-    }
-
-    string path = tmp.get();
-    auto cbExec = [path = path, mode = mode](napi_env env) -> UniError {
-        if (chmod(path.c_str(), mode) == -1) {
-            return UniError(errno);
-        } else {
-            return UniError(ERRNO_NOERR);
-        }
-    };
-
-    auto cbComplete = [](napi_env env, UniError err) -> NVal {
-        if (err) {
-            return { env, err.GetNapiErr(env) };
-        }
-        return { NVal::CreateUndefined(env) };
-    };
-
-    size_t argc = funcArg.GetArgc();
-    NVal thisVar(env, funcArg.GetThisVar());
-    const string procedureName = "FileIOChmod";
-    if (argc == NARG_CNT::TWO) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplete).val_;
-    } else {
-        NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplete).val_;
-    }
+    return NVal::CreateUndefined(env).val_;
 }
 } // namespace ModuleFileIO
 } // namespace DistributedFS
