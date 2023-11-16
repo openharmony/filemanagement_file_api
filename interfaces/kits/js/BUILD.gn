@@ -332,7 +332,31 @@ ohos_shared_library("environment") {
     "napi:ace_napi",
   ]
 }
+ohos_shared_library("userdirectory") {
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
 
+  relative_install_dir = "module/file"
+
+  sources = [
+    "src/mod_userdirectory/userdirectory_n_exporter.cpp",
+    "src/mod_userdirectory/userdirectory_napi.cpp",
+  ]
+
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+    "os_account:os_account_innerkits",
+  ]
+}
 ohos_shared_library("securitylabel") {
   subsystem_name = "filemanagement"
   part_name = "file_api"
@@ -399,5 +423,6 @@ group("build_kits_js") {
     ":securitylabel",
     ":statfs",
     ":statvfs",
+    ":userdirectory",
   ]
 }
