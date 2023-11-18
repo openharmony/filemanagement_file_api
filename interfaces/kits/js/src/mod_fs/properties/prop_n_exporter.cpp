@@ -65,6 +65,18 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
+static int AccessCore(const string &path)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> access_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!access_req) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    int ret = uv_fs_access(nullptr, access_req.get(), path.c_str(), 0, nullptr);
+    return ret;
+}
+
 napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -82,14 +94,7 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
     }
 
     bool isAccess = false;
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> access_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!access_req) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
-    }
-    int ret = uv_fs_access(nullptr, access_req.get(), path.get(), 0, nullptr);
+    int ret = AccessCore(path.get());
     if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
         HILOGE("Failed to access file by path");
         NError(ret).ThrowErr(env);
@@ -124,13 +129,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [path = string(tmp.get()), result]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> access_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!access_req) {
-            HILOGE("Failed to request heap memory.");
-            return NError(ENOMEM);
-        }
-        int ret = uv_fs_access(nullptr, access_req.get(), path.c_str(), 0, nullptr);
+        int ret = AccessCore(path);
         if (ret == 0) {
             result->isAccess = true;
         }
@@ -248,9 +247,23 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (hasOption) {
+        int ret = AccessCore(path);
+        if (ret == ERRNO_NOERR) {
+            HILOGE("The path already exists");
+            return NError(EEXIST);
+        }
+        if (ret != -ENOENT) {
+            HILOGE("Failed to check for illegal path or request for heap memory");
+            return NError(ret);
+        }
         if (::Mkdirs(path.c_str(), static_cast<MakeDirectionMode>(recursion)) < 0) {
             HILOGE("Failed to create directories, error: %{public}d", errno);
             return NError(errno);
+        }
+        ret = AccessCore(path);
+        if (ret) {
+            HILOGE("Failed to verify the result of Mkdirs function");
+            return NError(ret);
         }
         return NError(ERRNO_NOERR);
     }
@@ -326,28 +339,21 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    bool hasOption = false;
+    bool recursion = false;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        auto [success, recursion] = NVal(env, funcArg[NARG_POS::SECOND]).ToBool(false);
-        if (!success) {
+        tie(hasOption, recursion) = NVal(env, funcArg[NARG_POS::SECOND]).ToBool(false);
+        if (!hasOption) {
             HILOGE("Invalid recursion mode");
             NError(EINVAL).ThrowErr(env);
             return nullptr;
         }
-        MakeDirectionMode recursionMode = SINGLE;
-        recursionMode = static_cast<MakeDirectionMode>(recursion);
-        if (::Mkdirs(path.get(), recursionMode) < 0) {
-            HILOGE("Failed to create directories, error: %{public}d", errno);
-            NError(errno).ThrowErr(env);
-            return nullptr;
-        }
-        return NVal::CreateUndefined(env).val_;
     }
 #endif
-    int ret = MkdirCore(path.get());
-    if (ret) {
-        HILOGE("Failed to create directory");
-        NError(ret).ThrowErr(env);
+    auto err = MkdirExec(path.get(), recursion, hasOption);
+    if (err) {
+        err.ThrowErr(env);
         return nullptr;
     }
     return NVal::CreateUndefined(env).val_;
