@@ -182,8 +182,8 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, unsi
 static tuple<int, string> OpenFileByBroker(const Uri &uri, uint32_t mode)
 {
     uint32_t flag = (mode % MAX_WANT_FLAG) > 0 ?
-        AAFwk::Want::FLAG_AUTH_READ_URI_PERMISSION :
-        AAFwk::Want::FLAG_AUTH_WRITE_URI_PERMISSION;
+        AAFwk::Want::FLAG_AUTH_WRITE_URI_PERMISSION :
+        AAFwk::Want::FLAG_AUTH_READ_URI_PERMISSION;
     int ret = AAFwk::AbilityManagerClient::GetInstance()->OpenFile(uri, flag);
     if (ret < 0) {
         HILOGE("Failed to open file by Broker error %{public}d", ret);
