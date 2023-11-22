@@ -25,6 +25,18 @@ config("libn_public_config") {
 }
 
 ohos_shared_library("filemgmt_libn") {
+  if (!use_mingw_win && !use_mac) {
+    stack_protector_ret = true
+    sanitize = {
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+  }
+
   sources = [
     "src/n_async/n_async_work_callback.cpp",
     "src/n_async/n_async_work_promise.cpp",

@@ -26,6 +26,16 @@ file_common_src = [
 ]
 
 ohos_shared_library("fileio") {
+  stack_protector_ret = true
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
@@ -158,6 +168,16 @@ ohos_shared_library("fs") {
   ]
 
   if (!use_mingw_win && !use_mac) {
+    stack_protector_ret = true
+    sanitize = {
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+
     include_dirs += [ "${file_api_path}/interfaces/kits/rust/include" ]
     sources += [
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
@@ -203,6 +223,16 @@ ohos_shared_library("fs") {
 }
 
 ohos_shared_library("hash") {
+  stack_protector_ret = true
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
@@ -232,6 +262,16 @@ ohos_shared_library("hash") {
 }
 
 ohos_shared_library("file") {
+  stack_protector_ret = true
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
@@ -266,6 +306,16 @@ ohos_shared_library("file") {
 }
 
 ohos_shared_library("statfs") {
+  stack_protector_ret = true
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
@@ -288,6 +338,16 @@ ohos_shared_library("statfs") {
 }
 
 ohos_shared_library("statvfs") {
+  stack_protector_ret = true
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
@@ -310,6 +370,16 @@ ohos_shared_library("statvfs") {
 }
 
 ohos_shared_library("environment") {
+  stack_protector_ret = true
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
@@ -333,6 +403,16 @@ ohos_shared_library("environment") {
   ]
 }
 ohos_shared_library("userdirectory") {
+  stack_protector_ret = true
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
@@ -358,6 +438,16 @@ ohos_shared_library("userdirectory") {
   ]
 }
 ohos_shared_library("securitylabel") {
+  stack_protector_ret = true
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
@@ -384,6 +474,16 @@ ohos_shared_library("securitylabel") {
 }
 
 ohos_shared_library("document") {
+  stack_protector_ret = true
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 

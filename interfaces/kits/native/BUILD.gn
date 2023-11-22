@@ -23,6 +23,18 @@ config("remote_uri_config") {
 }
 
 ohos_shared_library("remote_uri_native") {
+  if (!use_mingw_win && !use_mac) {
+    stack_protector_ret = true
+    sanitize = {
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+  }
+
   sources = [ "remote_uri/remote_uri.cpp" ]
 
   public_configs = [ ":remote_uri_config" ]
