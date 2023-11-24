@@ -26,6 +26,7 @@
 #include "class_file/file_entity.h"
 #include "class_file/file_n_exporter.h"
 #include "close.h"
+#include "copy.h"
 #include "fdatasync.h"
 #include "file_utils.h"
 #include "filemgmt_libn.h"
@@ -639,6 +640,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
         NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
         NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
+        NVal::DeclareNapiFunction("copy", Copy::Async),
         NVal::DeclareNapiFunction("createRandomAccessFile", CreateRandomAccessFile::Async),
         NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),

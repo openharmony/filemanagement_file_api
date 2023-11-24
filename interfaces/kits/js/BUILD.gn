@@ -166,6 +166,7 @@ ohos_shared_library("fs") {
       "src/mod_fs/class_stream/stream_n_exporter.cpp",
       "src/mod_fs/class_watcher/watcher_entity.cpp",
       "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
+      "src/mod_fs/properties/copy.cpp",
       "src/mod_fs/properties/copy_file.cpp",
       "src/mod_fs/properties/copydir.cpp",
       "src/mod_fs/properties/create_randomaccessfile.cpp",
