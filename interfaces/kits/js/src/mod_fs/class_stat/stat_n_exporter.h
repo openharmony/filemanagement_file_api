@@ -52,6 +52,9 @@ public:
     static napi_value GetAtime(napi_env env, napi_callback_info info);
     static napi_value GetMtime(napi_env env, napi_callback_info info);
     static napi_value GetCtime(napi_env env, napi_callback_info info);
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    static napi_value GetLocation(napi_env env, napi_callback_info info);
+#endif
 
     StatNExporter(napi_env env, napi_value exports);
     ~StatNExporter() override;

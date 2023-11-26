@@ -145,6 +145,29 @@ unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
     return flagsABI;
 }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf, Location location)
+{
+    napi_value objStat = NClass::InstantiateClass(env, StatNExporter::className_, {});
+    if (!objStat) {
+        HILOGE("Failed to instantiate stat class");
+        NError(EIO).ThrowErr(env);
+        return NVal();
+    }
+
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, objStat);
+    if (!statEntity) {
+        HILOGE("Failed to get stat entity");
+        NError(EIO).ThrowErr(env);
+        return NVal();
+    }
+
+    statEntity->stat_ = buf;
+    statEntity->location = location;
+    return { env, objStat };
+}
+#endif
+
 NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf)
 {
     napi_value objStat = NClass::InstantiateClass(env, StatNExporter::className_, {});

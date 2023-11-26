@@ -17,10 +17,18 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_STAT_STAT_ENTITY_H
 
 #include "uv.h"
-
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+enum Location {
+    LOCAL = 1 << 0,
+    CLOUD = 1 << 1
+};
+#endif
 namespace OHOS::FileManagement::ModuleFileIO {
 struct StatEntity {
     uv_stat_t stat_;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    Location location;
+#endif
 };
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_STAT_STAT_ENTITY_H
