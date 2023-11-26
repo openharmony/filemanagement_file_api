@@ -226,6 +226,26 @@ napi_value StatNExporter::GetCtime(napi_env env, napi_callback_info info)
     return NVal::CreateInt64(env, static_cast<int64_t>(statEntity->stat_.st_ctim.tv_sec)).val_;
 }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+napi_value StatNExporter::GetLocation(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
+    if (!statEntity) {
+        HILOGE("Failed to get stat entity");
+        return nullptr;
+    }
+
+    return NVal::CreateInt32(env, static_cast<int32_t>(statEntity->location)).val_;
+}
+#endif
+
 napi_value StatNExporter::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -268,6 +288,9 @@ bool StatNExporter::Export()
         NVal::DeclareNapiGetter("atime", GetAtime),
         NVal::DeclareNapiGetter("mtime", GetMtime),
         NVal::DeclareNapiGetter("ctime", GetCtime),
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+        NVal::DeclareNapiGetter("location", GetLocation),
+#endif
     };
 
 #ifdef WIN_PLATFORM

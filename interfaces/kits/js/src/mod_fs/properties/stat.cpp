@@ -15,6 +15,10 @@
 #include "stat.h"
 
 #include <memory>
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include <string>
+#include <sys/xattr.h>
+#endif
 #include <tuple>
 
 #include "class_stat/stat_entity.h"
@@ -71,6 +75,47 @@ static NError CheckFsStat(const FileInfo &fileInfo, uv_fs_t* req)
     return NError(ERRNO_NOERR);
 }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+static Location GetLocationAttr(const FileInfo &fileInfo)
+{
+    const std::string cloudLocationXattr = "user.cloud.location";
+    const Location defaultLocation = LOCAL;
+    ssize_t size = 0;
+    if (fileInfo.isPath) {
+        size = getxattr(fileInfo.path.get(), cloudLocationXattr.c_str(), nullptr, 0);
+    } else {
+        size = fgetxattr(fileInfo.fdg->GetFD(), cloudLocationXattr.c_str(), nullptr, 0);
+    }
+    if (size <= 0) {
+        HILOGE("Getxattr size failed, errno is %{public}d", errno);
+        return defaultLocation;
+    }
+
+    std::unique_ptr<char[]> value = CreateUniquePtr<char[]>(size);
+    if (value == nullptr) {
+        HILOGE("Getxattr memory out, errno is %{public}d", errno);
+        return defaultLocation;
+    }
+
+    if (fileInfo.isPath) {
+        size = getxattr(fileInfo.path.get(), cloudLocationXattr.c_str(), value.get(), size);
+    } else {
+        size = fgetxattr(fileInfo.fdg->GetFD(), cloudLocationXattr.c_str(), value.get(), size);
+    }
+    if (size <= 0) {
+        HILOGE("Getxattr value failed, errno is %{public}d", errno);
+        return defaultLocation;
+    }
+
+    std::string location = value.get();
+    if (!std::all_of(location.begin(), location.end(), ::isdigit)) {
+        HILOGE("Getxattr location is not all digit!");
+        return defaultLocation;
+    }
+    return static_cast<Location>(atoi(location.c_str()));
+}
+#endif
+
 napi_value Stat::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -96,8 +141,12 @@ napi_value Stat::Sync(napi_env env, napi_callback_info info)
         err.ThrowErr(env);
         return nullptr;
     }
-
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    Location location = GetLocationAttr(fileInfo);
+    auto stat = CommonFunc::InstantiateStat(env, stat_req->statbuf, location).val_;
+#else
     auto stat = CommonFunc::InstantiateStat(env, stat_req->statbuf).val_;
+#endif
     return stat;
 }
 
@@ -131,15 +180,23 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
             return err;
         }
         arg->stat_ = stat_req->statbuf;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+        arg->location = GetLocationAttr(*fileInfo);
+#endif
         return NError(ERRNO_NOERR);
     };
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+        auto stat = CommonFunc::InstantiateStat(env, arg->stat_, arg->location);
+#else
         auto stat = CommonFunc::InstantiateStat(env, arg->stat_);
+#endif
         return stat;
     };
+
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STAT_NAME, cbExec, cbCompl).val_;
