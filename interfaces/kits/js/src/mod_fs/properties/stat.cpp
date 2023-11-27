@@ -91,7 +91,7 @@ static Location GetLocationAttr(const FileInfo &fileInfo)
         return defaultLocation;
     }
 
-    std::unique_ptr<char[]> value = CreateUniquePtr<char[]>(size);
+    std::unique_ptr<char[]> value = CreateUniquePtr<char[]>(size + 1);
     if (value == nullptr) {
         HILOGE("Getxattr memory out, errno is %{public}d", errno);
         return defaultLocation;
