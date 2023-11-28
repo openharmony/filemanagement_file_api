@@ -19,4 +19,9 @@
             <option name="push" value="remote_uri_test.txt -> /data/test" src="res"/>
         </preparer>
     </target>
+    <target name="class_file_test">
+        <preparer>
+            <option name="push" value="rust_test.txt -> /data/test" src="res"/>
+        </preparer>
+    </target>
 </configuration>
