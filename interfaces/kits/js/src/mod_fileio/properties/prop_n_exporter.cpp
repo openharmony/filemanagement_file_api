@@ -26,7 +26,6 @@
 #include "chown.h"
 #include "close.h"
 #include "copy_file.h"
-#include "create_randomaccessfile.h"
 #include "create_stream.h"
 #include "fchmod.h"
 #include "fchown.h"
@@ -594,8 +593,6 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("closeSync", Close::Sync),
         NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
         NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
-        NVal::DeclareNapiFunction("createRandomAccessFile", CreateRandomAccessFile::Async),
-        NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),
         NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
         NVal::DeclareNapiFunction("createWatcher", Watcher::CreateWatcher),
