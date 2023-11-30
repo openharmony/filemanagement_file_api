@@ -149,7 +149,8 @@ enum CommonErrCode {
     E_PERMISSION_SYS = 202,
     E_PARAMS = 401,
     E_DEVICENOTSUPPORT = 801,
-    E_OSNOTSUPPORT = 901
+    E_OSNOTSUPPORT = 901,
+    E_UNKNOWN_ERROR = 13900042
 };
 
 static const std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {

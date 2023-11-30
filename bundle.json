@@ -34,6 +34,7 @@
             "eventhandler",
             "hilog",
             "ipc",
+            "init",
             "napi",
             "samgr",
             "app_file_service",
