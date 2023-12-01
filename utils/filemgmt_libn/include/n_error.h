@@ -152,7 +152,7 @@ enum CommonErrCode {
     E_OSNOTSUPPORT = 901
 };
 
-static const std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
+static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "EPERM", EPERM },
     { "ENOENT", ENOENT },
     { "ESRCH", ESRCH },
