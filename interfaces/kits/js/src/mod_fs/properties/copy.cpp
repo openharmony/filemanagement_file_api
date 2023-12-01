@@ -614,7 +614,6 @@ void Copy::RemoveWatch(int notifyFd, std::shared_ptr<JsCallbackObject> callback)
 
 void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
 {
-    HILOGD("GetNotifyEvent in.");
     if (infos->run || infos->notifyFd < 0) {
         HILOGE("Already run or notifyFd is invalid, notifyFd: %{public}d.", infos->notifyFd);
         infos->exceptionCode = EINVAL;
@@ -632,8 +631,7 @@ void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
             break;
         }
         int len, index = 0;
-        while (((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {
-        };
+        while (((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
         while (index < len) {
             event = reinterpret_cast<inotify_event *>(buf + index);
             auto callback = GetRegisteredListener(infos);
@@ -693,7 +691,7 @@ void Copy::StartNotify(std::shared_ptr<FileInfos> infos)
     if (infos->notifyFd != -1) {
         std::thread([infos] {
             GetNotifyEvent(infos);
-        }).detach();
+            }).detach();
     }
 }
 

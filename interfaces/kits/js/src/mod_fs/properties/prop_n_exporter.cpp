@@ -26,7 +26,6 @@
 #include "class_file/file_entity.h"
 #include "class_file/file_n_exporter.h"
 #include "close.h"
-#include "copy.h"
 #include "fdatasync.h"
 #include "file_utils.h"
 #include "filemgmt_libn.h"
@@ -43,6 +42,7 @@
 #include "utimes.h"
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include "copy.h"
 #include "copy_file.h"
 #include "copydir.h"
 #include "create_randomaccessfile.h"
