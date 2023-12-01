@@ -37,7 +37,6 @@
             "napi",
             "samgr",
             "app_file_service",
-            "build_framework",
             "os_account"
         ],
         "third_party": [
