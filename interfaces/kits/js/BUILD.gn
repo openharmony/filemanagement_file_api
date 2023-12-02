@@ -119,9 +119,12 @@ ohos_shared_library("fs") {
   relative_install_dir = "module/file"
 
   include_dirs = [
+    "${filemanagement_service_path}/distributedfiledaemon/include/ipc",
     "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_fs",
+    "${src_path}/mod_fs/properties",
+    "${src_path}/mod_fs/properties/copy_listener",
     "${utils_path}/common/include",
     "//third_party/libuv/include",
   ]
@@ -188,6 +191,7 @@ ohos_shared_library("fs") {
       "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
       "src/mod_fs/properties/copy.cpp",
       "src/mod_fs/properties/copy_file.cpp",
+      "src/mod_fs/properties/copy_listener/trans_listener.cpp",
       "src/mod_fs/properties/copydir.cpp",
       "src/mod_fs/properties/create_randomaccessfile.cpp",
       "src/mod_fs/properties/create_stream.cpp",
@@ -203,9 +207,11 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/watcher.cpp",
     ]
     external_deps += [
+      "ability_base:want",
       "ability_base:zuri",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:uri_permission_mgr",
       "access_token:libtokenid_sdk",
       "app_file_service:fileuri_native",
       "bundle_framework:appexecfwk_base",
@@ -213,6 +219,7 @@ ohos_shared_library("fs") {
       "c_utils:utils",
       "data_share:datashare_common",
       "data_share:datashare_consumer",
+      "dfs_service:distributed_file_daemon_kit_inner",
       "ipc:ipc_core",
       "samgr:samgr_proxy",
     ]

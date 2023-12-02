@@ -31,6 +31,7 @@
             "common_event_service",
             "c_utils",
             "data_share",
+            "dfs_service",
             "eventhandler",
             "hilog",
             "ipc",
