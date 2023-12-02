@@ -26,6 +26,11 @@ napi_value EnvironmentExport(napi_env env, napi_value exports)
     static napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("getStorageDataDir", GetStorageDataDir),
         DECLARE_NAPI_FUNCTION("getUserDataDir", GetUserDataDir),
+        DECLARE_NAPI_FUNCTION("getUserDownloadDir", GetUserDownloadDir),
+        DECLARE_NAPI_FUNCTION("getUserDesktopDir", GetUserDesktopDir),
+        DECLARE_NAPI_FUNCTION("getUserDocumentDir", GetUserDocumentDir),
+        DECLARE_NAPI_FUNCTION("getUserHomeDir", GetUserHomeDir),
+        DECLARE_NAPI_FUNCTION("getExternalStorageDir", GetExternalStorageDir),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;

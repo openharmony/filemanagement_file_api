@@ -23,6 +23,11 @@ namespace FileManagement {
 namespace ModuleEnvironment {
 napi_value GetStorageDataDir(napi_env env, napi_callback_info info);
 napi_value GetUserDataDir(napi_env env, napi_callback_info info);
+napi_value GetUserDownloadDir(napi_env env, napi_callback_info info);
+napi_value GetUserDesktopDir(napi_env env, napi_callback_info info);
+napi_value GetUserDocumentDir(napi_env env, napi_callback_info info);
+napi_value GetExternalStorageDir(napi_env env, napi_callback_info info);
+napi_value GetUserHomeDir(napi_env env, napi_callback_info info);
 } // namespace ModuleEnvironment
 } // namespace FileManagement
 } // namespace OHOS
