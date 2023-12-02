@@ -42,6 +42,7 @@
 #include "utimes.h"
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include "copy.h"
 #include "copy_file.h"
 #include "copydir.h"
 #include "create_randomaccessfile.h"
@@ -645,6 +646,7 @@ bool PropNExporter::Export()
         NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
         NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
         NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
+        NVal::DeclareNapiFunction("copy", Copy::Async),
         NVal::DeclareNapiFunction("createRandomAccessFile", CreateRandomAccessFile::Async),
         NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),
