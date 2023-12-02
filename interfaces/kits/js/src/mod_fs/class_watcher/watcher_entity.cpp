@@ -16,6 +16,7 @@
 
 #include <cerrno>
 #include <cstdint>
+#include <mutex>
 #include <unistd.h>
 #include <algorithm>
 
@@ -27,6 +28,7 @@ using namespace OHOS::FileManagement::LibN;
 using namespace std;
 
 mutex FileWatcher::watchMutex_;
+mutex FileWatcher::selectMutex_;
 
 FileWatcher::FileWatcher() {}
 
@@ -148,6 +150,10 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
 
 void FileWatcher::GetNotifyEvent(WatcherCallback callback)
 {
+    unique_lock<mutex> lock(selectMutex_, std::try_to_lock);
+    if (!lock.try_lock()) {
+        return;
+    }
     if (run_) {
         return;
     }
@@ -157,12 +163,15 @@ void FileWatcher::GetNotifyEvent(WatcherCallback callback)
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(notifyFd_, &fds);
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 1000;
     while (run_) {
         if (notifyFd_ < 0) {
             HILOGE("Failed to run Listener Thread because notifyFd_:%{public}d", notifyFd_);
             break;
         }
-        if (select(notifyFd_ + 1, &fds, nullptr, nullptr, nullptr) > 0) {
+        if (select(notifyFd_ + 1, &fds, nullptr, nullptr, &tv) > 0) {
             int len, index = 0;
             while (((len = read(notifyFd_, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
             while (index < len) {
