@@ -35,6 +35,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "trans_listener.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -42,51 +43,16 @@ namespace ModuleFileIO {
 using namespace AppFileService::ModuleFileUri;
 const std::string FILE_PREFIX_NAME = "file://";
 const std::string NETWORK_PARA = "?networkid=";
+const string PROCEDURE_COPY_NAME = "FileFSCopy";
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
 std::recursive_mutex Copy::mutex_;
 std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
 
-sptr<OHOS::AppExecFwk::IBundleMgr> Copy::GetBundleMgr()
-{
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (systemAbilityManager == nullptr) {
-        HILOGE("systemAbilityManager is nullptr");
-        return nullptr;
-    }
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (remoteObject == nullptr) {
-        HILOGE("remoteObject is nullptr");
-        return nullptr;
-    }
-    return iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
-}
-
-std::string Copy::GetCurrentBundleName()
-{
-    auto bundleMgr = GetBundleMgr();
-    if (bundleMgr == nullptr) {
-        HILOGE("failed to get bunlde manager sa");
-        return "";
-    }
-    AppExecFwk::BundleInfo bundleInfo;
-    auto ret = bundleMgr->GetBundleInfoForSelf(0, bundleInfo);
-    if (ret != 0) {
-        return "";
-    }
-    return bundleInfo.name;
-}
-
 bool Copy::IsValidUri(const std::string &uri)
 {
-    if (uri.find(FILE_PREFIX_NAME) != 0) {
-        return false;
-    }
-    std::string currentBundleName = GetCurrentBundleName();
-    std::string temp = uri.substr(FILE_PREFIX_NAME.size(), uri.size());
-    return temp.find(currentBundleName) == 0;
+    return uri.find(FILE_PREFIX_NAME) == 0;
 }
 
 tuple<bool, std::string> Copy::ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
@@ -755,7 +721,7 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
     auto cbExec = [env, tempInfos]() -> NError {
         if (IsRemoteUri(tempInfos->srcUri)) {
             // copyRemoteUri
-            return NError(ERRNO_NOERR);
+            return SubscribeRemoteListener(env, tempInfos);
         }
         StartNotify(tempInfos);
         auto result = ExecCopy(tempInfos);
@@ -780,6 +746,17 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH)]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
     }
+}
+
+NError Copy::SubscribeRemoteListener(napi_env env, std::shared_ptr<FileInfos> infos)
+{
+    sptr<TransListener> transListener = new (std::nothrow) TransListener;
+    if (transListener == nullptr) {
+        HILOGE("transListener is empty");
+        return NError(ENOMEM);
+    }
+    transListener->callback_ = std::make_shared<JsCallbackObject>(env, infos->listener);
+    return TransListener::CopyFileFromSoftBus(infos->srcUri, infos->destUri, transListener);
 }
 } // namespace ModuleFileIO
 } // namespace FileManagement

@@ -75,10 +75,11 @@ struct UvEntry {
     std::shared_ptr<FileInfos> fileInfos;
     uint64_t progressSize = 0;
     uint64_t totalSize = 0;
-    UvEntry(std::shared_ptr<JsCallbackObject> &cb, std::shared_ptr<FileInfos> fileInfos)
+    UvEntry(const std::shared_ptr<JsCallbackObject> &cb, std::shared_ptr<FileInfos> fileInfos)
         : callback(cb), fileInfos(fileInfos)
     {
     }
+    explicit UvEntry(const std::shared_ptr<JsCallbackObject> &cb) : callback(cb) {}
 };
 
 class Copy final {
@@ -108,6 +109,7 @@ private:
     static void UnregisterListenerComplete(uv_work_t *work, int stat);
     static std::shared_ptr<JsCallbackObject> GetRegisteredListener(std::shared_ptr<FileInfos> infos);
     static void RemoveWatch(int notifyFd, std::shared_ptr<JsCallbackObject> callback);
+    static NError SubscribeRemoteListener(napi_env env, std::shared_ptr<FileInfos> infos);
 
     // operator of file
     static int RecurCopyDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);
@@ -135,12 +137,7 @@ private:
     static bool IsDirectory(const std::string &path);
     static bool IsFile(const std::string &path);
     static std::string ConvertUriToPath(const std::string &uri);
-
-    // other tools
-    static sptr<OHOS::AppExecFwk::IBundleMgr> GetBundleMgr();
-    static std::string GetCurrentBundleName();
 };
-const string PROCEDURE_COPY_NAME = "FileFSCopy";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
