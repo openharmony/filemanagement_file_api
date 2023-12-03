@@ -153,7 +153,7 @@ enum CommonErrCode {
     E_UNKNOWN_ERROR = 13900042
 };
 
-static const std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
+static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "EPERM", EPERM },
     { "ENOENT", ENOENT },
     { "ESRCH", ESRCH },
