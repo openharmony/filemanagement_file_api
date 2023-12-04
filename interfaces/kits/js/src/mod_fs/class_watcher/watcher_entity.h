@@ -67,7 +67,6 @@ private:
 
 private:
     static std::mutex watchMutex_;
-    static std::mutex selectMutex_;
     bool run_ = false;
     int32_t notifyFd_ = -1;
     std::unordered_set<std::shared_ptr<WatcherInfoArg>> watcherInfoSet_;
