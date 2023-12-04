@@ -32,17 +32,19 @@ public:
     int32_t OnFileReceive(uint64_t totalBytes, uint64_t processedBytes) override;
     int32_t OnFinished(const std::string &sessionName) override;
     int32_t OnFailed(const std::string &sessionName) override;
-    static NError CopyFileFromSoftBus(const std::string &srcUri, const std::string &destUri,
-        sptr<TransListener> transListener);
+    static NError CopyFileFromSoftBus(const std::string &srcUri,
+                                      const std::string &destUri,
+                                      std::shared_ptr<JsCallbackObject> callback);
     static std::string GetNetworkIdFromUri(const std::string &uri);
     static void CallbackComplete(uv_work_t *work, int stat);
     std::mutex cvMutex_;
     std::condition_variable cv_;
     int copyEvent_ = NONE;
+    std::mutex callbackMutex_;
     std::shared_ptr<JsCallbackObject> callback_;
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif //FILEMANAGEMENT_FILE_API_TRANS_LISTENER_H
+#endif // FILEMANAGEMENT_FILE_API_TRANS_LISTENER_H

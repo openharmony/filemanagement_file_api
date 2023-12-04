@@ -285,7 +285,9 @@ int Copy::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<Fil
     return CopySubDir(src, destStr, infos);
 }
 
-int Copy::SubscribeLocalListener(napi_env env, std::shared_ptr<FileInfos> infos)
+int Copy::SubscribeLocalListener(napi_env env,
+                                 std::shared_ptr<FileInfos> infos,
+                                 std::shared_ptr<JsCallbackObject> callback)
 {
     if (!infos->listener.TypeIs(napi_function)) {
         return ERRNO_NOERR;
@@ -310,11 +312,6 @@ int Copy::SubscribeLocalListener(napi_env env, std::shared_ptr<FileInfos> infos)
         return ENOMEM;
     }
     receiveInfo->path = infos->destPath;
-    auto callback = CreateSharedPtr<JsCallbackObject>(env, infos->listener);
-    if (callback == nullptr) {
-        HILOGE("Failed to request heap memory.");
-        return ENOMEM;
-    }
     callback->wds.push_back({ newWd, receiveInfo });
     if (IsFile(infos->srcPath)) {
         auto [err, fileSize] = GetFileSize(infos->srcPath);
@@ -325,25 +322,27 @@ int Copy::SubscribeLocalListener(napi_env env, std::shared_ptr<FileInfos> infos)
     } else {
         callback->totalSize = GetDirSize(infos, infos->srcPath);
     }
-    if (RegisterListener(infos, callback)) {
-        return ERRNO_NOERR;
-    }
     inotify_rm_watch(infos->notifyFd, newWd);
     close(infos->notifyFd);
     HILOGE("Can not copy repeat.");
     return EINVAL;
 }
 
-bool Copy::RegisterListener(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
+std::shared_ptr<JsCallbackObject> Copy::RegisterListener(napi_env env, const std::shared_ptr<FileInfos> &infos)
 {
+    auto callback = CreateSharedPtr<JsCallbackObject>(env, infos->listener);
+    if (callback == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return nullptr;
+    }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = jsCbMap_.find(*infos);
     if (iter != jsCbMap_.end()) {
         HILOGI("Copy::RegisterListener, already registered.");
-        return false;
+        return nullptr;
     }
     jsCbMap_.insert({ *infos, callback });
-    return true;
+    return callback;
 }
 
 void Copy::UnregisterListener(std::shared_ptr<FileInfos> infos)
@@ -710,18 +709,23 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         NError(result).ThrowErr(env);
         return nullptr;
     }
+    auto callback = RegisterListener(env, infos);
+    if (callback == nullptr) {
+        NError(E_UNKNOWN_ERROR).ThrowErr(env);
+        return nullptr;
+    }
     if (!IsRemoteUri(infos->srcUri)) {
-        auto ret = SubscribeLocalListener(env, infos);
+        auto ret = SubscribeLocalListener(env, infos, callback);
         if (ret != ERRNO_NOERR) {
             NError(ret).ThrowErr(env);
             return nullptr;
         }
     }
     std::shared_ptr<FileInfos> tempInfos = infos;
-    auto cbExec = [env, tempInfos]() -> NError {
+    auto cbExec = [env, tempInfos, callback]() -> NError {
         if (IsRemoteUri(tempInfos->srcUri)) {
             // copyRemoteUri
-            return SubscribeRemoteListener(env, tempInfos);
+            return TransListener::CopyFileFromSoftBus(tempInfos->srcUri, tempInfos->destUri, std::move(callback));
         }
         StartNotify(tempInfos);
         auto result = ExecCopy(tempInfos);
@@ -731,7 +735,8 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         return NError(tempInfos->exceptionCode);
     };
 
-    auto cbCompl = [](napi_env env, NError err) -> NVal {
+    auto cbCompl = [infos](napi_env env, NError err) -> NVal {
+        UnregisterListener(infos);
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
@@ -746,17 +751,6 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH)]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
     }
-}
-
-NError Copy::SubscribeRemoteListener(napi_env env, std::shared_ptr<FileInfos> infos)
-{
-    sptr<TransListener> transListener = new (std::nothrow) TransListener;
-    if (transListener == nullptr) {
-        HILOGE("transListener is empty");
-        return NError(ENOMEM);
-    }
-    transListener->callback_ = std::make_shared<JsCallbackObject>(env, infos->listener);
-    return TransListener::CopyFileFromSoftBus(infos->srcUri, infos->destUri, transListener);
 }
 } // namespace ModuleFileIO
 } // namespace FileManagement

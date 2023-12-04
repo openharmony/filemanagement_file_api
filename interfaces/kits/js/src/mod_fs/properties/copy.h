@@ -98,8 +98,9 @@ private:
 
     // operator of local listener
     static fd_set InitFds(int notifyFd);
-    static int SubscribeLocalListener(napi_env env, std::shared_ptr<FileInfos> infos);
-    static bool RegisterListener(std::shared_ptr<FileInfos> fileInfos, std::shared_ptr<JsCallbackObject> callback);
+    static int SubscribeLocalListener(
+        napi_env env, std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
+    static std::shared_ptr<JsCallbackObject> RegisterListener(napi_env env, const std::shared_ptr<FileInfos> &infos);
     static void OnFileReceive(std::shared_ptr<FileInfos> infos);
     static void GetNotifyEvent(std::shared_ptr<FileInfos> infos);
     static void StartNotify(std::shared_ptr<FileInfos> infos);
@@ -109,7 +110,6 @@ private:
     static void UnregisterListenerComplete(uv_work_t *work, int stat);
     static std::shared_ptr<JsCallbackObject> GetRegisteredListener(std::shared_ptr<FileInfos> infos);
     static void RemoveWatch(int notifyFd, std::shared_ptr<JsCallbackObject> callback);
-    static NError SubscribeRemoteListener(napi_env env, std::shared_ptr<FileInfos> infos);
 
     // operator of file
     static int RecurCopyDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);
