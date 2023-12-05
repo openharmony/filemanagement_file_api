@@ -127,6 +127,19 @@ Str* GetParent(int fd);
 
 /**
  * @ingroup     rust
+ * @brief       Cut the file name by the specified length.
+ * @param       path    file name.
+ * @param       size    specified length.
+ * @retval      NULL    The file name is empty or error.
+ * @retval      !NULL   The result of the file name after cutting.
+ * @attention
+ * 1.Errors are stored in errno.
+ * @li          rust_file.h:The file where the interface is located.
+ */
+Str* CutFileName(const char* path, size_t size);
+
+/**
+ * @ingroup     rust
  * @brief       Releases the memory that the `Str` pointer points to.
  * @param       lines   pointer to `Str`.
  * @li          rust_file.h:The file where the interface is located.
