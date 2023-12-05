@@ -23,6 +23,7 @@
 #include <limits>
 #include <memory>
 #include <sys/inotify.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <tuple>
@@ -73,7 +74,6 @@ tuple<bool, NVal> Copy::GetListenerFromOptionArg(napi_env env, const NFuncArg &f
 {
     if (funcArg.GetArgc() >= NARG_CNT::THREE) {
         NVal op(env, funcArg[NARG_POS::THIRD]);
-
         if (op.HasProp("progressListener") && !op.GetProp("progressListener").TypeIs(napi_undefined)) {
             if (!op.GetProp("progressListener").TypeIs(napi_function)) {
                 HILOGE("Illegal options.progressListener type");
@@ -93,8 +93,7 @@ bool Copy::IsRemoteUri(const std::string &uri)
 
 bool Copy::IsDirectory(const std::string &path)
 {
-    struct stat buf {
-    };
+    struct stat buf {};
     int ret = stat(path.c_str(), &buf);
     if (ret == -1) {
         HILOGE("stat failed, errno is %{public}d, path is %{public}s", errno, path.c_str());
@@ -105,8 +104,7 @@ bool Copy::IsDirectory(const std::string &path)
 
 bool Copy::IsFile(const std::string &path)
 {
-    struct stat buf {
-    };
+    struct stat buf {};
     int ret = stat(path.c_str(), &buf);
     if (ret == -1) {
         HILOGI("stat failed, errno is %{public}d, ", errno);
@@ -117,8 +115,7 @@ bool Copy::IsFile(const std::string &path)
 
 tuple<int, uint64_t> Copy::GetFileSize(const std::string &path)
 {
-    struct stat buf {
-    };
+    struct stat buf {};
     int ret = stat(path.c_str(), &buf);
     if (ret == -1) {
         HILOGI("Stat failed.");
@@ -127,23 +124,14 @@ tuple<int, uint64_t> Copy::GetFileSize(const std::string &path)
     return { ERRNO_NOERR, buf.st_size };
 }
 
-bool Copy::CheckValidParam(const std::string &srcUri, const std::string &destUri)
+void Copy::CheckOrCreatePath(const std::string &destPath)
 {
-    auto srcPath = ConvertUriToPath(srcUri);
-    auto destPath = ConvertUriToPath(destUri);
     if (!filesystem::exists(destPath)) {
         HILOGE("destPath not exist, destPath = %{public}s", destPath.c_str());
         ofstream out;
         out.open(destPath.c_str());
         out.close();
     }
-    if (IsDirectory(srcPath)) {
-        return IsDirectory(destPath);
-    }
-    if (IsFile(srcPath)) {
-        return IsFile(destPath);
-    }
-    return false;
 }
 
 int Copy::CopyFile(const string &src, const string &dest)
@@ -236,6 +224,9 @@ uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, std::string path)
     long int size = 0;
     for (int i = 0; i < num; i++) {
         string dest = path + '/' + string((pNameList->namelist[i])->d_name);
+        if ((pNameList->namelist[i])->d_type == DT_LNK) {
+            continue;
+        }
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
             return size += GetDirSize(infos, dest);
         }
@@ -261,6 +252,9 @@ int Copy::RecurCopyDir(const string &srcPath, const string &destPath, std::share
     for (int i = 0; i < num; i++) {
         string src = srcPath + '/' + string((pNameList->namelist[i])->d_name);
         string dest = destPath + '/' + string((pNameList->namelist[i])->d_name);
+        if ((pNameList->namelist[i])->d_type == DT_LNK) {
+            continue;
+        }
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
             return CopySubDir(src, dest, infos);
         }
@@ -285,47 +279,60 @@ int Copy::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<Fil
     return CopySubDir(src, destStr, infos);
 }
 
-int Copy::SubscribeLocalListener(napi_env env,
-                                 std::shared_ptr<FileInfos> infos,
+int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
+{
+    CheckOrCreatePath(infos->destPath);
+    if (!infos->hasListener) {
+        return ExecCopy(infos);
+    }
+    auto ret = SubscribeLocalListener(infos, callback);
+    if (ret != ERRNO_NOERR) {
+        HILOGE("Failed to subscribe local listener, errno = %{public}d", ret);
+        return ret;
+    }
+    StartNotify(infos, callback);
+    return ExecCopy(infos);
+}
+
+int Copy::SubscribeLocalListener(std::shared_ptr<FileInfos> infos,
                                  std::shared_ptr<JsCallbackObject> callback)
 {
-    if (!infos->listener.TypeIs(napi_function)) {
-        return ERRNO_NOERR;
-    }
     infos->notifyFd = inotify_init();
     if (infos->notifyFd < 0) {
         HILOGE("Failed to init inotify, errno:%{public}d", errno);
         return errno;
     }
-    uint32_t watchEvents = IN_MODIFY;
-    int newWd = inotify_add_watch(infos->notifyFd, infos->destPath.c_str(), watchEvents);
+    callback->notifyFd = infos->notifyFd;
+    int newWd = inotify_add_watch(infos->notifyFd, infos->destPath.c_str(), IN_MODIFY);
     if (newWd < 0) {
-        auto errNo = errno;
-        HILOGE("Failed to add inotify watch, errno:%{public}d, notifyFd = %{public}d, destPath = %{public}s", errNo,
-            infos->notifyFd, infos->destPath.c_str());
+        auto errCode = errno;
+        HILOGE("Failed to add watch, errno = %{public}d, notifyFd: %{public}d, destPath: %{public}s", errno,
+               infos->notifyFd, infos->destPath.c_str());
         close(infos->notifyFd);
-        return errNo;
+        infos->notifyFd = -1;
+        callback->notifyFd = -1;
+        return errCode;
     }
     auto receiveInfo = CreateSharedPtr<ReceiveInfo>();
     if (receiveInfo == nullptr) {
         HILOGE("Failed to request heap memory.");
+        inotify_rm_watch(infos->notifyFd, newWd);
+        close(infos->notifyFd);
+        infos->notifyFd = -1;
+        callback->notifyFd = -1;
         return ENOMEM;
     }
     receiveInfo->path = infos->destPath;
     callback->wds.push_back({ newWd, receiveInfo });
-    if (IsFile(infos->srcPath)) {
-        auto [err, fileSize] = GetFileSize(infos->srcPath);
-        if (err != ERRNO_NOERR) {
-            return err;
-        }
-        callback->totalSize = fileSize;
-    } else {
+    if (IsDirectory(infos->srcPath)) {
         callback->totalSize = GetDirSize(infos, infos->srcPath);
+        return ERRNO_NOERR;
     }
-    inotify_rm_watch(infos->notifyFd, newWd);
-    close(infos->notifyFd);
-    HILOGE("Can not copy repeat.");
-    return EINVAL;
+    auto [err, fileSize] = GetFileSize(infos->srcPath);
+    if (err == ERRNO_NOERR) {
+        callback->totalSize = fileSize;
+    }
+    return err;
 }
 
 std::shared_ptr<JsCallbackObject> Copy::RegisterListener(napi_env env, const std::shared_ptr<FileInfos> &infos)
@@ -338,7 +345,7 @@ std::shared_ptr<JsCallbackObject> Copy::RegisterListener(napi_env env, const std
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = jsCbMap_.find(*infos);
     if (iter != jsCbMap_.end()) {
-        HILOGI("Copy::RegisterListener, already registered.");
+        HILOGE("Copy::RegisterListener, already registered.");
         return nullptr;
     }
     jsCbMap_.insert({ *infos, callback });
@@ -358,7 +365,6 @@ void Copy::UnregisterListener(std::shared_ptr<FileInfos> infos)
         return;
     }
     jsCbMap_.erase(*infos);
-    HILOGD("UnregisterListener end.");
 }
 
 void Copy::ReceiveComplete(uv_work_t *work, int stat)
@@ -390,7 +396,7 @@ void Copy::ReceiveComplete(uv_work_t *work, int stat)
         return;
     }
     NVal obj = NVal::CreateObject(env);
-    if (processedSize <= numeric_limits<int64_t >::max() && entry->totalSize <= numeric_limits<int64_t >::max()) {
+    if (processedSize <= numeric_limits<int64_t>::max() && entry->totalSize <= numeric_limits<int64_t>::max()) {
         obj.AddProp("processedSize", NVal::CreateInt64(env, processedSize).val_);
         obj.AddProp("totalSize", NVal::CreateInt64(env, entry->totalSize).val_);
     }
@@ -400,32 +406,10 @@ void Copy::ReceiveComplete(uv_work_t *work, int stat)
     if (status != napi_ok) {
         HILOGE("Failed to get result, status: %{public}d.", status);
     }
-    if (entry->progressSize == entry->totalSize) {
-        HILOGI("entry->progressSize == entry->totalSize, %" PRId64, entry->progressSize);
-        UnregisterListener(entry->fileInfos);
-    }
     status = napi_close_handle_scope(env, scope);
     if (status != napi_ok) {
         HILOGE("Failed to close scope, status: %{public}d.", status);
     }
-}
-
-void Copy::UnregisterListenerComplete(uv_work_t *work, int stat)
-{
-    if (work == nullptr) {
-        HILOGE("uv_work_t pointer is nullptr.");
-        return;
-    }
-
-    std::shared_ptr<UvEntry> entry(static_cast<UvEntry *>(work->data), [work](UvEntry *data) {
-        delete data;
-        delete work;
-    });
-    if (entry == nullptr) {
-        HILOGE("entry pointer is nullptr.");
-        return;
-    }
-    UnregisterListener(entry->fileInfos);
 }
 
 uv_work_t *Copy::GetUVwork(std::shared_ptr<FileInfos> infos)
@@ -451,6 +435,7 @@ uv_work_t *Copy::GetUVwork(std::shared_ptr<FileInfos> infos)
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
         HILOGE("Failed to create uv_work_t pointer");
+        delete entry;
         return nullptr;
     }
     work->data = entry;
@@ -470,19 +455,6 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
         loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(ReceiveComplete));
 }
 
-void Copy::OnUnregisterListener(std::shared_ptr<FileInfos> infos)
-{
-    uv_work_t *work = GetUVwork(infos);
-    if (work == nullptr) {
-        HILOGE("Failed to create uv_work_t pointer");
-        return;
-    }
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(infos->env, &loop);
-    uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(UnregisterListenerComplete));
-}
-
 fd_set Copy::InitFds(int notifyFd)
 {
     fd_set fds;
@@ -493,12 +465,9 @@ fd_set Copy::InitFds(int notifyFd)
 
 std::shared_ptr<ReceiveInfo> Copy::GetReceivedInfo(int wd, std::shared_ptr<JsCallbackObject> callback)
 {
-    std::string path;
-    auto wds = callback->wds;
-    auto it = wds.begin();
-    for (; it != wds.end(); ++it) {
-        if (it->first == wd) {
-            return it->second;
+    for (auto &it : callback->wds) {
+        if (it.first == wd) {
+            return it.second;
         }
     }
     return nullptr;
@@ -509,8 +478,9 @@ bool Copy::CheckFileValid(const std::string &filePath, std::shared_ptr<FileInfos
     return infos->filePaths.count(filePath) != 0;
 }
 
-int Copy::UpdateProgressSize(const std::string &filePath, std::shared_ptr<FileInfos> infos,
-    std::shared_ptr<ReceiveInfo> receivedInfo, std::shared_ptr<JsCallbackObject> callback)
+int Copy::UpdateProgressSize(const std::string &filePath,
+                             std::shared_ptr<ReceiveInfo> receivedInfo,
+                             std::shared_ptr<JsCallbackObject> callback)
 {
     auto [err, fileSize] = GetFileSize(filePath);
     if (err != ERRNO_NOERR) {
@@ -555,7 +525,7 @@ tuple<bool, int, bool> Copy::HandleProgress(
         if (!CheckFileValid(fileName, infos)) {
             return { true, EINVAL, false };
         }
-        auto err = UpdateProgressSize(fileName, infos, receivedInfo, callback);
+        auto err = UpdateProgressSize(fileName, receivedInfo, callback);
         if (err != ERRNO_NOERR) {
             return { false, err, false };
         }
@@ -569,64 +539,43 @@ tuple<bool, int, bool> Copy::HandleProgress(
     return { true, ERRNO_NOERR, true };
 }
 
-void Copy::RemoveWatch(int notifyFd, std::shared_ptr<JsCallbackObject> callback)
-{
-    for (auto item : callback->wds) {
-        inotify_rm_watch(notifyFd, item.first);
-    }
-    close(notifyFd);
-}
-
 void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
 {
-    if (infos->run || infos->notifyFd < 0) {
-        HILOGE("Already run or notifyFd is invalid, notifyFd: %{public}d.", infos->notifyFd);
-        infos->exceptionCode = EINVAL;
-        return;
-    }
+    prctl(PR_SET_NAME, "NotifyThread");
     infos->run = true;
     char buf[BUF_SIZE] = { 0 };
     struct inotify_event *event = nullptr;
     fd_set fds = InitFds(infos->notifyFd);
     while (infos->run && infos->exceptionCode == ERRNO_NOERR) {
         auto ret = select(infos->notifyFd + 1, &fds, nullptr, nullptr, nullptr);
-        if (ret <= 0) {
+        if (ret < 0) {
             HILOGD("Failed to select, ret = %{public}d.", ret);
             infos->exceptionCode = errno;
             break;
         }
         int len, index = 0;
         while (((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
-        while (index < len) {
+        while (index < len && infos->run) {
             event = reinterpret_cast<inotify_event *>(buf + index);
             auto callback = GetRegisteredListener(infos);
             if (callback == nullptr) {
                 infos->exceptionCode = EINVAL;
-                infos->run = false;
                 return;
             }
             auto [needContinue, errCode, needSend] = HandleProgress(event, infos, callback);
             if (!needContinue) {
                 infos->exceptionCode = errCode;
-                RemoveWatch(infos->notifyFd, callback);
                 callback = nullptr;
-                OnUnregisterListener(infos);
                 return;
             }
             if (needContinue && !needSend) {
                 index += sizeof(struct inotify_event) + event->len;
                 continue;
             }
-            if (callback->progressSize == callback->totalSize) {
-                infos->run = false;
-                RemoveWatch(infos->notifyFd, callback);
-            }
-            callback = nullptr;
             OnFileReceive(infos);
             index += sizeof(struct inotify_event) + event->len;
         }
     }
-    OnUnregisterListener(infos);
 }
 
 std::string Copy::ConvertUriToPath(const std::string &uri)
@@ -648,15 +597,19 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->listener = listener;
     infos->srcPath = ConvertUriToPath(infos->srcUri);
     infos->destPath = ConvertUriToPath(infos->destUri);
+
+    if (listener) {
+        infos->hasListener = true;
+    }
     return { ERRNO_NOERR, infos };
 }
 
-void Copy::StartNotify(std::shared_ptr<FileInfos> infos)
+void Copy::StartNotify(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
-    if (infos->notifyFd != -1) {
-        std::thread([infos] {
+    if (infos->hasListener && callback != nullptr) {
+        callback->notifyHandler = std::thread([infos] {
             GetNotifyEvent(infos);
-            }).detach();
+            });
     }
 }
 
@@ -675,16 +628,15 @@ int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
 
 int Copy::ParseJsParam(napi_env env, NFuncArg &funcArg, std::shared_ptr<FileInfos> &fileInfos)
 {
+    if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
+        HILOGE("Number of arguments unmatched");
+        return E_PARAMS;
+    }
     auto [succSrc, srcUri] = ParseJsOperand(env, { env, funcArg[NARG_POS::FIRST] });
     auto [succDest, destUri] = ParseJsOperand(env, { env, funcArg[NARG_POS::SECOND] });
     auto [succOptions, listener] = GetListenerFromOptionArg(env, funcArg);
     if (!succSrc || !succDest || !succOptions) {
         HILOGE("The first/second/third argument requires uri/uri/napi_function");
-        return E_PARAMS;
-    }
-
-    if (!IsRemoteUri(srcUri) && !CheckValidParam(srcUri, destUri)) {
-        HILOGE("Should copy one file to another, or copy one dir to another.");
         return E_PARAMS;
     }
     auto [errCode, infos] = CreateFileInfos(srcUri, destUri, listener);
@@ -695,14 +647,26 @@ int Copy::ParseJsParam(napi_env env, NFuncArg &funcArg, std::shared_ptr<FileInfo
     return ERRNO_NOERR;
 }
 
+void Copy::WaitNotifyFinished(std::shared_ptr<JsCallbackObject> callback)
+{
+    if (callback != nullptr) {
+        if (callback->notifyHandler.joinable()) {
+            callback->notifyHandler.join();
+        }
+    }
+}
+
+void Copy::CopyComplete(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
+{
+    if (callback != nullptr) {
+        callback->progressSize = callback->totalSize;
+        OnFileReceive(infos);
+    }
+}
+
 napi_value Copy::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
-        HILOGE("Number of arguments unmatched");
-        NError(E_PARAMS).ThrowErr(env);
-        return nullptr;
-    }
     std::shared_ptr<FileInfos> infos = nullptr;
     auto result = ParseJsParam(env, funcArg, infos);
     if (result != ERRNO_NOERR) {
@@ -714,25 +678,19 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         NError(E_UNKNOWN_ERROR).ThrowErr(env);
         return nullptr;
     }
-    if (!IsRemoteUri(infos->srcUri)) {
-        auto ret = SubscribeLocalListener(env, infos, callback);
-        if (ret != ERRNO_NOERR) {
-            NError(ret).ThrowErr(env);
-            return nullptr;
+    auto cbExec = [infos, callback]() -> NError {
+        if (IsRemoteUri(infos->srcUri)) {
+            return TransListener::CopyFileFromSoftBus(infos->srcUri, infos->destUri, std::move(callback));
         }
-    }
-    std::shared_ptr<FileInfos> tempInfos = infos;
-    auto cbExec = [env, tempInfos, callback]() -> NError {
-        if (IsRemoteUri(tempInfos->srcUri)) {
-            // copyRemoteUri
-            return TransListener::CopyFileFromSoftBus(tempInfos->srcUri, tempInfos->destUri, std::move(callback));
-        }
-        StartNotify(tempInfos);
-        auto result = ExecCopy(tempInfos);
+        auto result = Copy::ExecLocal(infos, callback);
+        infos->run = false;
+        WaitNotifyFinished(callback);
         if (result != ERRNO_NOERR) {
-            tempInfos->exceptionCode = result;
+            infos->exceptionCode = result;
+            return NError(infos->exceptionCode);
         }
-        return NError(tempInfos->exceptionCode);
+        CopyComplete(infos, callback);
+        return NError(infos->exceptionCode);
     };
 
     auto cbCompl = [infos](napi_env env, NError err) -> NVal {
