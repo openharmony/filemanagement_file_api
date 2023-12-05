@@ -18,36 +18,33 @@
 #include "distributed_file_daemon_manager.h"
 #include "ipc_skeleton.h"
 #include "uri.h"
-#include "uri_permission_manager_client.h"
-#include "want.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-using namespace OHOS::AppExecFwk;
 const std::string NETWORK_PARA = "?networkid=";
 
-NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::string &destUri,
-    sptr<TransListener> transListener)
+NError TransListener::CopyFileFromSoftBus(const std::string &srcUri,
+                                          const std::string &destUri,
+                                          std::shared_ptr<JsCallbackObject> callback)
 {
-    auto &permissionClient = AAFwk::UriPermissionManagerClient::GetInstance();
-    OHOS::Uri uri(srcUri);
-    auto isVerified = permissionClient.VerifyUriPermission(uri, AAFwk::Want::FLAG_AUTH_READ_URI_PERMISSION,
-        IPCSkeleton::GetCallingTokenID());
-    if (!isVerified) {
-        return NError(E_PARAMS);
+    sptr<TransListener> transListener = new (std::nothrow) TransListener();
+    if (transListener == nullptr) {
+        HILOGE("new trans listener failed");
+        return NError(ENOMEM);
     }
-
+    transListener->callback_ = std::move(callback);
     auto networkId = GetNetworkIdFromUri(srcUri);
-    auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(srcUri, destUri,
-        networkId, transListener);
+    auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(
+        srcUri, destUri, networkId, transListener);
     if (ret != ERRNO_NOERR) {
         HILOGE("PrepareSession failed, ret = %{public}d.", ret);
         return NError(ret);
     }
     std::unique_lock<std::mutex> lock(transListener->cvMutex_);
-    transListener->cv_.wait(lock,
-        [&transListener]() { return transListener->copyEvent_ == SUCCESS || transListener->copyEvent_ == FAILED; });
+    transListener->cv_.wait(lock, [&transListener]() {
+        return transListener->copyEvent_ == SUCCESS || transListener->copyEvent_ == FAILED;
+    });
     if (transListener->copyEvent_ == FAILED) {
         return NError(EIO);
     }
@@ -101,6 +98,7 @@ void TransListener::CallbackComplete(uv_work_t *work, int stat)
 
 int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedBytes)
 {
+    std::lock_guard<std::mutex> lock(callbackMutex_);
     if (callback_ == nullptr) {
         HILOGE("Failed to parse watcher callback");
         return ENOMEM;
@@ -137,6 +135,10 @@ int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedByte
 int32_t TransListener::OnFinished(const std::string &sessionName)
 {
     HILOGD("OnFinished");
+    {
+        std::lock_guard<std::mutex> lock(callbackMutex_);
+        callback_ = nullptr;
+    }
     copyEvent_ = SUCCESS;
     cv_.notify_all();
     return ERRNO_NOERR;
@@ -145,6 +147,10 @@ int32_t TransListener::OnFinished(const std::string &sessionName)
 int32_t TransListener::OnFailed(const std::string &sessionName)
 {
     HILOGD("OnFailed");
+    {
+        std::lock_guard<std::mutex> lock(callbackMutex_);
+        callback_ = nullptr;
+    }
     copyEvent_ = FAILED;
     cv_.notify_all();
     return ERRNO_NOERR;

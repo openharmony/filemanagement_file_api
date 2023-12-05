@@ -207,11 +207,9 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/watcher.cpp",
     ]
     external_deps += [
-      "ability_base:want",
       "ability_base:zuri",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
-      "ability_runtime:uri_permission_mgr",
       "access_token:libtokenid_sdk",
       "app_file_service:fileuri_native",
       "bundle_framework:appexecfwk_base",
