@@ -14,10 +14,12 @@
  */
 #include "watcher_entity.h"
 
+#include <algorithm>
 #include <cerrno>
 #include <cstdint>
+#include <poll.h>
+#include <sys/eventfd.h>
 #include <unistd.h>
-#include <algorithm>
 
 #include "filemgmt_libhilog.h"
 #include "uv.h"
@@ -42,6 +44,11 @@ bool FileWatcher::InitNotify()
     notifyFd_ = inotify_init();
     if (notifyFd_ < 0) {
         HILOGE("Failed to init notify errCode:%{public}d", errno);
+        return false;
+    }
+    eventFd_ = eventfd(0, EFD_CLOEXEC);
+    if (eventFd_ < 0) {
+        HILOGE("Failed to init eventfd errCode:%{public}d", errno);
         return false;
     }
     return true;
@@ -113,9 +120,14 @@ int FileWatcher::CloseNotifyFd()
     if (watcherInfoSet_.size() == 0) {
         closeRet = close(notifyFd_);
         if (closeRet != 0) {
-            HILOGE("Failed to stop notify close fd errCode:%{public}d", closeRet);
+            HILOGE("Failed to stop notify close fd errCode:%{public}d", errno);
         }
         notifyFd_ = -1;
+        closeRet = close(eventFd_);
+        if (closeRet != 0) {
+            HILOGE("Failed to close eventfd errCode:%{public}d", errno);
+        }
+        eventFd_ = -1;
         run_ = false;
     }
 
@@ -131,7 +143,11 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
     }
     uint32_t newEvents = RemoveWatcherInfo(arg);
     if (newEvents > 0) {
-        return NotifyToWatchNewEvents(arg->fileName, arg->wd, newEvents);
+        if (access(arg->fileName.c_str(), F_OK) == 0) {
+            return NotifyToWatchNewEvents(arg->fileName, arg->wd, newEvents);
+        }
+        HILOGE("The Watched file does not exist, and the remaining monitored events will be invalid.");
+        return ERRNO_NOERR;
     }
     if (inotify_rm_watch(notifyFd_, arg->wd) == -1) {
         int rmErr = errno;
@@ -146,30 +162,48 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
     return CloseNotifyFd();
 }
 
+void FileWatcher::ReadNotifyEvent(WatcherCallback callback)
+{
+    int len = 0;
+    int index = 0;
+    char buf[BUF_SIZE] = {0};
+    struct inotify_event *event = nullptr;
+    while (((len = read(notifyFd_, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
+    while (index < len) {
+        event = reinterpret_cast<inotify_event *>(buf + index);
+        NotifyEvent(event, callback);
+        index += sizeof(struct inotify_event) + event->len;
+    }
+}
+
 void FileWatcher::GetNotifyEvent(WatcherCallback callback)
 {
     if (run_) {
         return;
     }
     run_ = true;
-    char buf[BUF_SIZE] = {0};
-    struct inotify_event *event = nullptr;
-    fd_set fds;
-    FD_ZERO(&fds);
-    FD_SET(notifyFd_, &fds);
+    nfds_t nfds = 2;
+    struct pollfd fds[2];
+    fds[0].fd = eventFd_;
+    fds[0].events = 0;
+    fds[1].fd = notifyFd_;
+    fds[1].events = POLLIN;
+    int ret = 0;
     while (run_) {
-        if (notifyFd_ < 0) {
-            HILOGE("Failed to run Listener Thread because notifyFd_:%{public}d", notifyFd_);
-            break;
-        }
-        if (select(notifyFd_ + 1, &fds, nullptr, nullptr, nullptr) > 0) {
-            int len, index = 0;
-            while (((len = read(notifyFd_, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
-            while (index < len) {
-                event = reinterpret_cast<inotify_event *>(buf + index);
-                NotifyEvent(event, callback);
-                index += sizeof(struct inotify_event) + event->len;
+        ret = poll(fds, nfds, -1);
+        if (ret > 0) {
+            if (fds[0].revents & POLLNVAL) {
+                run_ = false;
+                return;
             }
+            if (fds[1].revents & POLLIN) {
+                ReadNotifyEvent(callback);
+            }
+        } else if (ret < 0 && errno == EINTR) {
+            continue;
+        } else {
+            HILOGE("Failed to poll NotifyFd, errno=%{public}d", errno);
+            return;
         }
     }
 }
