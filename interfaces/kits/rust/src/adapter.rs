@@ -162,3 +162,26 @@ pub(crate) fn get_parent(fd: i32) -> Result<*mut Str, Error> {
     }
     Ok(null_mut())
 }
+
+pub(crate) unsafe fn cut_file_name(path: *const c_char, size: usize) -> *mut Str {
+    let path_str = match CStr::from_ptr(path).to_str() {
+        Ok(s) => s,
+        Err(_) => return std::ptr::null_mut(),
+    };
+    let len = path_str.chars().count();
+    let size = size.min(len);
+
+    let mut sliced_str = String::from(path_str);
+    for _ in 0..size {
+        let _ = sliced_str.pop();
+    }
+
+    let result = match CString::new(sliced_str.clone()) {
+        Ok(s) => Str {
+            str: s.into_raw(),
+            len: sliced_str.as_bytes().len() as c_uint,
+        },
+        Err(_) => return std::ptr::null_mut(),
+    };
+    Box::into_raw(Box::new(result))
+}

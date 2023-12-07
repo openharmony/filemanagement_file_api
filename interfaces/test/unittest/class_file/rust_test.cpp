@@ -591,6 +591,33 @@ HWTEST_F(RustTest, RustTest_StrFree_0002, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "RustTest-end RustTest_StrFree_0002";
 }
 
+/**
+* @tc.name: RustTest_CutFileName_0000
+* @tc.desc: Test function of CutFileName() interface for SUCCESS.
+* @tc.size: MEDIUM
+* @tc.type: FUNC
+* @tc.level Level 1
+* @tc.require: AR000IGDNF
+*/
+HWTEST_F(RustTest, RustTest_CutFileName_0000, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RustTest-begin RustTest_CutFileName_0000";
+    string myStr = "<?,你好，世界！hello, world! ?XML, 你好，世界！";
+
+    Str *str1 = CutFileName(myStr.c_str(), 2);
+    GTEST_LOG_(INFO) << "RustTest_CutFileName_0000 str1" << str1->str;
+    GTEST_LOG_(INFO) << "RustTest_CutFileName_0000 str1" << str1->len;
+    EXPECT_TRUE(string(str1->str).compare("<?,你好，世界！hello, world! ?XML, 你好，世") == 0);
+    StrFree(str1);
+    Str *str2 = CutFileName(myStr.c_str(), 10);
+    GTEST_LOG_(INFO) << "RustTest_CutFileName_0000 str2" << str2->str;
+    GTEST_LOG_(INFO) << "RustTest_CutFileName_0000 str2" << str2->len;
+    EXPECT_TRUE(string(str2->str).compare("<?,你好，世界！hello, world! ?X") == 0);
+    StrFree(str2);
+
+    GTEST_LOG_(INFO) << "RustTest-end RustTest_CutFileName_0000";
+}
+
 }
 }
 }

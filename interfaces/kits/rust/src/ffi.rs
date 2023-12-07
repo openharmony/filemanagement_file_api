@@ -14,8 +14,8 @@
  */
 
 use crate::adapter::{
-    create_dir, error_control, get_parent, next_line, reader_iterator, seek, MakeDirectionMode,
-    SeekPos, Str,
+    create_dir, error_control, get_parent, next_line, reader_iterator, seek, cut_file_name,
+    MakeDirectionMode, SeekPos, Str,
 };
 use libc::{c_char, c_int, c_longlong, c_void};
 use std::ffi::CString;
@@ -84,4 +84,9 @@ pub unsafe extern "C" fn StrFree(str: *mut Str) {
         let string = Box::from_raw(str);
         let _ = CString::from_raw(string.str);
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn CutFileName(path: *const c_char, size: usize) -> *mut Str {
+    cut_file_name(path, size)
 }
