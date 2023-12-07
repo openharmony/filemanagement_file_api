@@ -56,6 +56,7 @@ public:
     int StartNotify(std::shared_ptr<WatcherInfoArg> arg);
     int StopNotify(std::shared_ptr<WatcherInfoArg> arg);
     void GetNotifyEvent(WatcherCallback callback);
+    void ReadNotifyEvent(WatcherCallback callback);
     bool AddWatcherInfo(const std::string &fileName, std::shared_ptr<WatcherInfoArg> arg);
     bool CheckEventValid(const uint32_t &event);
 private:
@@ -69,6 +70,7 @@ private:
     static std::mutex watchMutex_;
     bool run_ = false;
     int32_t notifyFd_ = -1;
+    int32_t eventFd_ = -1;
     std::unordered_set<std::shared_ptr<WatcherInfoArg>> watcherInfoSet_;
     std::unordered_map<std::string, std::pair<int, uint32_t>> wdFileNameMap_;
 };
