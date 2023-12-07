@@ -27,86 +27,14 @@ namespace DistributedFS {
 namespace ModuleFileIO {
 using namespace std;
 
-static tuple<bool, string, int, int> GetLchownArg(napi_env env, const NFuncArg &funcArg)
-{
-    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
-    if (!resGetFirstArg) {
-        UniError(EINVAL).ThrowErr(env, "Invalid path");
-        return { false, "", -1, -1 };
-    }
-
-    auto [resGetSecondArg, owner] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-    if (!resGetSecondArg) {
-        UniError(EINVAL).ThrowErr(env, "Invalid owner");
-        return { false, "", -1, -1 };
-    }
-
-    auto [resGetThirdArg, group] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32();
-    if (!resGetThirdArg) {
-        UniError(EINVAL).ThrowErr(env, "Invalid group");
-        return { false, "", -1, -1 };
-    }
-
-    return { true, path.get(), owner, group };
-}
-
 napi_value Lchown::Sync(napi_env env, napi_callback_info info)
 {
-    NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::THREE)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
-        return nullptr;
-    }
-
-    auto [resGetLchownArg, path, owner, group] = GetLchownArg(env, funcArg);
-    if (!resGetLchownArg) {
-        return nullptr;
-    }
-
-    if (lchown(path.c_str(), owner, group) == -1) {
-        UniError(errno).ThrowErr(env);
-        return nullptr;
-    }
-
     return NVal::CreateUndefined(env).val_;
 }
 
 napi_value Lchown::Async(napi_env env, napi_callback_info info)
 {
-    NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::THREE, NARG_CNT::FOUR)) {
-        UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
-        return nullptr;
-    }
-
-    auto [resGetLchownArg, path, owner, group] = GetLchownArg(env, funcArg);
-    if (!resGetLchownArg) {
-        return nullptr;
-    }
-
-    auto cbExec = [path = path, owner = owner, group = group](napi_env env) -> UniError {
-        if (lchown(path.c_str(), owner, group) == -1) {
-            return UniError(errno);
-        } else {
-            return UniError(ERRNO_NOERR);
-        }
-    };
-
-    auto cbCompl = [](napi_env env, UniError err) -> NVal {
-        if (err) {
-            return { env, err.GetNapiErr(env) };
-        }
-        return { NVal::CreateUndefined(env) };
-    };
-
-    const string procedureName = "FileIOLchown";
-    NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::THREE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
-    } else {
-        NVal cb(env, funcArg[NARG_POS::FOURTH]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
-    }
+    return NVal::CreateUndefined(env).val_;
 }
 } // namespace ModuleFileIO
 } // namespace DistributedFS
