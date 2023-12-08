@@ -38,12 +38,24 @@ struct ReceiveInfo {
 struct JsCallbackObject {
     napi_env env = nullptr;
     LibN::NRef nRef;
+    int32_t notifyFd = -1;
     std::vector<std::pair<int, std::shared_ptr<ReceiveInfo>>> wds;
     uint64_t totalSize = 0;
     uint64_t progressSize = 0;
     uint64_t maxProgressSize = 0;
+    std::thread notifyHandler;
     explicit JsCallbackObject(napi_env env, LibN::NVal jsVal) : env(env), nRef(jsVal) {}
-    ~JsCallbackObject() = default;
+    ~JsCallbackObject()
+    {
+        if (notifyFd == -1) {
+            return;
+        }
+        for (auto item : wds) {
+            inotify_rm_watch(notifyFd, item.first);
+        }
+        close(notifyFd);
+        notifyFd = -1;
+    }
 };
 
 struct FileInfos {
@@ -53,6 +65,7 @@ struct FileInfos {
     std::string destPath;
     int32_t notifyFd = -1;
     bool run = false;
+    bool hasListener = false;
     napi_env env;
     NVal listener;
     std::set<std::string> filePaths;
@@ -93,23 +106,22 @@ private:
     // operator of napi
     static tuple<bool, std::string> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg);
     static tuple<bool, NVal> GetListenerFromOptionArg(napi_env env, const NFuncArg &funcArg);
-    static bool CheckValidParam(const std::string &srcUri, const std::string &destUri);
+    static void CheckOrCreatePath(const std::string &path);
     static int ParseJsParam(napi_env env, NFuncArg &funcArg, std::shared_ptr<FileInfos> &fileInfos);
 
     // operator of local listener
+    static int ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
+    static void CopyComplete(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
+    static void WaitNotifyFinished(std::shared_ptr<JsCallbackObject> callback);
     static fd_set InitFds(int notifyFd);
-    static int SubscribeLocalListener(
-        napi_env env, std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
+    static int SubscribeLocalListener(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static std::shared_ptr<JsCallbackObject> RegisterListener(napi_env env, const std::shared_ptr<FileInfos> &infos);
     static void OnFileReceive(std::shared_ptr<FileInfos> infos);
     static void GetNotifyEvent(std::shared_ptr<FileInfos> infos);
-    static void StartNotify(std::shared_ptr<FileInfos> infos);
+    static void StartNotify(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static uv_work_t *GetUVwork(std::shared_ptr<FileInfos> infos);
     static void ReceiveComplete(uv_work_t *work, int stat);
-    static void OnUnregisterListener(std::shared_ptr<FileInfos> infos);
-    static void UnregisterListenerComplete(uv_work_t *work, int stat);
     static std::shared_ptr<JsCallbackObject> GetRegisteredListener(std::shared_ptr<FileInfos> infos);
-    static void RemoveWatch(int notifyFd, std::shared_ptr<JsCallbackObject> callback);
 
     // operator of file
     static int RecurCopyDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);
@@ -124,8 +136,9 @@ private:
     static int ExecCopy(std::shared_ptr<FileInfos> infos);
 
     // operator of file size
-    static int UpdateProgressSize(const std::string &filePath, std::shared_ptr<FileInfos> infos,
-        std::shared_ptr<ReceiveInfo> receivedInfo, std::shared_ptr<JsCallbackObject> callback);
+    static int UpdateProgressSize(const std::string &filePath,
+                                  std::shared_ptr<ReceiveInfo> receivedInfo,
+                                  std::shared_ptr<JsCallbackObject> callback);
     static tuple<bool, int, bool> HandleProgress(
         inotify_event *event, std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static std::shared_ptr<ReceiveInfo> GetReceivedInfo(int wd, std::shared_ptr<JsCallbackObject> callback);
