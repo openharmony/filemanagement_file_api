@@ -119,6 +119,32 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
     return NError(ERRNO_NOERR);
 }
 
+static int OpenFile(const std::string& path)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup
+    };
+    if (open_req == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return -ENOMEM;
+    }
+
+    return uv_fs_open(nullptr, open_req.get(), path.c_str(), O_RDONLY,
+        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+}
+
+static int ReadFromFile(int fd, int64_t offset, string& buffer)
+{
+    uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(buffer.size()));
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (read_req == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return -ENOMEM;
+    }
+    return uv_fs_read(nullptr, read_req.get(), fd, &readbuf, 1, offset, nullptr);
+}
+
 napi_value ReadText::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -142,21 +168,14 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     }
 
     OHOS::DistributedFS::FDGuard sfd;
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!open_req) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
+    int fd = OpenFile(path.get());
+    if (fd < 0) {
+        HILOGE("Failed to open file by ret: %{public}d", fd);
+        NError(fd).ThrowErr(env);
         return nullptr;
     }
-    int ret = uv_fs_open(nullptr, open_req.get(), path.get(), O_RDONLY,
-                         S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to open file by ret: %{public}d", ret);
-        NError(errno).ThrowErr(env);
-        return nullptr;
-    }
-    sfd.SetFD(ret);
+    sfd.SetFD(fd);
+
     struct stat statbf;
     if ((!sfd) || (fstat(sfd.GetFD(), &statbf) < 0)) {
         HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
@@ -172,22 +191,14 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
 
     len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     string buffer(len, '\0');
-    uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(len));
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!read_req) {
-        HILOGE("Failed to request heap memory.");
-        NError(ENOMEM).ThrowErr(env);
-        return nullptr;
-    }
-    ret = uv_fs_read(nullptr, read_req.get(), sfd.GetFD(), &readbuf, 1, offset, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to read file by fd: %{public}d", sfd.GetFD());
-        NError(errno).ThrowErr(env);
+    int readRet = ReadFromFile(sfd.GetFD(), offset, buffer);
+    if (readRet < 0) {
+        HILOGE("Failed to read file by fd: %{public}d", fd);
+        NError(readRet).ThrowErr(env);
         return nullptr;
     }
 
-    return NVal::CreateUTF8String(env, readbuf.base, ret).val_;
+    return NVal::CreateUTF8String(env, buffer.c_str(), buffer.size()).val_;
 }
 
 napi_value ReadText::Async(napi_env env, napi_callback_info info)

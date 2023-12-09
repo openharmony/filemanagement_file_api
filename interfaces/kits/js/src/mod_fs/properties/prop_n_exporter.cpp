@@ -510,9 +510,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    bool succ = false;
-    int32_t fd = 0;
-    tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
+    auto[succ, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
         NError(EINVAL).ThrowErr(env);
@@ -537,7 +535,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, buf, len, fd, offset]() -> NError {
+    auto cbExec = [arg, buf, len, fd = fd, offset]() -> NError {
         return WriteExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
 

@@ -237,9 +237,8 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg, StreamEntity *stream
             return NError(EIO);
         }
         if (offset >= 0) {
-            int ret = fseek(streamEntity->fp.get(), static_cast<long>(offset), SEEK_SET);
-            if (ret < 0) {
-                HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
+            if (fseek(streamEntity->fp.get(), static_cast<long>(offset), SEEK_SET) < 0) {
+                HILOGE("Failed to set the offset location of the file stream pointer");
                 return NError(errno);
             }
         }
