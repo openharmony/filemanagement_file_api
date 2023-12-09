@@ -64,8 +64,8 @@ static std::string GetUserName()
     ErrCode errCode = OHOS::AccountSA::OsAccountManager::GetOsAccountShortName(userName);
     if (errCode != ERR_OK || userName.empty()) {
         HILOGE("Get userName Failed");
-        userName = DEFAULT_USERNAME;
     }
+    userName = DEFAULT_USERNAME;
     return userName;
 }
 
