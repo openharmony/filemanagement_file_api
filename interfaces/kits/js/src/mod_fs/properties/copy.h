@@ -39,14 +39,20 @@ struct JsCallbackObject {
     napi_env env = nullptr;
     LibN::NRef nRef;
     int32_t notifyFd = -1;
+    int32_t eventFd = -1;
     std::vector<std::pair<int, std::shared_ptr<ReceiveInfo>>> wds;
     uint64_t totalSize = 0;
     uint64_t progressSize = 0;
     uint64_t maxProgressSize = 0;
     std::thread notifyHandler;
     explicit JsCallbackObject(napi_env env, LibN::NVal jsVal) : env(env), nRef(jsVal) {}
-    ~JsCallbackObject()
+
+    void CloseFd()
     {
+        if (eventFd != -1) {
+            close(eventFd);
+            eventFd = -1;
+        }
         if (notifyFd == -1) {
             return;
         }
@@ -56,6 +62,11 @@ struct JsCallbackObject {
         close(notifyFd);
         notifyFd = -1;
     }
+
+    ~JsCallbackObject()
+    {
+        CloseFd();
+    }
 };
 
 struct FileInfos {
@@ -64,7 +75,8 @@ struct FileInfos {
     std::string srcPath;
     std::string destPath;
     int32_t notifyFd = -1;
-    bool run = false;
+    int32_t eventFd = -1;
+    bool run = true;
     bool hasListener = false;
     napi_env env;
     NVal listener;
@@ -113,7 +125,7 @@ private:
     static int ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static void CopyComplete(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static void WaitNotifyFinished(std::shared_ptr<JsCallbackObject> callback);
-    static fd_set InitFds(int notifyFd);
+    static void ReadNotifyEvent(std::shared_ptr<FileInfos> infos);
     static int SubscribeLocalListener(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static std::shared_ptr<JsCallbackObject> RegisterListener(napi_env env, const std::shared_ptr<FileInfos> &infos);
     static void OnFileReceive(std::shared_ptr<FileInfos> infos);

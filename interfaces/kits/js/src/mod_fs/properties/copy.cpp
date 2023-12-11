@@ -22,6 +22,8 @@
 #include <fstream>
 #include <limits>
 #include <memory>
+#include <poll.h>
+#include <sys/eventfd.h>
 #include <sys/inotify.h>
 #include <sys/prctl.h>
 #include <sys/stat.h>
@@ -291,7 +293,13 @@ int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallback
         return ret;
     }
     StartNotify(infos, callback);
-    return ExecCopy(infos);
+    ret = ExecCopy(infos);
+    HILOGI("tyx::Copy end, ret = %{public}d", ret);
+    callback->CloseFd();
+    infos->eventFd = -1;
+    infos->notifyFd = -1;
+    infos->run = false;
+    return ret;
 }
 
 int Copy::SubscribeLocalListener(std::shared_ptr<FileInfos> infos,
@@ -302,24 +310,30 @@ int Copy::SubscribeLocalListener(std::shared_ptr<FileInfos> infos,
         HILOGE("Failed to init inotify, errno:%{public}d", errno);
         return errno;
     }
+    infos->eventFd = eventfd(0, EFD_CLOEXEC);
+    if (infos->eventFd < 0) {
+        HILOGE("Failed to init eventFd, errno:%{public}d", errno);
+        return errno;
+    }
     callback->notifyFd = infos->notifyFd;
+    callback->eventFd = infos->eventFd;
     int newWd = inotify_add_watch(infos->notifyFd, infos->destPath.c_str(), IN_MODIFY);
     if (newWd < 0) {
         auto errCode = errno;
         HILOGE("Failed to add watch, errno = %{public}d, notifyFd: %{public}d, destPath: %{public}s", errno,
                infos->notifyFd, infos->destPath.c_str());
-        close(infos->notifyFd);
+        callback->CloseFd();
         infos->notifyFd = -1;
-        callback->notifyFd = -1;
+        infos->eventFd = -1;
         return errCode;
     }
     auto receiveInfo = CreateSharedPtr<ReceiveInfo>();
     if (receiveInfo == nullptr) {
         HILOGE("Failed to request heap memory.");
         inotify_rm_watch(infos->notifyFd, newWd);
-        close(infos->notifyFd);
+        callback->CloseFd();
         infos->notifyFd = -1;
-        callback->notifyFd = -1;
+        infos->eventFd = -1;
         return ENOMEM;
     }
     receiveInfo->path = infos->destPath;
@@ -455,14 +469,6 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
         loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(ReceiveComplete));
 }
 
-fd_set Copy::InitFds(int notifyFd)
-{
-    fd_set fds;
-    FD_ZERO(&fds);
-    FD_SET(notifyFd, &fds);
-    return fds;
-}
-
 std::shared_ptr<ReceiveInfo> Copy::GetReceivedInfo(int wd, std::shared_ptr<JsCallbackObject> callback)
 {
     for (auto &it : callback->wds) {
@@ -539,41 +545,65 @@ tuple<bool, int, bool> Copy::HandleProgress(
     return { true, ERRNO_NOERR, true };
 }
 
-void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
+void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
 {
-    prctl(PR_SET_NAME, "NotifyThread");
-    infos->run = true;
     char buf[BUF_SIZE] = { 0 };
     struct inotify_event *event = nullptr;
-    fd_set fds = InitFds(infos->notifyFd);
-    while (infos->run && infos->exceptionCode == ERRNO_NOERR) {
-        auto ret = select(infos->notifyFd + 1, &fds, nullptr, nullptr, nullptr);
-        if (ret < 0) {
-            HILOGD("Failed to select, ret = %{public}d.", ret);
-            infos->exceptionCode = errno;
-            break;
+    int len = 0;
+    int index = 0;
+    auto callback = GetRegisteredListener(infos);
+    while (((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {}
+    while (infos->run && index < len) {
+        event = reinterpret_cast<inotify_event *>(buf + index);
+        auto [needContinue, errCode, needSend] = HandleProgress(event, infos, callback);
+        if (!needContinue) {
+            infos->exceptionCode = errCode;
+            return;
         }
-        int len, index = 0;
-        while (((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
-        while (index < len && infos->run) {
-            event = reinterpret_cast<inotify_event *>(buf + index);
-            auto callback = GetRegisteredListener(infos);
-            if (callback == nullptr) {
-                infos->exceptionCode = EINVAL;
-                return;
-            }
-            auto [needContinue, errCode, needSend] = HandleProgress(event, infos, callback);
-            if (!needContinue) {
-                infos->exceptionCode = errCode;
-                callback = nullptr;
-                return;
-            }
-            if (needContinue && !needSend) {
-                index += sizeof(struct inotify_event) + event->len;
-                continue;
-            }
-            OnFileReceive(infos);
+        if (needContinue && !needSend) {
             index += sizeof(struct inotify_event) + event->len;
+            continue;
+        }
+        if (callback->progressSize == callback->totalSize) {
+            infos->run = false;
+            return;
+        }
+        OnFileReceive(infos);
+        index += sizeof(struct inotify_event) + event->len;
+    }
+}
+
+void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
+{
+    auto callback = GetRegisteredListener(infos);
+    if (callback == nullptr) {
+        infos->exceptionCode = EINVAL;
+        return;
+    }
+    prctl(PR_SET_NAME, "NotifyThread");
+    nfds_t nfds = 2;
+    struct pollfd fds[2];
+    fds[0].events = 0;
+    fds[1].events = POLLIN;
+    fds[0].fd = infos->eventFd;
+    fds[1].fd = infos->notifyFd;
+    while (infos->run && infos->exceptionCode == ERRNO_NOERR && infos->eventFd != -1 && infos->notifyFd != -1) {
+        fds[0].fd = infos->eventFd;
+        fds[1].fd = infos->notifyFd;
+        auto ret = poll(fds, nfds, -1);
+        if (ret > 0) {
+            if (fds[0].revents & POLLNVAL) {
+                infos->run = false;
+                return;
+            }
+            if (fds[1].revents & POLLIN) {
+                ReadNotifyEvent(infos);
+            }
+        } else if (ret < 0 && errno == EINTR) {
+            continue;
+        } else {
+            infos->exceptionCode = errno;
+            return;
         }
     }
 }
@@ -675,7 +705,7 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
     }
     auto callback = RegisterListener(env, infos);
     if (callback == nullptr) {
-        NError(E_UNKNOWN_ERROR).ThrowErr(env);
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     auto cbExec = [infos, callback]() -> NError {
