@@ -106,7 +106,7 @@ private:
     // operator of napi
     static tuple<bool, std::string> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg);
     static tuple<bool, NVal> GetListenerFromOptionArg(napi_env env, const NFuncArg &funcArg);
-    static void CheckOrCreatePath(const std::string &path);
+    static void CheckOrCreatePath(const std::string &destPath);
     static int ParseJsParam(napi_env env, NFuncArg &funcArg, std::shared_ptr<FileInfos> &fileInfos);
 
     // operator of local listener
