@@ -15,14 +15,81 @@
 
 #include "trans_listener.h"
 
+#include <dirent.h>
+#include <filesystem>
+
 #include "distributed_file_daemon_manager.h"
+#include "file_uri.h"
 #include "ipc_skeleton.h"
 #include "uri.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
+using namespace OHOS::AppFileService;
+using namespace AppFileService::ModuleFileUri;
 const std::string NETWORK_PARA = "?networkid=";
+const std::string FILE_MANAGER_AUTHORITY = "docs";
+const std::string MEDIA_AUTHORITY = "media";
+const std::string DISTRIBUTED_PATH = "/data/storage/el2/distributedfiles";
+
+void TransListener::RmDirectory(const std::string &path)
+{
+    DIR *dir = opendir(path.c_str());
+    if (dir == nullptr) {
+        HILOGE("Open dir failed");
+        return;
+    }
+    dirent *entry = nullptr;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, ".") == 0 ||
+            strcmp(entry->d_name, ".remote_share") == 0) {
+            continue;
+        }
+        std::string subPath = path + "/" + entry->d_name;
+        std::filesystem::path pathName(subPath);
+        if (std::filesystem::exists(pathName)) {
+            std::error_code errCode;
+            std::filesystem::remove_all(pathName, errCode);
+            if (errCode.value() != 0) {
+                HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
+                return;
+            }
+        }
+    }
+    closedir(dir);
+}
+
+void TransListener::CopyDir(const std::string &path, const std::string &sandboxPath)
+{
+    DIR *dir = opendir(path.c_str());
+    if (dir == nullptr) {
+        HILOGE("Open dir failed");
+        return;
+    }
+    dirent *entry = nullptr;
+    while ((entry = readdir(dir)) != nullptr) {
+        if (strcmp(entry->d_name, "..") == 0 || strcmp(entry->d_name, ".") == 0 ||
+            strcmp(entry->d_name, ".remote_share") == 0) {
+            continue;
+        }
+        std::string subPath = path + "/" + entry->d_name;
+        if (std::filesystem::is_directory(subPath)) {
+            auto pos = subPath.find_last_of('/');
+            if (pos == std::string::npos) {
+                closedir(dir);
+                return;
+            }
+            auto dirName = subPath.substr(pos);
+            std::filesystem::create_directories(sandboxPath + dirName);
+            std::filesystem::copy(subPath, sandboxPath + dirName,
+                std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing);
+        } else {
+            std::filesystem::copy(subPath, sandboxPath, std::filesystem::copy_options::update_existing);
+        }
+    }
+    closedir(dir);
+}
 
 NError TransListener::CopyFileFromSoftBus(const std::string &srcUri,
                                           const std::string &destUri,
@@ -35,8 +102,8 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri,
     }
     transListener->callback_ = std::move(callback);
     auto networkId = GetNetworkIdFromUri(srcUri);
-    auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(
-        srcUri, destUri, networkId, transListener);
+    auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(srcUri, destUri,
+        networkId, transListener);
     if (ret != ERRNO_NOERR) {
         HILOGE("PrepareSession failed, ret = %{public}d.", ret);
         return NError(ret);
@@ -48,6 +115,35 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri,
     if (transListener->copyEvent_ == FAILED) {
         return NError(EIO);
     }
+
+    Uri uri(srcUri);
+    auto authority = uri.GetAuthority();
+    if (authority == FILE_MANAGER_AUTHORITY || authority == MEDIA_AUTHORITY) {
+        HILOGW("Public or media path not copy");
+        return NError(ERRNO_NOERR);
+    }
+
+    FileUri fileUri(destUri);
+    std::string sandboxPath = fileUri.GetPath();
+    if (std::filesystem::exists(sandboxPath) && std::filesystem::is_directory(sandboxPath)) {
+        HILOGI("Copy dir");
+        CopyDir(DISTRIBUTED_PATH, sandboxPath);
+    } else {
+        auto pos = srcUri.find_last_of('/');
+        if (pos == std::string::npos) {
+            HILOGE("invalid uri");
+            return NError(EIO);
+        }
+        auto fileName = srcUri.substr(pos);
+        auto networkIdPos = fileName.find(NETWORK_PARA);
+        if (networkIdPos == std::string::npos) {
+            HILOGE("Not remote uri");
+            return NError(EIO);
+        }
+        fileName = fileName.substr(0, networkIdPos);
+        std::filesystem::copy(DISTRIBUTED_PATH + fileName, sandboxPath, std::filesystem::copy_options::update_existing);
+    }
+    RmDirectory(DISTRIBUTED_PATH);
     return NError(ERRNO_NOERR);
 }
 
