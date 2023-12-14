@@ -143,7 +143,7 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
     }
     if (destFile.isPath) {
         auto openResult = OpenCore(destFile, UV_FS_O_RDWR | UV_FS_O_CREAT |
-            UV_FS_O_TRUNC, statbf.st_mode);
+            UV_FS_O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (openResult) {
             return openResult;
         }
