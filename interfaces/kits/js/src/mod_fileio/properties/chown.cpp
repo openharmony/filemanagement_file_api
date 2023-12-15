@@ -35,7 +35,24 @@ napi_value Chown::Sync(napi_env env, napi_callback_info info)
 
 napi_value Chown::Async(napi_env env, napi_callback_info info)
 {
-    return NVal::CreateUndefined(env).val_;
+    NFuncArg funcArg(env, info);
+    auto cbExec = [](napi_env env) -> UniError {
+        return UniError(ERRNO_NOERR);
+    };
+
+    auto cbCompl = [](napi_env env, UniError err) -> NVal {
+        return { NVal::CreateUndefined(env) };
+    };
+
+    const string procedureName = "FileIOChown";
+    NVal thisVar(env, funcArg.GetThisVar());
+    if (funcArg.GetArgc() == NARG_CNT::THREE) {
+        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
+    } else {
+        int cbIdx = NARG_POS::FOURTH;
+        NVal cb(env, funcArg[cbIdx]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
+    }
 }
 } // namespace ModuleFileIO
 } // namespace DistributedFS

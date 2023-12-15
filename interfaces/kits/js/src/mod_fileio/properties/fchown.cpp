@@ -34,7 +34,23 @@ napi_value Fchown::Sync(napi_env env, napi_callback_info info)
 
 napi_value Fchown::Async(napi_env env, napi_callback_info info)
 {
-    return NVal::CreateUndefined(env).val_;
+    NFuncArg funcArg(env, info);
+    auto cbExec = [](napi_env env) -> UniError {
+        return UniError(ERRNO_NOERR);
+    };
+
+    auto cbComplCallback = [](napi_env env, UniError err) -> NVal {
+        return { NVal::CreateUndefined(env) };
+    };
+
+    const string procedureName = "FileIOFchown";
+    NVal thisVar(env, funcArg.GetThisVar());
+    if (funcArg.GetArgc() == NARG_CNT::THREE) {
+        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbComplCallback).val_;
+    } else {
+        NVal cb(env, funcArg[NARG_POS::FOURTH]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbComplCallback).val_;
+    }
 }
 } // namespace ModuleFileIO
 } // namespace DistributedFS
