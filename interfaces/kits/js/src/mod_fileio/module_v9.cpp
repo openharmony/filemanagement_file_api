@@ -39,8 +39,6 @@ static napi_value Export(napi_env env, napi_value exports)
         if (!product->Export()) {
             HILOGE("INNER BUG. Failed to export class %{public}s for module fileio", product->GetClassName().c_str());
             return nullptr;
-        } else {
-            HILOGE("Class %{public}s for module fileio has been exported", product->GetClassName().c_str());
         }
     }
     return exports;
