@@ -293,13 +293,7 @@ int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallback
         return ret;
     }
     StartNotify(infos, callback);
-    ret = ExecCopy(infos);
-    HILOGI("tyx::Copy end, ret = %{public}d", ret);
-    callback->CloseFd();
-    infos->eventFd = -1;
-    infos->notifyFd = -1;
-    infos->run = false;
-    return ret;
+    return ExecCopy(infos);
 }
 
 int Copy::SubscribeLocalListener(std::shared_ptr<FileInfos> infos,
@@ -322,18 +316,14 @@ int Copy::SubscribeLocalListener(std::shared_ptr<FileInfos> infos,
         auto errCode = errno;
         HILOGE("Failed to add watch, errno = %{public}d, notifyFd: %{public}d, destPath: %{public}s", errno,
                infos->notifyFd, infos->destPath.c_str());
-        callback->CloseFd();
-        infos->notifyFd = -1;
-        infos->eventFd = -1;
+        CloseNotifyFd(infos, callback);
         return errCode;
     }
     auto receiveInfo = CreateSharedPtr<ReceiveInfo>();
     if (receiveInfo == nullptr) {
         HILOGE("Failed to request heap memory.");
         inotify_rm_watch(infos->notifyFd, newWd);
-        callback->CloseFd();
-        infos->notifyFd = -1;
-        infos->eventFd = -1;
+        CloseNotifyFd(infos, callback);
         return ENOMEM;
     }
     receiveInfo->path = infos->destPath;
@@ -518,6 +508,13 @@ std::shared_ptr<JsCallbackObject> Copy::GetRegisteredListener(std::shared_ptr<Fi
     return iter->second;
 }
 
+void Copy::CloseNotifyFd(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
+{
+    callback->CloseFd();
+    infos->eventFd = -1;
+    infos->notifyFd = -1;
+}
+
 tuple<bool, int, bool> Copy::HandleProgress(
     inotify_event *event, std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
@@ -588,8 +585,6 @@ void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
     fds[0].fd = infos->eventFd;
     fds[1].fd = infos->notifyFd;
     while (infos->run && infos->exceptionCode == ERRNO_NOERR && infos->eventFd != -1 && infos->notifyFd != -1) {
-        fds[0].fd = infos->eventFd;
-        fds[1].fd = infos->notifyFd;
         auto ret = poll(fds, nfds, -1);
         if (ret > 0) {
             if (fds[0].revents & POLLNVAL) {
@@ -713,6 +708,7 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
             return TransListener::CopyFileFromSoftBus(infos->srcUri, infos->destUri, std::move(callback));
         }
         auto result = Copy::ExecLocal(infos, callback);
+        CloseNotifyFd(infos, callback);
         infos->run = false;
         WaitNotifyFinished(callback);
         if (result != ERRNO_NOERR) {
