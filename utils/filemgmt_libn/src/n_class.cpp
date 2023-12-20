@@ -55,7 +55,6 @@ bool NClass::SaveClass(napi_env env, string className, napi_value exClass)
     napi_status res = napi_create_reference(env, exClass, 1, &constructor);
     if (res == napi_ok) {
         nClass.exClassMap.insert({className, constructor});
-        HILOGI("Class %{public}s has been saved", className.c_str());
     } else {
         HILOGE("INNER BUG. Cannot ref class constructor %{public}s because of %{public}d", className.c_str(), res);
     }
