@@ -40,7 +40,7 @@ const std::string DOWNLOAD_PATH = "/Download";
 const std::string DESKTOP_PATH = "/Desktop";
 const std::string DOCUMENTS_PATH = "/Documents";
 const std::string DEFAULT_USERNAME = "currentUser";
-const char *g_fileManagerFullMountEnableParameter = "const.filemanager.full_mout.enable";
+const char *g_fileManagerFullMountEnableParameter = "const.filemanager.full_mount.enable";
 static bool IsSystemApp()
 {
     uint64_t fullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
