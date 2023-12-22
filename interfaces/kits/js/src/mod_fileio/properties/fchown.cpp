@@ -35,6 +35,7 @@ napi_value Fchown::Sync(napi_env env, napi_callback_info info)
 napi_value Fchown::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
+    funcArg.InitArgs(NARG_CNT::THREE, NARG_CNT::FOUR);
     auto cbExec = [](napi_env env) -> UniError {
         return UniError(ERRNO_NOERR);
     };
