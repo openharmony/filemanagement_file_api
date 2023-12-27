@@ -20,6 +20,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include <sys/xattr.h>
+#endif
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -241,8 +244,33 @@ napi_value StatNExporter::GetLocation(napi_env env, napi_callback_info info)
         HILOGE("Failed to get stat entity");
         return nullptr;
     }
+    std::unique_ptr<char[]> value = CreateUniquePtr<char[]>(MAX_ATTR_NAME);
+    if (value == nullptr) {
+        HILOGE("Getxattr memory out, errno is %{public}d", errno);
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
 
-    return NVal::CreateInt32(env, static_cast<int32_t>(statEntity->location)).val_;
+    ssize_t size = 0;
+    if (statEntity->fileInfo_->isPath) {
+        size = getxattr(statEntity->fileInfo_->path.get(), CLOUD_LOCATION_ATTR.c_str(), value.get(), MAX_ATTR_NAME);
+    } else {
+        size = fgetxattr(statEntity->fileInfo_->fdg->GetFD(), CLOUD_LOCATION_ATTR.c_str(), value.get(), MAX_ATTR_NAME);
+    }
+    Location defaultLocation = LOCAL;
+    if (size <= 0) {
+        if (errno != ENODATA && errno != EOPNOTSUPP) {
+            HILOGE("Getxattr value failed, errno is %{public}d", errno);
+        }
+        return NVal::CreateInt32(env, static_cast<int32_t>(defaultLocation)).val_;
+    }
+    std::string location = string(value.get(), static_cast<size_t>(size));
+    if (!std::all_of(location.begin(), location.end(), ::isdigit)) {
+        HILOGE("Getxattr location is not all digit!");
+        return NVal::CreateInt32(env, static_cast<int32_t>(defaultLocation)).val_;
+    }
+    defaultLocation = static_cast<Location>(atoi(location.c_str()));
+    return NVal::CreateInt32(env, static_cast<int32_t>(defaultLocation)).val_;
 }
 #endif
 

@@ -22,6 +22,10 @@ namespace OHOS::FileManagement::ModuleFileIO {
 using namespace OHOS::FileManagement::LibN;
 
 constexpr int S_PERMISSION = 00000777;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+const size_t MAX_ATTR_NAME = 64;
+const std::string CLOUD_LOCATION_ATTR = "user.cloud.location";
+#endif
 class StatNExporter final : public NExporter {
 public:
     inline static const std::string className_ = "Stat";

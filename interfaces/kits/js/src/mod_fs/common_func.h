@@ -19,9 +19,6 @@
 #include "fd_guard.h"
 #include "n_val.h"
 #include "uv.h"
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-#include "class_stat/stat_entity.h"
-#endif
 
 namespace OHOS {
 namespace FileManagement {
@@ -65,7 +62,7 @@ struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);
     static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf);
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf, Location location);
+    static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf, std::shared_ptr<FileInfo> fileInfo);
 #endif
 #ifndef WIN_PLATFORM
     static LibN::NVal InstantiateFile(napi_env env, int fd, const std::string &pathOrUri, bool isUri);

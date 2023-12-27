@@ -43,9 +43,9 @@ struct FileEntity {
         if (ret == 0) {
             struct stat buf;
             if (fstat(fd, &buf) == 0) {
-                HILOGI("Unlock succeeded inode = %{public}" PRIu64, buf.st_ino);
+                HILOGD("Unlock succeeded inode = %{public}" PRIu64, buf.st_ino);
             } else {
-                HILOGI("Failed to get inode number");
+                HILOGE("Failed to get inode number, error: %{public}d", errno);
             }
         }
     }
