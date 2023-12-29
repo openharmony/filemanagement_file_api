@@ -573,9 +573,9 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
             return;
         }
         auto currentTime = std::chrono::steady_clock::now();
-        if (currentTime >= infos->notifyTime_) {
+        if (currentTime >= infos->notifyTime) {
             OnFileReceive(infos);
-            infos->notifyTime_ = currentTime + NOTIFY_PROGRESS_DELAY;
+            infos->notifyTime = currentTime + NOTIFY_PROGRESS_DELAY;
         }
         index += sizeof(struct inotify_event) + event->len;
     }
@@ -633,7 +633,7 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->listener = listener;
     infos->srcPath = ConvertUriToPath(infos->srcUri);
     infos->destPath = ConvertUriToPath(infos->destUri);
-    infos->notifyTime_ = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;
+    infos->notifyTime = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;
     if (listener) {
         infos->hasListener = true;
     }
