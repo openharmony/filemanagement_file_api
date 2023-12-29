@@ -19,6 +19,7 @@
 #include <set>
 #include <sys/inotify.h>
 #include <thread>
+#include <chrono>
 
 #include "bundle_mgr_client_impl.h"
 #include "common_func.h"
@@ -74,6 +75,7 @@ struct FileInfos {
     std::string destUri;
     std::string srcPath;
     std::string destPath;
+    std::chrono::steady_clock::time_point notifyTime;
     int32_t notifyFd = -1;
     int32_t eventFd = -1;
     bool run = true;
