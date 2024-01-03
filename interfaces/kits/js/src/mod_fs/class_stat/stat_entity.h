@@ -16,6 +16,9 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_STAT_STAT_ENTITY_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_STAT_STAT_ENTITY_H
 
+#include <memory>
+
+#include "common_func.h"
 #include "uv.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 enum Location {
@@ -27,7 +30,7 @@ namespace OHOS::FileManagement::ModuleFileIO {
 struct StatEntity {
     uv_stat_t stat_;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    Location location;
+    std::shared_ptr<FileInfo> fileInfo_;
 #endif
 };
 } // namespace OHOS::FileManagement::ModuleFileIO

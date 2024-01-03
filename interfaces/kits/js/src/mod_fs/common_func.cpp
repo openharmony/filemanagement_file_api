@@ -146,7 +146,7 @@ unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf, Location location)
+NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf, shared_ptr<FileInfo> fileInfo)
 {
     napi_value objStat = NClass::InstantiateClass(env, StatNExporter::className_, {});
     if (!objStat) {
@@ -163,7 +163,7 @@ NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf, Location lo
     }
 
     statEntity->stat_ = buf;
-    statEntity->location = location;
+    statEntity->fileInfo_ = fileInfo;
     return { env, objStat };
 }
 #endif
