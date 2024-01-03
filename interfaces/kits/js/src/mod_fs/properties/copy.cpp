@@ -50,6 +50,7 @@ const string PROCEDURE_COPY_NAME = "FileFSCopy";
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
+constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(200);
 std::recursive_mutex Copy::mutex_;
 std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
 
@@ -129,7 +130,7 @@ tuple<int, uint64_t> Copy::GetFileSize(const std::string &path)
 void Copy::CheckOrCreatePath(const std::string &destPath)
 {
     if (!filesystem::exists(destPath)) {
-        HILOGE("destPath not exist, destPath = %{public}s", destPath.c_str());
+        HILOGI("destPath not exist, destPath = %{public}s", destPath.c_str());
         ofstream out;
         out.open(destPath.c_str());
         out.close();
@@ -283,7 +284,13 @@ int Copy::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<Fil
 
 int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
-    CheckOrCreatePath(infos->destPath);
+    if (infos->srcPath == infos->destPath) {
+        HILOGE("The src and dest are the same.");
+        return EINVAL;
+    }
+    if (IsFile(infos->srcPath)) {
+        CheckOrCreatePath(infos->destPath);
+    }
     if (!infos->hasListener) {
         return ExecCopy(infos);
     }
@@ -387,7 +394,7 @@ void Copy::ReceiveComplete(uv_work_t *work, int stat)
         return;
     }
     auto processedSize = entry->progressSize;
-    if (processedSize <= entry->callback->maxProgressSize) {
+    if (processedSize < entry->callback->maxProgressSize) {
         return;
     }
     entry->callback->maxProgressSize = processedSize;
@@ -565,7 +572,11 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
             infos->run = false;
             return;
         }
-        OnFileReceive(infos);
+        auto currentTime = std::chrono::steady_clock::now();
+        if (currentTime >= infos->notifyTime) {
+            OnFileReceive(infos);
+            infos->notifyTime = currentTime + NOTIFY_PROGRESS_DELAY;
+        }
         index += sizeof(struct inotify_event) + event->len;
     }
 }
@@ -622,7 +633,7 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->listener = listener;
     infos->srcPath = ConvertUriToPath(infos->srcUri);
     infos->destPath = ConvertUriToPath(infos->destUri);
-
+    infos->notifyTime = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;
     if (listener) {
         infos->hasListener = true;
     }
