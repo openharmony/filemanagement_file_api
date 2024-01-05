@@ -198,7 +198,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return NVal::CreateUTF8String(env, buffer.c_str(), buffer.size()).val_;
+    return NVal::CreateUTF8String(env, buffer.c_str(), readRet).val_;
 }
 
 napi_value ReadText::Async(napi_env env, napi_callback_info info)
