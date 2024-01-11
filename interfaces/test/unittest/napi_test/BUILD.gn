@@ -22,5 +22,5 @@ ohos_js_unittest("FileApiJsTest") {
 
 group("unittest") {
   testonly = true
-  deps = [":FileApiJsTest"]
+  deps = [ ":FileApiJsTest" ]
 }
