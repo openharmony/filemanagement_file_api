@@ -187,12 +187,9 @@ describe("FsCopyTest", function () {
    */
   it("Fs_Copy_Test006", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test006 start.');
-    try {
-      console.info("Fs_Copy_Test006 111111111111111111 ");
+    try {s
       fs.mkdirSync(srcDirPathLocal);          //SRC
-      console.info("Fs_Copy_Test006 222222222222222222 ");
       fs.mkdirSync(dstDirPathLocal);
-      console.info("Fs_Copy_Test006 3333333333333333333 ");
       let srcFile = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
       fs.writeSync(srcFile.fd, 'ttttttttttttt');
       fs.closeSync(srcFile);
@@ -275,11 +272,11 @@ describe("FsCopyTest", function () {
   });
 
   /*
-    * @tc.name:Fs_Copy_Test009
-    * @tc.desc:test fs.copy, copy file and write the contents but dest isn't exist
-    * @tc.type: FUNC
-    * @tc.require: issueNumber
-    */
+   * @tc.name:Fs_Copy_Test009
+   * @tc.desc:test fs.copy, copy file and write the contents but dest isn't exist
+   * @tc.type: FUNC
+   * @tc.require: issueNumber
+   */
   it("Fs_Copy_Test009", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test009 start.');
     try {
@@ -307,11 +304,11 @@ describe("FsCopyTest", function () {
   });
 
   /*
-    * @tc.name:Fs_Copy_Test010
-    * @tc.desc:test fs.copy, copy dir and file in the src path 
-    * @tc.type: FUNC
-    * @tc.require: issueNumber
-    */
+   * @tc.name:Fs_Copy_Test010
+   * @tc.desc:test fs.copy, copy dir and file in the src path 
+   * @tc.type: FUNC
+   * @tc.require: issueNumber
+   */
   it("Fs_Copy_Test010", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test010 start.');
     try {
@@ -415,7 +412,6 @@ describe("FsCopyTest", function () {
   it("Fs_Copy_Test013", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test013 start.');
     try {
-      console.info("Fs_Copy_Test013 11111111111111111111");
       let progressListener = (progress) => {
         console.info("Fs_Copy_Test013 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
           " 百分比： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
@@ -484,10 +480,11 @@ describe("FsCopyTest", function () {
    */
   it("Fs_Copy_Test015", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test015 start.');
-    let file = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
-    fs.writeSync(file.fd, 'ttttttttttttt');
-    fs.closeSync(file);
     try {
+
+      let file = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+      fs.writeSync(file.fd, 'ttttttttttttt');
+      fs.closeSync(file);
       fs.copy(srcFileUriLocal, dstFileUriLocal, (err) => {
         if (err) {
           console.info(TAG, "Fs_Copy_Test015_first failed, with error message: " + err.message + ", error code: " + err.code);
@@ -526,6 +523,9 @@ describe("FsCopyTest", function () {
   it("Fs_Copy_Test016", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test016 start.');
     try {
+      if (fs.accessSync(srcFilePathLocal)) {
+        fs.unlinkSync(srcFilePathLocal);
+      }
       fs.mkdirSync(srcDirPathLocal);
       fs.mkdirSync(dstDirPathLocal);
       let file = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
@@ -555,6 +555,9 @@ describe("FsCopyTest", function () {
   it("Fs_Copy_Test017", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test017 start.');
     try {
+      if (fs.accessSync(srcFilePathLocal)) {
+        fs.unlinkSync(srcFilePathLocal);
+      }
       fs.copy(srcDirUriLocal, dstDirUriLocal, (err) => {
         if (err) {
           console.info(TAG, "Fs_Copy_Test017 failed, with error message: " + err.message + ", error code: " + err.code);
@@ -581,7 +584,6 @@ describe("FsCopyTest", function () {
   it("Fs_Copy_Test018", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test018 start.');
     try {
-      // fs.mkdirSync(srcDirPathLocal);
       fs.copy(srcFileUriLocal, srcFileUriLocal, (err) => {
         if (err) {
           console.info(TAG, "Fs_Copy_Test018 failed, with error message: " + err.message + ", error code: " + err.code);
@@ -634,11 +636,11 @@ describe("FsCopyTest", function () {
   });
 
   /*
- * @tc.name:Fs_Copy_Test020
- * @tc.desc:test fs.copy, copy 1KB file
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
+   * @tc.name:Fs_Copy_Test020
+   * @tc.desc:test fs.copy, copy 1KB file
+   * @tc.type: FUNC
+   * @tc.require: issueNumber
+   */
   it("Fs_Copy_Test020", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test020 start.');
     try {
@@ -676,14 +678,13 @@ describe("FsCopyTest", function () {
 
   /*
    * @tc.name:Fs_Copy_Test021
-   * @tc.desc:test fs.copy, copy 1000MB file
+   * @tc.desc:test fs.copy, copy 100MB file
    * @tc.type: FUNC
    * @tc.require: issueNumber
    */
   it("Fs_Copy_Test021", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test021 start.');
     try {
-      console.info("Fs_Copy_Test021 111111111111111 ");
       let file = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
       let content = 't'.repeat(1024 * 1024 * 100);
       fs.writeSync(file.fd, content);
@@ -713,7 +714,7 @@ describe("FsCopyTest", function () {
   });
 
   /*
-   * @tc.name:Fs_Copy_Test020
+   * @tc.name:Fs_Copy_Test022
    * @tc.desc:test fs.copy, same task
    * @tc.type: FUNC
    * @tc.require: issueNumber
@@ -728,7 +729,7 @@ describe("FsCopyTest", function () {
       let options = {
         "progressListener": progressListener
       }
-      if(fs.accessSync(srcFilePathLocal)){
+      if (fs.accessSync(srcFilePathLocal)) {
         fs.unlinkSync(srcFilePathLocal);
       }
       let file = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
