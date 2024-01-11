@@ -97,37 +97,6 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
     return { true, move(src), move(dest), mode };
 }
 
-static int RestoreTime(const string &srcPath, const string &destPath)
-{
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
-        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!stat_req) {
-        HILOGE("Failed to request heap memory.");
-        return ENOMEM;
-    }
-    int ret = uv_fs_stat(nullptr, stat_req.get(), srcPath.c_str(), nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to stat srcPath");
-        return ret;
-    }
-    double atime = static_cast<double>(stat_req->statbuf.st_atim.tv_sec) +
-        static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / NS;
-    double mtime = static_cast<double>(stat_req->statbuf.st_mtim.tv_sec) +
-        static_cast<double>(stat_req->statbuf.st_mtim.tv_nsec) / NS;
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> utime_req = {
-        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!utime_req) {
-        HILOGE("Failed to request heap memory.");
-        return ENOMEM;
-    }
-    ret = uv_fs_utime(nullptr, utime_req.get(), destPath.c_str(), atime, mtime, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to utime %s, error code: %d", destPath.c_str(), ret);
-        return ret;
-    }
-    return ERRNO_NOERR;
-}
-
 static int CopyAndDeleteFile(const string &src, const string &dest)
 {
     filesystem::path dstPath(dest);
@@ -143,11 +112,6 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
     if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
         HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
         return errCode.value();
-    }
-    int ret = RestoreTime(srcPath, dstPath);
-    if (ret) {
-        HILOGE("Failed to utime dstPath");
-        return ret;
     }
     return RemovePath(src);
 }
@@ -197,11 +161,6 @@ static int RenameDir(const string &src, const string &dest, const int mode, dequ
         if (!filesystem::create_directory(destPath, errCode)) {
             HILOGE("Failed to create directory, error code: %{public}d", errCode.value());
             return errCode.value();
-        }
-        int ret = RestoreTime(srcPath, destPath);
-        if (ret) {
-            HILOGE("Failed to utime dstPath");
-            return ret;
         }
         return RecurMoveDir(src, dest, mode, errfiles);
     }
