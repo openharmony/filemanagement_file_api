@@ -14,7 +14,7 @@
 import("//build/test.gni")
 
 module_output_path = "file_api/napi"
-ohos_js_unittest("FileApiJsTest") {
+ohos_js_unittest("file_api_js_test") {
   module_out_path = module_output_path
   hap_profile = "./config.json"
   certificate_profile = "./openharmony_sx.p7b"
@@ -22,5 +22,5 @@ ohos_js_unittest("FileApiJsTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":FileApiJsTest" ]
+  deps = [ ":file_api_js_test" ]
 }

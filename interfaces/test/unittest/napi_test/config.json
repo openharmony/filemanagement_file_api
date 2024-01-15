@@ -8,7 +8,7 @@
     },
     "apiVersion": {
       "compatible": 4,
-      "target": 5
+      "target": 11
     }
   },
   "deviceConfig": {},
