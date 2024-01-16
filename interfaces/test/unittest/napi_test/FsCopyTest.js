@@ -370,6 +370,7 @@ describe("FsCopyTest", function () {
           console.info(TAG, "Fs_Copy_Test013 progressListener error. ");
           expect().assertFail();
           done();
+          return;
         }
         expect(true).assertTrue();
         done();
@@ -412,6 +413,7 @@ describe("FsCopyTest", function () {
           console.info(TAG, "Fs_Copy_Test013 progressListener error. ");
           expect().assertFail();
           done();
+          return;
         }
         expect(true).assertTrue();
         done();
@@ -457,6 +459,7 @@ describe("FsCopyTest", function () {
           console.info(TAG, "Fs_Copy_Test013 progressListener error. ");
           expect().assertFail();
           done();
+          return;
         }
         expect(true).assertTrue();
         done();
@@ -499,6 +502,7 @@ describe("FsCopyTest", function () {
             console.info(TAG, "Fs_Copy_Test013 progressListener error. ");
             expect().assertFail();
             done();
+            return;
           }
           expect(true).assertTrue();
           done();
@@ -648,6 +652,7 @@ describe("FsCopyTest", function () {
           console.info(TAG, "Fs_Copy_Test013 progressListener error. ");
           expect().assertFail();
           done();
+          return;
         }
         expect(true).assertTrue();
         done();
@@ -697,7 +702,7 @@ describe("FsCopyTest", function () {
       let file = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
       fs.writeSync(file.fd, 'ttttttttttttt');
       fs.closeSync(file);
-      // 执行拷贝操作10次
+      // execute the copy operation 10 times
       for (let i = 0; i < 10; i++) {
         const dstStitchFilePath = `${dstDirUriLocal}/file_${i}.txt`;
         await fs.copy(srcFileUriLocal, dstStitchFilePath, (err) => {
