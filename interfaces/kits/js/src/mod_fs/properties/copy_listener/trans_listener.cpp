@@ -39,7 +39,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri,
         srcUri, destUri, networkId, transListener);
     if (ret != ERRNO_NOERR) {
         HILOGE("PrepareSession failed, ret = %{public}d.", ret);
-        return NError(ret);
+        return NError(EIO);
     }
     std::unique_lock<std::mutex> lock(transListener->cvMutex_);
     transListener->cv_.wait(lock, [&transListener]() {
@@ -120,15 +120,20 @@ int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedByte
     UvEntry *entry = new (std::nothrow) UvEntry(callback_);
     if (entry == nullptr) {
         HILOGE("entry ptr is nullptr");
-        delete entry;
         delete work;
         return ENOMEM;
     }
     entry->progressSize = processedBytes;
     entry->totalSize = totalBytes;
     work->data = entry;
-    uv_queue_work(
+    int retVal = uv_queue_work(
         loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(CallbackComplete));
+    if (retVal != 0) {
+        HILOGE("failed to get uv_queue_work");
+        delete (reinterpret_cast<UvEntry *>(work->data));
+        delete work;
+        return ENOMEM;
+    }
     return ERRNO_NOERR;
 }
 
