@@ -150,19 +150,16 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
             return { env, err.GetNapiErr(env) };
         }
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-        auto stat = CommonFunc::InstantiateStat(env, arg->stat_, arg->fileInfo_);
+        return CommonFunc::InstantiateStat(env, arg->stat_, arg->fileInfo_);
 #else
-        auto stat = CommonFunc::InstantiateStat(env, arg->stat_);
+        return CommonFunc::InstantiateStat(env, arg->stat_);
 #endif
-        return stat;
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STAT_NAME, cbExec, cbCompl).val_;
-    } else {
-        NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_STAT_NAME, cbExec, cbCompl).val_;
-    }
+    NVal callbackVal(env, funcArg[SECOND]);
+    return (funcArg.GetArgc() == NARG_CNT::ONE) ?
+        NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STAT_NAME, cbExec, cbCompl).val_ :
+        NAsyncWorkCallback(env, thisVar, callbackVal).Schedule(PROCEDURE_STAT_NAME, cbExec, cbCompl).val_;
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

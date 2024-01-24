@@ -604,70 +604,82 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
 
     return NVal::CreateInt64(env, static_cast<int64_t>(ret)).val_;
 }
+bool PropNExporter::ExportSync()
+{
+    return exports_.AddProp({
+        NVal::DeclareNapiFunction("accessSync", AccessSync),
+        NVal::DeclareNapiFunction("closeSync", Close::Sync),
+        NVal::DeclareNapiFunction("fdatasyncSync", Fdatasync::Sync),
+        NVal::DeclareNapiFunction("fsyncSync", Fsync::Sync),
+        NVal::DeclareNapiFunction("lstatSync", Lstat::Sync),
+        NVal::DeclareNapiFunction("mkdirSync", MkdirSync),
+        NVal::DeclareNapiFunction("mkdtempSync", Mkdtemp::Sync),
+        NVal::DeclareNapiFunction("openSync", Open::Sync),
+        NVal::DeclareNapiFunction("readSync", ReadSync),
+        NVal::DeclareNapiFunction("renameSync", Rename::Sync),
+        NVal::DeclareNapiFunction("rmdirSync", Rmdirent::Sync),
+        NVal::DeclareNapiFunction("statSync", Stat::Sync),
+        NVal::DeclareNapiFunction("truncateSync", Truncate::Sync),
+        NVal::DeclareNapiFunction("unlinkSync", UnlinkSync),
+        NVal::DeclareNapiFunction("utimes", Utimes::Sync),
+        NVal::DeclareNapiFunction("writeSync", WriteSync),
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+        NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
+        NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
+        NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
+        NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
+        NVal::DeclareNapiFunction("dup", Dup::Sync),
+        NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
+        NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
+        NVal::DeclareNapiFunction("lseek", Lseek::Sync),
+        NVal::DeclareNapiFunction("moveDirSync", MoveDir::Sync),
+        NVal::DeclareNapiFunction("moveFileSync", Move::Sync),
+        NVal::DeclareNapiFunction("readLinesSync", ReadLines::Sync),
+        NVal::DeclareNapiFunction("readTextSync", ReadText::Sync),
+        NVal::DeclareNapiFunction("symlinkSync", Symlink::Sync),
+#endif
+    });
+}
 
-bool PropNExporter::Export()
+bool PropNExporter::ExportAsync()
 {
     return exports_.AddProp({
         NVal::DeclareNapiFunction("access", Access),
-        NVal::DeclareNapiFunction("accessSync", AccessSync),
         NVal::DeclareNapiFunction("close", Close::Async),
-        NVal::DeclareNapiFunction("closeSync", Close::Sync),
         NVal::DeclareNapiFunction("fdatasync", Fdatasync::Async),
-        NVal::DeclareNapiFunction("fdatasyncSync", Fdatasync::Sync),
         NVal::DeclareNapiFunction("fsync", Fsync::Async),
-        NVal::DeclareNapiFunction("fsyncSync", Fsync::Sync),
         NVal::DeclareNapiFunction("lstat", Lstat::Async),
-        NVal::DeclareNapiFunction("lstatSync", Lstat::Sync),
         NVal::DeclareNapiFunction("mkdir", Mkdir),
-        NVal::DeclareNapiFunction("mkdirSync", MkdirSync),
         NVal::DeclareNapiFunction("mkdtemp", Mkdtemp::Async),
-        NVal::DeclareNapiFunction("mkdtempSync", Mkdtemp::Sync),
         NVal::DeclareNapiFunction("open", Open::Async),
-        NVal::DeclareNapiFunction("openSync", Open::Sync),
-        NVal::DeclareNapiFunction("read", Read),
-        NVal::DeclareNapiFunction("readSync", ReadSync),
         NVal::DeclareNapiFunction("rename", Rename::Async),
-        NVal::DeclareNapiFunction("renameSync", Rename::Sync),
         NVal::DeclareNapiFunction("rmdir", Rmdirent::Async),
-        NVal::DeclareNapiFunction("rmdirSync", Rmdirent::Sync),
         NVal::DeclareNapiFunction("stat", Stat::Async),
-        NVal::DeclareNapiFunction("statSync", Stat::Sync),
         NVal::DeclareNapiFunction("truncate", Truncate::Async),
-        NVal::DeclareNapiFunction("truncateSync", Truncate::Sync),
-        NVal::DeclareNapiFunction("unlink", Unlink),
-        NVal::DeclareNapiFunction("unlinkSync", UnlinkSync),
-        NVal::DeclareNapiFunction("utimes", Utimes::Sync),
+        NVal::DeclareNapiFunction("read", Read),
         NVal::DeclareNapiFunction("write", Write),
-        NVal::DeclareNapiFunction("writeSync", WriteSync),
+        NVal::DeclareNapiFunction("unlink", Unlink),
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
         NVal::DeclareNapiFunction("copyDir", CopyDir::Async),
-        NVal::DeclareNapiFunction("copyDirSync", CopyDir::Sync),
         NVal::DeclareNapiFunction("copyFile", CopyFile::Async),
-        NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
         NVal::DeclareNapiFunction("copy", Copy::Async),
         NVal::DeclareNapiFunction("createRandomAccessFile", CreateRandomAccessFile::Async),
-        NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),
-        NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
-        NVal::DeclareNapiFunction("dup", Dup::Sync),
         NVal::DeclareNapiFunction("fdopenStream", FdopenStream::Async),
-        NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
         NVal::DeclareNapiFunction("listFile", ListFile::Async),
-        NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
-        NVal::DeclareNapiFunction("lseek", Lseek::Sync),
         NVal::DeclareNapiFunction("moveDir", MoveDir::Async),
-        NVal::DeclareNapiFunction("moveDirSync", MoveDir::Sync),
         NVal::DeclareNapiFunction("moveFile", Move::Async),
-        NVal::DeclareNapiFunction("moveFileSync", Move::Sync),
         NVal::DeclareNapiFunction("readLines", ReadLines::Async),
-        NVal::DeclareNapiFunction("readLinesSync", ReadLines::Sync),
         NVal::DeclareNapiFunction("readText", ReadText::Async),
-        NVal::DeclareNapiFunction("readTextSync", ReadText::Sync),
         NVal::DeclareNapiFunction("symlink", Symlink::Async),
-        NVal::DeclareNapiFunction("symlinkSync", Symlink::Sync),
         NVal::DeclareNapiFunction("createWatcher", Watcher::CreateWatcher),
 #endif
     });
+}
+
+bool PropNExporter::Export()
+{
+    return ExportSync() && ExportAsync();
 }
 
 #ifdef WIN_PLATFORM
