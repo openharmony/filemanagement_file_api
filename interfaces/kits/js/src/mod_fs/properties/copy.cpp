@@ -42,6 +42,7 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace AppFileService::ModuleFileUri;
+namespace fs = std::filesystem;
 const std::string FILE_PREFIX_NAME = "file://";
 const std::string NETWORK_PARA = "?networkid=";
 const string PROCEDURE_COPY_NAME = "FileFSCopy";
@@ -249,7 +250,23 @@ static void Deleter(struct NameList *arg)
     free(arg->namelist);
 }
 
-uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, std::string path)
+std::string Copy::GetRealPath(const std::string& path)
+{
+    fs::path tempPath(path);
+    fs::path realPath{};
+    for (const auto& component : tempPath) {
+        if (component == ".") {
+            continue;
+        } else if (component == "..") {
+            realPath = realPath.parent_path();
+        } else {
+            realPath /= component;
+        }
+    }
+    return realPath.string();
+}
+
+uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, const std::string &path)
 {
     unique_ptr<struct NameList, decltype(Deleter) *> pNameList = { new (nothrow) struct NameList, Deleter };
     if (pNameList == nullptr) {
@@ -266,13 +283,14 @@ uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, std::string path)
             continue;
         }
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
-            return size += GetDirSize(infos, dest);
+            size += GetDirSize(infos, dest);
+        } else {
+            struct stat st {};
+            if (stat(dest.c_str(), &st) == -1) {
+                return size;
+            }
+            size += st.st_size;
         }
-        struct stat st {};
-        if (stat(dest.c_str(), &st) == -1) {
-            return size;
-        }
-        size += st.st_size;
     }
     return size;
 }
@@ -293,13 +311,15 @@ int Copy::RecurCopyDir(const string &srcPath, const string &destPath, std::share
         if ((pNameList->namelist[i])->d_type == DT_LNK) {
             continue;
         }
+        int ret = ERRNO_NOERR;
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
-            return CopySubDir(src, dest, infos);
+            ret = CopySubDir(src, dest, infos);
+        } else {
+            infos->filePaths.insert(dest);
+            ret = CopyFile(src, dest);
         }
-        infos->filePaths.insert(dest);
-        auto res = CopyFile(src, dest);
-        if (res != ERRNO_NOERR) {
-            return res;
+        if (ret != ERRNO_NOERR) {
+            return ret;
         }
     }
     return ERRNO_NOERR;
@@ -319,8 +339,8 @@ int Copy::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<Fil
 
 int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
-    if (infos->srcPath == infos->destPath) {
-        HILOGE("The src and dest are the same.");
+    if (infos->destPath.find(infos->srcPath) != std::string::npos) {
+        HILOGE("The src directory is the subdirectory of dest");
         return EINVAL;
     }
     if (IsFile(infos->srcPath)) {
@@ -503,10 +523,11 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
 
 std::shared_ptr<ReceiveInfo> Copy::GetReceivedInfo(int wd, std::shared_ptr<JsCallbackObject> callback)
 {
-    for (auto &it : callback->wds) {
-        if (it.first == wd) {
-            return it.second;
-        }
+    auto it = find_if(callback->wds.begin(), callback->wds.end(), [wd](const auto& item) {
+        return item.first == wd;
+    });
+    if (it != callback->wds.end()) {
+        return it->second;
     }
     return nullptr;
 }
@@ -656,7 +677,7 @@ std::string Copy::ConvertUriToPath(const std::string &uri)
 }
 
 tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
-    const std::string &srcUri, const std::string &destUri, NVal &listener)
+    const std::string &srcUri, const std::string &destUri, const NVal &listener)
 {
     auto infos = CreateSharedPtr<FileInfos>();
     if (infos == nullptr) {
@@ -668,6 +689,8 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->listener = listener;
     infos->srcPath = ConvertUriToPath(infos->srcUri);
     infos->destPath = ConvertUriToPath(infos->destUri);
+    infos->srcPath = GetRealPath(infos->srcPath);
+    infos->destPath = GetRealPath(infos->destPath);
     infos->notifyTime = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;
     if (listener) {
         infos->hasListener = true;
@@ -688,11 +711,11 @@ int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
 {
     if (IsFile(infos->srcPath) && IsFile(infos->destPath)) {
         // copyFile
-        return CopyFile(infos->srcPath.c_str(), infos->destPath.c_str());
+        return CopyFile(infos->srcPath, infos->destPath);
     }
     if (IsDirectory(infos->srcPath) && IsDirectory(infos->destPath)) {
         // copyDir
-        return CopyDirFunc(infos->srcPath.c_str(), infos->destPath.c_str(), infos);
+        return CopyDirFunc(infos->srcPath, infos->destPath, infos);
     }
     return EINVAL;
 }

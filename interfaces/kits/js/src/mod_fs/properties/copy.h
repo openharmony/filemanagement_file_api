@@ -93,7 +93,7 @@ struct FileInfos {
         if (srcUri == infos.srcUri) {
             return destUri < infos.destUri;
         }
-        return (srcUri < infos.srcUri || destUri < infos.destUri);
+        return srcUri < infos.srcUri;
     }
 };
 
@@ -113,7 +113,7 @@ class Copy final {
 public:
     static napi_value Async(napi_env env, napi_callback_info info);
     static std::map<FileInfos, std::shared_ptr<JsCallbackObject>> jsCbMap_;
-    static void UnregisterListener(std::shared_ptr<FileInfos> fileInfos);
+    static void UnregisterListener(std::shared_ptr<FileInfos> infos);
     static std::recursive_mutex mutex_;
 
 private:
@@ -141,13 +141,13 @@ private:
     // operator of file
     static int RecurCopyDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);
     static tuple<int, uint64_t> GetFileSize(const std::string &path);
-    static uint64_t GetDirSize(std::shared_ptr<FileInfos> infos, std::string path);
+    static uint64_t GetDirSize(std::shared_ptr<FileInfos> infos, const std::string &path);
     static int CopyFile(const string &src, const string &dest);
     static int MakeDir(const string &path);
     static int CopySubDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);
     static int CopyDirFunc(const string &src, const string &dest, std::shared_ptr<FileInfos> infos);
     static tuple<int, std::shared_ptr<FileInfos>> CreateFileInfos(
-        const std::string &srcUri, const std::string &destUri, NVal &listener);
+        const std::string &srcUri, const std::string &destUri, const NVal &listener);
     static int ExecCopy(std::shared_ptr<FileInfos> infos);
 
     // operator of file size
@@ -165,6 +165,7 @@ private:
     static bool IsDirectory(const std::string &path);
     static bool IsFile(const std::string &path);
     static std::string ConvertUriToPath(const std::string &uri);
+    static std::string GetRealPath(const std::string& path);
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement
