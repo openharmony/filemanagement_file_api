@@ -88,7 +88,8 @@ enum ErrCodeSuffixOfFileIO {
     E_RESTART,
     E_DQUOT,
     E_UKERR,
-    E_NOLCK
+    E_NOLCK,
+    E_NETUNREACH
 };
 
 enum ErrCodeSuffixOfUserFileManager {
@@ -195,6 +196,7 @@ static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "EBADFD", EBADFD },
     { "ERESTART", ERESTART },
     { "EDQUOT", EDQUOT },
+    { "ENETUNREACH", ENETUNREACH },
 };
 
 static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
@@ -242,6 +244,7 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { EDQUOT, { FILEIO_SYS_CAP_TAG + E_DQUOT, "Quota exceeded" } },
     { UNKROWN_ERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
     { ENOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
+    { ENETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
     { FILEIO_SYS_CAP_TAG + E_PERM, { FILEIO_SYS_CAP_TAG + E_PERM, "Operation not permitted" } },
     { FILEIO_SYS_CAP_TAG + E_NOENT, { FILEIO_SYS_CAP_TAG + E_NOENT, "No such file or directory" } },
     { FILEIO_SYS_CAP_TAG + E_SRCH, { FILEIO_SYS_CAP_TAG + E_SRCH, "No such process" } },
@@ -286,6 +289,7 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { FILEIO_SYS_CAP_TAG + E_DQUOT, { FILEIO_SYS_CAP_TAG + E_DQUOT, "Quota exceeded" } },
     { FILEIO_SYS_CAP_TAG + E_UKERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
     { FILEIO_SYS_CAP_TAG + E_NOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
+    { FILEIO_SYS_CAP_TAG + E_NETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME, { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME,
         "Invalid display name" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_URIM, { USER_FILE_MANAGER_SYS_CAP_TAG + E_URIM, "Invalid uri" } },
