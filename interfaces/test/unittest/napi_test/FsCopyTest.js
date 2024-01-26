@@ -25,6 +25,7 @@ describe("FsCopyTest", function () {
   let srcFilePathLocal = srcDirPathLocal + '/srcFile.txt';
   let dstDirPathLocal = pathDir + "/dest";
   let dstFilePathLocal = dstDirPathLocal + '/dstFile.txt';
+  let muiltDirLocal = srcDirPathLocal+"/test1";
 
   let srcDirUriLocal = fileuri.getUriFromPath(srcDirPathLocal);
   let srcFileUriLocal = fileuri.getUriFromPath(srcFilePathLocal);
@@ -46,6 +47,20 @@ describe("FsCopyTest", function () {
   afterEach(function () {
     console.info(TAG, 'afterEach called')
   });
+
+  function isDirectory(path){
+    try {
+      console.info("Fs_Copy_Test020:path",path);
+      let stat = fs.statSync(path);
+      if (stat.isDirectory()) {
+          return true;
+      }
+      return false;
+    } catch (error) {
+        console.error("Error:", error);
+        return false;
+    }
+  }
 
   /*
    * @tc.name:Fs_Copy_Test001
@@ -347,7 +362,7 @@ describe("FsCopyTest", function () {
       let progressListener = (progress) => {
         flag = true;
         console.info("Fs_Copy_Test011 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
-          " 百分比： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
+          " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
       };
       let options = {
         "progressListener": progressListener
@@ -395,7 +410,7 @@ describe("FsCopyTest", function () {
       let progressListener = (progress) => {
         flag = true;
         console.info("Fs_Copy_Test012 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
-          " 百分比： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
+          " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
       };
       let options = {
         "progressListener": progressListener
@@ -438,7 +453,7 @@ describe("FsCopyTest", function () {
       let progressListener = (progress) => {
         flag = true;
         console.info("Fs_Copy_Test013 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
-          " 百分比： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
+          " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
       };
       let options = {
         "progressListener": progressListener
@@ -484,7 +499,7 @@ describe("FsCopyTest", function () {
       let progressListener = (progress) => {
         flag = true;
         console.info("Fs_Copy_Test014 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
-          " 百分比： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
+          " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
       };
       let options = {
         "progressListener": progressListener
@@ -691,32 +706,37 @@ describe("FsCopyTest", function () {
   });
 
   /*
-   * @tc.name:Fs_Copy_Test020
-   * @tc.desc:test fs.copy, copy file 10 times
-   * @tc.type: FUNC
-   * @tc.require: #I8UV2F
-   */
+    * @tc.name:Fs_Copy_Test020
+    * @tc.desc:test fs.copy, copy muilt empty dir
+    * @tc.type: FUNC
+    * @tc.require: #I8UV2F
+    */
   it("Fs_Copy_Test020", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test020 start.');
     try {
-      let file = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
-      fs.writeSync(file.fd, 'ttttttttttttt');
-      fs.closeSync(file);
-      // execute the copy operation 10 times
-      for (let i = 0; i < 10; i++) {
-        const dstStitchFilePath = `${dstDirUriLocal}/file_${i}.txt`;
-        await fs.copy(srcFileUriLocal, dstStitchFilePath, (err) => {
-          if (err) {
-            console.info(TAG, "Fs_Copy_Test020 failed, with error message: " + err.message + ", error code: " + err.code);
-            expect().assertFail();
-            done();
-          } else {
-            console.info(TAG, "Fs_Copy_Test020 success. ");
-          }
-        })
+      fs.mkdirSync(srcDirPathLocal+"/test1");
+      fs.mkdirSync(srcDirPathLocal+"/test2");
+      let progressListener = (progress) => {
+        console.info("Fs_Copy_Test020 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize);
+      };
+      let options = {
+        "progressListener": progressListener
       }
-      expect(true).assertTrue();
-      done();
+      await fs.copy(srcDirUriLocal, dstDirUriLocal, options, (err) => {
+        if (err) {
+          console.info(TAG, "Fs_Copy_Test020 failed, with error message: " + err.message + ", error code: " + err.code);
+          expect().assertFail();
+        } else {
+          if (isDirectory(dstDirPathLocal + "/src/test1") && isDirectory(dstDirPathLocal + "/src/test2")) {
+            console.info(TAG, "Fs_Copy_Test020 success. ");
+            expect(true).assertTrue();
+            done();
+            return;
+          }
+          expect().assertFail();
+        }
+        done();
+      })
     } catch (err) {
       console.error("Fs_Copy_Test020 failed with invalid param: " + err.message + ", error code: " + err.code);
       expect().assertFail();
@@ -724,35 +744,40 @@ describe("FsCopyTest", function () {
     }
   });
 
-  /*
+   /*
    * @tc.name:Fs_Copy_Test021
-   * @tc.desc:test fs.copy, copy 1KB file
+   * @tc.desc:test fs.copy, copy muilt dir contain files
    * @tc.type: FUNC
    * @tc.require: #I8UV2F
    */
   it("Fs_Copy_Test021", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test021 start.');
     try {
+      let file1 = fs.openSync(muiltDirLocal + "/test1.txt", fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+      fs.writeSync(file1.fd, "ttttttttttttt");
+      fs.closeSync(file1);
+      let file2 = fs.openSync(muiltDirLocal + "/test2.txt", fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+      fs.writeSync(file2.fd, "ttttttttttttt");
+      fs.closeSync(file2);
       let progressListener = (progress) => {
         console.info("Fs_Copy_Test021 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
-          " 百分比： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
+          " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
       };
       let options = {
         "progressListener": progressListener
       }
-      let srcFile = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
-      let content = 't'.repeat(1024);
-      fs.writeSync(srcFile.fd, content);
-      fs.closeSync(srcFile);
-      let dstFile = fs.openSync(dstFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
-      fs.closeSync(dstFile);
-      await fs.copy(srcFileUriLocal, dstFileUriLocal, options, (err) => {
+      await fs.copy(srcDirUriLocal, dstDirUriLocal, options, (err) => {
         if (err) {
           console.info(TAG, "Fs_Copy_Test021 failed, with error message: " + err.message + ", error code: " + err.code);
           expect().assertFail();
         } else {
-          console.info(TAG, "Fs_Copy_Test021 success. ");
-          expect(true).assertTrue();
+          if (fs.accessSync(dstDirPathLocal +"/src/test1/test1.txt") && fs.accessSync(dstDirPathLocal + "/src/test1/test2.txt")) {
+            console.info(TAG, "Fs_Copy_Test021 success. ");
+            expect(true).assertTrue();
+            done();
+            return;
+          }
+          expect().assertFail();
         }
         done();
       })
@@ -765,7 +790,7 @@ describe("FsCopyTest", function () {
 
   /*
    * @tc.name:Fs_Copy_Test022
-   * @tc.desc:test fs.copy, copy 100MB file
+   * @tc.desc:test fs.copy, copy file 10 times
    * @tc.type: FUNC
    * @tc.require: #I8UV2F
    */
@@ -773,26 +798,23 @@ describe("FsCopyTest", function () {
     console.info(TAG, 'Fs_Copy_Test022 start.');
     try {
       let file = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
-      let content = 't'.repeat(1024 * 1024 * 100);
-      fs.writeSync(file.fd, content);
+      fs.writeSync(file.fd, 'ttttttttttttt');
       fs.closeSync(file);
-      let progressListener = (progress) => {
-        console.info("Fs_Copy_Test022 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
-          " 百分比： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
-      };
-      let options = {
-        "progressListener": progressListener
+      // execute the copy operation 10 times
+      for (let i = 0; i < 10; i++) {
+        const dstStitchFilePath = `${dstDirUriLocal}/file_${i}.txt`;
+        await fs.copy(srcFileUriLocal, dstStitchFilePath, (err) => {
+          if (err) {
+            console.info(TAG, "Fs_Copy_Test022 failed, with error message: " + err.message + ", error code: " + err.code);
+            expect().assertFail();
+            done();
+          } else {
+            console.info(TAG, "Fs_Copy_Test022 success. ");
+          }
+        })
       }
-      await fs.copy(srcFileUriLocal, dstFileUriLocal, options, (err) => {
-        if (err) {
-          console.info(TAG, "Fs_Copy_Test022 failed, with error message: " + err.message + ", error code: " + err.code);
-          expect().assertFail();
-        } else {
-          console.info(TAG, "Fs_Copy_Test022 success. ");
-          expect(true).assertTrue();
-        }
-        done();
-      })
+      expect(true).assertTrue();
+      done();
     } catch (err) {
       console.error("Fs_Copy_Test022 failed with invalid param: " + err.message + ", error code: " + err.code);
       expect().assertFail();
@@ -802,18 +824,94 @@ describe("FsCopyTest", function () {
 
   /*
    * @tc.name:Fs_Copy_Test023
+   * @tc.desc:test fs.copy, copy 1KB file
+   * @tc.type: FUNC
+   * @tc.require: #I8UV2F
+   */
+  it("Fs_Copy_Test023", 0, async function (done) {
+    console.info(TAG, 'Fs_Copy_Test023 start.');
+    try {
+      let progressListener = (progress) => {
+        console.info("Fs_Copy_Test023 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
+          " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
+      };
+      let options = {
+        "progressListener": progressListener
+      }
+      let srcFile = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+      let content = 't'.repeat(1024);
+      fs.writeSync(srcFile.fd, content);
+      fs.closeSync(srcFile);
+      let dstFile = fs.openSync(dstFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+      fs.closeSync(dstFile);
+      await fs.copy(srcFileUriLocal, dstFileUriLocal, options, (err) => {
+        if (err) {
+          console.info(TAG, "Fs_Copy_Test023 failed, with error message: " + err.message + ", error code: " + err.code);
+          expect().assertFail();
+        } else {
+          console.info(TAG, "Fs_Copy_Test023 success. ");
+          expect(true).assertTrue();
+        }
+        done();
+      })
+    } catch (err) {
+      console.error("Fs_Copy_Test023 failed with invalid param: " + err.message + ", error code: " + err.code);
+      expect().assertFail();
+      done();
+    }
+  });
+
+  /*
+   * @tc.name:Fs_Copy_Test024
+   * @tc.desc:test fs.copy, copy 100MB file
+   * @tc.type: FUNC
+   * @tc.require: #I8UV2F
+   */
+  it("Fs_Copy_Test024", 0, async function (done) {
+    console.info(TAG, 'Fs_Copy_Test024 start.');
+    try {
+      let file = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+      let content = 't'.repeat(1024 * 1024 * 100);
+      fs.writeSync(file.fd, content);
+      fs.closeSync(file);
+      let progressListener = (progress) => {
+        console.info("Fs_Copy_Test024 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
+          " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
+      };
+      let options = {
+        "progressListener": progressListener
+      }
+      await fs.copy(srcFileUriLocal, dstFileUriLocal, options, (err) => {
+        if (err) {
+          console.info(TAG, "Fs_Copy_Test024 failed, with error message: " + err.message + ", error code: " + err.code);
+          expect().assertFail();
+        } else {
+          console.info(TAG, "Fs_Copy_Test024 success. ");
+          expect(true).assertTrue();
+        }
+        done();
+      })
+    } catch (err) {
+      console.error("Fs_Copy_Test024 failed with invalid param: " + err.message + ", error code: " + err.code);
+      expect().assertFail();
+      done();
+    }
+  });
+
+  /*
+   * @tc.name:Fs_Copy_Test025
    * @tc.desc:test fs.copy, same task
    * @tc.type: FUNC
    * @tc.require: #I8UV2F
     */
-  it("Fs_Copy_Test023", 0, async function (done) {
-    console.info(TAG, 'Fs_Copy_Test023 start.');
+  it("Fs_Copy_Test025", 0, async function (done) {
+    console.info(TAG, 'Fs_Copy_Test025 start.');
     try {
       let flag1 = false;
       let flag2 = false;
       let progressListener = (progress) => {
-        console.info("Fs_Copy_Test023 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
-          " 百分比： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
+        console.info("Fs_Copy_Test025 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
+          " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
       };
       let options = {
         "progressListener": progressListener
@@ -828,11 +926,11 @@ describe("FsCopyTest", function () {
         setTimeout(() => {
           fs.copy(srcFileUriLocal, dstFileUriLocal, options, (err) => {
             if (err) {
-              console.info(TAG, "Fs_Copy_Test023_first failed, with error message: " + err.message + ", error code: " + err.code);
+              console.info(TAG, "Fs_Copy_Test025_first failed, with error message: " + err.message + ", error code: " + err.code);
               expect().assertFail();
             } else {
               flag1 = true;
-              console.info(TAG, "Fs_Copy_Test023_first success. ");
+              console.info(TAG, "Fs_Copy_Test025_first success. ");
             }
           })
           resolve();
@@ -845,15 +943,15 @@ describe("FsCopyTest", function () {
             fs.copy(srcFileUriLocal, dstFileUriLocal, options, (err) => {
               flag2 = true;
               if (err) {
-                console.info(TAG, "Fs_Copy_Test023_second failed, with error message: " + err.message + ", error code: " + err.code);
+                console.info(TAG, "Fs_Copy_Test025_second failed, with error message: " + err.message + ", error code: " + err.code);
               } else {
-                console.info(TAG, "Fs_Copy_Test023_second success. ");;
+                console.info(TAG, "Fs_Copy_Test025_second success. ");;
               }
               expect().assertFail();
             })
             resolve();
           } catch (err) {
-            console.error("Fs_Copy_Test023_second failed with invalid param: " + err.message + ", error code: " + err.code);
+            console.error("Fs_Copy_Test025_second failed with invalid param: " + err.message + ", error code: " + err.code);
           }
         }, 20);
       });
@@ -866,7 +964,7 @@ describe("FsCopyTest", function () {
       });
       done();
     } catch (err) {
-      console.error("Fs_Copy_Test023 failed with invalid param: " + err.message + ", error code: " + err.code);
+      console.error("Fs_Copy_Test025 failed with invalid param: " + err.message + ", error code: " + err.code);
       expect().assertFail();
       done();
     }
