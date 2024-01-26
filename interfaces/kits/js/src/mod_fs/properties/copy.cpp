@@ -266,13 +266,14 @@ uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, std::string path)
             continue;
         }
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
-            return size += GetDirSize(infos, dest);
+            size += GetDirSize(infos, dest);
+        } else {
+            struct stat st {};
+            if (stat(dest.c_str(), &st) == -1) {
+                return size;
+            }
+            size += st.st_size;
         }
-        struct stat st {};
-        if (stat(dest.c_str(), &st) == -1) {
-            return size;
-        }
-        size += st.st_size;
     }
     return size;
 }
@@ -293,13 +294,15 @@ int Copy::RecurCopyDir(const string &srcPath, const string &destPath, std::share
         if ((pNameList->namelist[i])->d_type == DT_LNK) {
             continue;
         }
+        int ret = ERRNO_NOERR;
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
-            return CopySubDir(src, dest, infos);
+            ret = CopySubDir(src, dest, infos);
+        } else {
+            infos->filePaths.insert(dest);
+            ret = CopyFile(src, dest);
         }
-        infos->filePaths.insert(dest);
-        auto res = CopyFile(src, dest);
-        if (res != ERRNO_NOERR) {
-            return res;
+        if (ret != ERRNO_NOERR) {
+            return ret;
         }
     }
     return ERRNO_NOERR;
