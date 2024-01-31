@@ -35,8 +35,13 @@ public:
     static NError CopyFileFromSoftBus(const std::string &srcUri,
                                       const std::string &destUri,
                                       std::shared_ptr<JsCallbackObject> callback);
+
+private:
     static std::string GetNetworkIdFromUri(const std::string &uri);
     static void CallbackComplete(uv_work_t *work, int stat);
+    static void RmDirectory(const std::string &path);
+    static void CopyDir(const std::string &path, const std::string &sandboxPath);
+
     std::mutex cvMutex_;
     std::condition_variable cv_;
     int copyEvent_ = NONE;
