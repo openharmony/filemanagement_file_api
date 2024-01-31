@@ -52,6 +52,7 @@ void TransListener::RmDirectory(const std::string &path)
             std::error_code errCode;
             std::filesystem::remove_all(pathName, errCode);
             if (errCode.value() != 0) {
+                closedir(dir);
                 HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
                 return;
             }
