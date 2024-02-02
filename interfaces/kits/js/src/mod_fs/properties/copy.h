@@ -93,7 +93,7 @@ struct FileInfos {
         if (srcUri == infos.srcUri) {
             return destUri < infos.destUri;
         }
-        return (srcUri < infos.srcUri || destUri < infos.destUri);
+        return srcUri < infos.srcUri;
     }
 };
 
@@ -165,6 +165,7 @@ private:
     static bool IsDirectory(const std::string &path);
     static bool IsFile(const std::string &path);
     static std::string ConvertUriToPath(const std::string &uri);
+    static std::string GetRealPath(const std::string& path);
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement
