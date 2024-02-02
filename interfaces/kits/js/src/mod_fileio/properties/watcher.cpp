@@ -44,7 +44,8 @@ void Watcher::RunCommand(uv_fs_event_t *handle, const char *filename, int events
         napi_value callback = nullptr;
         napi_get_reference_value(information->env, information->ref, &callback);
         vector<napi_value> argv;
-        argv.push_back(NVal::CreateInt64(information->env, events).val_);
+        argv = { UniError(ERRNO_NOERR).GetNapiErr(information->env),
+            NVal::CreateInt64(information->env, events).val_ };
         napi_value global = nullptr;
         napi_get_global(information->env, &global);
         napi_value tmp = nullptr;
