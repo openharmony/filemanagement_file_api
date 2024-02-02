@@ -42,6 +42,7 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace AppFileService::ModuleFileUri;
+namespace fs = std::filesystem;
 const std::string FILE_PREFIX_NAME = "file://";
 const std::string NETWORK_PARA = "?networkid=";
 const string PROCEDURE_COPY_NAME = "FileFSCopy";
@@ -249,6 +250,22 @@ static void Deleter(struct NameList *arg)
     free(arg->namelist);
 }
 
+std::string Copy::GetRealPath(const std::string& path)
+{
+    fs::path tempPath(path);
+    fs::path realPath{};
+    for (const auto& component : tempPath) {
+        if (component == ".") {
+            continue;
+        } else if (component == "..") {
+            realPath = realPath.parent_path();
+        } else {
+            realPath /= component;
+        }
+    }
+    return realPath.string();
+}
+
 uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, std::string path)
 {
     unique_ptr<struct NameList, decltype(Deleter) *> pNameList = { new (nothrow) struct NameList, Deleter };
@@ -322,8 +339,8 @@ int Copy::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<Fil
 
 int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
-    if (infos->srcPath == infos->destPath) {
-        HILOGE("The src and dest are the same.");
+    if (infos->destPath.find(infos->srcPath) != std::string::npos) {
+        HILOGE("The src directory is the subdirectory of dest");
         return EINVAL;
     }
     if (IsFile(infos->srcPath)) {
@@ -671,6 +688,8 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->listener = listener;
     infos->srcPath = ConvertUriToPath(infos->srcUri);
     infos->destPath = ConvertUriToPath(infos->destUri);
+    infos->srcPath = GetRealPath(infos->srcPath);
+    infos->destPath = GetRealPath(infos->destPath);
     infos->notifyTime = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;
     if (listener) {
         infos->hasListener = true;
