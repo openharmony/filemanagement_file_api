@@ -117,7 +117,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri,
         return NError(EIO);
     }
 
-    Uri uri(srcUri);
+    Uri uri(destUri);
     auto authority = uri.GetAuthority();
     if (authority == FILE_MANAGER_AUTHORITY || authority == MEDIA_AUTHORITY) {
         HILOGW("Public or media path not copy");
