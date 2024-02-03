@@ -58,13 +58,11 @@ public:
     template <class T> static bool SetEntityFor(napi_env env, napi_value obj, std::unique_ptr<T> entity)
     {
         napi_status status = napi_wrap(
-            env, obj, entity.get(),
+            env, obj, entity.release(),
             [](napi_env env, void *data, void *hint) {
-                auto entity = static_cast<T *>(data);
-                delete entity;
+                std::unique_ptr<T>(static_cast<T *>(data));
             },
             nullptr, nullptr);
-        entity.release();
         return status == napi_ok;
     }
 
