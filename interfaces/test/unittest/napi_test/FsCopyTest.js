@@ -899,18 +899,44 @@ describe("FsCopyTest", function () {
   });
 
   /*
-   * @tc.name:Fs_Copy_Test025
+ * @tc.name:Fs_Copy_Test025
+ * @tc.desc:test fs.copy dir to own directory
+ * @tc.type: FUNC
+ * @tc.require: #I8UV2F
+ */
+  it("Fs_Copy_Test025", 0, async function (done) {
+    console.info(TAG, 'Fs_Copy_Test025 start.');
+    try {
+      await fs.copy(srcDirUriLocal, srcDirUriLocal+"/", (err) => {
+        if (err) {
+          console.info(TAG, "Fs_Copy_Test025 failed, with error message: " + err.message + ", error code: " + err.code);
+          expect(true).assertTrue();
+        } else {
+          console.info(TAG, "Fs_Copy_Test025 success. ");
+          expect().assertFail();
+        }
+        done();
+      })
+    } catch (err) {
+      console.error("Fs_Copy_Test025 failed with invalid param: " + err.message + ", error code: " + err.code);
+      expect().assertFail();
+      done();
+    }
+  });
+
+  /*
+   * @tc.name:Fs_Copy_Test026
    * @tc.desc:test fs.copy, same task
    * @tc.type: FUNC
    * @tc.require: #I8UV2F
     */
-  it("Fs_Copy_Test025", 0, async function (done) {
-    console.info(TAG, 'Fs_Copy_Test025 start.');
+  it("Fs_Copy_Test026", 0, async function (done) {
+    console.info(TAG, 'Fs_Copy_Test026 start.');
     try {
       let flag1 = false;
       let flag2 = false;
       let progressListener = (progress) => {
-        console.info("Fs_Copy_Test025 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
+        console.info("Fs_Copy_Test026 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
           " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
       };
       let options = {
@@ -926,11 +952,11 @@ describe("FsCopyTest", function () {
         setTimeout(() => {
           fs.copy(srcFileUriLocal, dstFileUriLocal, options, (err) => {
             if (err) {
-              console.info(TAG, "Fs_Copy_Test025_first failed, with error message: " + err.message + ", error code: " + err.code);
+              console.info(TAG, "Fs_Copy_Test026_first failed, with error message: " + err.message + ", error code: " + err.code);
               expect().assertFail();
             } else {
               flag1 = true;
-              console.info(TAG, "Fs_Copy_Test025_first success. ");
+              console.info(TAG, "Fs_Copy_Test026_first success. ");
             }
           })
           resolve();
@@ -943,15 +969,15 @@ describe("FsCopyTest", function () {
             fs.copy(srcFileUriLocal, dstFileUriLocal, options, (err) => {
               flag2 = true;
               if (err) {
-                console.info(TAG, "Fs_Copy_Test025_second failed, with error message: " + err.message + ", error code: " + err.code);
+                console.info(TAG, "Fs_Copy_Test026_second failed, with error message: " + err.message + ", error code: " + err.code);
               } else {
-                console.info(TAG, "Fs_Copy_Test025_second success. ");;
+                console.info(TAG, "Fs_Copy_Test026_second success. ");;
               }
               expect().assertFail();
             })
             resolve();
           } catch (err) {
-            console.error("Fs_Copy_Test025_second failed with invalid param: " + err.message + ", error code: " + err.code);
+            console.error("Fs_Copy_Test026_second failed with invalid param: " + err.message + ", error code: " + err.code);
           }
         }, 20);
       });
@@ -964,11 +990,10 @@ describe("FsCopyTest", function () {
       });
       done();
     } catch (err) {
-      console.error("Fs_Copy_Test025 failed with invalid param: " + err.message + ", error code: " + err.code);
+      console.error("Fs_Copy_Test026 failed with invalid param: " + err.message + ", error code: " + err.code);
       expect().assertFail();
       done();
-    }
-    finally {
+    } finally {
       const timerId = setTimeout(() => {
         fs.rmdirSync(srcDirPathLocal);
         fs.rmdirSync(dstDirPathLocal);

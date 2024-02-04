@@ -222,6 +222,11 @@ int Copy::CopySubDir(const string &srcPath, const string &destPath, std::shared_
                 return ENOMEM;
             }
             receiveInfo->path = destPath;
+            if (iter == Copy::jsCbMap_.end() || iter->second == nullptr) {
+                HILOGE("Failed to find infos, srcPath = %{public}s, destPath = %{public}s", infos->srcPath.c_str(),
+                    infos->destPath.c_str());
+                return UNKROWN_ERR;
+            }
             iter->second->wds.push_back({ newWd, receiveInfo });
         }
     }
