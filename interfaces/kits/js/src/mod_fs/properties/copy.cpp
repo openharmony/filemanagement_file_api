@@ -266,7 +266,7 @@ std::string Copy::GetRealPath(const std::string& path)
     return realPath.string();
 }
 
-uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, std::string path)
+uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, const std::string &path)
 {
     unique_ptr<struct NameList, decltype(Deleter) *> pNameList = { new (nothrow) struct NameList, Deleter };
     if (pNameList == nullptr) {
@@ -523,10 +523,11 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
 
 std::shared_ptr<ReceiveInfo> Copy::GetReceivedInfo(int wd, std::shared_ptr<JsCallbackObject> callback)
 {
-    for (auto &it : callback->wds) {
-        if (it.first == wd) {
-            return it.second;
-        }
+    auto it = find_if(callback->wds.begin(), callback->wds.end(), [wd](const auto& item) {
+        return item.first == wd;
+    });
+    if (it != callback->wds.end()) {
+        return it->second;
     }
     return nullptr;
 }
@@ -676,7 +677,7 @@ std::string Copy::ConvertUriToPath(const std::string &uri)
 }
 
 tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
-    const std::string &srcUri, const std::string &destUri, NVal &listener)
+    const std::string &srcUri, const std::string &destUri, const NVal &listener)
 {
     auto infos = CreateSharedPtr<FileInfos>();
     if (infos == nullptr) {
@@ -710,11 +711,11 @@ int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
 {
     if (IsFile(infos->srcPath) && IsFile(infos->destPath)) {
         // copyFile
-        return CopyFile(infos->srcPath.c_str(), infos->destPath.c_str());
+        return CopyFile(infos->srcPath, infos->destPath);
     }
     if (IsDirectory(infos->srcPath) && IsDirectory(infos->destPath)) {
         // copyDir
-        return CopyDirFunc(infos->srcPath.c_str(), infos->destPath.c_str(), infos);
+        return CopyDirFunc(infos->srcPath, infos->destPath, infos);
     }
     return EINVAL;
 }
