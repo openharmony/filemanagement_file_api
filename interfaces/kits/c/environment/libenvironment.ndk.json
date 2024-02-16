@@ -1,0 +1,14 @@
+[
+    {
+        "first_introduced": "12",
+        "name":"OH_Environment_GetUserDownloadDir" 
+    },
+    {
+        "first_introduced": "12",
+        "name":"OH_Environment_GetUserDesktopDir" 
+    },
+    {
+        "first_introduced": "12",
+        "name":"OH_Environment_GetUserDocumentDir" 
+    }
+]

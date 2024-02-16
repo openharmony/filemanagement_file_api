@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -51,6 +51,74 @@ ohos_shared_library("remote_uri_native") {
   subsystem_name = "filemanagement"
 }
 
+config("environment_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "environment" ]
+}
+
+ohos_shared_library("environment_native") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  sources = [ "environment/environment_native.cpp" ]
+  public_configs = [ ":environment_config" ]
+
+  deps = [ "${utils_path}/filemgmt_libhilog:filemgmt_libhilog" ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "bounds_checking_function:libsec_shared",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "file_api"
+  subsystem_name = "filemanagement"
+}
+
+config("fileio_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "fileio" ]
+}
+
+ohos_shared_library("fileio_native") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  sources = [ "fileio/fileio_native.cpp" ]
+
+  public_configs = [ ":fileio_config" ]
+
+  deps = [ "${utils_path}/filemgmt_libhilog:filemgmt_libhilog" ]
+
+  external_deps = [
+    "ability_base:zuri",
+    "app_file_service:fileuri_native",
+    "bounds_checking_function:libsec_shared",
+    "hilog:libhilog",
+  ]
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "file_api"
+  subsystem_name = "filemanagement"
+}
+
 group("build_kits_native") {
-  deps = [ ":remote_uri_native" ]
+  deps = [
+    ":environment_native",
+    ":fileio_native",
+    ":remote_uri_native",
+  ]
 }
