@@ -1,0 +1,51 @@
+# Copyright (C) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//build/ohos/ndk/ndk.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
+
+ohos_shared_library("ohenvironment") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  include_dirs = [ "./" ]
+
+  sources = [ "./environment.c" ]
+  deps = [ "${file_api_path}/interfaces/kits/native:environment_native" ]
+  external_deps = []
+
+  output_name = "ohenvironment"
+  output_extension = "so"
+  relative_install_dir = "ndk"
+  part_name = "file_api"
+  subsystem_name = "filemanagement"
+}
+
+ohos_ndk_headers("oh_environment_header") {
+  dest_dir = "$ndk_headers_out_dir/filemanagement/environment/"
+  sources = [ "./environment.h" ]
+}
+
+ohos_ndk_library("libohenvironment") {
+  output_name = "ohenvironment"
+  output_extension = "so"
+  ndk_description_file = "./libenvironment.ndk.json"
+  system_capability =
+      "SystemCapability.FileManagement.File.Environment.FolderObtain"
+}
