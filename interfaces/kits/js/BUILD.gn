@@ -47,7 +47,6 @@ ohos_shared_library("fileio") {
     "src/common/napi",
     "src/common/napi/n_async",
     "//third_party/node/src",
-    "//third_party/bounds_checking_function/include",
     "//third_party/libuv/include",
     "//third_party/openssl/include",
   ]
@@ -99,11 +98,11 @@ ohos_shared_library("fileio") {
 
   deps = [
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
-    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "napi:ace_napi",
   ]
@@ -254,11 +253,11 @@ ohos_shared_library("hash") {
   deps = [
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
-    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "napi:ace_napi",
   ]
@@ -287,7 +286,6 @@ ohos_shared_library("file") {
     "src/common/napi/n_async",
     "src/common/file_helper",
     "//third_party/node/src",
-    "//third_party/bounds_checking_function/include",
   ]
 
   sources = file_common_src
@@ -298,10 +296,9 @@ ohos_shared_library("file") {
     "src/mod_file/module.cpp",
   ]
 
-  deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
-
   external_deps = [
     "ability_runtime:abilitykit_native",
+    "bounds_checking_function:libsec_shared",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "hilog:libhilog",

@@ -36,7 +36,7 @@ const std::string DOWNLOAD_PATH = "/Download";
 const std::string DESKTOP_PATH = "/Desktop";
 const std::string DOCUMENTS_PATH = "/Documents";
 const std::string DEFAULT_USERNAME = "currentUser";
-const char *g_fileManagerFullMountEnableParameter = "const.filemanager.full_mount.enable";
+const std::string FILE_MANAGER_FULL_MOUNT_ENABLE_PARAMETER = "const.filemanager.full_mount.enable";
 const int PERMISSION_ERROR = 201;
 const int DEVICE_NOT_SUPPORTED = 801;
 
@@ -60,14 +60,14 @@ static std::string GetPublicPath(const std::string &directoryName)
 static bool CheckFileManagerFullMountEnable()
 {
     char value[] = "false";
-    int retSystem = GetParameter(g_fileManagerFullMountEnableParameter, "false", value, sizeof(value));
+    int retSystem = GetParameter(FILE_MANAGER_FULL_MOUNT_ENABLE_PARAMETER.c_str(), "false", value, sizeof(value));
     return (retSystem > 0) && (!std::strcmp(value, "true"));
 }
 
 static int CheckInvalidAccess(const std::string &permission)
 {
     if (!CheckFileManagerFullMountEnable()) {
-        HILOGD("Failed to enable the parameter: %{public}s", g_fileManagerFullMountEnableParameter);
+        HILOGD("Failed to enable the parameter: %{public}s", FILE_MANAGER_FULL_MOUNT_ENABLE_PARAMETER.c_str());
         return -DEVICE_NOT_SUPPORTED;
     }
     if (!CheckCallingPermission(permission)) {
