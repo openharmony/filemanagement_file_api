@@ -333,22 +333,26 @@ int Copy::RecurCopyDir(const string &srcPath, const string &destPath, std::share
 int Copy::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<FileInfos> infos)
 {
     HILOGD("CopyDirFunc in, src = %{public}s, dest = %{public}s", src.c_str(), dest.c_str());
-    size_t found = string(src).rfind('/');
-    if (found == std::string::npos) {
+    size_t found = dest.find(src);
+    if (found != std::string::npos && found == 0) {
         return EINVAL;
     }
-    string dirName = string(src).substr(found);
-    string destStr = dest + dirName;
+    fs::path srcPath = fs::u8path(src);
+    std::string dirName;
+    if (srcPath.has_parent_path()) {
+        dirName = srcPath.parent_path().filename();
+    }
+    string destStr = dest + "/" + dirName;
     return CopySubDir(src, destStr, infos);
 }
 
 int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
-    if (infos->destPath.find(infos->srcPath) != std::string::npos) {
-        HILOGE("The src directory is the subdirectory of dest");
-        return EINVAL;
-    }
     if (IsFile(infos->srcPath)) {
+        if (infos->srcPath == infos->destPath) {
+            HILOGE("The src and dest is same, path = %{public}s", infos->srcPath.c_str());
+            return EINVAL;
+        }
         CheckOrCreatePath(infos->destPath);
     }
     if (!infos->hasListener) {
@@ -718,6 +722,12 @@ int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
         return CopyFile(infos->srcPath.c_str(), infos->destPath.c_str());
     }
     if (IsDirectory(infos->srcPath) && IsDirectory(infos->destPath)) {
+        if (infos->srcPath.back() != '/') {
+            infos->srcPath += '/';
+        }
+        if (infos->destPath.back() != '/') {
+            infos->destPath += '/';
+        }
         // copyDir
         return CopyDirFunc(infos->srcPath.c_str(), infos->destPath.c_str(), infos);
     }
