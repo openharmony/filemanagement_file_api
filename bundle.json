@@ -44,7 +44,6 @@
             "os_account"
         ],
         "third_party": [
-            "bounds_checking_function",
             "e2fsprogs",
             "openssl"
         ]

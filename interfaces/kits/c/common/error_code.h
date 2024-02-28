@@ -22,29 +22,35 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* End of #ifdef __cplusplus */
-#define MAP_SIZE 6
-#define UNKNOWN_ERROR 13900042
-#define PERMISSION_ERROR 201
-#define DEVICE_NOT_SUPPORTED 801
-#define FILEIO_SYS_CAP_ID 13900000
+
+enum ErrorCode {
+    PERMISSION_ERROR = 201,
+    PARAMETER_ERROR = 401,
+    DEVICE_NOT_SUPPORTED = 801,
+    E_PERM = 13900001,
+    E_NOENT = 13900002,
+    E_NOMEM = 13900011,
+    UNKNOWN_ERROR = 13900042
+};
 
 typedef struct {
     int errNo;
     int errorCode;
 } Map;
 
-static Map g_map[MAP_SIZE] = {
+static Map g_map[] = {
     { UNKNOWN_ERROR, UNKNOWN_ERROR },
     { -PERMISSION_ERROR, PERMISSION_ERROR },
+    { -PARAMETER_ERROR, PARAMETER_ERROR },
     { -DEVICE_NOT_SUPPORTED, DEVICE_NOT_SUPPORTED },
-    { -EPERM, FILEIO_SYS_CAP_ID + EPERM },
-    { -ENOENT, FILEIO_SYS_CAP_ID + ENOENT },
-    { -ENOMEM, FILEIO_SYS_CAP_ID + ENOMEM - 1 },
+    { -EPERM, E_PERM },
+    { -ENOENT, E_NOENT },
+    { -ENOMEM, E_NOMEM },
 };
 
 static int GetErrorCode(int errNum)
 {
-    for (int i = 1; i < MAP_SIZE; i++) {
+    for (size_t i = 1; i < sizeof(g_map) / sizeof(g_map[0]); i++) {
         if (g_map[i].errNo == errNum) {
             return g_map[i].errorCode;
         }
