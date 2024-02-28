@@ -21,4 +21,5 @@ ohos_rust_shared_ffi("rust_file") {
   crate_name = "rust_file"
   deps = [ "//third_party/rust/crates/libc:lib" ]
   external_deps = [ "hilog:hilog_rust" ]
+  innerapi_tags = [ "platformsdk" ]
 }
