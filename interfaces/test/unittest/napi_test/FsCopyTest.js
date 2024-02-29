@@ -897,7 +897,7 @@ describe("FsCopyTest", function () {
       done();
     }
   });
-  
+
   /*
    * @tc.name:Fs_Copy_Test025
    * @tc.desc:test fs.copy dir to own directory
@@ -924,7 +924,6 @@ describe("FsCopyTest", function () {
     }
   });
   
-
   /*
    * @tc.name:Fs_Copy_Test026
    * @tc.desc:test fs.copy, same task
