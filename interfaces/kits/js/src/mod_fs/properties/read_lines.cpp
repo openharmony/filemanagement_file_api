@@ -94,9 +94,9 @@ struct ReaderIteratorArg {
     int64_t offset = 0;
 };
 
-static NError AsyncExec(ReaderIteratorArg &readerIterator, char *pathStr)
+static NError AsyncExec(ReaderIteratorArg &readerIterator, const string &pathStr)
 {
-    readerIterator.iterator = ::ReaderIterator(pathStr);
+    readerIterator.iterator = ::ReaderIterator(pathStr.c_str());
     if (readerIterator.iterator == nullptr) {
         HILOGE("Failed to read lines of the file, error: %{public}d", errno);
         return NError(errno);
@@ -141,8 +141,8 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, path = path.get()]() -> NError {
-        return AsyncExec(*arg, path);
+    auto cbExec = [arg, pathStr = string(path.get())]() -> NError {
+        return AsyncExec(*arg, pathStr);
     };
 
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
