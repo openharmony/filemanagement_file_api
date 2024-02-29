@@ -831,14 +831,14 @@ describe("FsCopyTest", function () {
   it("Fs_Copy_Test023", 0, async function (done) {
     console.info(TAG, 'Fs_Copy_Test023 start.');
     try {
-	    let progressListener = (progress) => {
+      let progressListener = (progress) => {
         console.info("Fs_Copy_Test023 progressListener in, progressSize: " + progress.processedSize + ", totalSize: " + progress.totalSize +
             " progress： " + (progress.processedSize / progress.totalSize * 100).toFixed(2) + "%");
       };
       let options = {
         "progressListener": progressListener
       }
-	    let srcFile = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+      let srcFile = fs.openSync(srcFilePathLocal, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
       let content = 't'.repeat(1024);
       fs.writeSync(srcFile.fd, content);
       fs.closeSync(srcFile);
