@@ -22,7 +22,7 @@
 int OH_FileIO_GetFileLocation(char *uri, int uriLength, int *location)
 {
     if (uri == NULL || location == NULL) {
-        return GetErrorCode(-ENOMEM);
+        return GetErrorCode(-PARAMETER_ERROR);
     }
     int ret = GetFileLocation(uri, uriLength, location);
     if (ret < 0) {
