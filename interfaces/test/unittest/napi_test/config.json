@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "com.example.myapplication",
+    "bundleName": "com.example.fileapitest",
     "vendor": "example",
     "version": {
       "code": 1,
@@ -13,7 +13,7 @@
   },
   "deviceConfig": {},
   "module": {
-    "package": "com.example.myapplication",
+    "package": "com.example.fileapitest",
     "name": ".MyApplication",
     "deviceType": [
       "default",
@@ -38,7 +38,7 @@
             ]
           }
         ],
-        "name": "com.example.myapplication.MainAbility",
+        "name": "com.example.fileapitest.MainAbility",
         "icon": "$media:icon",
         "description": "$string:mainability_description",
         "label": "MyApplication",

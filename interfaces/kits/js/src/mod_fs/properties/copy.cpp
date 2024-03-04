@@ -152,12 +152,7 @@ int Copy::CopyFile(const string &src, const string &dest)
     }
     auto srcFdg = CreateUniquePtr<DistributedFS::FDGuard>(srcFd, true);
     auto destFdg = CreateUniquePtr<DistributedFS::FDGuard>(destFd, true);
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendFileReq = {
-        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (sendFileReq == nullptr) {
-        HILOGE("Failed to request heap memory.");
-        return ENOMEM;
-    }
+    uv_fs_t sendFileReq;
     int64_t offset = 0;
     struct stat srcStat{};
     if (fstat(srcFdg->GetFD(), &srcStat) < 0) {
@@ -167,8 +162,9 @@ int Copy::CopyFile(const string &src, const string &dest)
     int64_t size = static_cast<int64_t>(srcStat.st_size);
     int ret = 0;
     while (size > 0) {
-        ret = uv_fs_sendfile(nullptr, sendFileReq.get(), destFdg->GetFD(), srcFdg->GetFD(),
+        ret = uv_fs_sendfile(nullptr, &sendFileReq, destFdg->GetFD(), srcFdg->GetFD(),
             offset, MAX_SIZE, nullptr);
+        uv_fs_req_cleanup(&sendFileReq);
         if (ret < 0) {
             HILOGE("Failed to sendfile by errno : %{public}d", errno);
             return errno;
