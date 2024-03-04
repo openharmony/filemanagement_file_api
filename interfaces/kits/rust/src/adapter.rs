@@ -99,7 +99,8 @@ pub(crate) unsafe fn next_line(iter: *mut c_void) -> Result<*mut Str, Error> {
     let mut line = String::new();
     let len = reader.read_line(&mut line)? as c_uint;
     if len > 0 {
-        let line = CString::new(line).unwrap();
+        let line_bytes = line.into_bytes();
+        let line = CString::from_vec_unchecked(line_bytes);
         let item = Str {
             str: line.into_raw(),
             len,
