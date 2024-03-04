@@ -274,15 +274,14 @@ describe("FsCopyTest", function () {
           console.info(TAG, "Fs_Copy_Test008 success. ");
           expect(true).assertTrue();
         }
+        fs.rmdirSync(srcDirPathLocal);
+        fs.rmdirSync(dstDirPathLocal);
         done();
       })
     } catch (err) {
       console.error("Fs_Copy_Test008 failed with invalid param: " + err.message + ", error code: " + err.code);
       expect().assertFail();
       done();
-    } finally {
-      fs.rmdirSync(srcDirPathLocal);
-      fs.rmdirSync(dstDirPathLocal);
     }
   });
 
