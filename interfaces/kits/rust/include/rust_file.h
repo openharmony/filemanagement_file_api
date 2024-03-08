@@ -68,7 +68,7 @@ typedef struct {
  * 3.Errors are stored in errno.
  * @li          rust_file.h:The file where the interface is located.
  */
-void* ReaderIterator(char* path);
+void* ReaderIterator(const char* path);
 
 /**
  * @ingroup     rust
