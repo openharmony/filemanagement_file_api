@@ -73,10 +73,15 @@ static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& sta
     int ret = 0;
     while (size > 0) {
         ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
-            offset, MAX_SIZE, nullptr);
+            offset, std::min(MAX_SIZE, size), nullptr);
         if (ret < 0) {
             HILOGE("Failed to sendfile by ret : %{public}d", ret);
             return NError(ret);
+        }
+        if (static_cast<size_t>(ret) > size) {
+            HILOGE("More bytes returned than the size of the file. The file size is %{public}d" \
+                "The bytes returned is %{public}d", size, ret);
+            return NError(EIO);
         }
         offset += static_cast<int64_t>(ret);
         size -= static_cast<size_t>(ret);
