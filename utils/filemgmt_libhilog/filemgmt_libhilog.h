@@ -23,19 +23,19 @@
 namespace OHOS {
 namespace FileManagement {
 
-static constexpr int FILEFS_LOG_DOMAIN = 0xD004388;
-static constexpr HiviewDFX::HiLogLabel FILEMGMT_LOG_LABEL = {LOG_CORE, FILEFS_LOG_DOMAIN, "file_api"};
-
 #if defined __FILE_NAME__
 #define FILEMGMT_FILE_NAME __FILE_NAME__
 #else
-#include <cstring>
 #define FILEMGMT_FILE_NAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #endif
 
-#define FILEMGMT_PRINT_LOG(Level, fmt, ...)                                                                     \
-    HiviewDFX::HiLog::Level(FILEMGMT_LOG_LABEL, "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, \
-                            __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#ifndef FILEMGMT_LOG_DOMAIN
+#define FILEMGMT_LOG_DOMAIN 0xD004388
+#endif
+
+#undef FILEMGMT_LOG_TAG
+#define FILEMGMT_LOG_TAG "file_api"
+
 
 #ifdef HILOGD
 #undef HILOGD
@@ -57,11 +57,21 @@ static constexpr HiviewDFX::HiLogLabel FILEMGMT_LOG_LABEL = {LOG_CORE, FILEFS_LO
 #undef HILOGI
 #endif
 
-#define HILOGD(fmt, ...) FILEMGMT_PRINT_LOG(Debug, fmt, ##__VA_ARGS__)
-#define HILOGI(fmt, ...) FILEMGMT_PRINT_LOG(Info, fmt, ##__VA_ARGS__)
-#define HILOGW(fmt, ...) FILEMGMT_PRINT_LOG(Warn, fmt, ##__VA_ARGS__)
-#define HILOGE(fmt, ...) FILEMGMT_PRINT_LOG(Error, fmt, ##__VA_ARGS__)
-#define HILOGF(fmt, ...) FILEMGMT_PRINT_LOG(Fatal, fmt, ##__VA_ARGS__)
+#define HILOGF(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, FILEMGMT_LOG_DOMAIN, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
+#define HILOGE(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, FILEMGMT_LOG_DOMAIN, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
+#define HILOGW(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, FILEMGMT_LOG_DOMAIN, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
+#define HILOGI(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, FILEMGMT_LOG_DOMAIN, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
+#define HILOGD(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, FILEMGMT_LOG_DOMAIN, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
 } // namespace FileManagement
 } // namespace OHOS
 
