@@ -66,7 +66,7 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-static int AccessCore(const string &path)
+static int AccessCore(const string &path, int mode)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> access_req = {
         new uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -74,14 +74,29 @@ static int AccessCore(const string &path)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int ret = uv_fs_access(nullptr, access_req.get(), path.c_str(), 0, nullptr);
+    int ret = uv_fs_access(nullptr, access_req.get(), path.c_str(), mode, nullptr);
     return ret;
+}
+
+static int GetMode(NVal secondVar, bool *hasMode)
+{
+    if (secondVar.TypeIs(napi_number)) {
+        bool succ = false;
+        int mode = 0;
+        *hasMode = true;
+        tie(succ, mode) = secondVar.ToInt32();
+        if (succ && (mode & 0x06) == mode) {
+            return mode;
+        }
+    }
+
+    return -1;
 }
 
 napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -94,8 +109,19 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    bool hasMode = false;
+    int mode = 0;
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
+        mode = GetMode(NVal(env, funcArg[NARG_POS::SECOND]), &hasMode);
+    }
+    if (mode < 0 && hasMode) {
+        HILOGE("Invalid mode from JS second argument");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
     bool isAccess = false;
-    int ret = AccessCore(path.get());
+    int ret = AccessCore(path.get(), mode);
     if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
         HILOGE("Failed to access file by path");
         NError(ret).ThrowErr(env);
@@ -123,14 +149,25 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    bool hasMode = false;
+    int mode = 0;
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
+        mode = GetMode(NVal(env, funcArg[NARG_POS::SECOND]), &hasMode);
+    }
+    if (mode < 0 && hasMode) {
+        HILOGE("Invalid mode from JS second argument");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
     auto result = CreateSharedPtr<AsyncAccessArg>();
     if (result == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [path = string(tmp.get()), result]() -> NError {
-        int ret = AccessCore(path);
+    auto cbExec = [path = string(tmp.get()), result, mode]() -> NError {
+        int ret = AccessCore(path, mode);
         if (ret == 0) {
             result->isAccess = true;
         }
@@ -145,7 +182,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || hasMode) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_ACCESS_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
@@ -248,7 +285,7 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (hasOption) {
-        int ret = AccessCore(path);
+        int ret = AccessCore(path, 0);
         if (ret == ERRNO_NOERR) {
             HILOGE("The path already exists");
             return NError(EEXIST);
@@ -261,7 +298,7 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
             HILOGE("Failed to create directories, error: %{public}d", errno);
             return NError(errno);
         }
-        ret = AccessCore(path);
+        ret = AccessCore(path, 0);
         if (ret) {
             HILOGE("Failed to verify the result of Mkdirs function");
             return NError(ret);

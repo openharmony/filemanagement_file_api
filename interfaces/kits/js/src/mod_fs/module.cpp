@@ -36,6 +36,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 static napi_value Export(napi_env env, napi_value exports)
 {
+    InitAccessModeType(env, exports);
     InitOpenMode(env, exports);
     InitWhenceType(env, exports);
     std::vector<unique_ptr<NExporter>> products;

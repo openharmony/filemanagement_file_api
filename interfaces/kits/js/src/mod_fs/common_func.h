@@ -35,6 +35,11 @@ constexpr int DIRECTORY = UV_FS_O_DIRECTORY;
 constexpr int NOFOLLOW = UV_FS_O_NOFOLLOW;
 constexpr int SYNC = UV_FS_O_SYNC;
 
+constexpr unsigned int MODE_EXIST = 00;
+constexpr unsigned int MODE_WRITE = 02;
+constexpr unsigned int MODE_READ = 04;
+constexpr unsigned int MODE_READ_WRITE = 06;
+
 constexpr unsigned int USR_READ_ONLY = 00;
 constexpr unsigned int USR_WRITE_ONLY = 01;
 constexpr unsigned int USR_RDWR = 02;
@@ -55,6 +60,7 @@ struct FileInfo {
     std::unique_ptr<DistributedFS::FDGuard> fdg = { nullptr };
 };
 
+void InitAccessModeType(napi_env env, napi_value exports);
 void InitOpenMode(napi_env env, napi_value exports);
 void InitWhenceType(napi_env env, napi_value exports);
 
