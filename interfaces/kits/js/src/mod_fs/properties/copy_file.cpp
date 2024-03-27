@@ -79,7 +79,7 @@ static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& sta
             return NError(ret);
         }
         if (static_cast<size_t>(ret) > size) {
-            HILOGE("More bytes returned than the size of the file. The file size is %{public}d" \
+            HILOGE("More bytes returned than the size of the file. The file size is %{public}zu" \
                 "The bytes returned is %{public}d", size, ret);
             return NError(EIO);
         }
