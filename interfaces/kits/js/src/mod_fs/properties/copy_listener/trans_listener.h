@@ -20,6 +20,7 @@
 
 #include "copy.h"
 #include "file_trans_listener_stub.h"
+#include "file_uri.h"
 
 constexpr int NONE = 0;
 constexpr int SUCCESS = 1;
@@ -39,9 +40,13 @@ public:
 private:
     static std::string GetNetworkIdFromUri(const std::string &uri);
     static void CallbackComplete(uv_work_t *work, int stat);
-    static void RmDirectory(const std::string &path);
-    static void CopyDir(const std::string &path, const std::string &sandboxPath);
-
+    static void RmDir(const std::string &path);
+    static std::string CreateDfsCopyPath();
+    static std::string GetFileName(const std::string &path);
+    static int32_t CopyToSandBox(const std::string &authority,
+                                const std::string &srcUri,
+                                const std::string &disSandboxPath,
+                                Uri &uri);
     std::mutex cvMutex_;
     std::condition_variable cv_;
     int copyEvent_ = NONE;
