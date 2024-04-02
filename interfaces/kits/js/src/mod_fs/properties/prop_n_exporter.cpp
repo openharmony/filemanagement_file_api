@@ -119,6 +119,7 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    mode = hasMode ? mode : 0;
 
     bool isAccess = false;
     int ret = AccessCore(path.get(), mode);
