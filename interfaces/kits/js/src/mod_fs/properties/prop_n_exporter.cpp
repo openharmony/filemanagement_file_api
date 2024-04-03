@@ -160,6 +160,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    mode = hasMode ? mode : 0;
 
     auto result = CreateSharedPtr<AsyncAccessArg>();
     if (result == nullptr) {
