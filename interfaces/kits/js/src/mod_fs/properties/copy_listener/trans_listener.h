@@ -42,7 +42,7 @@ private:
     static void CallbackComplete(uv_work_t *work, int stat);
     static void RmDir(const std::string &path);
     static std::string CreateDfsCopyPath();
-    static std::string GetFileName(const std::string &path);
+    static std::string GetFileName(const std::string &uri);
     static int32_t CopyToSandBox(const std::string &authority,
                                 const std::string &srcUri,
                                 const std::string &disSandboxPath,
