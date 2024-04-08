@@ -21,6 +21,7 @@
 
 #include "distributed_file_daemon_manager.h"
 #include "ipc_skeleton.h"
+#include "sandbox_helper.h"
 #include "uri.h"
 
 namespace OHOS {
@@ -47,8 +48,8 @@ void TransListener::RmDir(const std::string &path)
 
 std::string TransListener::CreateDfsCopyPath()
 {
-    std::string random;
     std::random_device rd;
+    std::string random = std::to_string(rd());
     while (std::filesystem::exists(DISTRIBUTED_PATH + random)) {
         random = std::to_string(rd());
     }
@@ -98,13 +99,13 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
         }
         return NError(EIO);
     }
-
     if (authority == FILE_MANAGER_AUTHORITY || authority == MEDIA_AUTHORITY) {
         HILOGW("Public or media path not copy");
         return NError(ERRNO_NOERR);
     }
 
-    ret = CopyToSandBox(authority, srcUri, disSandboxPath, uri);
+    ret = CopyToSandBox(srcUri, disSandboxPath, uri.GetPath());
+    RmDir(disSandboxPath);
     if (ret != ERRNO_NOERR) {
         HILOGE("CopyToSandBox failed, ret = %{public}d.", ret);
         return NError(EIO);
@@ -112,41 +113,44 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
     return NError(ERRNO_NOERR);
 }
 
-int32_t TransListener::CopyToSandBox(const std::string &authority, const std::string &srcUri,
-    const std::string &disSandboxPath, Uri &uri)
+int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::string &disSandboxPath,
+    const std::string &sandboxPath)
 {
-    std::string sandboxPath = uri.GetPath();
+    std::error_code errCode;
     if (std::filesystem::exists(sandboxPath) && std::filesystem::is_directory(sandboxPath)) {
         HILOGI("Copy dir");
         std::filesystem::copy(disSandboxPath, sandboxPath,
-            std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing);
+            std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing, errCode);
+        if (errCode.value() != 0) {
+            HILOGE("Copy dir failed: errCode: %{public}d", errCode.value());
+            return EIO;
+        }
     } else {
-        auto fileName = GetFileName(srcUri);
+        Uri uri(srcUri);
+        auto fileName = GetFileName(uri.GetPath());
         if (fileName.empty()) {
             HILOGE("Get filename failed");
             RmDir(disSandboxPath);
             return EIO;
         }
-        std::filesystem::copy(disSandboxPath + fileName, sandboxPath, std::filesystem::copy_options::update_existing);
+        std::filesystem::copy(disSandboxPath + fileName, sandboxPath, std::filesystem::copy_options::update_existing,
+            errCode);
+        if (errCode.value() != 0) {
+            HILOGE("Copy file failed: errCode: %{public}d", errCode.value());
+            return EIO;
+        }
     }
-    RmDir(disSandboxPath);
     return ERRNO_NOERR;
 }
 
-std::string TransListener::GetFileName(const std::string &uri)
+std::string TransListener::GetFileName(const std::string &path)
 {
-    auto pos = uri.find_last_of('/');
+    auto pos = path.find_last_of('/');
     if (pos == std::string::npos) {
-        HILOGE("invalid uri");
+        HILOGE("invalid path");
         return "";
     }
-    auto fileName = uri.substr(pos);
-    auto networkIdPos = fileName.find(NETWORK_PARA);
-    if (networkIdPos == std::string::npos) {
-        HILOGE("Not remote uri");
-        return "";
-    }
-    return fileName.substr(0, networkIdPos);
+    return SandboxHelper::Decode(path.substr(pos));
 }
 
 std::string TransListener::GetNetworkIdFromUri(const std::string &uri)

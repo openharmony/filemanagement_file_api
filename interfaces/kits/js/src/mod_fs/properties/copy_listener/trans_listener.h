@@ -42,11 +42,10 @@ private:
     static void CallbackComplete(uv_work_t *work, int stat);
     static void RmDir(const std::string &path);
     static std::string CreateDfsCopyPath();
-    static std::string GetFileName(const std::string &uri);
-    static int32_t CopyToSandBox(const std::string &authority,
-                                const std::string &srcUri,
-                                const std::string &disSandboxPath,
-                                Uri &uri);
+    static std::string GetFileName(const std::string &path);
+    static int32_t CopyToSandBox(const std::string &srcUri, const std::string &disSandboxPath,
+        const std::string &sandboxPath);
+
     std::mutex cvMutex_;
     std::condition_variable cv_;
     int copyEvent_ = NONE;
