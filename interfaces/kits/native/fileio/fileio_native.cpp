@@ -75,6 +75,9 @@ namespace {
 
 int GetFileLocation(char *uri, int uriLength, int *location)
 {
+    if (uri == nullptr) {
+        return -EINVAL;
+    }
     std::string uriStr(uri, uriLength);
     AppFileService::ModuleFileUri::FileUri fileUri(uriStr);
     int ret = GetLocationFromPath(fileUri.GetRealPath());
