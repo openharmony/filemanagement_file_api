@@ -75,7 +75,7 @@ namespace {
 
 int GetFileLocation(char *uri, int uriLength, int *location)
 {
-    if (uri == nullptr) {
+    if (uri == nullptr || location == nullptr) {
         return -EINVAL;
     }
     std::string uriStr(uri, uriLength);
