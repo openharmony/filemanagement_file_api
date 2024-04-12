@@ -13,6 +13,10 @@
 
 import("//build/ohos.gni")
 
+config("public_config") {
+  include_dirs = [ "include/rust_file.h" ]
+}
+
 ohos_rust_shared_ffi("rust_file") {
   crate_type = "cdylib"
   part_name = "file_api"
@@ -22,4 +26,5 @@ ohos_rust_shared_ffi("rust_file") {
   deps = [ "//third_party/rust/crates/libc:lib" ]
   external_deps = [ "hilog:hilog_rust" ]
   innerapi_tags = [ "platformsdk" ]
+  public_configs = [ ":public_config" ]
 }
