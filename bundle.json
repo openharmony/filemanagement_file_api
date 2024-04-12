@@ -41,7 +41,8 @@
             "napi",
             "samgr",
             "app_file_service",
-            "os_account"
+            "os_account",
+            "libuv"
         ],
         "third_party": [
             "e2fsprogs",
@@ -127,6 +128,15 @@
                 "fileio.h"
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/c/fileio"
+            }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/cj:cjfile",
+            "header": {
+              "header_files": [
+                "utils.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/cj"
             }
           }
         ],
