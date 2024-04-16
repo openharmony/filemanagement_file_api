@@ -104,7 +104,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
         return NError(ERRNO_NOERR);
     }
 
-    ret = CopyToSandBox(srcUri, disSandboxPath, uri.GetPath());
+    ret = CopyToSandBox(srcUri, disSandboxPath, SandboxHelper::Decode(uri.GetPath()));
     RmDir(disSandboxPath);
     if (ret != ERRNO_NOERR) {
         HILOGE("CopyToSandBox failed, ret = %{public}d.", ret);
