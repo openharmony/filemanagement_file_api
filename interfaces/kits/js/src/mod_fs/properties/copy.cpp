@@ -50,7 +50,7 @@ constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
 constexpr size_t MAX_SIZE = 0x7ffff000;
-constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(200);
+constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(1000);
 std::recursive_mutex Copy::mutex_;
 std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
 
