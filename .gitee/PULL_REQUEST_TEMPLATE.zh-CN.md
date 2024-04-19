@@ -59,7 +59,7 @@
     </tr>
     </tr>
     <tr>
-        <td rowspan="3">内核操作</td><td>是否有mmap操作，并使用remap_pfn_range进行地址映射时，校验起始地址是否是用户态输入切没有做合法性校验	</td><td>自检结果：</td>
+        <td rowspan="3">内核操作</td><td>是否有mmap操作，并使用remap_pfn_range进行地址映射时，校验起始地址是否是用户态输入且没有做合法性校验	</td><td>自检结果：</td>
     </tr>
     <tr>
         <td>是否有copy_from_user，并对外部输入的数据做了长度校验，以防止缓冲区溢出</td><td>自检结果：</td>
