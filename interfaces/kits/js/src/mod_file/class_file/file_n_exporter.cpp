@@ -244,7 +244,7 @@ bool Rmdirs(const string &path)
 string ConvertUri(string path, string originPath, string originUri)
 {
     if (path.find(originPath) != path.npos) {
-        if (originUri[originUri.length() - 1] == '/') {
+        if (originUri.length() >= 1 && originUri[originUri.length() - 1] == '/') {
             originUri = originUri.substr(0, originUri.length() - 1);
         }
         path.replace(0, originPath.length(), originUri);

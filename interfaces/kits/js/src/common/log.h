@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace DistributedFS {
 #ifndef FILE_SUBSYSTEM_DEBUG_LOCAL
-static constexpr int FILEIO_DOMAIN_ID = 0xD004388;
+#define FILEIO_DOMAIN_ID 0xD004388
 static constexpr OHOS::HiviewDFX::HiLogLabel FILEIO_LABEL = { LOG_CORE, FILEIO_DOMAIN_ID, "file_api" };
 
 #ifdef HILOGD
@@ -63,28 +63,21 @@ static constexpr OHOS::HiviewDFX::HiLogLabel FILEIO_LABEL = { LOG_CORE, FILEIO_D
 
 #else
 
-#define PCLOG(fmt, ...)                                                  \
-    do {                                                                 \
-        const std::vector<std::string> filter = {                        \
-            "{public}",                                                  \
-            "{private}",                                                 \
-        };                                                               \
-        std::string str____(fmt);                                        \
-        for (auto &&pattern : filter) {                                  \
-            size_t pos = 0;                                              \
-            while (std::string::npos != (pos = str____.find(pattern))) { \
-                str____.erase(pos, pattern.length());                    \
-            }                                                            \
-        }                                                                \
-        str____ += "\n";                                                 \
-        printf(str____.c_str(), ##__VA_ARGS__);                          \
-    } while (0)                                                          \
-
-#define HILOGD(fmt, ...) PCLOG("%{public}s: " fmt, __func__, ##__VA_ARGS__)
-#define HILOGI(fmt, ...) PCLOG("%{public}s: " fmt, __func__, ##__VA_ARGS__)
-#define HILOGW(fmt, ...) PCLOG("%{public}s: " fmt, __func__, ##__VA_ARGS__)
-#define HILOGE(fmt, ...) PCLOG("%{public}s: " fmt, __func__, ##__VA_ARGS__)
-#define HILOGF(fmt, ...) PCLOG("%{public}s: " fmt, __func__, ##__VA_ARGS__)
+#define HILOGF(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, FILEIO_DOMAIN_ID, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
+#define HILOGE(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, FILEIO_DOMAIN_ID, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
+#define HILOGW(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, FILEIO_DOMAIN_ID, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
+#define HILOGI(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, FILEIO_DOMAIN_ID, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
+#define HILOGD(fmt, ...)            \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, FILEIO_DOMAIN_ID, FILEMGMT_LOG_TAG, \
+    "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
 
 #endif
 } // namespace DistributedFS
