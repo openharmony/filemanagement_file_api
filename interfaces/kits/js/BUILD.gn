@@ -49,6 +49,7 @@ ohos_shared_library("fileio") {
     "//third_party/node/src",
     "//third_party/libuv/include",
     "//third_party/openssl/include",
+    "${utils_path}/common/include",
   ]
 
   sources = file_common_src
@@ -98,8 +99,11 @@ ohos_shared_library("fileio") {
 
   deps = [
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "//third_party/openssl:libcrypto_shared",
   ]
+
+  use_exceptions = true
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
