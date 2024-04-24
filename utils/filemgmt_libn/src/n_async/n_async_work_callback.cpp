@@ -221,6 +221,8 @@ void NAsyncWorkCallback::ThreadSafeSchedule(NContextCBComplete cbComplete)
         });
     if (ret) {
         HILOGE("Failed to call uv_queue_work %{public}d", status);
+        workArgs.reset();
+        work.reset();
         return;
     }
     workArgs.release();
