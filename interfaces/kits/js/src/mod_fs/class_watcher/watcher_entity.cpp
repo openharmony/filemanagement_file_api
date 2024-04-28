@@ -172,7 +172,7 @@ void FileWatcher::ReadNotifyEvent(WatcherCallback callback)
     while (index < len) {
         event = reinterpret_cast<inotify_event *>(buf + index);
         NotifyEvent(event, callback);
-        index += sizeof(struct inotify_event) + event->len;
+        index += sizeof(struct inotify_event) + static_cast<int>(event->len);
     }
 }
 
@@ -191,11 +191,11 @@ void FileWatcher::GetNotifyEvent(WatcherCallback callback)
     while (run_) {
         int ret = poll(fds, nfds, -1);
         if (ret > 0) {
-            if (fds[0].revents & POLLNVAL) {
+            if (static_cast<unsigned short>(fds[0].revents) & POLLNVAL) {
                 run_ = false;
                 return;
             }
-            if (fds[1].revents & POLLIN) {
+            if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
                 ReadNotifyEvent(callback);
             }
         } else if (ret < 0 && errno == EINTR) {

@@ -85,7 +85,7 @@ static int GetMode(NVal secondVar, bool *hasMode)
         int mode = 0;
         *hasMode = true;
         tie(succ, mode) = secondVar.ToInt32();
-        if (succ && (mode & 0x06) == mode) {
+        if (succ && (static_cast<unsigned int>(mode) & 0x06) == static_cast<unsigned int>(mode)) {
             return mode;
         }
     }

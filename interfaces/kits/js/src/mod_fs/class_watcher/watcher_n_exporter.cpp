@@ -171,25 +171,26 @@ void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::
         HILOGE("Failed to get uv event loop");
         return;
     }
-
+    if (!callback) {
+        HILOGE("Failed to parse watcher callback");
+        return;
+    }
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
         HILOGE("Failed to create uv_work_t pointer");
         return;
     }
 
-    if (!callback) {
-        HILOGE("Failed to parse watcher callback");
+    JSCallbackContext *callbackContext = new (std::nothrow) JSCallbackContext(callback);
+    if (callbackContext == nullptr) {
+        delete work;
         return;
     }
-
-    JSCallbackContext *callbackContext = new (std::nothrow) JSCallbackContext(callback);
     callbackContext->env_ = env;
     callbackContext->fileName_ = fileName;
     callbackContext->event_ = event;
     callbackContext->cookie_ = cookie;
     work->data = reinterpret_cast<void *>(callbackContext);
-
     int ret = uv_queue_work(
         loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(WatcherCallbackComplete));
     if (ret != 0) {
