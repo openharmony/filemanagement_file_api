@@ -23,8 +23,6 @@ namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 using namespace DistributedFS::ModuleTaskSignal;
-constexpr int NO_ERROR = 0;
-constexpr int CANCEL_ERR = -3;
 TaskSignalNExporter::TaskSignalNExporter(napi_env env, napi_value exports) : NExporter(env, exports) {}
 
 TaskSignalNExporter::~TaskSignalNExporter() {}
