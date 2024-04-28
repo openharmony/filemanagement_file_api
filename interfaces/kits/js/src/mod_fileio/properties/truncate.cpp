@@ -97,13 +97,13 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    const string PROCEDURENAME = "FileIOTruncate";
+    const string procedureName = "FileIOTruncate";
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
         !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURENAME, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[funcArg.GetArgc() - 1]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURENAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO

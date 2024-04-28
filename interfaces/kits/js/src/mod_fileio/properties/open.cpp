@@ -104,6 +104,18 @@ static UniError DoOpenExec(const std::string& path, const unsigned int flags, co
     }
 }
 
+static bool ParseFlags(napi_env env, const NFuncArg& funcArg, unsigned int& flags)
+{
+    auto [succ, authFlags] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
+    if (!succ || authFlags < 0) {
+        UniError(EINVAL).ThrowErr(env, "Invalid flags");
+        return false;
+    }
+    flags = static_cast<unsigned int>(authFlags);
+    (void)CommonFunc::ConvertJsFlags(flags);
+    return true;
+}
+
 napi_value Open::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -111,25 +123,18 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
     }
-
     auto [succ, path, unuse] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
     }
-
     size_t argc = funcArg.GetArgc();
     unsigned int flags = O_RDONLY;
     if (argc >= NARG_CNT::TWO) {
-        auto [succ, authFlags] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
-        if (!succ || authFlags < 0) {
-            UniError(EINVAL).ThrowErr(env, "Invalid flags");
+        if (!ParseFlags(env, funcArg, flags)) {
             return nullptr;
         }
-        flags = static_cast<unsigned int>(authFlags);
-        (void)CommonFunc::ConvertJsFlags(flags);
     }
-
     int32_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
     if (argc >= NARG_CNT::THREE) {
         tie(succ, mode) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(mode);
@@ -138,12 +143,10 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-
     auto arg = make_shared<int32_t>();
     auto cbExec = [path = string(path.get()), flags, mode, arg](napi_env env) -> UniError {
         return DoOpenExec(path, flags, mode, arg);
     };
-
     auto cbComplCallback = [arg](napi_env env, UniError err) -> NVal {
         if (err) {
             if (err.GetErrno(ERR_CODE_SYSTEM_POSIX) == ENAMETOOLONG) {
@@ -153,7 +156,6 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
         }
         return { NVal::CreateInt64(env, *arg) };
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     if (argc == NARG_CNT::ONE || (argc == NARG_CNT::TWO &&
         !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function)) || (argc == NARG_CNT::THREE &&

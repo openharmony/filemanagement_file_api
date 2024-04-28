@@ -18,6 +18,7 @@
 #include <memory>
 #include <new>
 
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "uv.h"
 
@@ -45,7 +46,7 @@ NAsyncWorkCallback::~NAsyncWorkCallback()
         return;
     }
 
-    unique_ptr<uv_work_t> work(new (std::nothrow) uv_work_t);
+    auto work = CreateUniquePtr<uv_work_t>();
     if (work == nullptr) {
         HILOGE("Failed to new uv_work_t");
         return;
@@ -195,7 +196,7 @@ void NAsyncWorkCallback::ThreadSafeSchedule(NContextCBComplete cbComplete)
         return;
     }
 
-    unique_ptr<uv_work_t> work(new (std::nothrow) uv_work_t);
+    auto work = CreateUniquePtr<uv_work_t>();
     if (!work) {
         HILOGE("Failed to new uv_work_t");
         return;
