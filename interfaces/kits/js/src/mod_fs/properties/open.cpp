@@ -275,7 +275,7 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
 #endif
     int ret = OpenFileByPath(pathStr, mode);
     if (ret < 0) {
-        HILOGE("Failed to open file for libuv error %{public}d", ret);
+        HILOGD("Failed to open file for libuv error %{public}d", ret);
         return NError(ret);
     }
     arg->fd = ret;

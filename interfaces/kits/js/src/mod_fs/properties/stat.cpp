@@ -58,7 +58,7 @@ static NError CheckFsStat(const FileInfo &fileInfo, uv_fs_t* req)
     if (fileInfo.isPath) {
         int ret = uv_fs_stat(nullptr, req, fileInfo.path.get(), nullptr);
         if (ret < 0) {
-            HILOGE("Failed to stat file with path");
+            HILOGD("Failed to stat file with path");
             return NError(ret);
         }
     } else {
