@@ -25,6 +25,8 @@
 #include "common_func.h"
 #include "filemgmt_libn.h"
 #include "n_async/n_ref.h"
+#include "task_signal.h"
+#include "class_tasksignal/task_signal_entity.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -32,6 +34,7 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 using namespace OHOS::AppExecFwk;
+using namespace DistributedFS::ModuleTaskSignal;
 struct ReceiveInfo {
     std::string path;                         // dir name
     std::map<std::string, uint64_t> fileList; // filename, proceededSize
@@ -82,6 +85,8 @@ struct FileInfos {
     bool hasListener = false;
     napi_env env;
     NVal listener;
+    NVal copySignal;
+    std::shared_ptr<TaskSignal> taskSignal = nullptr;
     std::set<std::string> filePaths;
     int exceptionCode = ERRNO_NOERR;    // notify copy thread or listener thread has exceptions.
     bool operator==(const FileInfos &infos) const
@@ -120,6 +125,7 @@ private:
     // operator of napi
     static tuple<bool, std::string> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg);
     static tuple<bool, NVal> GetListenerFromOptionArg(napi_env env, const NFuncArg &funcArg);
+    static tuple<bool, NVal> GetCopySignalFromOptionArg(napi_env env, const NFuncArg &funcArg);
     static void CheckOrCreatePath(const std::string &destPath);
     static int ParseJsParam(napi_env env, NFuncArg &funcArg, std::shared_ptr<FileInfos> &fileInfos);
 
@@ -142,12 +148,12 @@ private:
     static int RecurCopyDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);
     static tuple<int, uint64_t> GetFileSize(const std::string &path);
     static uint64_t GetDirSize(std::shared_ptr<FileInfos> infos, const std::string &path);
-    static int CopyFile(const string &src, const string &dest);
+    static int CopyFile(const string &src, const string &dest, std::shared_ptr<FileInfos> infos);
     static int MakeDir(const string &path);
     static int CopySubDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);
     static int CopyDirFunc(const string &src, const string &dest, std::shared_ptr<FileInfos> infos);
     static tuple<int, std::shared_ptr<FileInfos>> CreateFileInfos(
-        const std::string &srcUri, const std::string &destUri, const NVal &listener);
+        const std::string &srcUri, const std::string &destUri, const NVal &listener, NVal copySignal);
     static int ExecCopy(std::shared_ptr<FileInfos> infos);
 
     // operator of file size
