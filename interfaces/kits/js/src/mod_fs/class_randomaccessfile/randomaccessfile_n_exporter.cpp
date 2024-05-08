@@ -121,7 +121,7 @@ napi_value RandomAccessFileNExporter::SetFilePointerSync(napi_env env, napi_call
 static int64_t CalculateOffset(int64_t offset, int64_t fPointer)
 {
     if (offset < 0) {
-        HILOGI("No specified offset provided");
+        HILOGD("No specified offset provided");
         offset = fPointer;
     } else {
         offset += fPointer;

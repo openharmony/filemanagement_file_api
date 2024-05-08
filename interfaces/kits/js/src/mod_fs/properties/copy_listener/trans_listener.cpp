@@ -19,7 +19,6 @@
 #include <filesystem>
 #include <random>
 
-#include "distributed_file_daemon_manager.h"
 #include "ipc_skeleton.h"
 #include "sandbox_helper.h"
 #include "uri.h"
@@ -66,51 +65,88 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
     }
     transListener->callback_ = std::move(callback);
 
+    Storage::DistributedFile::HmdfsInfo info{};
     Uri uri(destUri);
-    auto authority = uri.GetAuthority();
-
-    std::string tmpDir;
+    info.authority = uri.GetAuthority();
+    info.sandboxPath = SandboxHelper::Decode(uri.GetPath());
     std::string disSandboxPath;
-    if (authority != FILE_MANAGER_AUTHORITY && authority != MEDIA_AUTHORITY) {
-        tmpDir = CreateDfsCopyPath();
-        disSandboxPath = DISTRIBUTED_PATH + tmpDir;
-        if (!std::filesystem::create_directory(disSandboxPath)) {
-            HILOGE("Create dir failed");
-            return NError(EIO);
-        }
-    }
-
-    auto networkId = GetNetworkIdFromUri(srcUri);
-    auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(srcUri, destUri,
-        networkId, transListener, tmpDir);
+    auto ret = PrepareCopySession(srcUri, destUri, transListener, info, disSandboxPath);
     if (ret != ERRNO_NOERR) {
-        HILOGE("PrepareSession failed, ret = %{public}d.", ret);
-        if (authority != FILE_MANAGER_AUTHORITY && authority != MEDIA_AUTHORITY) {
-            RmDir(disSandboxPath);
-        }
+        HILOGE("PrepareCopySession failed, ret = %{public}d.", ret);
         return NError(EIO);
     }
+
     std::unique_lock<std::mutex> lock(transListener->cvMutex_);
     transListener->cv_.wait(lock,
         [&transListener]() { return transListener->copyEvent_ == SUCCESS || transListener->copyEvent_ == FAILED; });
     if (transListener->copyEvent_ == FAILED) {
-        if (authority != FILE_MANAGER_AUTHORITY && authority != MEDIA_AUTHORITY) {
+        if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
             RmDir(disSandboxPath);
         }
         return NError(EIO);
     }
-    if (authority == FILE_MANAGER_AUTHORITY || authority == MEDIA_AUTHORITY) {
+    if (info.authority == FILE_MANAGER_AUTHORITY || info.authority == MEDIA_AUTHORITY) {
         HILOGW("Public or media path not copy");
         return NError(ERRNO_NOERR);
     }
 
-    ret = CopyToSandBox(srcUri, disSandboxPath, uri.GetPath());
+    ret = CopyToSandBox(srcUri, disSandboxPath, info.sandboxPath);
     RmDir(disSandboxPath);
     if (ret != ERRNO_NOERR) {
         HILOGE("CopyToSandBox failed, ret = %{public}d.", ret);
         return NError(EIO);
     }
     return NError(ERRNO_NOERR);
+}
+
+int32_t TransListener::PrepareCopySession(const std::string &srcUri,
+                                          const std::string &destUri,
+                                          TransListener* transListener,
+                                          Storage::DistributedFile::HmdfsInfo &info,
+                                          std::string &disSandboxPath)
+{
+    std::string tmpDir;
+    if (info.authority != FILE_MANAGER_AUTHORITY && info.authority  != MEDIA_AUTHORITY) {
+        tmpDir = CreateDfsCopyPath();
+        disSandboxPath = DISTRIBUTED_PATH + tmpDir;
+        if (!std::filesystem::create_directory(disSandboxPath)) {
+            HILOGE("Create dir failed");
+            return EIO;
+        }
+
+        auto pos = info.sandboxPath.rfind('/');
+        if (pos == std::string::npos) {
+            HILOGE("invalid file path");
+            return EIO;
+        }
+        auto sandboxDir = info.sandboxPath.substr(0, pos);
+        std::error_code errCode;
+        if (std::filesystem::exists(sandboxDir, errCode)) {
+            info.dirExistFlag = true;
+        }
+    }
+
+    info.copyPath = tmpDir;
+    auto networkId = GetNetworkIdFromUri(srcUri);
+    auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(srcUri, destUri,
+        networkId, transListener, info);
+    if (ret != ERRNO_NOERR) {
+        HILOGE("PrepareSession failed, ret = %{public}d.", ret);
+        if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
+            RmDir(disSandboxPath);
+        }
+        return EIO;
+    }
+    std::unique_lock<std::mutex> lock(transListener->cvMutex_);
+    transListener->cv_.wait(lock,
+        [&transListener]() { return transListener->copyEvent_ == SUCCESS || transListener->copyEvent_ == FAILED; });
+    if (transListener->copyEvent_ == FAILED) {
+        if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
+            RmDir(disSandboxPath);
+        }
+        return EIO;
+    }
+    return ERRNO_NOERR;
 }
 
 int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::string &disSandboxPath,
@@ -181,7 +217,8 @@ void TransListener::CallbackComplete(uv_work_t *work, int stat)
         return;
     }
     NVal obj = NVal::CreateObject(env);
-    if (entry->progressSize <= numeric_limits<int64_t>::max() && entry->totalSize <= numeric_limits<int64_t>::max()) {
+    if (entry->progressSize <= numeric_limits<int64_t>::max() &&
+        entry->totalSize <= static_cast<uint64_t>(numeric_limits<int64_t>::max())) {
         obj.AddProp("processedSize", NVal::CreateInt64(env, entry->progressSize).val_);
         obj.AddProp("totalSize", NVal::CreateInt64(env, entry->totalSize).val_);
     }

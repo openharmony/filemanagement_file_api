@@ -99,7 +99,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
+    len = (!hasLen || len > static_cast<size_t>(statbf.st_size)) ? statbf.st_size : len;
     std::unique_ptr<char[]> readbuf = std::make_unique<char[]>(len + 1);
     if (readbuf == nullptr) {
         UniError(EINVAL).ThrowErr(env, "file is too large");
@@ -146,7 +146,7 @@ static UniError AsyncExec(const std::string &path, std::shared_ptr<AsyncReadText
         return UniError(EINVAL);
     }
 
-    len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
+    len = (!hasLen || len > static_cast<size_t>(statbf.st_size)) ? statbf.st_size : len;
     arg->buf = std::make_unique<char[]>(len);
     if (arg->buf == nullptr) {
         return UniError(ENOMEM);
