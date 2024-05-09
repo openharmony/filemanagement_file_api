@@ -159,6 +159,7 @@ ohos_shared_library("fs") {
   cflags_cc = [ "-std=c++17" ]
 
   deps = [
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
   ]
@@ -194,6 +195,8 @@ ohos_shared_library("fs") {
       "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
       "src/mod_fs/class_stream/flush.cpp",
       "src/mod_fs/class_stream/stream_n_exporter.cpp",
+      "src/mod_fs/class_tasksignal/task_signal_entity.cpp",
+      "src/mod_fs/class_tasksignal/task_signal_n_exporter.cpp",
       "src/mod_fs/class_watcher/watcher_entity.cpp",
       "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
       "src/mod_fs/properties/copy.cpp",

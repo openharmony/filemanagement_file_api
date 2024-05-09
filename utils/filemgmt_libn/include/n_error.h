@@ -36,6 +36,8 @@ constexpr int ERESTART = 85;
 constexpr int EDQUOT = 122;
 #endif
 constexpr int UNKROWN_ERR = -1;
+constexpr int NO_TASK_ERR = -2;
+constexpr int CANCEL_ERR = -3;
 constexpr int ERRNO_NOERR = 0;
 constexpr int STORAGE_SERVICE_SYS_CAP_TAG = 13600000;
 constexpr int FILEIO_SYS_CAP_TAG = 13900000;
@@ -89,6 +91,9 @@ enum ErrCodeSuffixOfFileIO {
     E_DQUOT,
     E_UKERR,
     E_NOLCK,
+    E_NOTASK,
+    E_UNCANCELED,
+    E_CANCELED,
     E_NETUNREACH
 };
 
@@ -196,6 +201,7 @@ static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "EBADFD", EBADFD },
     { "ERESTART", ERESTART },
     { "EDQUOT", EDQUOT },
+    { "ECANCELED", ECANCELED },
     { "ENETUNREACH", ENETUNREACH },
 };
 
@@ -243,6 +249,9 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { ERESTART, { FILEIO_SYS_CAP_TAG + E_RESTART, "Interrupted system call should be restarted" } },
     { EDQUOT, { FILEIO_SYS_CAP_TAG + E_DQUOT, "Quota exceeded" } },
     { UNKROWN_ERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
+    { NO_TASK_ERR, { FILEIO_SYS_CAP_TAG + E_NOTASK, "No task can be canceled" } },
+    { CANCEL_ERR, { FILEIO_SYS_CAP_TAG + E_UNCANCELED, "Failed to cancel" } },
+    { ECANCELED, { FILEIO_SYS_CAP_TAG + E_CANCELED, "Operation canceled" } },
     { ENOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { ENETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
     { FILEIO_SYS_CAP_TAG + E_PERM, { FILEIO_SYS_CAP_TAG + E_PERM, "Operation not permitted" } },

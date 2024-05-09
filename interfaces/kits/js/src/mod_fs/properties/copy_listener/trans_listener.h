@@ -36,6 +36,7 @@ public:
     int32_t OnFailed(const std::string &sessionName) override;
     static NError CopyFileFromSoftBus(const std::string &srcUri,
                                       const std::string &destUri,
+                                      std::shared_ptr<FileInfos> fileInfos,
                                       std::shared_ptr<JsCallbackObject> callback);
 
 private:
