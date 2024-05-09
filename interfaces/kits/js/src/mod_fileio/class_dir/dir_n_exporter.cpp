@@ -196,12 +196,12 @@ napi_value DirNExporter::Read(napi_env env, napi_callback_info info)
         return DoReadComplete(env, err, arg);
     };
     NVal thisVar(env, funcArg.GetThisVar());
-    const string PROCEDURE_NAME = "fileioDirRead";
+    const string procedureName = "fileioDirRead";
     if (funcArg.GetArgc() == NARG_CNT::ZERO) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::FIRST]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
     }
 }
 
@@ -212,7 +212,7 @@ napi_value DirNExporter::ReadSync(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
     }
-    
+
     DirEntity *dirEntity = GetDirEntity(env, info);
     if (!dirEntity || !dirEntity->dir_) {
         UniError(EBADF).ThrowErr(env, "Dir has been closed yet");
@@ -340,10 +340,10 @@ napi_value DirNExporter::ListFile(napi_env env, napi_callback_info info)
     int listNum = num;
     auto cbExec = [arg, dir, dirEntity, listNum](napi_env env) -> UniError {
         lock_guard(dirEntity->lock_);
-        errno = 0;
         dirent *res = nullptr;
         int listCount = 0;
         do {
+            errno = 0;
             res = readdir(dir);
             if (res == nullptr && errno) {
                 return UniError(errno);
@@ -391,11 +391,11 @@ napi_value DirNExporter::ListFileSync(napi_env env, napi_callback_info info)
     vector<dirent> dirents;
     {
         lock_guard(dirEntity->lock_);
-        errno = 0;
         dirent *res = nullptr;
         int listCount = 0;
         auto dir = dirEntity->dir_.get();
         do {
+            errno = 0;
             res = readdir(dir);
             if (res == nullptr && errno) {
                 UniError(errno).ThrowErr(env);

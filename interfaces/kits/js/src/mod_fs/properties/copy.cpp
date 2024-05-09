@@ -50,7 +50,7 @@ constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
 constexpr size_t MAX_SIZE = 0x7ffff000;
-constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(200);
+constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(1000);
 std::recursive_mutex Copy::mutex_;
 std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
 
@@ -526,8 +526,13 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
     }
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(infos->env, &loop);
-    uv_queue_work(
+    auto ret = uv_queue_work(
         loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(ReceiveComplete));
+    if (ret != 0) {
+        HILOGE("failed to uv_queue_work");
+        delete (reinterpret_cast<UvEntry *>(work->data));
+        delete work;
+    }
 }
 
 std::shared_ptr<ReceiveInfo> Copy::GetReceivedInfo(int wd, std::shared_ptr<JsCallbackObject> callback)

@@ -25,6 +25,7 @@
 #include "../../common/napi/n_func_arg.h"
 #include "../../common/napi/n_val.h"
 #include "../../common/uni_error.h"
+#include "file_utils.h"
 
 #include "../class_watcher/watcher_entity.h"
 #include "../class_watcher/watcher_n_exporter.h"
@@ -81,7 +82,12 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     napi_create_reference(val.env_, val.val_, 1, &(data->ref));
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env, &loop);
-    unique_ptr<uv_fs_event_t, WatcherHandleDeleter> fsEventReq(new uv_fs_event_t);
+    auto watcherHandleDeleter = WatcherHandleDeleter();
+    std::unique_ptr<uv_fs_event_t, WatcherHandleDeleter> fsEventReq = {new uv_fs_event_t, watcherHandleDeleter};
+    if (!fsEventReq) {
+        UniError(ENOMEM).ThrowErr(env, "Fail to request heap memory.");
+        return nullptr;
+    }
     uv_fs_event_init(loop, fsEventReq.get());
     fsEventReq->data = data.get();
     uv_fs_event_start(fsEventReq.get(), RunCommand, filename.get(), UV_FS_EVENT_RECURSIVE);
