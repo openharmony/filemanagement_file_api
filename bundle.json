@@ -131,15 +131,6 @@
             }
           },
           {
-            "name": "//foundation/filemanagement/file_api/interfaces/kits/cj:cjfile",
-            "header": {
-              "header_files": [
-                "utils.h"
-              ],
-              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/cj"
-            }
-          },
-          {
             "name": "//foundation/filemanagement/file_api/interfaces/kits/js:securitylabel",
             "header": {
               "header_files": [
