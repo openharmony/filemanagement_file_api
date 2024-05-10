@@ -516,3 +516,681 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
     }
     return RemovePath(src);
 }
+
+static int RenameFile(const string &src, const string &dest, const int mode, deque<struct ConflictFiles> &errfiles)
+{
+    filesystem::path dstPath(dest);
+    if (filesystem::exists(dstPath)) {
+        if (filesystem::is_directory(dstPath)) {
+            errfiles.emplace_front(src, dest);
+            return ERRNO_NOERR;
+        }
+        if (mode == DIRMODE_FILE_THROW_ERR) {
+            errfiles.emplace_back(src, dest);
+            return ERRNO_NOERR;
+        }
+    }
+    filesystem::path srcPath(src);
+    std::error_code errCode;
+    filesystem::rename(srcPath, dstPath, errCode);
+    if (errCode.value() == EXDEV) {
+        HILOGE("Failed to rename file due to EXDEV");
+        return CopyAndDeleteFile(src, dest);
+    }
+    return errCode.value();
+}
+
+static int RecurMoveDir(const string &srcPath, const string &destPath, const int mode,
+    deque<struct ConflictFiles> &errfiles)
+{
+    filesystem::path dpath(destPath);
+    if (!filesystem::is_directory(dpath)) {
+        errfiles.emplace_front(srcPath, destPath);
+        return ERRNO_NOERR;
+    }
+
+    unique_ptr<struct NameListArg, decltype(Deleter)*> ptr = {new struct NameListArg, Deleter};
+    if (!ptr) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    int num = scandir(srcPath.c_str(), &(ptr->namelist), FilterFunc, alphasort);
+    ptr->num = num;
+
+    for (int i = 0; i < num; i++) {
+        if ((ptr->namelist[i])->d_type == DT_DIR) {
+            string srcTemp = srcPath + '/' + string((ptr->namelist[i])->d_name);
+            string destTemp = destPath + '/' + string((ptr->namelist[i])->d_name);
+            size_t size = errfiles.size();
+            int res = RenameDir(srcTemp, destTemp, mode, errfiles);
+            if (res != ERRNO_NOERR) {
+                return res;
+            }
+            if (size != errfiles.size()) {
+                continue;
+            }
+            res = RemovePath(srcTemp);
+            if (res) {
+                return res;
+            }
+        } else {
+            string src = srcPath + '/' + string((ptr->namelist[i])->d_name);
+            string dest = destPath + '/' + string((ptr->namelist[i])->d_name);
+            int res = RenameFile(src, dest, mode, errfiles);
+            if (res != ERRNO_NOERR) {
+                HILOGE("Failed to rename file for error %{public}d", res);
+                return res;
+            }
+        }
+    }
+    return ERRNO_NOERR;
+}
+
+static int MoveDirFunc(const string &src, const string &dest, const int mode,
+    std::deque<struct ConflictFiles> &errfiles)
+{
+    size_t found = string(src).rfind('/');
+    if (found == std::string::npos) {
+        return EINVAL;
+    }
+    if (access(src.c_str(), W_OK) != 0) {
+        LOGE("Failed to move src directory due to doesn't exist or hasn't write permission");
+        return errno;
+    }
+    string dirName = string(src).substr(found);
+    string destStr = dest + dirName;
+    auto [destStrExist, destStrEmpty] = JudgeExistAndEmpty(destStr);
+    if (destStrExist && !destStrEmpty) {
+        if (mode == DIRMODE_DIRECTORY_REPLACE) {
+            int removeRes = RmDirectory(destStr);
+            if (removeRes) {
+                HILOGE("Failed to remove dest directory in DIRMODE_DIRECTORY_REPLACE");
+                return removeRes;
+            }
+        }
+        if (mode == DIRMODE_DIRECTORY_THROW_ERR) {
+            HILOGE("Failed to move directory in DIRMODE_DIRECTORY_THROW_ERR");
+            return ENOTEMPTY;
+        }
+    }
+    int res = RenameDir(src, destStr, mode, errfiles);
+    if (res == ERRNO_NOERR) {
+        if (!errfiles.empty()) {
+            HILOGE("Failed to movedir with some conflicted files");
+            return EEXIST;
+        }
+        int removeRes = RmDirectory(src);
+        if (removeRes) {
+            HILOGE("Failed to remove src directory");
+            return removeRes;
+        }
+    }
+    return res;
+}
+
+static void FreeConflictFiles(CConflictFiles* conflictFiles, size_t index)
+{
+    for (size_t i = index; i >= 0; i--) {
+        free(conflictFiles[i].srcFiles);
+        free(conflictFiles[i].destFiles);
+    }
+}
+
+static CConflictFiles* DequeToCConflict(std::deque<struct ConflictFiles> errfiles)
+{
+    CConflictFiles* result = new CConflictFiles[errfiles.size()];
+    for (size_t i = 0; i < errfiles.size(); i++) {
+        size_t srcFilesLen = errfiles[i].srcFiles.length() + 1;
+        result[i].srcFiles = static_cast<char*>(malloc(srcFilesLen));
+        if (result[i].srcFiles == nullptr) {
+            FreeConflictFiles(result, i - 1);
+        }
+        if (strcpy_s(result[i].srcFiles, srcFilesLen, errfiles[i].srcFiles.c_str()) != 0) {
+            free(result[i].srcFiles);
+            FreeConflictFiles(result, i - 1);
+            delete[] result;
+            return nullptr;
+        }
+        size_t destFilesLen = errfiles[i].destFiles.length() + 1;
+        result[i].destFiles = static_cast<char*>(malloc(destFilesLen));
+        if (result[i].destFiles != nullptr) {
+            free(result[i].srcFiles);
+            FreeConflictFiles(result, i - 1);
+        }
+        if (strcpy_s(result[i].destFiles, destFilesLen, errfiles[i].destFiles.c_str()) != 0) {
+            FreeConflictFiles(result, i);
+            delete[] result;
+            return nullptr;
+        }
+    }
+    return result;
+}
+
+RetDataCArrConflictFiles FileFsImpl::MoveDir(string src, string dest, int32_t mode)
+{
+    RetDataCArrConflictFiles ret = { .code = EINVAL, .data = { .head = nullptr, .size = 0 } };
+    if (!filesystem::is_directory(filesystem::status(src))) {
+        HILOGE("Invalid src");
+        ret.code = GetErrorCode(EINVAL);
+        return ret;
+    }
+    if (!filesystem::is_directory(filesystem::status(dest))) {
+        HILOGE("Invalid dest");
+        ret.code = GetErrorCode(EINVAL);
+        return ret;
+    }
+    if (mode < DIRMODE_MIN || mode > DIRMODE_MAX) {
+        HILOGE("Invalid mode");
+        ret.code = GetErrorCode(EINVAL);
+        return ret;
+    }
+    std::deque<struct ConflictFiles> errfiles = {};
+    int code = MoveDirFunc(src, dest, mode, errfiles);
+    if (code != SUCCESS_CODE) {
+        ret.code = GetErrorCode(code);
+    } else {
+        ret.code = SUCCESS_CODE;
+    }
+    ret.data.size = (int64_t)errfiles.size();
+    ret.data.head = DequeToCConflict(errfiles);
+    return ret;
+}
+
+static bool CheckReadArgs(int32_t fd, const char* buf, int64_t bufLen, size_t length, int64_t offset)
+{
+    if (fd < 0) {
+        LOGE("Invalid fd");
+        return false;
+    }
+    if (buf == nullptr) {
+        LOGE("malloc fail");
+        return false;
+    }
+    if (bufLen > UINT_MAX) {
+        LOGE("Invalid arraybuffer");
+        return false;
+    }
+    if (length > UINT_MAX) {
+        LOGE("Invalid arraybuffer");
+        return false;
+    }
+    if (offset < 0) {
+        LOGE("option.offset shall be positive number");
+        return false;
+    }
+    return true;
+}
+
+RetDataI64 FileFsImpl::Read(int32_t fd, char* buf, int64_t bufLen, size_t length, int64_t offset)
+{
+    LOGI("FS_TEST::FileFsImpl::Read start");
+    RetDataI64 ret = { .code = EINVAL, .data = 0 };
+
+    if (!CheckReadArgs(fd, buf, bufLen, length, offset)) {
+        return ret;
+    }
+
+    auto [state, buff, len, offsetResult] = GetReadArg(static_cast<size_t>(bufLen), length, offset);
+    if (state != SUCCESS_CODE) {
+        LOGE("Failed to resolve buf and options");
+        return {GetErrorCode(state), 0};
+    }
+
+    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
+
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!read_req) {
+        LOGE("Failed to request heap memory.");
+        ret.code = ENOMEM;
+        return ret;
+    }
+    int readCode = uv_fs_read(nullptr, read_req.get(), fd, &buffer, 1, offset, nullptr);
+    if (readCode < 0) {
+        LOGE("Failed to read file for %{public}d", readCode);
+        ret.code = readCode;
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = static_cast<int64_t>(readCode);
+    return ret;
+}
+
+RetDataI64 FileFsImpl::ReadCur(int32_t fd, char* buf, int64_t bufLen, size_t length)
+{
+    LOGI("FS_TEST::FileFsImpl::Read start");
+    RetDataI64 ret = { .code = EINVAL, .data = 0 };
+    
+    if (!CheckReadArgs(fd, buf, bufLen, length, 0)) {
+        return ret;
+    }
+
+    auto [state, buff, len, offsetResult] = GetReadArg(static_cast<size_t>(bufLen), length, 0);
+    if (state != SUCCESS_CODE) {
+        LOGE("Failed to resolve buf and options");
+        return {GetErrorCode(state), 0};
+    }
+
+    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
+
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!read_req) {
+        LOGE("Failed to request heap memory.");
+        ret.code = ENOMEM;
+        return ret;
+    }
+    int readCode = uv_fs_read(nullptr, read_req.get(), fd, &buffer, 1, -1, nullptr);
+    if (readCode < 0) {
+        LOGE("Failed to read file for %{public}d", readCode);
+        ret.code = readCode;
+        return ret;
+    }
+
+    ret.code = SUCCESS_CODE;
+    ret.data = static_cast<int64_t>(readCode);
+    return ret;
+}
+
+RetDataI64 FileFsImpl::Write(int32_t fd, char* buf, size_t length, int64_t offset, std::string encode)
+{
+    LOGI("FS_TEST::FileFsImpl::Write start");
+    RetDataI64 ret = { .code = EINVAL, .data = 0 };
+    if (fd < 0) {
+        LOGE("Invalid fd");
+        return ret;
+    } else if (length > UINT_MAX) {
+        LOGE("Invalid arraybuffer");
+        return ret;
+    }
+    if (offset < 0) {
+        LOGE("option.offset shall be positive number");
+        return ret;
+    }
+
+    auto [state, bufGuard, buff, len, offsetResult] =
+        FileFs::GetWriteArg(buf, length, offset, encode);
+    if (state != SUCCESS_CODE) {
+        LOGE("Failed to resolve buf and options");
+        return {state, 0};
+    }
+
+    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buff), static_cast<unsigned int>(len));
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> write_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!write_req) {
+        LOGE("Failed to request heap memory.");
+        ret.code = ENOMEM;
+        return ret;
+    }
+    int writeCode = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
+    if (writeCode < 0) {
+        LOGE("Failed to write file for %{public}d", writeCode);
+        ret.code = writeCode;
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = static_cast<int64_t>(writeCode);
+    return ret;
+}
+
+RetDataI64 FileFsImpl::WriteCur(int32_t fd, char* buf, size_t length, std::string encode)
+{
+    LOGI("FS_TEST::FileFsImpl::Write start");
+    RetDataI64 ret = { .code = EINVAL, .data = 0 };
+    if (fd < 0) {
+        LOGE("Invalid fd");
+        return ret;
+    }
+    if (length > UINT_MAX) {
+        LOGE("Invalid arraybuffer");
+        return ret;
+    }
+
+    auto [state, bufGuard, buff, len, offsetResult] =
+        FileFs::GetWriteArg(buf, length, 0, encode);
+    if (state != SUCCESS_CODE) {
+        LOGE("Failed to resolve buf and options");
+        return {state, 0};
+    }
+    
+    uv_buf_t buffer = uv_buf_init(static_cast<char *>(buff), static_cast<unsigned int>(len));
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> write_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!write_req) {
+        LOGE("Failed to request heap memory.");
+        ret.code = ENOMEM;
+        return ret;
+    }
+    int writeCode = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, -1, nullptr);
+    if (writeCode < 0) {
+        LOGE("Failed to write file for %{public}d", writeCode);
+        ret.code = writeCode;
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = static_cast<int64_t>(writeCode);
+    return ret;
+}
+
+std::tuple<int32_t, bool> FileFsImpl::Access(std::string path)
+{
+    auto [fileState, fileInfo] = ParseFile(path);
+ 
+    if (fileState != SUCCESS_CODE) {
+        return {GetErrorCode(ENOMEM), false};
+    }
+    auto [accessState, access] = GetFsAccess(fileInfo);
+    if (accessState < 0) {
+        return {GetErrorCode(accessState), false};
+    }
+    return {SUCCESS_CODE, access};
+}
+
+int FileFsImpl::Truncate(std::string file, int64_t len)
+{
+    auto [fileState, fileInfo] = ParseFile(file);
+    if (fileState != SUCCESS_CODE) {
+        return GetErrorCode(EINVAL);
+    }
+    if (len < 0) {
+        return GetErrorCode(EINVAL);
+    }
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> open_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!open_req) {
+        HILOGE("Failed to request heap memory.");
+        return GetErrorCode(ENOMEM);
+    }
+    int ret = uv_fs_open(nullptr, open_req.get(), fileInfo.path.get(), O_RDWR,
+        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    if (ret < 0) {
+        return GetErrorCode(ret);
+    }
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> ftruncate_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!ftruncate_req) {
+        HILOGE("Failed to request heap memory.");
+        return GetErrorCode(ENOMEM);
+    }
+    ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), ret, len, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to truncate file by path");
+        return GetErrorCode(ret);
+    }
+    return SUCCESS_CODE;
+}
+
+int FileFsImpl::Truncate(int32_t fd, int64_t len)
+{
+    auto [fileState, fileInfo] = ParseFile(fd);
+    if (fileState != SUCCESS_CODE) {
+        return GetErrorCode(EINVAL);
+    }
+    if (len < 0) {
+        return GetErrorCode(EINVAL);
+    }
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> ftruncate_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!ftruncate_req) {
+        HILOGE("Failed to request heap memory.");
+        return GetErrorCode(ENOMEM);
+    }
+    int ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), fileInfo.fdg->GetFD(), len, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to truncate file by fd for libuv error %{public}d", ret);
+        return GetErrorCode(ret);
+    }
+    return SUCCESS_CODE;
+}
+
+static int CloseFd(int fd)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> close_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!close_req) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to close file with ret: %{public}d", ret);
+        return ret;
+    }
+    return SUCCESS_CODE;
+}
+
+static int CloseCore(FileStruct fileStruct)
+{
+    if (fileStruct.isFd) {
+        auto err = CloseFd(fileStruct.fd);
+        if (err) {
+            return GetErrorCode(err);
+        }
+    } else {
+        auto err = CloseFd(fileStruct.fileEntity->fd_->GetFD());
+        if (err) {
+            return GetErrorCode(err);
+        }
+    }
+    return SUCCESS_CODE;
+}
+
+int FileFsImpl::Close(int32_t file)
+{
+    FileStruct fileStruct;
+    if (file >= 0) {
+        fileStruct = FileStruct { true, file, nullptr };
+    } else {
+        fileStruct = FileStruct { false, -1, nullptr };
+        return GetErrorCode(EINVAL);
+    }
+    
+    return CloseCore(fileStruct);
+}
+
+int FileFsImpl::Close(sptr<OHOS::CJSystemapi::FileFs::FileEntity> file)
+{
+    FileStruct fileStruct = FileStruct { false, -1, file };
+    return CloseCore(fileStruct);
+}
+
+static int GetFileSize(const string &path, int64_t &offset)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> stat_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!stat_req) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+
+    int ret = uv_fs_stat(nullptr, stat_req.get(), path.c_str(), nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to get file stat by path");
+        return ret;
+    }
+
+    offset = static_cast<int64_t>(stat_req->statbuf.st_size);
+    return ERRNO_NOERR;
+}
+
+std::tuple<int32_t, sptr<ReadIteratorImpl>> FileFsImpl::ReadLines(char* file, std::string encoding)
+{
+    if (encoding != "utf-8") {
+        return { GetErrorCode(EINVAL), nullptr};
+    }
+    auto iterator = ::ReaderIterator(file);
+    if (iterator == nullptr) {
+        HILOGE("Failed to read lines of the file, error: %{public}d", errno);
+        return { GetErrorCode(errno), nullptr};
+    }
+    int64_t offset = 0;
+    int ret = GetFileSize(file, offset);
+    if (ret != 0) {
+        HILOGE("Failed to get size of the file");
+        return { GetErrorCode(ret), nullptr};
+    }
+    std::shared_ptr<OHOS::FileManagement::ModuleFileIO::ReaderIteratorEntity> ptr =
+        std::make_shared<OHOS::FileManagement::ModuleFileIO::ReaderIteratorEntity>();
+    ptr->iterator = iterator;
+    ptr->offset = offset;
+    auto readIteratorImpl = FFIData::Create<ReadIteratorImpl>(std::move(ptr));
+    return {SUCCESS_CODE, readIteratorImpl};
+}
+
+static int ReadTextCheckArgs(int64_t offset, int64_t len, char* encoding)
+{
+    if (offset < 0) {
+        HILOGE("Illegal option.offset parameter");
+        return GetErrorCode(EINVAL);
+    }
+    if (len < 0 || len > UINT_MAX) {
+        HILOGE("Illegal option.length parameter");
+        return GetErrorCode(EINVAL);
+    }
+    if (string(encoding) != "utf-8") {
+        HILOGE("Illegal option.encoding parameter");
+        return GetErrorCode(EINVAL);
+    }
+    return SUCCESS_CODE;
+}
+
+static int ReadTextOpenFile(const std::string& path)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> open_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup
+    };
+    if (open_req == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return -ENOMEM;
+    }
+
+    return uv_fs_open(nullptr, open_req.get(), path.c_str(), O_RDONLY,
+        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+}
+
+static int ReadFromFile(int fd, int64_t offset, string& buffer)
+{
+    uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(buffer.size()));
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> read_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (read_req == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return -ENOMEM;
+    }
+    return uv_fs_read(nullptr, read_req.get(), fd, &readbuf, 1, offset, nullptr);
+}
+
+RetDataCString FileFsImpl::ReadText(char* path, int64_t offset, bool hasLen, int64_t len, char* encoding)
+{
+    RetDataCString retData = { .code = ERR_INVALID_INSTANCE_CODE, .data = nullptr };
+    int code = ReadTextCheckArgs(offset, len, encoding);
+    if (code != SUCCESS_CODE) {
+        retData.code = code;
+        return retData;
+    }
+
+    DistributedFS::FDGuard sfd;
+    int fd = ReadTextOpenFile(path);
+    if (fd < 0) {
+        HILOGE("Failed to open file by ret: %{public}d", fd);
+        retData.code =  GetErrorCode(errno);
+        return retData;
+    }
+    sfd.SetFD(fd);
+    struct stat statbf;
+    if ((!sfd) || (fstat(sfd.GetFD(), &statbf) < 0)) {
+        HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
+        retData.code =  GetErrorCode(errno);
+        return retData;
+    }
+
+    if (offset > statbf.st_size) {
+        HILOGE("Invalid offset: %{public}" PRIu64, offset);
+        retData.code =  GetErrorCode(EINVAL);
+        return retData;
+    }
+
+    len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
+    string buffer(len, '\0');
+    int readRet = ReadFromFile(sfd.GetFD(), offset, buffer);
+    if (readRet < 0) {
+        HILOGE("Failed to read file by fd: %{public}d", sfd.GetFD());
+        retData.code =  GetErrorCode(errno);
+        return retData;
+    }
+    char *value = static_cast<char*>(malloc((len + 1) * sizeof(char)));
+    if (value == nullptr) {
+        return retData;
+    }
+    std::char_traits<char>::copy(value, buffer.c_str(), len + 1);
+    retData.code = SUCCESS_CODE;
+    retData.data = value;
+    return retData;
+}
+
+int FileFsImpl::Utimes(std::string path, double mtime)
+{
+    if (mtime < 0) {
+        HILOGE("Invalid mtime from JS second argument");
+        return GetErrorCode(EINVAL);
+    }
+
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> stat_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!stat_req) {
+        HILOGE("Failed to request heap memory.");
+        return GetErrorCode(ENOMEM);
+    }
+
+    int ret = uv_fs_stat(nullptr, stat_req.get(), path.c_str(), nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to get stat of the file by path");
+        return GetErrorCode(ret);
+    }
+
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> utimes_req = {
+        new uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!utimes_req) {
+        HILOGE("Failed to request heap memory.");
+        return GetErrorCode(ENOMEM);
+    }
+
+    double atime = static_cast<double>(stat_req->statbuf.st_atim.tv_sec) +
+        static_cast<double>(stat_req->statbuf.st_atim.tv_nsec) / NS;
+    ret = uv_fs_utime(nullptr, utimes_req.get(), path.c_str(), atime, mtime / MS, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to chang mtime of the file for %{public}d", ret);
+        return GetErrorCode(ret);
+    }
+    return SUCCESS_CODE;
+}
+
+std::tuple<int32_t, sptr<WatcherImpl>> FileFsImpl::CreateWatcher(std::string path, uint32_t events,
+    void (*callback)(CWatchEvent))
+{
+    std::shared_ptr<WatcherInfoArg> infoArg = std::make_shared<WatcherInfoArg>(callback);
+    if (!WatcherImpl::GetInstance().CheckEventValid(events)) {
+        return { GetErrorCode(EINVAL), nullptr };
+    }
+    infoArg->events = events;
+    infoArg->fileName = path;
+
+    auto watcherImpl = FFIData::Create<WatcherImpl>();
+    watcherImpl->data_ = infoArg;
+
+    if (watcherImpl->GetNotifyId() < 0 && !watcherImpl->InitNotify()) {
+        HILOGE("Failed to get notifyId or initnotify fail");
+        return { GetErrorCode(errno), nullptr };
+    }
+
+    bool ret = watcherImpl->AddWatcherInfo(infoArg->fileName, infoArg);
+    if (!ret) {
+        HILOGE("Failed to add watcher info.");
+        return {GetErrorCode(EINVAL), nullptr};
+    }
+    return {SUCCESS_CODE, watcherImpl};
+}
+
+} // CJSystemapi
+} // namespace OHOS
