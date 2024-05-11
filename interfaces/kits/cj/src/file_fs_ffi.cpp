@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "file_fs_ffi.h"
-#include "macro.h"
 #include "copy_file.h"
-#include "move_file.h"
-#include "mkdtemp.h"
-#include "list_file.h"
-#include "uni_error.h"
-#include "lseek.h"
 #include "fdatasync.h"
+#include "file_fs_ffi.h"
 #include "fsync.h"
+#include "list_file.h"
+#include "lseek.h"
+#include "macro.h"
+#include "mkdtemp.h"
+#include "move_file.h"
 #include "symlink.h"
+#include "uni_error.h"
 
 using namespace OHOS::FFI;
 
@@ -574,7 +574,6 @@ int32_t FfiOHOSFileFsWatcherStop(int64_t id)
     return instance->StopNotify();
 }
 }
-
 } //namespace FileFs
 } //namespace CJSystemapi
 } //namespace OHOS
