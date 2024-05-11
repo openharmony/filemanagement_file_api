@@ -138,6 +138,37 @@
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/js/src/mod_securitylabel"
             }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/cj:cj_file_fs_ffi",
+            "header": {
+              "header_files": [
+                "copy_dir.h",
+                "copy_file.h",
+                "fdatasync.h",
+                "file_ffi.h",
+                "file_fs_ffi.h",
+                "file_fs_impl.h",
+                "file_impl.h",
+                "fsync.h",
+                "list_file.h",
+                "lseek.h",
+                "macro.h",
+                "mkdtemp.h",
+                "move_file.h",
+                "randomAccessFile_impl.h",
+                "readerIterator_impl.h",
+                "stat_ffi.h",
+                "stat_impl.h",
+                "stream_ffi.h",
+                "stream_impl.h",
+                "symlink.h",
+                "uni_error.h",
+                "utils.h",
+                "watcher_impl.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/cj/src"
+            }
           }
         ],
         "test": [

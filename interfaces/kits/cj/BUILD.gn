@@ -107,8 +107,27 @@ ohos_shared_library("cj_file_fs_ffi") {
     ]
     sources = [
       "../js/src/common/file_helper/fd_guard.cpp",
+      "src/copy_dir.cpp",
+      "src/copy_file.cpp",
+      "src/fdatasync.cpp",
+      "src/file_ffi.cpp",
+      "src/file_fs_ffi.cpp",
+      "src/file_fs_impl.cpp",
+      "src/file_impl.cpp",
+      "src/fsync.cpp",
+      "src/list_file.cpp",
+      "src/lseek.cpp",
+      "src/mkdtemp.cpp",
+      "src/move_file.cpp",
+      "src/randomAccessFile_impl.cpp",
+      "src/readerIterator_impl.cpp",
+      "src/stat_ffi.cpp",
+      "src/stream_ffi.cpp",
+      "src/stream_impl.cpp",
+      "src/symlink.cpp",
       "src/uni_error.cpp",
       "src/utils.cpp",
+      "src/watcher_impl.cpp",
     ]
   } else {
     defines += [ "PREVIEWER" ]
