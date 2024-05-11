@@ -85,7 +85,7 @@ static int GetMode(NVal secondVar, bool *hasMode)
         int mode = 0;
         *hasMode = true;
         tie(succ, mode) = secondVar.ToInt32();
-        if (succ && (mode & 0x06) == mode) {
+        if (succ && (static_cast<unsigned int>(mode) & 0x06) == static_cast<unsigned int>(mode)) {
             return mode;
         }
     }
@@ -217,7 +217,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
         }
         int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
-            HILOGE("Failed to unlink with path");
+            HILOGD("Failed to unlink with path");
             return NError(ret);
         }
         return NError(ERRNO_NOERR);
@@ -264,7 +264,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     }
     int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.get(), nullptr);
     if (ret < 0) {
-        HILOGE("Failed to unlink with path");
+        HILOGD("Failed to unlink with path");
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -310,7 +310,7 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
 #endif
     int ret = MkdirCore(path);
     if (ret) {
-        HILOGE("Failed to create directory");
+        HILOGD("Failed to create directory");
         return NError(ret);
     }
     return NError(ERRNO_NOERR);

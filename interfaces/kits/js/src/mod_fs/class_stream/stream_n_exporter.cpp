@@ -208,7 +208,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Failed to get entity of Stream");
+        HILOGD("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }

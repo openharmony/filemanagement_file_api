@@ -19,6 +19,7 @@
 #include <condition_variable>
 
 #include "copy.h"
+#include "distributed_file_daemon_manager.h"
 #include "file_trans_listener_stub.h"
 #include "file_uri.h"
 
@@ -35,6 +36,7 @@ public:
     int32_t OnFailed(const std::string &sessionName) override;
     static NError CopyFileFromSoftBus(const std::string &srcUri,
                                       const std::string &destUri,
+                                      std::shared_ptr<FileInfos> fileInfos,
                                       std::shared_ptr<JsCallbackObject> callback);
 
 private:
@@ -45,6 +47,11 @@ private:
     static std::string GetFileName(const std::string &path);
     static int32_t CopyToSandBox(const std::string &srcUri, const std::string &disSandboxPath,
         const std::string &sandboxPath);
+    static int32_t PrepareCopySession(const std::string &srcUri,
+                                      const std::string &destUri,
+                                      TransListener* transListener,
+                                      Storage::DistributedFile::HmdfsInfo &info,
+                                      std::string &disSandboxPath);
 
     std::mutex cvMutex_;
     std::condition_variable cv_;
