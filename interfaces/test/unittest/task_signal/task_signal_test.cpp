@@ -129,8 +129,8 @@ HWTEST_F(TaskSignalTest, Task_Signal_MarkRemoteTask_0000, testing::ext::TestSize
     GTEST_LOG_(INFO) << "TaskSignalTest-begin Task_Signal_MarkRemoteTask_0000";
     auto signal = std::make_shared<TaskSignal>();
     signal->MarkRemoteTask();
-    int sessionId = 10;
-    signal->SetSessionIdOfRemoteTask(sessionId);
+    std::string sessionName = "DistributedDevice0"
+    signal->SetFileInfoOfRemoteTask(sessionName);
     auto ret = signal->Cancel();
     EXPECT_EQ(ret, -1);
 }

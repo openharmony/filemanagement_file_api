@@ -28,8 +28,8 @@ ohos_unittest("task_signal_test") {
 
   deps = [
     "${file_api_path}/interfaces/kits/native:task_signal_native",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "//third_party/googletest:gtest_main",
-    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog"
   ]
 
   external_deps = [
