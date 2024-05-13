@@ -53,10 +53,11 @@ public:
     {
         TaskSignalTest::canceledFilePath_ = path;
         TaskSignalTest::taskListenerCv_.notify_one();
-        HILOGI("tyx::OnCancel in. path = %{public}s", path.c_str());
+        HILOGI("OnCancel in. path = %{public}s", path.c_str());
     }
 };
 
+class T
 /**
  * @tc.name: Task_Signal_Cancel_0000
  * @tc.desc: Test function of Cancel() interface for SUCCESS.
@@ -109,6 +110,7 @@ HWTEST_F(TaskSignalTest, Task_Signal_SetTaskSignalListener_0000, testing::ext::T
     auto signal = std::make_shared<TaskSignal>();
     auto listener = std::make_shared<TaskSignalListenerTestImpl>();
     signal->SetTaskSignalListener(listener);
+    listener->OnCancel(filePath);
     std::string filePath = "aaa";
     signal->CheckCancelIfNeed(filePath);
     auto cvStatus = taskListenerCv_.wait_for(lock, std::chrono::seconds(DEALY_TIME));
@@ -118,7 +120,7 @@ HWTEST_F(TaskSignalTest, Task_Signal_SetTaskSignalListener_0000, testing::ext::T
 
 /**
  * @tc.name: Task_Signal_MarkRemoteTask_0000
- * @tc.desc: Test function of SetTaskSignalListener() interface for SUCCESS.
+ * @tc.desc: Test function of MarkRemoteTask() and SetFileInfoOfRemoteTask() interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -129,10 +131,11 @@ HWTEST_F(TaskSignalTest, Task_Signal_MarkRemoteTask_0000, testing::ext::TestSize
     GTEST_LOG_(INFO) << "TaskSignalTest-begin Task_Signal_MarkRemoteTask_0000";
     auto signal = std::make_shared<TaskSignal>();
     signal->MarkRemoteTask();
-    std::string sessionName = "DistributedDevice0"
-    signal->SetFileInfoOfRemoteTask(sessionName);
+    std::string sessionName = "DistributedDevice0";
+    std::string filePath = "aaa";
+    signal->SetFileInfoOfRemoteTask(sessionName, filePath);
     auto ret = signal->Cancel();
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 4);
 }
 } // namespace DistributedFS
 } // namespace OHOS
