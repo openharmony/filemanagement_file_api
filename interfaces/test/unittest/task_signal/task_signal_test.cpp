@@ -57,7 +57,6 @@ public:
     }
 };
 
-class T
 /**
  * @tc.name: Task_Signal_Cancel_0000
  * @tc.desc: Test function of Cancel() interface for SUCCESS.
