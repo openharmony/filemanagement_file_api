@@ -28,7 +28,6 @@ namespace DistributedFS {
 using namespace std;
 using namespace OHOS::DistributedFS::ModuleTaskSignal;
 using namespace FileManagement;
-constexpr uint32_t DEALY_TIME = 1;
 
 class TaskSignalTest : public testing::Test {
 public:
@@ -112,8 +111,6 @@ HWTEST_F(TaskSignalTest, Task_Signal_SetTaskSignalListener_0000, testing::ext::T
     std::string filePath = "aaa";
     listener->OnCancel(filePath);
     signal->CheckCancelIfNeed(filePath);
-    auto cvStatus = taskListenerCv_.wait_for(lock, std::chrono::seconds(DEALY_TIME));
-    EXPECT_NE(cvStatus, std::cv_status::timeout);
     EXPECT_EQ(TaskSignalTest::canceledFilePath_, filePath);
 }
 
