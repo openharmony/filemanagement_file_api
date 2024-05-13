@@ -110,8 +110,8 @@ HWTEST_F(TaskSignalTest, Task_Signal_SetTaskSignalListener_0000, testing::ext::T
     auto signal = std::make_shared<TaskSignal>();
     auto listener = std::make_shared<TaskSignalListenerTestImpl>();
     signal->SetTaskSignalListener(listener);
-    listener->OnCancel(filePath);
     std::string filePath = "aaa";
+    listener->OnCancel(filePath);
     signal->CheckCancelIfNeed(filePath);
     auto cvStatus = taskListenerCv_.wait_for(lock, std::chrono::seconds(DEALY_TIME));
     EXPECT_NE(cvStatus, std::cv_status::timeout);
