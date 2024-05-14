@@ -24,19 +24,19 @@ extern "C" {
 #endif /* End of #ifdef __cplusplus */
 
 enum ErrorCode {
-    /** @error Permission verification failed. The app does not have the permission to use the API. Need to apply for the permission.*/
+    /** @error Permission verification failed. The app does not have the permission to use the API. Need to apply for the permission. */
     PERMISSION_ERROR = 201,
-    /** @error Invalid input parameter, pointer is null.*/
+    /** @error Invalid input parameter, pointer is null. */
     PARAMETER_ERROR = 401,
-    /** @error Device not supported.*/
+    /** @error Device not supported. */
     DEVICE_NOT_SUPPORTED = 801,
-    /** @error Operation not permitted.*/
+    /** @error Operation not permitted. */
     E_PERM = 13900001,
-    /** @error No such file or directory.*/
+    /** @error No such file or directory. */
     E_NOENT = 13900002,
-    /** @error Failed to apply for memory.*/
+    /** @error Failed to apply for memory. */
     E_NOMEM = 13900011,
-    /** @error Unknown error.*/
+    /** @error Unknown error. */
     UNKNOWN_ERROR = 13900042
 };
 
