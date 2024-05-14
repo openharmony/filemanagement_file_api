@@ -24,7 +24,7 @@ extern "C" {
 #endif /* End of #ifdef __cplusplus */
 
 enum ErrorCode {
-    /** @error Failed to own the permission.*/
+    /** @error Permission verification failed. The app does not have the permission to use the API. Need to apply for the permission.*/
     PERMISSION_ERROR = 201,
     /** @error Invalid input parameter, pointer is null.*/
     PARAMETER_ERROR = 401,
