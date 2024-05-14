@@ -24,7 +24,7 @@ extern "C" {
 #endif /* End of #ifdef __cplusplus */
 
 enum ErrorCode {
-    /** @error Non System Application.*/
+    /** @error Failed to own the permission.*/
     PERMISSION_ERROR = 201,
     /** @error Invalid input parameter, pointer is null.*/
     PARAMETER_ERROR = 401,
