@@ -132,6 +132,7 @@ ohos_shared_library("cj_file_fs_ffi") {
   } else {
     defines += [ "PREVIEWER" ]
     sources = [ "src/file_fs_mock.cpp" ]
+    external_deps = [ "napi:cj_bind_ffi" ]
   }
 
   if (current_os == "ohos") {

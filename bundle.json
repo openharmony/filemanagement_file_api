@@ -131,6 +131,15 @@
             }
           },
           {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/js:securitylabel",
+            "header": {
+              "header_files": [
+                "security_label.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/js/src/mod_securitylabel"
+            }
+          },
+          {
             "name": "//foundation/filemanagement/file_api/interfaces/kits/cj:cj_file_fs_ffi",
             "header": {
               "header_files": [
@@ -159,15 +168,6 @@
                 "watcher_impl.h"
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/cj/src"
-            }
-          },
-          {
-            "name": "//foundation/filemanagement/file_api/interfaces/kits/js:securitylabel",
-            "header": {
-              "header_files": [
-                "security_label.h"
-              ],
-              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/js/src/mod_securitylabel"
             }
           }
         ],

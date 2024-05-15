@@ -16,13 +16,13 @@
 #ifndef OHOS_FILE_FS_FFI_H
 #define OHOS_FILE_FS_FFI_H
 
-#include "ffi_remote_data.h"
-#include "file_fs_impl.h"
+#include <cstdint>
+
 #include "cj_common_ffi.h"
 #include "copy_dir.h"
+#include "ffi_remote_data.h"
+#include "file_fs_impl.h"
 #include "list_file.h"
-
-#include <cstdint>
 
 extern "C" {
     FFI_EXPORT RetDataI64 FfiOHOSFileFsStatByID(int32_t file);
@@ -53,24 +53,18 @@ extern "C" {
     FFI_EXPORT RetDataI64 FfiOHOSFileFsWriteCur(int32_t fd, char* buffer, size_t length, const char* encode);
     FFI_EXPORT OHOS::CJSystemapi::RetDataCArrConflictFiles FfiOHOSFileFsCopyDir(const char* src, const char* dest,
         int mode);
-
     FFI_EXPORT int FfiOHOSFileFsCopyFile(const char* src, const char* dest, int mode);
     FFI_EXPORT int FfiOHOSFileFsCopyFileSI(const char* src, int32_t dest, int mode);
     FFI_EXPORT int FfiOHOSFileFsCopyFileIS(int32_t src, const char* dest, int mode);
     FFI_EXPORT int FfiOHOSFileFsCopyFileII(int32_t src, int32_t dest, int mode);
-
     FFI_EXPORT int FfiOHOSFileFsMoveFile(const char* src, const char* dest, int mode);
-
     FFI_EXPORT RetDataCString FfiOHOSFileFsMkdtemp(const char* prefix);
-
     FFI_EXPORT int32_t FfiOHOSFileFsTruncateByString(const char* file, int64_t len);
     FFI_EXPORT int32_t FfiOHOSFileFsTruncateByFd(int32_t file, int64_t len);
-
     FFI_EXPORT RetDataI64 FfiOHOSFileFsReadLines(char* path, char* encoding);
     FFI_EXPORT RetDataCString FfiOHOSFileFsReadText(char* path, int64_t offset, bool hasLen, int64_t len,
         char* encoding);
     FFI_EXPORT int32_t FfiOHOSFileFsUtimes(char* path, double mtime);
-
     FFI_EXPORT RetDataI64 FfiOHOSFileFsCreateWatcher(char* path, uint32_t events,
         void (*callback)(OHOS::CJSystemapi::CWatchEvent));
     FFI_EXPORT int32_t FfiOHOSFileFsWatcherStart(int64_t id);
@@ -82,17 +76,11 @@ extern "C" {
         char* data;
     };
     FFI_EXPORT RetReaderIteratorResult FfiOHOSFileFsReaderIteratorNext(int64_t id);
-
     FFI_EXPORT OHOS::CJSystemapi::RetDataCArrStringN FfiOHOSFileListFile(const char* path,
         OHOS::CJSystemapi::CListFileOptions options);
-
     FFI_EXPORT RetDataI64 FfiOHOSFileFsLseek(int32_t fd, int64_t offset, int whence);
-
     FFI_EXPORT int FfiOHOSFileFsFdatasync(int32_t fd);
-
     FFI_EXPORT int FfiOHOSFileFsFsync(int32_t fd);
-
     FFI_EXPORT int FfiOHOSFileFsSymlink(const char* target, const char* srcPath);
 }
-
 #endif
