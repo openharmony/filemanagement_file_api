@@ -49,7 +49,7 @@ std::tuple<int, size_t> GetActualLen(size_t bufLen, size_t bufOff, int64_t offse
     }
 
     if (length < 0 || static_cast<size_t>(length) > retLen) {
-        LOGE("Invalid option length, length: %{public}lld, retLen: %{public}zu", length, retLen);
+        LOGE("Invalid option length, length: %{public}" PRId64 ", retLen: %{public}zu", length, retLen);
         return { EINVAL, 0 };
     }
     retLen = static_cast<size_t>(length);

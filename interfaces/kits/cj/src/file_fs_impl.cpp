@@ -77,7 +77,8 @@ std::tuple<int, uv_stat_t*> GetUvStat(const FileInfo& fileInfo)
     if (state != SUCCESS_CODE) {
         return { state, nullptr };
     }
-    return {SUCCESS_CODE, &stat_req->statbuf};
+    uv_stat_t* tempBuf = new uv_stat_t(stat_req->statbuf);
+    return {SUCCESS_CODE, tempBuf};
 }
 
 std::tuple<bool, FileInfo, int> ParseRandomFile(std::string file)
@@ -132,6 +133,7 @@ std::tuple<int, sptr<StatImpl>> FileFsImpl::Stat(int32_t file)
         return {GetErrorCode(statState), nullptr};
     }
     auto nativeStat = FFIData::Create<StatImpl>(*stat);
+    delete(stat);
     return {SUCCESS_CODE, nativeStat};
 }
 
@@ -149,6 +151,7 @@ std::tuple<int32_t, sptr<StatImpl>> FileFsImpl::Stat(std::string file)
         return {GetErrorCode(statState), nullptr};
     }
     auto nativeStat = FFIData::Create<StatImpl>(*stat);
+    delete(stat);
     return {SUCCESS_CODE, nativeStat};
 }
 

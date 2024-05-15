@@ -22,6 +22,7 @@
 #include "fd_guard.h"
 #include "ffi_remote_data.h"
 #include "cj_common_ffi.h"
+#include <cinttypes>
 #include <string>
 #include <memory>
 
@@ -44,7 +45,7 @@ public:
         if (ret == 0) {
             struct stat buf;
             if (fstat(fd, &buf) == 0) {
-                LOGI("Unlock succeeded inode = %llu", buf.st_ino);
+                LOGI("Unlock succeeded inode = %{public}" PRIu64, buf.st_ino);
             } else {
                 LOGI("Failed to get inode number");
             }
