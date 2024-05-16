@@ -26,7 +26,7 @@ config("libn_public_config") {
 
 ohos_shared_library("filemgmt_libn") {
   if (!use_mingw_win && !use_mac) {
-    stack_protector_ret = true
+    branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
       ubsan = true
