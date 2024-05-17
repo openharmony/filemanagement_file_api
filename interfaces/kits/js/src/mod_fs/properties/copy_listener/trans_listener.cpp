@@ -56,7 +56,7 @@ std::string TransListener::CreateDfsCopyPath()
 }
 
 NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::string &destUri,
-    std::shared_ptr<JsCallbackObject> callback)
+    std::shared_ptr<FileInfos> fileInfos, std::shared_ptr<JsCallbackObject> callback)
 {
     sptr<TransListener> transListener = new (std::nothrow) TransListener();
     if (transListener == nullptr) {
@@ -75,7 +75,9 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
         HILOGE("PrepareCopySession failed, ret = %{public}d.", ret);
         return NError(EIO);
     }
-
+    if (fileInfos->taskSignal != nullptr) {
+        fileInfos->taskSignal->SetFileInfoOfRemoteTask(info.sessionName, fileInfos->srcPath);
+    }
     std::unique_lock<std::mutex> lock(transListener->cvMutex_);
     transListener->cv_.wait(lock,
         [&transListener]() { return transListener->copyEvent_ == SUCCESS || transListener->copyEvent_ == FAILED; });
@@ -132,15 +134,6 @@ int32_t TransListener::PrepareCopySession(const std::string &srcUri,
         networkId, transListener, info);
     if (ret != ERRNO_NOERR) {
         HILOGE("PrepareSession failed, ret = %{public}d.", ret);
-        if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
-            RmDir(disSandboxPath);
-        }
-        return EIO;
-    }
-    std::unique_lock<std::mutex> lock(transListener->cvMutex_);
-    transListener->cv_.wait(lock,
-        [&transListener]() { return transListener->copyEvent_ == SUCCESS || transListener->copyEvent_ == FAILED; });
-    if (transListener->copyEvent_ == FAILED) {
         if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
             RmDir(disSandboxPath);
         }

@@ -78,9 +78,9 @@ void TaskSignal::MarkRemoteTask()
     remoteTask_.store(true);
 }
 
-void TaskSignal::SetSessionIdOfRemoteTask(const std::string &sessionName, const std::string &filePath)
+void TaskSignal::SetFileInfoOfRemoteTask(const std::string &sessionName, const std::string &filePath)
 {
-    HILOGD("SetSessionIdOfRemoteTask sessionName = %{public}s", sessionName.c_str());
+    HILOGD("SetFileInfoOfRemoteTask sessionName = %{public}s", sessionName.c_str());
     sessionName_ = sessionName;
     filePath_ = filePath;
 }

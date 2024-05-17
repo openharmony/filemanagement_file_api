@@ -12,10 +12,9 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//build/ohos/ndk/ndk.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
-ohos_shared_library("cjfile") {
+ohos_shared_library("cj_file_fs_ffi") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -24,14 +23,126 @@ ohos_shared_library("cjfile") {
     cfi_cross_dso = true
     debug = false
   }
-  include_dirs = [ "${src_path}/common/file_helper" ]
 
-  sources = [ "./utils.cpp" ]
-  deps = []
-  external_deps = [ "libuv:uv" ]
+  defines = []
+  cflags_cc = []
+  if (is_mingw || is_mac || is_linux) {
+    defines += [ "PREVIEW" ]
+  }
 
-  output_name = "cjfile"
-  output_extension = "so"
+  if (current_os == "ohos" && current_cpu == "x86_64") {
+    defines += [ "SIMULATOR" ]
+  }
+  if (is_ohos) {
+    defines += [ "OHOS_PLATFORM" ]
+    if (use_musl && !is_asan) {
+      defines += [ "HOOK_ENABLE" ]
+    }
+  } else if (is_mingw) {
+    defines += [ "WINDOWS_PLATFORM" ]
+    cflags_cc += [ "-std=c++17" ]
+  } else if (is_mac) {
+    defines += [ "MAC_PLATFORM" ]
+  } else if (is_linux) {
+    defines += [ "LINUX_PLATFORM" ]
+    cflags_cc += [ "-std=c++17" ]
+  } else if (is_arkui_x && target_os == "ios") {
+    defines += [ "IOS_PLATFORM" ]
+  } else if (is_arkui_x && target_os == "android") {
+    defines += [ "ANDROID_PLATFORM" ]
+  }
+
+  include_dirs = [
+    "${src_path}/common",
+    "${src_path}/common/napi",
+    "${src_path}/common/napi/n_async",
+    "${src_path}/common/file_helper",
+    "${src_path}/mod_fs",
+    "${src_path}/mod_fs/class_randomaccessfile",
+    "${src_path}/mod_fs/class_readeriterator",
+    "${src_path}/mod_fs/properties",
+    "${utils_path}/common/include",
+    "${utils_path}/filemgmt_libhilog",
+    "${utils_path}/filemgmt_libh",
+    "${utils_path}/filemgmt_libn/include",
+    "${file_api_path}/interfaces/kits/cj/src",
+    "${file_api_path}/interfaces/kits/native/remote_uri",
+    "${file_api_path}/interfaces/kits/rust/include",
+  ]
+
+  if (!defined(defines)) {
+    defines = []
+  }
+
+  use_exceptions = true
+
+  if (product_name != "ohos-sdk") {
+    deps = [
+      "${file_api_path}/interfaces/kits/js:build_kits_js",
+      "${file_api_path}/interfaces/kits/js:fs",
+      "${file_api_path}/interfaces/kits/native:remote_uri_native",
+      "${file_api_path}/interfaces/kits/rust:rust_file",
+      "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+      "${utils_path}/filemgmt_libn:filemgmt_libn",
+    ]
+    external_deps = [
+      "ability_base:zuri",
+      "ability_runtime:ability_manager",
+      "ability_runtime:abilitykit_native",
+      "access_token:libtokenid_sdk",
+      "app_file_service:fileuri_native",
+      "bounds_checking_function:libsec_shared",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
+      "data_share:datashare_common",
+      "data_share:datashare_consumer",
+      "hilog:libhilog",
+      "ipc:ipc_core",
+      "libuv:uv",
+      "napi:ace_napi",
+      "napi:cj_bind_ffi",
+      "napi:cj_bind_native",
+      "samgr:samgr_proxy",
+    ]
+    sources = [
+      "../js/src/common/file_helper/fd_guard.cpp",
+      "src/copy_dir.cpp",
+      "src/copy_file.cpp",
+      "src/fdatasync.cpp",
+      "src/file_ffi.cpp",
+      "src/file_fs_ffi.cpp",
+      "src/file_fs_impl.cpp",
+      "src/file_impl.cpp",
+      "src/fsync.cpp",
+      "src/list_file.cpp",
+      "src/lseek.cpp",
+      "src/mkdtemp.cpp",
+      "src/move_file.cpp",
+      "src/randomAccessFile_impl.cpp",
+      "src/readerIterator_impl.cpp",
+      "src/stat_ffi.cpp",
+      "src/stream_ffi.cpp",
+      "src/stream_impl.cpp",
+      "src/symlink.cpp",
+      "src/uni_error.cpp",
+      "src/utils.cpp",
+      "src/watcher_impl.cpp",
+    ]
+  } else {
+    defines += [ "PREVIEWER" ]
+    sources = [ "src/file_fs_mock.cpp" ]
+    external_deps = [ "napi:cj_bind_ffi" ]
+  }
+
+  if (current_os == "ohos") {
+    defines += [ "OHOS_PLATFORM" ]
+  }
+
+  if (current_os == "mingw") {
+    defines += [ "WINDOWS_PLATFORM" ]
+  }
+
   part_name = "file_api"
   subsystem_name = "filemanagement"
 }
