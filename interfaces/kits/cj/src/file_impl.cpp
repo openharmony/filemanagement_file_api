@@ -286,7 +286,16 @@ const char* FileEntity::GetPath(int64_t id)
     if (realPathRes != ERRNO_NOERR) {
         return nullptr;
     }
-    return static_cast<const char *>(realPath->ptr);
+    string tempPath = string(static_cast<char*>(realPath->ptr));
+    char* value = static_cast<char*>(malloc((tempPath.size() + 1) * sizeof(char)));
+    if (value == nullptr) {
+        return nullptr;
+    }
+    if (strcpy_s(value, tempPath.size() + 1, tempPath.c_str()) != 0) {
+        free(value);
+        return nullptr;
+    }
+    return value;
 }
 
 const char* FileEntity::GetName(int64_t id)
