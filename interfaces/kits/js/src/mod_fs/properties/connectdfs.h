@@ -16,16 +16,17 @@
 #ifndef FILEMANAGEMENT_FILE_API_CONNECTDFS_H
 #define FILEMANAGEMENT_FILE_API_CONNECTDFS_H
 
+#include <chrono>
 #include <set>
 #include <sys/inotify.h>
 #include <thread>
-#include <chrono>
+
 #include "bundle_mgr_client_impl.h"
 #include "common_func.h"
+#include "dfs_listener/file_dfs_listener_stub.h"
+#include "distributed_file_daemon_manager.h"
 #include "filemgmt_libn.h"
 #include "n_async/n_ref.h"
-#include "distributed_file_daemon_manager.h"
-#include "dfs_listener/file_dfs_listener_stub.h"
 
 namespace OHOS {
 namespace FileManagement {

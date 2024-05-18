@@ -14,6 +14,7 @@
  */
 
 #include "connectdfs.h"
+
 #include <cstring>
 #include <dirent.h>
 #include <fcntl.h>
@@ -22,6 +23,7 @@
 #include <sys/types.h>
 #include <tuple>
 #include <unistd.h>
+
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
 #include "distributed_file_daemon_manager.h"
@@ -149,10 +151,32 @@ napi_value ConnectDfs::Async(napi_env env, napi_callback_info info)
     }
 
     napi_value ret = nullptr;
-    napi_create_promise(env, &connectDfsCB->cbBase.deferred, &ret);
-    napi_create_async_work(env, nullptr, NVal::CreateUTF8String(env, "ResourceName").val_,
+    napi_status status;
+    status = napi_create_promise(env, &connectDfsCB->cbBase.deferred, &ret);
+    if (status != napi_ok) {
+        HILOGE("INNER BUG. Cannot create promise for %{public}d", status);
+        delete connectDfsCB;
+        connectDfsCB = nullptr;
+        return nullptr;
+    }
+    
+    status = napi_create_async_work(env, nullptr, NVal::CreateUTF8String(env, "ResourceName").val_,
         cbExec, cbCompl, static_cast<void *>(connectDfsCB), &connectDfsCB->cbBase.asyncWork);
-    napi_queue_async_work(env, connectDfsCB->cbBase.asyncWork);
+    if (status != napi_ok) {
+        HILOGE("INNER BUG. Failed to create async work for %{public}d", status);
+        delete connectDfsCB;
+        connectDfsCB = nullptr;
+        return nullptr;
+    }
+    
+    status = napi_queue_async_work(env, connectDfsCB->cbBase.asyncWork);
+    if (status != napi_ok) {
+        HILOGE("INNER BUG. Failed to queue async work for %{public}d", status);
+        delete connectDfsCB;
+        connectDfsCB = nullptr;
+        return nullptr;
+    }
+
     if (ret == nullptr) {
         HILOGE("napi_async_work ret = nullptr");
         NError(E_PARAMS).ThrowErr(env);

@@ -37,7 +37,7 @@ constexpr int EDQUOT = 122;
 #endif
 constexpr int UNKROWN_ERR = -1;
 constexpr int ERRNO_NOERR = 0;
-constexpr int ECONNECTION = 45;
+constexpr int ECONNECTIONFAIL = 45;
 constexpr int ECONNECTIONABORT = 46;
 constexpr int STORAGE_SERVICE_SYS_CAP_TAG = 13600000;
 constexpr int FILEIO_SYS_CAP_TAG = 13900000;
@@ -92,7 +92,7 @@ enum ErrCodeSuffixOfFileIO {
     E_UKERR,
     E_NOLCK,
     E_NETUNREACH,
-    E_CONNECTION,
+    E_CONNECTION_FAIL,
     E_CONNECTION_ABORT,
 };
 
@@ -201,7 +201,7 @@ static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "ERESTART", ERESTART },
     { "EDQUOT", EDQUOT },
     { "ENETUNREACH", ENETUNREACH },
-    { "ECONNECTION", ECONNECTION },
+    { "ECONNECTIONFAIL", ECONNECTIONFAIL },
     { "ECONNECTIONABORT", ECONNECTIONABORT },
 };
 
@@ -251,7 +251,7 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { UNKROWN_ERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
     { ENOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { ENETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
-    { ECONNECTION, { FILEIO_SYS_CAP_TAG + E_CONNECTION, "Connection failed" } },
+    { ECONNECTIONFAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
     { ECONNECTIONABORT, { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT,
         "Software caused connection abort" } },
     { FILEIO_SYS_CAP_TAG + E_PERM, { FILEIO_SYS_CAP_TAG + E_PERM, "Operation not permitted" } },
@@ -299,7 +299,7 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { FILEIO_SYS_CAP_TAG + E_UKERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
     { FILEIO_SYS_CAP_TAG + E_NOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { FILEIO_SYS_CAP_TAG + E_NETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
-    { FILEIO_SYS_CAP_TAG + E_CONNECTION, { FILEIO_SYS_CAP_TAG + E_CONNECTION, "Connection failed" } },
+    { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
     { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT, { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT,
         "Software caused connection abort" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME, { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME,

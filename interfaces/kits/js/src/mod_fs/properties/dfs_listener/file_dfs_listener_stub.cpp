@@ -60,6 +60,10 @@ int32_t FileDfsListenerStub::HandleOnStatus(MessageParcel &data, MessageParcel &
         HILOGE("read status failed");
         return E_INVAL_ARG;
     }
+    if (networkId.empty() || status < 0) {
+        HILOGE("Invalid arguments");
+        return E_INVAL_ARG;
+    }
     OnStatus(networkId, status);
     return NO_ERROR;
 }

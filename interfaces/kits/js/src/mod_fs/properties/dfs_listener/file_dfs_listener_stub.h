@@ -15,6 +15,7 @@
 
 #ifndef FILEMANAGEMENT_FILE_API_FILE_DFS_LISTENER_STUB_H
 #define FILEMANAGEMENT_FILE_API_FILE_DFS_LISTENER_STUB_H
+#include <map>
 
 #include "i_file_dfs_listener.h"
 #include "iremote_stub.h"
