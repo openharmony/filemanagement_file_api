@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,8 @@ constexpr int UNKROWN_ERR = -1;
 constexpr int NO_TASK_ERR = -2;
 constexpr int CANCEL_ERR = -3;
 constexpr int ERRNO_NOERR = 0;
+constexpr int ECONNECTIONFAIL = 45;
+constexpr int ECONNECTIONABORT = 46;
 constexpr int STORAGE_SERVICE_SYS_CAP_TAG = 13600000;
 constexpr int FILEIO_SYS_CAP_TAG = 13900000;
 constexpr int USER_FILE_MANAGER_SYS_CAP_TAG = 14000000;
@@ -91,10 +93,12 @@ enum ErrCodeSuffixOfFileIO {
     E_DQUOT,
     E_UKERR,
     E_NOLCK,
+    E_NETUNREACH,
+    E_CONNECTION_FAIL,
+    E_CONNECTION_ABORT,
     E_NOTASK,
     E_UNCANCELED,
-    E_CANCELED,
-    E_NETUNREACH
+    E_CANCELED
 };
 
 enum ErrCodeSuffixOfUserFileManager {
@@ -203,6 +207,8 @@ static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "EDQUOT", EDQUOT },
     { "ECANCELED", ECANCELED },
     { "ENETUNREACH", ENETUNREACH },
+    { "ECONNECTIONFAIL", ECONNECTIONFAIL },
+    { "ECONNECTIONABORT", ECONNECTIONABORT },
 };
 
 static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
@@ -254,6 +260,9 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { ECANCELED, { FILEIO_SYS_CAP_TAG + E_CANCELED, "Operation canceled" } },
     { ENOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { ENETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
+    { ECONNECTIONFAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
+    { ECONNECTIONABORT, { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT,
+        "Software caused connection abort" } },
     { FILEIO_SYS_CAP_TAG + E_PERM, { FILEIO_SYS_CAP_TAG + E_PERM, "Operation not permitted" } },
     { FILEIO_SYS_CAP_TAG + E_NOENT, { FILEIO_SYS_CAP_TAG + E_NOENT, "No such file or directory" } },
     { FILEIO_SYS_CAP_TAG + E_SRCH, { FILEIO_SYS_CAP_TAG + E_SRCH, "No such process" } },
@@ -299,6 +308,9 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { FILEIO_SYS_CAP_TAG + E_UKERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
     { FILEIO_SYS_CAP_TAG + E_NOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { FILEIO_SYS_CAP_TAG + E_NETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
+    { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
+    { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT, { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT,
+        "Software caused connection abort" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME, { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME,
         "Invalid display name" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_URIM, { USER_FILE_MANAGER_SYS_CAP_TAG + E_URIM, "Invalid uri" } },
