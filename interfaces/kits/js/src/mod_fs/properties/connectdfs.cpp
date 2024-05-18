@@ -151,8 +151,7 @@ napi_value ConnectDfs::Async(napi_env env, napi_callback_info info)
     }
 
     napi_value ret = nullptr;
-    napi_status status;
-    status = napi_create_promise(env, &connectDfsCB->cbBase.deferred, &ret);
+    napi_status status = napi_create_promise(env, &connectDfsCB->cbBase.deferred, &ret);
     if (status != napi_ok) {
         HILOGE("INNER BUG. Cannot create promise for %{public}d", status);
         delete connectDfsCB;
