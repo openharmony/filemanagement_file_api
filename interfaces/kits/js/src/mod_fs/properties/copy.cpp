@@ -88,6 +88,22 @@ tuple<bool, NVal> Copy::GetListenerFromOptionArg(napi_env env, const NFuncArg &f
     return { true, NVal() };
 }
 
+tuple<bool, NVal> Copy::GetCopySignalFromOptionArg(napi_env env, const NFuncArg &funcArg)
+{
+    if (funcArg.GetArgc() < NARG_CNT::THREE) {
+        return { true, NVal() };
+    }
+    NVal op(env, funcArg[NARG_POS::THIRD]);
+    if (op.HasProp("copySignal") && !op.GetProp("copySignal").TypeIs(napi_undefined)) {
+        if (!op.GetProp("copySignal").TypeIs(napi_object)) {
+            HILOGE("Illegal options.CopySignal type");
+            return { false, NVal() };
+        }
+        return { true, op.GetProp("copySignal") };
+    }
+    return { true, NVal() };
+}
+
 bool Copy::IsRemoteUri(const std::string &uri)
 {
     // NETWORK_PARA
@@ -139,7 +155,7 @@ void Copy::CheckOrCreatePath(const std::string &destPath)
     }
 }
 
-int Copy::CopyFile(const string &src, const string &dest)
+int Copy::CopyFile(const string &src, const string &dest, std::shared_ptr<FileInfos> infos)
 {
     HILOGD("src = %{public}s, dest = %{public}s", src.c_str(), dest.c_str());
     auto srcFd = open(src.c_str(), O_RDONLY);
@@ -172,6 +188,11 @@ int Copy::CopyFile(const string &src, const string &dest)
         if (ret < 0) {
             HILOGE("Failed to sendfile by errno : %{public}d", errno);
             return errno;
+        }
+        if (infos != nullptr && infos->taskSignal != nullptr) {
+            if (infos->taskSignal->CheckCancelIfNeed(src)) {
+                return E_CANCELED;
+            }
         }
         offset += static_cast<int64_t>(ret);
         size -= static_cast<int64_t>(ret);
@@ -321,7 +342,7 @@ int Copy::RecurCopyDir(const string &srcPath, const string &destPath, std::share
             ret = CopySubDir(src, dest, infos);
         } else {
             infos->filePaths.insert(dest);
-            ret = CopyFile(src, dest);
+            ret = CopyFile(src, dest, infos);
         }
         if (ret != ERRNO_NOERR) {
             return ret;
@@ -691,7 +712,7 @@ std::string Copy::ConvertUriToPath(const std::string &uri)
 }
 
 tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
-    const std::string &srcUri, const std::string &destUri, const NVal &listener)
+    const std::string &srcUri, const std::string &destUri, const NVal &listener, NVal copySignal)
 {
     auto infos = CreateSharedPtr<FileInfos>();
     if (infos == nullptr) {
@@ -701,6 +722,8 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->srcUri = srcUri;
     infos->destUri = destUri;
     infos->listener = listener;
+    infos->env = listener.env_;
+    infos->copySignal = copySignal;
     infos->srcPath = ConvertUriToPath(infos->srcUri);
     infos->destPath = ConvertUriToPath(infos->destUri);
     infos->srcPath = GetRealPath(infos->srcPath);
@@ -708,6 +731,12 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->notifyTime = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;
     if (listener) {
         infos->hasListener = true;
+    }
+    if (infos->copySignal) {
+        auto taskSignalEntity = NClass::GetEntityOf<TaskSignalEntity>(infos->env, infos->copySignal.val_);
+        if (taskSignalEntity != nullptr) {
+            infos->taskSignal = taskSignalEntity->taskSignal_;
+        }
     }
     return { ERRNO_NOERR, infos };
 }
@@ -725,7 +754,7 @@ int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
 {
     if (IsFile(infos->srcPath) && IsFile(infos->destPath)) {
         // copyFile
-        return CopyFile(infos->srcPath, infos->destPath);
+        return CopyFile(infos->srcPath, infos->destPath, infos);
     }
     if (IsDirectory(infos->srcPath) && IsDirectory(infos->destPath)) {
         if (infos->srcPath.back() != '/') {
@@ -748,12 +777,13 @@ int Copy::ParseJsParam(napi_env env, NFuncArg &funcArg, std::shared_ptr<FileInfo
     }
     auto [succSrc, srcUri] = ParseJsOperand(env, { env, funcArg[NARG_POS::FIRST] });
     auto [succDest, destUri] = ParseJsOperand(env, { env, funcArg[NARG_POS::SECOND] });
-    auto [succOptions, listener] = GetListenerFromOptionArg(env, funcArg);
-    if (!succSrc || !succDest || !succOptions) {
+    auto [succListener, listener] = GetListenerFromOptionArg(env, funcArg);
+    auto [succSignal, copySignal] = GetCopySignalFromOptionArg(env, funcArg);
+    if (!succSrc || !succDest || !succListener || !succSignal) {
         HILOGE("The first/second/third argument requires uri/uri/napi_function");
         return E_PARAMS;
     }
-    auto [errCode, infos] = CreateFileInfos(srcUri, destUri, listener);
+    auto [errCode, infos] = CreateFileInfos(srcUri, destUri, listener, copySignal);
     if (errCode != ERRNO_NOERR) {
         return errCode;
     }
@@ -772,7 +802,7 @@ void Copy::WaitNotifyFinished(std::shared_ptr<JsCallbackObject> callback)
 
 void Copy::CopyComplete(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
-    if (callback != nullptr) {
+    if (callback != nullptr && infos->hasListener) {
         callback->progressSize = callback->totalSize;
         OnFileReceive(infos);
     }
@@ -794,7 +824,12 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
     }
     auto cbExec = [infos, callback]() -> NError {
         if (IsRemoteUri(infos->srcUri)) {
-            return TransListener::CopyFileFromSoftBus(infos->srcUri, infos->destUri, std::move(callback));
+            if (infos->taskSignal != nullptr) {
+                infos->taskSignal->MarkRemoteTask();
+            }
+            auto ret = TransListener::CopyFileFromSoftBus(infos->srcUri, infos->destUri,
+                                                          infos, std::move(callback));
+            return ret;
         }
         auto result = Copy::ExecLocal(infos, callback);
         CloseNotifyFd(infos, callback);

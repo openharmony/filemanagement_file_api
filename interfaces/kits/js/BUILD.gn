@@ -32,7 +32,7 @@ config("kits_public_config") {
 }
 
 ohos_shared_library("fileio") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -159,6 +159,7 @@ ohos_shared_library("fs") {
   cflags_cc = [ "-std=c++17" ]
 
   deps = [
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
   ]
@@ -178,7 +179,7 @@ ohos_shared_library("fs") {
   ]
 
   if (!use_mingw_win && !use_mac) {
-    stack_protector_ret = true
+    branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
       ubsan = true
@@ -194,6 +195,8 @@ ohos_shared_library("fs") {
       "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
       "src/mod_fs/class_stream/flush.cpp",
       "src/mod_fs/class_stream/stream_n_exporter.cpp",
+      "src/mod_fs/class_tasksignal/task_signal_entity.cpp",
+      "src/mod_fs/class_tasksignal/task_signal_n_exporter.cpp",
       "src/mod_fs/class_watcher/watcher_entity.cpp",
       "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
       "src/mod_fs/properties/connectdfs.cpp",
@@ -239,7 +242,7 @@ ohos_shared_library("fs") {
 }
 
 ohos_shared_library("hash") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -278,7 +281,7 @@ ohos_shared_library("hash") {
 }
 
 ohos_shared_library("file") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -320,7 +323,7 @@ ohos_shared_library("file") {
 }
 
 ohos_shared_library("statfs") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -352,7 +355,7 @@ ohos_shared_library("statfs") {
 }
 
 ohos_shared_library("statvfs") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -384,7 +387,7 @@ ohos_shared_library("statvfs") {
 }
 
 ohos_shared_library("environment") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -420,7 +423,7 @@ ohos_shared_library("environment") {
   ]
 }
 ohos_shared_library("securitylabel") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -458,7 +461,7 @@ ohos_shared_library("securitylabel") {
 }
 
 ohos_shared_library("document") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true

@@ -22,9 +22,17 @@ config("remote_uri_config") {
   ]
 }
 
+config("task_signal_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "include",
+    "task_signal",
+  ]
+}
+
 ohos_shared_library("remote_uri_native") {
   if (!use_mingw_win && !use_mac) {
-    stack_protector_ret = true
+    branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
       ubsan = true
@@ -49,6 +57,36 @@ ohos_shared_library("remote_uri_native") {
   innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"
   subsystem_name = "filemanagement"
+}
+
+ohos_shared_library("task_signal_native") {
+  if (!use_mingw_win && !use_mac) {
+    branch_protector_ret = "pac_ret"
+    sanitize = {
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+
+    sources = [ "task_signal/task_signal.cpp" ]
+
+    public_configs = [ ":task_signal_config" ]
+
+    deps = [ "${utils_path}/filemgmt_libhilog:filemgmt_libhilog" ]
+
+    external_deps = [
+      "c_utils:utils",
+      "dfs_service:distributed_file_daemon_kit_inner",
+      "hilog:libhilog",
+    ]
+
+    innerapi_tags = [ "platformsdk" ]
+    part_name = "file_api"
+    subsystem_name = "filemanagement"
+  }
 }
 
 config("environment_config") {
@@ -120,5 +158,6 @@ group("build_kits_native") {
     ":environment_native",
     ":fileio_native",
     ":remote_uri_native",
+    ":task_signal_native",
   ]
 }

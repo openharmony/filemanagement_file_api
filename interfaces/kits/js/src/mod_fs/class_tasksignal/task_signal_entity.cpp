@@ -22,11 +22,11 @@ TaskSignalEntity::~TaskSignalEntity() {}
 void TaskSignalEntity::OnCancel(const std::string &path)
 {
     uv_loop_s *loop = nullptr;
-    if (!callbackContext) {
+    if (!callbackContext_) {
         return;
     }
-    auto env = callbackContext->env_;
-    callbackContext->filePath_ = path;
+    auto env = callbackContext_->env_;
+    callbackContext_->filePath_ = path;
     napi_get_uv_event_loop(env, &loop);
     if (loop == nullptr) {
         return;
@@ -35,7 +35,7 @@ void TaskSignalEntity::OnCancel(const std::string &path)
     if (work == nullptr) {
         return;
     }
-    work->data = reinterpret_cast<void *>(callbackContext.get());
+    work->data = reinterpret_cast<void *>(callbackContext_.get());
     int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
         [](uv_work_t *work, int status) {
                 JSCallbackContext *callbackContext = reinterpret_cast<JSCallbackContext *>(work->data);
@@ -52,7 +52,7 @@ void TaskSignalEntity::OnCancel(const std::string &path)
                 }
                 napi_env env = callbackContext->env_;
                 napi_value jsCallback = callbackContext->ref_.Deref(env).val_;
-                napi_value filePath = LibN::NVal::CreateUTF8String(env, callbackContext->filePath).val_;
+                napi_value filePath = LibN::NVal::CreateUTF8String(env, callbackContext->filePath_).val_;
                 napi_value retVal = nullptr;
                 ret = napi_call_function(env, nullptr, jsCallback, 1, &filePath, &retVal);
                 if (ret != napi_ok) {
@@ -66,7 +66,7 @@ void TaskSignalEntity::OnCancel(const std::string &path)
                 delete work;
             }, uv_qos_user_initiated);
     if (ret != 0) {
-        delete callbackContext;
+        HILOGE("Failed to uv_queue_work_with_qos, ret: %{public}d", ret);
         delete work;
     }
 }
