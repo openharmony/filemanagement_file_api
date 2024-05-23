@@ -48,6 +48,7 @@ struct JsCallbackObject {
     uint64_t totalSize = 0;
     uint64_t progressSize = 0;
     uint64_t maxProgressSize = 0;
+    int32_t errorCode = 0;
     std::thread notifyHandler;
     explicit JsCallbackObject(napi_env env, LibN::NVal jsVal) : env(env), nRef(jsVal) {}
 

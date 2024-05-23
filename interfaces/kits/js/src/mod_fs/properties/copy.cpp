@@ -637,7 +637,8 @@ tuple<bool, int, bool> Copy::HandleProgress(
         }
         callback->progressSize = fileSize;
     }
-    return { true, ERRNO_NOERR, true };
+    auto errorCode = callback->errorCode;
+    return { true, errorCode, true };
 }
 
 void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
