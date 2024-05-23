@@ -48,8 +48,6 @@ ohos_shared_library("cj_file_fs_ffi") {
     cflags_cc += [ "-std=c++17" ]
   } else if (is_arkui_x && target_os == "ios") {
     defines += [ "IOS_PLATFORM" ]
-  } else if (is_arkui_x && target_os == "android") {
-    defines += [ "ANDROID_PLATFORM" ]
   }
 
   include_dirs = [
