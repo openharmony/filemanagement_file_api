@@ -80,8 +80,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
         fileInfos->taskSignal->SetFileInfoOfRemoteTask(info.sessionName, fileInfos->srcPath);
     }
     std::unique_lock<std::mutex> lock(transListener->cvMutex_);
-    transListener->cv_.wait(lock,
-        [&transListener]() { return transListener->copyEvent_.copyResult == SUCCESS ||
+    transListener->cv_.wait(lock,[&transListener]() { return transListener->copyEvent_.copyResult == SUCCESS ||
         transListener->copyEvent_.copyResult == FAILED; });
     if (transListener->copyEvent_.copyResult == FAILED) {
         if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
