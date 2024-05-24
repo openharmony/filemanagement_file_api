@@ -72,6 +72,14 @@ void* ReaderIterator(const char* path);
 
 /**
  * @ingroup     rust
+ * @brief       Drop iterator to release fd
+ * @param       iter pointer to reader iterator.
+ * @li          rust_file.h:The file where the interface is located.
+ */
+void DropReaderIterator(void* iter);
+
+/**
+ * @ingroup     rust
  * @brief       Reads a line from the reader iterator.
  * @param       iter   pointer to reader iterator.
  * @retval      NULL and error stored in errno  Invalid pointer to iterator.

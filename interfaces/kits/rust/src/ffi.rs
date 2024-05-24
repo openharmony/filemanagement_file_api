@@ -14,7 +14,7 @@
  */
 
 use crate::adapter::{
-    create_dir, error_control, get_parent, next_line, reader_iterator, seek, cut_file_name,
+    create_dir, error_control, get_parent, next_line, reader_iterator, drop_reader_iterator, seek, cut_file_name,
     MakeDirectionMode, SeekPos, Str,
 };
 use libc::{c_char, c_int, c_longlong, c_void};
@@ -30,6 +30,11 @@ pub unsafe extern "C" fn ReaderIterator(path: *const c_char) -> *mut c_void {
             null_mut()
         }
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn DropReaderIterator(iter: *mut c_void) {
+    drop_reader_iterator(iter)
 }
 
 #[no_mangle]
