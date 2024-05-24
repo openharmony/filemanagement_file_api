@@ -91,6 +91,14 @@ pub(crate) unsafe fn reader_iterator(path: *const c_char) -> Result<*mut c_void,
     Ok(Box::into_raw(Box::new(reader)) as *mut c_void)
 }
 
+pub(crate) unsafe fn drop_reader_iterator(iter: *mut c_void) {
+    if iter.is_null() {
+        return;
+    }
+    let reader = Box::from_raw(iter as *mut BufReader<File>);
+    drop(reader);
+}
+
 pub(crate) unsafe fn next_line(iter: *mut c_void) -> Result<*mut Str, Error> {
     if iter.is_null() {
         return Err(Error::new(ErrorKind::InvalidInput, "Invalid input"));

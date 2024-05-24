@@ -17,6 +17,7 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ENTITY_H
 
 #include "filemgmt_libhilog.h"
+#include "rust_file.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -25,6 +26,13 @@ namespace ModuleFileIO {
 struct ReaderIteratorEntity {
     void *iterator = nullptr;
     int64_t offset = 0;
+    ~ReaderIteratorEntity()
+    {
+        if (iterator != nullptr) {
+            DropReaderIterator(iterator);
+            iterator = nullptr;
+        }
+    }
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement
