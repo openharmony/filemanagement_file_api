@@ -179,6 +179,7 @@ ohos_shared_library("fs") {
   ]
 
   if (!use_mingw_win && !use_mac) {
+    defines = [ "FILE_API_TRACE" ]
     branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
@@ -231,6 +232,7 @@ ohos_shared_library("fs") {
       "data_share:datashare_common",
       "data_share:datashare_consumer",
       "dfs_service:distributed_file_daemon_kit_inner",
+      "hitrace:hitrace_meter",
       "ipc:ipc_core",
       "samgr:samgr_proxy",
     ]

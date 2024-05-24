@@ -36,6 +36,7 @@
             "dfs_service",
             "eventhandler",
             "hilog",
+            "hitrace",
             "ipc",
             "init",
             "napi",

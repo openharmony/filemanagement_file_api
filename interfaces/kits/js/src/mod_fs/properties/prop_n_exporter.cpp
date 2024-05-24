@@ -62,6 +62,10 @@
 #include "disconnectdfs.h"
 #endif
 
+#ifdef FILE_API_TRACE
+#include "hitrace_meter.h"
+#endif
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -403,6 +407,9 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
 {
+#ifdef FILE_API_TRACE
+    HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
+#endif
     NFuncArg funcArg(env, info);
 
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
@@ -469,6 +476,9 @@ static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, in
 
 napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
 {
+#ifdef FILE_API_TRACE
+    HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
+#endif
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
         HILOGE("Number of arguments unmatched");
