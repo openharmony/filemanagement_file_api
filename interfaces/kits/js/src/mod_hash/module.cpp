@@ -18,6 +18,7 @@
 
 #include "filemgmt_libhilog.h"
 #include "hash.h"
+#include "hashstream_n_exporter.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -25,11 +26,14 @@ namespace ModuleFileIO {
 using namespace std;
 static napi_value Export(napi_env env, napi_value exports)
 {
-    std::unique_ptr<NExporter> products = make_unique<HashNExporter>(env, exports);
-
-    if (!products->Export()) {
-        HILOGE("INNER BUG. Failed to export class %{public}s for module fileio", products->GetClassName().c_str());
-        return nullptr;
+    vector<unique_ptr<NExporter>> products;
+    products.push_back(make_unique<HashNExporter>(env, exports));
+    products.push_back(make_unique<HashStreamNExporter>(env, exports));
+    for (auto &&product : products) {
+        if (!product->Export()) {
+            HILOGE("INNER BUG. Failed to export class %{public}s for module fileio", product->GetClassName().c_str());
+            return nullptr;
+        }
     }
     return exports;
 }
