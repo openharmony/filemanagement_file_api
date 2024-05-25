@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "flush.h"
+#include "rust_file.h"
 #include "stream_entity.h"
 
 namespace OHOS {
@@ -331,6 +332,58 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
     }
 }
 
+napi_value StreamNExporter::Seek(napi_env env, napi_callback_info cbInfo)
+{
+    NFuncArg funcArg(env, cbInfo);
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    if (!streamEntity || !streamEntity->fp) {
+        HILOGE("Failed to get entity of Stream");
+        NError(EIO).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto [succGetOffset, offset] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt64();
+    if (!succGetOffset) {
+        HILOGE("Invalid offset from JS first argument");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    int whence = SEEK_SET;
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
+        auto [succGetWhence, pos] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(SEEK_SET);
+        if (!succGetWhence || pos < SEEK_SET || pos > SEEK_END) {
+            HILOGE("Invalid whence from JS third argument");
+            NError(EINVAL).ThrowErr(env);
+            return nullptr;
+        }
+        whence = pos;
+    }
+
+    if (offset >= 0) {
+        int ret = fseek(streamEntity->fp.get(), static_cast<long>(offset), whence);
+        if (ret < 0) {
+            HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
+            NError(errno).ThrowErr(env);
+            return nullptr;
+        }
+    }
+    int64_t res = ftell(streamEntity->fp.get());
+    if (res < 0) {
+        HILOGE("Failed to tell, error:%{public}d", errno);
+        NError(errno).ThrowErr(env);
+        return nullptr;
+    }
+
+    return NVal::CreateInt64(env, res).val_;
+}
+
 napi_value StreamNExporter::Constructor(napi_env env, napi_callback_info cbInfo)
 {
     NFuncArg funcArg(env, cbInfo);
@@ -365,6 +418,7 @@ bool StreamNExporter::Export()
         NVal::DeclareNapiFunction("write", Write),
         NVal::DeclareNapiFunction("read", Read),
         NVal::DeclareNapiFunction("close", Close),
+        NVal::DeclareNapiFunction("seek", Seek),
     };
 
     string className = GetClassName();

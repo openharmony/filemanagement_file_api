@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ public:
     static napi_value Write(napi_env env, napi_callback_info cbInfo);
     static napi_value Read(napi_env env, napi_callback_info cbInfo);
     static napi_value Close(napi_env env, napi_callback_info cbInfo);
+    static napi_value Seek(napi_env env, napi_callback_info cbInfo);
 
     StreamNExporter(napi_env env, napi_value exports);
     ~StreamNExporter() override;
