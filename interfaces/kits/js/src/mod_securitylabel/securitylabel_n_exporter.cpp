@@ -39,7 +39,7 @@ napi_value SetSecurityLabel(napi_env env, napi_callback_info info)
     bool succ = false;
     std::unique_ptr<char []> path;
     std::unique_ptr<char []> dataLevel;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
@@ -92,7 +92,7 @@ napi_value SetSecurityLabelSync(napi_env env, napi_callback_info info)
     bool succ = false;
     std::unique_ptr<char []> path;
     std::unique_ptr<char []> dataLevel;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
@@ -132,7 +132,7 @@ napi_value GetSecurityLabel(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
@@ -175,7 +175,7 @@ napi_value GetSecurityLabelSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::FIRST)]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);

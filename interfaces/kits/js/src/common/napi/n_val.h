@@ -43,6 +43,7 @@ public:
     std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8String() const;
     std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8String(std::string_view defaultValue) const;
     std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF16String() const;
+    std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8StringPath() const;
     std::tuple<bool, void *> ToPointer() const;
     std::tuple<bool, bool> ToBool() const;
     std::tuple<bool, bool> ToBool(bool defaultValue) const;

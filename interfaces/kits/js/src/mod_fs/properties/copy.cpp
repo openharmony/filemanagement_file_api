@@ -61,7 +61,7 @@ bool Copy::IsValidUri(const std::string &uri)
 
 tuple<bool, std::string> Copy::ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
 {
-    auto [succ, uri, ignore] = pathOrFdFromJsArg.ToUTF8String();
+    auto [succ, uri, ignore] = pathOrFdFromJsArg.ToUTF8StringPath();
     if (!succ) {
         HILOGE("parse uri failed.");
         return { false, "" };

@@ -157,13 +157,13 @@ tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(n
 {
     bool succ = false;
     unique_ptr<char[]> src;
-    tie(succ, src, ignore) = NVal(env, srcPath).ToUTF8String();
+    tie(succ, src, ignore) = NVal(env, srcPath).ToUTF8StringPath();
     if (!succ) {
         return { false, nullptr, nullptr };
     }
 
     unique_ptr<char[]> dest;
-    tie(succ, dest, ignore) = NVal(env, dstPath).ToUTF8String();
+    tie(succ, dest, ignore) = NVal(env, dstPath).ToUTF8StringPath();
     if (!succ) {
         return { false, nullptr, nullptr };
     }
@@ -324,7 +324,7 @@ tuple<bool, unique_ptr<char[]>, void *, int64_t, bool, int64_t> CommonFunc::GetW
     int64_t retLen;
     bool hasPos = false;
     int64_t retPos;
-    
+
     bool succ = false;
     void *buf = nullptr;
     int64_t bufLen;

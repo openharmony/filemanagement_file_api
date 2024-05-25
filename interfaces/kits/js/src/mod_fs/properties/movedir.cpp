@@ -75,12 +75,12 @@ static int RemovePath(const string& pathStr)
 
 static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(napi_env env, const NFuncArg& funcArg)
 {
-    auto [resGetFirstArg, src, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, src, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg || !filesystem::is_directory(filesystem::status(src.get()))) {
         HILOGE("Invalid src");
         return { false, nullptr, nullptr, 0 };
     }
-    auto [resGetSecondArg, dest, unused] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
+    auto [resGetSecondArg, dest, unused] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8StringPath();
     if (!resGetSecondArg || !filesystem::is_directory(filesystem::status(dest.get()))) {
         HILOGE("Invalid dest");
         return { false, nullptr, nullptr, 0 };

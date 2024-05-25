@@ -41,7 +41,7 @@ struct FileInfo {
 
 static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJsArg)
 {
-    auto [isPath, path, ignore] = NVal(env, pathOrFdFromJsArg).ToUTF8String();
+    auto [isPath, path, ignore] = NVal(env, pathOrFdFromJsArg).ToUTF8StringPath();
     if (isPath) {
         return { true, FileInfo { true, move(path), {} } };
     }

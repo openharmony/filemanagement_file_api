@@ -42,7 +42,7 @@ static FileEntity* GetFileEntity(napi_env env, napi_value objFile)
 
 static tuple<bool, FileInfo, int> ParseJsFile(napi_env env, napi_value pathOrFileFromJsArg)
 {
-    auto [isPath, path, ignore] = NVal(env, pathOrFileFromJsArg).ToUTF8String();
+    auto [isPath, path, ignore] = NVal(env, pathOrFileFromJsArg).ToUTF8StringPath();
     if (isPath) {
         OHOS::DistributedFS::FDGuard sfd;
         auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(sfd, false);

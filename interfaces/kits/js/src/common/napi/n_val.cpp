@@ -58,6 +58,15 @@ bool NVal::TypeIsError(bool checkErrno) const
     return res;
 }
 
+std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8StringPath() const
+{
+    auto [succ, path, strLen] = ToUTF8String();
+    if (succ == false || std::strlen(path.get()) < strLen) {
+        return { false, nullptr, 0 };
+    }
+    return make_tuple(true, move(path), strLen);
+}
+
 tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF8String() const
 {
     size_t strLen = 0;

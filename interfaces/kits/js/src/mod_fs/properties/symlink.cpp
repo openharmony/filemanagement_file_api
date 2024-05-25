@@ -31,12 +31,12 @@ using namespace OHOS::FileManagement::LibN;
 
 static tuple<bool, string, string> GetSymlinkArg(napi_env env, const NFuncArg &funcArg)
 {
-    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         return { false, "", "" };
     }
 
-    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
+    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8StringPath();
     if (!resGetSecondArg) {
         return { false, "", "" };
     }

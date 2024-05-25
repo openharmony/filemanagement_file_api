@@ -33,7 +33,7 @@ using namespace std;
 
 static tuple<bool, unique_ptr<char[]>> ParseJsPath(napi_env env, napi_value pathFromJs)
 {
-    auto [succ, path, ignore] = NVal(env, pathFromJs).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, pathFromJs).ToUTF8StringPath();
     return {succ, move(path)};
 }
 
@@ -127,7 +127,7 @@ napi_value Rmdirent::Async(napi_env env, napi_callback_info info)
             return NVal::CreateUndefined(env);
         }
     };
-    
+
     NVal thisVar(env, funcArg.GetThisVar());
     size_t argc = funcArg.GetArgc();
     if (argc == NARG_CNT::ONE) {
