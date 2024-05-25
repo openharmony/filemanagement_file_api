@@ -81,7 +81,8 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
     }
     std::unique_lock<std::mutex> lock(transListener->cvMutex_);
     transListener->cv_.wait(lock,
-        [&transListener]() { return transListener->copyEvent_.copyResult == SUCCESS || transListener->copyEvent_.copyResult == FAILED; });
+        [&transListener]() { return transListener->copyEvent_.copyResult == SUCCESS ||
+                                    transListener->copyEvent_.copyResult == FAILED; });
     if (transListener->copyEvent_.copyResult == FAILED) {
         if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
             RmDir(disSandboxPath);
