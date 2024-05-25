@@ -616,6 +616,9 @@ void Copy::CloseNotifyFd(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCal
 tuple<bool, int, bool> Copy::HandleProgress(
     inotify_event *event, std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
+    if (callback == nullptr) {
+        return { true, EINVAL, false };
+    }
     auto receivedInfo = GetReceivedInfo(event->wd, callback);
     if (receivedInfo == nullptr) {
         return { true, EINVAL, false };
@@ -637,7 +640,7 @@ tuple<bool, int, bool> Copy::HandleProgress(
         }
         callback->progressSize = fileSize;
     }
-    return { true, ERRNO_NOERR, true };
+    return { true, callback->errorCode, true };
 }
 
 void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
