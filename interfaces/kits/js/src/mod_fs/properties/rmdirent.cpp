@@ -111,7 +111,7 @@ napi_value Rmdirent::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
@@ -136,7 +136,7 @@ napi_value Rmdirent::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);

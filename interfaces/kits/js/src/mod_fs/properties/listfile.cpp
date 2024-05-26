@@ -325,7 +325,7 @@ napi_value ListFile::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    auto [succPath, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succPath, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succPath) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
@@ -357,7 +357,7 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succPath, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succPath, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succPath) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);

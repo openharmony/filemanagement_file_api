@@ -36,7 +36,7 @@ static HASH_ALGORITHM_TYPE GetHashAlgorithm(const string &alg)
 static tuple<bool, unique_ptr<char[]>, HASH_ALGORITHM_TYPE, bool> GetHashArgs(napi_env env, const NFuncArg &funcArg)
 {
     bool isPromise = false;
-    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);

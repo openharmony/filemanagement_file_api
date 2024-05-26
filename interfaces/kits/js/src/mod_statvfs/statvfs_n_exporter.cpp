@@ -34,7 +34,7 @@ napi_value GetFreeSizeSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char[]> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
@@ -63,7 +63,7 @@ napi_value GetFreeSize(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
@@ -110,7 +110,7 @@ napi_value GetTotalSizeSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char[]> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
@@ -139,7 +139,7 @@ napi_value GetTotalSize(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);

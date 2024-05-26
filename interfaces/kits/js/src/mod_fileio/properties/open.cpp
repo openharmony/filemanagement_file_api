@@ -40,7 +40,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     unique_ptr<char[]> path = nullptr;
-    tie(succ, path, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -123,7 +123,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
     }
-    auto [succ, path, unuse] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, unuse] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;

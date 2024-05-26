@@ -53,7 +53,7 @@ static NVal InstantiateStream(napi_env env, unique_ptr<FILE, decltype(&fclose)> 
 
 static tuple<bool, string, string> GetCreateStreamArgs(napi_env env, const NFuncArg &funcArg)
 {
-    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return { false, "", "" };

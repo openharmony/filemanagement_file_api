@@ -29,13 +29,13 @@ using namespace std;
 
 static tuple<bool, string, string> GetSymlinkArg(napi_env env, const NFuncArg &funcArg)
 {
-    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid src");
         return { false, "", "" };
     }
 
-    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
+    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8StringPath();
     if (!resGetSecondArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid dest");
         return { false, "", "" };

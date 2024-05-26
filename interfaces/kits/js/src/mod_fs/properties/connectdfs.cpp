@@ -158,7 +158,7 @@ napi_value ConnectDfs::Async(napi_env env, napi_callback_info info)
         connectDfsCB = nullptr;
         return nullptr;
     }
-    
+
     status = napi_create_async_work(env, nullptr, NVal::CreateUTF8String(env, "ResourceName").val_,
         cbExec, cbCompl, static_cast<void *>(connectDfsCB), &connectDfsCB->cbBase.asyncWork);
     if (status != napi_ok) {
@@ -167,7 +167,7 @@ napi_value ConnectDfs::Async(napi_env env, napi_callback_info info)
         connectDfsCB = nullptr;
         return nullptr;
     }
-    
+
     status = napi_queue_async_work(env, connectDfsCB->cbBase.asyncWork);
     if (status != napi_ok) {
         HILOGE("INNER BUG. Failed to queue async work for %{public}d", status);
@@ -258,7 +258,7 @@ void UvWorkAfterOnStaus(uv_work_t *work, int status)
         return;
     }
     HILOGI("UvWorkAfterOnStaus, status = %{public}d", connectDfsCB->status);
-    
+
     napi_value result[NARG_CNT::TWO] = {nullptr};
     result[NARG_POS::FIRST] = WrapString(connectDfsCB->cbBase.cbInfo.env, connectDfsCB->networkId.c_str(), "networkId");
     result[NARG_POS::SECOND] = WrapInt32(connectDfsCB->cbBase.cbInfo.env, connectDfsCB->status, "status");
@@ -284,7 +284,7 @@ void UvWorkAfterOnStaus(uv_work_t *work, int status)
             napi_reject_deferred(connectDfsCB->cbBase.cbInfo.env, connectDfsCB->cbBase.deferred, res[NARG_POS::FIRST]);
         }
     }
-        
+
     napi_close_handle_scope(connectDfsCB->cbBase.cbInfo.env, scope);
     delete connectDfsCB;
     connectDfsCB = nullptr;

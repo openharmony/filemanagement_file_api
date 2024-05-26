@@ -333,14 +333,14 @@ tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(n
 {
     bool succ = false;
     unique_ptr<char[]> src = nullptr;
-    tie(succ, src, ignore) = NVal(env, srcPath).ToUTF8String();
+    tie(succ, src, ignore) = NVal(env, srcPath).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Failed to convert the src path to UTF-8 string");
         return { false, nullptr, nullptr };
     }
 
     unique_ptr<char[]> dest = nullptr;
-    tie(succ, dest, ignore) = NVal(env, dstPath).ToUTF8String();
+    tie(succ, dest, ignore) = NVal(env, dstPath).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Failed to convert the dest path to UTF-8 string");
         return { false, nullptr, nullptr };

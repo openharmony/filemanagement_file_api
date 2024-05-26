@@ -52,7 +52,7 @@ shared_ptr<WatcherInfoArg> ParseParam(const napi_env &env, const napi_callback_i
         return nullptr;
     }
 
-    auto [succGetPath, filename, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succGetPath, filename, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succGetPath) {
         HILOGE("Failed to get watcher path.");
         errCode = EINVAL;

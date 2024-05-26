@@ -181,7 +181,7 @@ static tuple<bool, int> ParseJsMode(napi_env env, const NFuncArg& funcArg)
 
 static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
 {
-    auto [isPath, path, ignore] = pathOrFdFromJsArg.ToUTF8String();
+    auto [isPath, path, ignore] = pathOrFdFromJsArg.ToUTF8StringPath();
     if (isPath) {
         return { true, FileInfo { true, move(path), {} } };
     }

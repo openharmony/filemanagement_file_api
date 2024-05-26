@@ -36,7 +36,7 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, pathPtr, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, pathPtr, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
@@ -88,7 +88,7 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, tmp, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, tmp, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);

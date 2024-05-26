@@ -101,7 +101,7 @@ static tuple<bool, int32_t> ParseJsModeAndProm(napi_env env, const NFuncArg &fun
 
 static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
 {
-    auto [isPath, path, ignore] = pathOrFdFromJsArg.ToUTF8String();
+    auto [isPath, path, ignore] = pathOrFdFromJsArg.ToUTF8StringPath();
     if (isPath) {
         return {true, FileInfo{true, move(path), {}}};
     }
@@ -190,7 +190,7 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         }
         return {NVal::CreateUndefined(env)};
     };
-    
+
     const string PROCEDURENAME = "FileIOCopyFile";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
