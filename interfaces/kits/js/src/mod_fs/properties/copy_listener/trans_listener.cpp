@@ -89,7 +89,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
             RmDir(disSandboxPath);
         }
         auto it = softbusErr2ErrCodeTable.find(transListener->copyEvent_.errorCode);
-        if (it != softbusErr2ErrCodeTable.end()) {
+        if (it == softbusErr2ErrCodeTable.end()) {
             return NError(EIO);
         }
         return NError(it->second);
