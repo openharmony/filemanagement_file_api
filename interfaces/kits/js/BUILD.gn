@@ -254,16 +254,24 @@ ohos_shared_library("hash") {
     debug = false
   }
 
+  use_exceptions = true
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
   relative_install_dir = "module/file"
 
-  include_dirs = [ "${src_path}/common/file_helper" ]
+  include_dirs = [
+    "${src_path}/common/file_helper",
+    "${src_path}/mod_hash",
+    "${src_path}/mod_hash/class_hashstream",
+  ]
 
   sources = [
     "src/common/file_helper/fd_guard.cpp",
     "src/common/file_helper/hash_file.cpp",
+    "src/mod_hash/class_hashstream/hashstream_n_exporter.cpp",
+    "src/mod_hash/create_streamhash.cpp",
     "src/mod_hash/hash.cpp",
     "src/mod_hash/module.cpp",
   ]

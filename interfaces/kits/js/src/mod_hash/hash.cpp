@@ -19,6 +19,7 @@
 #include <string_view>
 #include <tuple>
 
+#include "create_streamhash.h"
 #include "filemgmt_libhilog.h"
 #include "hash_file.h"
 
@@ -117,6 +118,7 @@ bool HashNExporter::Export()
 {
     return exports_.AddProp({
         NVal::DeclareNapiFunction("hash", Hash::Async),
+        NVal::DeclareNapiFunction("createHash", CreateStreamHash::Hash),
     });
 }
 
