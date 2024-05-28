@@ -88,7 +88,12 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
         if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
             RmDir(disSandboxPath);
         }
-        return NError(softbusErr2ErrCodeTable.at(transListener->copyEvent_.errorCode));
+        auto it = softbusErr2ErrCodeTable.find(transListener->copyEvent_.errorCode);
+        if (it != softbusErr2ErrCodeTable.end()){
+            return NError(it->second);
+        }else{
+            return NError(EIO);
+        }
     }
     if (info.authority == FILE_MANAGER_AUTHORITY || info.authority == MEDIA_AUTHORITY) {
         HILOGW("Public or media path not copy");
