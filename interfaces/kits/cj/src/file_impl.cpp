@@ -239,7 +239,7 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Dup(int32_t fd)
         LOGE("Failed to readlink fd, ret: %{public}d", ret);
         return {ret, nullptr};
     }
-    auto fdPrt = CreateUniquePtr<DistributedFS::FDGuard>(ret, false);
+    auto fdPrt = CreateUniquePtr<DistributedFS::FDGuard>(dstFd, false);
     if (fdPrt == nullptr) {
         LOGE("Failed to request heap memory.");
         return {ENOMEM, nullptr};
