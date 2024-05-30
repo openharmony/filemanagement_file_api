@@ -41,6 +41,9 @@ public:
     static napi_value Write(napi_env env, napi_callback_info info);
     static napi_value Read(napi_env env, napi_callback_info info);
 
+    static napi_value GetReadStream(napi_env env, napi_callback_info info);
+    static napi_value GetWriteStream(napi_env env, napi_callback_info info);
+
     static napi_value GetFD(napi_env env, napi_callback_info info);
     static napi_value GetFPointer(napi_env env, napi_callback_info info);
 

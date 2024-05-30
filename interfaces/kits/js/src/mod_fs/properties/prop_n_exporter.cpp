@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@
 #include "copydir.h"
 #include "create_randomaccessfile.h"
 #include "create_stream.h"
+#include "create_streamrw.h"
 #include "dup.h"
 #include "fdopen_stream.h"
 #include "listfile.h"
@@ -679,6 +680,8 @@ bool PropNExporter::ExportSync()
         NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
         NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
+        NVal::DeclareNapiFunction("createReadStream", CreateStreamRw::Read),
+        NVal::DeclareNapiFunction("createWriteStream", CreateStreamRw::Write),
         NVal::DeclareNapiFunction("dup", Dup::Sync),
         NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
         NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
