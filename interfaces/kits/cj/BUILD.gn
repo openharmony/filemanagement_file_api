@@ -141,6 +141,7 @@ ohos_shared_library("cj_file_fs_ffi") {
     defines += [ "WINDOWS_PLATFORM" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"
   subsystem_name = "filemanagement"
 }
