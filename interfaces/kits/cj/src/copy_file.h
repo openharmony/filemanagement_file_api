@@ -27,9 +27,9 @@ namespace OHOS {
 namespace CJSystemapi {
 class CopyFileImpl {
 public:
-    static int CopyFile(std::string src, std::string dest, int mode);
-    static int CopyFile(std::string src, int32_t dest, int mode);
-    static int CopyFile(int32_t src, std::string dest, int mode);
+    static int CopyFile(const std::string& src, const std::string& dest, int mode);
+    static int CopyFile(const std::string& src, int32_t dest, int mode);
+    static int CopyFile(int32_t src, const std::string& dest, int mode);
     static int CopyFile(int32_t src, int32_t dest, int mode);
 };
 constexpr size_t MAX_SIZE = 0x7ffff000;

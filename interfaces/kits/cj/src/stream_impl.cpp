@@ -25,7 +25,7 @@ namespace OHOS {
 namespace CJSystemapi {
 namespace FileFs {
 
-std::tuple<int, std::unique_ptr<char[]>, size_t> DecodeString(std::string buffer, std::string encode)
+std::tuple<int, std::unique_ptr<char[]>, size_t> DecodeString(const std::string& buffer, const std::string& encode)
 {
     std::unique_ptr<char[]> buf = std::make_unique<char[]>(buffer.length() + 1);
 
@@ -56,8 +56,8 @@ std::tuple<int, size_t> GetActualLen(size_t bufLen, size_t bufOff, int64_t offse
     return { SUCCESS_CODE, retLen };
 }
 
-tuple<int, unique_ptr<char[]>, void *, size_t, int64_t> GetWriteArg(std::string buffer, int64_t length, int64_t offset,
-    std::string encode)
+tuple<int, unique_ptr<char[]>, void *, size_t, int64_t> GetWriteArg(const std::string& buffer, int64_t length,
+    int64_t offset, const std::string& encode)
 {
     void *buf = nullptr;
 
@@ -190,7 +190,7 @@ tuple<int, int64_t> StreamImpl::Read(uint8_t* buffer, size_t buLen, int64_t leng
     return {SUCCESS_CODE, static_cast<int64_t>(actLen)};
 }
 
-tuple<int, int64_t> StreamImpl::WriteCur(std::string buffer, int64_t length, std::string encode)
+tuple<int, int64_t> StreamImpl::WriteCur(const std::string& buffer, int64_t length, const std::string& encode)
 {
     FILE *filp = nullptr;
     filp = fp_.get();
@@ -210,7 +210,8 @@ tuple<int, int64_t> StreamImpl::WriteCur(std::string buffer, int64_t length, std
     return {SUCCESS_CODE, static_cast<int64_t>(writeLen)};
 }
 
-tuple<int, int64_t> StreamImpl::Write(std::string buffer, int64_t length, int64_t offset, std::string encode)
+tuple<int, int64_t> StreamImpl::Write(const std::string& buffer, int64_t length, int64_t offset,
+    const std::string& encode)
 {
     FILE *filp = nullptr;
     filp = fp_.get();

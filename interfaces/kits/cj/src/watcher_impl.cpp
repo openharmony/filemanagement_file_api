@@ -56,7 +56,7 @@ tuple<bool, int> WatcherImpl::CheckEventWatched(const string &fileName, const ui
 
 bool WatcherImpl::AddWatcherInfo(const string &fileName, shared_ptr<WatcherInfoArg> arg)
 {
-    for (auto &iter : watcherInfoSet_) {
+    for (auto const &iter : watcherInfoSet_) {
         if (iter->fileName == arg->fileName && iter->events == arg->events) {
             LOGE("Faile to add watcher, fileName:%{public}s the callback is same", fileName.c_str());
             return false;

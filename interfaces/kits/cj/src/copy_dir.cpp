@@ -149,7 +149,7 @@ static int RecurCopyDir(const std::string &srcPath, const std::string &destPath,
     return OHOS::FileManagement::LibN::ERRNO_NOERR;
 }
 
-static bool AllowToCopy(const std::string &src, const std::string &dest)
+static bool AllowToCopy(const std::string& src, const std::string& dest)
 {
     if (dest.find(src) == 0 || std::filesystem::path(src).parent_path() == dest) {
         return false;
@@ -186,28 +186,48 @@ static int CopyDirFunc(const std::string &src, const std::string &dest, const in
 static CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errfiles)
 {
     CConflictFiles* result = new CConflictFiles[errfiles.size()];
+    if (result == nullptr) {
+        return nullptr;
+    }
+    size_t temp = 0;
     for (size_t i = 0; i < errfiles.size(); i++) {
         size_t srcFilesLen = errfiles[i].srcFiles.length() + 1;
         result[i].srcFiles = new char[srcFilesLen];
+        if (result[i].srcFiles == nullptr) {
+            break;
+        }
         if (strcpy_s(result[i].srcFiles, srcFilesLen, errfiles[i].srcFiles.c_str()) != 0) {
             delete result[i].srcFiles;
-            for (size_t j = i - 1; j >= 0; j--) {
-                delete result[j].srcFiles;
-                delete result[j].destFiles;
-            }
-            delete[] result;
-            return nullptr;
+            result[i].srcFiles = nullptr;
+            break;
         }
         size_t destFilesLen = errfiles[i].destFiles.length() + 1;
         result[i].destFiles = new char[destFilesLen];
-        if (strcpy_s(result[i].destFiles, destFilesLen, errfiles[i].destFiles.c_str()) != 0) {
-            for (size_t j = i; j >= 0; j--) {
-                delete result[j].srcFiles;
-                delete result[j].destFiles;
-            }
-            delete[] result;
-            return nullptr;
+        if (result[i].destFiles == nullptr) {
+            delete result[i].srcFiles;
+            result[i].srcFiles = nullptr;
+            break;
         }
+        if (strcpy_s(result[i].destFiles, destFilesLen, errfiles[i].destFiles.c_str()) != 0) {
+            delete result[i].srcFiles;
+            delete result[i].destFiles;
+
+            result[i].srcFiles = nullptr;
+            result[i].destFiles = nullptr;
+            break;
+        }
+        temp++;
+    }
+    if (temp != errfiles.size()) {
+        for (size_t j = temp; j > 0; j--) {
+            delete result[j - 1].srcFiles;
+            delete result[j - 1].destFiles;
+
+            result[j - 1].srcFiles = nullptr;
+            result[j - 1].destFiles = nullptr;
+        }
+        delete[] result;
+        return nullptr;
     }
     return result;
 }
@@ -217,7 +237,7 @@ static CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errf
 namespace OHOS {
 namespace CJSystemapi {
 
-RetDataCArrConflictFiles CopyDirImpl::CopyDir(std::string src, std::string dest, int mode)
+RetDataCArrConflictFiles CopyDirImpl::CopyDir(const std::string& src, const std::string& dest, int mode)
 {
     LOGI("FS_TEST:: FileFsImpl::CopyDir start");
     RetDataCArrConflictFiles ret = { .code = EINVAL, .data = { .head = nullptr, .size = 0 } };

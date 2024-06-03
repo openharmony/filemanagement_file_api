@@ -100,9 +100,8 @@ static int SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& statbf
     }
     int64_t offset = 0;
     size_t size = static_cast<size_t>(statbf.st_size);
-    int ret = 0;
     while (size > 0) {
-        ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
+        int ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
             offset, MAX_SIZE, nullptr);
         if (ret < 0) {
             LOGE("Failed to sendfile by ret : %{public}d", ret);
@@ -191,7 +190,7 @@ static int OpenFile(FileInfo& srcFile, FileInfo& destFile)
     return SendFileCore(srcFile, destFile, statbf);
 }
 
-int CopyFileImpl::CopyFile(std::string src, std::string dest, int mode)
+int CopyFileImpl::CopyFile(const std::string& src, const std::string& dest, int mode)
 {
     LOGI("FS_TEST:: CopyFile::CopyFile start");
     auto srcFileInfo = ParseFile(src);
@@ -199,7 +198,7 @@ int CopyFileImpl::CopyFile(std::string src, std::string dest, int mode)
     return IsAllPath(srcFileInfo, destFileInfo);
 }
 
-int CopyFileImpl::CopyFile(std::string src, int32_t dest, int mode)
+int CopyFileImpl::CopyFile(const std::string& src, int32_t dest, int mode)
 {
     LOGI("FS_TEST:: CopyFile::CopyFile start");
     auto srcFileInfo = ParseFile(src);
@@ -211,7 +210,7 @@ int CopyFileImpl::CopyFile(std::string src, int32_t dest, int mode)
     return OpenFile(srcFileInfo, destFileInfo);
 }
 
-int CopyFileImpl::CopyFile(int32_t src, std::string dest, int mode)
+int CopyFileImpl::CopyFile(int32_t src, const std::string& dest, int mode)
 {
     LOGI("FS_TEST:: CopyFile::CopyFile start");
     auto [succSrc, srcFileInfo] = ParseFile(src);

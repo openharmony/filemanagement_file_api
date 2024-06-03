@@ -26,7 +26,7 @@ namespace CJSystemapi {
 
 using namespace std;
 
-int SymlinkImpl::Symlink(std::string target, std::string srcPath)
+int SymlinkImpl::Symlink(const std::string& target, const std::string& srcPath)
 {
     LOGI("FS_TEST::SymlinkImpl::Symlink start");
 

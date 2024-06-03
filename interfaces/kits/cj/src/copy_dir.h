@@ -35,7 +35,7 @@ enum ModeOfCopyDir {
 
 class CopyDirImpl {
 public:
-    static RetDataCArrConflictFiles CopyDir(std::string src, std::string dest, int mode);
+    static RetDataCArrConflictFiles CopyDir(const std::string& src, const std::string& dest, int mode);
 };
 
 }

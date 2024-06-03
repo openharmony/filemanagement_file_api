@@ -255,15 +255,29 @@ static int RecursiveFunc(const string &path, vector<string> &dirents)
 static char** VectorToCArrString(vector<string> &vec)
 {
     char** result = new char* [vec.size()];
+    if (result == nullptr) {
+        return nullptr;
+    }
+    size_t temp = 0;
     for (size_t i = 0; i < vec.size(); i++) {
         result[i] = new char[vec[i].length() + 1];
-        if (strcpy_s(result[i], vec[i].length() + 1, vec[i].c_str()) != 0) {
-            for (size_t j = i; j > 0; j--) {
-                free(result[j]);
-            }
-            delete[] result;
-            return nullptr;
+        if (result[i] == nullptr) {
+            break;
         }
+        if (strcpy_s(result[i], vec[i].length() + 1, vec[i].c_str()) != 0) {
+            free(result[i]);
+            result[i] = nullptr;
+            break;
+        }
+        temp++;
+    }
+    if (temp != vec.size()) {
+        for (size_t j = temp; j > 0; j--) {
+            free(result[j - 1]);
+            result[j - 1] = nullptr;
+        }
+        delete[] result;
+        return nullptr;
     }
     return result;
 }
@@ -273,7 +287,7 @@ static char** VectorToCArrString(vector<string> &vec)
 namespace OHOS {
 namespace CJSystemapi {
 
-RetDataCArrStringN ListFileImpl::ListFile(string path, CListFileOptions options)
+RetDataCArrStringN ListFileImpl::ListFile(const string& path, CListFileOptions options)
 {
     LOGI("FS_TEST:: ListFileImpl::ListFile start");
     RetDataCArrStringN ret = { .code = EINVAL, .data = { .head = nullptr, .size = 0 } };
