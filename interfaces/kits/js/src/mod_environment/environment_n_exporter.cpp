@@ -182,7 +182,9 @@ napi_value GetUserDataDir(napi_env env, napi_callback_info info)
 
 napi_value GetUserDownloadDir(napi_env env, napi_callback_info info)
 {
-    if (CheckInvalidAccess(READ_WRITE_DOWNLOAD_PERMISSION, env)) {
+    if (!CheckFileManagerFullMountEnable()) {
+        HILOGE("Capability not supported");
+        NError(E_DEVICENOTSUPPORT).ThrowErr(env);
         return nullptr;
     }
     NFuncArg funcArg(env, info);
@@ -202,7 +204,9 @@ napi_value GetUserDownloadDir(napi_env env, napi_callback_info info)
 
 napi_value GetUserDesktopDir(napi_env env, napi_callback_info info)
 {
-    if (CheckInvalidAccess(READ_WRITE_DESKTOP_PERMISSION, env)) {
+    if (!CheckFileManagerFullMountEnable()) {
+        HILOGE("Capability not supported");
+        NError(E_DEVICENOTSUPPORT).ThrowErr(env);
         return nullptr;
     }
     NFuncArg funcArg(env, info);
@@ -222,7 +226,9 @@ napi_value GetUserDesktopDir(napi_env env, napi_callback_info info)
 
 napi_value GetUserDocumentDir(napi_env env, napi_callback_info info)
 {
-    if (CheckInvalidAccess(READ_WRITE_DOCUMENTS_PERMISSION, env)) {
+    if (!CheckFileManagerFullMountEnable()) {
+        HILOGE("Capability not supported");
+        NError(E_DEVICENOTSUPPORT).ThrowErr(env);
         return nullptr;
     }
     NFuncArg funcArg(env, info);

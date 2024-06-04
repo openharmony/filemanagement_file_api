@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_HASH_CLASS_HASHSTREAM_HASHSTREAM_ENTITY_H
+#define INTERFACES_KITS_JS_SRC_MOD_HASH_CLASS_HASHSTREAM_HASHSTREAM_ENTITY_H
 
+#include <openssl/md5.h>
+#include <openssl/sha.h>
 #include <unistd.h>
 
-#include "fd_guard.h"
-#include "n_val.h"
+#include "hash.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    std::unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
+struct HashStreamEntity {
+    MD5_CTX md5Ctx;
+    SHA_CTX shaCtx;
+    SHA256_CTX sha256Ctx;
+    HASH_ALGORITHM_TYPE algType = HASH_ALGORITHM_TYPE_UNSUPPORTED;
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement

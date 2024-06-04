@@ -20,7 +20,7 @@
 extern "C" {
 #endif /* End of #ifdef __cplusplus */
 
-int GetUserDir(char *permission, char **result);
+int GetUserDir(char *path, char **result);
 
 #ifdef __cplusplus
 }

@@ -52,6 +52,7 @@ constexpr int SOFTBUS_TRANS_FILE_NO_MEMORY = -426114936;
 constexpr int SOFTBUS_TRANS_FILE_NETWORK_ERROR = -426114935;
 constexpr int SOFTBUS_TRANS_FILE_NOT_FOUND = -426114934;
 constexpr int SOFTBUS_TRANS_FILE_EXISTED = -426114933;
+constexpr int DFS_CANCEL_SUCCESS = 204;
 const std::string FILEIO_TAG_ERR_CODE = "code";
 const std::string FILEIO_TAG_ERR_DATA = "data";
 
@@ -176,6 +177,7 @@ static inline std::unordered_map<int, int> softbusErr2ErrCodeTable {
     {SOFTBUS_TRANS_FILE_NETWORK_ERROR, ENETUNREACH},
     {SOFTBUS_TRANS_FILE_NOT_FOUND, ENOENT},
     {SOFTBUS_TRANS_FILE_EXISTED, EEXIST},
+    {DFS_CANCEL_SUCCESS, ECANCELED},
 };
 
 static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {

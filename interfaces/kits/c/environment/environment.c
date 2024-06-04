@@ -25,7 +25,7 @@ int OH_Environment_GetUserDownloadDir(char **result)
     if (result == NULL) {
         return GetErrorCode(-PARAMETER_ERROR);
     }
-    int ret = GetUserDir("ohos.permission.READ_WRITE_DOWNLOAD_DIRECTORY", result);
+    int ret = GetUserDir("/Download", result);
     if (ret < 0) {
         return GetErrorCode(ret);
     }
@@ -37,7 +37,7 @@ int OH_Environment_GetUserDocumentDir(char **result)
     if (result == NULL) {
         return GetErrorCode(-PARAMETER_ERROR);
     }
-    int ret = GetUserDir("ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY", result);
+    int ret = GetUserDir("/Documents", result);
     if (ret < 0) {
         return GetErrorCode(ret);
     }
@@ -49,7 +49,7 @@ int OH_Environment_GetUserDesktopDir(char **result)
     if (result == NULL) {
         return GetErrorCode(-PARAMETER_ERROR);
     }
-    int ret = GetUserDir("ohos.permission.READ_WRITE_DESKTOP_DIRECTORY", result);
+    int ret = GetUserDir("/Desktop", result);
     if (ret < 0) {
         return GetErrorCode(ret);
     }
