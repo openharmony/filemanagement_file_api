@@ -672,7 +672,7 @@ bool PropNExporter::ExportAsync()
 bool PropNExporter::Export()
 {
     return ExportSync() && ExportAsync();
-}  
+}
 
 string PropNExporter::GetClassName()
 {
