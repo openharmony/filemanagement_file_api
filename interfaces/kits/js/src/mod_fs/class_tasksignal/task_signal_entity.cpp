@@ -19,13 +19,14 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 TaskSignalEntity::~TaskSignalEntity() {}
 
-void TaskSignalEntity::OnCancel(const std::string &path)
+void TaskSignalEntity::OnCancel()
 {
     uv_loop_s *loop = nullptr;
     if (!callbackContext_) {
         return;
     }
     auto env = callbackContext_->env_;
+    auto path = taskSignal_->filePath_;
     callbackContext_->filePath_ = path;
     napi_get_uv_event_loop(env, &loop);
     if (loop == nullptr) {
