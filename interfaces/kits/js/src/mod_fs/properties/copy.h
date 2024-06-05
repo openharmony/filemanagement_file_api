@@ -28,6 +28,7 @@
 #include "task_signal.h"
 #include "class_tasksignal/task_signal_entity.h"
 
+const uint64_t MAX_VALUE = 0x7FFFFFFFFFFFFFFF;
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {

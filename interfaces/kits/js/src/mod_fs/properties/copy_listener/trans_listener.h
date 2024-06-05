@@ -26,6 +26,7 @@
 constexpr int NONE = 0;
 constexpr int SUCCESS = 1;
 constexpr int FAILED = 2;
+const uint64_t MAX_VALUE = 0x7FFFFFFFFFFFFFFF;
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
