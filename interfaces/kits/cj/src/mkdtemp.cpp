@@ -41,7 +41,7 @@ char* MallocCString(const std::string& origin)
     return std::char_traits<char>::copy(res, origin.c_str(), len);
 }
 
-RetDataCString MkdtempImpl::Mkdtemp(std::string prefix)
+RetDataCString MkdtempImpl::Mkdtemp(const std::string& prefix)
 {
     LOGI("FS_TEST:: MkdtempImpl::Mkdtemp start");
     RetDataCString ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = nullptr };

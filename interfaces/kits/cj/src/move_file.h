@@ -27,7 +27,7 @@ namespace CJSystemapi {
 
 class MoveFileImpl {
 public:
-    static int MoveFile(std::string src, std::string dest, int mode);
+    static int MoveFile(const std::string& src, const std::string& dest, int mode);
 };
 constexpr int MODE_FORCE_MOVE = 0;
 constexpr int MODE_THROW_ERR = 1;

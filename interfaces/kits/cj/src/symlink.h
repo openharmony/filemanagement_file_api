@@ -23,7 +23,7 @@ namespace CJSystemapi {
     
 class SymlinkImpl {
 public:
-    static int Symlink(std::string target, std::string srcPath);
+    static int Symlink(const std::string& target, const std::string& srcPath);
 };
 
 } // namespace CJSystemapi

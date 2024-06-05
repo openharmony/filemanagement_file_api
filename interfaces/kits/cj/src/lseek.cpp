@@ -33,9 +33,8 @@ RetDataI64 LseekImpl::Lseek(int32_t fd, int64_t offset, int pos)
         LOGE("Invalid fd");
         return ret;
     }
-    
-    SeekPos whence = SeekPos::START;
-    whence = static_cast<SeekPos>(pos);
+
+    SeekPos whence = static_cast<SeekPos>(pos);
 
     int64_t seekRet = ::Lseek(fd, offset, whence);
     if (seekRet < 0) {

@@ -78,7 +78,7 @@ struct OptionArgs {
 
 class ListFileImpl {
 public:
-    static RetDataCArrStringN ListFile(std::string path, CListFileOptions options);
+    static RetDataCArrStringN ListFile(const std::string &path, CListFileOptions options);
 };
 
 }

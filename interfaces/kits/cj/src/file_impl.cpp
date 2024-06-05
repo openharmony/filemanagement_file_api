@@ -152,7 +152,7 @@ static std::tuple<int, std::string> OpenFileByUri(const std::string &path, uint3
     return { -EINVAL, path };
 }
 
-FileEntity* InstantiateFile(int fd, std::string pathOrUri, bool isUri)
+FileEntity* InstantiateFile(int fd, const std::string& pathOrUri, bool isUri)
 {
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
@@ -376,8 +376,13 @@ RetDataCString FileEntity::GetParent()
     ret.code = SUCCESS_CODE;
     auto parent = path.substr(0, pos);
     char* result = new char[parent.length() + 1];
+    if (result == nullptr) {
+        ret.code = ENOMEM;
+        return ret;
+    }
     if (strcpy_s(result, parent.length() + 1, parent.c_str()) != 0) {
         ret.code = ENOMEM;
+        free(result);
         return ret;
     }
     ret.data = result;

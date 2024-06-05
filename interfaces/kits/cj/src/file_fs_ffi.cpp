@@ -225,6 +225,7 @@ void FfiOHOSRandomAccessFileSetFilePointerSync(int64_t id, int64_t fd)
     auto instance = FFIData::GetData<RandomAccessFileImpl>(id);
     if (!instance) {
         LOGE("FfiOHOSRandomAccessFileSetFilePointerSync instance not exist %{public}" PRId64, id);
+        return;
     }
     LOGI("FS_TEST::FfiOHOSRandomAccessFileSetFilePointerSync success");
     instance->SetFilePointerSync(fd);
@@ -236,7 +237,8 @@ void FfiOHOSRandomAccessFileClose(int64_t id)
     LOGI("FS_TEST::FfiOHOSRandomAccessFileClose");
     auto instance = FFIData::GetData<RandomAccessFileImpl>(id);
     if (!instance) {
-        LOGI("FfiOHOSRandomAccessFileClose instance not exist %{public}" PRId64, id);
+        LOGE("FfiOHOSRandomAccessFileClose instance not exist %{public}" PRId64, id);
+        return;
     }
     LOGI("FS_TEST::FfiOHOSRandomAccessFileClose success");
     return instance->CloseSync();
@@ -248,7 +250,10 @@ RetDataI64 FfiOHOSRandomAccessFileWrite(int64_t id, char* buf, size_t len, int64
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto instance = FFIData::GetData<RandomAccessFileImpl>(id);
     if (!instance) {
-        LOGI("FfiOHOSRandomAccessFileWriteByString instance not exist %{public}" PRId64, id);
+        LOGE("FfiOHOSRandomAccessFileWriteByString instance not exist %{public}" PRId64, id);
+        ret.code = ERR_INVALID_INSTANCE_CODE;
+        ret.data = 0;
+        return ret;
     }
     LOGI("FS_TEST::FfiOHOSRandomAccessFileWriteByString success");
     auto [code, data] = instance->WriteSync(buf, len, offset);
@@ -263,7 +268,10 @@ RetDataI64 FfiOHOSRandomAccessFileRead(int64_t id, char* buf, size_t len, int64_
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto instance = FFIData::GetData<RandomAccessFileImpl>(id);
     if (!instance) {
-        LOGI("FfiOHOSRandomAccessFileReadByArray instance not exist %{public}" PRId64, id);
+        LOGE("FfiOHOSRandomAccessFileReadByArray instance not exist %{public}" PRId64, id);
+        ret.code = ERR_INVALID_INSTANCE_CODE;
+        ret.data = 0;
+        return ret;
     }
     LOGI("FS_TEST::FfiOHOSRandomAccessFileReadByArray success");
     auto [code, data] = instance->ReadSync(buf, len, offset);

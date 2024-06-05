@@ -211,7 +211,7 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
     }
  
     if (fileInfo.isPath) {
-        if (!succ || mode < 0) {
+        if (mode < 0) {
             LOGE("Invalid flags");
             return {GetErrorCode(EINVAL), nullptr};
         }
@@ -631,40 +631,51 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode,
     return res;
 }
 
-static void FreeConflictFiles(CConflictFiles* conflictFiles, size_t index)
-{
-    for (size_t i = index; i >= 0; i--) {
-        free(conflictFiles[i].srcFiles);
-        free(conflictFiles[i].destFiles);
-    }
-}
-
 static CConflictFiles* DequeToCConflict(std::deque<struct ConflictFiles> errfiles)
 {
     CConflictFiles* result = new CConflictFiles[errfiles.size()];
+    if (result == nullptr) {
+        return nullptr;
+    }
+    size_t temp = 0;
     for (size_t i = 0; i < errfiles.size(); i++) {
         size_t srcFilesLen = errfiles[i].srcFiles.length() + 1;
         result[i].srcFiles = static_cast<char*>(malloc(srcFilesLen));
         if (result[i].srcFiles == nullptr) {
-            FreeConflictFiles(result, i - 1);
+            break;
         }
         if (strcpy_s(result[i].srcFiles, srcFilesLen, errfiles[i].srcFiles.c_str()) != 0) {
             free(result[i].srcFiles);
-            FreeConflictFiles(result, i - 1);
-            delete[] result;
-            return nullptr;
+            result[i].srcFiles = nullptr;
+            break;
         }
         size_t destFilesLen = errfiles[i].destFiles.length() + 1;
         result[i].destFiles = static_cast<char*>(malloc(destFilesLen));
-        if (result[i].destFiles != nullptr) {
+        if (result[i].destFiles == nullptr) {
             free(result[i].srcFiles);
-            FreeConflictFiles(result, i - 1);
+            result[i].srcFiles = nullptr;
+            break;
         }
         if (strcpy_s(result[i].destFiles, destFilesLen, errfiles[i].destFiles.c_str()) != 0) {
-            FreeConflictFiles(result, i);
-            delete[] result;
-            return nullptr;
+            free(result[i].srcFiles);
+            free(result[i].destFiles);
+
+            result[i].srcFiles = nullptr;
+            result[i].destFiles = nullptr;
+            break;
         }
+        temp++;
+    }
+    if (temp != errfiles.size()) {
+        for (size_t j = temp; j > 0; j--) {
+            free(result[j - 1].srcFiles);
+            free(result[j - 1].destFiles);
+
+            result[j - 1].srcFiles = nullptr;
+            result[j - 1].destFiles = nullptr;
+        }
+        delete[] result;
+        return nullptr;
     }
     return result;
 }
@@ -985,7 +996,6 @@ int FileFsImpl::Close(int32_t file)
     if (file >= 0) {
         fileStruct = FileStruct { true, file, nullptr };
     } else {
-        fileStruct = FileStruct { false, -1, nullptr };
         return GetErrorCode(EINVAL);
     }
     

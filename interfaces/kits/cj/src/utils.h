@@ -70,6 +70,7 @@ struct ConflictFiles {
 struct CConflictFiles {
     char* srcFiles;
     char* destFiles;
+    CConflictFiles() : srcFiles(nullptr), destFiles(nullptr) {}
 };
 
 struct CArrConflictFiles {

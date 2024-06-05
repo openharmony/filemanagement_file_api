@@ -143,7 +143,7 @@ static int RenameFile(const string &src, const string &dest)
     return OHOS::FileManagement::LibN::ERRNO_NOERR;
 }
 
-int MoveFileImpl::MoveFile(std::string src, std::string dest, int mode)
+int MoveFileImpl::MoveFile(const std::string& src, const std::string& dest, int mode)
 {
     LOGI("FS_TEST:: MoveFileImpl::MoveFile start");
     if (CheckDir(src)) {

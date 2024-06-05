@@ -51,7 +51,7 @@ public:
             }
         }
     }
-    FileEntity(std::unique_ptr<DistributedFS::FDGuard> fd, std::string path, std::string uri)
+    FileEntity(std::unique_ptr<DistributedFS::FDGuard> fd, const std::string& path, const std::string& uri)
         : fd_(std::move(fd)), path_(path), uri_(uri) {}
     FileEntity() {};
     static std::tuple<int32_t, sptr<FileEntity>> Open(const char* path, int64_t mode);

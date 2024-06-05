@@ -25,8 +25,8 @@ namespace OHOS {
 namespace CJSystemapi {
 namespace FileFs {
 
-std::tuple<int, std::unique_ptr<char[]>, void *, size_t, int64_t> GetWriteArg(std::string buffer, int64_t length,
-    int64_t offset, std::string encode);
+std::tuple<int, std::unique_ptr<char[]>, void *, size_t, int64_t> GetWriteArg(const std::string& buffer, int64_t length,
+    int64_t offset, const std::string& encode);
 std::tuple<int, std::unique_ptr<char[]>, size_t, int64_t> GetReadArg(size_t bufLen, int64_t length, int64_t offset);
 
 class StreamImpl : public OHOS::FFI::FFIData {
@@ -41,9 +41,10 @@ public:
 
     std::tuple<int, int64_t> Read(uint8_t* buffer, size_t buLen, int64_t length, int64_t offset);
 
-    std::tuple<int, int64_t> WriteCur(std::string buffer, int64_t length, std::string encode);
+    std::tuple<int, int64_t> WriteCur(const std::string& buffer, int64_t length, const std::string& encode);
 
-    std::tuple<int, int64_t> Write(std::string buffer, int64_t length, int64_t offset, std::string encode);
+    std::tuple<int, int64_t> Write(const std::string& buffer, int64_t length, int64_t offset,
+        const std::string& encode);
 
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 
