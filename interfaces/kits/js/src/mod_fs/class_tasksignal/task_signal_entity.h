@@ -27,7 +27,7 @@ public:
     explicit JSCallbackContext(LibN::NVal jsVal) : ref_(jsVal) {}
     ~JSCallbackContext() = default;
 
-    napi_env env_;
+    napi_env env_ = nullptr;
     LibN::NRef ref_;
     std::string filePath_;
 };

@@ -42,7 +42,7 @@ napi_value Utimes::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succGetMtime, mtime] = NVal(env, funcArg[NARG_POS::SECOND]).ToDouble();;
+    auto [succGetMtime, mtime] = NVal(env, funcArg[NARG_POS::SECOND]).ToDouble();
     if (!succGetMtime || mtime < 0) {
         HILOGE("Invalid mtime from JS second argument");
         NError(EINVAL).ThrowErr(env);

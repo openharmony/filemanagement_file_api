@@ -327,7 +327,7 @@ int FileEntity::TryLock(int64_t id, bool exclusive)
     }
     int ret = 0;
     auto mode = exclusive ? LOCK_EX : LOCK_SH;
-    ret = flock(fileEntity->fd_.get()->GetFD(), mode | LOCK_NB);
+    ret = flock(fileEntity->fd_.get()->GetFD(), static_cast<unsigned int>(mode) | LOCK_NB);
     if (ret < 0) {
         LOGE("Failed to try to lock file");
         return GetErrorCode(ETXTBSY);

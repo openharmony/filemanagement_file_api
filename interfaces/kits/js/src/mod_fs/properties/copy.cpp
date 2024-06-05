@@ -309,7 +309,7 @@ uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, const std::string &p
             continue;
         }
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
-            size += GetDirSize(infos, dest);
+            size += static_cast<int64_t>(GetDirSize(infos, dest));
         } else {
             struct stat st {};
             if (stat(dest.c_str(), &st) == -1) {
@@ -671,7 +671,7 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
             OnFileReceive(infos);
             infos->notifyTime = currentTime + NOTIFY_PROGRESS_DELAY;
         }
-        index += sizeof(struct inotify_event) + event->len;
+        index += sizeof(struct inotify_event) + static_cast<int>(event->len);
     }
 }
 
@@ -692,11 +692,11 @@ void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
     while (infos->run && infos->exceptionCode == ERRNO_NOERR && infos->eventFd != -1 && infos->notifyFd != -1) {
         auto ret = poll(fds, nfds, -1);
         if (ret > 0) {
-            if (fds[0].revents & POLLNVAL) {
+            if (static_cast<unsigned short>(fds[0].revents) & POLLNVAL) {
                 infos->run = false;
                 return;
             }
-            if (fds[1].revents & POLLIN) {
+            if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
                 ReadNotifyEvent(infos);
             }
         } else if (ret < 0 && errno == EINTR) {
