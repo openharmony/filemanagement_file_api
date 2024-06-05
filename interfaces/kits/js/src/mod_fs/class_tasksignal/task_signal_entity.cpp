@@ -26,8 +26,7 @@ void TaskSignalEntity::OnCancel()
         return;
     }
     auto env = callbackContext_->env_;
-    auto path = taskSignal_->filePath_;
-    callbackContext_->filePath_ = path;
+    callbackContext_->filePath_ = taskSignal_->filePath_;
     napi_get_uv_event_loop(env, &loop);
     if (loop == nullptr) {
         return;
