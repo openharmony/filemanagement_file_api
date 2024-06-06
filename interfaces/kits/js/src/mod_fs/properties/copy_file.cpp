@@ -163,6 +163,9 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
             return NError(errno);
         }
     }
+    if (statbf.st_size == 0) {
+        return NError(ERRNO_NOERR);
+    }
     return SendFileCore(srcFile, destFile, statbf);
 }
 
