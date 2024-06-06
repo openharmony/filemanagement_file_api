@@ -175,7 +175,7 @@ static tuple<bool, unsigned int> GetCjFlags(int64_t mode)
 {
     unsigned int flags = O_RDONLY;
     int32_t invalidMode = (O_WRONLY | O_RDWR);
-    if (mode < 0 || ((mode & invalidMode) == invalidMode)) {
+    if (mode < 0 || (static_cast<unsigned int>(mode) & invalidMode) == invalidMode) {
         LOGE("Invalid mode");
         return { false, flags };
     }
@@ -196,21 +196,29 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Open(const char* path, int64_t
         return {EINVAL, nullptr};
     }
     std::string pathStr(path);
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (pathStr.find("://") != string::npos) {
         auto [res, uriStr] = OpenFileByUri(pathStr, flags);
         if (res < 0) {
             return {res, nullptr};
         }
         auto fileEntity = InstantiateFile(res, uriStr, true);
+        if (fileEntity == nullptr) {
+            return { ENOMEM, nullptr};
+        }
         auto fileUri = FFIData::Create<FileEntity>(std::move(fileEntity->fd_), fileEntity->path_, fileEntity->uri_);
         return {SUCCESS_CODE, fileUri};
     }
+#endif
     int ret = OpenFileByPath(pathStr, flags);
     if (ret < 0) {
         LOGE("Failed to open file for libuv error %{public}d", ret);
         return {ret, nullptr};
     }
     auto file = InstantiateFile(ret, pathStr, false);
+    if (file == nullptr) {
+        return { ENOMEM, nullptr};
+    }
     auto filePath = FFIData::Create<FileEntity>(std::move(file->fd_), file->path_, file->uri_);
     return {SUCCESS_CODE, filePath};
 }

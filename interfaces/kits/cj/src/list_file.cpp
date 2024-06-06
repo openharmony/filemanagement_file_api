@@ -84,7 +84,8 @@ static bool GetFileFilterParam(CFilter cFilter, FileFilter *filter)
         filter->SetFileSizeOver(cFilter.fileSizeOver);
     }
     
-    if (cFilter.lastModifiedAfter != -1.0) {
+    double epsilon = 1e-6;
+    if (fabs(cFilter.lastModifiedAfter + -1.0) > epsilon) {
         LOGI("GetFileFilterParam lastModifiedAfter");
         filter->SetLastModifiedAfter(cFilter.lastModifiedAfter);
     }
