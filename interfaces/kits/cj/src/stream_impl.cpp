@@ -129,6 +129,22 @@ int StreamImpl::Flush()
     return SUCCESS_CODE;
 }
 
+tuple<int, int64_t> ReadImpl(std::unique_ptr<char[]> &buf, size_t len, FILE* filp, uint8_t* buffer)
+{
+    size_t actLen = fread(buf.get(), sizeof(char), len, filp);
+    if ((actLen != static_cast<size_t>(len) && !feof(filp)) || ferror(filp)) {
+        LOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
+        return {GetErrorCode(EIO), 0};
+    }
+    if (actLen != 0) {
+        int ret = memcpy_s(buffer, actLen, buf.get(), actLen);
+        if (ret != 0) {
+            return {GetErrorCode(EIO), 0};
+        }
+    }
+    return {SUCCESS_CODE, static_cast<int64_t>(actLen)};
+}
+
 tuple<int, int64_t> StreamImpl::ReadCur(uint8_t* buffer, size_t buLen, int64_t length)
 {
     if (!fp_) {
@@ -145,15 +161,7 @@ tuple<int, int64_t> StreamImpl::ReadCur(uint8_t* buffer, size_t buLen, int64_t l
         return {GetErrorCode(state), 0};
     }
 
-    size_t actLen = fread(buf.get(), sizeof(char), len, filp);
-    if ((actLen != static_cast<size_t>(len) && !feof(filp)) || ferror(filp)) {
-        LOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
-        return {GetErrorCode(EIO), 0};
-    }
-
-    memcpy_s(buffer, actLen, buf.get(), actLen);
-
-    return {SUCCESS_CODE, static_cast<int64_t>(actLen)};
+    return ReadImpl(buf, len, filp, buffer);
 }
 
 tuple<int, int64_t> StreamImpl::Read(uint8_t* buffer, size_t buLen, int64_t length, int64_t offset)
@@ -179,15 +187,7 @@ tuple<int, int64_t> StreamImpl::Read(uint8_t* buffer, size_t buLen, int64_t leng
             return {GetErrorCode(errno), 0};
         }
     }
-    size_t actLen = fread(buf.get(), sizeof(char), len, filp);
-    if ((actLen != static_cast<size_t>(len) && !feof(filp)) || ferror(filp)) {
-        LOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
-        return {GetErrorCode(EIO), 0};
-    }
-
-    memcpy_s(buffer, actLen, buf.get(), actLen);
-
-    return {SUCCESS_CODE, static_cast<int64_t>(actLen)};
+    return ReadImpl(buf, len, filp, buffer);
 }
 
 tuple<int, int64_t> StreamImpl::WriteCur(const std::string& buffer, int64_t length, const std::string& encode)

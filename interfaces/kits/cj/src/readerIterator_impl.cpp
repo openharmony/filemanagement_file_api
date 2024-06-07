@@ -39,7 +39,11 @@ std::tuple<int32_t, bool, char*> ReadIteratorImpl::Next()
     if (value == nullptr) {
         return {GetErrorCode(ENOMEM), done, nullptr};
     }
-    memcpy_s(value, str->len + 1, str->str, str->len + 1);
+    int ret = memcpy_s(value, str->len + 1, str->str, str->len + 1);
+    if (ret != EOK) {
+        free(value);
+        return { GetErrorCode(ENOMEM), done, value};
+    }
     entity_->offset -= static_cast<int64_t>(str->len);
     StrFree(str);
     return { SUCCESS_CODE, done, value};
