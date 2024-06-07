@@ -485,7 +485,8 @@ napi_value RandomAccessFileNExporter::GetReadStream(napi_env env, napi_callback_
     }
 
     int flags = fcntl(rafEntity->fd.get()->GetFD(), F_GETFL);
-    if (((flags & O_ACCMODE) != O_RDONLY) && ((flags & O_ACCMODE) != O_RDWR)) {
+    unsigned int uflags = static_cast<unsigned int>(flags);
+    if (((uflags & O_ACCMODE) != O_RDONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
         HILOGE("Failed to check Permission");
         NError(EACCES).ThrowErr(env);
         return nullptr;
@@ -510,7 +511,8 @@ napi_value RandomAccessFileNExporter::GetWriteStream(napi_env env, napi_callback
     }
 
     int flags = fcntl(rafEntity->fd.get()->GetFD(), F_GETFL);
-    if (((flags & O_ACCMODE) != O_WRONLY) && ((flags & O_ACCMODE) != O_RDWR)) {
+    unsigned int uflags = static_cast<unsigned int>(flags);
+    if (((uflags & O_ACCMODE) != O_WRONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
         HILOGE("Failed to check Permission");
         NError(EACCES).ThrowErr(env);
         return nullptr;

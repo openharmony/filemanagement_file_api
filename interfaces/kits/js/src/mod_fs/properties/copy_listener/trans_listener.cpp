@@ -217,8 +217,7 @@ void TransListener::CallbackComplete(uv_work_t *work, int stat)
         return;
     }
     NVal obj = NVal::CreateObject(env);
-    if (entry->progressSize <= numeric_limits<int64_t>::max() &&
-        entry->totalSize <= static_cast<uint64_t>(numeric_limits<int64_t>::max())) {
+    if (entry->progressSize <= MAX_VALUE && entry->totalSize <= MAX_VALUE) {
         obj.AddProp("processedSize", NVal::CreateInt64(env, entry->progressSize).val_);
         obj.AddProp("totalSize", NVal::CreateInt64(env, entry->totalSize).val_);
     }

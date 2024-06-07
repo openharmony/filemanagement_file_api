@@ -492,7 +492,7 @@ void Copy::ReceiveComplete(uv_work_t *work, int stat)
         return;
     }
     NVal obj = NVal::CreateObject(env);
-    if (processedSize <= numeric_limits<int64_t>::max() && entry->totalSize <= numeric_limits<int64_t>::max()) {
+    if (processedSize <= MAX_VALUE && entry->totalSize <= MAX_VALUE) {
         obj.AddProp("processedSize", NVal::CreateInt64(env, processedSize).val_);
         obj.AddProp("totalSize", NVal::CreateInt64(env, entry->totalSize).val_);
     }
