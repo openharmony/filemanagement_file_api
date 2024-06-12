@@ -257,8 +257,9 @@ napi_value CreateRandomAccessFile::Async(napi_env env, napi_callback_info info)
         return InstantiateRandomAccessFile(env, move(movedFileInfo->fdg), 0, start, end);
     };
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
-        NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number))) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE ||
+        (funcArg.GetArgc() == NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) ||
+        (funcArg.GetArgc() == NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_object))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_CREATERAT_NAME, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);

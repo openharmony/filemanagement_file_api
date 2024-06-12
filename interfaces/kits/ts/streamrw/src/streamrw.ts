@@ -46,32 +46,33 @@ class ReadStream extends stream.Readable {
         this.offset = this.start ?? 0;
     }
 
-    get path() {
+    get path(): string {
         return this.pathInner;
     }
 
-    get bytesRead() {
+    get bytesRead(): number {
         return this.bytesReadInner;
     }
 
     // @ts-ignore
-    seek(offset: number, whence?: fileIo.WhenceType) {
-        if (whence == undefined) {
+    seek(offset: number, whence?: fileIo.WhenceType): number {
+        if (whence === undefined) {
             this.offset = this.stream?.seek(offset);
         } else {
             this.offset = this.stream?.seek(offset, whence);
         }
+        return this.offset;
     }
 
-    close() {
+    close(): void {
         this.stream?.close();
     }
 
-    doInitialize(callback: Function) {
+    doInitialize(callback: Function): void {
         callback();
     }
 
-    doRead(size: number) {
+    doRead(size: number): void {
         let readSize = size;
         if (this.end !== undefined) {
             if (this.offset > this.end) {
@@ -91,11 +92,11 @@ class ReadStream extends stream.Readable {
                     this.bytesReadInner += readOut;
                     this.push(new Uint8Array(buffer.slice(0, readOut)));
                 }
-                if (readOut != readSize || readOut < size) {
+                if (readOut !== readSize || readOut < size) {
                     this.offset = this.offset - readSize + readOut;
                     this.push(null);
                 }
-            })
+            });
     }
 }
 
@@ -118,32 +119,33 @@ class WriteStream extends stream.Writable {
         this.offset = this.start ?? 0;
     }
 
-    get path() {
+    get path(): string {
         return this.pathInner;
     }
 
-    get bytesWritten() {
+    get bytesWritten(): number {
         return this.bytesWrittenInner;
     }
 
     // @ts-ignore
-    seek(offset: number, whence?: fileIo.WhenceType) {
-        if (whence == undefined) {
+    seek(offset: number, whence?: fileIo.WhenceType): number {
+        if (whence === undefined) {
             this.offset = this.stream?.seek(offset);
         } else {
             this.offset = this.stream?.seek(offset, whence);
         }
+        return this.offset;
     }
 
-    close() {
+    close(): void {
         this.stream?.close();
     }
 
-    doInitialize(callback: Function) {
+    doInitialize(callback: Function): void {
         callback();
     }
 
-    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         this.stream?.write(chunk, { offset: this.offset })
             .then((writeIn: number) => {
                 this.offset += writeIn;
@@ -152,7 +154,7 @@ class WriteStream extends stream.Writable {
             })
             .finally(() => {
                 this.stream?.flush();
-            })
+            });
     }
 
     convertOpenMode(mode?: number): string {
@@ -167,10 +169,10 @@ class WriteStream extends stream.Writable {
             modeStr = 'w+';
         }
         if ((mode & fileIo.OpenMode.WRITE_ONLY) && (mode & fileIo.OpenMode.APPEND)) {
-            modeStr = "a"
+            modeStr = 'a';
         }
         if ((mode & fileIo.OpenMode.READ_WRITE) && (mode & fileIo.OpenMode.APPEND)) {
-            modeStr = "a+"
+            modeStr = 'a+';
         }
         return modeStr;
     }
@@ -179,4 +181,4 @@ class WriteStream extends stream.Writable {
 export default {
     ReadStream: ReadStream,
     WriteStream: WriteStream,
-}
+};

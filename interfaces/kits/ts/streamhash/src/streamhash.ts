@@ -31,26 +31,26 @@ class HashStream extends stream.Transform {
         return this.hs.digest();
     }
 
-    update(data: ArrayBuffer) {
+    update(data: ArrayBuffer): void {
         this.hs.update(data);
     }
 
-    doTransform(chunk: string, encoding: string, callback: Function) {
+    doTransform(chunk: string, encoding: string, callback: Function): void {
         const buf = new Uint8Array(chunk.split('').map(x => x.charCodeAt(0))).buffer;
         this.hs.update(buf);
         this.push(chunk);
         callback();
     }
 
-    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function) {
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
         callback();
     }
 
-    doFlush(callback: Function) {
+    doFlush(callback: Function): void {
         callback();
     }
 }
 
 export default {
     HashStream: HashStream,
-}
+};
