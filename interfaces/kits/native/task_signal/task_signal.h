@@ -35,7 +35,7 @@ public:
     void OnCancel();
     void SetTaskSignalListener(std::shared_ptr<TaskSignalListener> signalListener);
     void MarkRemoteTask();
-    std::string SetFileInfoOfRemoteTask(const std::string &sessionName, const std::string &filePath);
+    void SetFileInfoOfRemoteTask(const std::string &sessionName, const std::string &filePath);
     std::atomic_bool needCancel_{ false };
     std::atomic_bool remoteTask_{ false };
     std::string sessionName_ = std::string("");
