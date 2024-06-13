@@ -648,7 +648,7 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
     char buf[BUF_SIZE] = { 0 };
     struct inotify_event *event = nullptr;
     int len = 0;
-    int index = 0;
+    int64_t index = 0;
     auto callback = GetRegisteredListener(infos);
     while (((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {}
     while (infos->run && index < len) {
@@ -659,7 +659,7 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
             return;
         }
         if (needContinue && !needSend) {
-            index += sizeof(struct inotify_event) + event->len;
+            index += static_cast<int64_t>(sizeof(struct inotify_event) + event->len);
             continue;
         }
         if (callback->progressSize == callback->totalSize) {
@@ -671,7 +671,7 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
             OnFileReceive(infos);
             infos->notifyTime = currentTime + NOTIFY_PROGRESS_DELAY;
         }
-        index += sizeof(struct inotify_event) + static_cast<int>(event->len);
+        index += static_cast<int64_t>(sizeof(struct inotify_event) + event->len);
     }
 }
 
