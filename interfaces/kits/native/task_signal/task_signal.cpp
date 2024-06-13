@@ -83,7 +83,6 @@ void TaskSignal::SetFileInfoOfRemoteTask(const std::string &sessionName, const s
     HILOGD("SetFileInfoOfRemoteTask sessionName = %{public}s", sessionName.c_str());
     sessionName_ = sessionName;
     filePath_ = filePath;
-    return filePath_;
 }
 } // namespace ModuleTaskSignal
 } // namespace DistributedFS
