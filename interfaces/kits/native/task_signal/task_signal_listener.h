@@ -22,7 +22,7 @@ namespace ModuleTaskSignal {
 class TaskSignalListener {
 public:
     virtual ~TaskSignalListener() = default;
-    virtual void OnCancel(const std::string &path) = 0;
+    virtual void OnCancel() = 0;
 };
 } // namespace ModuleTaskSignal
 } // namespace DistributedFS

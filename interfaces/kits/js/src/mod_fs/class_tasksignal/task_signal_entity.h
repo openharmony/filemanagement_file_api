@@ -36,7 +36,7 @@ class TaskSignalEntity : public TaskSignalListener {
 public:
     TaskSignalEntity() = default;
     ~TaskSignalEntity() override;
-    void OnCancel(const std::string &path) override;
+    void OnCancel() override;
 
     std::shared_ptr<TaskSignal> taskSignal_ = nullptr;
     std::shared_ptr<JSCallbackContext> callbackContext_ = nullptr;

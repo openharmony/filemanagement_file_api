@@ -48,8 +48,9 @@ std::string TaskSignalTest::canceledFilePath_;
 class TaskSignalListenerTestImpl : public TaskSignalListener {
 public:
     ~TaskSignalListenerTestImpl() = default;
-    void OnCancel(const std::string &path)
+    void OnCancel()
     {
+        string path = "aaa";
         TaskSignalTest::canceledFilePath_ = path;
         TaskSignalTest::taskListenerCv_.notify_one();
         HILOGI("OnCancel in. path = %{public}s", path.c_str());
@@ -109,7 +110,7 @@ HWTEST_F(TaskSignalTest, Task_Signal_SetTaskSignalListener_0000, testing::ext::T
     auto listener = std::make_shared<TaskSignalListenerTestImpl>();
     signal->SetTaskSignalListener(listener);
     std::string filePath = "aaa";
-    listener->OnCancel(filePath);
+    listener->OnCancel();
     signal->CheckCancelIfNeed(filePath);
     EXPECT_EQ(TaskSignalTest::canceledFilePath_, filePath);
 }
