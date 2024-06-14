@@ -383,7 +383,7 @@ RetDataCString FileEntity::GetParent()
     }
     ret.code = SUCCESS_CODE;
     auto parent = path.substr(0, pos);
-    char* result = new char[parent.length() + 1];
+    char* result = new(std::nothrow) char[parent.length() + 1];
     if (result == nullptr) {
         ret.code = ENOMEM;
         return ret;

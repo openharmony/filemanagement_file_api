@@ -255,7 +255,7 @@ static int RecursiveFunc(const string &path, vector<string> &dirents)
 
 static char** VectorToCArrString(vector<string> &vec)
 {
-    char** result = new char* [vec.size()];
+    char** result = new(std::nothrow) char* [vec.size()];
     if (result == nullptr) {
         return nullptr;
     }

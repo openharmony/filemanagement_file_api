@@ -31,6 +31,8 @@ namespace OHOS {
 namespace CJSystemapi {
 namespace FileFs {
 
+constexpr int S_PREMISSION = 00000777;
+
 class StatImpl : public OHOS::FFI::FFIData {
 public:
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
@@ -44,7 +46,7 @@ public:
 
     inline int64_t GetMode() const
     {
-        return static_cast<int64_t>(real_.st_mode);
+        return static_cast<int64_t>(real_.st_mode & S_PREMISSION);
     }
 
     inline int64_t GetUid() const
