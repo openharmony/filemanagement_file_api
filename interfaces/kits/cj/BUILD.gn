@@ -97,7 +97,6 @@ ohos_shared_library("cj_file_fs_ffi") {
       "data_share:datashare_consumer",
       "hilog:libhilog",
       "ipc:ipc_core",
-      "libuv:uv",
       "napi:ace_napi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",

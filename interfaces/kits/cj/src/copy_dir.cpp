@@ -185,7 +185,7 @@ static int CopyDirFunc(const std::string &src, const std::string &dest, const in
 
 static CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errfiles)
 {
-    CConflictFiles* result = new CConflictFiles[errfiles.size()];
+    CConflictFiles* result = new(std::nothrow) CConflictFiles[errfiles.size()];
     if (result == nullptr) {
         return nullptr;
     }

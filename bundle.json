@@ -42,8 +42,7 @@
             "napi",
             "samgr",
             "app_file_service",
-            "os_account",
-            "libuv"
+            "os_account"
         ],
         "third_party": [
             "e2fsprogs",

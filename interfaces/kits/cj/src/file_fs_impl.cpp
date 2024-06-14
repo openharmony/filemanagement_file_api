@@ -633,7 +633,7 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode,
 
 static CConflictFiles* DequeToCConflict(std::deque<struct ConflictFiles> errfiles)
 {
-    CConflictFiles* result = new CConflictFiles[errfiles.size()];
+    CConflictFiles* result = new(std::nothrow) CConflictFiles[errfiles.size()];
     if (result == nullptr) {
         return nullptr;
     }
