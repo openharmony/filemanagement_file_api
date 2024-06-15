@@ -23,7 +23,7 @@ namespace CJSystemapi {
 
 class MkdtempImpl {
 public:
-    static RetDataCString Mkdtemp(const std::string& src);
+    static RetDataCString Mkdtemp(const std::string& prefix);
 };
 
 }

@@ -184,10 +184,10 @@ void WatcherImpl::NotifyEvent(const struct inotify_event *event)
         if (event->len > 0) {
             fileName += "/" + string(event->name);
         }
-        CWatchEvent ret = { .fileName = nullptr, .event = 0, .cookie = 0 };
-        ret.fileName = fileName.c_str();
-        ret.event = event->mask & IN_ALL_EVENTS;
-        ret.cookie = event->cookie;
+        CWatchEvent ret = { 
+            .fileName = fileName.c_str(),
+            .event = event->mask & IN_ALL_EVENTS,
+            .cookie = event->cookie };
         data_->watchCallback_(ret);
     }
 }

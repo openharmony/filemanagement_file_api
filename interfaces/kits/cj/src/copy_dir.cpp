@@ -192,7 +192,7 @@ static CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errf
     size_t temp = 0;
     for (size_t i = 0; i < errfiles.size(); i++) {
         size_t srcFilesLen = errfiles[i].srcFiles.length() + 1;
-        result[i].srcFiles = new char[srcFilesLen];
+        result[i].srcFiles = new(std::nothrow) char[srcFilesLen];
         if (result[i].srcFiles == nullptr) {
             break;
         }
@@ -202,7 +202,7 @@ static CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errf
             break;
         }
         size_t destFilesLen = errfiles[i].destFiles.length() + 1;
-        result[i].destFiles = new char[destFilesLen];
+        result[i].destFiles = new(std::nothrow) char[destFilesLen];
         if (result[i].destFiles == nullptr) {
             delete result[i].srcFiles;
             result[i].srcFiles = nullptr;

@@ -42,6 +42,7 @@ std::tuple<int32_t, bool, char*> ReadIteratorImpl::Next()
     int ret = memcpy_s(value, str->len + 1, str->str, str->len + 1);
     if (ret != EOK) {
         free(value);
+        value = nullptr;
         return { GetErrorCode(ENOMEM), done, value};
     }
     entity_->offset -= static_cast<int64_t>(str->len);
