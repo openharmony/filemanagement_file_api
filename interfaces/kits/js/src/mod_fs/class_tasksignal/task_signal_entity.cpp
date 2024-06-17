@@ -62,7 +62,6 @@ void TaskSignalEntity::OnCancel()
                 if (ret != napi_ok) {
                     HILOGE("Failed to close handle scope, ret: %{public}d", ret);
                 }
-                delete callbackContext;
                 delete work;
             }, uv_qos_user_initiated);
     if (ret != 0) {
