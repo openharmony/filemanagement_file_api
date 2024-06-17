@@ -49,7 +49,7 @@ const string PROCEDURE_COPY_NAME = "FileFSCopy";
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
-constexpr size_t MAX_SIZE = 1024 * 1024 * 4;
+constexpr size_t MAX_SIZE = 1024 * 1024 * 128;
 constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(300);
 std::recursive_mutex Copy::mutex_;
 std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
