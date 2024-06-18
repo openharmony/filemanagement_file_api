@@ -182,7 +182,7 @@ int Copy::CopyFile(const string &src, const string &dest, std::shared_ptr<FileIn
     }
     int64_t size = static_cast<int64_t>(srcStat.st_size);
     int ret = 0;
-    while (size > 0) {
+    while (size >= 0) {
         ret = uv_fs_sendfile(nullptr, sendFileReq.get(), destFdg->GetFD(), srcFdg->GetFD(),
             offset, MAX_SIZE, nullptr);
         if (ret < 0) {
