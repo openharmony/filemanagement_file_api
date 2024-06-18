@@ -38,8 +38,8 @@ public:
     ~TaskSignalEntity() override;
     void OnCancel() override;
 
-    std::shared_ptr<TaskSignal> taskSignal_ = nullptr;
-    std::shared_ptr<JSCallbackContext> callbackContext_ = nullptr;
+    std::unique_ptr<TaskSignal> taskSignal_ = nullptr;
+    std::unique_ptr<JSCallbackContext> callbackContext_ = nullptr;
 };
 } // namespace OHOS::FileManagement::ModuleFileIO
 
