@@ -110,7 +110,7 @@ napi_value TaskSignalNExporter::OnCancel(napi_env env, napi_callback_info info)
 {
     HILOGD("TaskSignal OnCancel Func Run in.");
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE)) {
+    if (!funcArg.InitArgs(NARG_CNT::NONE)) {
         HILOGE("Failed to get param when stop.");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
