@@ -49,7 +49,7 @@ napi_value TaskSignalNExporter::Constructor(napi_env env, napi_callback_info inf
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    taskSignalEntity->taskSignal_ = std::make_shared<TaskSignal>();
+    taskSignalEntity->taskSignal_ = std::make_unique<TaskSignal>();
     if (!NClass::SetEntityFor<TaskSignalEntity>(env, funcArg.GetThisVar(), std::move(taskSignalEntity))) {
         HILOGE("Failed to set watcherEntity.");
         NError(EIO).ThrowErr(env);
@@ -122,7 +122,7 @@ napi_value TaskSignalNExporter::OnCancel(napi_env env, napi_callback_info info)
         return nullptr;
     }
     taskSignalEntity->taskSignal_->SetTaskSignalListener(taskSignalEntity);
-    auto callbackContext = std::make_shared<JSCallbackContext>(NVal(env, funcArg[0]));
+    auto callbackContext = std::make_unique<JSCallbackContext>(NVal(env, funcArg[0]));
     callbackContext->env_ = env;
     taskSignalEntity->callbackContext_ = callbackContext;
     napi_value result = nullptr;
