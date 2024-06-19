@@ -734,7 +734,7 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     if (infos->copySignal) {
         auto taskSignalEntity = NClass::GetEntityOf<TaskSignalEntity>(infos->env, infos->copySignal.val_);
         if (taskSignalEntity != nullptr) {
-            infos->taskSignal = std::move(taskSignalEntity->taskSignal_);
+            infos->taskSignal = taskSignalEntity->taskSignal_;
         }
     }
     return { ERRNO_NOERR, infos };
