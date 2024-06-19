@@ -124,7 +124,7 @@ napi_value TaskSignalNExporter::OnCancel(napi_env env, napi_callback_info info)
     taskSignalEntity->taskSignal_->SetTaskSignalListener(taskSignalEntity);
     auto callbackContext = std::make_unique<JSCallbackContext>(NVal(env, funcArg[0]));
     callbackContext->env_ = env;
-    taskSignalEntity->callbackContext_ = callbackContext;
+    taskSignalEntity->callbackContext_ = std::move(callbackContext);
     napi_value result = nullptr;
     napi_get_null(env, &result);
     return result;
