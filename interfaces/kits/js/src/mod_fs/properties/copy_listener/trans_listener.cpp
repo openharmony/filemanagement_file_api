@@ -118,9 +118,10 @@ int32_t TransListener::PrepareCopySession(const std::string &srcUri,
     if (info.authority != FILE_MANAGER_AUTHORITY && info.authority  != MEDIA_AUTHORITY) {
         tmpDir = CreateDfsCopyPath();
         disSandboxPath = DISTRIBUTED_PATH + tmpDir;
-        if (!std::filesystem::create_directory(disSandboxPath)) {
-            HILOGE("Create dir failed");
-            return EIO;
+        std::err_code errCode;
+        if (!std::filesystem::create_directory(disSandboxPath, errCode)) {
+            HILOGE("Create dir failed, error code: %{public}d", errCode.value());
+            return errCode.value();
         }
 
         auto pos = info.sandboxPath.rfind('/');
