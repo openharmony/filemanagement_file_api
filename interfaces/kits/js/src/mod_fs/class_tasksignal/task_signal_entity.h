@@ -27,7 +27,7 @@ public:
     explicit JSCallbackContext(LibN::NVal jsVal) : ref_(jsVal) {}
     ~JSCallbackContext() = default;
 
-    napi_env env_;
+    napi_env env_ = nullptr;
     LibN::NRef ref_;
     std::string filePath_;
 };
@@ -36,7 +36,7 @@ class TaskSignalEntity : public TaskSignalListener {
 public:
     TaskSignalEntity() = default;
     ~TaskSignalEntity() override;
-    void OnCancel(const std::string &path) override;
+    void OnCancel() override;
 
     std::shared_ptr<TaskSignal> taskSignal_ = nullptr;
     std::shared_ptr<JSCallbackContext> callbackContext_ = nullptr;

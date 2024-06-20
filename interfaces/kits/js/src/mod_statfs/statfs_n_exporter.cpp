@@ -33,7 +33,7 @@ napi_value GetFrSizeSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char[]> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -60,7 +60,7 @@ napi_value GetFrSize(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -105,7 +105,7 @@ napi_value GetBSizeSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char[]> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -130,7 +130,7 @@ napi_value GetBSize(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -174,7 +174,7 @@ napi_value GetBAvailSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char[]> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -199,7 +199,7 @@ napi_value GetBAvail(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -243,7 +243,7 @@ napi_value GetBlocksSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char[]> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -268,7 +268,7 @@ napi_value GetBlocks(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -312,7 +312,7 @@ napi_value GetBFreeSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char[]> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -337,7 +337,7 @@ napi_value GetBFree(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -381,7 +381,7 @@ napi_value GetFreeBytesSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char[]> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -408,7 +408,7 @@ napi_value GetFreeBytes(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -453,7 +453,7 @@ napi_value GetTotalBytesSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char[]> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -480,7 +480,7 @@ napi_value GetTotalBytes(napi_env env, napi_callback_info info)
 
     bool succ = false;
     std::unique_ptr<char []> path;
-    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, std::ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         NError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;

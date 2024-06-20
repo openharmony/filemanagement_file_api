@@ -42,7 +42,7 @@ static FileEntity* GetFileEntity(napi_env env, napi_value objFile)
 
 static tuple<bool, FileInfo, int> ParseJsFile(napi_env env, napi_value pathOrFileFromJsArg)
 {
-    auto [isPath, path, ignore] = NVal(env, pathOrFileFromJsArg).ToUTF8String();
+    auto [isPath, path, ignore] = NVal(env, pathOrFileFromJsArg).ToUTF8StringPath();
     if (isPath) {
         OHOS::DistributedFS::FDGuard sfd;
         auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(sfd, false);
@@ -75,25 +75,64 @@ static tuple<bool, FileInfo, int> ParseJsFile(napi_env env, napi_value pathOrFil
     return { false, FileInfo { false, nullptr, nullptr }, EINVAL};
 }
 
-static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcArg, FileInfo &fileInfo)
+static tuple<bool, int64_t, int64_t> GetRafOptions(napi_env env, napi_value options)
 {
-    unsigned int flags = O_RDONLY;
-    if (fileInfo.isPath) {
-        if (funcArg.GetArgc() >= NARG_CNT::TWO) {
-            auto [succ, mode] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(0);
-            if (!succ || mode < 0) {
-                HILOGE("Invalid flags");
-                NError(EINVAL).ThrowErr(env);
-                return { false, flags };
-            }
-            flags = static_cast<unsigned int>(mode);
-            (void)CommonFunc::ConvertJsFlags(flags);
+    NVal op = NVal(env, options);
+    int64_t opStart = INVALID_POS;
+    int64_t opEnd = INVALID_POS;
+    if (op.HasProp("start")) {
+        auto [succ, start] = op.GetProp("start").ToInt64();
+        if (!succ || start < 0) {
+            NError(EINVAL).ThrowErr(env, "Invalid option.start, positive integer is desired");
+            return {false, opStart, opEnd};
         }
+        opStart = start;
     }
-    return { true, flags };
+    if (op.HasProp("end")) {
+        auto [succ, end] = op.GetProp("end").ToInt64();
+        if (!succ || end < 0) {
+            NError(EINVAL).ThrowErr(env, "Invalid option.end, positive integer is desired");
+            return {false, opStart, opEnd};
+        }
+        opEnd = end;
+    }
+    return {true, opStart, opEnd};
 }
 
-static NVal InstantiateRandomAccessFile(napi_env env, std::unique_ptr<DistributedFS::FDGuard> fdg, int64_t fp)
+static tuple<bool, unsigned int, int64_t, int64_t> GetJsFlags(napi_env env, const NFuncArg &funcArg, FileInfo &fileInfo)
+{
+    unsigned int flags = O_RDONLY;
+    int64_t start = INVALID_POS;
+    int64_t end = INVALID_POS;
+    if (fileInfo.isPath && funcArg.GetArgc() >= NARG_CNT::TWO) {
+        auto [succ, mode] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(0);
+        if (!succ || mode < 0) {
+            HILOGE("Invalid flags");
+            NError(EINVAL).ThrowErr(env);
+            return {false, flags, start, end};
+        }
+        flags = static_cast<unsigned int>(mode);
+        (void)CommonFunc::ConvertJsFlags(flags);
+    }
+
+    bool succOpt;
+    if (funcArg.GetArgc() == NARG_CNT::THREE && !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function)) {
+        tie(succOpt, start, end) = GetRafOptions(env, funcArg[NARG_POS::THIRD]);
+        if (!succOpt) {
+            HILOGE("invalid RandomAccessFile options");
+            NError(EINVAL).ThrowErr(env);
+            return {false, flags, start, end};
+        }
+    }
+
+    return {true, flags, start, end};
+}
+
+static NVal InstantiateRandomAccessFile(napi_env env,
+                                        std::unique_ptr<DistributedFS::FDGuard> fdg,
+                                        int64_t fp,
+                                        int64_t start = INVALID_POS,
+                                        int64_t end = INVALID_POS)
 {
     napi_value objRAF = NClass::InstantiateClass(env, RandomAccessFileNExporter::className_, {});
     if (!objRAF) {
@@ -109,13 +148,15 @@ static NVal InstantiateRandomAccessFile(napi_env env, std::unique_ptr<Distribute
     }
     rafEntity->fd.swap(fdg);
     rafEntity->filePointer = fp;
-    return { env, objRAF };
+    rafEntity->start = start;
+    rafEntity->end = end;
+    return {env, objRAF};
 }
 
 napi_value CreateRandomAccessFile::Sync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -126,7 +167,7 @@ napi_value CreateRandomAccessFile::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     if (fileInfo.isPath) {
-        auto [succFlags, flags] = GetJsFlags(env, funcArg, fileInfo);
+        auto [succFlags, flags, ignoreStart, ignoreEnd] = GetJsFlags(env, funcArg, fileInfo);
         if (!succFlags) {
             return nullptr;
         }
@@ -145,6 +186,12 @@ napi_value CreateRandomAccessFile::Sync(napi_env env, napi_callback_info info)
         }
 
         fileInfo.fdg->SetFD(open_req.get()->result, false);
+    }
+    if (funcArg.GetArgc() == NARG_CNT::THREE) {
+        auto [succ, start, end] = GetRafOptions(env, funcArg[NARG_POS::THIRD]);
+        if (succ) {
+            return InstantiateRandomAccessFile(env, move(fileInfo.fdg), 0, start, end).val_;
+        }
     }
     return InstantiateRandomAccessFile(env, move(fileInfo.fdg), 0).val_;
 }
@@ -183,7 +230,7 @@ napi_value CreateRandomAccessFile::Async(napi_env env, napi_callback_info info)
         NError(err).ThrowErr(env);
         return nullptr;
     }
-    auto [succFlags, flags] = GetJsFlags(env, funcArg, fileInfo);
+    auto [succFlags, flags, start, end] = GetJsFlags(env, funcArg, fileInfo);
     if (!succFlags) {
         return nullptr;
     }
@@ -203,15 +250,16 @@ napi_value CreateRandomAccessFile::Async(napi_env env, napi_callback_info info)
         return AsyncExec(arg, movedFileInfo, flags);
     };
 
-    auto cbCompl = [arg, movedFileInfo](napi_env env, NError err) -> NVal {
+    auto cbCompl = [arg, movedFileInfo, start = start, end = end](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return InstantiateRandomAccessFile(env, move(movedFileInfo->fdg), 0);
+        return InstantiateRandomAccessFile(env, move(movedFileInfo->fdg), 0, start, end);
     };
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
-        NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number))) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE ||
+        (funcArg.GetArgc() == NARG_CNT::TWO && NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) ||
+        (funcArg.GetArgc() == NARG_CNT::THREE && NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_object))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_CREATERAT_NAME, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);

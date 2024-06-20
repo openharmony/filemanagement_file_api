@@ -32,7 +32,7 @@ config("task_signal_config") {
 
 ohos_shared_library("remote_uri_native") {
   if (!use_mingw_win && !use_mac) {
-    stack_protector_ret = true
+    branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
       ubsan = true
@@ -61,7 +61,7 @@ ohos_shared_library("remote_uri_native") {
 
 ohos_shared_library("task_signal_native") {
   if (!use_mingw_win) {
-    stack_protector_ret = true
+    branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
       ubsan = true

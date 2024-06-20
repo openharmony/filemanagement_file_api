@@ -29,11 +29,15 @@ constexpr int FAILED = 2;
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
+struct CopyEvent {
+    int copyResult = NONE;
+    int32_t errorCode = 0;
+};
 class TransListener : public Storage::DistributedFile::FileTransListenerStub {
 public:
     int32_t OnFileReceive(uint64_t totalBytes, uint64_t processedBytes) override;
     int32_t OnFinished(const std::string &sessionName) override;
-    int32_t OnFailed(const std::string &sessionName) override;
+    int32_t OnFailed(const std::string &sessionName, int32_t errorCode) override;
     static NError CopyFileFromSoftBus(const std::string &srcUri,
                                       const std::string &destUri,
                                       std::shared_ptr<FileInfos> fileInfos,
@@ -55,7 +59,7 @@ private:
 
     std::mutex cvMutex_;
     std::condition_variable cv_;
-    int copyEvent_ = NONE;
+    CopyEvent copyEvent_;
     std::mutex callbackMutex_;
     std::shared_ptr<JsCallbackObject> callback_;
 };

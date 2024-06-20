@@ -22,6 +22,7 @@
 #include "ipc_skeleton.h"
 #include "sandbox_helper.h"
 #include "uri.h"
+#include "n_error.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -79,13 +80,19 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
         fileInfos->taskSignal->SetFileInfoOfRemoteTask(info.sessionName, fileInfos->srcPath);
     }
     std::unique_lock<std::mutex> lock(transListener->cvMutex_);
-    transListener->cv_.wait(lock,
-        [&transListener]() { return transListener->copyEvent_ == SUCCESS || transListener->copyEvent_ == FAILED; });
-    if (transListener->copyEvent_ == FAILED) {
+    transListener->cv_.wait(lock, [&transListener]() {
+            return transListener->copyEvent_.copyResult == SUCCESS ||
+                transListener->copyEvent_.copyResult == FAILED;
+    });
+    if (transListener->copyEvent_.copyResult == FAILED) {
         if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
             RmDir(disSandboxPath);
         }
-        return NError(EIO);
+        auto it = softbusErr2ErrCodeTable.find(transListener->copyEvent_.errorCode);
+        if (it == softbusErr2ErrCodeTable.end()) {
+            return NError(EIO);
+        }
+        return NError(it->second);
     }
     if (info.authority == FILE_MANAGER_AUTHORITY || info.authority == MEDIA_AUTHORITY) {
         HILOGW("Public or media path not copy");
@@ -210,8 +217,7 @@ void TransListener::CallbackComplete(uv_work_t *work, int stat)
         return;
     }
     NVal obj = NVal::CreateObject(env);
-    if (entry->progressSize <= numeric_limits<int64_t>::max() &&
-        entry->totalSize <= static_cast<uint64_t>(numeric_limits<int64_t>::max())) {
+    if (entry->progressSize <= MAX_VALUE && entry->totalSize <= MAX_VALUE) {
         obj.AddProp("processedSize", NVal::CreateInt64(env, entry->progressSize).val_);
         obj.AddProp("totalSize", NVal::CreateInt64(env, entry->totalSize).val_);
     }
@@ -276,19 +282,20 @@ int32_t TransListener::OnFinished(const std::string &sessionName)
         std::lock_guard<std::mutex> lock(callbackMutex_);
         callback_ = nullptr;
     }
-    copyEvent_ = SUCCESS;
+    copyEvent_.copyResult = SUCCESS;
     cv_.notify_all();
     return ERRNO_NOERR;
 }
 
-int32_t TransListener::OnFailed(const std::string &sessionName)
+int32_t TransListener::OnFailed(const std::string &sessionName, int32_t errorCode)
 {
     HILOGD("OnFailed");
     {
         std::lock_guard<std::mutex> lock(callbackMutex_);
         callback_ = nullptr;
     }
-    copyEvent_ = FAILED;
+    copyEvent_.copyResult = FAILED;
+    copyEvent_.errorCode = errorCode;
     cv_.notify_all();
     return ERRNO_NOERR;
 }

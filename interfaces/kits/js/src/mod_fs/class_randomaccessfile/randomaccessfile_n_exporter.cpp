@@ -15,6 +15,8 @@
 
 #include "randomaccessfile_n_exporter.h"
 
+#include <fcntl.h>
+
 #include "file_utils.h"
 #include "randomaccessfile_entity.h"
 #include "../common_func.h"
@@ -24,6 +26,9 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+const int BUF_SIZE = 1024;
+const string READ_STREAM_CLASS = "ReadStream";
+const string WRITE_STREAM_CLASS = "WriteStream";
 
 static tuple<bool, RandomAccessFileEntity*> GetRAFEntity(napi_env env, napi_value raf_entity)
 {
@@ -414,6 +419,108 @@ napi_value RandomAccessFileNExporter::Constructor(napi_env env, napi_callback_in
     return funcArg.GetThisVar();
 }
 
+static napi_value CreateStream(napi_env env, const string &streamName, RandomAccessFileEntity *rafEntity, int flags)
+{
+    auto dstFd = dup(rafEntity->fd.get()->GetFD());
+    if (dstFd < 0) {
+        HILOGE("Failed to get valid fd, fail reason: %{public}s, fd: %{public}d", strerror(errno),
+               rafEntity->fd.get()->GetFD());
+        NError(errno).ThrowErr(env);
+        return nullptr;
+    }
+
+    string path = "/proc/self/fd/" + to_string(dstFd);
+    auto buf = CreateUniquePtr<char[]>(BUF_SIZE);
+    int readLinkRes = readlink(path.c_str(), buf.get(), BUF_SIZE);
+    if (readLinkRes < 0) {
+        HILOGE("Failed to readlink uri, errno=%{public}d", errno);
+        close(dstFd);
+        NError(errno).ThrowErr(env);
+        return nullptr;
+    }
+    close(dstFd);
+
+    napi_value filePath = NVal::CreateUTF8String(env, string(buf.get())).val_;
+    const char moduleName[] = "@ohos.file.streamrw";
+    napi_value streamrw;
+    napi_load_module(env, moduleName, &streamrw);
+    napi_value constructor = nullptr;
+    napi_get_named_property(env, streamrw, streamName.c_str(), &constructor);
+    napi_value streamObj = nullptr;
+
+    NVal options = NVal::CreateObject(env);
+    if (rafEntity->start >= 0) {
+        options.AddProp("start", NVal::CreateInt64(env, rafEntity->start).val_);
+    }
+    if (rafEntity->end >= 0 && streamName == READ_STREAM_CLASS) {
+        options.AddProp("end", NVal::CreateInt64(env, rafEntity->end).val_);
+    }
+    if (streamName == WRITE_STREAM_CLASS) {
+        options.AddProp("mode", NVal::CreateInt32(env, flags).val_);
+    }
+
+    napi_value argv[NARG_CNT::TWO] = {filePath, options.val_};
+    napi_status status = napi_new_instance(env, constructor, NARG_CNT::TWO, argv, &streamObj);
+    if (status != napi_ok) {
+        HILOGE("create stream obj fail");
+        return nullptr;
+    }
+
+    return NVal(env, streamObj).val_;
+}
+
+napi_value RandomAccessFileNExporter::GetReadStream(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+    auto [succEntity, rafEntity] = GetRAFEntity(env, funcArg.GetThisVar());
+    if (!succEntity) {
+        HILOGE("Failed to get entity of RandomAccessFile");
+        NError(EIO).ThrowErr(env);
+        return nullptr;
+    }
+
+    int flags = fcntl(rafEntity->fd.get()->GetFD(), F_GETFL);
+    unsigned int uflags = static_cast<unsigned int>(flags);
+    if (((uflags & O_ACCMODE) != O_RDONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
+        HILOGE("Failed to check Permission");
+        NError(EACCES).ThrowErr(env);
+        return nullptr;
+    }
+
+    return CreateStream(env, READ_STREAM_CLASS, rafEntity, flags);
+}
+
+napi_value RandomAccessFileNExporter::GetWriteStream(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+    auto [succEntity, rafEntity] = GetRAFEntity(env, funcArg.GetThisVar());
+    if (!succEntity) {
+        HILOGE("Failed to get entity of RandomAccessFile");
+        NError(EIO).ThrowErr(env);
+        return nullptr;
+    }
+
+    int flags = fcntl(rafEntity->fd.get()->GetFD(), F_GETFL);
+    unsigned int uflags = static_cast<unsigned int>(flags);
+    if (((uflags & O_ACCMODE) != O_WRONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
+        HILOGE("Failed to check Permission");
+        NError(EACCES).ThrowErr(env);
+        return nullptr;
+    }
+
+    return CreateStream(env, WRITE_STREAM_CLASS, rafEntity, flags);
+}
+
 bool RandomAccessFileNExporter::Export()
 {
     vector<napi_property_descriptor> props = {
@@ -423,6 +530,8 @@ bool RandomAccessFileNExporter::Export()
         NVal::DeclareNapiFunction("writeSync", WriteSync),
         NVal::DeclareNapiFunction("setFilePointer", SetFilePointerSync),
         NVal::DeclareNapiFunction("close", CloseSync),
+        NVal::DeclareNapiFunction("getReadStream", GetReadStream),
+        NVal::DeclareNapiFunction("getWriteStream", GetWriteStream),
         NVal::DeclareNapiGetter("fd", GetFD),
         NVal::DeclareNapiGetter("filePointer", GetFPointer),
     };

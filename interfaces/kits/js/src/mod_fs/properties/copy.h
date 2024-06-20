@@ -28,6 +28,7 @@
 #include "task_signal.h"
 #include "class_tasksignal/task_signal_entity.h"
 
+const uint64_t MAX_VALUE = 0x7FFFFFFFFFFFFFFF;
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -48,6 +49,7 @@ struct JsCallbackObject {
     uint64_t totalSize = 0;
     uint64_t progressSize = 0;
     uint64_t maxProgressSize = 0;
+    int32_t errorCode = 0;
     std::thread notifyHandler;
     explicit JsCallbackObject(napi_env env, LibN::NVal jsVal) : env(env), nRef(jsVal) {}
 

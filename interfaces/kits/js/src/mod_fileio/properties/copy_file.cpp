@@ -101,7 +101,7 @@ static tuple<bool, int32_t> ParseJsModeAndProm(napi_env env, const NFuncArg &fun
 
 static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
 {
-    auto [isPath, path, ignore] = pathOrFdFromJsArg.ToUTF8String();
+    auto [isPath, path, ignore] = pathOrFdFromJsArg.ToUTF8StringPath();
     if (isPath) {
         return {true, FileInfo{true, move(path), {}}};
     }
@@ -190,15 +190,15 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         }
         return {NVal::CreateUndefined(env)};
     };
-    
-    const string PROCEDURENAME = "FileIOCopyFile";
+
+    const string procedureName = "FileIOCopyFile";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
         !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURENAME, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH)]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURENAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO

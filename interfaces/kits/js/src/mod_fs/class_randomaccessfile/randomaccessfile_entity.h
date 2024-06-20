@@ -19,13 +19,17 @@
 #include <unistd.h>
 
 #include "fd_guard.h"
+#include "n_val.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
+const int64_t INVALID_POS = -1;
 struct RandomAccessFileEntity {
-    std::unique_ptr<DistributedFS::FDGuard> fd = { nullptr };
+    std::unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
     int64_t filePointer = 0;
+    int64_t start = INVALID_POS;
+    int64_t end = INVALID_POS;
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement

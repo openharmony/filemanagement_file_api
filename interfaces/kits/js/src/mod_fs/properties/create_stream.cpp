@@ -32,7 +32,7 @@ using namespace OHOS::FileManagement::LibN;
 
 static tuple<bool, string, string> GetCreateStreamArgs(napi_env env, const NFuncArg &funcArg)
 {
-    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         return { false, "", "" };
     }

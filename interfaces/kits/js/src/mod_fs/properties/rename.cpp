@@ -37,14 +37,14 @@ napi_value Rename::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         HILOGE("Invalid src");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
+    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8StringPath();
     if (!resGetSecondArg) {
         HILOGE("Invalid dest");
         NError(EINVAL).ThrowErr(env);
@@ -77,14 +77,14 @@ napi_value Rename::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, src, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         HILOGE("Invalid src");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8String();
+    auto [resGetSecondArg, dest, useless] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8StringPath();
     if (!resGetSecondArg) {
         HILOGE("Invalid dest");
         NError(EINVAL).ThrowErr(env);

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,7 +32,7 @@ config("kits_public_config") {
 }
 
 ohos_shared_library("fileio") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -179,7 +179,8 @@ ohos_shared_library("fs") {
   ]
 
   if (!use_mingw_win && !use_mac) {
-    stack_protector_ret = true
+    defines = [ "FILE_API_TRACE" ]
+    branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
       ubsan = true
@@ -199,12 +200,16 @@ ohos_shared_library("fs") {
       "src/mod_fs/class_tasksignal/task_signal_n_exporter.cpp",
       "src/mod_fs/class_watcher/watcher_entity.cpp",
       "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
+      "src/mod_fs/properties/connectdfs.cpp",
       "src/mod_fs/properties/copy.cpp",
       "src/mod_fs/properties/copy_file.cpp",
       "src/mod_fs/properties/copy_listener/trans_listener.cpp",
       "src/mod_fs/properties/copydir.cpp",
       "src/mod_fs/properties/create_randomaccessfile.cpp",
       "src/mod_fs/properties/create_stream.cpp",
+      "src/mod_fs/properties/create_streamrw.cpp",
+      "src/mod_fs/properties/dfs_listener/file_dfs_listener_stub.cpp",
+      "src/mod_fs/properties/disconnectdfs.cpp",
       "src/mod_fs/properties/dup.cpp",
       "src/mod_fs/properties/fdopen_stream.cpp",
       "src/mod_fs/properties/listfile.cpp",
@@ -220,6 +225,7 @@ ohos_shared_library("fs") {
       "ability_base:zuri",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:extensionkit_native",
       "access_token:libtokenid_sdk",
       "app_file_service:fileuri_native",
       "bundle_framework:appexecfwk_base",
@@ -228,6 +234,7 @@ ohos_shared_library("fs") {
       "data_share:datashare_common",
       "data_share:datashare_consumer",
       "dfs_service:distributed_file_daemon_kit_inner",
+      "hitrace:hitrace_meter",
       "ipc:ipc_core",
       "samgr:samgr_proxy",
     ]
@@ -239,7 +246,7 @@ ohos_shared_library("fs") {
 }
 
 ohos_shared_library("hash") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -249,16 +256,24 @@ ohos_shared_library("hash") {
     debug = false
   }
 
+  use_exceptions = true
+
   subsystem_name = "filemanagement"
   part_name = "file_api"
 
   relative_install_dir = "module/file"
 
-  include_dirs = [ "${src_path}/common/file_helper" ]
+  include_dirs = [
+    "${src_path}/common/file_helper",
+    "${src_path}/mod_hash",
+    "${src_path}/mod_hash/class_hashstream",
+  ]
 
   sources = [
     "src/common/file_helper/fd_guard.cpp",
     "src/common/file_helper/hash_file.cpp",
+    "src/mod_hash/class_hashstream/hashstream_n_exporter.cpp",
+    "src/mod_hash/create_streamhash.cpp",
     "src/mod_hash/hash.cpp",
     "src/mod_hash/module.cpp",
   ]
@@ -278,7 +293,7 @@ ohos_shared_library("hash") {
 }
 
 ohos_shared_library("file") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -311,6 +326,7 @@ ohos_shared_library("file") {
 
   external_deps = [
     "ability_runtime:abilitykit_native",
+    "ability_runtime:extensionkit_native",
     "bounds_checking_function:libsec_shared",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -320,7 +336,7 @@ ohos_shared_library("file") {
 }
 
 ohos_shared_library("statfs") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -352,7 +368,7 @@ ohos_shared_library("statfs") {
 }
 
 ohos_shared_library("statvfs") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -384,7 +400,7 @@ ohos_shared_library("statvfs") {
 }
 
 ohos_shared_library("environment") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -420,7 +436,7 @@ ohos_shared_library("environment") {
   ]
 }
 ohos_shared_library("securitylabel") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -458,7 +474,7 @@ ohos_shared_library("securitylabel") {
 }
 
 ohos_shared_library("document") {
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true

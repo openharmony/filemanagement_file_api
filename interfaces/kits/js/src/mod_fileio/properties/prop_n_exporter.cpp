@@ -69,7 +69,7 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -100,7 +100,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -152,7 +152,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -191,7 +191,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -240,7 +240,7 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -535,7 +535,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
 
     bool succ = false;
     unique_ptr<char[]> path;
-    tie(succ, path, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    tie(succ, path, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -672,7 +672,7 @@ bool PropNExporter::ExportAsync()
 bool PropNExporter::Export()
 {
     return ExportSync() && ExportAsync();
-}  
+}
 
 string PropNExporter::GetClassName()
 {

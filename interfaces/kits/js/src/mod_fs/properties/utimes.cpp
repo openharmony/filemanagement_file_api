@@ -35,20 +35,20 @@ napi_value Utimes::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succGetPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succGetPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succGetPath) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [succGetMtime, mtime] = NVal(env, funcArg[NARG_POS::SECOND]).ToDouble();;
+    auto [succGetMtime, mtime] = NVal(env, funcArg[NARG_POS::SECOND]).ToDouble();
     if (!succGetMtime || mtime < 0) {
         HILOGE("Invalid mtime from JS second argument");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    
+
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> stat_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!stat_req) {

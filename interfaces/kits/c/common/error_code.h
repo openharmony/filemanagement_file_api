@@ -24,12 +24,19 @@ extern "C" {
 #endif /* End of #ifdef __cplusplus */
 
 enum ErrorCode {
+    /** @error Permission verification failed. */
     PERMISSION_ERROR = 201,
+    /** @error Invalid input parameter, pointer is null. */
     PARAMETER_ERROR = 401,
+    /** @error Device not supported. */
     DEVICE_NOT_SUPPORTED = 801,
+    /** @error Operation not permitted. */
     E_PERM = 13900001,
+    /** @error No such file or directory. */
     E_NOENT = 13900002,
+    /** @error Failed to apply for memory. */
     E_NOMEM = 13900011,
+    /** @error Unknown error. */
     UNKNOWN_ERROR = 13900042
 };
 

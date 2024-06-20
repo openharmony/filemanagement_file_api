@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,11 +39,20 @@ constexpr int UNKROWN_ERR = -1;
 constexpr int NO_TASK_ERR = -2;
 constexpr int CANCEL_ERR = -3;
 constexpr int ERRNO_NOERR = 0;
+constexpr int ECONNECTIONFAIL = 45;
+constexpr int ECONNECTIONABORT = 46;
 constexpr int STORAGE_SERVICE_SYS_CAP_TAG = 13600000;
 constexpr int FILEIO_SYS_CAP_TAG = 13900000;
 constexpr int USER_FILE_MANAGER_SYS_CAP_TAG = 14000000;
 constexpr int USER_FILE_SERVICE_SYS_CAP_TAG = 14300000;
 constexpr int DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG = 22400000;
+constexpr int SOFTBUS_TRANS_FILE_PERMISSION_DENIED = -426114938;
+constexpr int SOFTBUS_TRANS_FILE_DISK_QUOTA_EXCEEDED = -426114937;
+constexpr int SOFTBUS_TRANS_FILE_NO_MEMORY = -426114936;
+constexpr int SOFTBUS_TRANS_FILE_NETWORK_ERROR = -426114935;
+constexpr int SOFTBUS_TRANS_FILE_NOT_FOUND = -426114934;
+constexpr int SOFTBUS_TRANS_FILE_EXISTED = -426114933;
+constexpr int DFS_CANCEL_SUCCESS = 204;
 const std::string FILEIO_TAG_ERR_CODE = "code";
 const std::string FILEIO_TAG_ERR_DATA = "data";
 
@@ -91,10 +100,12 @@ enum ErrCodeSuffixOfFileIO {
     E_DQUOT,
     E_UKERR,
     E_NOLCK,
+    E_NETUNREACH,
+    E_CONNECTION_FAIL,
+    E_CONNECTION_ABORT,
     E_NOTASK,
     E_UNCANCELED,
-    E_CANCELED,
-    E_NETUNREACH
+    E_CANCELED
 };
 
 enum ErrCodeSuffixOfUserFileManager {
@@ -159,6 +170,16 @@ enum CommonErrCode {
     E_UNKNOWN_ERROR = 13900042
 };
 
+static inline std::unordered_map<int, int> softbusErr2ErrCodeTable {
+    {SOFTBUS_TRANS_FILE_PERMISSION_DENIED, EPERM},
+    {SOFTBUS_TRANS_FILE_DISK_QUOTA_EXCEEDED, EIO},
+    {SOFTBUS_TRANS_FILE_NO_MEMORY, ENOMEM},
+    {SOFTBUS_TRANS_FILE_NETWORK_ERROR, ENETUNREACH},
+    {SOFTBUS_TRANS_FILE_NOT_FOUND, ENOENT},
+    {SOFTBUS_TRANS_FILE_EXISTED, EEXIST},
+    {DFS_CANCEL_SUCCESS, ECANCELED},
+};
+
 static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "EPERM", EPERM },
     { "ENOENT", ENOENT },
@@ -203,6 +224,8 @@ static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "EDQUOT", EDQUOT },
     { "ECANCELED", ECANCELED },
     { "ENETUNREACH", ENETUNREACH },
+    { "ECONNECTIONFAIL", ECONNECTIONFAIL },
+    { "ECONNECTIONABORT", ECONNECTIONABORT },
 };
 
 static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
@@ -254,6 +277,9 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { ECANCELED, { FILEIO_SYS_CAP_TAG + E_CANCELED, "Operation canceled" } },
     { ENOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { ENETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
+    { ECONNECTIONFAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
+    { ECONNECTIONABORT, { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT,
+        "Software caused connection abort" } },
     { FILEIO_SYS_CAP_TAG + E_PERM, { FILEIO_SYS_CAP_TAG + E_PERM, "Operation not permitted" } },
     { FILEIO_SYS_CAP_TAG + E_NOENT, { FILEIO_SYS_CAP_TAG + E_NOENT, "No such file or directory" } },
     { FILEIO_SYS_CAP_TAG + E_SRCH, { FILEIO_SYS_CAP_TAG + E_SRCH, "No such process" } },
@@ -299,6 +325,9 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { FILEIO_SYS_CAP_TAG + E_UKERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
     { FILEIO_SYS_CAP_TAG + E_NOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { FILEIO_SYS_CAP_TAG + E_NETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
+    { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
+    { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT, { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT,
+        "Software caused connection abort" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME, { USER_FILE_MANAGER_SYS_CAP_TAG + E_DISPLAYNAME,
         "Invalid display name" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_URIM, { USER_FILE_MANAGER_SYS_CAP_TAG + E_URIM, "Invalid uri" } },

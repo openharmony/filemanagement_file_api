@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@
 #include "copydir.h"
 #include "create_randomaccessfile.h"
 #include "create_stream.h"
+#include "create_streamrw.h"
 #include "dup.h"
 #include "fdopen_stream.h"
 #include "listfile.h"
@@ -58,6 +59,12 @@
 #include "rust_file.h"
 #include "symlink.h"
 #include "watcher.h"
+#include "connectdfs.h"
+#include "disconnectdfs.h"
+#endif
+
+#ifdef FILE_API_TRACE
+#include "hitrace_meter.h"
 #endif
 
 namespace OHOS {
@@ -102,7 +109,7 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
@@ -143,7 +150,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, tmp, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, tmp, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
@@ -201,7 +208,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, tmp, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, tmp, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
@@ -248,7 +255,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
@@ -324,7 +331,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    auto [succ, tmp, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, tmp, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
@@ -373,7 +380,7 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succ) {
         HILOGE("Invalid path from JS first argument");
         NError(EINVAL).ThrowErr(env);
@@ -401,6 +408,9 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
 {
+#ifdef FILE_API_TRACE
+    HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
+#endif
     NFuncArg funcArg(env, info);
 
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
@@ -467,6 +477,9 @@ static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, in
 
 napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
 {
+#ifdef FILE_API_TRACE
+    HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
+#endif
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
         HILOGE("Number of arguments unmatched");
@@ -667,6 +680,8 @@ bool PropNExporter::ExportSync()
         NVal::DeclareNapiFunction("copyFileSync", CopyFile::Sync),
         NVal::DeclareNapiFunction("createRandomAccessFileSync", CreateRandomAccessFile::Sync),
         NVal::DeclareNapiFunction("createStreamSync", CreateStream::Sync),
+        NVal::DeclareNapiFunction("createReadStream", CreateStreamRw::Read),
+        NVal::DeclareNapiFunction("createWriteStream", CreateStreamRw::Write),
         NVal::DeclareNapiFunction("dup", Dup::Sync),
         NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
         NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
@@ -712,6 +727,8 @@ bool PropNExporter::ExportAsync()
         NVal::DeclareNapiFunction("readText", ReadText::Async),
         NVal::DeclareNapiFunction("symlink", Symlink::Async),
         NVal::DeclareNapiFunction("createWatcher", Watcher::CreateWatcher),
+        NVal::DeclareNapiFunction("connectDfs", ConnectDfs::Async),
+        NVal::DeclareNapiFunction("disconnectDfs", DisconnectDfs::Async),
 #endif
     });
 }

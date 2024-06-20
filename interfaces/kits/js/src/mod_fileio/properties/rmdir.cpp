@@ -34,7 +34,7 @@ napi_value Rmdir::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
@@ -56,7 +56,7 @@ napi_value Rmdir::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;

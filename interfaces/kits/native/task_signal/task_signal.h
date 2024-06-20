@@ -32,7 +32,7 @@ public:
     int32_t Cancel();
     bool IsCanceled();
     bool CheckCancelIfNeed(const std::string &path);
-    void OnCancel(const std::string &path);
+    void OnCancel();
     void SetTaskSignalListener(std::shared_ptr<TaskSignalListener> signalListener);
     void MarkRemoteTask();
     void SetFileInfoOfRemoteTask(const std::string &sessionName, const std::string &filePath);

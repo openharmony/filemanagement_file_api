@@ -63,7 +63,7 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [succGetPath, filename, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succGetPath, filename, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succGetPath) {
         UniError(EINVAL).ThrowErr(env, "Invalid filename");
         return nullptr;

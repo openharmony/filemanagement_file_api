@@ -38,7 +38,7 @@ int32_t TaskSignal::Cancel()
             HILOGI("CancelCopyTask failed, ret = %{public}d", ret);
             return ret;
         }
-        OnCancel(filePath_);
+        OnCancel();
         return ret;
     }
     needCancel_.store(true);
@@ -57,10 +57,10 @@ void TaskSignal::SetTaskSignalListener(std::shared_ptr<TaskSignalListener> signa
     }
 }
 
-void TaskSignal::OnCancel(const std::string &path)
+void TaskSignal::OnCancel()
 {
     if (signalListener_ != nullptr) {
-        signalListener_->OnCancel(path);
+        signalListener_->OnCancel();
     }
 }
 
@@ -69,7 +69,7 @@ bool TaskSignal::CheckCancelIfNeed(const std::string &path)
     if (!needCancel_.load()) {
         return false;
     }
-    OnCancel(path);
+    OnCancel();
     return true;
 }
 

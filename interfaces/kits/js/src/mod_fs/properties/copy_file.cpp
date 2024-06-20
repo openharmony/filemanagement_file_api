@@ -163,6 +163,9 @@ static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
             return NError(errno);
         }
     }
+    if (statbf.st_size == 0) {
+        return NError(ERRNO_NOERR);
+    }
     return SendFileCore(srcFile, destFile, statbf);
 }
 
@@ -181,7 +184,7 @@ static tuple<bool, int> ParseJsMode(napi_env env, const NFuncArg& funcArg)
 
 static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
 {
-    auto [isPath, path, ignore] = pathOrFdFromJsArg.ToUTF8String();
+    auto [isPath, path, ignore] = pathOrFdFromJsArg.ToUTF8StringPath();
     if (isPath) {
         return { true, FileInfo { true, move(path), {} } };
     }

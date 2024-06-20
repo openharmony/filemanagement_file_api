@@ -38,6 +38,10 @@
 #include "file_uri.h"
 #endif
 
+#ifdef FILE_API_TRACE
+#include "hitrace_meter.h"
+#endif
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -216,13 +220,16 @@ static tuple<int, string> OpenFileByUri(const string &path, unsigned int mode)
 
 napi_value Open::Sync(napi_env env, napi_callback_info info)
 {
+#ifdef FILE_API_TRACE
+    HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
+#endif
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succPath) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
@@ -286,13 +293,16 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
 
 napi_value Open::Async(napi_env env, napi_callback_info info)
 {
+#ifdef FILE_API_TRACE
+    HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
+#endif
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succPath) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);

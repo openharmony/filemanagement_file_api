@@ -61,7 +61,7 @@ bool Copy::IsValidUri(const std::string &uri)
 
 tuple<bool, std::string> Copy::ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg)
 {
-    auto [succ, uri, ignore] = pathOrFdFromJsArg.ToUTF8String();
+    auto [succ, uri, ignore] = pathOrFdFromJsArg.ToUTF8StringPath();
     if (!succ) {
         HILOGE("parse uri failed.");
         return { false, "" };
@@ -309,7 +309,7 @@ uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, const std::string &p
             continue;
         }
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
-            size += GetDirSize(infos, dest);
+            size += static_cast<int64_t>(GetDirSize(infos, dest));
         } else {
             struct stat st {};
             if (stat(dest.c_str(), &st) == -1) {
@@ -492,7 +492,7 @@ void Copy::ReceiveComplete(uv_work_t *work, int stat)
         return;
     }
     NVal obj = NVal::CreateObject(env);
-    if (processedSize <= numeric_limits<int64_t>::max() && entry->totalSize <= numeric_limits<int64_t>::max()) {
+    if (processedSize <= MAX_VALUE && entry->totalSize <= MAX_VALUE) {
         obj.AddProp("processedSize", NVal::CreateInt64(env, processedSize).val_);
         obj.AddProp("totalSize", NVal::CreateInt64(env, entry->totalSize).val_);
     }
@@ -616,6 +616,9 @@ void Copy::CloseNotifyFd(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCal
 tuple<bool, int, bool> Copy::HandleProgress(
     inotify_event *event, std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
+    if (callback == nullptr) {
+        return { true, EINVAL, false };
+    }
     auto receivedInfo = GetReceivedInfo(event->wd, callback);
     if (receivedInfo == nullptr) {
         return { true, EINVAL, false };
@@ -637,7 +640,7 @@ tuple<bool, int, bool> Copy::HandleProgress(
         }
         callback->progressSize = fileSize;
     }
-    return { true, ERRNO_NOERR, true };
+    return { true, callback->errorCode, true };
 }
 
 void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
@@ -645,7 +648,7 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
     char buf[BUF_SIZE] = { 0 };
     struct inotify_event *event = nullptr;
     int len = 0;
-    int index = 0;
+    int64_t index = 0;
     auto callback = GetRegisteredListener(infos);
     while (((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {}
     while (infos->run && index < len) {
@@ -656,7 +659,7 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
             return;
         }
         if (needContinue && !needSend) {
-            index += sizeof(struct inotify_event) + event->len;
+            index += static_cast<int64_t>(sizeof(struct inotify_event) + event->len);
             continue;
         }
         if (callback->progressSize == callback->totalSize) {
@@ -668,7 +671,7 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
             OnFileReceive(infos);
             infos->notifyTime = currentTime + NOTIFY_PROGRESS_DELAY;
         }
-        index += sizeof(struct inotify_event) + event->len;
+        index += static_cast<int64_t>(sizeof(struct inotify_event) + event->len);
     }
 }
 
@@ -689,11 +692,11 @@ void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
     while (infos->run && infos->exceptionCode == ERRNO_NOERR && infos->eventFd != -1 && infos->notifyFd != -1) {
         auto ret = poll(fds, nfds, -1);
         if (ret > 0) {
-            if (fds[0].revents & POLLNVAL) {
+            if (static_cast<unsigned short>(fds[0].revents) & POLLNVAL) {
                 infos->run = false;
                 return;
             }
-            if (fds[1].revents & POLLIN) {
+            if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
                 ReadNotifyEvent(infos);
             }
         } else if (ret < 0 && errno == EINTR) {

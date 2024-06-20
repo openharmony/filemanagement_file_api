@@ -38,8 +38,8 @@ using namespace std;
 
 void CommonFunc::FsReqCleanup(uv_fs_t* req)
 {
-    uv_fs_req_cleanup(req);
     if (req) {
+        uv_fs_req_cleanup(req);
         delete req;
         req = nullptr;
     }

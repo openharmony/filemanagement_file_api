@@ -40,7 +40,7 @@ napi_value Stat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, pathPtr, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, pathPtr, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         UniError(EINVAL).ThrowErr(env, "The first argument requires type string");
         return nullptr;
@@ -79,7 +79,7 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto [resGetFirstArg, tmp, unuse] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    auto [resGetFirstArg, tmp, unuse] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!resGetFirstArg) {
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;

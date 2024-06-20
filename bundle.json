@@ -36,13 +36,13 @@
             "dfs_service",
             "eventhandler",
             "hilog",
+            "hitrace",
             "ipc",
             "init",
             "napi",
             "samgr",
             "app_file_service",
-            "os_account",
-            "libuv"
+            "os_account"
         ],
         "third_party": [
             "e2fsprogs",
@@ -53,7 +53,9 @@
         "group_type": {
           "base_group": [],
           "fwk_group": [
-            "//foundation/filemanagement/file_api/interfaces/kits/js:build_kits_js"
+            "//foundation/filemanagement/file_api/interfaces/kits/js:build_kits_js",
+            "//foundation/filemanagement/file_api/interfaces/kits/ts/streamrw:streamrw_packages",
+            "//foundation/filemanagement/file_api/interfaces/kits/ts/streamhash:streamhash_packages"
           ],
           "service_group": []
         },
@@ -131,21 +133,43 @@
             }
           },
           {
-            "name": "//foundation/filemanagement/file_api/interfaces/kits/cj:cjfile",
-            "header": {
-              "header_files": [
-                "utils.h"
-              ],
-              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/cj"
-            }
-          },
-          {
             "name": "//foundation/filemanagement/file_api/interfaces/kits/js:securitylabel",
             "header": {
               "header_files": [
                 "security_label.h"
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/js/src/mod_securitylabel"
+            }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/cj:cj_file_fs_ffi",
+            "header": {
+              "header_files": [
+                "copy_dir.h",
+                "copy_file.h",
+                "fdatasync.h",
+                "file_ffi.h",
+                "file_fs_ffi.h",
+                "file_fs_impl.h",
+                "file_impl.h",
+                "fsync.h",
+                "list_file.h",
+                "lseek.h",
+                "macro.h",
+                "mkdtemp.h",
+                "move_file.h",
+                "randomAccessFile_impl.h",
+                "readerIterator_impl.h",
+                "stat_ffi.h",
+                "stat_impl.h",
+                "stream_ffi.h",
+                "stream_impl.h",
+                "symlink.h",
+                "uni_error.h",
+                "utils.h",
+                "watcher_impl.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/cj/src"
             }
           }
         ],
