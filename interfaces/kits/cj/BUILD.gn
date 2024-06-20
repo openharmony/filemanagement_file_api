@@ -25,7 +25,16 @@ ohos_shared_library("cj_file_fs_ffi") {
   }
 
   defines = []
-  cflags_cc = []
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Oz",
+  ]
+  cflags_cc = [
+    "-fvisibility-inlines-hidden",
+    "-Oz",
+  ]
   if (is_mingw || is_mac || is_linux) {
     defines += [ "PREVIEW" ]
   }
