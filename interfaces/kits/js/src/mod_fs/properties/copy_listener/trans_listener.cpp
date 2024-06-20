@@ -130,7 +130,6 @@ int32_t TransListener::PrepareCopySession(const std::string &srcUri,
             return EIO;
         }
         auto sandboxDir = info.sandboxPath.substr(0, pos);
-        std::error_code errCode;
         if (std::filesystem::exists(sandboxDir, errCode)) {
             info.dirExistFlag = true;
         }
