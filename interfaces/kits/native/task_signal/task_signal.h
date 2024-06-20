@@ -33,7 +33,7 @@ public:
     bool IsCanceled();
     bool CheckCancelIfNeed(const std::string &path);
     void OnCancel();
-    void SetTaskSignalListener(std::unique_ptr<TaskSignalListener> signalListener);
+    void SetTaskSignalListener(TaskSignalListener *signalListener);
     void MarkRemoteTask();
     void SetFileInfoOfRemoteTask(const std::string &sessionName, const std::string &filePath);
     std::atomic_bool needCancel_{ false };
@@ -41,7 +41,7 @@ public:
     std::string sessionName_ = std::string("");
     std::string filePath_ = std::string("");
 private:
-    std::unique_ptr<TaskSignalListener> signalListener_;
+    TaskSignalListener *signalListener_;
 };
 } // namespace ModuleTaskSignal
 } // namespace DistributedFS
