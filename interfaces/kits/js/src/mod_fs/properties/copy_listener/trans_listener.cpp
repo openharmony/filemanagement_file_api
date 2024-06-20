@@ -37,8 +37,8 @@ const std::string DISTRIBUTED_PATH = "/data/storage/el2/distributedfiles/";
 void TransListener::RmDir(const std::string &path)
 {
     std::filesystem::path pathName(path);
-    if (std::filesystem::exists(pathName)) {
-        std::error_code errCode;
+    std::error_code errCode;
+    if (std::filesystem::exists(pathName, errCode)) {
         std::filesystem::remove_all(pathName, errCode);
         if (errCode.value() != 0) {
             HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
@@ -49,8 +49,9 @@ void TransListener::RmDir(const std::string &path)
 std::string TransListener::CreateDfsCopyPath()
 {
     std::random_device rd;
+    std::error_code errCode;
     std::string random = std::to_string(rd());
-    while (std::filesystem::exists(DISTRIBUTED_PATH + random)) {
+    while (std::filesystem::exists(DISTRIBUTED_PATH + random, errCode)) {
         random = std::to_string(rd());
     }
     return random;
@@ -153,7 +154,7 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
     const std::string &sandboxPath)
 {
     std::error_code errCode;
-    if (std::filesystem::exists(sandboxPath) && std::filesystem::is_directory(sandboxPath)) {
+    if (std::filesystem::exists(sandboxPath, errCode) && std::filesystem::is_directory(sandboxPath, errCode)) {
         HILOGI("Copy dir");
         std::filesystem::copy(disSandboxPath, sandboxPath,
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing, errCode);
