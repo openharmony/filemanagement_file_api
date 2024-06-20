@@ -60,7 +60,7 @@ ohos_shared_library("remote_uri_native") {
 }
 
 ohos_shared_library("task_signal_native") {
-  if (!use_mingw_win && !use_mac) {
+  if (!use_mingw_win) {
     stack_protector_ret = true
     sanitize = {
       integer_overflow = true
