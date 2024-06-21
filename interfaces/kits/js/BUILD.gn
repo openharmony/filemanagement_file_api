@@ -159,7 +159,6 @@ ohos_shared_library("fs") {
   cflags_cc = [ "-std=c++17" ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/native:task_signal_native",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
   ]
@@ -234,6 +233,7 @@ ohos_shared_library("fs") {
     deps += [
       "${file_api_path}/interfaces/kits/native:remote_uri_native",
       "${file_api_path}/interfaces/kits/rust:rust_file",
+      "${file_api_path}/interfaces/kits/native:task_signal_native",
     ]
   }
 }
