@@ -52,25 +52,19 @@ public:
 #else
         auto xattrValueSize = getxattr(path.c_str(), XATTR_KEY, nullptr, 0);
 #endif
-        if (xattrValueSize == -1) {
-            return "";
-        }
-        if (xattrValueSize == 0) {
+        if (xattrValueSize == -1 ||xattrValueSize == 0) {
             return DEFAULT_DATA_LEVEL;
         }
         std::unique_ptr<char[]> xattrValue = std::make_unique<char[]>((long)xattrValueSize + 1);
         if (xattrValue == nullptr) {
-            return "";
+            return DEFAULT_DATA_LEVEL;
         }
 #ifdef IOS_PLATFORM
         xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize, 0, 0);
 #else
         xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize);
 #endif
-        if (xattrValueSize == -1) {
-            return "";
-        }
-        if (xattrValueSize == 0) {
+        if (xattrValueSize == -1 || xattrValueSize == 0) {
             return DEFAULT_DATA_LEVEL;
         }
         return std::string(xattrValue.get());
