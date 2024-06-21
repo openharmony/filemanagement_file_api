@@ -60,7 +60,7 @@ ohos_shared_library("remote_uri_native") {
 }
 
 ohos_shared_library("task_signal_native") {
-  if (!use_mingw_win) {
+  if (!use_mingw_win && !use_mac) {
     branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
