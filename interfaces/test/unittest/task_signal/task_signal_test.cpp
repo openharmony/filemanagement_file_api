@@ -108,7 +108,7 @@ HWTEST_F(TaskSignalTest, Task_Signal_SetTaskSignalListener_0000, testing::ext::T
     std::unique_lock<std::mutex> lock(TaskSignalTest::taskListenerCallbackLock_);
     auto signal = std::make_shared<TaskSignal>();
     auto listener = std::make_shared<TaskSignalListenerTestImpl>();
-    signal->SetTaskSignalListener(listener);
+    signal->SetTaskSignalListener(listener.get());
     std::string filePath = "aaa";
     listener->OnCancel();
     signal->CheckCancelIfNeed(filePath);

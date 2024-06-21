@@ -49,8 +49,8 @@ const string PROCEDURE_COPY_NAME = "FileFSCopy";
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
-constexpr size_t MAX_SIZE = 0x7ffff000;
-constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(1000);
+constexpr size_t MAX_SIZE = 1024 * 1024 * 128;
+constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(300);
 std::recursive_mutex Copy::mutex_;
 std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
 
@@ -182,7 +182,7 @@ int Copy::CopyFile(const string &src, const string &dest, std::shared_ptr<FileIn
     }
     int64_t size = static_cast<int64_t>(srcStat.st_size);
     int ret = 0;
-    while (size > 0) {
+    while (size >= 0) {
         ret = uv_fs_sendfile(nullptr, sendFileReq.get(), destFdg->GetFD(), srcFdg->GetFD(),
             offset, MAX_SIZE, nullptr);
         if (ret < 0) {
@@ -191,7 +191,7 @@ int Copy::CopyFile(const string &src, const string &dest, std::shared_ptr<FileIn
         }
         if (infos != nullptr && infos->taskSignal != nullptr) {
             if (infos->taskSignal->CheckCancelIfNeed(src)) {
-                return E_CANCELED;
+                return ECANCELED;
             }
         }
         offset += static_cast<int64_t>(ret);
@@ -202,7 +202,7 @@ int Copy::CopyFile(const string &src, const string &dest, std::shared_ptr<FileIn
     }
     if (size != 0) {
         HILOGE("The execution of the sendfile task was terminated, remaining file size %{public}" PRIu64, size);
-        return E_IO;
+        return EIO;
     }
     return ERRNO_NOERR;
 }
@@ -708,12 +708,6 @@ void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
     }
 }
 
-std::string Copy::ConvertUriToPath(const std::string &uri)
-{
-    FileUri fileUri(uri);
-    return fileUri.GetRealPath();
-}
-
 tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     const std::string &srcUri, const std::string &destUri, const NVal &listener, NVal copySignal)
 {
@@ -727,8 +721,10 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->listener = listener;
     infos->env = listener.env_;
     infos->copySignal = copySignal;
-    infos->srcPath = ConvertUriToPath(infos->srcUri);
-    infos->destPath = ConvertUriToPath(infos->destUri);
+    FileUri srcFileUri(infos->srcUri);
+    infos->srcPath = srcFileUri.GetRealPath();
+    FileUri dstFileUri(infos->destUri);
+    infos->destPath = dstFileUri.GetPath();
     infos->srcPath = GetRealPath(infos->srcPath);
     infos->destPath = GetRealPath(infos->destPath);
     infos->notifyTime = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;

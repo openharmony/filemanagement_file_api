@@ -110,7 +110,7 @@ napi_value TaskSignalNExporter::OnCancel(napi_env env, napi_callback_info info)
 {
     HILOGD("TaskSignal OnCancel Func Run in.");
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE)) {
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Failed to get param when stop.");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -121,8 +121,7 @@ napi_value TaskSignalNExporter::OnCancel(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    std::shared_ptr<TaskSignalEntity> signal(taskSignalEntity);
-    taskSignalEntity->taskSignal_->SetTaskSignalListener(signal);
+    taskSignalEntity->taskSignal_->SetTaskSignalListener(taskSignalEntity);
     auto callbackContext = std::make_shared<JSCallbackContext>(NVal(env, funcArg[0]));
     callbackContext->env_ = env;
     taskSignalEntity->callbackContext_ = callbackContext;

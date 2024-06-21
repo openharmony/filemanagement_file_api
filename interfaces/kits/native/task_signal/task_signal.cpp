@@ -50,10 +50,10 @@ bool TaskSignal::IsCanceled()
     return needCancel_.load() || remoteTask_.load();
 }
 
-void TaskSignal::SetTaskSignalListener(std::shared_ptr<TaskSignalListener> signalListener)
+void TaskSignal::SetTaskSignalListener(TaskSignalListener *signalListener)
 {
     if (signalListener_ == nullptr) {
-        signalListener_ = move(signalListener);
+        signalListener_ = std::move(signalListener);
     }
 }
 
