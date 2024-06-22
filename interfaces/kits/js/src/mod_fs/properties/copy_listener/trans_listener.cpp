@@ -39,6 +39,9 @@ void TransListener::RmDir(const std::string &path)
     std::filesystem::path pathName(path);
     std::error_code errCode;
     if (std::filesystem::exists(pathName, errCode)) {
+        if (errCode.value() != 0) {
+            HILOGE("pathName is not exists, error code: %{public}d", errCode.value());
+        }
         std::filesystem::remove_all(pathName, errCode);
         if (errCode.value() != 0) {
             HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
