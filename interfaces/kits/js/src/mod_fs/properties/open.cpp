@@ -252,7 +252,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
 #endif
     int ret = OpenFileByPath(pathStr, mode);
     if (ret < 0) {
-        HILOGE("Failed to open file for libuv error %{public}d", ret);
+        HILOGD("Failed to open file for libuv error %{public}d", ret);
         NError(ret).ThrowErr(env);
         return nullptr;
     }
