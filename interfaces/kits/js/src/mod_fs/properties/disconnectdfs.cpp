@@ -50,12 +50,6 @@ napi_value DisconnectDfs::Async(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [networkId = move(networkId)]() -> NError {
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> disconnectdfs_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
-        if (!disconnectdfs_req) {
-            HILOGE("Failed to request heap memory.");
-            return NError(E_PARAMS);
-        }
         auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().
             CloseP2PConnectionEx(networkId);
         if (ret != ERRNO_NOERR) {

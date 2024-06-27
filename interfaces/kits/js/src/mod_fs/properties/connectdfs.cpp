@@ -269,7 +269,7 @@ void UvWorkAfterOnStaus(uv_work_t *work, int status)
         napi_value callResult = nullptr;
         napi_get_reference_value(connectDfsCB->cbBase.cbInfo.env,
             connectDfsCB->cbBase.cbInfo.callback, &callback);
-        napi_call_function(connectDfsCB->cbBase.cbInfo.env, undefined, callback, 1, result, &callResult);
+        napi_call_function(connectDfsCB->cbBase.cbInfo.env, undefined, callback, NARG_CNT::TWO, result, &callResult);
         if (connectDfsCB->cbBase.cbInfo.callback != nullptr) {
             napi_delete_reference(connectDfsCB->cbBase.cbInfo.env, connectDfsCB->cbBase.cbInfo.callback);
         }
