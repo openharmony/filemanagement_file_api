@@ -296,7 +296,7 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
     if (hasOption) {
         int ret = AccessCore(path, 0);
         if (ret == ERRNO_NOERR) {
-            HILOGE("The path already exists");
+            HILOGD("The path already exists");
             return NError(EEXIST);
         }
         if (ret != -ENOENT) {
@@ -304,7 +304,7 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
             return NError(ret);
         }
         if (::Mkdirs(path.c_str(), static_cast<MakeDirectionMode>(recursion)) < 0) {
-            HILOGE("Failed to create directories, error: %{public}d", errno);
+            HILOGD("Failed to create directories, error: %{public}d", errno);
             return NError(errno);
         }
         ret = AccessCore(path, 0);

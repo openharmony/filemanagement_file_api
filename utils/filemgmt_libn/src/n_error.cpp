@@ -69,7 +69,7 @@ NError::NError(int errCode)
         errMsg_ = errCodeTable.at(genericCode).second;
     } else {
         errno_ = errCodeTable.at(UNKROWN_ERR).first;
-        errMsg_ = errCodeTable.at(UNKROWN_ERR).second;
+        errMsg_ = errCodeTable.at(UNKROWN_ERR).second + ", errno is " + to_string(abs(errCode));
     }
 }
 

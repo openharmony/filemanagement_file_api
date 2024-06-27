@@ -40,7 +40,7 @@ static NError RmDirent(const string &fpath)
     std::error_code errCode;
     std::uintmax_t num = std::filesystem::remove_all(strToPath, errCode);
     if (errCode) {
-        HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
+        HILOGD("Failed to remove directory, error code: %{public}d", errCode.value());
         return NError(errCode.value());
     }
     if (!num || std::filesystem::exists(strToPath)) {

@@ -170,7 +170,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     OHOS::DistributedFS::FDGuard sfd;
     int fd = OpenFile(path.get());
     if (fd < 0) {
-        HILOGE("Failed to open file by ret: %{public}d", fd);
+        HILOGD("Failed to open file by ret: %{public}d", fd);
         NError(fd).ThrowErr(env);
         return nullptr;
     }

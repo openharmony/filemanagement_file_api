@@ -133,7 +133,7 @@ static int RenameFile(const string &src, const string &dest, const int mode, deq
     std::error_code errCode;
     filesystem::rename(srcPath, dstPath, errCode);
     if (errCode.value() == EXDEV) {
-        HILOGE("Failed to rename file due to EXDEV");
+        HILOGD("Failed to rename file due to EXDEV");
         return CopyAndDeleteFile(src, dest);
     }
     return errCode.value();
@@ -157,7 +157,7 @@ static int RenameDir(const string &src, const string &dest, const int mode, dequ
     std::error_code errCode;
     filesystem::rename(srcPath, destPath, errCode);
     if (errCode.value() == EXDEV) {
-        HILOGE("Failed to rename file due to EXDEV");
+        HILOGD("Failed to rename file due to EXDEV");
         if (!filesystem::create_directory(destPath, errCode)) {
             HILOGE("Failed to create directory, error code: %{public}d", errCode.value());
             return errCode.value();
