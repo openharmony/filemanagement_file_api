@@ -53,9 +53,8 @@ void TransListener::RmDir(const std::string &path)
 std::string TransListener::CreateDfsCopyPath()
 {
     std::random_device rd;
-    std::error_code errCode;
     std::string random = std::to_string(rd());
-    while (std::filesystem::exists(DISTRIBUTED_PATH + random, errCode)) {
+    while (std::filesystem::exists(DISTRIBUTED_PATH + random)) {
         random = std::to_string(rd());
     }
     return random;
@@ -158,7 +157,7 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
     const std::string &sandboxPath)
 {
     std::error_code errCode;
-    if (std::filesystem::exists(sandboxPath, errCode) && std::filesystem::is_directory(sandboxPath, errCode)) {
+    if (std::filesystem::exists(sandboxPath, errCode) && std::filesystem::is_directory(sandboxPath)) {
         HILOGI("Copy dir");
         std::filesystem::copy(disSandboxPath, sandboxPath,
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing, errCode);
