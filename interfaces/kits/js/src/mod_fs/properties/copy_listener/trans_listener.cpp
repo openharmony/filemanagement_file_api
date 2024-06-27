@@ -44,9 +44,7 @@ void TransListener::RmDir(const std::string &path)
             HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
         }
     } else {
-        if (errCode.value() != 0) {
             HILOGE("pathName is not exists, error code: %{public}d", errCode.value());
-        }
     }
 }
 
