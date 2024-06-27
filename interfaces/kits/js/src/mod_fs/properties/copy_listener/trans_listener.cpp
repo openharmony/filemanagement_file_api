@@ -155,7 +155,7 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
     const std::string &sandboxPath)
 {
     std::error_code errCode;
-    if (std::filesystem::exists(sandboxPath, errCode) && std::filesystem::is_directory(sandboxPath)) {
+    if (std::filesystem::exists(sandboxPath) && std::filesystem::is_directory(sandboxPath)) {
         HILOGI("Copy dir");
         std::filesystem::copy(disSandboxPath, sandboxPath,
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing, errCode);
