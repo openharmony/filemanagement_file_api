@@ -37,12 +37,14 @@ const std::string DISTRIBUTED_PATH = "/data/storage/el2/distributedfiles/";
 void TransListener::RmDir(const std::string &path)
 {
     std::filesystem::path pathName(path);
-    if (std::filesystem::exists(pathName)) {
-        std::error_code errCode;
+    std::error_code errCode;
+    if (std::filesystem::exists(pathName, errCode)) {
         std::filesystem::remove_all(pathName, errCode);
         if (errCode.value() != 0) {
             HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
         }
+    } else {
+            HILOGE("pathName is not exists, error code: %{public}d", errCode.value());
     }
 }
 
@@ -118,9 +120,10 @@ int32_t TransListener::PrepareCopySession(const std::string &srcUri,
     if (info.authority != FILE_MANAGER_AUTHORITY && info.authority  != MEDIA_AUTHORITY) {
         tmpDir = CreateDfsCopyPath();
         disSandboxPath = DISTRIBUTED_PATH + tmpDir;
-        if (!std::filesystem::create_directory(disSandboxPath)) {
-            HILOGE("Create dir failed");
-            return EIO;
+        std::error_code errCode;
+        if (!std::filesystem::create_directory(disSandboxPath, errCode)) {
+            HILOGE("Create dir failed, error code: %{public}d", errCode.value());
+            return errCode.value();
         }
 
         auto pos = info.sandboxPath.rfind('/');
@@ -129,7 +132,6 @@ int32_t TransListener::PrepareCopySession(const std::string &srcUri,
             return EIO;
         }
         auto sandboxDir = info.sandboxPath.substr(0, pos);
-        std::error_code errCode;
         if (std::filesystem::exists(sandboxDir, errCode)) {
             info.dirExistFlag = true;
         }
