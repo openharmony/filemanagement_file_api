@@ -17,7 +17,6 @@
 #include <iomanip>
 #include <sstream>
 
-#include "file_utils.h"
 #include "hashstream_entity.h"
 
 namespace OHOS {
@@ -54,12 +53,13 @@ static string HashFinal(const unique_ptr<unsigned char[]> &hashBuf, size_t hashL
 
 static napi_value SetHsEntity(napi_env env, NFuncArg &funcArg, HASH_ALGORITHM_TYPE algType)
 {
-    auto hsEntity = CreateUniquePtr<HashStreamEntity>();
-    if (hsEntity == nullptr) {
+    HashStreamEntity* rawPtr = new (std::nothrow) HashStreamEntity();
+    if (rawPtr == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    std::unique_ptr<HashStreamEntity> hsEntity(rawPtr);
     hsEntity->algType = algType;
 
     switch (algType) {

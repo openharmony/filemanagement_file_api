@@ -33,6 +33,17 @@ ohos_shared_library("filemgmt_libhilog") {
     }
   }
 
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Oz",
+  ]
+  cflags_cc = [
+    "-fvisibility-inlines-hidden",
+    "-Oz",
+  ]
+
   public_configs = [ ":log_public_config" ]
 
   external_deps = [ "hilog:libhilog" ]
