@@ -36,12 +36,7 @@ ohos_shared_library("filemgmt_libn") {
       debug = false
     }
   }
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
+
   sources = [
     "src/n_async/n_async_work_callback.cpp",
     "src/n_async/n_async_work_promise.cpp",
@@ -52,11 +47,7 @@ ohos_shared_library("filemgmt_libn") {
     "src/n_val.cpp",
   ]
 
-  cflags_cc = [
-    "-std=c++17",
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
+  cflags_cc = [ "-std=c++17" ]
   if (use_mingw_win) {
     defines = [ "WIN_PLATFORM" ]
   }

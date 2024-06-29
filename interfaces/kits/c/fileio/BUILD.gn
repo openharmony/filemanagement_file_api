@@ -24,16 +24,6 @@ ohos_shared_library("ohfileio") {
     cfi_cross_dso = true
     debug = false
   }
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   include_dirs = [ "./" ]
 
   sources = [ "./fileio.c" ]

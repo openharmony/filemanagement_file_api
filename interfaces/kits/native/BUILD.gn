@@ -31,16 +31,6 @@ config("task_signal_config") {
 }
 
 ohos_shared_library("remote_uri_native") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   if (!use_mingw_win && !use_mac) {
     branch_protector_ret = "pac_ret"
     sanitize = {
@@ -70,16 +60,6 @@ ohos_shared_library("remote_uri_native") {
 }
 
 ohos_shared_library("task_signal_native") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   if (!use_mingw_win && !use_mac) {
     branch_protector_ret = "pac_ret"
     sanitize = {
@@ -123,16 +103,6 @@ ohos_shared_library("environment_native") {
     cfi_cross_dso = true
     debug = false
   }
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   sources = [ "environment/environment_native.cpp" ]
   public_configs = [ ":environment_config" ]
 
@@ -166,16 +136,6 @@ ohos_shared_library("fileio_native") {
     cfi_cross_dso = true
     debug = false
   }
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   sources = [ "fileio/fileio_native.cpp" ]
 
   public_configs = [ ":fileio_config" ]
