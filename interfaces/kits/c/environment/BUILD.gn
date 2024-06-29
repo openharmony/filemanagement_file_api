@@ -16,16 +16,6 @@ import("//build/ohos/ndk/ndk.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
 ohos_shared_library("ohenvironment") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   sanitize = {
     integer_overflow = true
     ubsan = true

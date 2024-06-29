@@ -73,21 +73,7 @@ gen_obj("streamhash_abc") {
 
 streamhash_sources = [ "native_module_streamhash.cpp" ]
 
-config("optimize-size") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
-}
-
 ohos_shared_library("streamhash") {
-  config = [ ":optimize-size" ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
