@@ -134,6 +134,7 @@ static bool GetOptionParam(const NVal &argv, OptionArgs *optionArgs)
 
 static bool GetOptionArg(napi_env env, const NFuncArg &funcArg, OptionArgs &optionArgs, const string &path)
 {
+    optionArgs.Clear();
     optionArgs.path = path;
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return true;
