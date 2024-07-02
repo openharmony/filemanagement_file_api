@@ -22,6 +22,17 @@ config("log_public_config") {
 
 ohos_shared_library("filemgmt_libhilog") {
   if (!use_mingw_win && !use_mac) {
+    cflags = [
+      "-fvisibility=hidden",
+      "-fdata-sections",
+      "-ffunction-sections",
+      "-Oz",
+    ]
+    cflags_cc = [
+      "-fvisibility-inlines-hidden",
+      "-Oz",
+    ]
+
     branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
