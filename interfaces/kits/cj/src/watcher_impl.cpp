@@ -184,7 +184,7 @@ void WatcherImpl::NotifyEvent(const struct inotify_event *event)
         if (event->len > 0) {
             fileName += "/" + string(event->name);
         }
-        CWatchEvent ret = { 
+        CWatchEvent ret = {
             .fileName = fileName.c_str(),
             .event = event->mask & IN_ALL_EVENTS,
             .cookie = event->cookie };
