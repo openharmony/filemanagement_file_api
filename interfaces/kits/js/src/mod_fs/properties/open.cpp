@@ -71,8 +71,8 @@ static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcAr
     unsigned int flags = O_RDONLY;
     if (funcArg.GetArgc() >= NARG_CNT::TWO) {
         auto [succ, mode] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
-        unsigned int invalidMode = (O_WRONLY | O_RDWR);
-        if (!succ || mode < 0 || ((static_cast<unsigned int>(mode) & invalidMode) == invalidMode)) {
+        int32_t invalidMode = (O_WRONLY | O_RDWR);
+        if (!succ || mode < 0 || ((mode & invalidMode) == invalidMode)) {
             HILOGE("Invalid mode");
             NError(EINVAL).ThrowErr(env);
             return { false, flags };
