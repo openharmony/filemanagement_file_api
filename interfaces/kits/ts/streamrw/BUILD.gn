@@ -73,7 +73,21 @@ gen_obj("streamrw_abc") {
 
 streamrw_sources = [ "native_module_streamrw.cpp" ]
 
+config("optimize-size") {
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Oz",
+  ]
+  cflags_cc = [
+    "-fvisibility-inlines-hidden",
+    "-Oz",
+  ]
+}
+
 ohos_shared_library("streamrw") {
+  config = [ ":optimize-size" ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
