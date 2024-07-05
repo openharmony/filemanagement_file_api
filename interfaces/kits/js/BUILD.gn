@@ -32,16 +32,6 @@ config("kits_public_config") {
 }
 
 ohos_shared_library("fileio") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -188,16 +178,6 @@ ohos_shared_library("fs") {
   ]
 
   if (!use_mingw_win && !use_mac) {
-    cflags = [
-      "-fvisibility=hidden",
-      "-fdata-sections",
-      "-ffunction-sections",
-      "-Oz",
-    ]
-    cflags_cc += [
-      "-fvisibility-inlines-hidden",
-      "-Oz",
-    ]
     defines = [ "FILE_API_TRACE" ]
     branch_protector_ret = "pac_ret"
     sanitize = {
@@ -266,16 +246,6 @@ ohos_shared_library("fs") {
 }
 
 ohos_shared_library("hash") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -285,6 +255,8 @@ ohos_shared_library("hash") {
     cfi_cross_dso = true
     debug = false
   }
+
+  use_exceptions = true
 
   subsystem_name = "filemanagement"
   part_name = "file_api"
@@ -321,16 +293,6 @@ ohos_shared_library("hash") {
 }
 
 ohos_shared_library("file") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -374,16 +336,6 @@ ohos_shared_library("file") {
 }
 
 ohos_shared_library("statfs") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -416,16 +368,6 @@ ohos_shared_library("statfs") {
 }
 
 ohos_shared_library("statvfs") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -458,16 +400,6 @@ ohos_shared_library("statvfs") {
 }
 
 ohos_shared_library("environment") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -519,17 +451,7 @@ ohos_shared_library("securitylabel") {
 
   relative_install_dir = "module/file"
 
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Wno-format",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
+  cflags = [ "-Wno-format" ]
 
   sources = [
     "src/mod_securitylabel/securitylabel_n_exporter.cpp",
@@ -552,16 +474,6 @@ ohos_shared_library("securitylabel") {
 }
 
 ohos_shared_library("document") {
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true

@@ -25,18 +25,7 @@ config("libn_public_config") {
 }
 
 ohos_shared_library("filemgmt_libn") {
-  cflags_cc = [ "-std=c++17" ]
   if (!use_mingw_win && !use_mac) {
-    cflags = [
-      "-fvisibility=hidden",
-      "-fdata-sections",
-      "-ffunction-sections",
-      "-Oz",
-    ]
-    cflags_cc += [
-      "-fvisibility-inlines-hidden",
-      "-Oz",
-    ]
     branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
@@ -58,6 +47,7 @@ ohos_shared_library("filemgmt_libn") {
     "src/n_val.cpp",
   ]
 
+  cflags_cc = [ "-std=c++17" ]
   if (use_mingw_win) {
     defines = [ "WIN_PLATFORM" ]
   }
