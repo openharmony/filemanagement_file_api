@@ -28,7 +28,6 @@ ohos_shared_library("filemgmt_libn") {
   cflags_cc = [ "-std=c++17" ]
   if (!use_mingw_win && !use_mac) {
     cflags = [
-      "-fvisibility=hidden",
       "-fdata-sections",
       "-ffunction-sections",
       "-Oz",
