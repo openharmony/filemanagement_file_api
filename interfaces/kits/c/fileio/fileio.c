@@ -19,7 +19,7 @@
 #include "fileio_native.h"
 #include "../common/error_code.h"
 
-int OH_FileIO_GetFileLocation(char *uri, int uriLength, int *location)
+__attribute__((visibility("default"))) int OH_FileIO_GetFileLocation(char *uri, int uriLength, int *location)
 {
     if (uri == NULL || location == NULL) {
         return GetErrorCode(-PARAMETER_ERROR);

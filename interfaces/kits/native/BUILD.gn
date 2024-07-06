@@ -33,7 +33,6 @@ config("task_signal_config") {
 ohos_shared_library("remote_uri_native") {
   if (!use_mingw_win && !use_mac) {
     cflags = [
-      "-fvisibility=hidden",
       "-fdata-sections",
       "-ffunction-sections",
       "-Oz",
@@ -72,7 +71,6 @@ ohos_shared_library("remote_uri_native") {
 ohos_shared_library("task_signal_native") {
   if (!use_mingw_win && !use_mac) {
     cflags = [
-      "-fvisibility=hidden",
       "-fdata-sections",
       "-ffunction-sections",
       "-Oz",
@@ -124,7 +122,6 @@ ohos_shared_library("environment_native") {
     debug = false
   }
   cflags = [
-    "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-Oz",

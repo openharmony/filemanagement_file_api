@@ -73,7 +73,7 @@ namespace {
     }
 }
 
-int GetFileLocation(char *uri, int uriLength, int *location)
+__attribute__((visibility("default"))) int GetFileLocation(char *uri, int uriLength, int *location)
 {
     if (uri == nullptr || location == nullptr || uriLength <= 0 || uriLength > PATH_MAX) {
         return -EINVAL;

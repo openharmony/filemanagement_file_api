@@ -17,7 +17,6 @@ import("//foundation/filemanagement/file_api/file_api.gni")
 
 ohos_shared_library("ohenvironment") {
   cflags = [
-    "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-Oz",
