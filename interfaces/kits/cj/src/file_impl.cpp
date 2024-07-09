@@ -159,7 +159,10 @@ FileEntity* InstantiateFile(int fd, const std::string& pathOrUri, bool isUri)
         LOGE("Failed to request heap memory.");
         return nullptr;
     }
-    FileEntity *fileEntity = new FileEntity();
+    FileEntity *fileEntity = new(std::nothrow) FileEntity();
+    if (fileEntity == nullptr) {
+        return nullptr;
+    }
     fileEntity->fd_.swap(fdg);
     if (isUri) {
         fileEntity->path_ = "";
@@ -174,7 +177,7 @@ FileEntity* InstantiateFile(int fd, const std::string& pathOrUri, bool isUri)
 static tuple<bool, unsigned int> GetCjFlags(int64_t mode)
 {
     unsigned int flags = O_RDONLY;
-    int32_t invalidMode = (O_WRONLY | O_RDWR);
+    unsigned int invalidMode = (O_WRONLY | O_RDWR);
     if (mode < 0 || (static_cast<unsigned int>(mode) & invalidMode) == invalidMode) {
         LOGE("Invalid mode");
         return { false, flags };
