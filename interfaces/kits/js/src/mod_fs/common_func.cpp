@@ -236,6 +236,7 @@ NVal CommonFunc::InstantiateFile(napi_env env, int fd, const string &pathOrUri, 
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        close(fd);
         NError(ENOMEM).ThrowErr(env);
         return NVal();
     }

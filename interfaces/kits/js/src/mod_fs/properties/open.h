@@ -17,9 +17,6 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_H
 
 #include "filemgmt_libn.h"
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-#include "iremote_broker.h"
-#endif
 
 namespace OHOS {
 namespace FileManagement {
@@ -30,15 +27,6 @@ public:
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-class FileIoToken : public IRemoteBroker {
-public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.fileio.open");
-
-    FileIoToken() = default;
-    virtual ~FileIoToken() noexcept = default;
-};
-#endif
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

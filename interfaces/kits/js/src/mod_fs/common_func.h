@@ -19,6 +19,9 @@
 #include "fd_guard.h"
 #include "n_val.h"
 #include "uv.h"
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include "iremote_broker.h"
+#endif
 
 namespace OHOS {
 namespace FileManagement {
@@ -59,6 +62,16 @@ struct FileInfo {
     std::unique_ptr<char[]> path = { nullptr };
     std::unique_ptr<DistributedFS::FDGuard> fdg = { nullptr };
 };
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+class FileIoToken : public IRemoteBroker {
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.fileio.open");
+
+    FileIoToken() = default;
+    virtual ~FileIoToken() noexcept = default;
+};
+#endif
 
 void InitAccessModeType(napi_env env, napi_value exports);
 void InitOpenMode(napi_env env, napi_value exports);

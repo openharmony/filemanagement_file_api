@@ -36,6 +36,7 @@ using namespace std;
 using namespace OHOS::FileManagement::LibN;
 using namespace OHOS::AppExecFwk;
 using namespace DistributedFS::ModuleTaskSignal;
+
 struct ReceiveInfo {
     std::string path;                         // dir name
     std::map<std::string, uint64_t> fileList; // filename, proceededSize

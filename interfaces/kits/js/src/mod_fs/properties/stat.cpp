@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <tuple>
+#include <unistd.h>
 
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
@@ -43,6 +44,7 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
         auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
         if (fdg == nullptr) {
             HILOGE("Failed to request heap memory.");
+            close(fd);
             NError(ENOMEM).ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
         }

@@ -109,6 +109,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        close(fd);
         NError(ENOMEM).ThrowErr(env);
         return NVal();
     }

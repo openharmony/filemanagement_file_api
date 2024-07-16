@@ -128,6 +128,7 @@ static NError OpenCore(FileInfo& fileInfo, const int flags, const int mode)
     fileInfo.fdg = CreateUniquePtr<DistributedFS::FDGuard>(ret, true);
     if (fileInfo.fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        close(ret);
         return NError(ENOMEM);
     }
     return NError(ERRNO_NOERR);
@@ -194,6 +195,7 @@ static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg
         auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
         if (fdg == nullptr) {
             HILOGE("Failed to request heap memory.");
+            close(fd);
             NError(ENOMEM).ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
         }
