@@ -158,7 +158,6 @@ int32_t TransListener::PrepareCopySession(const std::string &srcUri,
 int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::string &disSandboxPath,
     const std::string &sandboxPath)
 {
-    HILOGI("CopyToSandBox begin.");
     std::error_code errCode;
     if (std::filesystem::exists(sandboxPath) && std::filesystem::is_directory(sandboxPath)) {
         HILOGI("Copy dir");
@@ -183,8 +182,8 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             HILOGE("Copy file failed: errCode: %{public}d", errCode.value());
             return EIO;
         }
-        HILOGI("Copy file success.");
     }
+    HILOGI("Copy file success.");
     return ERRNO_NOERR;
 }
 
