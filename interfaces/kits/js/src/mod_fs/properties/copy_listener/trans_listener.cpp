@@ -169,7 +169,7 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             return EIO;
         }
     } else {
-        HILOGI("Copy file.")
+        HILOGI("Copy file.");
         Uri uri(srcUri);
         auto fileName = GetFileName(uri.GetPath());
         if (fileName.empty()) {
@@ -183,6 +183,7 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             HILOGE("Copy file failed: errCode: %{public}d", errCode.value());
             return EIO;
         }
+        HILOGI("Copy file success.");
     }
     return ERRNO_NOERR;
 }
