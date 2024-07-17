@@ -36,6 +36,7 @@ const std::string DISTRIBUTED_PATH = "/data/storage/el2/distributedfiles/";
 
 void TransListener::RmDir(const std::string &path)
 {
+    HILOGI("RmDirm path : %{public}s", path.c_str());
     std::filesystem::path pathName(path);
     std::error_code errCode;
     if (std::filesystem::exists(pathName, errCode)) {
@@ -61,6 +62,7 @@ std::string TransListener::CreateDfsCopyPath()
 NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::string &destUri,
     std::shared_ptr<FileInfos> fileInfos, std::shared_ptr<JsCallbackObject> callback)
 {
+    HILOGI("CopyFileFromSoftBus begin.");
     sptr<TransListener> transListener = new (std::nothrow) TransListener();
     if (transListener == nullptr) {
         HILOGE("new trans listener failed");
@@ -86,6 +88,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
             return transListener->copyEvent_.copyResult == SUCCESS ||
                 transListener->copyEvent_.copyResult == FAILED;
     });
+    HILOGI("dfs PrepareSession Finish, result is %{public}d", transListener->copyEvent_.copyResult);
     if (transListener->copyEvent_.copyResult == FAILED) {
         if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
             RmDir(disSandboxPath);
@@ -139,6 +142,7 @@ int32_t TransListener::PrepareCopySession(const std::string &srcUri,
 
     info.copyPath = tmpDir;
     auto networkId = GetNetworkIdFromUri(srcUri);
+    HILOGI("dfs PrepareSession begin.");
     auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(srcUri, destUri,
         networkId, transListener, info);
     if (ret != ERRNO_NOERR) {
@@ -164,6 +168,7 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             return EIO;
         }
     } else {
+        HILOGI("Copy file.");
         Uri uri(srcUri);
         auto fileName = GetFileName(uri.GetPath());
         if (fileName.empty()) {
@@ -178,6 +183,7 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             return EIO;
         }
     }
+    HILOGI("Copy file success.");
     return ERRNO_NOERR;
 }
 
@@ -279,7 +285,7 @@ int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedByte
 
 int32_t TransListener::OnFinished(const std::string &sessionName)
 {
-    HILOGD("OnFinished");
+    HILOGI("OnFinished");
     {
         std::lock_guard<std::mutex> lock(callbackMutex_);
         callback_ = nullptr;
@@ -291,7 +297,7 @@ int32_t TransListener::OnFinished(const std::string &sessionName)
 
 int32_t TransListener::OnFailed(const std::string &sessionName, int32_t errorCode)
 {
-    HILOGD("OnFailed");
+    HILOGI("OnFailed, errorCode is %{public}d", errorCode);
     {
         std::lock_guard<std::mutex> lock(callbackMutex_);
         callback_ = nullptr;
