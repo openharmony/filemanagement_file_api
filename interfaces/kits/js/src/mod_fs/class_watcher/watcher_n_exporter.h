@@ -29,7 +29,7 @@ public:
         ~JSCallbackContext() {}
 
     public:
-        napi_env env_;
+        napi_env env_ = nullptr;
         NRef &ref_;
         std::string fileName_;
         uint32_t event_ = 0;
