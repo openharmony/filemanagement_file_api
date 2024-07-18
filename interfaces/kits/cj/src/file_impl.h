@@ -78,4 +78,4 @@ private:
 }
 }
 }
-#endif //OHOS_FILE_FS_FILE_IMPL_H
+#endif // OHOS_FILE_FS_FILE_IMPL_H

@@ -134,6 +134,10 @@ std::tuple<int, sptr<StatImpl>> FileFsImpl::Stat(int32_t file)
     }
     auto nativeStat = FFIData::Create<StatImpl>(*stat);
     delete(stat);
+    stat = nullptr;
+    if (!nativeStat) {
+        return {GetErrorCode(ENOMEM), nullptr};
+    }
     return {SUCCESS_CODE, nativeStat};
 }
 
@@ -152,6 +156,10 @@ std::tuple<int32_t, sptr<StatImpl>> FileFsImpl::Stat(std::string file)
     }
     auto nativeStat = FFIData::Create<StatImpl>(*stat);
     delete(stat);
+    stat = nullptr;
+    if (!nativeStat) {
+        return {GetErrorCode(ENOMEM), nullptr};
+    }
     return {SUCCESS_CODE, nativeStat};
 }
 
@@ -163,6 +171,9 @@ std::tuple<int32_t, sptr<StreamImpl>> FileFsImpl::CreateStream(std::string path,
         return {GetErrorCode(errno), nullptr};
     }
     auto nativeStream = FFIData::Create<StreamImpl>(std::move(fp));
+    if (!nativeStream) {
+        return {GetErrorCode(ENOMEM), nullptr};
+    }
     return {SUCCESS_CODE, nativeStream};
 }
 
@@ -179,6 +190,9 @@ std::tuple<int32_t, sptr<StreamImpl>> FileFsImpl::FdopenStream(int32_t fd, std::
         return {GetErrorCode(errno), nullptr};
     }
     auto nativeStream = FFIData::Create<StreamImpl>(std::move(fp));
+    if (!nativeStream) {
+        return {GetErrorCode(ENOMEM), nullptr};
+    }
     return {SUCCESS_CODE, nativeStream};
 }
 
@@ -198,6 +212,9 @@ std::tuple<int32_t, sptr<StatImpl>> FileFsImpl::Lstat(std::string path)
         return {GetErrorCode(ret), nullptr};
     }
     auto nativeStat = FFIData::Create<StatImpl>(lstat_req->statbuf);
+    if (!nativeStat) {
+        return {GetErrorCode(ENOMEM), nullptr};
+    }
     return {SUCCESS_CODE, nativeStat};
 }
 
@@ -218,7 +235,7 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
         unsigned int flags = static_cast<unsigned int>(mode);
         CommonFunc::ConvertCjFlags(flags);
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
         if (!open_req) {
             LOGE("Failed to request heap memory.");
             return {GetErrorCode(ENOMEM), nullptr};
@@ -237,6 +254,9 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
     ptr->fd.swap(fileInfo.fdg);
     ptr->filePointer = 0;
     auto randomAccessFileImpl = FFIData::Create<RandomAccessFileImpl>(std::move(ptr));
+    if (!randomAccessFileImpl) {
+        return {GetErrorCode(ENOMEM), nullptr};
+    }
     return {SUCCESS_CODE, randomAccessFileImpl};
 }
 
@@ -265,6 +285,9 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
     ptr->fd.swap(fileInfo.fdg);
     ptr->filePointer = 0;
     auto randomAccessFileImpl = FFIData::Create<RandomAccessFileImpl>(std::move(ptr));
+    if (!randomAccessFileImpl) {
+        return {GetErrorCode(ENOMEM), nullptr};
+    }
     return {SUCCESS_CODE, randomAccessFileImpl};
 }
 
@@ -282,7 +305,7 @@ int FileFsImpl::Mkdir(std::string path, bool recursion, bool isTwoArgs)
     }
 #endif
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> mkdir_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!mkdir_req) {
         HILOGE("Failed to request heap memory.");
         return GetErrorCode(ENOMEM);
@@ -360,7 +383,7 @@ int FileFsImpl::Rename(std::string oldPath, std::string newPath)
 int FileFsImpl::Unlink(std::string path)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> unlink_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!unlink_req) {
         HILOGE("Failed to request heap memory.");
         return GetErrorCode(ENOMEM);
@@ -445,6 +468,7 @@ static void Deleter(struct NameListArg *arg)
         (arg->namelist)[i] = nullptr;
     }
     delete arg->namelist;
+    arg->namelist = nullptr;
 }
 
 static int32_t FilterFunc(const struct dirent *filename)
@@ -675,6 +699,7 @@ static CConflictFiles* DequeToCConflict(std::deque<struct ConflictFiles> errfile
             result[j - 1].destFiles = nullptr;
         }
         delete[] result;
+        result = nullptr;
         return nullptr;
     }
     return result;
@@ -753,7 +778,7 @@ RetDataI64 FileFsImpl::Read(int32_t fd, char* buf, int64_t bufLen, size_t length
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
 
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> read_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!read_req) {
         LOGE("Failed to request heap memory.");
         ret.code = ENOMEM;
@@ -788,7 +813,7 @@ RetDataI64 FileFsImpl::ReadCur(int32_t fd, char* buf, int64_t bufLen, size_t len
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
 
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> read_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!read_req) {
         LOGE("Failed to request heap memory.");
         ret.code = ENOMEM;
@@ -831,7 +856,7 @@ RetDataI64 FileFsImpl::Write(int32_t fd, char* buf, size_t length, int64_t offse
 
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buff), static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> write_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!write_req) {
         LOGE("Failed to request heap memory.");
         ret.code = ENOMEM;
@@ -870,7 +895,7 @@ RetDataI64 FileFsImpl::WriteCur(int32_t fd, char* buf, size_t length, std::strin
     
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buff), static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> write_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!write_req) {
         LOGE("Failed to request heap memory.");
         ret.code = ENOMEM;
@@ -911,7 +936,7 @@ int FileFsImpl::Truncate(std::string file, int64_t len)
         return GetErrorCode(EINVAL);
     }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         return GetErrorCode(ENOMEM);
@@ -922,7 +947,7 @@ int FileFsImpl::Truncate(std::string file, int64_t len)
         return GetErrorCode(ret);
     }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> ftruncate_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!ftruncate_req) {
         HILOGE("Failed to request heap memory.");
         return GetErrorCode(ENOMEM);
@@ -945,7 +970,7 @@ int FileFsImpl::Truncate(int32_t fd, int64_t len)
         return GetErrorCode(EINVAL);
     }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> ftruncate_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!ftruncate_req) {
         HILOGE("Failed to request heap memory.");
         return GetErrorCode(ENOMEM);
@@ -961,7 +986,7 @@ int FileFsImpl::Truncate(int32_t fd, int64_t len)
 static int CloseFd(int fd)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> close_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!close_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -1048,6 +1073,9 @@ std::tuple<int32_t, sptr<ReadIteratorImpl>> FileFsImpl::ReadLines(char* file, st
     ptr->iterator = iterator;
     ptr->offset = offset;
     auto readIteratorImpl = FFIData::Create<ReadIteratorImpl>(std::move(ptr));
+    if (!readIteratorImpl) {
+        return {GetErrorCode(ENOMEM), nullptr};
+    }
     return {SUCCESS_CODE, readIteratorImpl};
 }
 
@@ -1071,7 +1099,7 @@ static int ReadTextCheckArgs(int64_t offset, int64_t len, char* encoding)
 static int ReadTextOpenFile(const std::string& path)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup
     };
     if (open_req == nullptr) {
         HILOGE("Failed to request heap memory.");
@@ -1086,7 +1114,7 @@ static int ReadFromFile(int fd, int64_t offset, string& buffer)
 {
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(buffer.size()));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> read_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (read_req == nullptr) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;
@@ -1163,7 +1191,7 @@ int FileFsImpl::Utimes(std::string path, double mtime)
     }
 
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> utimes_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!utimes_req) {
         HILOGE("Failed to request heap memory.");
         return GetErrorCode(ENOMEM);
@@ -1190,6 +1218,9 @@ std::tuple<int32_t, sptr<WatcherImpl>> FileFsImpl::CreateWatcher(std::string pat
     infoArg->fileName = path;
 
     auto watcherImpl = FFIData::Create<WatcherImpl>();
+    if (!watcherImpl) {
+        return {GetErrorCode(ENOMEM), nullptr};
+    }
     watcherImpl->data_ = infoArg;
 
     if (watcherImpl->GetNotifyId() < 0 && !watcherImpl->InitNotify()) {
