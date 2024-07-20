@@ -28,7 +28,8 @@ public:
     ~NRef();
     explicit operator bool() const;
     NVal Deref(napi_env env);
-    void CleanJsEnv() {
+    void CleanJsEnv()
+    {
         env_ = nullptr;
         ref_ = nullptr;
     }
