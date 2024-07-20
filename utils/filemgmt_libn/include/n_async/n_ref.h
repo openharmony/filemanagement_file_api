@@ -28,6 +28,10 @@ public:
     ~NRef();
     explicit operator bool() const;
     NVal Deref(napi_env env);
+    void CleanJsEnv() {
+        env_ = nullptr;
+        ref_ = nullptr;
+    }
 
 private:
     napi_env env_ = nullptr;
