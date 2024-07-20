@@ -42,6 +42,7 @@ NAsyncWorkCallback::~NAsyncWorkCallback()
     uv_loop_s *loop = nullptr;
     napi_status status = napi_get_uv_event_loop(env_, &loop);
     if (status != napi_ok) {
+        ptr->cb_.CleanJsEnv();
         HILOGE("Failed to get uv event loop");
         return;
     }
