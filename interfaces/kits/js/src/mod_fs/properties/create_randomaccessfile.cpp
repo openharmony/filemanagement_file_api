@@ -48,6 +48,7 @@ static tuple<bool, FileInfo, int> ParseJsFile(napi_env env, napi_value pathOrFil
         auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(sfd, false);
         if (fdg == nullptr) {
             HILOGE("Failed to request heap memory.");
+            close(sfd);
             return { false, FileInfo { false, nullptr, nullptr }, ENOMEM};
         }
         return { true, FileInfo { true, move(path), move(fdg) }, ERRNO_NOERR};
@@ -67,6 +68,7 @@ static tuple<bool, FileInfo, int> ParseJsFile(napi_env env, napi_value pathOrFil
         auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(dupFd, false);
         if (fdg == nullptr) {
             HILOGE("Failed to request heap memory.");
+            close(dupFd);
             return { false, FileInfo { false, nullptr, nullptr }, ENOMEM};
         }
         return { true, FileInfo { false, nullptr, move(fdg) }, ERRNO_NOERR};

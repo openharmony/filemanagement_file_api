@@ -30,11 +30,13 @@
 #include <unistd.h>
 #include <vector>
 
+#include "datashare_helper.h"
 #include "file_uri.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "ipc_skeleton.h"
 #include "system_ability_definition.h"
 #include "trans_listener.h"
 
@@ -46,6 +48,7 @@ namespace fs = std::filesystem;
 const std::string FILE_PREFIX_NAME = "file://";
 const std::string NETWORK_PARA = "?networkid=";
 const string PROCEDURE_COPY_NAME = "FileFSCopy";
+const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
@@ -53,6 +56,79 @@ constexpr size_t MAX_SIZE = 1024 * 1024 * 128;
 constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(300);
 std::recursive_mutex Copy::mutex_;
 std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
+
+static int OpenSrcFile(const string &srcPth, std::shared_ptr<FileInfos> infos, int32_t &srcFd)
+{
+    Uri uri(infos->srcUri);
+    if (uri.GetAuthority() == "media") {
+        std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
+        sptr<FileIoToken> remote = new (std::nothrow) IRemoteStub<FileIoToken>();
+        if (!remote) {
+            HILOGE("Failed to get remote object");
+            return ENOMEM;
+        }
+        dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
+        if (!dataShareHelper) {
+            HILOGE("Failed to connect to datashare");
+            return E_PERMISSION;
+        }
+        srcFd = dataShareHelper->OpenFile(uri, CommonFunc::GetModeFromFlags(O_RDONLY));
+        if (srcFd < 0) {
+            HILOGE("Open media uri by data share fail. ret = %{public}d", srcFd);
+            return srcFd;
+        }
+    } else {
+        srcFd = open(srcPth.c_str(), O_RDONLY);
+        if (srcFd < 0) {
+            HILOGE("Error opening src file descriptor. errno = %{public}d", errno);
+            return errno;
+        }
+    }
+    return ERRNO_NOERR;
+}
+
+static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg,
+                        std::unique_ptr<DistributedFS::FDGuard> destFdg,
+                        std::shared_ptr<FileInfos> infos)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendFileReq = {
+        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (sendFileReq == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return ENOMEM;
+    }
+    int64_t offset = 0;
+    struct stat srcStat{};
+    if (fstat(srcFdg->GetFD(), &srcStat) < 0) {
+        HILOGE("Failed to get stat of file by fd: %{public}d ,errno = %{public}d", srcFdg->GetFD(), errno);
+        return errno;
+    }
+    int32_t ret = 0;
+    int64_t size = static_cast<int64_t>(srcStat.st_size);
+    while (size >= 0) {
+        ret = uv_fs_sendfile(nullptr, sendFileReq.get(), destFdg->GetFD(), srcFdg->GetFD(),
+            offset, MAX_SIZE, nullptr);
+        if (ret < 0) {
+            HILOGE("Failed to sendfile by errno : %{public}d", errno);
+            return errno;
+        }
+        if (infos != nullptr && infos->taskSignal != nullptr) {
+            if (infos->taskSignal->CheckCancelIfNeed(infos->srcPath)) {
+                return ECANCELED;
+            }
+        }
+        offset += static_cast<int64_t>(ret);
+        size -= static_cast<int64_t>(ret);
+        if (ret == 0) {
+            break;
+        }
+    }
+    if (size != 0) {
+        HILOGE("The execution of the sendfile task was terminated, remaining file size %{public}" PRIu64, size);
+        return EIO;
+    }
+    return ERRNO_NOERR;
+}
 
 bool Copy::IsValidUri(const std::string &uri)
 {
@@ -158,53 +234,26 @@ void Copy::CheckOrCreatePath(const std::string &destPath)
 int Copy::CopyFile(const string &src, const string &dest, std::shared_ptr<FileInfos> infos)
 {
     HILOGD("src = %{public}s, dest = %{public}s", src.c_str(), dest.c_str());
-    auto srcFd = open(src.c_str(), O_RDONLY);
+    int32_t srcFd = -1;
+    int32_t ret = OpenSrcFile(src, infos, srcFd);
+    if (srcFd < 0) {
+        return ret;
+    }
     auto destFd = open(dest.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-    if (srcFd < 0 || destFd < 0) {
-        HILOGE("Error opening file descriptor. errno = %{public}d", errno);
+    if (destFd < 0) {
+        HILOGE("Error opening dest file descriptor. errno = %{public}d", errno);
         close(srcFd);
-        close(destFd);
         return errno;
     }
     auto srcFdg = CreateUniquePtr<DistributedFS::FDGuard>(srcFd, true);
     auto destFdg = CreateUniquePtr<DistributedFS::FDGuard>(destFd, true);
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendFileReq = {
-        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (sendFileReq == nullptr) {
+    if (srcFdg == nullptr || destFdg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        close(srcFd);
+        close(destFd);
         return ENOMEM;
     }
-    int64_t offset = 0;
-    struct stat srcStat{};
-    if (fstat(srcFdg->GetFD(), &srcStat) < 0) {
-        HILOGE("Failed to get stat of file by fd: %{public}d ,errno = %{public}d", srcFdg->GetFD(), errno);
-        return errno;
-    }
-    int64_t size = static_cast<int64_t>(srcStat.st_size);
-    int ret = 0;
-    while (size >= 0) {
-        ret = uv_fs_sendfile(nullptr, sendFileReq.get(), destFdg->GetFD(), srcFdg->GetFD(),
-            offset, MAX_SIZE, nullptr);
-        if (ret < 0) {
-            HILOGE("Failed to sendfile by errno : %{public}d", errno);
-            return errno;
-        }
-        if (infos != nullptr && infos->taskSignal != nullptr) {
-            if (infos->taskSignal->CheckCancelIfNeed(src)) {
-                return ECANCELED;
-            }
-        }
-        offset += static_cast<int64_t>(ret);
-        size -= static_cast<int64_t>(ret);
-        if (ret == 0) {
-            break;
-        }
-    }
-    if (size != 0) {
-        HILOGE("The execution of the sendfile task was terminated, remaining file size %{public}" PRIu64, size);
-        return EIO;
-    }
-    return ERRNO_NOERR;
+    return SendFileCore(move(srcFdg), move(destFdg), infos);
 }
 
 int Copy::MakeDir(const string &path)

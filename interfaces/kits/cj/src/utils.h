@@ -19,10 +19,13 @@
 #include "uv.h"
 #include "fd_guard.h"
 #include <string>
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include "iremote_broker.h"
+#endif
 
 namespace OHOS {
 namespace CJSystemapi {
-    
+
 constexpr int RDONLY = UV_FS_O_RDONLY;
 constexpr int WRONLY = UV_FS_O_WRONLY;
 constexpr int RDWR = UV_FS_O_RDWR;
@@ -47,6 +50,16 @@ constexpr unsigned int USR_SYNC = 04010000;
 
 const double NS = 1e9;
 const double MS = 1e3;
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+class FileIoToken : public IRemoteBroker {
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.fileio.open");
+
+    FileIoToken() = default;
+    virtual ~FileIoToken() noexcept = default;
+};
+#endif
 
 struct FileInfo {
     bool isPath = false;
