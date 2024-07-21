@@ -20,6 +20,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <sys/types.h>
 #include <sys/xattr.h>
 
 namespace OHOS {
@@ -33,7 +34,25 @@ public:
     static bool SetSecurityLabel(const std::string &path, const std::string &dataLevel)
     {
         if (DATA_LEVEL.count(dataLevel) != 1) {
+            errno = EINVAL;
             return false;
+        }
+#ifdef IOS_PLATFORM
+        auto xattrValueSize = getxattr(path.c_str(), XATTR_KEY, nullptr, 0, 0, 0);
+#else
+        auto xattrValueSize = getxattr(path.c_str(), XATTR_KEY, nullptr, 0);
+#endif
+        if (xattrValueSize == static_cast<ssize_t>(DEFAULT_DATA_LEVEL.length())) {
+            std::unique_ptr<char[]> xattrValue = std::make_unique<char[]>((long)xattrValueSize + 1);
+#ifdef IOS_PLATFORM
+            xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize, 0, 0);
+#else
+            xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize);
+#endif
+            if (xattrValue[xattrValueSize - 1] > dataLevel.at(dataLevel.size() - 1)) {
+                errno = EINVAL;
+                return false;
+            }
         }
 #ifdef IOS_PLATFORM
         if (setxattr(path.c_str(), XATTR_KEY, dataLevel.c_str(), dataLevel.size(), 0, 0) < 0) {
@@ -52,25 +71,19 @@ public:
 #else
         auto xattrValueSize = getxattr(path.c_str(), XATTR_KEY, nullptr, 0);
 #endif
-        if (xattrValueSize == -1) {
-            return "";
-        }
-        if (xattrValueSize == 0) {
+        if (xattrValueSize == -1 || xattrValueSize == 0) {
             return DEFAULT_DATA_LEVEL;
         }
         std::unique_ptr<char[]> xattrValue = std::make_unique<char[]>((long)xattrValueSize + 1);
         if (xattrValue == nullptr) {
-            return "";
+            return DEFAULT_DATA_LEVEL;
         }
 #ifdef IOS_PLATFORM
         xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize, 0, 0);
 #else
         xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize);
 #endif
-        if (xattrValueSize == -1) {
-            return "";
-        }
-        if (xattrValueSize == 0) {
+        if (xattrValueSize == -1 || xattrValueSize == 0) {
             return DEFAULT_DATA_LEVEL;
         }
         return std::string(xattrValue.get());
