@@ -152,6 +152,7 @@ static int OpenCore(FileInfo& fileInfo, const int flags, const int mode)
     fileInfo.fdg = CreateUniquePtr<DistributedFS::FDGuard>(ret, true);
     if (fileInfo.fdg == nullptr) {
         LOGE("Failed to request heap memory.");
+        close(ret);
         return 1;
     }
     return 0;

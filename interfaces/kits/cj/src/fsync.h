@@ -28,4 +28,4 @@ public:
 
 }
 }
-#endif //OHOS_FILE_FS_FDATASYNC_H
+#endif // OHOS_FILE_FS_FDATASYNC_H

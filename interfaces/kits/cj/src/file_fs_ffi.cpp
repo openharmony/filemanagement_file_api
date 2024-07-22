@@ -582,6 +582,6 @@ int32_t FfiOHOSFileFsWatcherStop(int64_t id)
     return instance->StopNotify();
 }
 }
-} //namespace FileFs
-} //namespace CJSystemapi
-} //namespace OHOS
+} // namespace FileFs
+} // namespace CJSystemapi
+} // namespace OHOS

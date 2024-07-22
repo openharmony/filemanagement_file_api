@@ -39,4 +39,4 @@ extern "C" {
     bool FfiOHOSStatIsSymbolicLink(int64_t id);
 }
 
-#endif //OHOS_FILE_FS_STAT_FFI_H
+#endif // OHOS_FILE_FS_STAT_FFI_H

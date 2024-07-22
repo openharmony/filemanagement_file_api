@@ -54,7 +54,7 @@ using namespace std;
 static int OpenFileByPath(const std::string &path, unsigned int mode)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!open_req) {
         LOGE("Failed to request heap memory.");
         return -ENOMEM;
@@ -157,6 +157,7 @@ FileEntity* InstantiateFile(int fd, const std::string& pathOrUri, bool isUri)
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
         LOGE("Failed to request heap memory.");
+        close(fd);
         return nullptr;
     }
     FileEntity *fileEntity = new(std::nothrow) FileEntity();
@@ -210,6 +211,9 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Open(const char* path, int64_t
             return { ENOMEM, nullptr};
         }
         auto fileUri = FFIData::Create<FileEntity>(std::move(fileEntity->fd_), fileEntity->path_, fileEntity->uri_);
+        if (!fileUri) {
+            return {ENOMEM, nullptr};
+        }
         return {SUCCESS_CODE, fileUri};
     }
 #endif
@@ -223,6 +227,9 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Open(const char* path, int64_t
         return { ENOMEM, nullptr};
     }
     auto filePath = FFIData::Create<FileEntity>(std::move(file->fd_), file->path_, file->uri_);
+    if (!filePath) {
+        return {ENOMEM, nullptr};
+    }
     return {SUCCESS_CODE, filePath};
 }
 
@@ -257,6 +264,9 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Dup(int32_t fd)
     }
     auto pathStr = string(static_cast<const char *>(readlink_req->ptr));
     auto fileEntity = FFIData::Create<FileEntity>(std::move(fdPrt), pathStr, "");
+    if (!fileEntity) {
+        return {ENOMEM, nullptr};
+    }
     return {SUCCESS_CODE, fileEntity};
 }
 
@@ -304,6 +314,7 @@ const char* FileEntity::GetPath(int64_t id)
     }
     if (strcpy_s(value, tempPath.size() + 1, tempPath.c_str()) != 0) {
         free(value);
+        value = nullptr;
         return nullptr;
     }
     return value;
@@ -394,6 +405,7 @@ RetDataCString FileEntity::GetParent()
     if (strcpy_s(result, parent.length() + 1, parent.c_str()) != 0) {
         ret.code = ENOMEM;
         free(result);
+        result = nullptr;
         return ret;
     }
     ret.data = result;

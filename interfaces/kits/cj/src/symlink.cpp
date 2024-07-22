@@ -31,7 +31,7 @@ int SymlinkImpl::Symlink(const std::string& target, const std::string& srcPath)
     LOGI("FS_TEST::SymlinkImpl::Symlink start");
 
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> symlink_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!symlink_req) {
         LOGE("Failed to request heap memory.");
         return ENOMEM;

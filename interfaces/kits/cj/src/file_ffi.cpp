@@ -55,6 +55,10 @@ int FfiOHOSFileFsClose(int64_t file)
 {
     LOGI("FS_TEST::FfiOHOSFileFsClose");
     auto instance = FFIData::GetData<FileEntity>(file);
+    if (!instance) {
+        LOGE("Stream instance not exist %{public}" PRId64, file);
+        return ERR_INVALID_INSTANCE_CODE;
+    }
     int err = FileFsImpl::Close(instance);
     FFIData::Release(file);
     LOGI("FS_TEST::FfiOHOSFileFsClose success");
@@ -125,6 +129,10 @@ RetCode FfiOHOSFILEFsUnLock(int64_t id)
 {
     LOGI("FS_TEST::FfiOHOSFILEFsUnLock");
     auto instance = FFIData::GetData<FileEntity>(id);
+    if (!instance) {
+        LOGE("FileEntity instance not exist %{public}" PRId64, id);
+        return ERR_INVALID_INSTANCE_CODE;
+    }
     return instance->UnLock(id);
 }
 
@@ -145,6 +153,6 @@ RetDataCString FfiOHOSFILEFsGetParent(int64_t id)
     return ret;
 }
 }
-} //namespace FileFs
-} //namespace CJSystemapi
-} //namespace OHOS
+} // namespace FileFs
+} // namespace CJSystemapi
+} // namespace OHOS

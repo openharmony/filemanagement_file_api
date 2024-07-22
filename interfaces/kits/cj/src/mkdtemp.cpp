@@ -46,7 +46,7 @@ RetDataCString MkdtempImpl::Mkdtemp(const std::string& prefix)
     LOGI("FS_TEST:: MkdtempImpl::Mkdtemp start");
     RetDataCString ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = nullptr };
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> mkdtemp_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!mkdtemp_req) {
         LOGE("Failed to request heap memory.");
         ret.code = ENOMEM;

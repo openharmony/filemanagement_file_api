@@ -202,6 +202,7 @@ static void Deleter(struct NameListArg *arg)
         (arg->namelist)[i] = nullptr;
     }
     free(arg->namelist);
+    arg->namelist = nullptr;
 }
 
 static int FilterFileRes(const string &path, vector<string> &dirents)
@@ -278,6 +279,7 @@ static char** VectorToCArrString(vector<string> &vec)
             result[j - 1] = nullptr;
         }
         delete[] result;
+        result = nullptr;
         return nullptr;
     }
     return result;

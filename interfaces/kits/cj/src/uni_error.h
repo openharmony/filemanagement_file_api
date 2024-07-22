@@ -316,4 +316,4 @@ int GetErrorCode(int errCode);
 }
 }
 }
-#endif //OHOS_FILE_FS_UNI_ERROR_H
+#endif // OHOS_FILE_FS_UNI_ERROR_H

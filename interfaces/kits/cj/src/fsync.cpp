@@ -29,7 +29,7 @@ int FsyncImpl::Fsync(int32_t fd)
 {
     LOGI("FS_TEST::FsyncImpl::Fsync start");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> fsync_req = {
-        new uv_fs_t, CommonFunc::FsReqCleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!fsync_req) {
         LOGE("Failed to request heap memory.");
         return ENOMEM;
