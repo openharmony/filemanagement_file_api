@@ -40,12 +40,13 @@ int32_t FileDfsListenerStub::OnRemoteRequest(uint32_t code,
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         return FILE_DFS_LISTENER_DESCRIPTOR_IS_EMPTY;
     }
-    auto interfaceIndex = opToInterfaceMap_.find(code);
-    if (interfaceIndex == opToInterfaceMap_.end() || !interfaceIndex->second) {
-        HILOGE("Cannot response request %{public}d: unknown tranction", code);
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    switch (code) {
+        case static_cast<uint32_t>(Storage::DistributedFile::FileDfsListenerInterfaceCode::FILE_DFS_LISTENER_ON_STATUS):
+            return HandleOnStatus(data, reply);
+        default:
+            HILOGE("Cannot response request %{public}d: unknown tranction", code);
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
-    return (this->*(interfaceIndex->second))(data, reply);
 }
 
 int32_t FileDfsListenerStub::HandleOnStatus(MessageParcel &data, MessageParcel &reply)
