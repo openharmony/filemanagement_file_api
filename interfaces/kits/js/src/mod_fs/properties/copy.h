@@ -28,7 +28,6 @@
 #include "task_signal.h"
 #include "class_tasksignal/task_signal_entity.h"
 
-const uint64_t MAX_VALUE = 0x7FFFFFFFFFFFFFFF;
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -36,6 +35,7 @@ using namespace std;
 using namespace OHOS::FileManagement::LibN;
 using namespace OHOS::AppExecFwk;
 using namespace DistributedFS::ModuleTaskSignal;
+const uint64_t MAX_VALUE = 0x7FFFFFFFFFFFFFFF;
 
 struct ReceiveInfo {
     std::string path;                         // dir name
@@ -121,7 +121,7 @@ class Copy final {
 public:
     static napi_value Async(napi_env env, napi_callback_info info);
     static std::map<FileInfos, std::shared_ptr<JsCallbackObject>> jsCbMap_;
-    static void UnregisterListener(std::shared_ptr<FileInfos> infos);
+    static void UnregisterListener(std::shared_ptr<FileInfos> fileInfos);
     static std::recursive_mutex mutex_;
 
 private:
@@ -150,7 +150,7 @@ private:
     // operator of file
     static int RecurCopyDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);
     static tuple<int, uint64_t> GetFileSize(const std::string &path);
-    static uint64_t GetDirSize(std::shared_ptr<FileInfos> infos, const std::string &path);
+    static uint64_t GetDirSize(std::shared_ptr<FileInfos> infos, std::string path);
     static int CopyFile(const string &src, const string &dest, std::shared_ptr<FileInfos> infos);
     static int MakeDir(const string &path);
     static int CopySubDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);

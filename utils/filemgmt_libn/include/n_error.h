@@ -105,7 +105,7 @@ enum ErrCodeSuffixOfFileIO {
     E_CONNECTION_ABORT,
     E_NOTASK,
     E_UNCANCELED,
-    E_CANCELED
+    E_CANCELED,
 };
 
 enum ErrCodeSuffixOfUserFileManager {
@@ -222,10 +222,10 @@ static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "EBADFD", EBADFD },
     { "ERESTART", ERESTART },
     { "EDQUOT", EDQUOT },
-    { "ECANCELED", ECANCELED },
     { "ENETUNREACH", ENETUNREACH },
     { "ECONNECTIONFAIL", ECONNECTIONFAIL },
     { "ECONNECTIONABORT", ECONNECTIONABORT },
+    { "ECANCELED", ECANCELED },
 };
 
 static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
@@ -272,14 +272,14 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { ERESTART, { FILEIO_SYS_CAP_TAG + E_RESTART, "Interrupted system call should be restarted" } },
     { EDQUOT, { FILEIO_SYS_CAP_TAG + E_DQUOT, "Quota exceeded" } },
     { UNKROWN_ERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
-    { NO_TASK_ERR, { FILEIO_SYS_CAP_TAG + E_NOTASK, "No task can be canceled" } },
-    { CANCEL_ERR, { FILEIO_SYS_CAP_TAG + E_UNCANCELED, "Failed to cancel" } },
-    { ECANCELED, { FILEIO_SYS_CAP_TAG + E_CANCELED, "Operation canceled" } },
     { ENOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { ENETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
     { ECONNECTIONFAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
     { ECONNECTIONABORT, { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT,
         "Software caused connection abort" } },
+    { NO_TASK_ERR, { FILEIO_SYS_CAP_TAG + E_NOTASK, "No task can be canceled" } },
+    { CANCEL_ERR, { FILEIO_SYS_CAP_TAG + E_UNCANCELED, "Failed to cancel" } },
+    { ECANCELED, { FILEIO_SYS_CAP_TAG + E_CANCELED, "Operation canceled" } },
     { FILEIO_SYS_CAP_TAG + E_PERM, { FILEIO_SYS_CAP_TAG + E_PERM, "Operation not permitted" } },
     { FILEIO_SYS_CAP_TAG + E_NOENT, { FILEIO_SYS_CAP_TAG + E_NOENT, "No such file or directory" } },
     { FILEIO_SYS_CAP_TAG + E_SRCH, { FILEIO_SYS_CAP_TAG + E_SRCH, "No such process" } },

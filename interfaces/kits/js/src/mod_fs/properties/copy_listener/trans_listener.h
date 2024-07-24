@@ -22,6 +22,7 @@
 #include "distributed_file_daemon_manager.h"
 #include "file_trans_listener_stub.h"
 #include "file_uri.h"
+#include "hmdfs_info.h"
 
 constexpr int NONE = 0;
 constexpr int SUCCESS = 1;
@@ -42,7 +43,6 @@ public:
                                       const std::string &destUri,
                                       std::shared_ptr<FileInfos> fileInfos,
                                       std::shared_ptr<JsCallbackObject> callback);
-
 private:
     static std::string GetNetworkIdFromUri(const std::string &uri);
     static void CallbackComplete(uv_work_t *work, int stat);
