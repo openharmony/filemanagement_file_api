@@ -122,6 +122,7 @@ ohos_shared_library("fileio") {
   use_exceptions = true
 
   external_deps = [
+    "ability_base:zuri",
     "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "napi:ace_napi",
