@@ -156,7 +156,7 @@ private:
     static int CopySubDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);
     static int CopyDirFunc(const string &src, const string &dest, std::shared_ptr<FileInfos> infos);
     static tuple<int, std::shared_ptr<FileInfos>> CreateFileInfos(
-        const std::string &srcUri, const std::string &destUri, const NVal &listener, NVal copySignal);
+        const std::string &srcUri, const std::string &destUri, NVal &listener, NVal copySignal);
     static int ExecCopy(std::shared_ptr<FileInfos> infos);
 
     // operator of file size
