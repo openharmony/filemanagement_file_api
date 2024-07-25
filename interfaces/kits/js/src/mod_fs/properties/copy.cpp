@@ -18,6 +18,7 @@
 #include <cstring>
 #include <dirent.h>
 #include <fcntl.h>
+#include <filesystem>
 #include <limits>
 #include <memory>
 #include <poll.h>
@@ -341,7 +342,7 @@ std::string Copy::GetRealPath(const std::string& path)
     return realPath.string();
 }
 
-uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, const std::string &path)
+uint64_t Copy::GetDirSize(std::shared_ptr<FileInfos> infos, std::string path)
 {
     unique_ptr<struct NameList, decltype(Deleter) *> pNameList = { new (nothrow) struct NameList, Deleter };
     if (pNameList == nullptr) {
@@ -758,7 +759,7 @@ void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
 }
 
 tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
-    const std::string &srcUri, const std::string &destUri, const NVal &listener, NVal copySignal)
+    const std::string &srcUri, const std::string &destUri, NVal &listener, NVal copySignal)
 {
     auto infos = CreateSharedPtr<FileInfos>();
     if (infos == nullptr) {
@@ -802,7 +803,7 @@ int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
 {
     if (IsFile(infos->srcPath) && IsFile(infos->destPath)) {
         // copyFile
-        return CopyFile(infos->srcPath, infos->destPath, infos);
+        return CopyFile(infos->srcPath.c_str(), infos->destPath.c_str(), infos);
     }
     if (IsDirectory(infos->srcPath) && IsDirectory(infos->destPath)) {
         if (infos->srcPath.back() != '/') {
@@ -812,7 +813,7 @@ int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
             infos->destPath += '/';
         }
         // copyDir
-        return CopyDirFunc(infos->srcPath, infos->destPath, infos);
+        return CopyDirFunc(infos->srcPath.c_str(), infos->destPath.c_str(), infos);
     }
     return EINVAL;
 }
