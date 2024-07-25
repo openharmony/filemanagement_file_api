@@ -22,12 +22,13 @@
 #include "stream_impl.h"
 
 extern "C" {
-RetCode FfiOHOSStreamClose(int64_t id);
-RetCode FfiOHOSStreamFlush(int64_t id);
-RetDataI64 FfiOHOSStreamWriteCur(int64_t id, const char* buffer, int64_t length, const char* encode);
-RetDataI64 FfiOHOSStreamWrite(int64_t id, const char* buffer, int64_t length, int64_t offset, const char* encode);
-RetDataI64 FfiOHOSStreamReadCur(int64_t id, uint8_t* buffer, int64_t bufLen, int64_t length);
-RetDataI64 FfiOHOSStreamRead(int64_t id, uint8_t* buffer, int64_t bufLen, int64_t length, int64_t offset);
+FFI_EXPORT RetCode FfiOHOSStreamClose(int64_t id);
+FFI_EXPORT RetCode FfiOHOSStreamFlush(int64_t id);
+FFI_EXPORT RetDataI64 FfiOHOSStreamWriteCur(int64_t id, const char* buffer, int64_t length, const char* encode);
+FFI_EXPORT RetDataI64 FfiOHOSStreamWrite(int64_t id,
+    const char* buffer, int64_t length, int64_t offset, const char* encode);
+FFI_EXPORT RetDataI64 FfiOHOSStreamReadCur(int64_t id, uint8_t* buffer, int64_t bufLen, int64_t length);
+FFI_EXPORT RetDataI64 FfiOHOSStreamRead(int64_t id, uint8_t* buffer, int64_t bufLen, int64_t length, int64_t offset);
 }
 
 #endif // OHOS_STREAM_FFI_H
