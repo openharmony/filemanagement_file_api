@@ -22,21 +22,21 @@
 #include <cstdint>
 
 extern "C" {
-    int64_t FfiOHOSStatGetIno(int64_t id);
-    int64_t FfiOHOSStatGetMode(int64_t id);
-    int64_t FfiOHOSStatGetUid(int64_t id);
-    int64_t FfiOHOSStatGetGid(int64_t id);
-    int64_t FfiOHOSStatGetSize(int64_t id);
-    int64_t FfiOHOSStatGetAtime(int64_t id);
-    int64_t FfiOHOSStatGetMtime(int64_t id);
-    int64_t FfiOHOSStatGetCtime(int64_t id);
-    bool FfiOHOSStatIsBlockDevice(int64_t id);
-    bool FfiOHOSStatIsCharacterDevice(int64_t id);
-    bool FfiOHOSStatIsDirectory(int64_t id);
-    bool FfiOHOSStatIsFIFO(int64_t id);
-    bool FfiOHOSStatIsFile(int64_t id);
-    bool FfiOHOSStatIsSocket(int64_t id);
-    bool FfiOHOSStatIsSymbolicLink(int64_t id);
+    FFI_EXPORT int64_t FfiOHOSStatGetIno(int64_t id);
+    FFI_EXPORT int64_t FfiOHOSStatGetMode(int64_t id);
+    FFI_EXPORT int64_t FfiOHOSStatGetUid(int64_t id);
+    FFI_EXPORT int64_t FfiOHOSStatGetGid(int64_t id);
+    FFI_EXPORT int64_t FfiOHOSStatGetSize(int64_t id);
+    FFI_EXPORT int64_t FfiOHOSStatGetAtime(int64_t id);
+    FFI_EXPORT int64_t FfiOHOSStatGetMtime(int64_t id);
+    FFI_EXPORT int64_t FfiOHOSStatGetCtime(int64_t id);
+    FFI_EXPORT bool FfiOHOSStatIsBlockDevice(int64_t id);
+    FFI_EXPORT bool FfiOHOSStatIsCharacterDevice(int64_t id);
+    FFI_EXPORT bool FfiOHOSStatIsDirectory(int64_t id);
+    FFI_EXPORT bool FfiOHOSStatIsFIFO(int64_t id);
+    FFI_EXPORT bool FfiOHOSStatIsFile(int64_t id);
+    FFI_EXPORT bool FfiOHOSStatIsSocket(int64_t id);
+    FFI_EXPORT bool FfiOHOSStatIsSymbolicLink(int64_t id);
 }
 
 #endif // OHOS_FILE_FS_STAT_FFI_H

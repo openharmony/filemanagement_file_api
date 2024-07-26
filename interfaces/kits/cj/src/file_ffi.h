@@ -20,16 +20,16 @@
 #include <cstdint>
 
 extern "C" {
-    RetDataI64 FfiOHOSFileFsOpen(const char* path, int64_t mode);
-    int32_t FfiOHOSFileFsClose(int64_t file);
-    int32_t FfiOHOSFileFsCloseByFd(int32_t file);
-    RetDataI64 FfiOHOSFileFsDup(int32_t fd);
-    int32_t FfiOHOSFileFsGetFD(int64_t id);
-    const char* FfiOHOSFILEFsGetPath(int64_t id);
-    const char* FfiOHOSFILEFsGetName(int64_t id);
-    RetCode FfiOHOSFILEFsTryLock(int64_t id, bool exclusive);
-    RetCode FfiOHOSFILEFsUnLock(int64_t id);
-    RetDataCString FfiOHOSFILEFsGetParent(int64_t id);
+    FFI_EXPORT RetDataI64 FfiOHOSFileFsOpen(const char* path, int64_t mode);
+    FFI_EXPORT int32_t FfiOHOSFileFsClose(int64_t file);
+    FFI_EXPORT int32_t FfiOHOSFileFsCloseByFd(int32_t file);
+    FFI_EXPORT RetDataI64 FfiOHOSFileFsDup(int32_t fd);
+    FFI_EXPORT int32_t FfiOHOSFileFsGetFD(int64_t id);
+    FFI_EXPORT const char* FfiOHOSFILEFsGetPath(int64_t id);
+    FFI_EXPORT const char* FfiOHOSFILEFsGetName(int64_t id);
+    FFI_EXPORT RetCode FfiOHOSFILEFsTryLock(int64_t id, bool exclusive);
+    FFI_EXPORT RetCode FfiOHOSFILEFsUnLock(int64_t id);
+    FFI_EXPORT RetDataCString FfiOHOSFILEFsGetParent(int64_t id);
 }
 
 #endif // OHOS_FILE_FFI_H
