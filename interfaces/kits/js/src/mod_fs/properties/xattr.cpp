@@ -35,9 +35,9 @@ static bool IsIllegalXattr(const char *path, const char *key)
     if (path == nullptr || key == nullptr) {
         return true;
     }
-    bool isIllegalKey = strnlen(key, MAX_XATTR_SIZE) > MAX_XATTR_SIZE;
+    bool isIllegalKey = strnlen(key, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE;
     if (isIllegalKey) {
-        HILOGE("key is too long %{public}d", strnlen(key, MAX_XATTR_SIZE));
+        HILOGE("key is too long");
     }
     return isIllegalKey;
 }
@@ -47,9 +47,9 @@ static bool IsIllegalXattr(const char *path, const char *key, const char *value)
     if (value == nullptr || IsIllegalXattr(path, key)) {
         return true;
     }
-    bool isIllegalValue = strnlen(value, MAX_XATTR_SIZE) > MAX_XATTR_SIZE;
+    bool isIllegalValue = strnlen(value, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE;
     if (isIllegalValue) {
-        HILOGE("value is too long %{public}d", strnlen(value, MAX_XATTR_SIZE));
+        HILOGE("value is too long);
     }
     return isIllegalValue;
 }
@@ -129,7 +129,7 @@ napi_value Xattr::GetSync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    tie(succ, key, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::SECOND)]).ToUTF8StringPath();
+    tie(succ, key, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::SECOND)]).ToUTF8String();
     if (!succ || IsIllegalXattr(path.get(), key.get())) {
         HILOGE("Invalid xattr key");
         NError(EINVAL).ThrowErr(env);
