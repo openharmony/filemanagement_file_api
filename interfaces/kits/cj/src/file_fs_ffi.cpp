@@ -561,12 +561,12 @@ int32_t FfiOHOSFileFsWatcherStart(int64_t id)
         LOGE("FfiOHOSFileFsWatcherStart instance not exist %{public}" PRId64, id);
         return ERR_INVALID_INSTANCE_CODE;
     }
-    LOGI("FS_TEST::FfiOHOSFileFsWatcherStart success");
-    int32_t startCode = instance->StartNotify();
+    int32_t startCode = FileWatcherManager::GetInstance().StartNotify(instance->data_);
     if (startCode != SUCCESS_CODE) {
         return startCode;
     }
-    instance->GetNotifyEvent();
+    FileWatcherManager::GetInstance().GetNotifyEvent(instance->data_);
+    LOGI("FfiOHOSFileFsWatcherStart success");
     return SUCCESS_CODE;
 }
 
@@ -579,7 +579,7 @@ int32_t FfiOHOSFileFsWatcherStop(int64_t id)
         return ERR_INVALID_INSTANCE_CODE;
     }
     LOGI("FS_TEST::FfiOHOSFileFsWatcherStart success");
-    return instance->StopNotify();
+    return FileWatcherManager::GetInstance().StopNotify(instance->data_);
 }
 }
 } // namespace FileFs
