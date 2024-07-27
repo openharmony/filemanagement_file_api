@@ -30,28 +30,17 @@ using namespace OHOS::FileManagement::LibN;
 using namespace std;
 constexpr size_t MAX_XATTR_SIZE = 4096;
 
-static bool IsIllegalXattr(const char *path, const char *key)
+static bool IsIllegalXattr(const char *key, const char *value)
 {
-    if (path == nullptr || key == nullptr) {
-        return true;
-    }
     bool isIllegalKey = strnlen(key, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE;
     if (isIllegalKey) {
         HILOGE("key is too long");
     }
-    return isIllegalKey;
-}
-
-static bool IsIllegalXattr(const char *path, const char *key, const char *value)
-{
-    if (value == nullptr || IsIllegalXattr(path, key)) {
-        return true;
-    }
     bool isIllegalValue = strnlen(value, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE;
     if (isIllegalValue) {
-        HILOGE("value is too long);
+        HILOGE("value is too long");
     }
-    return isIllegalValue;
+    return isIllegalKey || isIllegalValue;
 }
 
 static int32_t GetXattrCore(const char *path,
@@ -98,7 +87,7 @@ napi_value Xattr::SetSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     tie(succ, value, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::THIRD)]).ToUTF8String();
-    if (!succ || IsIllegalXattr(path.get(), key.get(), value.get())) {
+    if (!succ || IsIllegalXattr(key.get(), value.get())) {
         HILOGE("Invalid xattr value");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -130,7 +119,7 @@ napi_value Xattr::GetSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     tie(succ, key, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::SECOND)]).ToUTF8String();
-    if (!succ || IsIllegalXattr(path.get(), key.get())) {
+    if (!succ) {
         HILOGE("Invalid xattr key");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -163,7 +152,7 @@ napi_value Xattr::GetAsync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     tie(succ, key, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::SECOND)]).ToUTF8String();
-    if (!succ || IsIllegalXattr(path.get(), key.get())) {
+    if (!succ) {
         HILOGE("Invalid xattr key");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
@@ -212,7 +201,7 @@ napi_value Xattr::SetAsync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     tie(succ, value, std::ignore) = NVal(env, funcArg[static_cast<int>(NARG_POS::THIRD)]).ToUTF8String();
-    if (!succ || IsIllegalXattr(path.get(), key.get(), value.get())) {
+    if (!succ || IsIllegalXattr(key.get(), value.get())) {
         HILOGE("Invalid xattr value");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
