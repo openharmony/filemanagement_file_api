@@ -240,6 +240,7 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/read_text.cpp",
       "src/mod_fs/properties/symlink.cpp",
       "src/mod_fs/properties/watcher.cpp",
+      "src/mod_fs/properties/xattr.cpp",
     ]
     external_deps += [
       "ability_base:zuri",

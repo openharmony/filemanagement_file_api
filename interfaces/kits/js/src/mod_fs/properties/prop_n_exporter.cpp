@@ -61,6 +61,7 @@
 #include "watcher.h"
 #include "connectdfs.h"
 #include "disconnectdfs.h"
+#include "xattr.h"
 #endif
 
 #ifdef FILE_API_TRACE
@@ -691,6 +692,10 @@ bool PropNExporter::ExportSync()
         NVal::DeclareNapiFunction("readLinesSync", ReadLines::Sync),
         NVal::DeclareNapiFunction("readTextSync", ReadText::Sync),
         NVal::DeclareNapiFunction("symlinkSync", Symlink::Sync),
+        NVal::DeclareNapiFunction("setxattrSync", Xattr::SetSync),
+        NVal::DeclareNapiFunction("getxattrSync", Xattr::GetSync),
+        NVal::DeclareNapiFunction("setxattr", Xattr::SetAsync),
+        NVal::DeclareNapiFunction("getxattr", Xattr::GetAsync),
 #endif
     });
 }
