@@ -188,8 +188,9 @@ void FileWatcher::GetNotifyEvent(WatcherCallback callback)
     fds[0].events = 0;
     fds[1].fd = notifyFd_;
     fds[1].events = POLLIN;
+    int ret = 0;
     while (run_) {
-        int ret = poll(fds, nfds, -1);
+        ret = poll(fds, nfds, -1);
         if (ret > 0) {
             if (static_cast<unsigned short>(fds[0].revents) & POLLNVAL) {
                 run_ = false;
