@@ -1310,6 +1310,7 @@ napi_value FileNExporter::WriteArrayBuffer(napi_env env, napi_callback_info info
     if (!CheckUri(env, path)) {
         CallBackError(env, asyncCallbackInfo->callback[COMMON_NUM::ONE], "illegal uri", URI_PARAMER_ERROR);
         CallComplete(env, asyncCallbackInfo->callback[COMMON_NUM::TWO]);
+        napi_delete_reference(env, bufferRef);
         delete asyncCallbackInfo;
         return nullptr;
     }
