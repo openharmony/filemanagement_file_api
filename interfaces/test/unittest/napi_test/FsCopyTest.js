@@ -925,7 +925,7 @@ describe("FsCopyTest", function () {
   });
 
   /*
-   * @tc.name:Fs_Copy_Test025
+   * @tc.name:Fs_Copy_Test026
    * @tc.desc:test fs.copy dir to own directory2
    * @tc.type: FUNC
    * @tc.require: #I8UV2F

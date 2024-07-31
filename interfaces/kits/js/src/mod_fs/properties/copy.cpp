@@ -76,7 +76,7 @@ static int OpenSrcFile(const string &srcPth, std::shared_ptr<FileInfos> infos, i
         srcFd = dataShareHelper->OpenFile(uri, CommonFunc::GetModeFromFlags(O_RDONLY));
         if (srcFd < 0) {
             HILOGE("Open media uri by data share fail. ret = %{public}d", srcFd);
-            return srcFd;
+            return EPERM;
         }
     } else {
         srcFd = open(srcPth.c_str(), O_RDONLY);
