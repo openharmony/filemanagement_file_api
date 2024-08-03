@@ -71,4 +71,4 @@ static constexpr HiviewDFX::HiSysEvent::EventType TYPE = HiviewDFX::HiSysEvent::
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif //DISTRIBUTEDDATAMGR_DFS_EVENT_DFX_H
+#endif //DISTRIBUTEDFILE_DFS_EVENT_DFX_H
