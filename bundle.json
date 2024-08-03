@@ -36,6 +36,7 @@
             "dfs_service",
             "eventhandler",
             "hilog",
+            "hisysevent",
             "hitrace",
             "ipc",
             "init",

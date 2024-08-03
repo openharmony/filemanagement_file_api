@@ -50,13 +50,16 @@ private:
     static std::string CreateDfsCopyPath();
     static std::string GetFileName(const std::string &path);
     static int32_t CopyToSandBox(const std::string &srcUri, const std::string &disSandboxPath,
-        const std::string &sandboxPath);
+        const std::string &sandboxPath, const std::string &currentId);
     static int32_t PrepareCopySession(const std::string &srcUri,
                                       const std::string &destUri,
                                       TransListener* transListener,
                                       Storage::DistributedFile::HmdfsInfo &info,
                                       std::string &disSandboxPath);
-
+    static NError HandleCopyFailure(CopyEvent &copyEvent, const Storage::DistributedFile::HmdfsInfo &info,
+        const std::string &disSandboxPath, const std::string &currentId);
+    static int WaitForCopyResult(TransListener* transListener);
+    staiic std::atomic<uint32_t> getSequenceId_;
     std::mutex cvMutex_;
     std::condition_variable cv_;
     CopyEvent copyEvent_;
