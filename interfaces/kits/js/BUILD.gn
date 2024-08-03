@@ -247,7 +247,6 @@ ohos_shared_library("fs") {
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
       "ability_runtime:extensionkit_native",
-      "access_token:libaccesstoken_sdk",
       "access_token:libtokenid_sdk",
       "app_file_service:fileuri_native",
       "bundle_framework:appexecfwk_base",

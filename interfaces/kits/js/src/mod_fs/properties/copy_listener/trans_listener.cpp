@@ -19,9 +19,7 @@
 #include <filesystem>
 #include <random>
 
-#include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
-#include "iremote_object.h"
 #include "sandbox_helper.h"
 #include "uri.h"
 #include "n_error.h"
@@ -32,8 +30,6 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace OHOS::AppFileService;
 using namespace AppFileService::ModuleFileUri;
-using HapTokenInfo = OHOS::Security::AccessToken::HapTokenInfo;
-using AccessTokenKit = OHOS::Security::AccessToken::AccessTokenKit;
 const std::string NETWORK_PARA = "?networkid=";
 const std::string FILE_MANAGER_AUTHORITY = "docs";
 const std::string MEDIA_AUTHORITY = "media";
@@ -104,14 +100,8 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
     HILOGI("CopyFileFromSoftBus begin.");
     std::string currentId = "GetPasteData_" + std::to_string(getpid()) + "_" + std::to_string(getSequenceId_);
     ++getSequenceId_;
-    HapTokenInfo hapTokenInfo;
-    int result = AccessTokenKit::GetHapTokenInfo(IPCSkeleton::GetSelfTokenID(), hapTokenInfo);
-    if (result != Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
-        HILOGE("GetHapTokenInfo failed, errCode = %{public}d", result);
-        return NError(EIO);
-    }
     RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
-            RadarReporter::BIZ_STATE, RadarReporter::DFX_BEGIN, RadarReporter::PACKAGE_NAME, hapTokenInfo.bundleName,
+            RadarReporter::BIZ_STATE, RadarReporter::DFX_BEGIN, RadarReporter::PACKAGE_NAME, std::to_string(getpid()),
             RadarReporter::CONCURRENT_ID, currentId);
     sptr<TransListener> transListener = new (std::nothrow) TransListener();
     if (transListener == nullptr) {
