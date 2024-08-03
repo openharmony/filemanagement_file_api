@@ -59,7 +59,7 @@ private:
     static NError HandleCopyFailure(CopyEvent &copyEvent, const Storage::DistributedFile::HmdfsInfo &info,
         const std::string &disSandboxPath, const std::string &currentId);
     static int WaitForCopyResult(TransListener* transListener);
-    staiic std::atomic<uint32_t> getSequenceId_;
+    static std::atomic<uint32_t> getSequenceId_;
     std::mutex cvMutex_;
     std::condition_variable cv_;
     CopyEvent copyEvent_;

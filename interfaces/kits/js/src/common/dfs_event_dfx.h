@@ -28,7 +28,7 @@ enum BizScene : std::int32_t {
     DFX_SET_DFS = 1,
 };
 
-enum BizStageSetPasteboard : std::int32_t {
+enum BizStageSetDfs : std::int32_t {
     DFX_SET_BIZ_SCENE = 1,
 };
 
@@ -46,7 +46,7 @@ enum BizState : std::int32_t {
 
 enum ErrorCode : std::int32_t {
     DFS_ERROR = (DIST_DATA_MGR_SYS_ID << 21) | (DFS_ID << 16),
-    PERPARE_COPY_SESSION_ERROR,
+    PREPARE_COPY_SESSION_ERROR,
     COPY_TO_SANDBOX_ERROR,
     SEND_FILE_ERROR,
 };
@@ -69,6 +69,6 @@ static constexpr HiviewDFX::HiSysEvent::EventType TYPE = HiviewDFX::HiSysEvent::
 })
 } // namespace RadarReporter
 } // namespace ModuleFileIO
-} // namespace MiscServices
+} // namespace FileManagement
 } // namespace OHOS
 #endif //DISTRIBUTEDDATAMGR_DFS_EVENT_DFX_H
