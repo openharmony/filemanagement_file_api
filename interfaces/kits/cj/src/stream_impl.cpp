@@ -28,6 +28,9 @@ namespace FileFs {
 std::tuple<int, std::unique_ptr<char[]>, size_t> DecodeString(const std::string& buffer, const std::string& encode)
 {
     std::unique_ptr<char[]> buf = std::make_unique<char[]>(buffer.length() + 1);
+    if (!buf) {
+        return { ENOMEM, nullptr, 0};
+    }
 
     for (size_t i = 0; i < buffer.length(); i++) {
         buf[i] = buffer[i];

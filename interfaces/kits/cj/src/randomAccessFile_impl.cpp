@@ -84,6 +84,10 @@ void RandomAccessFileImpl::CloseSync()
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> close_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!close_req) {
+        LOGE("Failed to close file with ret: %{public}d", ENOMEM);
+        return;
+    }
     int ret = uv_fs_close(nullptr, close_req.get(), entity_->fd.get()->GetFD(), nullptr);
     if (ret < 0) {
         LOGE("Failed to close file with ret: %{public}d", ret);
