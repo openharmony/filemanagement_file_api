@@ -71,14 +71,14 @@ NError TransListener::HandleCopyFailure(CopyEvent &copyEvent, const Storage::Dis
     if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
         RmDir(disSandboxPath);
     }
-    auto it = softbusErr2ErrCodeTable.find(copyEvent_.errorCode);
+    auto it = softbusErr2ErrCodeTable.find(copyEvent.errorCode);
     if (it == softbusErr2ErrCodeTable.end()) {
         RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
             RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
             RadarReporter::SEND_FILE_ERROR, RadarReporter::CONCURRENT_ID, currentId);
         return NError(EIO);
     }
-    RADAR_REPORT(RadarReproter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+    RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
             RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
             RadarReporter::SEND_FILE_ERROR, RadarReporter::CONCURRENT_ID, currentId);
     return NError(it->second);
@@ -110,7 +110,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
         HILOGE("GetHapTokenInfo failed, errCode = %{public}d", result);
         return NError(EIO);
     }
-    RADAR_REPORT(RadarReproter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
+    RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
             RadarReporter::BIZ_STATE, RadarReporter::DFX_BEGIN, RadarReporter::PACKAGE_NAME, hapTokenInfo.bundleName,
             RadarReporter::CONCURRENT_ID, currentId);
     sptr<TransListener> transListener = new (std::nothrow) TransListener();
@@ -127,7 +127,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
     std::string disSandboxPath;
     auto ret = PrepareCopySession(srcUri, destUri, transListener, info, disSandboxPath);
     if (ret != ERRNO_NOERR) {
-        RADAR_REPORT(RadarReproter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+        RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
             RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
             RadarReporter::PREPARE_COPY_SESSION_ERROR, RadarReporter::CONCURRENT_ID, currentId);
         return NError(EIO);
@@ -141,7 +141,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
     }
     if (info.authority == FILE_MANAGER_AUTHORITY || info.authority == MEDIA_AUTHORITY) {
         HILOGW("Public or media path not copy");
-        RADAR_REPORT(RadarReproter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
+        RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
             RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::CONCURRENT_ID, currentId);
         return NError(ERRNO_NOERR);
     }
@@ -207,7 +207,7 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing, errCode);
         if (errCode.value() != 0) {
             HILOGE("Copy dir failed: errCode: %{public}d", errCode.value());
-            RADAR_REPORT(RadarReproter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+            RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
                 RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
                 RadarReporter::COPY_TO_SANDBOX_ERROR, RadarReporter::CONCURRENT_ID, currentId);
             return EIO;
@@ -225,14 +225,14 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             errCode);
         if (errCode.value() != 0) {
             HILOGE("Copy file failed: errCode: %{public}d", errCode.value());
-            RADAR_REPORT(RadarReproter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+            RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
                 RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
                 RadarReporter::COPY_TO_SANDBOX_ERROR, RadarReporter::CONCURRENT_ID, currentId);
             return EIO;
         }
     }
     HILOGI("Copy file success.");
-    RADAR_REPORT(RadarReproter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
+    RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
         RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::CONCURRENT_ID, currentId);
     return ERRNO_NOERR;
 }
