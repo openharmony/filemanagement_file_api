@@ -163,23 +163,22 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, unsi
     string bundleName = uri.GetAuthority();
     AppFileService::ModuleFileUri::FileUri fileUri(uriStr);
     string realPath = fileUri.GetRealPath();
-    if ((bundleName == MEDIA || bundleName == DOCS) && access(realPath.c_str(), F_OK) != 0) {
+    if (bundleName == MEDIA) {
         int res = OpenFileByDatashare(uri.ToString(), mode);
         if (res < 0) {
             HILOGE("Failed to open file by Datashare error %{public}d", res);
         }
         return { res, uri.ToString() };
+    } else if (bundleName == DOCS && access(realPath.c_str(), F_OK) != 0) {
+        int res = OpenFileByDatashare(uri.ToString(), mode);
+        if (res < 0) {
+            HILOGE("Failed to open file by Datashare error %{public}d", res);
+        }
+        return { ENOENT, uri.ToString() };
     }
     int ret = OpenFileByPath(realPath, mode);
     if (ret < 0) {
-        if (bundleName == MEDIA) {
-            ret = OpenFileByDatashare(uriStr, mode);
-            if (ret < 0) {
-                HILOGE("Failed to open file by Datashare error %{public}d", ret);
-            }
-        } else {
-            HILOGE("Failed to open file for libuv error %{public}d", ret);
-        }
+        HILOGE("Failed to open file for libuv error %{public}d", ret);
     }
     return { ret, uriStr };
 }
