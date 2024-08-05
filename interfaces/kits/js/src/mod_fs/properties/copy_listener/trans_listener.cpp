@@ -75,8 +75,8 @@ NError TransListener::HandleCopyFailure(CopyEvent &copyEvent, const Storage::Dis
         return NError(EIO);
     }
     RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
-            RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
-            RadarReporter::SEND_FILE_ERROR, RadarReporter::CONCURRENT_ID, currentId);
+        RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
+        RadarReporter::SEND_FILE_ERROR, RadarReporter::CONCURRENT_ID, currentId);
     return NError(it->second);
 }
 
@@ -101,8 +101,8 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
     std::string currentId = "GetPasteData_" + std::to_string(getpid()) + "_" + std::to_string(getSequenceId_);
     ++getSequenceId_;
     RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
-            RadarReporter::BIZ_STATE, RadarReporter::DFX_BEGIN, RadarReporter::PACKAGE_NAME, std::to_string(getpid()),
-            RadarReporter::CONCURRENT_ID, currentId);
+        RadarReporter::BIZ_STATE, RadarReporter::DFX_BEGIN, RadarReporter::PACKAGE_NAME, std::to_string(getpid()),
+        RadarReporter::CONCURRENT_ID, currentId);
     sptr<TransListener> transListener = new (std::nothrow) TransListener();
     if (transListener == nullptr) {
         HILOGE("new trans listener failed");
