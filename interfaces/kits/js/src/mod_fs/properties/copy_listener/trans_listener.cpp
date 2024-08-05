@@ -98,7 +98,7 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
     std::shared_ptr<FileInfos> fileInfos, std::shared_ptr<JsCallbackObject> callback)
 {
     HILOGI("CopyFileFromSoftBus begin.");
-    std::string currentId = "GetPasteData_" + std::to_string(getpid()) + "_" + std::to_string(getSequenceId_);
+    std::string currentId = "CopyFile_" + std::to_string(getpid()) + "_" + std::to_string(getSequenceId_);
     ++getSequenceId_;
     RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
         RadarReporter::BIZ_STATE, RadarReporter::DFX_BEGIN, RadarReporter::PACKAGE_NAME, std::to_string(getpid()),
