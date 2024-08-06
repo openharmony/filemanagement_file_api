@@ -30,8 +30,8 @@ namespace FileManagement {
 namespace ModuleFileIO {
 struct FileEntity {
     std::unique_ptr<DistributedFS::FDGuard> fd_ = { nullptr };
-    std::string path_;
-    std::string uri_;
+    std::string path_ = "";
+    std::string uri_ = "";
 #ifndef WIN_PLATFORM
     virtual ~FileEntity()
     {

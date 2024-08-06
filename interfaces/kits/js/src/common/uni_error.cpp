@@ -103,9 +103,10 @@ napi_value UniError::GetNapiErr(napi_env env)
     }
     int32_t code;
     string msg;
-    if (errCodeTable.find(errCode) != errCodeTable.end()) {
-        code = errCodeTable.at(errCode).first;
-        msg = errCodeTable.at(errCode).second;
+    auto it = errCodeTable.find(errCode);
+    if (it != errCodeTable.end()) {
+        code = it->second.first;
+        msg = it->second.second;
     } else {
         code = errCodeTable.at(-1).first;
         msg = errCodeTable.at(-1).second;
@@ -131,9 +132,10 @@ void UniError::ThrowErr(napi_env env)
     int32_t code;
     string msg;
     napi_status throwStatus = napi_ok;
-    if (errCodeTable.find(errno_) != errCodeTable.end()) {
-        code = errCodeTable.at(errno_).first;
-        msg = errCodeTable.at(errno_).second;
+    auto it = errCodeTable.find(errno_);
+    if (it != errCodeTable.end()) {
+        code = it->second.first;
+        msg = it->second.second;
     } else {
         code = errCodeTable.at(-1).first;
         msg = errCodeTable.at(-1).second;
@@ -143,7 +145,7 @@ void UniError::ThrowErr(napi_env env)
     } else {
         throwStatus = napi_throw(env, GenerateBusinessError(env, code, msg));
     }
-    
+
     if (throwStatus != napi_ok) {
         HILOGE("Failed to throw an exception, %{public}d, code = %{public}s", throwStatus, msg.c_str());
     }

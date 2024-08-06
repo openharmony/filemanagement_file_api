@@ -207,7 +207,7 @@ napi_value Xattr::SetAsync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [path = path.get(), key = key.get(), value = value.get()]() -> NError {
-        if (setxattr(path, key, value, strnlen(value, MAX_XATTR_SIZE), 0)) {
+        if (setxattr(path, key, value, strnlen(value, MAX_XATTR_SIZE), 0) < 0) {
             HILOGE("setxattr fail, errno is %{public}d", errno);
             return NError(errno);
         }
