@@ -35,7 +35,6 @@
 
 namespace OHOS {
 namespace CJSystemapi {
-constexpr int ERRNO_NOERR = 0;
 constexpr int DIR_DEFAULT_PERM = 0770;
 
 constexpr int FILE_DISMATCH = 0;

@@ -82,5 +82,9 @@ extern "C" {
     FFI_EXPORT int FfiOHOSFileFsFdatasync(int32_t fd);
     FFI_EXPORT int FfiOHOSFileFsFsync(int32_t fd);
     FFI_EXPORT int FfiOHOSFileFsSymlink(const char* target, const char* srcPath);
+    FFI_EXPORT int64_t FfiOHOSFileFsCreateCopyOptions(int64_t callbackId, int64_t signalId);
+    FFI_EXPORT int64_t FfiOHOSFileFsCreateTaskSignal();
+    FFI_EXPORT int64_t FfiOHOSFileFsTaskSignalCancel(int64_t id);
+    FFI_EXPORT void FfiOHOSFileFsCopy(const char* src, const char* dest, int64_t opt);
 }
 #endif

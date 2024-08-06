@@ -93,4 +93,8 @@ FFI_EXPORT int FfiOHOSStatIsFIFO = 0;
 FFI_EXPORT int FfiOHOSStatIsFile = 0;
 FFI_EXPORT int FfiOHOSStatIsSocket = 0;
 FFI_EXPORT int FfiOHOSStatIsSymbolicLink = 0;
+FFI_EXPORT int FfiOHOSFileFsCreateCopyOptions = 0;
+FFI_EXPORT int FfiOHOSFileFsCreateTaskSignal = 0;
+FFI_EXPORT int FfiOHOSFileFsTaskSignalCancel = 0;
+FFI_EXPORT int FfiOHOSFileFsCopy = 0;
 }

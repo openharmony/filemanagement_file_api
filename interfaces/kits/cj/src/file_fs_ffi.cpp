@@ -14,6 +14,7 @@
  */
 
 #include "file_fs_ffi.h"
+#include "copy.h"
 #include "copy_file.h"
 #include "fdatasync.h"
 #include "fsync.h"
@@ -32,6 +33,59 @@ namespace CJSystemapi {
 namespace FileFs {
 
 extern "C" {
+int64_t FfiOHOSFileFsCreateCopyOptions(int64_t callbackId, int64_t signalId)
+{
+    LOGD("FS_TEST::FfiOHOSFileFsCreateCopyOptions");
+    auto instance = FFIData::Create<CopyInfo>(callbackId, signalId);
+    if (!instance) {
+        LOGE("Failed to create CopyImpl.");
+        return 0;
+    }
+    return instance->GetID();
+}
+
+int64_t FfiOHOSFileFsCreateTaskSignal()
+{
+    LOGD("FS_TEST::FfiOHOSFileFsCreateTaskSignal");
+    auto instance = FFIData::Create<TaskSignalImpl>();
+    if (!instance || !instance->signalEntity || !instance->signalEntity->taskSignal_) {
+        LOGE("Failed to create TaskSignalImpl.");
+        return 0;
+    }
+    return instance->GetID();
+}
+
+int64_t FfiOHOSFileFsTaskSignalCancel(int64_t id)
+{
+    LOGD("FS_TEST::FfiOHOSFileFsTaskSignalCancel");
+    auto instance = FFIData::GetData<TaskSignalImpl>(id);
+    if (!instance || !instance->signalEntity || !instance->signalEntity->taskSignal_) {
+        LOGE("Failed to create TaskSignalImpl.");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    return instance->signalEntity->taskSignal_->Cancel();
+}
+
+void FfiOHOSFileFsCopy(const char* src, const char* dest, int64_t opt)
+{
+    LOGD("FS_TEST::FfiOHOSFileFsCopy");
+    if (opt == 0) {
+        auto emptyInfo = FFIData::Create<CopyInfo>(0, 0);
+        if (!emptyInfo) {
+            LOGE("Failed to create empty CopyInfo");
+            return;
+        }
+        CopyImpl::Copy(src, dest, emptyInfo);
+        return;
+    }
+    auto instance = FFIData::GetData<CopyInfo>(opt);
+    if (!instance) {
+        LOGE("Failed to get CopyInfo");
+        return;
+    }
+    CopyImpl::Copy(src, dest, instance);
+}
+
 RetDataI64 FfiOHOSFileFsStatByID(int32_t file)
 {
     LOGI("FS_TEST::FfiOHOSFileFsStatByID");

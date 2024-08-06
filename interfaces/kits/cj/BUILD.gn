@@ -74,6 +74,7 @@ ohos_shared_library("cj_file_fs_ffi") {
     "${utils_path}/filemgmt_libn/include",
     "${file_api_path}/interfaces/kits/cj/src",
     "${file_api_path}/interfaces/kits/native/remote_uri",
+    "${file_api_path}/interfaces/kits/native/task_signal",
     "${file_api_path}/interfaces/kits/rust/include",
   ]
 
@@ -88,6 +89,7 @@ ohos_shared_library("cj_file_fs_ffi") {
       "${file_api_path}/interfaces/kits/js:build_kits_js",
       "${file_api_path}/interfaces/kits/js:fs",
       "${file_api_path}/interfaces/kits/native:remote_uri_native",
+      "${file_api_path}/interfaces/kits/native:task_signal_native",
       "${file_api_path}/interfaces/kits/rust:rust_file",
       "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
       "${utils_path}/filemgmt_libn:filemgmt_libn",
@@ -104,6 +106,7 @@ ohos_shared_library("cj_file_fs_ffi") {
       "c_utils:utils",
       "data_share:datashare_common",
       "data_share:datashare_consumer",
+      "dfs_service:distributed_file_daemon_kit_inner",
       "hilog:libhilog",
       "ipc:ipc_core",
       "napi:ace_napi",
@@ -113,6 +116,7 @@ ohos_shared_library("cj_file_fs_ffi") {
     ]
     sources = [
       "../js/src/common/file_helper/fd_guard.cpp",
+      "src/copy.cpp",
       "src/copy_dir.cpp",
       "src/copy_file.cpp",
       "src/fdatasync.cpp",
@@ -131,6 +135,8 @@ ohos_shared_library("cj_file_fs_ffi") {
       "src/stream_ffi.cpp",
       "src/stream_impl.cpp",
       "src/symlink.cpp",
+      "src/task_signal_impl.cpp",
+      "src/translistener.cpp",
       "src/uni_error.cpp",
       "src/utils.cpp",
       "src/watcher_impl.cpp",
