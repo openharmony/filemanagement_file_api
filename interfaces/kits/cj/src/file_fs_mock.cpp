@@ -19,7 +19,6 @@ extern "C" {
 FFI_EXPORT int FfiOHOSFileFsClose = 0;
 FFI_EXPORT int FfiOHOSFileFsCloseByFd = 0;
 FFI_EXPORT int FfiOHOSFileFsDup = 0;
-FFI_EXPORT int FfiOHOSFileFsGetFD = 0;
 FFI_EXPORT int FfiOHOSFILEFsGetFD = 0;
 FFI_EXPORT int FfiOHOSFILEFsGetPath = 0;
 FFI_EXPORT int FfiOHOSFILEFsGetName = 0;
