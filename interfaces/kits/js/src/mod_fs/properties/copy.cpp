@@ -50,6 +50,7 @@ const std::string FILE_PREFIX_NAME = "file://";
 const std::string NETWORK_PARA = "?networkid=";
 const string PROCEDURE_COPY_NAME = "FileFSCopy";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
+const std::string MEDIA = "media";
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
@@ -61,7 +62,7 @@ std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
 static int OpenSrcFile(const string &srcPth, std::shared_ptr<FileInfos> infos, int32_t &srcFd)
 {
     Uri uri(infos->srcUri);
-    if (uri.GetAuthority() == "media") {
+    if (uri.GetAuthority() == MEDIA) {
         std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
         sptr<FileIoToken> remote = new (std::nothrow) IRemoteStub<FileIoToken>();
         if (!remote) {
@@ -207,6 +208,13 @@ bool Copy::IsFile(const std::string &path)
         return false;
     }
     return (buf.st_mode & S_IFMT) == S_IFREG;
+}
+
+bool Copy::IsMediaUri(const std::string &uriPath)
+{
+    Uri uri(uriPath);
+    string bundleName = uri.GetAuthority();
+    return bundleName == MEDIA;
 }
 
 tuple<int, uint64_t> Copy::GetFileSize(const std::string &path)
@@ -419,7 +427,7 @@ int Copy::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<Fil
 
 int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
-    if (IsFile(infos->srcPath)) {
+    if (infos->isFile) {
         if (infos->srcPath == infos->destPath) {
             HILOGE("The src and dest is same, path = %{public}s", infos->srcPath.c_str());
             return EINVAL;
@@ -470,7 +478,7 @@ int Copy::SubscribeLocalListener(std::shared_ptr<FileInfos> infos,
     }
     receiveInfo->path = infos->destPath;
     callback->wds.push_back({ newWd, receiveInfo });
-    if (IsDirectory(infos->srcPath)) {
+    if (!infos->isFile) {
         callback->totalSize = GetDirSize(infos, infos->srcPath);
         return ERRNO_NOERR;
     }
@@ -674,7 +682,7 @@ tuple<bool, int, bool> Copy::HandleProgress(
         return { true, EINVAL, false };
     }
     std::string fileName = receivedInfo->path;
-    if (event->len > 0) { // files under subdir
+    if (!infos->isFile) { // files under subdir
         fileName += "/" + string(event->name);
         if (!CheckFileValid(fileName, infos)) {
             return { true, EINVAL, false };
@@ -777,6 +785,7 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->destPath = dstFileUri.GetPath();
     infos->srcPath = GetRealPath(infos->srcPath);
     infos->destPath = GetRealPath(infos->destPath);
+    infos->isFile = IsMediaUri(infos->srcUri) || IsFile(infos->srcPath);
     infos->notifyTime = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;
     if (listener) {
         infos->hasListener = true;
@@ -801,11 +810,11 @@ void Copy::StartNotify(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallb
 
 int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
 {
-    if (IsFile(infos->srcPath) && IsFile(infos->destPath)) {
+    if (infos->isFile && IsFile(infos->destPath)) {
         // copyFile
         return CopyFile(infos->srcPath.c_str(), infos->destPath.c_str(), infos);
     }
-    if (IsDirectory(infos->srcPath) && IsDirectory(infos->destPath)) {
+    if (!infos->isFile && IsDirectory(infos->destPath)) {
         if (infos->srcPath.back() != '/') {
             infos->srcPath += '/';
         }
