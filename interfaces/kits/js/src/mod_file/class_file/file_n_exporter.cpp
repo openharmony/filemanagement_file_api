@@ -1304,12 +1304,18 @@ napi_value FileNExporter::WriteArrayBuffer(napi_env env, napi_callback_info info
     napi_ref bufferRef = nullptr;
     NVal bufNapi = NVal(env, funcArg[NARG_POS::FIRST]).GetProp("buffer");
     tie(succ, buffer, bufLength) = bufNapi.ToTypedArray();
-    napi_create_reference(env, bufNapi.val_, 1, &bufferRef);
+    napi_status status = napi_create_reference(env, bufNapi.val_, 1, &bufferRef);
+    if (status != napi_ok) {
+        UniError(EINVAL).ThrowErr(env, "Failed to create reference to buffer");
+        delete asyncCallbackInfo;
+        return nullptr;
+    }
 
     string path = (uri == nullptr) ? "" : uri.get();
     if (!CheckUri(env, path)) {
         CallBackError(env, asyncCallbackInfo->callback[COMMON_NUM::ONE], "illegal uri", URI_PARAMER_ERROR);
         CallComplete(env, asyncCallbackInfo->callback[COMMON_NUM::TWO]);
+        napi_delete_reference(env, bufferRef);
         delete asyncCallbackInfo;
         return nullptr;
     }
