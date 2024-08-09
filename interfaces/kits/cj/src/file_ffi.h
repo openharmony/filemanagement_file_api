@@ -24,7 +24,7 @@ extern "C" {
     FFI_EXPORT int32_t FfiOHOSFileFsClose(int64_t file);
     FFI_EXPORT int32_t FfiOHOSFileFsCloseByFd(int32_t file);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsDup(int32_t fd);
-    FFI_EXPORT int32_t FfiOHOSFileFsGetFD(int64_t id);
+    FFI_EXPORT int32_t FfiOHOSFILEFsGetFD(int64_t id);
     FFI_EXPORT const char* FfiOHOSFILEFsGetPath(int64_t id);
     FFI_EXPORT const char* FfiOHOSFILEFsGetName(int64_t id);
     FFI_EXPORT RetCode FfiOHOSFILEFsTryLock(int64_t id, bool exclusive);

@@ -212,6 +212,8 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Open(const char* path, int64_t
         }
         auto fileUri = FFIData::Create<FileEntity>(std::move(fileEntity->fd_), fileEntity->path_, fileEntity->uri_);
         if (!fileUri) {
+            delete(fileEntity);
+            fileEntity = nullptr;
             return {ENOMEM, nullptr};
         }
         return {SUCCESS_CODE, fileUri};
@@ -228,6 +230,8 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Open(const char* path, int64_t
     }
     auto filePath = FFIData::Create<FileEntity>(std::move(file->fd_), file->path_, file->uri_);
     if (!filePath) {
+        delete(file);
+        file = nullptr;
         return {ENOMEM, nullptr};
     }
     return {SUCCESS_CODE, filePath};
@@ -404,7 +408,7 @@ RetDataCString FileEntity::GetParent()
     }
     if (strcpy_s(result, parent.length() + 1, parent.c_str()) != 0) {
         ret.code = ENOMEM;
-        free(result);
+        delete[] (result);
         result = nullptr;
         return ret;
     }
