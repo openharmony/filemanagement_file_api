@@ -87,7 +87,7 @@ config("optimize-size") {
 }
 
 ohos_shared_library("streamrw") {
-  config = [ ":optimize-size" ]
+  configs = [ ":optimize-size" ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
