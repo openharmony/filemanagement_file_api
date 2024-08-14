@@ -30,7 +30,7 @@ NRef::NRef(NVal val)
 
 NRef::~NRef()
 {
-    if (ref_) {
+    if (ref_ && env_) {
         napi_delete_reference(env_, ref_);
     }
 }
@@ -42,7 +42,7 @@ NRef::operator bool() const
 
 NVal NRef::Deref(napi_env env)
 {
-    if (!ref_) {
+    if (!ref_ || !env) {
         return NVal();
     }
 

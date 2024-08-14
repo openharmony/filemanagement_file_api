@@ -173,8 +173,9 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, unsi
         int res = OpenFileByDatashare(uri.ToString(), mode);
         if (res < 0) {
             HILOGE("Failed to open file by Datashare error %{public}d", res);
+            return { -ENOENT, uri.ToString() };
         }
-        return { ENOENT, uri.ToString() };
+        return { res, uri.ToString() };
     }
     int ret = OpenFileByPath(realPath, mode);
     if (ret < 0) {
