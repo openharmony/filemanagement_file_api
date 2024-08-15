@@ -33,32 +33,35 @@ using namespace OHOS::FileManagement::LibN;
 using namespace OHOS::FileManagement;
 using namespace OHOS::CJSystemapi::FileFs;
 
-std::tuple<bool, FileInfo> ParseFile(int32_t file)
+std::tuple<int, FileInfo> ParseOperand(int32_t file)
 {
-    LOGI("FS_TEST:: FS_TEST::ParseFile");
+    LOGI("FS_TEST:: FS_TEST::ParseOperand");
     if (file < 0) {
         LOGE("Invalid fd");
-        return { false, FileInfo { false, {}, {} } };
+        return { EINVAL, FileInfo { false, {}, {} } };
     }
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(file, false);
     if (fdg == nullptr) {
         LOGE("Failed to request heap memory.");
-        return { false, FileInfo { false, {}, {} } };
+        return { ENOMEM, FileInfo { false, {}, {} } };
     }
-    LOGI("FS_TEST:: FS_TEST::ParseFile success");
-    return { true, FileInfo { false, {}, move(fdg) } };
+    LOGI("FS_TEST:: FS_TEST::ParseOperand success");
+    return { SUCCESS_CODE, FileInfo { false, {}, move(fdg) } };
 };
 
-static FileInfo ParseFile(std::string file)
+std::tuple<int, FileInfo> ParseOperand(std::string file)
 {
-    LOGI("FS_TEST:: ParseFile");
+    LOGI("FS_TEST:: ParseOperand");
     std::unique_ptr<char[]> filePath = std::make_unique<char[]>(file.length() + 1);
+    if (!filePath) {
+        return { ENOMEM, FileInfo { true, {}, {} } };
+    }
     for (size_t i = 0; i < file.length(); i++) {
         filePath[i] = file[i];
     }
 
-    LOGI("FS_TEST:: ParseFile success");
-    return FileInfo { true, move(filePath), {} };
+    LOGI("FS_TEST:: ParseOperand success");
+    return { SUCCESS_CODE, FileInfo { true, move(filePath), {} } };
 };
 
 static int IsAllPath(FileInfo& srcFile, FileInfo& destFile)
@@ -194,19 +197,27 @@ static int OpenFile(FileInfo& srcFile, FileInfo& destFile)
 int CopyFileImpl::CopyFile(const std::string& src, const std::string& dest, int mode)
 {
     LOGI("FS_TEST:: CopyFile::CopyFile start");
-    auto srcFileInfo = ParseFile(src);
-    auto destFileInfo = ParseFile(dest);
+    auto [succSrc, srcFileInfo] = ParseOperand(src);
+    if (succSrc != SUCCESS_CODE) {
+        return succSrc;
+    }
+    auto [succDest, destFileInfo] = ParseOperand(dest);
+    if (succDest != SUCCESS_CODE) {
+        return succDest;
+    }
     return IsAllPath(srcFileInfo, destFileInfo);
 }
 
 int CopyFileImpl::CopyFile(const std::string& src, int32_t dest, int mode)
 {
     LOGI("FS_TEST:: CopyFile::CopyFile start");
-    auto srcFileInfo = ParseFile(src);
-    auto [succDest, destFileInfo] = ParseFile(dest);
-    if (!succDest) {
-        LOGE("The destargument requires fd");
-        return EINVAL;
+    auto [succSrc, srcFileInfo] = ParseOperand(src);
+    if (succSrc != SUCCESS_CODE) {
+        return succSrc;
+    }
+    auto [succDest, destFileInfo] = ParseOperand(dest);
+    if (succDest != SUCCESS_CODE) {
+        return succDest;
     }
     return OpenFile(srcFileInfo, destFileInfo);
 }
@@ -214,11 +225,13 @@ int CopyFileImpl::CopyFile(const std::string& src, int32_t dest, int mode)
 int CopyFileImpl::CopyFile(int32_t src, const std::string& dest, int mode)
 {
     LOGI("FS_TEST:: CopyFile::CopyFile start");
-    auto [succSrc, srcFileInfo] = ParseFile(src);
-    auto destFileInfo = ParseFile(dest);
-    if (!succSrc) {
-        LOGE("The destargument requires fd");
-        return EINVAL;
+    auto [succSrc, srcFileInfo] = ParseOperand(src);
+    if (succSrc != SUCCESS_CODE) {
+        return succSrc;
+    }
+    auto [succDest, destFileInfo] = ParseOperand(dest);
+    if (succDest != SUCCESS_CODE) {
+        return succDest;
     }
     return OpenFile(srcFileInfo, destFileInfo);
 }
@@ -226,11 +239,13 @@ int CopyFileImpl::CopyFile(int32_t src, const std::string& dest, int mode)
 int CopyFileImpl::CopyFile(int32_t src, int32_t dest, int mode)
 {
     LOGI("FS_TEST:: CopyFile::CopyFile start");
-    auto [succSrc, srcFileInfo] = ParseFile(src);
-    auto [succDest, destFileInfo] = ParseFile(dest);
-    if (!succSrc || !succDest) {
-        LOGE("The destargument requires fd");
-        return EINVAL;
+    auto [succSrc, srcFileInfo] = ParseOperand(src);
+    if (succSrc != SUCCESS_CODE) {
+        return succSrc;
+    }
+    auto [succDest, destFileInfo] = ParseOperand(dest);
+    if (succDest != SUCCESS_CODE) {
+        return succDest;
     }
     return OpenFile(srcFileInfo, destFileInfo);
 }

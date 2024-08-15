@@ -40,6 +40,9 @@ std::tuple<int, FileInfo> ParseFile(int32_t file)
 std::tuple<int, FileInfo> ParseFile(std::string file)
 {
     std::unique_ptr<char[]> filePath = std::make_unique<char[]>(file.length() + 1);
+    if (!filePath) {
+        return { ENOMEM, FileInfo { true, nullptr, {} } };
+    }
     for (size_t i = 0; i < file.length(); i++) {
         filePath[i] = file[i];
     }
@@ -77,7 +80,10 @@ std::tuple<int, uv_stat_t*> GetUvStat(const FileInfo& fileInfo)
     if (state != SUCCESS_CODE) {
         return { state, nullptr };
     }
-    uv_stat_t* tempBuf = new uv_stat_t(stat_req->statbuf);
+    uv_stat_t* tempBuf = new (std::nothrow) uv_stat_t(stat_req->statbuf);
+    if (!tempBuf) {
+        return {ENOMEM, nullptr};
+    }
     return {SUCCESS_CODE, tempBuf};
 }
 
@@ -85,16 +91,19 @@ std::tuple<bool, FileInfo, int> ParseRandomFile(std::string file)
 {
     LOGI("FS_TEST:: RandomAccessFileImpl::ParseRandomFile");
     std::unique_ptr<char[]> filePath = std::make_unique<char[]>(file.length() + 1);
+    if (!filePath) {
+        return { false, FileInfo { true, nullptr, {} }, ENOMEM };
+    }
     for (size_t i = 0; i < file.length(); i++) {
         filePath[i] = file[i];
     }
     OHOS::DistributedFS::FDGuard sfd;
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(sfd, false);
     if (fdg == nullptr) {
-        return { false, FileInfo { false, nullptr, nullptr }, ENOMEM};
+        return { false, FileInfo { false, nullptr, nullptr }, ENOMEM };
     }
     LOGI("FS_TEST:: RandomAccessFileImpl::ParseRandomFile success");
-    return { true, FileInfo { true, move(filePath), move(fdg) }, ERRNO_NOERR};
+    return { true, FileInfo { true, move(filePath), move(fdg) }, ERRNO_NOERR };
 }
 
 std::tuple<int, bool> GetFsAccess(const FileInfo &fileInfo)
@@ -126,7 +135,7 @@ std::tuple<int, sptr<StatImpl>> FileFsImpl::Stat(int32_t file)
     auto [fileState, fileInfo] = ParseFile(file);
 
     if (fileState != SUCCESS_CODE) {
-        return {GetErrorCode(ENOMEM), nullptr};
+        return {GetErrorCode(fileState), nullptr};
     }
     auto [statState, stat] = GetUvStat(fileInfo);
     if (statState != SUCCESS_CODE) {
@@ -322,6 +331,9 @@ int FileFsImpl::Rmdir(std::string path)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> scandir_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+    if (!scandir_req) {
+        return GetErrorCode(ENOMEM);
+    }
     int ret = 0;
     ret = uv_fs_scandir(nullptr, scandir_req.get(), path.c_str(), 0, nullptr);
     if (ret < 0) {
@@ -964,7 +976,7 @@ int FileFsImpl::Truncate(int32_t fd, int64_t len)
 {
     auto [fileState, fileInfo] = ParseFile(fd);
     if (fileState != SUCCESS_CODE) {
-        return GetErrorCode(EINVAL);
+        return GetErrorCode(fileState);
     }
     if (len < 0) {
         return GetErrorCode(EINVAL);
