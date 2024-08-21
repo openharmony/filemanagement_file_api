@@ -87,7 +87,7 @@ config("optimize-size") {
 }
 
 ohos_shared_library("streamhash") {
-  configs = [ ":optimize-size" ]
+  config = [ ":optimize-size" ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
