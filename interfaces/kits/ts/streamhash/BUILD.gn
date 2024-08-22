@@ -75,7 +75,6 @@ streamhash_sources = [ "native_module_streamhash.cpp" ]
 
 config("optimize-size") {
   cflags = [
-    "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-Oz",
