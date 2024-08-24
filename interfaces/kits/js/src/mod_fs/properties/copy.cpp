@@ -193,7 +193,7 @@ bool Copy::IsDirectory(const std::string &path)
     struct stat buf {};
     int ret = stat(path.c_str(), &buf);
     if (ret == -1) {
-        HILOGE("stat failed, errno is %{public}d, path is %{public}s", errno, path.c_str());
+        HILOGE("stat failed, errno is %{public}d", errno);
         return false;
     }
     return (buf.st_mode & S_IFMT) == S_IFDIR;
@@ -231,7 +231,7 @@ tuple<int, uint64_t> Copy::GetFileSize(const std::string &path)
 void Copy::CheckOrCreatePath(const std::string &destPath)
 {
     if (!filesystem::exists(destPath)) {
-        HILOGI("destPath not exist, destPath = %{public}s", destPath.c_str());
+        HILOGI("destPath not exist");
         auto file = open(destPath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (file < 0) {
             HILOGE("Error opening file descriptor. errno = %{public}d", errno);
@@ -429,7 +429,7 @@ int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallback
 {
     if (infos->isFile) {
         if (infos->srcPath == infos->destPath) {
-            HILOGE("The src and dest is same, path = %{public}s", infos->srcPath.c_str());
+            HILOGE("The src and dest is same");
             return EINVAL;
         }
         CheckOrCreatePath(infos->destPath);
