@@ -1223,7 +1223,7 @@ std::tuple<int32_t, sptr<WatcherImpl>> FileFsImpl::CreateWatcher(std::string pat
     void (*callback)(CWatchEvent))
 {
     std::shared_ptr<WatcherInfoArg> infoArg = std::make_shared<WatcherInfoArg>(callback);
-    if (!WatcherImpl::GetInstance().CheckEventValid(events)) {
+    if (!FileWatcherManager::GetInstance().CheckEventValid(events)) {
         return { GetErrorCode(EINVAL), nullptr };
     }
     infoArg->events = events;
@@ -1235,12 +1235,13 @@ std::tuple<int32_t, sptr<WatcherImpl>> FileFsImpl::CreateWatcher(std::string pat
     }
     watcherImpl->data_ = infoArg;
 
-    if (watcherImpl->GetNotifyId() < 0 && !watcherImpl->InitNotify()) {
+    if (FileWatcherManager::GetInstance().GetNotifyId() < 0 &&
+        !FileWatcherManager::GetInstance().InitNotify()) {
         HILOGE("Failed to get notifyId or initnotify fail");
         return { GetErrorCode(errno), nullptr };
     }
 
-    bool ret = watcherImpl->AddWatcherInfo(infoArg->fileName, infoArg);
+    bool ret = FileWatcherManager::GetInstance().AddWatcherInfo(infoArg->fileName, infoArg);
     if (!ret) {
         HILOGE("Failed to add watcher info.");
         return {GetErrorCode(EINVAL), nullptr};

@@ -32,7 +32,7 @@ namespace CJSystemapi {
 constexpr int BUF_SIZE = 1024;
 
 struct CWatchEvent {
-    const char* fileName;
+    char* fileName;
     uint32_t event;
     uint32_t cookie;
 };
@@ -40,41 +40,21 @@ struct WatcherInfoArg {
     std::string fileName = "";
     uint32_t events = 0;
     int wd = -1;
+    int64_t callbackId = -1;
     std::function<void(CWatchEvent)> watchCallback_;
     explicit WatcherInfoArg(void (*callback)(CWatchEvent))
     {
         watchCallback_ = CJLambda::Create(callback);
+        callbackId = reinterpret_cast<int64_t>(callback);
     }
     ~WatcherInfoArg() = default;
 };
 
-class WatcherImpl : public OHOS::FFI::FFIData, public Singleton<WatcherImpl> {
+class WatcherImpl : public OHOS::FFI::FFIData {
 public:
     std::shared_ptr<WatcherInfoArg> data_;
-    WatcherImpl();
-    int32_t GetNotifyId();
-    bool InitNotify();
-    bool AddWatcherInfo(const std::string &fileName, std::shared_ptr<WatcherInfoArg> arg);
-    bool CheckEventValid(const uint32_t &event);
-    int32_t StartNotify();
-    void GetNotifyEvent();
-    int32_t StopNotify();
-
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 private:
-    uint32_t RemoveWatcherInfo(std::shared_ptr<WatcherInfoArg> arg);
-    std::tuple<bool, int> CheckEventWatched(const std::string &fileName, const uint32_t &event);
-    void NotifyEvent(const struct inotify_event *event);
-    int CloseNotifyFd();
-    int NotifyToWatchNewEvents(const std::string &fileName, const int &wd, const uint32_t &watchEvents);
-
-private:
-    static std::mutex watchMutex_;
-    bool run_ = false;
-    int32_t notifyFd_ = -1;
-    std::unordered_set<std::shared_ptr<WatcherInfoArg>> watcherInfoSet_;
-    std::unordered_map<std::string, std::pair<int, uint32_t>> wdFileNameMap_;
-
     friend class OHOS::FFI::RuntimeType;
     friend class OHOS::FFI::TypeBase;
     static OHOS::FFI::RuntimeType* GetClassType()
@@ -82,6 +62,38 @@ private:
         static OHOS::FFI::RuntimeType runtimeType = OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("WatcherImpl");
         return &runtimeType;
     }
+};
+
+class FileWatcherManager : public Singleton<FileWatcherManager> {
+public:
+    FileWatcherManager();
+    ~FileWatcherManager();
+    FileWatcherManager(FileWatcherManager const &) = delete;
+    void operator=(FileWatcherManager const &) = delete;
+
+    int32_t GetNotifyId();
+    bool InitNotify();
+    bool AddWatcherInfo(const std::string &fileName, std::shared_ptr<WatcherInfoArg> arg);
+    bool CheckEventValid(const uint32_t &event);
+    int32_t StartNotify(std::shared_ptr<WatcherInfoArg> arg);
+    void GetNotifyEvent(std::shared_ptr<WatcherInfoArg> arg);
+    void ReadNotifyEvent(std::function<void(CWatchEvent)> callback);
+    int32_t StopNotify(std::shared_ptr<WatcherInfoArg> arg);
+
+private:
+    uint32_t RemoveWatcherInfo(std::shared_ptr<WatcherInfoArg> arg);
+    std::tuple<bool, int> CheckEventWatched(const std::string &fileName, const uint32_t &event);
+    void NotifyEvent(const struct inotify_event *event, std::function<void(CWatchEvent)> callback);
+    int CloseNotifyFd();
+    int NotifyToWatchNewEvents(const std::string &fileName, const int &wd, const uint32_t &watchEvents);
+
+private:
+    static std::mutex watchMutex_;
+    bool run_ = false;
+    int32_t notifyFd_ = -1;
+    int32_t eventFd_ = -1;
+    std::unordered_set<std::shared_ptr<WatcherInfoArg>> watcherInfoSet_;
+    std::unordered_map<std::string, std::pair<int, uint32_t>> wdFileNameMap_;
 };
 } // OHOS::FileManagement::ModuleFileIO
 }
