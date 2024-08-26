@@ -116,7 +116,7 @@ napi_value FileNExporter::GetPath(napi_env env, napi_callback_info info)
     }
     auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
     if (realPathRes != ERRNO_NOERR) {
-        HILOGE("Failed to get real path, ret: %{public}d", realPathRes);
+        HILOGE("Failed to get real path");
         NError(realPathRes).ThrowErr(env);
         return nullptr;
     }
@@ -143,7 +143,7 @@ napi_value FileNExporter::GetName(napi_env env, napi_callback_info info)
     }
     auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
     if (realPathRes != ERRNO_NOERR) {
-        HILOGE("Failed to get real path, ret: %{public}d", realPathRes);
+        HILOGE("Failed to get real path");
         NError(realPathRes).ThrowErr(env);
         return nullptr;
     }
@@ -179,7 +179,7 @@ napi_value FileNExporter::GetParent(napi_env env, napi_callback_info info)
     } else {
         auto [realPathRes, realPath] = RealPathCore(path);
         if (realPathRes) {
-            HILOGE("Failed to get real path, ret: %{public}d", realPathRes);
+            HILOGE("Failed to get real path");
             NError(realPathRes).ThrowErr(env);
             return nullptr;
         }
