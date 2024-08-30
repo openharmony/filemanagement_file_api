@@ -33,22 +33,7 @@ struct FileEntity {
     std::string path_ = "";
     std::string uri_ = "";
 #ifndef WIN_PLATFORM
-    virtual ~FileEntity()
-    {
-        if (!fd_.get()) {
-            return;
-        }
-        int32_t fd = fd_.get()->GetFD();
-        int ret = flock(fd, LOCK_UN);
-        if (ret == 0) {
-            struct stat buf;
-            if (fstat(fd, &buf) == 0) {
-                HILOGD("Unlock succeeded inode = %{public}" PRIu64, buf.st_ino);
-            } else {
-                HILOGE("Failed to get inode number, error: %{public}d", errno);
-            }
-        }
-    }
+    virtual ~FileEntity() {};
 #endif
 };
 } // namespace ModuleFileIO
