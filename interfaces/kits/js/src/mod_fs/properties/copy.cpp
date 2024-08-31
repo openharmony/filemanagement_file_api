@@ -228,16 +228,21 @@ tuple<int, uint64_t> Copy::GetFileSize(const std::string &path)
     return { ERRNO_NOERR, buf.st_size };
 }
 
-void Copy::CheckOrCreatePath(const std::string &destPath)
+int Copy::CheckOrCreatePath(const std::string &destPath)
 {
-    if (!filesystem::exists(destPath)) {
+    std::error_code errCode;
+    if (!filesystem::exists(destPath, errCode) && errCode.value() == ERRNO_NOERR) {
         HILOGI("destPath not exist");
         auto file = open(destPath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (file < 0) {
             HILOGE("Error opening file descriptor. errno = %{public}d", errno);
+            return errno;
         }
         close(file);
+    } else if (errCode.value() != 0) {
+        return errCode.value();
     }
+    return ERRNO_NOERR;
 }
 
 int Copy::CopyFile(const string &src, const string &dest, std::shared_ptr<FileInfos> infos)
@@ -278,12 +283,16 @@ int Copy::MakeDir(const string &path)
 
 int Copy::CopySubDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos)
 {
-    if (!filesystem::exists(destPath)) {
+    std::error_code errCode;
+    if (!filesystem::exists(destPath, errCode) && errCode.value() == ERRNO_NOERR) {
         int res = MakeDir(destPath);
         if (res != ERRNO_NOERR) {
             HILOGE("Failed to mkdir");
             return res;
         }
+    } else if (errCode.value() != ERRNO_NOERR) {
+        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        return errCode.value();
     }
     uint32_t watchEvents = IN_MODIFY;
     if (infos->notifyFd >= 0) {
@@ -432,7 +441,11 @@ int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallback
             HILOGE("The src and dest is same");
             return EINVAL;
         }
-        CheckOrCreatePath(infos->destPath);
+        int ret = CheckOrCreatePath(infos->destPath);
+        if (ret != ERRNO_NOERR) {
+            HILOGE("check or create fail, error code is %{public}d", ret);
+            return ret;
+        }
     }
     if (!infos->hasListener) {
         return ExecCopy(infos);
