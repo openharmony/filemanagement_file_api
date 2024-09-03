@@ -177,8 +177,6 @@ private:
     static bool IsMediaUri(const std::string &uriPath);
     static std::string ConvertUriToPath(const std::string &uri);
     static std::string GetRealPath(const std::string& path);
-
-    static int CheckLocalCopyArgs(shared_ptr<FileInfos> fileInfos);
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement

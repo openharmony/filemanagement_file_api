@@ -235,7 +235,7 @@ tuple<int, uint64_t> Copy::GetFileSize(const std::string &path)
 void Copy::CheckOrCreatePath(const std::string &destPath)
 {
     if (!filesystem::exists(destPath)) {
-        HILOGI("destPath not exist, destPath = %{public}s", destPath.c_str());
+        HILOGI("destPath not exist");
         auto file = open(destPath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (file < 0) {
             HILOGE("Error opening file descriptor. errno = %{public}d", errno);

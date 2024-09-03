@@ -22,10 +22,10 @@
 #include <sstream>
 #include <unistd.h>
 
-#include "common_func.h"
 #include "class_file/file_entity.h"
 #include "class_file/file_n_exporter.h"
 #include "close.h"
+#include "common_func.h"
 #include "fdatasync.h"
 #include "file_utils.h"
 #include "filemgmt_libn.h"
@@ -42,14 +42,21 @@
 #include "utimes.h"
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include <sys/xattr.h>
+
+#include "bundle_mgr_proxy.h"
+#include "connectdfs.h"
 #include "copy.h"
 #include "copy_file.h"
 #include "copydir.h"
 #include "create_randomaccessfile.h"
 #include "create_stream.h"
 #include "create_streamrw.h"
+#include "disconnectdfs.h"
 #include "dup.h"
 #include "fdopen_stream.h"
+#include "ipc_skeleton.h"
+#include "iservice_registry.h"
 #include "listfile.h"
 #include "lseek.h"
 #include "move.h"
@@ -58,9 +65,8 @@
 #include "read_text.h"
 #include "rust_file.h"
 #include "symlink.h"
+#include "system_ability_definition.h"
 #include "watcher.h"
-#include "connectdfs.h"
-#include "disconnectdfs.h"
 #include "xattr.h"
 #endif
 
@@ -73,17 +79,125 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+const string CLOUDDISK_FILE_PREFIX = "/data/storage/el2/cloud";
+const string DISTRIBUTED_FILE_PREFIX = "/data/storage/el2/distributedfiles";
+const string PACKAGE_NAME_FLAG = "<PackageName>";
+const string USER_ID_FLAG = "<currentUserId>";
+const string PHYSICAL_PATH_PREFIX = "/mnt/hmdfs/<currentUserId>/account/device_view/local/data/<PackageName>";
+const string CLOUD_FILE_LOCATION = "user.cloud.location";
+const char POSITION_LOCAL = '1';
+const char POSITION_BOTH = '3';
+const int BASE_USER_RANGE = 200000;
+#endif
 
-static int AccessCore(const string &path, int mode)
+enum AccessFlag : int32_t {
+    DEFAULT_FLAG = -1,
+    LOCAL_FLAG,
+};
+
+struct AccessArgs {
+    string path;
+    int mode = -1;
+    int flag = DEFAULT_FLAG;
+};
+
+static int UvAccess(const string &path, int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> access_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup) *> access_req = {new uv_fs_t,
+        CommonFunc::fs_req_cleanup};
     if (!access_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int ret = uv_fs_access(nullptr, access_req.get(), path.c_str(), mode, nullptr);
-    return ret;
+    return uv_fs_access(nullptr, access_req.get(), path.c_str(), mode, nullptr);
+}
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+static bool IsCloudOrDistributedFilePath(const string &path)
+{
+    return path.find(CLOUDDISK_FILE_PREFIX) == 0 || path.find(DISTRIBUTED_FILE_PREFIX) == 0;
+}
+
+static int GetCurrentUserId()
+{
+    int uid = IPCSkeleton::GetCallingUid();
+    int userId = uid / BASE_USER_RANGE;
+    return userId;
+}
+
+static sptr<BundleMgrProxy> GetBundleMgrProxy()
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        HILOGE("fail to get system ability mgr");
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        HILOGE("fail to get bundle manager proxy");
+        return nullptr;
+    }
+
+    return iface_cast<BundleMgrProxy>(remoteObject);
+}
+
+static string GetSelfBundleName()
+{
+    sptr<BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (!bundleMgrProxy) {
+        HILOGE("bundleMgrProxy is nullptr");
+        return "";
+    }
+    BundleInfo bundleInfo;
+    auto ret = bundleMgrProxy->GetBundleInfoForSelf(0, bundleInfo);
+    if (ret != 0) {
+        HILOGE("bundleName get fail");
+        return "";
+    }
+    return bundleInfo.name;
+}
+
+static int HandleLocalCheck(const string &path, int mode)
+{
+    // check if the file of /data/storage/el2/cloud is on the local
+    if (path.find(CLOUDDISK_FILE_PREFIX) == 0) {
+        char val[2] = {'\0'};
+        if (getxattr(path.c_str(), CLOUD_FILE_LOCATION.c_str(), val, sizeof(val)) < 0) {
+            HILOGI("get cloud file location fail, err: %{public}d", errno);
+            return errno;
+        }
+        if (val[0] == POSITION_LOCAL || val[0] == POSITION_BOTH) {
+            return 0;
+        }
+        return ENOENT;
+    }
+    // check if the distributed file of /data/storage/el2/distributedfiles is on the local,
+    // convert into physical path(/mnt/hmdfs/<currentUserId>/account/device_view/local/data/<PackageName>) and check
+    if (path.find(DISTRIBUTED_FILE_PREFIX) == 0) {
+        int userId = GetCurrentUserId();
+        string bundleName = GetSelfBundleName();
+        string relativePath = path.substr(DISTRIBUTED_FILE_PREFIX.length());
+        string physicalPath = PHYSICAL_PATH_PREFIX + relativePath;
+        physicalPath.replace(physicalPath.find(USER_ID_FLAG), USER_ID_FLAG.length(), to_string(userId));
+        physicalPath.replace(physicalPath.find(PACKAGE_NAME_FLAG), PACKAGE_NAME_FLAG.length(), bundleName);
+
+        return UvAccess(path, mode);
+    }
+
+    return ENOENT;
+}
+#endif
+
+static int AccessCore(const string &path, int mode, int flag = DEFAULT_FLAG)
+{
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {
+        return HandleLocalCheck(path, mode);
+    }
+#endif
+    return UvAccess(path, mode);
 }
 
 static int GetMode(NVal secondVar, bool *hasMode)
@@ -101,36 +215,53 @@ static int GetMode(NVal secondVar, bool *hasMode)
     return -1;
 }
 
+static bool GetAccessArgs(napi_env env, const NFuncArg &funcArg, AccessArgs &args)
+{
+    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
+    if (!succ) {
+        HILOGE("Invalid path from JS first argument");
+        return false;
+    }
+    args.path = path.get();
+
+    bool hasMode = false;
+    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
+        args.mode = GetMode(NVal(env, funcArg[NARG_POS::SECOND]), &hasMode);
+    }
+    if (args.mode < 0 && hasMode) {
+        HILOGE("Invalid mode from JS second argument");
+        return false;
+    }
+    args.mode = hasMode ? args.mode : 0;
+
+    if (funcArg.GetArgc() == NARG_CNT::THREE) {
+        tie(succ, args.flag) = NVal(env, funcArg[NARG_POS::THIRD]).ToInt32(args.flag);
+        if (!succ) {
+            HILOGE("Invalid flag from JS third argument");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [succ, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
-    if (!succ) {
-        HILOGE("Invalid path from JS first argument");
+    AccessArgs args;
+    if (!GetAccessArgs(env, funcArg, args)) {
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    bool hasMode = false;
-    int mode = 0;
-    if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        mode = GetMode(NVal(env, funcArg[NARG_POS::SECOND]), &hasMode);
-    }
-    if (mode < 0 && hasMode) {
-        HILOGE("Invalid mode from JS second argument");
-        NError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
-    mode = hasMode ? mode : 0;
 
     bool isAccess = false;
-    int ret = AccessCore(path.get(), mode);
+    int ret = AccessCore(args.path, args.mode, args.flag);
     if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
         HILOGE("Failed to access file by path");
         NError(ret).ThrowErr(env);
@@ -145,30 +276,17 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
 napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
-    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
+    if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
-    auto [succ, tmp, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
-    if (!succ) {
-        HILOGE("Invalid path from JS first argument");
+    AccessArgs args;
+    if (!GetAccessArgs(env, funcArg, args)) {
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    bool hasMode = false;
-    int mode = 0;
-    if (funcArg.GetArgc() == NARG_CNT::TWO) {
-        mode = GetMode(NVal(env, funcArg[NARG_POS::SECOND]), &hasMode);
-    }
-    if (mode < 0 && hasMode) {
-        HILOGE("Invalid mode from JS second argument");
-        NError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
-    mode = hasMode ? mode : 0;
 
     auto result = CreateSharedPtr<AsyncAccessArg>();
     if (result == nullptr) {
@@ -176,8 +294,8 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [path = string(tmp.get()), result, mode]() -> NError {
-        int ret = AccessCore(path, mode);
+    auto cbExec = [path = args.path, result, mode = args.mode, flag = args.flag]() -> NError {
+        int ret = AccessCore(path, mode, flag);
         if (ret == 0) {
             result->isAccess = true;
         }
@@ -192,7 +310,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
-    if (funcArg.GetArgc() == NARG_CNT::ONE || hasMode) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE || NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_ACCESS_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
