@@ -436,6 +436,9 @@ int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallback
     if (errCode != 0) {
         return errCode;
     }
+    if (!infos->isFile && !IsDirectory(infos->srcPath, errCode)) {
+        return EINVAL;
+    }
     if (infos->srcPath == infos->destPath) {
         HILOGE("The src and dest is same, path = %{public}s", infos->srcPath.c_str());
         return EINVAL;
