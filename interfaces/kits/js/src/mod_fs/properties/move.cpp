@@ -97,7 +97,7 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     filesystem::path dstPath(dest);
     std::error_code errCode;
-    if (filesystem::exists(dstPath)) {
+    if (filesystem::exists(dstPath, errCode)) {
         if (!filesystem::remove(dstPath, errCode)) {
             HILOGE("Failed to remove dest file, error code: %{public}d", errCode.value());
             return errCode.value();

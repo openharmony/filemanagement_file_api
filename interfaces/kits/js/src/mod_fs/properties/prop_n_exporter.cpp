@@ -183,7 +183,7 @@ static int HandleLocalCheck(const string &path, int mode)
         physicalPath.replace(physicalPath.find(USER_ID_FLAG), USER_ID_FLAG.length(), to_string(userId));
         physicalPath.replace(physicalPath.find(PACKAGE_NAME_FLAG), PACKAGE_NAME_FLAG.length(), bundleName);
 
-        return UvAccess(path, mode);
+        return UvAccess(physicalPath, mode);
     }
 
     return ENOENT;

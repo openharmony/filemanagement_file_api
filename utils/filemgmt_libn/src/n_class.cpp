@@ -59,7 +59,30 @@ bool NClass::SaveClass(napi_env env, string className, napi_value exClass)
         HILOGE("INNER BUG. Cannot ref class constructor %{public}s because of %{public}d", className.c_str(), res);
     }
 
+    if (!nClass.addCleanHook) {
+        napi_status status = napi_add_env_cleanup_hook(env, CleanClass, env);
+        if (status != napi_ok) {
+            HILOGE("INNER BUG. Cleanup_hook registation has failed because of %{public}d", res);
+        } else {
+            nClass.addCleanHook = true;
+        }
+    }
     return res == napi_ok;
+}
+
+void NClass::CleanClass(void *arg)
+{
+    napi_env env = reinterpret_cast<napi_env>(arg);
+    NClass &nClass = NClass::GetInstance();
+    lock_guard<std::mutex>(nClass.exClassMapLock);
+
+    napi_status res;
+    for (auto it = nClass.exClassMap.begin(); it != nClass.exClassMap.end(); ++it) {
+        res = napi_delete_reference(env, it->second);
+        if (res != napi_ok) {
+            HILOGE("Cannot del ref class constructor %{public}s because of %{public}d", it->first.c_str(), res);
+        }
+    }
 }
 
 napi_value NClass::InstantiateClass(napi_env env, const string& className, const vector<napi_value>& args)
