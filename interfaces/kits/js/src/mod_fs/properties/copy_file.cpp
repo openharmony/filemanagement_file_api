@@ -137,7 +137,7 @@ static NError OpenCore(FileInfo& fileInfo, const int flags, const int mode)
 static NError OpenFile(FileInfo& srcFile, FileInfo& destFile)
 {
     if (srcFile.isPath) {
-        auto openResult = OpenCore(srcFile, UV_FS_O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+        auto openResult = OpenCore(srcFile, UV_FS_O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (openResult) {
             return openResult;
         }
