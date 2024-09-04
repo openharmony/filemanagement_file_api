@@ -26,6 +26,5 @@ ohos_rust_shared_ffi("rust_file") {
   rustflags = [ "-Zstack-protector=all" ]
   deps = [ "//third_party/rust/crates/libc:lib" ]
   external_deps = [ "hilog:hilog_rust" ]
-  innerapi_tags = [ "platformsdk" ]
   public_configs = [ ":public_config" ]
 }
