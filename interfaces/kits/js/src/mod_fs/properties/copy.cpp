@@ -188,22 +188,26 @@ bool Copy::IsRemoteUri(const std::string &uri)
     return uri.find(NETWORK_PARA) != uri.npos;
 }
 
-bool Copy::IsDirectory(const std::string &path)
+bool Copy::IsDirectory(const std::string &path, int &errCode)
 {
+    errCode = 0;
     struct stat buf {};
     int ret = stat(path.c_str(), &buf);
     if (ret == -1) {
+        errCode = errno;
         HILOGE("stat failed, errno is %{public}d", errno);
         return false;
     }
     return (buf.st_mode & S_IFMT) == S_IFDIR;
 }
 
-bool Copy::IsFile(const std::string &path)
+bool Copy::IsFile(const std::string &path, int &errCode)
 {
+    errCode = 0;
     struct stat buf {};
     int ret = stat(path.c_str(), &buf);
     if (ret == -1) {
+        errCode = errno;
         HILOGI("stat failed, errno is %{public}d, ", errno);
         return false;
     }
@@ -436,16 +440,20 @@ int Copy::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<Fil
 
 int Copy::ExecLocal(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
+    int errCode = 0;
+    infos->isFile = IsMediaUri(infos->srcUri) || IsFile(infos->srcPath, errCode);
+    if (errCode != 0) {
+        return errCode;
+    }
+    if (!infos->isFile && !IsDirectory(infos->srcPath, errCode)) {
+        return EINVAL;
+    }
+    if (infos->srcPath == infos->destPath) {
+        HILOGE("The src and dest is same, path = %{public}s", infos->srcPath.c_str());
+        return EINVAL;
+    }
     if (infos->isFile) {
-        if (infos->srcPath == infos->destPath) {
-            HILOGE("The src and dest is same");
-            return EINVAL;
-        }
-        int ret = CheckOrCreatePath(infos->destPath);
-        if (ret != ERRNO_NOERR) {
-            HILOGE("check or create fail, error code is %{public}d", ret);
-            return ret;
-        }
+        CheckOrCreatePath(infos->destPath);
     }
     if (!infos->hasListener) {
         return ExecCopy(infos);
@@ -798,7 +806,6 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
     infos->destPath = dstFileUri.GetPath();
     infos->srcPath = GetRealPath(infos->srcPath);
     infos->destPath = GetRealPath(infos->destPath);
-    infos->isFile = IsMediaUri(infos->srcUri) || IsFile(infos->srcPath);
     infos->notifyTime = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;
     if (listener) {
         infos->hasListener = true;
@@ -823,11 +830,15 @@ void Copy::StartNotify(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallb
 
 int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
 {
-    if (infos->isFile && IsFile(infos->destPath)) {
+    int errCode = 0;
+    if (infos->isFile && IsFile(infos->destPath, errCode) && errCode == 0) {
         // copyFile
         return CopyFile(infos->srcPath.c_str(), infos->destPath.c_str(), infos);
     }
-    if (!infos->isFile && IsDirectory(infos->destPath)) {
+    if (errCode != 0) {
+        return errCode;
+    }
+    if (!infos->isFile && IsDirectory(infos->destPath, errCode) && errCode == 0) {
         if (infos->srcPath.back() != '/') {
             infos->srcPath += '/';
         }
@@ -836,6 +847,9 @@ int Copy::ExecCopy(std::shared_ptr<FileInfos> infos)
         }
         // copyDir
         return CopyDirFunc(infos->srcPath.c_str(), infos->destPath.c_str(), infos);
+    }
+    if (errCode != 0) {
+        return errCode;
     }
     return EINVAL;
 }
