@@ -28,6 +28,7 @@ namespace FileManagement {
 namespace ModuleSecurityLabel {
 const char XATTR_KEY[] = {"user.security"};
 const std::string DEFAULT_DATA_LEVEL = "s3";
+const int DEFAULT_DATA_LENGTH = 2;
 const std::set<std::string> DATA_LEVEL = {"s0", "s1", "s2", "s3", "s4"};
 class SecurityLabel {
 public:
@@ -42,14 +43,15 @@ public:
 #else
         auto xattrValueSize = getxattr(path.c_str(), XATTR_KEY, nullptr, 0);
 #endif
-        if (xattrValueSize == static_cast<ssize_t>(DEFAULT_DATA_LEVEL.length())) {
-            std::unique_ptr<char[]> xattrValue = std::make_unique<char[]>((long)xattrValueSize + 1);
+        if (xattrValueSize == static_cast<ssize_t>(DEFAULT_DATA_LENGTH)) {
+            char xattrValue[DEFAULT_DATA_LENGTH + 1];
 #ifdef IOS_PLATFORM
-            xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize, 0, 0);
+            xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue, xattrValueSize, 0, 0);
 #else
-            xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue.get(), xattrValueSize);
+            xattrValueSize = getxattr(path.c_str(), XATTR_KEY, xattrValue, xattrValueSize);
 #endif
-            if (xattrValue[xattrValueSize - 1] > dataLevel.at(dataLevel.size() - 1)) {
+            xattrValue[DEFAULT_DATA_LENGTH] = '\0';
+            if (std::string(xattrValue) > dataLevel) {
                 errno = EINVAL;
                 return false;
             }
