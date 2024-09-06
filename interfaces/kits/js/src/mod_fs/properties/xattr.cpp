@@ -158,8 +158,10 @@ napi_value Xattr::GetAsync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto result = make_shared<std::string>();
-    auto cbExec = [path = path.get(), key = key.get(), result]() -> NError {
-        int ret = GetXattrCore(path, key, result);
+    string pathString(path.get());
+    string keyString(key.get());
+    auto cbExec = [path = move(pathString), key = move(keyString), result]() -> NError {
+        int ret = GetXattrCore(path.c_str(), key.c_str(), result);
         return NError(ret);
     };
     auto cbComplete = [result](napi_env env, NError err) -> NVal {
@@ -206,8 +208,11 @@ napi_value Xattr::SetAsync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [path = path.get(), key = key.get(), value = value.get()]() -> NError {
-        if (setxattr(path, key, value, strnlen(value, MAX_XATTR_SIZE), 0)) {
+    string pathString(path.get());
+    string keyString(key.get());
+    string valueString(value.get());
+    auto cbExec = [path = move(pathString), key = move(keyString), value = move(valueString)]() -> NError {
+        if (setxattr(path.c_str(), key.c_str(), value.c_str(), strnlen(value.c_str(), MAX_XATTR_SIZE), 0) < 0) {
             HILOGE("setxattr fail, errno is %{public}d", errno);
             return NError(errno);
         }
@@ -222,8 +227,7 @@ napi_value Xattr::SetAsync(napi_env env, napi_callback_info info)
     static const std::string PROCEDURE_NAME = "SetXattr";
     NVal thisVar(env, funcArg.GetThisVar());
     return NAsyncWorkPromise(env, thisVar)
-        .Schedule(PROCEDURE_NAME, cbExec, cbComplete)
-        .val_;
+        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 } // namespace ModuleFileIO
 } // namespace FileManagement
