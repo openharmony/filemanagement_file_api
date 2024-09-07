@@ -27,7 +27,6 @@
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
-#include "flush.h"
 #include "rust_file.h"
 #include "stream_entity.h"
 
@@ -36,6 +35,87 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+std::mutex StreamNExporter::mutex;
+std::shared_ptr<FILE> StreamNExporter::GetFilePtr(StreamEntity *streamEntity)
+{
+    std::lock_guard<std::mutex> lock(mutex);
+    if (streamEntity) {
+        return streamEntity->fp;
+    }
+    return nullptr;
+}
+
+napi_value StreamNExporter::FlushSync(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    auto fp = GetFilePtr(streamEntity);
+    if (fp == nullptr) {
+        HILOGE("Failed to get entity of Stream");
+        NError(EIO).ThrowErr(env);
+        return nullptr;
+    }
+
+    int ret = fflush(fp.get());
+    if (ret < 0) {
+        HILOGE("Failed to fflush file in the stream, ret: %{public}d", ret);
+        NError(errno).ThrowErr(env);
+        return nullptr;
+    }
+    return NVal::CreateUndefined(env).val_;
+}
+
+napi_value StreamNExporter::Flush(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO, NARG_CNT::ONE)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    auto fp = GetFilePtr(streamEntity);
+    if (fp == nullptr) {
+        HILOGE("Failed to get entity of Stream");
+        NError(EIO).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto cbExec = [fp]() -> NError {
+        if (!fp) {
+            HILOGE("Stream has been closed in flush cbExec possibly");
+            return NError(EIO);
+        }
+        int ret = fflush(fp.get());
+        if (ret < 0) {
+            HILOGE("Failed to fflush file in the stream");
+            return NError(errno);
+        } else {
+            return NError(ERRNO_NOERR);
+        }
+    };
+    auto cbCompl = [](napi_env env, NError err) -> NVal {
+        if (err) {
+            return { env, err.GetNapiErr(env) };
+        }
+        return { NVal::CreateUndefined(env) };
+    };
+
+    NVal thisVar(env, funcArg.GetThisVar());
+    if (funcArg.GetArgc() == NARG_CNT::ZERO) {
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STREAM_FLUSH_NAME, cbExec, cbCompl).val_;
+    } else {
+        NVal cb(env, funcArg[NARG_POS::FIRST]);
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_STREAM_FLUSH_NAME, cbExec, cbCompl).val_;
+    }
+}
 
 napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info cbInfo)
 {
@@ -47,13 +127,13 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info cbInfo)
     }
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
-    if (!streamEntity || !streamEntity->fp) {
+
+    auto fp = GetFilePtr(streamEntity);
+    if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
-    FILE *filp = nullptr;
-    filp = streamEntity->fp.get();
 
     auto [succ, buf, len, offset] =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
@@ -63,7 +143,7 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info cbInfo)
     }
 
     if (offset >= 0) {
-        int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
+        int ret = fseek(fp.get(), static_cast<long>(offset), SEEK_SET);
         if (ret < 0) {
             HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
             NError(errno).ThrowErr(env);
@@ -71,8 +151,8 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info cbInfo)
         }
     }
 
-    size_t actLen = fread(buf, 1, len, filp);
-    if ((actLen != static_cast<size_t>(len) && !feof(filp)) || ferror(filp)) {
+    size_t actLen = fread(buf, 1, len, fp.get());
+    if ((actLen != static_cast<size_t>(len) && !feof(fp.get())) || ferror(fp.get())) {
         HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
         NError(EIO).ThrowErr(env);
         return nullptr;
@@ -89,16 +169,10 @@ napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info cbInfo)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
-    if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Failed to get entity of Stream");
-        NError(EIO).ThrowErr(env);
-        return nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        (void)NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
     }
-    streamEntity->fp.reset();
-    (void)NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
-
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -112,13 +186,12 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
     }
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
-    if (!streamEntity || !streamEntity->fp) {
+    auto fp = GetFilePtr(streamEntity);
+    if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
-    FILE *filp = nullptr;
-    filp = streamEntity->fp.get();
 
     auto [succ, bufGuard, buf, len, offset] =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
@@ -127,7 +200,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
     if (offset >= 0) {
-        int ret = fseek(filp, static_cast<long>(offset), SEEK_SET);
+        int ret = fseek(fp.get(), static_cast<long>(offset), SEEK_SET);
         if (ret < 0) {
             HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
             NError(errno).ThrowErr(env);
@@ -135,7 +208,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
         }
     }
 
-    size_t writeLen = fwrite(buf, 1, len, filp);
+    size_t writeLen = fwrite(buf, 1, len, fp.get());
     if ((writeLen == 0) && (writeLen != len)) {
         HILOGE("Failed to fwrite stream");
         NError(EIO).ThrowErr(env);
@@ -145,7 +218,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
     return NVal::CreateInt64(env, static_cast<int64_t>(writeLen)).val_;
 }
 
-static napi_value WriteExec(napi_env env, NFuncArg &funcArg, StreamEntity *streamEntity)
+static napi_value WriteExec(napi_env env, NFuncArg &funcArg, shared_ptr<FILE> fp)
 {
     auto [succ, bufGuard, buf, len, offset] =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
@@ -160,19 +233,19 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, StreamEntity *strea
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, buf = buf, len = len, streamEntity, offset = offset]() -> NError {
-        if (!streamEntity || !streamEntity->fp.get()) {
+    auto cbExec = [arg, buf = buf, len = len, fp, offset = offset]() -> NError {
+        if (!fp.get()) {
             HILOGE("Stream has been closed in write cbExec possibly");
             return NError(EIO);
         }
         if (offset >= 0) {
-            int ret = fseek(streamEntity->fp.get(), static_cast<long>(offset), SEEK_SET);
+            int ret = fseek(fp.get(), static_cast<long>(offset), SEEK_SET);
             if (ret < 0) {
                 HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
                 return NError(errno);
             }
         }
-        arg->actLen = fwrite(buf, 1, len, streamEntity->fp.get());
+        arg->actLen = fwrite(buf, 1, len, fp.get());
         if ((arg->actLen == 0) && (arg->actLen != len)) {
             HILOGE("Failed to fwrite stream");
             return NError(EIO);
@@ -186,7 +259,6 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, StreamEntity *strea
         }
         return { NVal::CreateInt64(env, static_cast<int64_t>(arg->actLen)) };
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
         !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
@@ -208,15 +280,16 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
     }
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
-    if (!streamEntity || !streamEntity->fp) {
-        HILOGD("Failed to get entity of Stream");
+    auto fp = GetFilePtr(streamEntity);
+    if (fp == nullptr) {
+        HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
-    return WriteExec(env, funcArg, streamEntity);
+    return WriteExec(env, funcArg, fp);
 }
 
-static napi_value ReadExec(napi_env env, NFuncArg &funcArg, StreamEntity *streamEntity)
+static napi_value ReadExec(napi_env env, NFuncArg &funcArg, shared_ptr<FILE> fp)
 {
     auto [succ, buf, len, offset] =
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
@@ -232,19 +305,19 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg, StreamEntity *stream
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    auto cbExec = [arg, buf = buf, len = len, streamEntity, offset = offset]() -> NError {
-        if (!streamEntity || !streamEntity->fp.get()) {
+    auto cbExec = [arg, buf = buf, len = len, fp, offset = offset]() -> NError {
+        if (!fp.get()) {
             HILOGE("Stream has been closed in read cbExec possibly");
             return NError(EIO);
         }
         if (offset >= 0) {
-            if (fseek(streamEntity->fp.get(), static_cast<long>(offset), SEEK_SET) < 0) {
+            if (fseek(fp.get(), static_cast<long>(offset), SEEK_SET) < 0) {
                 HILOGE("Failed to set the offset location of the file stream pointer");
                 return NError(errno);
             }
         }
-        size_t actLen = fread(buf, 1, len, streamEntity->fp.get());
-        if ((actLen != static_cast<size_t>(len) && !feof(streamEntity->fp.get())) || ferror(streamEntity->fp.get())) {
+        size_t actLen = fread(buf, 1, len, fp.get());
+        if ((actLen != static_cast<size_t>(len) && !feof(fp.get())) || ferror(fp.get())) {
             HILOGE("Invalid buffer size and pointer, actlen: %{public}zu", actLen);
             return NError(EIO);
         } else {
@@ -281,12 +354,13 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
     }
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
-    if (!streamEntity || !streamEntity->fp) {
+    auto fp = GetFilePtr(streamEntity);
+    if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
-    return ReadExec(env, funcArg, streamEntity);
+    return ReadExec(env, funcArg, fp);
 }
 
 napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
@@ -297,20 +371,15 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
-    if (!streamEntity || !streamEntity->fp) {
-        HILOGE("Failed to get entity of Stream");
-        NError(EIO).ThrowErr(env);
-        return nullptr;
+    StreamEntity* ret = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        ret = NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
     }
-
-    auto fp = NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
-    if (!fp) {
+    if (!ret) {
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     auto cbExec = []() -> NError {
         return NError(ERRNO_NOERR);
     };
@@ -342,12 +411,12 @@ napi_value StreamNExporter::Seek(napi_env env, napi_callback_info cbInfo)
     }
 
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
-    if (!streamEntity || !streamEntity->fp) {
+    auto fp = GetFilePtr(streamEntity);
+    if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
-
     auto [succGetOffset, offset] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt64();
     if (!succGetOffset) {
         HILOGE("Invalid offset from JS first argument");
@@ -367,14 +436,14 @@ napi_value StreamNExporter::Seek(napi_env env, napi_callback_info cbInfo)
     }
 
     if (offset >= 0) {
-        int ret = fseek(streamEntity->fp.get(), static_cast<long>(offset), whence);
+        int ret = fseek(fp.get(), static_cast<long>(offset), whence);
         if (ret < 0) {
             HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
             NError(errno).ThrowErr(env);
             return nullptr;
         }
     }
-    int64_t res = ftell(streamEntity->fp.get());
+    int64_t res = ftell(fp.get());
     if (res < 0) {
         HILOGE("Failed to tell, error:%{public}d", errno);
         NError(errno).ThrowErr(env);
@@ -411,8 +480,8 @@ bool StreamNExporter::Export()
 {
     vector<napi_property_descriptor> props = {
         NVal::DeclareNapiFunction("writeSync", WriteSync),
-        NVal::DeclareNapiFunction("flush", Flush::Async),
-        NVal::DeclareNapiFunction("flushSync", Flush::Sync),
+        NVal::DeclareNapiFunction("flush", Flush),
+        NVal::DeclareNapiFunction("flushSync", FlushSync),
         NVal::DeclareNapiFunction("readSync", ReadSync),
         NVal::DeclareNapiFunction("closeSync", CloseSync),
         NVal::DeclareNapiFunction("write", Write),

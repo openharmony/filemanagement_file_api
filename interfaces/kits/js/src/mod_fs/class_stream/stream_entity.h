@@ -16,11 +16,12 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_STREAM_STREAM_ENTITY_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_CLASS_STREAM_STREAM_ENTITY_H
 
+#include <memory>
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 struct StreamEntity {
-    std::unique_ptr<FILE, decltype(&fclose)> fp = { nullptr, fclose };
+    std::shared_ptr<FILE> fp{ nullptr};
 };
 
 } // namespace ModuleFileIO

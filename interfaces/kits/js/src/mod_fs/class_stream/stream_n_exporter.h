@@ -18,12 +18,16 @@
 
 #include "filemgmt_libn.h"
 
+#include <mutex>
+#include "stream_entity.h"
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace OHOS::FileManagement::LibN;
 class StreamNExporter final : public NExporter {
 public:
+    static std::mutex mutex;
+
     inline static const std::string className_ = "FsStream";
 
     bool Export() override;
@@ -34,11 +38,15 @@ public:
     static napi_value WriteSync(napi_env env, napi_callback_info cbInfo);
     static napi_value ReadSync(napi_env env, napi_callback_info cbInfo);
     static napi_value CloseSync(napi_env env, napi_callback_info cbInfo);
+    static napi_value FlushSync(napi_env env, napi_callback_info cbInfo);
 
     static napi_value Write(napi_env env, napi_callback_info cbInfo);
     static napi_value Read(napi_env env, napi_callback_info cbInfo);
     static napi_value Close(napi_env env, napi_callback_info cbInfo);
     static napi_value Seek(napi_env env, napi_callback_info cbInfo);
+    static napi_value Flush(napi_env env, napi_callback_info cbInfo);
+
+    static std::shared_ptr<FILE> GetFilePtr(StreamEntity *streamEntity);
 
     StreamNExporter(napi_env env, napi_value exports);
     ~StreamNExporter() override;
@@ -65,6 +73,8 @@ struct AsyncWriteArg {
 const std::string PROCEDURE_STREAM_WRITE_NAME = "FileIOStreamWrite";
 const std::string PROCEDURE_STREAM_READ_NAME = "FileIOStreamRead";
 const std::string PROCEDURE_STREAM_CLOSE_NAME = "FileIOStreamClose";
+const std::string PROCEDURE_STREAM_FLUSH_NAME = "FileIOStreamFlush";
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

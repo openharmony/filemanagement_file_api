@@ -60,15 +60,14 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    unique_ptr<FILE, decltype(&fclose)> fp = { fopen(argPath.c_str(), argMode.c_str()), fclose };
-    if (!fp) {
+    FILE *file = fopen(argPath.c_str(), argMode.c_str());
+    if (!file) {
         HILOGE("Failed to fdopen file by path");
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-
-    return CommonFunc::InstantiateStream(env, move(fp)).val_;
+    std::shared_ptr<FILE> fp(file, fclose);
+    return CommonFunc::InstantiateStream(env, fp).val_;
 }
 
 napi_value CreateStream::Async(napi_env env, napi_callback_info info)
@@ -93,11 +92,12 @@ napi_value CreateStream::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [arg, argPath = move(argPath), argMode = move(argMode)]() -> NError {
-        arg->fp = { fopen(argPath.c_str(), argMode.c_str()), fclose };
-        if (!arg->fp) {
+        FILE *file = fopen(argPath.c_str(), argMode.c_str());
+        if (!file) {
             HILOGE("Failed to fdopen file by path");
             return NError(errno);
         }
+        arg->fp = std::shared_ptr<FILE>(file, fclose);
         return NError(ERRNO_NOERR);
     };
 
@@ -105,7 +105,7 @@ napi_value CreateStream::Async(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return CommonFunc::InstantiateStream(env, move(arg->fp));
+        return CommonFunc::InstantiateStream(env, arg->fp);
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
