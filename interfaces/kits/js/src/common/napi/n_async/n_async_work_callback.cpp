@@ -24,6 +24,13 @@ NAsyncWorkCallback::NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb) : NA
 {
     ctx_ = new(std::nothrow) NAsyncContextCallback(thisPtr, cb);
 }
+NAsyncWorkCallback::~NAsyncWorkCallback()
+{
+    if(!ctx_){
+        return;
+    }
+    delete ctx_;
+}
 
 static void CallbackExecute(napi_env env, void *data)
 {
