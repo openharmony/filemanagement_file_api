@@ -23,7 +23,7 @@ namespace DistributedFS {
 class NAsyncWorkCallback : public NAsyncWorkFactory {
 public:
     NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb);
-    ~NAsyncWorkCallback();
+    ~NAsyncWorkCallback() override;
 
     NVal Schedule(std::string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete) final;
 
