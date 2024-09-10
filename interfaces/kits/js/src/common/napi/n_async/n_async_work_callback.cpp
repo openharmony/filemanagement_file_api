@@ -26,7 +26,7 @@ NAsyncWorkCallback::NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb) : NA
 }
 NAsyncWorkCallback::~NAsyncWorkCallback()
 {
-    if(!ctx_){
+    if (!ctx_) {
         return;
     }
     delete ctx_;
