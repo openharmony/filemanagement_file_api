@@ -39,13 +39,17 @@ static NError RmDirent(const string &fpath)
     std::filesystem::path strToPath(fpath);
     std::error_code errCode;
     std::uintmax_t num = std::filesystem::remove_all(strToPath, errCode);
-    if (errCode) {
+    if (errCode.value() != ERRNO_NOERR) {
         HILOGD("Failed to remove directory, error code: %{public}d", errCode.value());
         return NError(errCode.value());
     }
-    if (!num || std::filesystem::exists(strToPath)) {
+    if (!num || std::filesystem::exists(strToPath, errCode)) {
         HILOGE("Failed to remove directory, dirPath does not exist");
         return NError(ENOENT);
+    }
+    if (errCode.value() != ERRNO_NOERR) {
+        HILOGE("fs exists fail, error code: %{public}d", errCode.value());
+        return NError(errCode.value());
     }
     return NError(ERRNO_NOERR);
 }

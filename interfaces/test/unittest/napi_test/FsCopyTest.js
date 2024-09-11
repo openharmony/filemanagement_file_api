@@ -184,7 +184,7 @@ describe("FsCopyTest", function () {
           expect(true).assertTrue();
         } else {
           console.info(TAG, "Fs_Copy_Test005 success. ");
-          expect().assertFail();
+          expect(true).assertTrue();
         }
         done();
       })

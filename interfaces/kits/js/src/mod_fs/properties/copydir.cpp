@@ -111,15 +111,19 @@ static void Deleter(struct NameList *arg)
 static int CopyFile(const string &src, const string &dest, const int mode)
 {
     filesystem::path dstPath(dest);
-    if (filesystem::exists(dstPath)) {
+    std::error_code errCode;
+    if (filesystem::exists(dstPath, errCode)) {
         int ret = (mode == DIRMODE_FILE_COPY_THROW_ERR) ? EEXIST : RemoveFile(dest);
         if (ret) {
             HILOGE("Failed to copy file due to existing destPath with throw err");
             return ret;
         }
     }
+    if (errCode.value() != ERRNO_NOERR) {
+        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        return errCode.value();
+    }
     filesystem::path srcPath(src);
-    std::error_code errCode;
     if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
         HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
         return errCode.value();
@@ -130,12 +134,16 @@ static int CopyFile(const string &src, const string &dest, const int mode)
 static int CopySubDir(const string &srcPath, const string &destPath, const int mode,
     vector<struct ConflictFiles> &errfiles)
 {
-    if (!filesystem::exists(destPath)) {
+    std::error_code errCode;
+    if (!filesystem::exists(destPath, errCode) && errCode.value() == ERRNO_NOERR) {
         int res = MakeDir(destPath);
         if (res != ERRNO_NOERR) {
             HILOGE("Failed to mkdir");
             return res;
         }
+    } else if (errCode.value() != ERRNO_NOERR) {
+        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        return errCode.value();
     }
     return RecurCopyDir(srcPath, destPath, mode, errfiles);
 }
@@ -194,12 +202,16 @@ static int CopyDirFunc(const string &src, const string &dest, const int mode, ve
     }
     string dirName = string(src).substr(found);
     string destStr = dest + dirName;
-    if (!filesystem::exists(destStr)) {
+    std::error_code errCode;
+    if (!filesystem::exists(destStr, errCode) && errCode.value() == ERRNO_NOERR) {
         int res = MakeDir(destStr);
         if (res != ERRNO_NOERR) {
             HILOGE("Failed to mkdir");
             return res;
         }
+    } else if (errCode.value() != ERRNO_NOERR) {
+        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        return errCode.value();
     }
     int res = RecurCopyDir(src, destStr, mode, errfiles);
     if (!errfiles.empty() && res == ERRNO_NOERR) {

@@ -38,8 +38,9 @@ static int RecurMoveDir(const string &srcPath, const string &destPath, const int
 
 static tuple<bool, bool> JudgeExistAndEmpty(const string &path)
 {
+    std::error_code errCode;
     filesystem::path pathName(path);
-    if (filesystem::exists(pathName)) {
+    if (filesystem::exists(pathName, errCode)) {
         if (filesystem::is_empty(pathName)) {
             return { true, true };
         }
@@ -51,13 +52,17 @@ static tuple<bool, bool> JudgeExistAndEmpty(const string &path)
 static int RmDirectory(const string &path)
 {
     filesystem::path pathName(path);
-    if (filesystem::exists(pathName)) {
+    std::error_code errCode;
+    if (filesystem::exists(pathName, errCode)) {
         std::error_code errCode;
         (void)filesystem::remove_all(pathName, errCode);
         if (errCode.value() != 0) {
             HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
             return errCode.value();
         }
+    } else if (errCode.value() != ERRNO_NOERR) {
+        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        return errCode.value();
     }
     return ERRNO_NOERR;
 }
@@ -100,7 +105,8 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(n
 static int CopyAndDeleteFile(const string &src, const string &dest)
 {
     filesystem::path dstPath(dest);
-    if (filesystem::exists(dstPath)) {
+    std::error_code errCode;
+    if (filesystem::exists(dstPath, errCode)) {
         int removeRes = RemovePath(dest);
         if (removeRes != 0) {
             HILOGE("Failed to remove dest file");
@@ -108,7 +114,6 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
         }
     }
     filesystem::path srcPath(src);
-    std::error_code errCode;
     if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
         HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
         return errCode.value();
@@ -119,8 +124,9 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
 static int RenameFile(const string &src, const string &dest, const int mode, deque<struct ErrFiles> &errfiles)
 {
     filesystem::path dstPath(dest);
-    if (filesystem::exists(dstPath)) {
-        if (filesystem::is_directory(dstPath)) {
+    std::error_code errCode;
+    if (filesystem::exists(dstPath, errCode)) {
+        if (filesystem::is_directory(dstPath, errCode)) {
             errfiles.emplace_front(src, dest);
             return ERRNO_NOERR;
         }
@@ -129,8 +135,10 @@ static int RenameFile(const string &src, const string &dest, const int mode, deq
             return ERRNO_NOERR;
         }
     }
+    if (errCode.value() != ERRNO_NOERR) {
+        HILOGE("fs exists or is_directory fail, errcode is %{public}d", errCode.value());
+    }
     filesystem::path srcPath(src);
-    std::error_code errCode;
     filesystem::rename(srcPath, dstPath, errCode);
     if (errCode.value() == EXDEV) {
         HILOGD("Failed to rename file due to EXDEV");
@@ -150,11 +158,14 @@ static int32_t FilterFunc(const struct dirent *filename)
 static int RenameDir(const string &src, const string &dest, const int mode, deque<struct ErrFiles> &errfiles)
 {
     filesystem::path destPath(dest);
-    if (filesystem::exists(destPath)) {
+    std::error_code errCode;
+    if (filesystem::exists(destPath, errCode)) {
         return RecurMoveDir(src, dest, mode, errfiles);
+    } else if (errCode.value() != ERRNO_NOERR) {
+        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        return errCode.value();
     }
     filesystem::path srcPath(src);
-    std::error_code errCode;
     filesystem::rename(srcPath, destPath, errCode);
     if (errCode.value() == EXDEV) {
         HILOGD("Failed to rename file due to EXDEV");
