@@ -198,20 +198,20 @@ static CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errf
             break;
         }
         if (strcpy_s(result[i].srcFiles, srcFilesLen, errfiles[i].srcFiles.c_str()) != 0) {
-            delete result[i].srcFiles;
+            delete[] result[i].srcFiles;
             result[i].srcFiles = nullptr;
             break;
         }
         size_t destFilesLen = errfiles[i].destFiles.length() + 1;
         result[i].destFiles = new(std::nothrow) char[destFilesLen];
         if (result[i].destFiles == nullptr) {
-            delete result[i].srcFiles;
+            delete[] result[i].srcFiles;
             result[i].srcFiles = nullptr;
             break;
         }
         if (strcpy_s(result[i].destFiles, destFilesLen, errfiles[i].destFiles.c_str()) != 0) {
-            delete result[i].srcFiles;
-            delete result[i].destFiles;
+            delete[] result[i].srcFiles;
+            delete[] result[i].destFiles;
 
             result[i].srcFiles = nullptr;
             result[i].destFiles = nullptr;
@@ -221,8 +221,8 @@ static CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errf
     }
     if (temp != errfiles.size()) {
         for (size_t j = temp; j > 0; j--) {
-            delete result[j - 1].srcFiles;
-            delete result[j - 1].destFiles;
+            delete[] result[j - 1].srcFiles;
+            delete[] result[j - 1].destFiles;
 
             result[j - 1].srcFiles = nullptr;
             result[j - 1].destFiles = nullptr;
