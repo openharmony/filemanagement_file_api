@@ -130,7 +130,7 @@ private:
     static tuple<bool, std::string> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg);
     static tuple<bool, NVal> GetListenerFromOptionArg(napi_env env, const NFuncArg &funcArg);
     static tuple<bool, NVal> GetCopySignalFromOptionArg(napi_env env, const NFuncArg &funcArg);
-    static void CheckOrCreatePath(const std::string &destPath);
+    static int CheckOrCreatePath(const std::string &destPath);
     static int ParseJsParam(napi_env env, NFuncArg &funcArg, std::shared_ptr<FileInfos> &fileInfos);
 
     // operator of local listener
@@ -172,8 +172,8 @@ private:
     // operator of uri or path
     static bool IsValidUri(const std::string &uri);
     static bool IsRemoteUri(const std::string &uri);
-    static bool IsDirectory(const std::string &path, int &errCode);
-    static bool IsFile(const std::string &path, int &errCode);
+    static bool IsDirectory(const std::string &path);
+    static bool IsFile(const std::string &path);
     static bool IsMediaUri(const std::string &uriPath);
     static std::string ConvertUriToPath(const std::string &uri);
     static std::string GetRealPath(const std::string& path);
