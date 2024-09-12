@@ -628,11 +628,10 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
 
 std::shared_ptr<ReceiveInfo> Copy::GetReceivedInfo(int wd, std::shared_ptr<JsCallbackObject> callback)
 {
-    auto it = find_if(callback->wds.begin(), callback->wds.end(), [wd](const auto& item) {
-        return item.first == wd;
-    });
-    if (it != callback->wds.end()) {
-        return it->second;
+    for (auto &it : callback->wds) {
+        if (it.first == wd) {
+            return it.second;
+        }
     }
     return nullptr;
 }
