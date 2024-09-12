@@ -172,8 +172,8 @@ private:
     // operator of uri or path
     static bool IsValidUri(const std::string &uri);
     static bool IsRemoteUri(const std::string &uri);
-    static bool IsDirectory(const std::string &path, int &errCode);
-    static bool IsFile(const std::string &path, int &errCode);
+    static bool IsDirectory(const std::string &path);
+    static bool IsFile(const std::string &path);
     static bool IsMediaUri(const std::string &uriPath);
     static std::string ConvertUriToPath(const std::string &uri);
     static std::string GetRealPath(const std::string& path);
