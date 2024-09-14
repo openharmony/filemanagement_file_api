@@ -17,6 +17,7 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDOPEN_STREAM_H
 
 #include "filemgmt_libn.h"
+#include <memory>
 
 namespace OHOS {
 namespace FileManagement {
@@ -28,7 +29,7 @@ public:
 };
 
 struct AsyncFdopenStreamArg {
-    std::unique_ptr<FILE, decltype(&fclose)> fp = { nullptr, fclose };
+    std::shared_ptr<FILE> fp{ nullptr };
 };
 
 const std::string PROCEDURE_FDOPENSTREAM_NAME = "FileIOFdopenStream";

@@ -21,7 +21,7 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 struct StreamEntity {
-    std::shared_ptr<FILE> fp{ nullptr};
+    std::shared_ptr<FILE> fp{ nullptr };
 };
 
 } // namespace ModuleFileIO
