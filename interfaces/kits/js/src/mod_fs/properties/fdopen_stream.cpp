@@ -60,14 +60,13 @@ napi_value FdopenStream::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
-    unique_ptr<FILE, decltype(&fclose)> fp = { fdopen(fd, mode.c_str()), fclose };
-    if (!fp) {
-        HILOGE("Failed to fdopen file by fd:%{public}d", fd);
+    FILE *file = fdopen(fd, mode.c_str());
+    if (!file) {
+        HILOGE("Failed to fdopen file by path");
         NError(errno).ThrowErr(env);
         return nullptr;
     }
-
+    std::shared_ptr<FILE> fp(file, fclose);
     return CommonFunc::InstantiateStream(env, move(fp)).val_;
 }
 
@@ -93,11 +92,12 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [arg, fd = fd, mode = mode]() -> NError {
-        arg->fp = { fdopen(fd, mode.c_str()), fclose };
-        if (!arg->fp) {
-            HILOGE("Failed to fdopen file by fd:%{public}d", fd);
+        FILE *file = fdopen(fd, mode.c_str());
+        if (!file) {
+            HILOGE("Failed to fdopen file by path");
             return NError(errno);
         }
+        arg->fp = std::shared_ptr<FILE>(file, fclose);
         return NError(ERRNO_NOERR);
     };
 

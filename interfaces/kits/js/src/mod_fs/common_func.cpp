@@ -251,7 +251,7 @@ NVal CommonFunc::InstantiateFile(napi_env env, int fd, const string &pathOrUri, 
     return { env, objFile };
 }
 
-NVal CommonFunc::InstantiateStream(napi_env env, unique_ptr<FILE, decltype(&fclose)> fp)
+NVal CommonFunc::InstantiateStream(napi_env env, shared_ptr<FILE> fp)
 {
     napi_value objStream = NClass::InstantiateClass(env, StreamNExporter::className_, {});
     if (!objStream) {
