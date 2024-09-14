@@ -17,7 +17,6 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDOPEN_STREAM_H
 
 #include "filemgmt_libn.h"
-#include <memory>
 
 namespace OHOS {
 namespace FileManagement {
