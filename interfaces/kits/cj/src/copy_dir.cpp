@@ -64,6 +64,8 @@ static void Deleter(struct NameList *arg)
     }
     free(arg->namelist);
     arg->namelist = nullptr;
+    delete arg;
+    arg = nullptr;
 }
 
 static int CopyFile(const std::string &src, const std::string &dest, const int mode)
