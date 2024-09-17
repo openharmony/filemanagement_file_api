@@ -476,11 +476,13 @@ struct NameListArg {
 static void Deleter(struct NameListArg *arg)
 {
     for (int i = 0; i < arg->num; i++) {
-        delete (arg->namelist)[i];
+        free((arg->namelist)[i]);
         (arg->namelist)[i] = nullptr;
     }
-    delete arg->namelist;
+    free(arg->namelist);
     arg->namelist = nullptr;
+    delete arg;
+    arg = nullptr;
 }
 
 static int32_t FilterFunc(const struct dirent *filename)
