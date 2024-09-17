@@ -203,6 +203,8 @@ static void Deleter(struct NameListArg *arg)
     }
     free(arg->namelist);
     arg->namelist = nullptr;
+    delete arg;
+    arg = nullptr;
 }
 
 static int FilterFileRes(const string &path, vector<string> &dirents)

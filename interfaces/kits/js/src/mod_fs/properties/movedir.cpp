@@ -194,6 +194,9 @@ static void Deleter(struct NameListArg *arg)
         (arg->namelist)[i] = nullptr;
     }
     free(arg->namelist);
+    arg->namelist = nullptr;
+    delete arg;
+    arg = nullptr;
 }
 
 static int RecurMoveDir(const string &srcPath, const string &destPath, const int mode,
