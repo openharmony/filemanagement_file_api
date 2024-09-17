@@ -83,6 +83,7 @@ void NClass::CleanClass(void *arg)
             HILOGE("Cannot del ref class constructor %{public}s because of %{public}d", it->first.c_str(), res);
         }
     }
+    nClass.exClassMap.clear();
 }
 
 napi_value NClass::InstantiateClass(napi_env env, const string& className, const vector<napi_value>& args)
