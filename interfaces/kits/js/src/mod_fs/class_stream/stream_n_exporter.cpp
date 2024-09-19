@@ -169,6 +169,12 @@ napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info cbInfo)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    if (!streamEntity) {
+        HILOGE("Failed to get entity of Stream, may closed twice");
+        NError(EIO).ThrowErr(env);
+        return nullptr;
+    }
     {
         std::lock_guard<std::mutex> lock(mutex);
         (void)NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
@@ -369,6 +375,12 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
     if (!funcArg.InitArgs(NARG_CNT::ZERO, NARG_CNT::ONE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    if (!streamEntity) {
+        HILOGE("Failed to get entity of Stream, may closed twice");
+        NError(EIO).ThrowErr(env);
         return nullptr;
     }
     StreamEntity* ret = nullptr;

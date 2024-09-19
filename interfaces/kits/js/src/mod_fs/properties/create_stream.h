@@ -28,7 +28,7 @@ public:
 };
 
 struct AsyncCreateStreamArg {
-    std::shared_ptr<FILE> fp;
+    std::shared_ptr<FILE> fp{ nullptr };
 };
 
 const std::string PROCEDURE_CREATESTREAM_NAME = "FileIOCreateStream";

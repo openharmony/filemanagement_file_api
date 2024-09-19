@@ -67,7 +67,7 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     std::shared_ptr<FILE> fp(file, fclose);
-    return CommonFunc::InstantiateStream(env, fp).val_;
+    return CommonFunc::InstantiateStream(env, move(fp)).val_;
 }
 
 napi_value CreateStream::Async(napi_env env, napi_callback_info info)
@@ -105,7 +105,7 @@ napi_value CreateStream::Async(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return CommonFunc::InstantiateStream(env, arg->fp);
+        return CommonFunc::InstantiateStream(env, move(arg->fp));
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
