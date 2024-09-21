@@ -37,7 +37,8 @@ using namespace OHOS::FileManagement::LibN;
 #ifdef __MUSL__
 static bool CheckDir(const string &path)
 {
-    if (!filesystem::is_directory(filesystem::status(path))) {
+    std::error_code errCode;
+    if (!filesystem::is_directory(filesystem::status(path, errCode))) {
         return false;
     }
     return true;

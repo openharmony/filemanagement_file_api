@@ -41,7 +41,7 @@ static tuple<bool, bool> JudgeExistAndEmpty(const string &path)
     std::error_code errCode;
     filesystem::path pathName(path);
     if (filesystem::exists(pathName, errCode)) {
-        if (filesystem::is_empty(pathName)) {
+        if (filesystem::is_empty(pathName, errCode)) {
             return { true, true };
         }
         return { true, false };
@@ -81,13 +81,14 @@ static int RemovePath(const string& pathStr)
 static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseJsOperand(napi_env env, const NFuncArg& funcArg)
 {
     auto [resGetFirstArg, src, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
-    if (!resGetFirstArg || !filesystem::is_directory(filesystem::status(src.get()))) {
-        HILOGE("Invalid src");
+    std::error_code errCode;
+    if (!resGetFirstArg || !filesystem::is_directory(filesystem::status(src.get(), errCode))) {
+        HILOGE("Invalid src, errCode = %{public}d", errCode.value());
         return { false, nullptr, nullptr, 0 };
     }
     auto [resGetSecondArg, dest, unused] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8StringPath();
-    if (!resGetSecondArg || !filesystem::is_directory(filesystem::status(dest.get()))) {
-        HILOGE("Invalid dest");
+    if (!resGetSecondArg || !filesystem::is_directory(filesystem::status(dest.get(), errCode))) {
+        HILOGE("Invalid dest,errCode = %{public}d", errCode.value());
         return { false, nullptr, nullptr, 0 };
     }
     int mode = 0;
@@ -203,7 +204,8 @@ static int RecurMoveDir(const string &srcPath, const string &destPath, const int
     deque<struct ErrFiles> &errfiles)
 {
     filesystem::path dpath(destPath);
-    if (!filesystem::is_directory(dpath)) {
+    std::error_code errCode;
+    if (!filesystem::is_directory(dpath, errCode)) {
         errfiles.emplace_front(srcPath, destPath);
         return ERRNO_NOERR;
     }
