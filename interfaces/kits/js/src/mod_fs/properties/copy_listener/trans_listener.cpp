@@ -23,6 +23,7 @@
 #include "sandbox_helper.h"
 #include "uri.h"
 #include "n_error.h"
+#include "dfs_event_dfx.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -33,6 +34,7 @@ const std::string NETWORK_PARA = "?networkid=";
 const std::string FILE_MANAGER_AUTHORITY = "docs";
 const std::string MEDIA_AUTHORITY = "media";
 const std::string DISTRIBUTED_PATH = "/data/storage/el2/distributedfiles/";
+std::atomic<uint32_t> TransListener::getSequenceId_ = 0;
 
 void TransListener::RmDir(const std::string &path)
 {
@@ -59,10 +61,48 @@ std::string TransListener::CreateDfsCopyPath()
     return random;
 }
 
+NError TransListener::HandleCopyFailure(CopyEvent &copyEvent, const Storage::DistributedFile::HmdfsInfo &info,
+    const std::string &disSandboxPath, const std::string &currentId)
+{
+    if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
+        RmDir(disSandboxPath);
+    }
+    auto it = softbusErr2ErrCodeTable.find(copyEvent.errorCode);
+    if (it == softbusErr2ErrCodeTable.end()) {
+        RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+            RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
+            RadarReporter::SEND_FILE_ERROR, RadarReporter::CONCURRENT_ID, currentId);
+        return NError(EIO);
+    }
+    RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+        RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
+        RadarReporter::SEND_FILE_ERROR, RadarReporter::CONCURRENT_ID, currentId);
+    return NError(it->second);
+}
+
+int TransListener::WaitForCopyResult(TransListener* transListener)
+{
+    if (transListener == nullptr) {
+        HILOGE("transListener is nullptr");
+        return FAILED;
+    }
+    std::unique_lock<std::mutex> lock(transListener->cvMutex_);
+    transListener->cv_.wait(lock, [&transListener]() {
+            return transListener->copyEvent_.copyResult == SUCCESS ||
+                transListener->copyEvent_.copyResult == FAILED;
+    });
+    return transListener->copyEvent_.copyResult;
+}
+
 NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::string &destUri,
     std::shared_ptr<FileInfos> fileInfos, std::shared_ptr<JsCallbackObject> callback)
 {
     HILOGI("CopyFileFromSoftBus begin.");
+    std::string currentId = "CopyFile_" + std::to_string(getpid()) + "_" + std::to_string(getSequenceId_);
+    ++getSequenceId_;
+    RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
+        RadarReporter::BIZ_STATE, RadarReporter::DFX_BEGIN, RadarReporter::PACKAGE_NAME, std::to_string(getpid()),
+        RadarReporter::CONCURRENT_ID, currentId);
     sptr<TransListener> transListener = new (std::nothrow) TransListener();
     if (transListener == nullptr) {
         HILOGE("new trans listener failed");
@@ -77,34 +117,26 @@ NError TransListener::CopyFileFromSoftBus(const std::string &srcUri, const std::
     std::string disSandboxPath;
     auto ret = PrepareCopySession(srcUri, destUri, transListener, info, disSandboxPath);
     if (ret != ERRNO_NOERR) {
-        HILOGE("PrepareCopySession failed, ret = %{public}d.", ret);
+        RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+            RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
+            RadarReporter::PREPARE_COPY_SESSION_ERROR, RadarReporter::CONCURRENT_ID, currentId);
         return NError(EIO);
     }
     if (fileInfos->taskSignal != nullptr) {
         fileInfos->taskSignal->SetFileInfoOfRemoteTask(info.sessionName, fileInfos->srcPath);
     }
-    std::unique_lock<std::mutex> lock(transListener->cvMutex_);
-    transListener->cv_.wait(lock, [&transListener]() {
-            return transListener->copyEvent_.copyResult == SUCCESS ||
-                transListener->copyEvent_.copyResult == FAILED;
-    });
-    HILOGI("dfs PrepareSession Finish, result is %{public}d", transListener->copyEvent_.copyResult);
-    if (transListener->copyEvent_.copyResult == FAILED) {
-        if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
-            RmDir(disSandboxPath);
-        }
-        auto it = softbusErr2ErrCodeTable.find(transListener->copyEvent_.errorCode);
-        if (it == softbusErr2ErrCodeTable.end()) {
-            return NError(EIO);
-        }
-        return NError(it->second);
+    auto copyResult = WaitForCopyResult(transListener);
+    if (copyResult == FAILED) {
+        return HandleCopyFailure(transListener->copyEvent_, info, disSandboxPath, currentId);
     }
     if (info.authority == FILE_MANAGER_AUTHORITY || info.authority == MEDIA_AUTHORITY) {
         HILOGW("Public or media path not copy");
+        RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
+            RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::CONCURRENT_ID, currentId);
         return NError(ERRNO_NOERR);
     }
 
-    ret = CopyToSandBox(srcUri, disSandboxPath, info.sandboxPath);
+    ret = CopyToSandBox(srcUri, disSandboxPath, info.sandboxPath, currentId);
     RmDir(disSandboxPath);
     if (ret != ERRNO_NOERR) {
         HILOGE("CopyToSandBox failed, ret = %{public}d.", ret);
@@ -156,7 +188,7 @@ int32_t TransListener::PrepareCopySession(const std::string &srcUri,
 }
 
 int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::string &disSandboxPath,
-    const std::string &sandboxPath)
+    const std::string &sandboxPath, const std::string &currentId)
 {
     std::error_code errCode;
     if (std::filesystem::exists(sandboxPath) && std::filesystem::is_directory(sandboxPath)) {
@@ -165,6 +197,9 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing, errCode);
         if (errCode.value() != 0) {
             HILOGE("Copy dir failed: errCode: %{public}d", errCode.value());
+            RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+                RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
+                RadarReporter::COPY_TO_SANDBOX_ERROR, RadarReporter::CONCURRENT_ID, currentId);
             return EIO;
         }
     } else {
@@ -180,10 +215,15 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             errCode);
         if (errCode.value() != 0) {
             HILOGE("Copy file failed: errCode: %{public}d", errCode.value());
+            RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+                RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
+                RadarReporter::COPY_TO_SANDBOX_ERROR, RadarReporter::CONCURRENT_ID, currentId);
             return EIO;
         }
     }
     HILOGI("Copy file success.");
+    RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_SUCCESS,
+        RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::CONCURRENT_ID, currentId);
     return ERRNO_NOERR;
 }
 
