@@ -45,9 +45,9 @@ std::shared_ptr<FILE> StreamNExporter::GetFilePtr(StreamEntity *streamEntity)
     return nullptr;
 }
 
-napi_value StreamNExporter::FlushSync(napi_env env, napi_callback_info info)
+napi_value StreamNExporter::FlushSync(napi_env env, napi_callback_info cbInfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
@@ -71,9 +71,9 @@ napi_value StreamNExporter::FlushSync(napi_env env, napi_callback_info info)
     return NVal::CreateUndefined(env).val_;
 }
 
-napi_value StreamNExporter::Flush(napi_env env, napi_callback_info info)
+napi_value StreamNExporter::Flush(napi_env env, napi_callback_info cbInfo)
 {
-    NFuncArg funcArg(env, info);
+    NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ZERO, NARG_CNT::ONE)) {
         HILOGE("Number of arguments unmatched");
         NError(EINVAL).ThrowErr(env);
