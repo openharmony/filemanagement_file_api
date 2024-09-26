@@ -212,7 +212,7 @@ ohos_shared_library("fs") {
 
     include_dirs += [
       "${file_api_path}/interfaces/kits/rust/include",
-      "${filemanagement_service_path}/distributedfiledaemon/include/ipc"
+      "${filemanagement_service_path}/distributedfiledaemon/include/ipc",
     ]
     sources += [
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
