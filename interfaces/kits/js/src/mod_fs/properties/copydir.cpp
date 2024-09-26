@@ -35,10 +35,23 @@ using namespace OHOS::FileManagement::LibN;
 static int RecurCopyDir(const string &srcPath, const string &destPath, const int mode,
     vector<struct ConflictFiles> &errfiles);
 
+static bool EndWithSlash(const string &src)
+{
+    return src.back() == '/';
+}
+
 static bool AllowToCopy(const string &src, const string &dest)
 {
-    if (dest.find(src) == 0 || filesystem::path(src).parent_path() == dest) {
-        HILOGE("Failed to copy file");
+    if (src == dest) {
+        HILOGE("Failed to copy file, the same path");
+        return false;
+    }
+    if (EndWithSlash(src) ? dest.find(src) == 0 : dest.find(src + "/") == 0) {
+        HILOGE("Failed to copy file, dest is under src");
+        return false;
+    }
+    if (filesystem::path(src).parent_path() == dest) {
+        HILOGE("Failed to copy file, src's parent path is dest");
         return false;
     }
     return true;
