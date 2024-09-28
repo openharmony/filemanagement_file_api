@@ -48,13 +48,14 @@ static tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>, int> ParseAndCheckJsO
     const NFuncArg &funcArg)
 {
     auto [resGetFirstArg, src, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
-    if (!resGetFirstArg || !filesystem::is_directory(filesystem::status(src.get()))) {
-        HILOGE("Invalid src");
+    std::error_code errCode;
+    if (!resGetFirstArg || !filesystem::is_directory(filesystem::status(src.get(), errCode))) {
+        HILOGE("Invalid src, errCode = %{public}d", errCode.value());
         return { false, nullptr, nullptr, 0 };
     }
     auto [resGetSecondArg, dest, unused] = NVal(env, funcArg[NARG_POS::SECOND]).ToUTF8StringPath();
-    if (!resGetSecondArg || !filesystem::is_directory(filesystem::status(dest.get()))) {
-        HILOGE("Invalid dest");
+    if (!resGetSecondArg || !filesystem::is_directory(filesystem::status(dest.get(), errCode))) {
+        HILOGE("Invalid dest, errCode = %{public}d", errCode.value());
         return { false, nullptr, nullptr, 0 };
     }
     if (!AllowToCopy(src.get(), dest.get())) {
