@@ -214,8 +214,11 @@ void NAsyncWorkCallback::ThreadSafeSchedule(NContextCBComplete cbComplete)
     work->data = static_cast<void *>(workArgs.get());
 
     int ret = uv_queue_work(
-        loop, work.get(), [](uv_work_t *work) {},
+        loop, work.get(), [](uv_work_t *work) {
+            HILOGI("Enter, %{public}zu", (size_t)work);
+        },
         [](uv_work_t *work, int status) {
+            HILOGI("AsyncWork Enter, %{public}zu", (size_t)work);
             auto workArgs = static_cast<WorkArgs *>(work->data);
             AfterWorkCallback(workArgs->ptr->env_, napi_ok, workArgs->ptr->ctx_, workArgs->cb);
             delete workArgs;
