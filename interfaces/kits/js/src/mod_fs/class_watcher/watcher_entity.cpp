@@ -117,8 +117,12 @@ int FileWatcher::NotifyToWatchNewEvents(const string &fileName, const int &wd, c
 int FileWatcher::CloseNotifyFd()
 {
     int closeRet = ERRNO_NOERR;
+    int fd = notifyFd_;
+
     if (watcherInfoSet_.size() == 0) {
-        closeRet = close(notifyFd_);
+        run_ = false;
+        notifyFd_ = -1;
+        closeRet = close(fd);
         if (closeRet != 0) {
             HILOGE("Failed to stop notify close fd errCode:%{public}d", errno);
         }
@@ -128,7 +132,6 @@ int FileWatcher::CloseNotifyFd()
             HILOGE("Failed to close eventfd errCode:%{public}d", errno);
         }
         eventFd_ = -1;
-        run_ = false;
     }
 
     return closeRet;
