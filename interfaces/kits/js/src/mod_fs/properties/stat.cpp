@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <tuple>
+#include <unistd.h>
 
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
