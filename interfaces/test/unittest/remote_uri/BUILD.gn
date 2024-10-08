@@ -32,6 +32,7 @@ ohos_unittest("remote_uri_test") {
   ]
 
   external_deps = [
+    "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "c_utils:utilsbase",
