@@ -211,9 +211,9 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Open(const char* path, int64_t
             return { ENOMEM, nullptr};
         }
         auto fileUri = FFIData::Create<FileEntity>(std::move(fileEntity->fd_), fileEntity->path_, fileEntity->uri_);
+        delete(fileEntity);
+        fileEntity = nullptr;
         if (!fileUri) {
-            delete(fileEntity);
-            fileEntity = nullptr;
             return {ENOMEM, nullptr};
         }
         return {SUCCESS_CODE, fileUri};
@@ -229,9 +229,9 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Open(const char* path, int64_t
         return { ENOMEM, nullptr};
     }
     auto filePath = FFIData::Create<FileEntity>(std::move(file->fd_), file->path_, file->uri_);
+    delete(file);
+    file = nullptr;
     if (!filePath) {
-        delete(file);
-        file = nullptr;
         return {ENOMEM, nullptr};
     }
     return {SUCCESS_CODE, filePath};
