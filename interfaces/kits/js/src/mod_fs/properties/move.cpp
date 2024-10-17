@@ -37,7 +37,11 @@ using namespace OHOS::FileManagement::LibN;
 #ifdef __MUSL__
 static bool CheckDir(const string &path)
 {
-    if (!filesystem::is_directory(filesystem::status(path))) {
+    std::error_code errCode;
+    if (!filesystem::is_directory(path, errCode)) {
+        if (errCode.value() != 0 && errCode.value() != ERRCODE_NOENT) {
+            HILOGE("Failed to check dir, err: %{public}d", errCode.value());
+        }
         return false;
     }
     return true;
