@@ -72,7 +72,7 @@ bool NClass::SaveClass(napi_env env, string className, napi_value exClass)
 napi_value NClass::InstantiateClass(napi_env env, const string& className, const vector<napi_value>& args)
 {
     NClass &nClass = NClass::GetInstance();
-    lock_guard(nClass.exClassMapLock);
+    lock_guard lock(nClass.exClassMapLock);
     auto it = nClass.exClassMap.find(className);
     if (it == nClass.exClassMap.end()) {
         HILOGE("Class %{public}s hasn't been saved yet", className.c_str());

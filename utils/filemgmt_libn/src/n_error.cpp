@@ -64,9 +64,10 @@ NError::NError() {}
 NError::NError(int errCode)
 {
     int genericCode = ConvertUVCode2ErrCode(errCode);
-    if (errCodeTable.find(genericCode) != errCodeTable.end()) {
-        errno_ = errCodeTable.at(genericCode).first;
-        errMsg_ = errCodeTable.at(genericCode).second;
+    auto it = errCodeTable.find(genericCode);
+    if (it != errCodeTable.end()) {
+        errno_ = it->second.first;
+        errMsg_ = it->second.second;
     } else {
         errno_ = errCodeTable.at(UNKROWN_ERR).first;
         errMsg_ = errCodeTable.at(UNKROWN_ERR).second + ", errno is " + to_string(abs(errCode));
@@ -98,9 +99,10 @@ napi_value NError::GetNapiErr(napi_env env, int errCode)
     }
     int32_t code = 0;
     string msg;
-    if (errCodeTable.find(errCode) != errCodeTable.end()) {
-        code = errCodeTable.at(errCode).first;
-        msg = errCodeTable.at(errCode).second;
+    auto it = errCodeTable.find(errCode);
+    if (it != errCodeTable.end()) {
+        code = it->second.first;
+        msg = it->second.second;
     } else {
         code = errCodeTable.at(UNKROWN_ERR).first;
         msg = errCodeTable.at(UNKROWN_ERR).second;
