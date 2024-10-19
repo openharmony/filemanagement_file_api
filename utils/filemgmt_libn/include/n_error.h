@@ -158,7 +158,9 @@ enum ErrCodeSuffixOfUserFileService {
 enum ErrCodeSuffixOfDistributedFile {
     E_CLOUD_NOT_READY = 1,
     E_NETWORK_ERR,
-    E_BATTERY_WARNING
+    E_BATTERY_WARNING,
+    E_EXCEED_MAX_LIMIT,
+    E_DATABASE_FAILED
 };
 
 enum CommonErrCode {
@@ -408,6 +410,10 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         E_NETWORK_ERR, "Network unavailable" } },
     { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG + E_BATTERY_WARNING, { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG +
         E_BATTERY_WARNING, "Battery level warning" } },
+    { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG + E_EXCEED_MAX_LIMIT, { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG +
+        E_EXCEED_MAX_LIMIT, "Exceed the maximum limit" } },
+    { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG + E_DATABASE_FAILED, { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG +
+        E_DATABASE_FAILED, "Database operation failed" } },
 };
 
 class NError {
