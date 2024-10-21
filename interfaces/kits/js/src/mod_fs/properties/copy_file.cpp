@@ -33,6 +33,33 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
+static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
+{
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    filesystem::path srcPath(string(srcFile.path.get()));
+    filesystem::path dstPath(string(destFile.path.get()));
+    error_code errCode;
+    if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
+        HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
+        return NError(errCode.value());
+    }
+#else
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> copyfile_req = {
+        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!copyfile_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_copyfile(nullptr, copyfile_req.get(), srcFile.path.get(), destFile.path.get(),
+                             UV_FS_COPYFILE_FICLONE, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to copy file when all parameters are paths");
+        return NError(ret);
+    }
+#endif
+    return NError(ERRNO_NOERR);
+}
+
 static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& statbf)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendfile_req = {
@@ -202,10 +229,18 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto err = OpenFile(src, dest);
-    if (err) {
-        err.ThrowErr(env);
-        return nullptr;
+    if (src.isPath && dest.isPath) {
+        auto err = IsAllPath(src, dest);
+        if (err) {
+            err.ThrowErr(env);
+            return nullptr;
+        }
+    } else {
+        auto err = OpenFile(src, dest);
+        if (err) {
+            err.ThrowErr(env);
+            return nullptr;
+        }
     }
     return NVal::CreateUndefined(env).val_;
 }
@@ -241,6 +276,9 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [para]() -> NError {
+        if (para->src_.isPath && para->dest_.isPath) {
+            return IsAllPath(para->src_, para->dest_);
+        }
         return OpenFile(para->src_, para->dest_);
     };
 
