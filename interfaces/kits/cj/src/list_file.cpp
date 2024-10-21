@@ -267,7 +267,7 @@ static char** VectorToCArrString(vector<string> &vec)
             break;
         }
         if (strcpy_s(result[i], vec[i].length() + 1, vec[i].c_str()) != 0) {
-            free(result[i]);
+            delete[] result[i];
             result[i] = nullptr;
             break;
         }
@@ -275,7 +275,7 @@ static char** VectorToCArrString(vector<string> &vec)
     }
     if (temp != vec.size()) {
         for (size_t j = temp; j > 0; j--) {
-            free(result[j - 1]);
+            delete[] result[j - 1];
             result[j - 1] = nullptr;
         }
         delete[] result;
