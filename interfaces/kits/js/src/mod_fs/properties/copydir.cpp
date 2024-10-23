@@ -165,6 +165,10 @@ static int RecurCopyDir(const string &srcPath, const string &destPath, const int
         return ENOMEM;
     }
     int num = scandir(srcPath.c_str(), &(pNameList->namelist), FilterFunc, alphasort);
+    if (num < 0) {
+        HILOGE("scandir fail errno is %{public}d", errno);
+        return errno;
+    }
     pNameList->direntNum = num;
 
     for (int i = 0; i < num; i++) {

@@ -75,13 +75,19 @@ tuple<bool, unique_ptr<char[]>, size_t> NVal::ToUTF8String() const
     if (status != napi_ok) {
         return { false, nullptr, 0 };
     }
-
+    if (strLen == std::numeric_limits<size_t>::max()) {
+        HILOGE("string is too long");
+        return { false, nullptr, 0 };
+    }
     size_t bufLen = strLen + 1;
     auto str = CreateUniquePtr<char[]>(bufLen);
     if (str == nullptr) {
         return { false, nullptr, 0 };
     }
     status = napi_get_value_string_utf8(env_, val_, str.get(), bufLen, &strLen);
+    if (str == nullptr) {
+        return { false, nullptr, 0 };
+    }
     return make_tuple(status == napi_ok, move(str), strLen);
 }
 

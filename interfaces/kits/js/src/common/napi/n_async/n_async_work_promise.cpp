@@ -22,7 +22,7 @@ using namespace std;
 
 NAsyncWorkPromise::NAsyncWorkPromise(napi_env env, NVal thisPtr) : NAsyncWorkFactory(env)
 {
-    ctx_ = new NAsyncContextPromise(thisPtr);
+    ctx_ = new(std::nothrow) NAsyncContextPromise(thisPtr);
 }
 
 static void PromiseOnExec(napi_env env, void *data)
@@ -63,6 +63,10 @@ static void PromiseOnComplete(napi_env env, napi_status status, void *data)
 
 NVal NAsyncWorkPromise::Schedule(string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete)
 {
+    if (ctx_ == nullptr) {
+        HILOGE("ctx is nullptr");
+        return NVal();
+    }
     ctx_->cbExec_ = move(cbExec);
     ctx_->cbComplete_ = move(cbComplete);
 
