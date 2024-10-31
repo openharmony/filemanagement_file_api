@@ -28,7 +28,7 @@ public:
 };
 
 struct AsyncFdopenStreamArg {
-    std::unique_ptr<FILE, decltype(&fclose)> fp = { nullptr, fclose };
+    std::shared_ptr<FILE> fp{ nullptr };
 };
 
 const std::string PROCEDURE_FDOPENSTREAM_NAME = "FileIOFdopenStream";
