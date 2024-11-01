@@ -326,7 +326,16 @@ const char* FileEntity::GetPath(int64_t id)
 
 const char* FileEntity::GetName(int64_t id)
 {
-    string path = FileEntity::GetPath(id);
+    auto fileEntity = FFIData::GetData<FileEntity>(id);
+    if (!fileEntity) {
+        LOGE("FileEntity instance not exist %{public}" PRId64, id);
+        return nullptr;
+    }
+    auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
+    if (realPathRes != ERRNO_NOERR) {
+        return nullptr;
+    }
+    string path(static_cast<const char *>(realPath->ptr));
     auto pos = path.find_last_of('/');
     if (pos == string::npos) {
         LOGE("Failed to split filename from path");
@@ -339,6 +348,7 @@ const char* FileEntity::GetName(int64_t id)
     }
     if (strcpy_s(value, name.size() + 1, name.c_str()) != 0) {
         free(value);
+        value = nullptr;
         return nullptr;
     }
     return value;
