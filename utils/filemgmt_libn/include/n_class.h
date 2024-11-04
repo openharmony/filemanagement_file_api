@@ -43,8 +43,9 @@ public:
 
     template <class T> static T *GetEntityOf(napi_env env, napi_value objStat)
     {
-        if (!env || !objStat) {
-            HILOGE("Empty input: env %d, obj %d", env == nullptr, objStat == nullptr);
+        std::lock_guard<std::mutex> lock(wrapLock);
+        if (!env || !objStat || wrapRelease) {
+            HILOGE("Empty input: env %d %d, obj %d", env == nullptr, wrapRelease, objStat == nullptr);
             return nullptr;
         }
         T *t = nullptr;
@@ -58,6 +59,7 @@ public:
 
     template <class T> static bool SetEntityFor(napi_env env, napi_value obj, std::unique_ptr<T> entity)
     {
+        std::lock_guard<std::mutex> lock(wrapLock);
         napi_status status = napi_wrap(
             env, obj, entity.release(),
             [](napi_env env, void *data, void *hint) {
@@ -69,6 +71,7 @@ public:
 
     template <class T> static T *RemoveEntityOfFinal(napi_env env, napi_value objStat)
     {
+        std::lock_guard<std::mutex> lock(wrapLock);
         if (!env || !objStat) {
             HILOGD("Empty input: env %d,obj %d", env == nullptr, objStat == nullptr);
             return nullptr;
@@ -88,7 +91,9 @@ private:
     static NClass &GetInstance();
     std::map<std::string, napi_ref> exClassMap;
     std::mutex exClassMapLock;
+    static std::mutex wrapLock;
     bool addCleanHook;
+    static bool wrapRelease;
 };
 } // namespace LibN
 } // namespace FileManagement
