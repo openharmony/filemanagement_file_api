@@ -38,7 +38,7 @@ std::atomic<uint32_t> TransListener::getSequenceId_ = 0;
 
 void TransListener::RmDir(const std::string &path)
 {
-    HILOGI("RmDirm path : %{public}s", path.c_str());
+    HILOGD("RmDirm path : %{private}s", path.c_str());
     std::filesystem::path pathName(path);
     std::error_code errCode;
     if (std::filesystem::exists(pathName, errCode)) {
