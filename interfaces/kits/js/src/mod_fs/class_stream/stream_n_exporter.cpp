@@ -45,6 +45,16 @@ std::shared_ptr<FILE> StreamNExporter::GetFilePtr(StreamEntity *streamEntity)
     return nullptr;
 }
 
+StreamEntity* StreamNExporter::GetEntityOf(napi_env env, NFuncArg &funcArg)
+{
+    NClass &nClass = NClass::GetInstance();
+    lock_guard<std::mutex>(nClass.wrapLock);
+    if (nClass.wrapReleased) {
+        return nullptr;
+    }
+    return NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+}
+
 napi_value StreamNExporter::FlushSync(napi_env env, napi_callback_info cbInfo)
 {
     NFuncArg funcArg(env, cbInfo);
@@ -54,7 +64,11 @@ napi_value StreamNExporter::FlushSync(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    auto streamEntity = GetEntityOf(env, funcArg);
+    if (streamEntity == nullptr) {
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
     auto fp = GetFilePtr(streamEntity);
     if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
@@ -80,7 +94,11 @@ napi_value StreamNExporter::Flush(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    auto streamEntity = GetEntityOf(env, funcArg);
+    if (streamEntity == nullptr) {
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
     auto fp = GetFilePtr(streamEntity);
     if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
@@ -126,8 +144,11 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
-
+    auto streamEntity = GetEntityOf(env, funcArg);
+    if (streamEntity == nullptr) {
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
     auto fp = GetFilePtr(streamEntity);
     if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
@@ -191,7 +212,11 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    auto streamEntity = GetEntityOf(env, funcArg);
+    if (streamEntity == nullptr) {
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
     auto fp = GetFilePtr(streamEntity);
     if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
@@ -285,7 +310,11 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    auto streamEntity = GetEntityOf(env, funcArg);
+    if (streamEntity == nullptr) {
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
     auto fp = GetFilePtr(streamEntity);
     if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
@@ -359,7 +388,11 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    auto streamEntity = GetEntityOf(env, funcArg);
+    if (streamEntity == nullptr) {
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
     auto fp = GetFilePtr(streamEntity);
     if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
@@ -422,7 +455,11 @@ napi_value StreamNExporter::Seek(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
 
-    auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
+    auto streamEntity = GetEntityOf(env, funcArg);
+    if (streamEntity == nullptr) {
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
     auto fp = GetFilePtr(streamEntity);
     if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
