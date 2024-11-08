@@ -47,6 +47,7 @@ public:
     static napi_value Flush(napi_env env, napi_callback_info cbInfo);
 
     static std::shared_ptr<FILE> GetFilePtr(StreamEntity *streamEntity);
+    static StreamEntity *GetEntityOf(napi_env env, NFuncArg &funcArg);
 
     StreamNExporter(napi_env env, napi_value exports);
     ~StreamNExporter() override;

@@ -40,6 +40,9 @@ public:
     static bool SaveClass(napi_env env, std::string className, napi_value exClass);
     static void CleanClass(void *arg);
     static napi_value InstantiateClass(napi_env env, const std::string& className, const std::vector<napi_value>& args);
+    static NClass &GetInstance();
+    std::mutex wrapLock;
+    bool wrapReleased;
 
     template <class T> static T *GetEntityOf(napi_env env, napi_value objStat)
     {
@@ -83,9 +86,8 @@ public:
     }
 
 private:
-    NClass() : addCleanHook(false) {};
+    NClass() : wrapReleased(false), addCleanHook(false) {};
     ~NClass() = default;
-    static NClass &GetInstance();
     std::map<std::string, napi_ref> exClassMap;
     std::mutex exClassMapLock;
     bool addCleanHook;
