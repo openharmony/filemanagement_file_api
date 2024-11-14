@@ -75,7 +75,10 @@ void NClass::CleanClass(void *arg)
     napi_env env = reinterpret_cast<napi_env>(arg);
     NClass &nClass = NClass::GetInstance();
     lock_guard<std::mutex>(nClass.exClassMapLock);
-
+    {
+        lock_guard<std::mutex>(nClass.wrapLock);
+        nClass.wrapReleased = true;
+    }
     napi_status res;
     for (auto it = nClass.exClassMap.begin(); it != nClass.exClassMap.end(); ++it) {
         res = napi_delete_reference(env, it->second);
