@@ -341,6 +341,9 @@ static void Deleter(struct NameList *arg)
         (arg->namelist)[i] = nullptr;
     }
     free(arg->namelist);
+    arg->namelist = nullptr;
+    delete arg;
+    arg = nullptr;
 }
 
 std::string Copy::GetRealPath(const std::string& path)

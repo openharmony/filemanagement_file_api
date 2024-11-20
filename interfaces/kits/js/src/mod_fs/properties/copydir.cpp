@@ -106,6 +106,9 @@ static void Deleter(struct NameList *arg)
         (arg->namelist)[i] = nullptr;
     }
     free(arg->namelist);
+    arg->namelist = nullptr;
+    delete arg;
+    arg = nullptr;
 }
 
 static int CopyFile(const string &src, const string &dest, const int mode)
