@@ -79,13 +79,14 @@ void InitWhenceType(napi_env env, napi_value exports);
 
 struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);
-    static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf);
+    static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf, bool async = false);
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf, std::shared_ptr<FileInfo> fileInfo);
+    static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf, std::shared_ptr<FileInfo> fileInfo,
+                                      bool async = false);
 #endif
 #ifndef WIN_PLATFORM
     static LibN::NVal InstantiateFile(napi_env env, int fd, const std::string &pathOrUri, bool isUri);
-    static LibN::NVal InstantiateStream(napi_env env, std::shared_ptr<FILE> fp);
+    static LibN::NVal InstantiateStream(napi_env env, std::shared_ptr<FILE> fp, bool async = false);
 #endif
     static std::tuple<bool, void *, size_t, int64_t> GetReadArg(napi_env env,
                                                                        napi_value readBuf,
