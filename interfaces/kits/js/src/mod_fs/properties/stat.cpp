@@ -151,9 +151,9 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
             return { env, err.GetNapiErr(env) };
         }
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-        return CommonFunc::InstantiateStat(env, arg->stat_, arg->fileInfo_);
+        return CommonFunc::InstantiateStat(env, arg->stat_, arg->fileInfo_, true);
 #else
-        return CommonFunc::InstantiateStat(env, arg->stat_);
+        return CommonFunc::InstantiateStat(env, arg->stat_, true);
 #endif
     };
 
