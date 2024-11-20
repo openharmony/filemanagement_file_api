@@ -62,10 +62,13 @@ static int GetFileSize(const string &path, int64_t &offset)
     return ERRNO_NOERR;
 }
 
-static NVal InstantiateReaderIterator(napi_env env, void *iterator, int64_t offset)
+static NVal InstantiateReaderIterator(napi_env env, void *iterator, int64_t offset, bool async = false)
 {
     if (iterator == nullptr) {
         HILOGE("Invalid argument iterator");
+        if (async) {
+            return {env, NError(EINVAL).GetNapiErr(env)};
+        }
         NError(EINVAL).ThrowErr(env);
         return NVal();
     }
@@ -73,6 +76,9 @@ static NVal InstantiateReaderIterator(napi_env env, void *iterator, int64_t offs
     napi_value objReaderIterator = NClass::InstantiateClass(env, ReaderIteratorNExporter::className_, {});
     if (!objReaderIterator) {
         HILOGE("Failed to instantiate class ReaderIterator");
+        if (async) {
+            return {env, NError(UNKROWN_ERR).GetNapiErr(env)};
+        }
         NError(UNKROWN_ERR).ThrowErr(env);
         return NVal();
     }
@@ -80,6 +86,9 @@ static NVal InstantiateReaderIterator(napi_env env, void *iterator, int64_t offs
     auto readerIteratorEntity = NClass::GetEntityOf<ReaderIteratorEntity>(env, objReaderIterator);
     if (!readerIteratorEntity) {
         HILOGE("Failed to get readerIteratorEntity");
+        if (async) {
+            return {env, NError(UNKROWN_ERR).GetNapiErr(env)};
+        }
         NError(UNKROWN_ERR).ThrowErr(env);
         return NVal();
     }
@@ -149,7 +158,7 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return InstantiateReaderIterator(env, arg->iterator, arg->offset);
+        return InstantiateReaderIterator(env, arg->iterator, arg->offset, true);
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
