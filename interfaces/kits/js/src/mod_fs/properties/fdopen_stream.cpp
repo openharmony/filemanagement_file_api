@@ -105,7 +105,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return CommonFunc::InstantiateStream(env, move(arg->fp));
+        return CommonFunc::InstantiateStream(env, move(arg->fp), true);
     };
 
     NVal thisVar(env, funcArg.GetThisVar());

@@ -83,33 +83,42 @@ static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcAr
     return { true, flags };
 }
 
-static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri)
+static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri, bool async = false)
 {
     napi_value objFile = NClass::InstantiateClass(env, FileNExporter::className_, {});
     if (!objFile) {
         HILOGE("Failed to instantiate class");
-        NError(EIO).ThrowErr(env);
         int ret = close(fd);
         if (ret < 0) {
             HILOGE("Failed to close fd");
         }
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
+        NError(EIO).ThrowErr(env);
         return NVal();
     }
 
     auto fileEntity = NClass::GetEntityOf<FileEntity>(env, objFile);
     if (!fileEntity) {
         HILOGE("Failed to get fileEntity");
-        NError(EIO).ThrowErr(env);
         int ret = close(fd);
         if (ret < 0) {
             HILOGE("Failed to close fd");
         }
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
+        NError(EIO).ThrowErr(env);
         return NVal();
     }
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
         close(fd);
+        if (async) {
+            return {env, NError(ENOMEM).GetNapiErr(env)};
+        }
         NError(ENOMEM).ThrowErr(env);
         return NVal();
     }
@@ -327,9 +336,9 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             return { env, err.GetNapiErr(env) };
         }
         if (arg->path.empty() && arg->uri.size()) {
-            return InstantiateFile(env, arg->fd, arg->uri, true);
+            return InstantiateFile(env, arg->fd, arg->uri, true, true);
         }
-        return InstantiateFile(env, arg->fd, arg->path, false);
+        return InstantiateFile(env, arg->fd, arg->path, false, true);
     };
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
