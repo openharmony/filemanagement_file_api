@@ -94,8 +94,9 @@ bool RemoteUri::IsRemoteUri(const string& path, int &fd, const int& flags)
     if (fragment == REMOTE_URI_TAG) {
         string fdStr = path.substr(posFd + 1);
         if (IsAllDigits(fdStr)) {
-            if (fdStr.size() >= DIGIT_LENGTH_LIMIT)
+            if (fdStr.size() > DIGIT_LENGTH_LIMIT){
                 return false;
+            }
             fd = stoi(fdStr.c_str());
             if (fd < 0 || flags != O_RDONLY) {
                 fd = -1;
