@@ -51,6 +51,7 @@ const std::string NETWORK_PARA = "?networkid=";
 const string PROCEDURE_COPY_NAME = "FileFSCopy";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
 const std::string MEDIA = "media";
+const int SLEEP_TIME = 100000;
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
@@ -785,6 +786,9 @@ void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
         } else {
             infos->exceptionCode = errno;
             return;
+        }
+        if (usleep(SLEEP_TIME) != 0) {
+            HILOGE("GetNotifyEvent sleep failed.");
         }
     }
 }
