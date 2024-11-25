@@ -38,7 +38,7 @@ const string ZERO_FD = "0";
 const string MEDIA = "/media/";
 const string PATH_SYMBOL = "/";
 const int MAX_URI_SIZE  = 128;
-const int DIGIT_LENGTH_LIMIT = 10;
+const int DIGIT_LENGTH_LIMIT = 9;
 class RemoteUri : public OHOS::Uri {
     static set<int>fdFromBinder;
     static void RemoveFd(int fd);
