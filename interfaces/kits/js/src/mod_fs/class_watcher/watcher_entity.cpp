@@ -117,12 +117,9 @@ int FileWatcher::NotifyToWatchNewEvents(const string &fileName, const int &wd, c
 int FileWatcher::CloseNotifyFd()
 {
     int closeRet = ERRNO_NOERR;
-    int fd = notifyFd_;
-
     if (watcherInfoSet_.size() == 0) {
         run_ = false;
-        notifyFd_ = -1;
-        closeRet = close(fd);
+        closeRet = close(notifyFd_);
         if (closeRet != 0) {
             HILOGE("Failed to stop notify close fd errCode:%{public}d", errno);
         }
@@ -134,7 +131,21 @@ int FileWatcher::CloseNotifyFd()
         eventFd_ = -1;
     }
 
+    closed_ = false;
     return closeRet;
+}
+
+int FileWatcher::CloseNotifyFdLocked()
+{
+    {
+        lock_guard<mutex> lock(readMutex_);
+        closed_ = true;
+        if (reading_) {
+            HILOGE("close while reading");
+            return ERRNO_NOERR;
+        }
+    }
+    return CloseNotifyFd();
 }
 
 int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
@@ -157,12 +168,12 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
         if (access(arg->fileName.c_str(), F_OK) == 0) {
             HILOGE("Failed to stop notify errCode:%{public}d", rmErr);
             wdFileNameMap_.erase(arg->fileName);
-            CloseNotifyFd();
+            CloseNotifyFdLocked();
             return rmErr;
         }
     }
     wdFileNameMap_.erase(arg->fileName);
-    return CloseNotifyFd();
+    return CloseNotifyFdLocked();
 }
 
 void FileWatcher::ReadNotifyEvent(WatcherCallback callback)
@@ -176,6 +187,28 @@ void FileWatcher::ReadNotifyEvent(WatcherCallback callback)
         event = reinterpret_cast<inotify_event *>(buf + index);
         NotifyEvent(event, callback);
         index += sizeof(struct inotify_event) + static_cast<int>(event->len);
+    }
+}
+
+void FileWatcher::ReadNotifyEventLocked(WatcherCallback callback)
+{
+    {
+        lock_guard<mutex> lock(readMutex_);
+        if (closed_) {
+            HILOGE("read after close");
+            return;
+        }
+        reading_ = true;
+    }
+    ReadNotifyEvent(callback);
+    {
+        lock_guard<mutex> lock(readMutex_);
+        reading_ = false;
+        if (closed_) {
+            HILOGE("close after read");
+            CloseNotifyFd();
+            return;
+        }
     }
 }
 
@@ -200,7 +233,7 @@ void FileWatcher::GetNotifyEvent(WatcherCallback callback)
                 return;
             }
             if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
-                ReadNotifyEvent(callback);
+                ReadNotifyEventLocked(callback);
             }
         } else if (ret < 0 && errno == EINTR) {
             continue;
