@@ -690,8 +690,22 @@ std::shared_ptr<JsCallbackObject> Copy::GetRegisteredListener(std::shared_ptr<Fi
 void Copy::CloseNotifyFd(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
     callback->CloseFd();
+    callback->closed = false;
     infos->eventFd = -1;
     infos->notifyFd = -1;
+}
+
+void Copy::CloseNotifyFdLocked(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
+{
+    {
+        lock_guard<mutex> lock(callback->readMutex);
+        callback->closed = true;
+        if (callback->reading) {
+            HILOGE("close while reading");
+            return;
+        }
+    }
+    CloseNotifyFd(infos, callback);
 }
 
 tuple<bool, int, bool> Copy::HandleProgress(
@@ -756,6 +770,28 @@ void Copy::ReadNotifyEvent(std::shared_ptr<FileInfos> infos)
     }
 }
 
+void Copy::ReadNotifyEventLocked(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
+{
+    {
+        std::lock_guard<std::mutex> lock(callback->readMutex);
+        if (callback->closed) {
+            HILOGE("read after close");
+            return;
+        }
+        callback->reading = true;
+    }
+    ReadNotifyEvent(infos);
+    {
+        std::lock_guard<std::mutex> lock(callback->readMutex);
+        callback->reading = false;
+        if (callback->closed) {
+            HILOGE("close after read");
+            CloseNotifyFd(infos, callback);
+            return;
+        }
+    }
+}
+
 void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
 {
     auto callback = GetRegisteredListener(infos);
@@ -778,7 +814,7 @@ void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
                 return;
             }
             if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
-                ReadNotifyEvent(infos);
+                ReadNotifyEventLocked(infos, callback);
             }
         } else if (ret < 0 && errno == EINTR) {
             continue;

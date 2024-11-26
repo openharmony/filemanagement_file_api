@@ -52,6 +52,9 @@ struct JsCallbackObject {
     uint64_t maxProgressSize = 0;
     int32_t errorCode = 0;
     std::thread notifyHandler;
+    std::mutex readMutex;
+    bool reading = false;
+    bool closed = false;
     explicit JsCallbackObject(napi_env env, LibN::NVal jsVal) : env(env), nRef(jsVal) {}
 
     void CloseFd()
@@ -138,6 +141,7 @@ private:
     static void CopyComplete(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static void WaitNotifyFinished(std::shared_ptr<JsCallbackObject> callback);
     static void ReadNotifyEvent(std::shared_ptr<FileInfos> infos);
+    static void ReadNotifyEventLocked(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static int SubscribeLocalListener(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static std::shared_ptr<JsCallbackObject> RegisterListener(napi_env env, const std::shared_ptr<FileInfos> &infos);
     static void OnFileReceive(std::shared_ptr<FileInfos> infos);
@@ -147,6 +151,7 @@ private:
     static void ReceiveComplete(uv_work_t *work, int stat);
     static std::shared_ptr<JsCallbackObject> GetRegisteredListener(std::shared_ptr<FileInfos> infos);
     static void CloseNotifyFd(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
+    static void CloseNotifyFdLocked(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
 
     // operator of file
     static int RecurCopyDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfos> infos);

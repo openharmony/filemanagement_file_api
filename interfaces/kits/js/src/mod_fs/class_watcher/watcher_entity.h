@@ -57,6 +57,7 @@ public:
     int StopNotify(std::shared_ptr<WatcherInfoArg> arg);
     void GetNotifyEvent(WatcherCallback callback);
     void ReadNotifyEvent(WatcherCallback callback);
+    void ReadNotifyEventLocked(WatcherCallback callback);
     bool AddWatcherInfo(const std::string &fileName, std::shared_ptr<WatcherInfoArg> arg);
     bool CheckEventValid(const uint32_t &event);
 private:
@@ -64,11 +65,15 @@ private:
     std::tuple<bool, int> CheckEventWatched(const std::string &fileName, const uint32_t &event);
     void NotifyEvent(const struct inotify_event *event, WatcherCallback callback);
     int CloseNotifyFd();
+    int CloseNotifyFdLocked();
     int NotifyToWatchNewEvents(const std::string &fileName, const int &wd, const uint32_t &watchEvents);
 
 private:
     static std::mutex watchMutex_;
+    std::mutex readMutex_;
     bool run_ = false;
+    bool reading_ = false;
+    bool closed_ = false;
     int32_t notifyFd_ = -1;
     int32_t eventFd_ = -1;
     std::unordered_set<std::shared_ptr<WatcherInfoArg>> watcherInfoSet_;
