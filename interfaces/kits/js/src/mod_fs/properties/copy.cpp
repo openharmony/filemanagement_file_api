@@ -40,6 +40,7 @@
 #include "ipc_skeleton.h"
 #include "system_ability_definition.h"
 #include "trans_listener.h"
+#include "utils_log.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -251,7 +252,7 @@ int Copy::CheckOrCreatePath(const std::string &destPath)
 
 int Copy::CopyFile(const string &src, const string &dest, std::shared_ptr<FileInfos> infos)
 {
-    HILOGD("src = %{private}s, dest = %{private}s", src.c_str(), dest.c_str());
+    HILOGD("src = %{public}s, dest = %{public}s", GetAnonyString(src).c_str(), GetAnonyString(dest).c_str());
     int32_t srcFd = -1;
     int32_t ret = OpenSrcFile(src, infos, srcFd);
     if (srcFd < 0) {
@@ -315,7 +316,8 @@ int Copy::CopySubDir(const string &srcPath, const string &destPath, std::shared_
             }
             receiveInfo->path = destPath;
             if (iter == Copy::jsCbMap_.end() || iter->second == nullptr) {
-                HILOGE("Failed to find infos, key does not exist or value is null");
+                HILOGE("Failed to find infos, srcPath = %{public}s, destPath = %{public}s",
+                    GetAnonyString(infos->srcPath).c_str(), GetAnonyString(infos->destPath).c_str());
                 return UNKROWN_ERR;
             }
             iter->second->wds.push_back({ newWd, receiveInfo });
@@ -426,7 +428,8 @@ int Copy::RecurCopyDir(const string &srcPath, const string &destPath, std::share
 
 int Copy::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<FileInfos> infos)
 {
-    HILOGD("CopyDirFunc in, src = %{private}s, dest = %{private}s", src.c_str(), dest.c_str());
+    HILOGD("CopyDirFunc in, src = %{public}s, dest = %{public}s", GetAnonyString(src).c_str(),
+        GetAnonyString(dest).c_str());
     size_t found = dest.find(src);
     if (found != std::string::npos && found == 0) {
         return EINVAL;

@@ -257,6 +257,7 @@ ohos_shared_library("fs") {
       "data_share:datashare_common",
       "data_share:datashare_consumer",
       "dfs_service:distributed_file_daemon_kit_inner",
+      "dfs_service:libdistributedfileutils",
       "hisysevent:libhisysevent",
       "hitrace:hitrace_meter",
       "ipc:ipc_core",

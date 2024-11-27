@@ -24,6 +24,7 @@
 #include "uri.h"
 #include "n_error.h"
 #include "dfs_event_dfx.h"
+#include "utils_log.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -38,7 +39,7 @@ std::atomic<uint32_t> TransListener::getSequenceId_ = 0;
 
 void TransListener::RmDir(const std::string &path)
 {
-    HILOGD("RmDirm path : %{private}s", path.c_str());
+    HILOGI("RmDirm path : %{public}s", GetAnonyString(path).c_str());
     std::filesystem::path pathName(path);
     std::error_code errCode;
     if (std::filesystem::exists(pathName, errCode)) {
