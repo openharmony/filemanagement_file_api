@@ -339,8 +339,11 @@ int32_t TransListener::OnFinished(const std::string &sessionName)
         std::lock_guard<std::mutex> lock(callbackMutex_);
         callback_ = nullptr;
     }
-    copyEvent_.copyResult = SUCCESS;
-    cv_.notify_all();
+    {
+        std::lock_guard<std::mutex> lock(cvMutex_);
+        copyEvent_.copyResult = SUCCESS;
+        cv_.notify_all();
+    }
     return ERRNO_NOERR;
 }
 
@@ -351,9 +354,12 @@ int32_t TransListener::OnFailed(const std::string &sessionName, int32_t errorCod
         std::lock_guard<std::mutex> lock(callbackMutex_);
         callback_ = nullptr;
     }
-    copyEvent_.copyResult = FAILED;
-    copyEvent_.errorCode = errorCode;
-    cv_.notify_all();
+    {
+        std::lock_guard<std::mutex> lock(cvMutex_);
+        copyEvent_.copyResult = FAILED;
+        copyEvent_.errorCode = errorCode;
+        cv_.notify_all();
+    }
     return ERRNO_NOERR;
 }
 } // namespace ModuleFileIO
