@@ -28,6 +28,7 @@ public:
     NVal Schedule(std::string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete) final;
     void ThreadSafeSchedule(NContextCBComplete cbComplete);
     explicit operator bool() const;
+    void CleanRef();
 
 private:
     NAsyncContextCallback *ctx_ = nullptr;
