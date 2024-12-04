@@ -141,6 +141,10 @@ class WriteStream extends stream.Writable {
         this.stream?.close();
     }
 
+    closeSync(): void {
+        this.stream?.closeSync();
+    }
+
     doInitialize(callback: Function): void {
         callback();
     }

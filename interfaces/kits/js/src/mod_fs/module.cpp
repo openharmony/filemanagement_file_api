@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "class_file/file_n_exporter.h"
 #include "class_stat/stat_n_exporter.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include "class_atomicfile/atomicfile_n_exporter.h"
 #include "class_randomaccessfile/randomaccessfile_n_exporter.h"
 #include "class_readeriterator/readeriterator_n_exporter.h"
 #include "class_stream/stream_n_exporter.h"
@@ -45,6 +46,7 @@ static napi_value Export(napi_env env, napi_value exports)
     products.emplace_back(make_unique<FileNExporter>(env, exports));
     products.emplace_back(make_unique<StatNExporter>(env, exports));
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    products.emplace_back(make_unique<AtomicFileNExporter>(env, exports));
     products.emplace_back(make_unique<RandomAccessFileNExporter>(env, exports));
     products.emplace_back(make_unique<ReaderIteratorNExporter>(env, exports));
     products.emplace_back(make_unique<StreamNExporter>(env, exports));
