@@ -27,6 +27,19 @@ namespace FileManagement {
 namespace LibN {
 using namespace std;
 
+void NAsyncWorkCallback::CleanRef()
+{
+    if (!ctx_) {
+        HILOGE("NAsyncWorkCallback ctx is nullptr");
+        return;
+    }
+    if (!bool(ctx_->cb_)) {
+        HILOGE("NAsyncWorkCallback ref is nullptr");
+        return;
+    }
+    ctx_->cb_.DeleteJsEnv();
+}
+
 NAsyncWorkCallback::NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb) : NAsyncWork(env)
 {
     ctx_ = new(std::nothrow) NAsyncContextCallback(thisPtr, cb);
@@ -109,6 +122,11 @@ static void CallbackComplete(napi_env env, napi_status status, void *data)
 
     napi_value global = nullptr;
     napi_value callback = ctx->cb_.Deref(env).val_;
+    if (!bool(ctx->cb_)) {
+        HILOGE("failed to get ref.");
+        return;
+    }
+    
     napi_value tmp = nullptr;
     napi_get_global(env, &global);
     napi_status stat = napi_call_function(env, global, callback, argv.size(), argv.data(), &tmp);
