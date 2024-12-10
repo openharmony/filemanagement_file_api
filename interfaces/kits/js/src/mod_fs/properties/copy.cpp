@@ -493,14 +493,14 @@ int Copy::SubscribeLocalListener(std::shared_ptr<FileInfos> infos,
         auto errCode = errno;
         HILOGE("Failed to add watch, errno = %{public}d, notifyFd: %{public}d, destPath: %{public}s", errno,
                infos->notifyFd, infos->destPath.c_str());
-        CloseNotifyFd(infos, callback);
+        CloseNotifyFdLocked(infos, callback);
         return errCode;
     }
     auto receiveInfo = CreateSharedPtr<ReceiveInfo>();
     if (receiveInfo == nullptr) {
         HILOGE("Failed to request heap memory.");
         inotify_rm_watch(infos->notifyFd, newWd);
-        CloseNotifyFd(infos, callback);
+        CloseNotifyFdLocked(infos, callback);
         return ENOMEM;
     }
     receiveInfo->path = infos->destPath;
@@ -962,7 +962,7 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
             return ret;
         }
         auto result = Copy::ExecLocal(infos, callback);
-        CloseNotifyFd(infos, callback);
+        CloseNotifyFdLocked(infos, callback);
         infos->run = false;
         WaitNotifyFinished(callback);
         if (result != ERRNO_NOERR) {
