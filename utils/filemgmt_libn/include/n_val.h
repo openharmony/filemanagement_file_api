@@ -64,6 +64,7 @@ public:
     /* Static helpers to create js objects */
     static NVal CreateUndefined(napi_env env);
     static NVal CreateBigInt64(napi_env env, int64_t val);
+    static NVal CreateBigIntUint64(napi_env env, int64_t val);
     static NVal CreateInt64(napi_env env, int64_t val);
     static NVal CreateInt32(napi_env env, int32_t val);
     static NVal CreateUint32(napi_env env, int32_t val);
