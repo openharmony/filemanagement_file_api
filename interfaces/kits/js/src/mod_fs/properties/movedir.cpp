@@ -41,7 +41,7 @@ static tuple<bool, bool> JudgeExistAndEmpty(const string &path)
     std::error_code errCode;
     filesystem::path pathName(path);
     if (filesystem::exists(pathName, errCode)) {
-        if (filesystem::is_empty(pathName)) {
+        if (filesystem::is_empty(pathName, errCode)) {
             return { true, true };
         }
         return { true, false };
