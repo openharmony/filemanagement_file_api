@@ -229,6 +229,69 @@ napi_value StatNExporter::GetCtime(napi_env env, napi_callback_info info)
     return NVal::CreateInt64(env, static_cast<int64_t>(statEntity->stat_.st_ctim.tv_sec)).val_;
 }
 
+napi_value StatNExporter::GetAtimeNs(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
+    if (!statEntity) {
+        HILOGE("Failed to get stat entity");
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
+
+    return NVal::CreateBigIntUint64(env, static_cast<uint64_t>
+        (statEntity->stat_.st_atim.tv_sec * SECOND_TO_NANOSECOND +
+         statEntity->stat_.st_atim.tv_nsec)).val_;
+}
+
+napi_value StatNExporter::GetMtimeNs(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
+    if (!statEntity) {
+        HILOGE("Failed to get stat entity");
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
+
+    return NVal::CreateBigIntUint64(env, static_cast<uint64_t>
+        (statEntity->stat_.st_mtim.tv_sec * SECOND_TO_NANOSECOND +
+         statEntity->stat_.st_mtim.tv_nsec)).val_;
+}
+
+napi_value StatNExporter::GetCtimeNs(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
+        HILOGE("Number of arguments unmatched");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
+    if (!statEntity) {
+        HILOGE("Failed to get stat entity");
+        NError(UNKROWN_ERR).ThrowErr(env);
+        return nullptr;
+    }
+
+    return NVal::CreateBigIntUint64(env, static_cast<uint64_t>
+        (statEntity->stat_.st_ctim.tv_sec * SECOND_TO_NANOSECOND +
+         statEntity->stat_.st_ctim.tv_nsec)).val_;
+}
+
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 napi_value StatNExporter::GetLocation(napi_env env, napi_callback_info info)
 {
@@ -316,6 +379,9 @@ bool StatNExporter::Export()
         NVal::DeclareNapiGetter("atime", GetAtime),
         NVal::DeclareNapiGetter("mtime", GetMtime),
         NVal::DeclareNapiGetter("ctime", GetCtime),
+        NVal::DeclareNapiGetter("atimeNs", GetAtimeNs),
+        NVal::DeclareNapiGetter("mtimeNs", GetMtimeNs),
+        NVal::DeclareNapiGetter("ctimeNs", GetCtimeNs),
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
         NVal::DeclareNapiGetter("location", GetLocation),
 #endif

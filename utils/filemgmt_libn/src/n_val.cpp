@@ -315,6 +315,13 @@ NVal NVal::CreateBigInt64(napi_env env, int64_t val)
     return { env, res };
 }
 
+NVal NVal::CreateBigIntUint64(napi_env env, uint64_t val)
+{
+    napi_value res = nullptr;
+    napi_create_bigint_uint64(env, val, &res);
+    return { env, res };
+}
+
 NVal NVal::CreateInt64(napi_env env, int64_t val)
 {
     napi_value res = nullptr;
