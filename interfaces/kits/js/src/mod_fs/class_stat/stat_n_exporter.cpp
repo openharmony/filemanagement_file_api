@@ -241,6 +241,7 @@ napi_value StatNExporter::GetAtimeNs(napi_env env, napi_callback_info info)
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
 
@@ -304,7 +305,6 @@ napi_value StatNExporter::GetLocation(napi_env env, napi_callback_info info)
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
-        NError(UNKNOWN_ERROR).ThrowErr(env);
         return nullptr;
     }
     std::unique_ptr<char[]> value = CreateUniquePtr<char[]>(MAX_ATTR_NAME);
