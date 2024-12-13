@@ -262,7 +262,7 @@ napi_value StatNExporter::GetMtimeNs(napi_env env, napi_callback_info info)
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
-        NError(UNKNOWN_ERROR).ThrowErr(env);
+        NError(UNKNOWN_ERR).ThrowErr(env);
         return nullptr;
     }
 
@@ -283,7 +283,7 @@ napi_value StatNExporter::GetCtimeNs(napi_env env, napi_callback_info info)
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
-        NError(UNKNOWN_ERROR).ThrowErr(env);
+        NError(UNKNOWN_ERR).ThrowErr(env);
         return nullptr;
     }
 
