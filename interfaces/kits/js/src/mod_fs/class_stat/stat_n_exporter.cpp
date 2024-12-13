@@ -24,7 +24,6 @@
 #include <sys/xattr.h>
 #endif
 
-#include "error_code.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -242,7 +241,7 @@ napi_value StatNExporter::GetAtimeNs(napi_env env, napi_callback_info info)
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
-        NError(UNKNOWN_ERROR).ThrowErr(env);
+        NError(UNKNOWN_ERR).ThrowErr(env);
         return nullptr;
     }
 
