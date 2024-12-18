@@ -220,7 +220,7 @@ void FileWatcherManager::NotifyEvent(const struct inotify_event *event, std::fun
             .fileName = nullptr,
             .event = event->mask & IN_ALL_EVENTS,
             .cookie = event->cookie };
-        int len = fileName.size() + 1;
+        size_t len = fileName.size() + 1;
         ret.fileName = (char*)malloc(len);
         if (ret.fileName == nullptr) {
             LOGE("Failed to create WatchEvent");
