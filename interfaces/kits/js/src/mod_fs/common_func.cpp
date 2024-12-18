@@ -284,7 +284,6 @@ NVal CommonFunc::InstantiateStream(napi_env env, shared_ptr<FILE> fp, bool async
         NError(EIO).ThrowErr(env);
         return NVal();
     }
-
     streamEntity->fp.swap(fp);
     return { env, objStream };
 }
