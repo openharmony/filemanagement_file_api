@@ -693,10 +693,14 @@ std::shared_ptr<JsCallbackObject> Copy::GetRegisteredListener(std::shared_ptr<Fi
 
 void Copy::CloseNotifyFd(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
 {
-    callback->CloseFd();
     callback->closed = false;
     infos->eventFd = -1;
     infos->notifyFd = -1;
+    {
+        std::unique_lock<std::mutex> lock(callback->cvLock);
+        callback->CloseFd();
+        callback->cv.notify_one();
+    }
 }
 
 void Copy::CloseNotifyFdLocked(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
@@ -826,8 +830,11 @@ void Copy::GetNotifyEvent(std::shared_ptr<FileInfos> infos)
             infos->exceptionCode = errno;
             return;
         }
-        if (usleep(SLEEP_TIME) != 0) {
-            HILOGE("GetNotifyEvent sleep failed.");
+        {
+            std::unique_lock<std::mutex> lock(callback->cvLock);
+            callback->cv.wait_for(lock, std::chrono::microseconds(SLEEP_TIME), [callback]() -> bool {
+                return callback->notifyFd == -1;
+            });
         }
     }
 }

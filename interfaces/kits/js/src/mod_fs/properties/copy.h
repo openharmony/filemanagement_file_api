@@ -16,10 +16,11 @@
 #ifndef FILEMANAGEMENT_FILE_API_COPY_H
 #define FILEMANAGEMENT_FILE_API_COPY_H
 
+#include <chrono>
+#include <condition_variable>
 #include <set>
 #include <sys/inotify.h>
 #include <thread>
-#include <chrono>
 
 #include "bundle_mgr_client_impl.h"
 #include "common_func.h"
@@ -53,6 +54,8 @@ struct JsCallbackObject {
     int32_t errorCode = 0;
     std::thread notifyHandler;
     std::mutex readMutex;
+    std::condition_variable cv;
+    std::mutex cvLock;
     bool reading = false;
     bool closed = false;
     explicit JsCallbackObject(napi_env env, LibN::NVal jsVal) : env(env), nRef(jsVal) {}
