@@ -595,19 +595,19 @@ std::shared_ptr<CjCallbackObject> CopyImpl::RegisterListener(std::shared_ptr<Fil
     return callback;
 }
 
-void CopyImpl::UnregisterListener(std::shared_ptr<FileInfos> infos)
+void CopyImpl::UnregisterListener(std::shared_ptr<FileInfos> fileInfos)
 {
-    if (infos == nullptr) {
+    if (fileInfos == nullptr) {
         LOGE("infos is nullptr");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = cjCbMap_.find(*infos);
+    auto iter = cjCbMap_.find(*fileInfos);
     if (iter == cjCbMap_.end()) {
         LOGI("It is not be registered.");
         return;
     }
-    cjCbMap_.erase(*infos);
+    cjCbMap_.erase(*fileInfos);
 }
 
 bool CopyImpl::IsRemoteUri(const std::string& uri)
