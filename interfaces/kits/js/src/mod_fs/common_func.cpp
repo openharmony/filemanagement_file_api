@@ -173,11 +173,14 @@ unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf, shared_ptr<FileInfo> fileInfo)
+NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf, shared_ptr<FileInfo> fileInfo, bool async)
 {
     napi_value objStat = NClass::InstantiateClass(env, StatNExporter::className_, {});
     if (!objStat) {
         HILOGE("Failed to instantiate stat class");
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
         NError(EIO).ThrowErr(env);
         return NVal();
     }
@@ -185,6 +188,9 @@ NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf, shared_ptr<
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, objStat);
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
         NError(EIO).ThrowErr(env);
         return NVal();
     }
@@ -195,11 +201,14 @@ NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf, shared_ptr<
 }
 #endif
 
-NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf)
+NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf, bool async)
 {
     napi_value objStat = NClass::InstantiateClass(env, StatNExporter::className_, {});
     if (!objStat) {
         HILOGE("Failed to instantiate stat class");
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
         NError(EIO).ThrowErr(env);
         return NVal();
     }
@@ -207,6 +216,9 @@ NVal CommonFunc::InstantiateStat(napi_env env, const uv_stat_t &buf)
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, objStat);
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
         NError(EIO).ThrowErr(env);
         return NVal();
     }
@@ -251,11 +263,14 @@ NVal CommonFunc::InstantiateFile(napi_env env, int fd, const string &pathOrUri, 
     return { env, objFile };
 }
 
-NVal CommonFunc::InstantiateStream(napi_env env, shared_ptr<FILE> fp)
+NVal CommonFunc::InstantiateStream(napi_env env, shared_ptr<FILE> fp, bool async)
 {
     napi_value objStream = NClass::InstantiateClass(env, StreamNExporter::className_, {});
     if (!objStream) {
         HILOGE("INNER BUG. Cannot instantiate stream");
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
         NError(EIO).ThrowErr(env);
         return NVal();
     }
@@ -263,10 +278,12 @@ NVal CommonFunc::InstantiateStream(napi_env env, shared_ptr<FILE> fp)
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, objStream);
     if (!streamEntity) {
         HILOGE("Cannot instantiate stream because of void entity");
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
         NError(EIO).ThrowErr(env);
         return NVal();
     }
-
     streamEntity->fp.swap(fp);
     return { env, objStream };
 }
