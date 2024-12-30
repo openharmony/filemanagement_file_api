@@ -196,12 +196,12 @@ napi_value DirNExporter::Read(napi_env env, napi_callback_info info)
         return DoReadComplete(env, err, arg);
     };
     NVal thisVar(env, funcArg.GetThisVar());
-    const string PROCEDURE_NAME = "fileioDirRead";
+    const string procedureName = "fileioDirRead";
     if (funcArg.GetArgc() == NARG_CNT::ZERO) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::FIRST]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb).Schedule(procedureName, cbExec, cbCompl).val_;
     }
 }
 
