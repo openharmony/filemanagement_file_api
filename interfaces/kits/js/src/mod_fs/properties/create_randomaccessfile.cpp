@@ -26,6 +26,12 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
+struct RandomAccessFileOps {
+    int64_t fp;
+    int64_t start;
+    int64_t end;
+};
+
 static FileEntity* GetFileEntity(napi_env env, napi_value objFile)
 {
     auto fileEntity = NClass::GetEntityOf<FileEntity>(env, objFile);
@@ -132,26 +138,31 @@ static tuple<bool, unsigned int, int64_t, int64_t> GetJsFlags(napi_env env, cons
 
 static NVal InstantiateRandomAccessFile(napi_env env,
                                         std::unique_ptr<DistributedFS::FDGuard> fdg,
-                                        int64_t fp,
-                                        int64_t start = INVALID_POS,
-                                        int64_t end = INVALID_POS)
+                                        struct RandomAccessFileOps ops,
+                                        bool async = false)
 {
     napi_value objRAF = NClass::InstantiateClass(env, RandomAccessFileNExporter::className_, {});
     if (!objRAF) {
         HILOGE("Cannot instantiate randomaccessfile");
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
         NError(EIO).ThrowErr(env);
         return NVal();
     }
     auto rafEntity = NClass::GetEntityOf<RandomAccessFileEntity>(env, objRAF);
     if (!rafEntity) {
         HILOGE("Cannot instantiate randomaccessfile because of void entity");
+        if (async) {
+            return {env, NError(EIO).GetNapiErr(env)};
+        }
         NError(EIO).ThrowErr(env);
         return NVal();
     }
     rafEntity->fd.swap(fdg);
-    rafEntity->filePointer = fp;
-    rafEntity->start = start;
-    rafEntity->end = end;
+    rafEntity->filePointer = ops.fp;
+    rafEntity->start = ops.start;
+    rafEntity->end = ops.end;
     return {env, objRAF};
 }
 
@@ -192,10 +203,10 @@ napi_value CreateRandomAccessFile::Sync(napi_env env, napi_callback_info info)
     if (funcArg.GetArgc() == NARG_CNT::THREE) {
         auto [succ, start, end] = GetRafOptions(env, funcArg[NARG_POS::THIRD]);
         if (succ) {
-            return InstantiateRandomAccessFile(env, move(fileInfo.fdg), 0, start, end).val_;
+            return InstantiateRandomAccessFile(env, move(fileInfo.fdg), {0, start, end}).val_;
         }
     }
-    return InstantiateRandomAccessFile(env, move(fileInfo.fdg), 0).val_;
+    return InstantiateRandomAccessFile(env, move(fileInfo.fdg), {0, INVALID_POS, INVALID_POS}).val_;
 }
 
 struct AsyncCreateRandomAccessFileArg {
@@ -256,7 +267,7 @@ napi_value CreateRandomAccessFile::Async(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        return InstantiateRandomAccessFile(env, move(movedFileInfo->fdg), 0, start, end);
+        return InstantiateRandomAccessFile(env, move(movedFileInfo->fdg), {0, start, end}, true);
     };
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE ||

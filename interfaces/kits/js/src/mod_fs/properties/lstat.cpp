@@ -110,7 +110,7 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
-        auto stat = CommonFunc::InstantiateStat(env, arg->stat_);
+        auto stat = CommonFunc::InstantiateStat(env, arg->stat_, true);
         return stat;
     };
 
