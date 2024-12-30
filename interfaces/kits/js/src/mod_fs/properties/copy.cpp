@@ -540,7 +540,7 @@ void Copy::UnregisterListener(std::shared_ptr<FileInfos> infos)
     jsCbMap_.erase(*infos);
 }
 
-void Copy::ReceiveComplete(uv_work_t *work, int stat)
+void Copy::ReceiveComplete(uv_work_t *work)
 {
     if (work == nullptr) {
         HILOGE("uv_work_t pointer is nullptr.");
@@ -622,10 +622,10 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
         HILOGE("failed to get uv work");
         return;
     }
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(infos->env, &loop);
-    auto ret = uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(ReceiveComplete));
+    auto task = [work] () {
+        ReceiveComplete(work);
+    };
+    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate);
     if (ret != 0) {
         HILOGE("failed to uv_queue_work");
         delete (reinterpret_cast<UvEntry *>(work->data));

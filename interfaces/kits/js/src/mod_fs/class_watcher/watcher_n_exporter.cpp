@@ -118,7 +118,7 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
     return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
 }
 
-static void WatcherCallbackComplete(uv_work_t *work, int stat)
+static void WatcherCallbackComplete(uv_work_t *work)
 {
     if (work == nullptr) {
         HILOGE("Failed to get uv_queue_work pointer");
@@ -165,12 +165,6 @@ static void WatcherCallbackComplete(uv_work_t *work, int stat)
 void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::string &fileName,
                                        const uint32_t &event, const uint32_t &cookie)
 {
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(env, &loop);
-    if (loop == nullptr) {
-        HILOGE("Failed to get uv event loop");
-        return;
-    }
     if (!callback) {
         HILOGE("Failed to parse watcher callback");
         return;
@@ -191,8 +185,10 @@ void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::
     callbackContext->event_ = event;
     callbackContext->cookie_ = cookie;
     work->data = reinterpret_cast<void *>(callbackContext);
-    int ret = uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(WatcherCallbackComplete));
+    auto task = [work] () {
+        WatcherCallbackComplete(work);
+    };
+    auto ret = napi_send_event(env, task, napi_eprio_immediate);
     if (ret != 0) {
         HILOGE("Failed to execute libuv work queue, ret: %{public}d", ret);
         delete callbackContext;

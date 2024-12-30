@@ -249,7 +249,7 @@ napi_value WrapString(napi_env &env, const std::string &param, const std::string
     return jsValue;
 }
 
-void UvWorkAfterOnStaus(uv_work_t *work, int status)
+void UvWorkAfterOnStaus(uv_work_t *work)
 {
     HILOGI("UvWorkAfterOnStaus called");
     napi_handle_scope scope = nullptr;
@@ -296,13 +296,6 @@ void UvWorkAfterOnStaus(uv_work_t *work, int status)
 void NAPIDfsListener::OnStatus(const std::string &networkId, int32_t status)
 {
     HILOGI("NAPIDfsListener::OnStatus called");
-    uv_loop_s *loop = nullptr;
-
-    napi_get_uv_event_loop(env_, &loop);
-    if (loop == nullptr) {
-        HILOGE("NAPIDfsListener::OnStatus, loop == nullptr");
-        return;
-    }
 
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
@@ -326,9 +319,11 @@ void NAPIDfsListener::OnStatus(const std::string &networkId, int32_t status)
     connectDfsCB->status = status;
     work->data = static_cast<void *>(connectDfsCB);
 
-    int rev = uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, UvWorkAfterOnStaus);
-    if (rev != ERRNO_NOERR) {
+    auto task = [work] () {
+        UvWorkAfterOnStaus(work);
+    };
+    auto ret = napi_send_event(env_, task, napi_eprio_immediate);
+    if (ret != ERRNO_NOERR) {
         delete connectDfsCB;
         connectDfsCB = nullptr;
         delete work;

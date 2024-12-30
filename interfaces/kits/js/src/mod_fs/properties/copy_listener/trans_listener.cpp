@@ -299,34 +299,47 @@ int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedByte
         return ENOMEM;
     }
 
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(callback_->env, &loop);
-    if (loop == nullptr) {
-        HILOGE("Failed to get uv event loop");
-        return ENOMEM;
-    }
-
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        HILOGE("Failed to create uv_work_t pointer");
-        return ENOMEM;
-    }
-
     UvEntry *entry = new (std::nothrow) UvEntry(callback_);
     if (entry == nullptr) {
         HILOGE("entry ptr is nullptr");
-        delete work;
         return ENOMEM;
     }
     entry->progressSize = processedBytes;
     entry->totalSize = totalBytes;
-    work->data = entry;
-    int retVal = uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(CallbackComplete));
+    auto env = entry->callback->env;
+    auto task = [entry] () {
+        if (entry == nullptr) {
+            HILOGE("entry pointer is nullptr.");
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_env env = entry->callback->env;
+        napi_status status = napi_open_handle_scope(env, &scope);
+        if (status != napi_ok) {
+            HILOGE("Failed to open handle scope, status: %{public}d.", status);
+            return;
+        }
+        NVal obj = NVal::CreateObject(env);
+        if (entry->progressSize <= MAX_VALUE && entry->totalSize <= MAX_VALUE) {
+            obj.AddProp("processedSize", NVal::CreateInt64(env, entry->progressSize).val_);
+            obj.AddProp("totalSize", NVal::CreateInt64(env, entry->totalSize).val_);
+        }
+
+        napi_value result = nullptr;
+        napi_value jsCallback = entry->callback->nRef.Deref(env).val_;
+        status = napi_call_function(env, nullptr, jsCallback, 1, &(obj.val_), &result);
+        if (status != napi_ok) {
+            HILOGE("Failed to get result, status: %{public}d.", status);
+        }
+        status = napi_close_handle_scope(env, scope);
+        if (status != napi_ok) {
+            HILOGE("Failed to close scope, status: %{public}d.", status);
+        }
+    };
+    auto retVal = napi_send_event(env, task, napi_eprio_immediate);
     if (retVal != 0) {
         HILOGE("failed to get uv_queue_work");
-        delete (reinterpret_cast<UvEntry *>(work->data));
-        delete work;
+        delete entry;
         return ENOMEM;
     }
     return ERRNO_NOERR;

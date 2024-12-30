@@ -151,7 +151,7 @@ private:
     static void GetNotifyEvent(std::shared_ptr<FileInfos> infos);
     static void StartNotify(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static uv_work_t *GetUVwork(std::shared_ptr<FileInfos> infos);
-    static void ReceiveComplete(uv_work_t *work, int stat);
+    static void ReceiveComplete(uv_work_t *work);
     static std::shared_ptr<JsCallbackObject> GetRegisteredListener(std::shared_ptr<FileInfos> infos);
     static void CloseNotifyFd(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
     static void CloseNotifyFdLocked(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback);
