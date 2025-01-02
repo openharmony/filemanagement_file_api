@@ -50,6 +50,14 @@ NVal NRef::Deref(napi_env env)
     napi_get_reference_value(env, ref_, &val);
     return {env, val};
 }
+
+void NRef::DeleteJsEnv()
+{
+    if (ref_ && env_) {
+        napi_delete_reference(env_, ref_);
+    }
+    ref_ = nullptr;
+}
 } // namespace LibN
 } // namespace FileManagement
 } // namespace OHOS

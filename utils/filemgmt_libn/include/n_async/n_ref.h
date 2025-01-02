@@ -33,6 +33,7 @@ public:
         env_ = nullptr;
         ref_ = nullptr;
     }
+    void DeleteJsEnv();
 
 private:
     napi_env env_ = nullptr;
