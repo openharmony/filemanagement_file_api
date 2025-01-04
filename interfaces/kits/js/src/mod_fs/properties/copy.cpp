@@ -525,19 +525,19 @@ std::shared_ptr<JsCallbackObject> Copy::RegisterListener(napi_env env, const std
     return callback;
 }
 
-void Copy::UnregisterListener(std::shared_ptr<FileInfos> infos)
+void Copy::UnregisterListener(std::shared_ptr<FileInfos> fileInfos)
 {
-    if (infos == nullptr) {
-        HILOGE("infos is nullptr");
+    if (fileInfos == nullptr) {
+        HILOGE("fileInfos is nullptr");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = jsCbMap_.find(*infos);
+    auto iter = jsCbMap_.find(*fileInfos);
     if (iter == jsCbMap_.end()) {
         HILOGI("It is not be registered.");
         return;
     }
-    jsCbMap_.erase(*infos);
+    jsCbMap_.erase(*fileInfos);
 }
 
 void Copy::ReceiveComplete(uv_work_t *work, int stat)
