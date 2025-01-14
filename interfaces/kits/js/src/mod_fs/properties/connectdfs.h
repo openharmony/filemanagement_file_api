@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 
 #include "bundle_mgr_client_impl.h"
 #include "common_func.h"
-#include "dfs_listener/file_dfs_listener_stub.h"
+#include "file_dfs_listener_stub.h"
 #include "distributed_file_daemon_manager.h"
 #include "filemgmt_libn.h"
 #include "n_async/n_ref.h"
