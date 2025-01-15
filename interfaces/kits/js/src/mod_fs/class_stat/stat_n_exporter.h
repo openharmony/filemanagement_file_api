@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace OHOS::FileManagement::LibN;
 
+const int64_t SECOND_TO_NANOSECOND = 1e9;
 constexpr int S_PERMISSION = 00000777;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 const size_t MAX_ATTR_NAME = 64;
@@ -56,6 +57,9 @@ public:
     static napi_value GetAtime(napi_env env, napi_callback_info info);
     static napi_value GetMtime(napi_env env, napi_callback_info info);
     static napi_value GetCtime(napi_env env, napi_callback_info info);
+    static napi_value GetAtimeNs(napi_env env, napi_callback_info info);
+    static napi_value GetMtimeNs(napi_env env, napi_callback_info info);
+    static napi_value GetCtimeNs(napi_env env, napi_callback_info info);
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     static napi_value GetLocation(napi_env env, napi_callback_info info);
 #endif
