@@ -290,7 +290,7 @@ int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedByte
         return ENOMEM;
     }
 
-    std::shared_ptr<UvEntry> entry(new (std::nothrow) UvEntry(callback_));
+    std::shared_ptr<UvEntry> entry = std::make_shared<UvEntry>(callback_);
     if (entry == nullptr) {
         HILOGE("entry ptr is nullptr");
         return ENOMEM;
