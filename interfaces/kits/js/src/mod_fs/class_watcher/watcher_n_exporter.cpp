@@ -118,15 +118,8 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
     return NAsyncWorkPromise(env, thisVar).Schedule(procedureName, cbExec, cbCompl).val_;
 }
 
-static void WatcherCallbackComplete(uv_work_t *work)
+static void WatcherCallbackComplete(WatcherNExporter::JSCallbackContext *callbackContext)
 {
-    if (work == nullptr) {
-        HILOGE("Failed to get uv_queue_work pointer");
-        return;
-    }
-
-    WatcherNExporter::JSCallbackContext *callbackContext =
-        reinterpret_cast<WatcherNExporter::JSCallbackContext *>(work->data);
     do {
         if (callbackContext == nullptr) {
             HILOGE("Failed to create context pointer");
@@ -159,7 +152,6 @@ static void WatcherCallbackComplete(uv_work_t *work)
         }
     } while (0);
     delete callbackContext;
-    delete work;
 }
 
 void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::string &fileName,
@@ -169,30 +161,22 @@ void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::
         HILOGE("Failed to parse watcher callback");
         return;
     }
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        HILOGE("Failed to create uv_work_t pointer");
-        return;
-    }
 
     JSCallbackContext *callbackContext = new (std::nothrow) JSCallbackContext(callback);
     if (callbackContext == nullptr) {
-        delete work;
         return;
     }
     callbackContext->env_ = env;
     callbackContext->fileName_ = fileName;
     callbackContext->event_ = event;
     callbackContext->cookie_ = cookie;
-    work->data = reinterpret_cast<void *>(callbackContext);
-    auto task = [work] () {
-        WatcherCallbackComplete(work);
+    auto task = [callbackContext] () {
+        WatcherCallbackComplete(callbackContext);
     };
     auto ret = napi_send_event(env, task, napi_eprio_immediate);
     if (ret != 0) {
         HILOGE("Failed to execute libuv work queue, ret: %{public}d", ret);
         delete callbackContext;
-        delete work;
     }
 }
 

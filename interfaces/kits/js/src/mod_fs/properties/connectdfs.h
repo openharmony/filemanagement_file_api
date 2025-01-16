@@ -78,7 +78,7 @@ struct ConnectDfsCB {
     napi_ref callbackRef;
 };
 
-ConnectDfsCB *CheckAndGetParameters(uv_work_t *work, napi_handle_scope *scope);
+ConnectDfsCB *CheckAndGetParameters(ConnectDfsCB *connectDfsCB, napi_handle_scope *scope);
 
 class ConnectDfs final {
 public:

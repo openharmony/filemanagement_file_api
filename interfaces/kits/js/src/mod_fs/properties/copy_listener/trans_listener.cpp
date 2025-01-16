@@ -251,17 +251,8 @@ std::string TransListener::GetNetworkIdFromUri(const std::string &uri)
     return uri.substr(uri.find(NETWORK_PARA) + NETWORK_PARA.size(), uri.size());
 }
 
-void TransListener::CallbackComplete(uv_work_t *work, int stat)
+void TransListener::CallbackComplete(std::shared_ptr<UvEntry> entry)
 {
-    if (work == nullptr) {
-        HILOGE("Failed to get uv_queue_work pointer");
-        return;
-    }
-
-    std::shared_ptr<UvEntry> entry(static_cast<UvEntry *>(work->data), [work](UvEntry *data) {
-        delete data;
-        delete work;
-    });
     if (entry == nullptr) {
         HILOGE("entry pointer is nullptr.");
         return;
@@ -299,7 +290,7 @@ int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedByte
         return ENOMEM;
     }
 
-    UvEntry *entry = new (std::nothrow) UvEntry(callback_);
+    std::shared_ptr<UvEntry> entry(new (std::nothrow) UvEntry(callback_));
     if (entry == nullptr) {
         HILOGE("entry ptr is nullptr");
         return ENOMEM;
@@ -308,38 +299,11 @@ int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedByte
     entry->totalSize = totalBytes;
     auto env = entry->callback->env;
     auto task = [entry] () {
-        if (entry == nullptr) {
-            HILOGE("entry pointer is nullptr.");
-            return;
-        }
-        napi_handle_scope scope = nullptr;
-        napi_env env = entry->callback->env;
-        napi_status status = napi_open_handle_scope(env, &scope);
-        if (status != napi_ok) {
-            HILOGE("Failed to open handle scope, status: %{public}d.", status);
-            return;
-        }
-        NVal obj = NVal::CreateObject(env);
-        if (entry->progressSize <= MAX_VALUE && entry->totalSize <= MAX_VALUE) {
-            obj.AddProp("processedSize", NVal::CreateInt64(env, entry->progressSize).val_);
-            obj.AddProp("totalSize", NVal::CreateInt64(env, entry->totalSize).val_);
-        }
-
-        napi_value result = nullptr;
-        napi_value jsCallback = entry->callback->nRef.Deref(env).val_;
-        status = napi_call_function(env, nullptr, jsCallback, 1, &(obj.val_), &result);
-        if (status != napi_ok) {
-            HILOGE("Failed to get result, status: %{public}d.", status);
-        }
-        status = napi_close_handle_scope(env, scope);
-        if (status != napi_ok) {
-            HILOGE("Failed to close scope, status: %{public}d.", status);
-        }
+        CallbackComplete(entry);
     };
     auto retVal = napi_send_event(env, task, napi_eprio_immediate);
     if (retVal != 0) {
         HILOGE("failed to get uv_queue_work");
-        delete entry;
         return ENOMEM;
     }
     return ERRNO_NOERR;
