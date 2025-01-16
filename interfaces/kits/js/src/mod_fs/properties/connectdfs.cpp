@@ -245,7 +245,7 @@ void UvWorkAfterOnStaus(ConnectDfsCB *connectDfsCB)
 {
     HILOGI("UvWorkAfterOnStaus called");
     napi_handle_scope scope = nullptr;
-    ConnectDfsCB *connectDfsCB = CheckAndGetParameters(connectDfsCB, &scope);
+    connectDfsCB = CheckAndGetParameters(connectDfsCB, &scope);
     if (connectDfsCB == nullptr) {
         return;
     }
@@ -304,8 +304,8 @@ void NAPIDfsListener::OnStatus(const std::string &networkId, int32_t status)
     auto task = [connectDfsCB] () {
         UvWorkAfterOnStaus(connectDfsCB);
     };
-    auto ret = napi_send_event(env_, task, napi_eprio_immediate);
-    if (ret != ERRNO_NOERR) {
+    auto rev = napi_send_event(env_, task, napi_eprio_immediate);
+    if (rev != ERRNO_NOERR) {
         delete connectDfsCB;
         connectDfsCB = nullptr;
     }
