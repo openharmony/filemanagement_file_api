@@ -163,7 +163,16 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
         HILOGE("The Watched file does not exist, and the remaining monitored events will be invalid.");
         return ERRNO_NOERR;
     }
-    if (inotify_rm_watch(notifyFd_, arg->wd) == -1) {
+    int oldWd = -1;
+    {
+        lock_guard<mutex> lock(readMutex_);
+        if (!(closed_ && reading_)) {
+            oldWd = inotify_rm_watch(notifyFd_, arg->wd);
+        } else {
+            HILOGE("rm watch fail");
+        }
+    }
+    if (oldWd == -1) {
         int rmErr = errno;
         if (access(arg->fileName.c_str(), F_OK) == 0) {
             HILOGE("Failed to stop notify errCode:%{public}d", rmErr);
