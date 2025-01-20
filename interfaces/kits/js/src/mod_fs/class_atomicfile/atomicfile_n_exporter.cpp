@@ -39,6 +39,7 @@ using namespace OHOS::FileManagement::LibN;
 namespace {
 const std::string READ_STREAM_CLASS = "ReadStream";
 const std::string WRITE_STREAM_CLASS = "WriteStream";
+const std::string TEMP_FILE_SUFFIX = "_XXXXXX";
 
 struct BufferData {
     uint8_t* buffer = nullptr;
@@ -389,7 +390,7 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
 
     std::rename(rafEntity->newFileName.c_str(), rafEntity->baseFileName.c_str());
     std::string tmpNewFileName = rafEntity->baseFileName;
-    rafEntity->newFileName = tmpNewFileName.append("_XXXXXX");
+    rafEntity->newFileName = tmpNewFileName.append(TEMP_FILE_SUFFIX);
     status = napi_delete_reference(env, rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to delete reference");
@@ -425,7 +426,7 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
         HILOGW("Failed to remove file");
     }
     std::string tmpNewFileName = rafEntity->baseFileName;
-    rafEntity->newFileName = tmpNewFileName.append("_XXXXXX");
+    rafEntity->newFileName = tmpNewFileName.append(TEMP_FILE_SUFFIX);
     status = napi_delete_reference(env, rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to delete reference");
@@ -462,6 +463,79 @@ napi_value AtomicFileNExporter::Delete(napi_env env, napi_callback_info info)
     rafEntity->newFileName.clear();
     rafEntity->baseFileName.clear();
     return nullptr;
+}
+
+napi_value AtomicFileNExporter::Constructor(napi_env env, napi_callback_info info)
+{
+    NFuncArg funcArg(env, info);
+    if (!funcArg.InitArgs(NARG_CNT::ONE)) {
+        HILOGE("Number of arguments unmatched");
+        NError(E_PARAMS).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto [resGetFirstArg, file, num] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8String();
+    if (!resGetFirstArg) {
+        HILOGE("Invalid path");
+        NError(E_PARAMS).ThrowErr(env);
+        return nullptr;
+    }
+
+    auto atomicFileEntity = CreateUniquePtr<AtomicFileEntity>();
+    if (atomicFileEntity == nullptr) {
+        HILOGE("Failed to request heap memory");
+        NError(ENOMEM).ThrowErr(env);
+        return nullptr;
+    }
+    std::string filePath = file.get();
+    atomicFileEntity->baseFileName = filePath;
+    atomicFileEntity->newFileName = filePath.append(TEMP_FILE_SUFFIX);
+    if (!NClass::SetEntityFor<AtomicFileEntity>(env, funcArg.GetThisVar(), move(atomicFileEntity))) {
+        HILOGE("Failed to wrap entity for obj AtomicFile");
+        NError(EIO).ThrowErr(env);
+        return nullptr;
+    }
+
+    return funcArg.GetThisVar();
+}
+
+bool AtomicFileNExporter::Export()
+{
+    std::vector<napi_property_descriptor> props = {
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+        NVal::DeclareNapiFunction("getBaseFile", GetBaseFile),
+        NVal::DeclareNapiFunction("openRead", OpenRead),
+        NVal::DeclareNapiFunction("readFully", ReadFully),
+        NVal::DeclareNapiFunction("startWrite", StartWrite),
+        NVal::DeclareNapiFunction("finishWrite", FinishWrite),
+        NVal::DeclareNapiFunction("failWrite", FailWrite),
+        NVal::DeclareNapiFunction("delete", Delete),
+#endif
+    };
+
+    std::string className = GetClassName();
+    bool succ = false;
+    napi_value classValue = nullptr;
+    std::tie(succ, classValue) = NClass::DefineClass(
+        exports_.env_, className, AtomicFileNExporter::Constructor, move(props));
+    if (!succ) {
+        HILOGE("INNER BUG. Failed to define class");
+        NError(ENOMEM).ThrowErr(exports_.env_);
+        return false;
+    }
+    succ = NClass::SaveClass(exports_.env_, className, classValue);
+    if (!succ) {
+        HILOGE("INNER BUG. Failed to save class");
+        NError(ENOMEM).ThrowErr(exports_.env_);
+        return false;
+    }
+
+    return exports_.AddProp(className, classValue);
+}
+
+std::string AtomicFileNExporter::GetClassName()
+{
+    return AtomicFileNExporter::className_;
 }
 
 AtomicFileNExporter::AtomicFileNExporter(napi_env env, napi_value exports) : NExporter(env, exports) {}
