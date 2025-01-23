@@ -21,52 +21,37 @@ TaskSignalEntity::~TaskSignalEntity() {}
 
 void TaskSignalEntity::OnCancel()
 {
-    uv_loop_s *loop = nullptr;
-    if (!callbackContext_) {
-        return;
-    }
     auto env = callbackContext_->env_;
     callbackContext_->filePath_ = taskSignal_->filePath_;
-    napi_get_uv_event_loop(env, &loop);
-    if (loop == nullptr) {
-        return;
-    }
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        return;
-    }
-    work->data = reinterpret_cast<void *>(callbackContext_.get());
-    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-        [](uv_work_t *work, int status) {
-                JSCallbackContext *callbackContext = reinterpret_cast<JSCallbackContext *>(work->data);
-                if (callbackContext == nullptr) {
-                    return;
-                }
-                if (!callbackContext->ref_) {
-                    return;
-                }
-                napi_handle_scope scope = nullptr;
-                napi_status ret = napi_open_handle_scope(callbackContext->env_, &scope);
-                if (ret != napi_ok) {
-                    return;
-                }
-                napi_env env = callbackContext->env_;
-                napi_value jsCallback = callbackContext->ref_.Deref(env).val_;
-                napi_value filePath = LibN::NVal::CreateUTF8String(env, callbackContext->filePath_).val_;
-                napi_value retVal = nullptr;
-                ret = napi_call_function(env, nullptr, jsCallback, 1, &filePath, &retVal);
-                if (ret != napi_ok) {
-                    HILOGE("Failed to call napi_call_function, ret: %{public}d", ret);
-                }
-                ret = napi_close_handle_scope(callbackContext->env_, scope);
-                if (ret != napi_ok) {
-                    HILOGE("Failed to close handle scope, ret: %{public}d", ret);
-                }
-                delete work;
-            }, uv_qos_user_initiated);
+    JSCallbackContext *callbackContext = callbackContext_.get();
+    auto task = [callbackContext] () {
+        if (callbackContext == nullptr) {
+            return;
+        }
+        if (!callbackContext->ref_) {
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_status ret = napi_open_handle_scope(callbackContext->env_, &scope);
+        if (ret != napi_ok) {
+            return;
+        }
+        napi_env env = callbackContext->env_;
+        napi_value jsCallback = callbackContext->ref_.Deref(env).val_;
+        napi_value filePath = LibN::NVal::CreateUTF8String(env, callbackContext->filePath_).val_;
+        napi_value retVal = nullptr;
+        ret = napi_call_function(env, nullptr, jsCallback, 1, &filePath, &retVal);
+        if (ret != napi_ok) {
+            HILOGE("Failed to call napi_call_function, ret: %{public}d", ret);
+        }
+        ret = napi_close_handle_scope(callbackContext->env_, scope);
+        if (ret != napi_ok) {
+            HILOGE("Failed to close handle scope, ret: %{public}d", ret);
+        }
+    };
+    auto ret = napi_send_event(env, task, napi_eprio_immediate);
     if (ret != 0) {
         HILOGE("Failed to uv_queue_work_with_qos, ret: %{public}d", ret);
-        delete work;
     }
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

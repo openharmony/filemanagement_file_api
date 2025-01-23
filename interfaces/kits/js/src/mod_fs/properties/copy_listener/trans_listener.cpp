@@ -251,17 +251,8 @@ std::string TransListener::GetNetworkIdFromUri(const std::string &uri)
     return uri.substr(uri.find(NETWORK_PARA) + NETWORK_PARA.size(), uri.size());
 }
 
-void TransListener::CallbackComplete(uv_work_t *work, int stat)
+void TransListener::CallbackComplete(std::shared_ptr<UvEntry> entry)
 {
-    if (work == nullptr) {
-        HILOGE("Failed to get uv_queue_work pointer");
-        return;
-    }
-
-    std::shared_ptr<UvEntry> entry(static_cast<UvEntry *>(work->data), [work](UvEntry *data) {
-        delete data;
-        delete work;
-    });
     if (entry == nullptr) {
         HILOGE("entry pointer is nullptr.");
         return;
@@ -299,34 +290,20 @@ int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedByte
         return ENOMEM;
     }
 
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(callback_->env, &loop);
-    if (loop == nullptr) {
-        HILOGE("Failed to get uv event loop");
-        return ENOMEM;
-    }
-
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        HILOGE("Failed to create uv_work_t pointer");
-        return ENOMEM;
-    }
-
-    UvEntry *entry = new (std::nothrow) UvEntry(callback_);
+    std::shared_ptr<UvEntry> entry = std::make_shared<UvEntry>(callback_);
     if (entry == nullptr) {
         HILOGE("entry ptr is nullptr");
-        delete work;
         return ENOMEM;
     }
     entry->progressSize = processedBytes;
     entry->totalSize = totalBytes;
-    work->data = entry;
-    int retVal = uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(CallbackComplete));
+    auto env = entry->callback->env;
+    auto task = [entry] () {
+        CallbackComplete(entry);
+    };
+    auto retVal = napi_send_event(env, task, napi_eprio_immediate);
     if (retVal != 0) {
         HILOGE("failed to get uv_queue_work");
-        delete (reinterpret_cast<UvEntry *>(work->data));
-        delete work;
         return ENOMEM;
     }
     return ERRNO_NOERR;

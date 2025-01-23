@@ -65,15 +65,11 @@ NAsyncWorkCallback::~NAsyncWorkCallback()
         HILOGE("Failed to new uv_work_t");
         return;
     }
-    work->data = static_cast<void *>(ctx_);
-
-    int ret = uv_queue_work(
-        loop, work.get(), [](uv_work_t *work) {},
-        [](uv_work_t *work, int status) {
-            NAsyncContextCallback *ctx = static_cast<NAsyncContextCallback *>(work->data);
-            delete ctx;
-            delete work;
-        });
+    NAsyncContextCallback *ctx = ctx_;
+    auto task = [ctx] () {
+        delete ctx;
+    };
+    auto ret = napi_send_event(env_, task, napi_eprio_immediate);
     if (ret) {
         HILOGE("Failed to call uv_queue_work %{public}d", status);
         return;
@@ -208,19 +204,6 @@ void NAsyncWorkCallback::ThreadSafeSchedule(NContextCBComplete cbComplete)
     ctx_->cbExec_ = nullptr;
     ctx_->cbComplete_ = nullptr;
 
-    uv_loop_s *loop = nullptr;
-    napi_status status = napi_get_uv_event_loop(env_, &loop);
-    if (status != napi_ok) {
-        HILOGE("Failed to get uv event loop");
-        return;
-    }
-
-    auto work = CreateUniquePtr<uv_work_t>();
-    if (!work) {
-        HILOGE("Failed to new uv_work_t");
-        return;
-    }
-
     struct WorkArgs {
         NAsyncWorkCallback *ptr = nullptr;
         NContextCBComplete cb;
@@ -228,28 +211,18 @@ void NAsyncWorkCallback::ThreadSafeSchedule(NContextCBComplete cbComplete)
     auto workArgs = make_unique<WorkArgs>();
     workArgs->ptr = this;
     workArgs->cb = cbComplete;
-
-    work->data = static_cast<void *>(workArgs.get());
-
-    int ret = uv_queue_work(
-        loop, work.get(), [](uv_work_t *work) {
-            HILOGI("Enter, %{public}zu", (size_t)work);
-        },
-        [](uv_work_t *work, int status) {
-            HILOGI("AsyncWork Enter, %{public}zu", (size_t)work);
-            auto workArgs = static_cast<WorkArgs *>(work->data);
-            AfterWorkCallback(workArgs->ptr->env_, napi_ok, workArgs->ptr->ctx_, workArgs->cb);
-            delete workArgs;
-            delete work;
-        });
+    auto workArgsRaw = workArgs.get();
+    auto task = [workArgsRaw] () {
+        AfterWorkCallback(workArgsRaw->ptr->env_, napi_ok, workArgsRaw->ptr->ctx_, workArgsRaw->cb);
+        delete workArgsRaw;
+    };
+    auto ret = napi_send_event(env_, task, napi_eprio_immediate);
     if (ret) {
-        HILOGE("Failed to call uv_queue_work %{public}d", status);
+        HILOGE("Failed to call napi_send_event");
         workArgs.reset();
-        work.reset();
         return;
     }
     workArgs.release();
-    work.release();
 }
 } // namespace LibN
 } // namespace FileManagement

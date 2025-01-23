@@ -185,26 +185,18 @@ napi_value ConnectDfs::Async(napi_env env, napi_callback_info info)
     return ret;
 }
 
-ConnectDfsCB *CheckAndGetParameters(uv_work_t *work, napi_handle_scope *scope)
+ConnectDfsCB *CheckAndGetParameters(ConnectDfsCB *connectDfsCB, napi_handle_scope *scope)
 {
     HILOGI("ConnectDfsCB::CheckAndGetParameters GetParam called");
-    if (work == nullptr) {
-        HILOGE("ConnectDfsCB, GetParam work is null");
-        return nullptr;
-    }
-    ConnectDfsCB *connectDfsCB = static_cast<ConnectDfsCB *>(work->data);
+
     if (connectDfsCB == nullptr) {
         HILOGE("ConnectDfsCB, GetParam connectDfsCB is null");
-        delete work;
-        work = nullptr;
         return nullptr;
     }
     napi_open_handle_scope(connectDfsCB->cbBase.cbInfo.env, scope);
     if (scope == nullptr) {
         delete connectDfsCB;
         connectDfsCB = nullptr;
-        delete work;
-        work = nullptr;
         return nullptr;
     }
     HILOGI("ConnectDfsCB::CheckAndGetParameters GetParam end");
@@ -249,11 +241,11 @@ napi_value WrapString(napi_env &env, const std::string &param, const std::string
     return jsValue;
 }
 
-void UvWorkAfterOnStaus(uv_work_t *work, int status)
+void UvWorkAfterOnStaus(ConnectDfsCB *connectDfsCB)
 {
     HILOGI("UvWorkAfterOnStaus called");
     napi_handle_scope scope = nullptr;
-    ConnectDfsCB *connectDfsCB = CheckAndGetParameters(work, &scope);
+    connectDfsCB = CheckAndGetParameters(connectDfsCB, &scope);
     if (connectDfsCB == nullptr) {
         return;
     }
@@ -288,32 +280,16 @@ void UvWorkAfterOnStaus(uv_work_t *work, int status)
     napi_close_handle_scope(connectDfsCB->cbBase.cbInfo.env, scope);
     delete connectDfsCB;
     connectDfsCB = nullptr;
-    delete work;
-    work = nullptr;
     HILOGI("UvWorkAfterOnStaus end");
 }
 
 void NAPIDfsListener::OnStatus(const std::string &networkId, int32_t status)
 {
     HILOGI("NAPIDfsListener::OnStatus called");
-    uv_loop_s *loop = nullptr;
-
-    napi_get_uv_event_loop(env_, &loop);
-    if (loop == nullptr) {
-        HILOGE("NAPIDfsListener::OnStatus, loop == nullptr");
-        return;
-    }
-
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        return;
-    }
 
     auto connectDfsCB = new (std::nothrow) ConnectDfsCB;
     if (connectDfsCB == nullptr) {
         HILOGE("NAPIDfsListener::OnStatus, connectDfsCb == nullptr");
-        delete work;
-        work = nullptr;
         return;
     }
     connectDfsCB->cbBase.cbInfo.env = env_;
@@ -324,15 +300,14 @@ void NAPIDfsListener::OnStatus(const std::string &networkId, int32_t status)
     }
     connectDfsCB->networkId = networkId;
     connectDfsCB->status = status;
-    work->data = static_cast<void *>(connectDfsCB);
 
-    int rev = uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, UvWorkAfterOnStaus);
+    auto task = [connectDfsCB] () {
+        UvWorkAfterOnStaus(connectDfsCB);
+    };
+    auto rev = napi_send_event(env_, task, napi_eprio_immediate);
     if (rev != ERRNO_NOERR) {
         delete connectDfsCB;
         connectDfsCB = nullptr;
-        delete work;
-        work = nullptr;
     }
     HILOGI("NAPIDfsListener::OnStatus end");
 }

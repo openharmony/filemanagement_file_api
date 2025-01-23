@@ -552,17 +552,8 @@ void Copy::UnregisterListener(std::shared_ptr<FileInfos> fileInfos)
     jsCbMap_.erase(*fileInfos);
 }
 
-void Copy::ReceiveComplete(uv_work_t *work, int stat)
+void Copy::ReceiveComplete(std::shared_ptr<UvEntry> entry)
 {
-    if (work == nullptr) {
-        HILOGE("uv_work_t pointer is nullptr.");
-        return;
-    }
-
-    std::shared_ptr<UvEntry> entry(static_cast<UvEntry *>(work->data), [work](UvEntry *data) {
-        delete data;
-        delete work;
-    });
     if (entry == nullptr) {
         HILOGE("entry pointer is nullptr.");
         return;
@@ -597,7 +588,7 @@ void Copy::ReceiveComplete(uv_work_t *work, int stat)
     }
 }
 
-uv_work_t *Copy::GetUVwork(std::shared_ptr<FileInfos> infos)
+UvEntry *Copy::GetUVwork(std::shared_ptr<FileInfos> infos)
 {
     UvEntry *entry = nullptr;
     {
@@ -617,31 +608,19 @@ uv_work_t *Copy::GetUVwork(std::shared_ptr<FileInfos> infos)
         entry->progressSize = callback->progressSize;
         entry->totalSize = callback->totalSize;
     }
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        HILOGE("Failed to create uv_work_t pointer");
-        delete entry;
-        return nullptr;
-    }
-    work->data = entry;
-    return work;
+
+    return entry;
 }
 
 void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
 {
-    uv_work_t *work = GetUVwork(infos);
-    if (work == nullptr) {
-        HILOGE("failed to get uv work");
-        return;
-    }
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(infos->env, &loop);
-    auto ret = uv_queue_work(
-        loop, work, [](uv_work_t *work) {}, reinterpret_cast<uv_after_work_cb>(ReceiveComplete));
+    std::shared_ptr<UvEntry> entry(GetUVwork(infos));
+    auto task = [entry] () {
+        ReceiveComplete(entry);
+    };
+    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate);
     if (ret != 0) {
         HILOGE("failed to uv_queue_work");
-        delete (reinterpret_cast<UvEntry *>(work->data));
-        delete work;
     }
 }
 
