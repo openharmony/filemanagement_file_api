@@ -366,7 +366,7 @@ bool IsNumeric(const string &str)
 void SetQueryMap(Uri* uri, std::unordered_map<std::string,
       std::string> &queryMap)
 {
-    // file://media/image/12?networkid=xxxx&api_version=xxxx
+    // file://media/image/12?networkid=xxxx&api_version=xxxx?times=xxx&user=101
     string query = uri->GetQuery();
     string pairString;
     stringstream queryStream(query);
@@ -394,7 +394,7 @@ bool CommonFunc::GetAndCheckUserId(Uri* uri, string &userId)
     if (it != queryMap.end()) {
         userId = it->second;
         if (!IsNumeric(userId)) {
-            HILOGE("IsNumeric check fail, userId = %{public}s", userId.c_str());
+            HILOGE("IsNumeric check fail");
             return false;
         }
         return true;
@@ -404,9 +404,12 @@ bool CommonFunc::GetAndCheckUserId(Uri* uri, string &userId)
     return false;
 }
 
+/*
+ * For compatibility considerations, filtering system applications require non permission verification
+*/
 bool CommonFunc::IsSystemApp()
 {
-    uint64_t fullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
+    uint64_t fullTokenId = OHOS::IPCSkeleton::GetSelfTokenID();
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
 }
 #endif
