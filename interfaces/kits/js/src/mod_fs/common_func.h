@@ -21,7 +21,6 @@
 #include "uv.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "iremote_broker.h"
-#include "file_uri.h"
 #endif
 
 namespace OHOS {
@@ -102,10 +101,6 @@ struct CommonFunc {
     static std::string GetModeFromFlags(unsigned int flags);
     static bool CheckPublicDirPath(const std::string &sandboxPath);
     static std::string Decode(const std::string &uri);
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    static bool GetAndCheckUserId(Uri* uri, std::string &userId);
-    static bool IsSystemApp();
-#endif
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement

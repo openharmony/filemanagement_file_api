@@ -148,26 +148,6 @@ static int OpenFileByPath(const string &path, unsigned int mode)
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 
-static int OpenFileByDatashareHasUserId(const string &path, unsigned int flags, const string &userId)
-{
-    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
-    sptr<FileIoToken> remote = new (std::nothrow) IRemoteStub<FileIoToken>();
-    if (!remote) {
-        HILOGE("Failed to get remote object");
-        return -ENOMEM;
-    }
-
-    dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(),
-        MEDIALIBRARY_DATA_URI + "?user=" + userId);
-    if (!dataShareHelper) {
-        HILOGE("Failed to connect to datashare");
-        return -E_PERMISSION;
-    }
-    Uri uri(path);
-    int fd = dataShareHelper->OpenFile(uri, CommonFunc::GetModeFromFlags(flags));
-    return fd;
-}
-
 static int OpenFileByDatashare(const string &path, unsigned int flags)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
@@ -193,20 +173,11 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, unsi
     AppFileService::ModuleFileUri::FileUri fileUri(uriStr);
     string realPath = fileUri.GetRealPath();
     if (bundleName == MEDIA) {
-        string userId;
-        if (CommonFunc::GetAndCheckUserId(&uri, userId) && CommonFunc::IsSystemApp()) {
-            int res = OpenFileByDatashareHasUserId(uri.ToString(), mode, userId);
-            if (res < 0) {
-                HILOGE("Failed to open file by DatashareHasUserId error %{public}d", res);
-            }
-            return { res, uri.ToString() };
-        } else {
-            int res = OpenFileByDatashare(uri.ToString(), mode);
-            if (res < 0) {
-                HILOGE("Failed to open file by Datashare error %{public}d", res);
-            }
-            return { res, uri.ToString() };
+        int res = OpenFileByDatashare(uri.ToString(), mode);
+        if (res < 0) {
+            HILOGE("Failed to open file by Datashare error %{public}d", res);
         }
+        return { res, uri.ToString() };
     } else if (bundleName == DOCS && access(realPath.c_str(), F_OK) != 0) {
         int res = OpenFileByDatashare(uri.ToString(), mode);
         if (res < 0) {
