@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "ffi_remote_data.h"
 #include "file_fs_impl.h"
 #include "list_file.h"
+#include "napi/native_api.h"
 
 extern "C" {
     FFI_EXPORT RetDataI64 FfiOHOSFileFsStatByID(int32_t file);
@@ -30,6 +31,10 @@ extern "C" {
     FFI_EXPORT RetDataI64 FfiOHOSFileFsCreateStream(const char* path, const char* mode);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsFdopenStream(int32_t fd, const char* mode);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsLstat(const char* path);
+
+    // RandomAccessFile
+    FFI_EXPORT napi_value FfiConvertRandomAccessFile2Napi(napi_env env, int64_t id);
+    FFI_EXPORT int64_t FfiCreateRandomAccessFileFromNapi(napi_env env, napi_value objRAF);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsCreateRandomAccessFileByString(const char* file, int64_t mode);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsCreateRandomAccessFileByID(int64_t file, int64_t mode);
     FFI_EXPORT int32_t FfiOHOSRandomAccessFileGetFd(int64_t id);
@@ -86,5 +91,8 @@ extern "C" {
     FFI_EXPORT int64_t FfiOHOSFileFsCreateTaskSignal();
     FFI_EXPORT int64_t FfiOHOSFileFsTaskSignalCancel(int64_t id);
     FFI_EXPORT void FfiOHOSFileFsCopy(const char* src, const char* dest, int64_t opt);
+
+    FFI_EXPORT int64_t FfiCreateStreamFromNapi(napi_env env, napi_value stream);
+    FFI_EXPORT napi_value FfiConvertStream2Napi(napi_env env, int64_t id);
 }
 #endif

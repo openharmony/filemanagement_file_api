@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,11 @@
 
 #include "cj_common_ffi.h"
 #include <cstdint>
+#include "napi/native_api.h"
 
 extern "C" {
+    FFI_EXPORT napi_value FfiConvertFile2Napi(napi_env env, int64_t id);
+    FFI_EXPORT int64_t FfiCreateFileFromNapi(napi_env env, napi_value objRAF);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsOpen(const char* path, int64_t mode);
     FFI_EXPORT int32_t FfiOHOSFileFsClose(int64_t file);
     FFI_EXPORT int32_t FfiOHOSFileFsCloseByFd(int32_t file);

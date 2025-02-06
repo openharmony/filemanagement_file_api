@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,5 +116,9 @@ std::tuple<int32_t, int64_t> RandomAccessFileImpl::ReadSync(char* buf, size_t le
     }
     entity_->filePointer = newOffset + readCode;
     return {SUCCESS_CODE, readCode};
+}
+std::shared_ptr<OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity> RandomAccessFileImpl::GetEntity()
+{
+    return entity_;
 }
 }
