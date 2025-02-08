@@ -214,6 +214,7 @@ ohos_shared_library("fs") {
       "${filemanagement_service_path}/distributedfiledaemon/include/ipc",
     ]
     sources += [
+      "src/mod_fs/class_atomicfile/atomicfile_n_exporter.cpp",
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
       "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
       "src/mod_fs/class_stream/stream_n_exporter.cpp",
