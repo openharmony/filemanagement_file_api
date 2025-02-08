@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ public:
     /* Static helpers to create js objects */
     static NVal CreateUndefined(napi_env env);
     static NVal CreateBigInt64(napi_env env, int64_t val);
+    static NVal CreateBigIntUint64(napi_env env, uint64_t val);
     static NVal CreateInt64(napi_env env, int64_t val);
     static NVal CreateInt32(napi_env env, int32_t val);
     static NVal CreateUint32(napi_env env, int32_t val);
