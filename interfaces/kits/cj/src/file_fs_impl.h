@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "cj_common_ffi.h"
 #include "uni_error.h"
 #include "rust_file.h"
+#include "napi/native_api.h"
 
 namespace OHOS {
 namespace CJSystemapi {
@@ -43,6 +44,10 @@ constexpr int FILE_MATCH = 1;
 // use for moveDir
 constexpr int DIRMODE_MIN = 0;
 constexpr int DIRMODE_MAX = 3;
+
+struct StreamEntity {
+    std::unique_ptr<FILE, decltype(&fclose)> fp = { nullptr, fclose };
+};
 
 enum ModeOfMoveDir {
     DIRMODE_DIRECTORY_THROW_ERR = 0,

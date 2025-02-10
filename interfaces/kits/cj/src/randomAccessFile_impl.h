@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ public:
     int64_t GetFPointer();
     void SetFilePointerSync(int64_t fp);
     void CloseSync();
+    std::shared_ptr<OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity> GetEntity();
     std::tuple<int32_t, int64_t> WriteSync(char* buf, size_t len, int64_t offset);
     std::tuple<int32_t, int64_t> ReadSync(char* buf, size_t len, int64_t offset);
 

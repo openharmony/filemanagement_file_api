@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 #include "copy_file.h"
 #include "fdatasync.h"
 #include "fsync.h"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
 #include "list_file.h"
 #include "lseek.h"
 #include "macro.h"
@@ -26,13 +28,117 @@
 #include "symlink.h"
 #include "uni_error.h"
 
+#include "stream_n_exporter.h"
+#include "randomaccessfile_n_exporter.h"
+
 using namespace OHOS::FFI;
 
 namespace OHOS {
 namespace CJSystemapi {
 namespace FileFs {
 
+static napi_value InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp)
+{
+    napi_value objStream = FileManagement::LibN::NClass::InstantiateClass(
+        env,
+        OHOS::FileManagement::ModuleFileIO::StreamNExporter::className_,
+        {});
+    if (!objStream) {
+        LOGE("[Stream]: INNER BUG. Cannot instantiate stream");
+        return nullptr;
+    }
+
+    auto streamEntity = FileManagement::LibN::NClass::GetEntityOf<StreamEntity>(env, objStream);
+    if (!streamEntity) {
+        LOGE("[Stream]: Cannot instantiate stream because of void entity");
+        return nullptr;
+    }
+
+    streamEntity->fp.swap(fp);
+    return objStream;
+}
+
 extern "C" {
+int64_t FfiCreateStreamFromNapi(napi_env env, napi_value stream)
+{
+    if (env == nullptr || stream == nullptr) {
+        LOGE("[Stream]: parameter nullptr!");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    napi_valuetype type = napi_undefined;
+    if (napi_typeof(env, stream, &type) != napi_ok || type != napi_object) {
+        LOGE("[Stream]: parameter napi value type is not object!");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    auto streamEntity = FileManagement::LibN::NClass::GetEntityOf<StreamEntity>(env, stream);
+    if (!streamEntity) {
+        LOGE("[Stream]: Cannot instantiate stream because of void entity");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    auto streamImpl = FFIData::Create<StreamImpl>(std::move(streamEntity->fp));
+    if (streamImpl == nullptr) {
+        LOGE("[Stream]: Create ffidata failed.");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    return streamImpl->GetID();
+}
+
+napi_value FfiConvertStream2Napi(napi_env env, int64_t id)
+{
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+    auto instance = FFIData::GetData<StreamImpl>(id);
+    if (instance == nullptr) {
+        LOGE("[Stream]: instance not exist %{public}" PRId64, id);
+        return undefined;
+    }
+
+    std::vector<napi_property_descriptor> props = {
+        FileManagement::LibN::NVal::DeclareNapiFunction("writeSync",
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::WriteSync),
+        FileManagement::LibN::NVal::DeclareNapiFunction("flush",
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Flush),
+        FileManagement::LibN::NVal::DeclareNapiFunction("flushSync",
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::FlushSync),
+        FileManagement::LibN::NVal::DeclareNapiFunction("resdSync",
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::ReadSync),
+        FileManagement::LibN::NVal::DeclareNapiFunction("closeSync",
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::CloseSync),
+        FileManagement::LibN::NVal::DeclareNapiFunction("write",
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Write),
+        FileManagement::LibN::NVal::DeclareNapiFunction("read",
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Read),
+        FileManagement::LibN::NVal::DeclareNapiFunction("close",
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Close),
+        FileManagement::LibN::NVal::DeclareNapiFunction("seek",
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Seek),
+    };
+
+    bool succ = false;
+    napi_value cls = nullptr;
+    std::tie(succ, cls) = FileManagement::LibN::NClass::DefineClass(
+        env,
+        OHOS::FileManagement::ModuleFileIO::StreamNExporter::className_,
+        OHOS::FileManagement::ModuleFileIO::StreamNExporter::Constructor,
+        move(props));
+
+    if (!succ) {
+        LOGE("INNER BUG. Failed to save class");
+        return undefined;
+    }
+
+    napi_value result = InstantiateStream(env, instance->GetRealFp());
+    napi_valuetype type = napi_undefined;
+    if (napi_typeof(env, result, &type) != napi_ok || type == napi_undefined) {
+        LOGE("[Stream]: create napiobj failed.");
+        return undefined;
+    }
+    return result;
+}
+
 int64_t FfiOHOSFileFsCreateCopyOptions(int64_t callbackId, int64_t signalId)
 {
     LOGD("FS_TEST::FfiOHOSFileFsCreateCopyOptions");
@@ -332,6 +438,83 @@ RetDataI64 FfiOHOSRandomAccessFileRead(int64_t id, char* buf, size_t len, int64_
     ret.code = code;
     ret.data = data;
     return ret;
+}
+
+napi_value FfiConvertRandomAccessFile2Napi(napi_env env, int64_t id)
+{
+    napi_value undefined = nullptr;
+    napi_get_undefined(env, &undefined);
+
+    auto instance = FFIData::GetData<RandomAccessFileImpl>(id);
+    if (instance == nullptr || instance->GetEntity() == nullptr) {
+        LOGE("FfiConvertRandomAccessFile2Napi instance not exist %{public}" PRId64, id);
+        return undefined;
+    }
+
+    napi_value objRAF = FileManagement::LibN::NClass::InstantiateClass(
+        env,
+        OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::className_,
+        {});
+    if (!env || !objRAF) {
+        LOGE("Empty input: env %d, obj %d", env == nullptr, objRAF == nullptr);
+        return undefined;
+    }
+
+    OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity *rafEntity = nullptr;
+    napi_status status = napi_unwrap(env, objRAF, reinterpret_cast<void **>(&rafEntity));
+    if (status != napi_ok) {
+        LOGE("Cannot unwrap for pointer: %d", status);
+        return undefined;
+    }
+    if (!rafEntity) {
+        LOGE("Cannot instantiate randomaccessfile because of void entity");
+        return undefined;
+    }
+
+    rafEntity->fd.swap(instance->GetEntity()->fd);
+    rafEntity->filePointer = instance->GetEntity()->filePointer;
+    rafEntity->start = instance->GetEntity()->start;
+    rafEntity->end = instance->GetEntity()->end;
+
+    napi_valuetype type;
+    status = napi_typeof(env, objRAF, &type);
+    if (status != napi_ok || type == napi_undefined) {
+        LOGE("[RandomAccessFile]: create napiobj failed");
+        return undefined;
+    }
+
+    return objRAF;
+}
+
+int64_t FfiCreateRandomAccessFileFromNapi(napi_env env, napi_value objRAF)
+{
+    if (env == nullptr || objRAF == nullptr) {
+        LOGE("[RandomAccessFile]: parameter is nullptr");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    napi_valuetype type = napi_undefined;
+
+    if (napi_typeof(env, objRAF, &type) != napi_ok || type != napi_object) {
+        LOGE("[RandomAccessFile]: parameter is not object");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    std::shared_ptr<OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity>* entity = nullptr;
+    napi_status status = napi_unwrap(env, objRAF, reinterpret_cast<void **>(&entity));
+    if (status != napi_ok || entity == nullptr) {
+        LOGE("Cannot unwrap for pointer: %d", status);
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    auto native = FFIData::Create<RandomAccessFileImpl>(*entity);
+
+    if (native == nullptr) {
+        LOGE("[RandomAccessFile]: Create ffidata failed");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+
+    return native->GetID();
 }
 
 int32_t FfiOHOSFileFsMkdir(const char* path, bool recursion, bool isTwoArgs)
