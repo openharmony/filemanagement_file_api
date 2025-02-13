@@ -34,6 +34,10 @@
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
 #include "file_utils.h"
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include "ipc_skeleton.h"
+#include "tokenid_kit.h"
+#endif
 
 namespace OHOS {
 namespace FileManagement {
@@ -345,6 +349,71 @@ string CommonFunc::Decode(const std::string &uri)
 
     return outPutStream.str();
 }
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+bool IsNumeric(const string &str)
+{
+    if (str.empty()) {
+        return false;
+    }
+    for (char const &c : str) {
+        if (!isdigit(c)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void SetQueryMap(Uri* uri, std::unordered_map<std::string,
+      std::string> &queryMap)
+{
+    // file://media/image/12?networkid=xxxx&api_version=xxxx?times=xxx&user=101
+    string query = uri->GetQuery();
+    string pairString;
+    stringstream queryStream(query);
+
+    while (getline(queryStream, pairString, '&')) {
+        size_t splitIndex = pairString.find('=');
+        if (splitIndex == string::npos || splitIndex == (pairString.length() - 1)) {
+            HILOGE("failed to parse query, query field is %{private}s!", pairString.c_str());
+            continue;
+        }
+        queryMap[pairString.substr(0, splitIndex)] = pairString.substr(splitIndex + 1);
+    }
+    return;
+}
+
+bool CommonFunc::GetAndCheckUserId(Uri* uri, string &userId)
+{
+    if (uri->ToString().find("user=") == string::npos) {
+        return false;
+    }
+
+    std::unordered_map<std::string, std::string> queryMap;
+    SetQueryMap(uri, queryMap);
+    auto it = queryMap.find("user");
+    if (it != queryMap.end()) {
+        userId = it->second;
+        if (!IsNumeric(userId)) {
+            HILOGE("IsNumeric check fail");
+            return false;
+        }
+        return true;
+    } else {
+        HILOGE("GetAndCheckUserId no match userId");
+    }
+    return false;
+}
+
+/*
+ * For compatibility considerations, filtering system applications require non permission verification
+*/
+bool CommonFunc::IsSystemApp()
+{
+    uint64_t fullTokenId = OHOS::IPCSkeleton::GetSelfTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+}
+#endif
 
 tuple<bool, unique_ptr<char[]>, unique_ptr<char[]>> CommonFunc::GetCopyPathArg(napi_env env,
                                                                                napi_value srcPath,
