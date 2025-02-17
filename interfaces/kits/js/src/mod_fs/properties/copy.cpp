@@ -40,6 +40,7 @@
 #include "ipc_skeleton.h"
 #include "system_ability_definition.h"
 #include "trans_listener.h"
+#include "common_func.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -69,7 +70,18 @@ static int OpenSrcFile(const string &srcPth, std::shared_ptr<FileInfos> infos, i
             HILOGE("Failed to get remote object");
             return ENOMEM;
         }
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+        string userId;
+        if (CommonFunc::GetAndCheckUserId(&uri, userId) && CommonFunc::IsSystemApp()) {
+            dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(),
+                MEDIALIBRARY_DATA_URI + "?user=" + userId);
+        } else {
+            dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
+        }
+#else
         dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
+#endif
         if (!dataShareHelper) {
             HILOGE("Failed to connect to datashare");
             return E_PERMISSION;
