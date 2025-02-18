@@ -19,7 +19,7 @@
 #include "fd_guard.h"
 #include "n_val.h"
 #include "uv.h"
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
 #include "iremote_broker.h"
 #include "file_uri.h"
 #endif
@@ -64,7 +64,7 @@ struct FileInfo {
     std::unique_ptr<DistributedFS::FDGuard> fdg = { nullptr };
 };
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
 class FileIoToken : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.fileio.open");
@@ -102,7 +102,7 @@ struct CommonFunc {
     static std::string GetModeFromFlags(unsigned int flags);
     static bool CheckPublicDirPath(const std::string &sandboxPath);
     static std::string Decode(const std::string &uri);
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     static bool GetAndCheckUserId(Uri* uri, std::string &userId);
     static bool IsSystemApp();
 #endif
