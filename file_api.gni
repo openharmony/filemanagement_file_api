@@ -23,3 +23,4 @@ utils_path = "${file_api_path}/utils"
 use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
           "${current_os}_${current_cpu}" == "mac_arm64"
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
+use_android = "${current_os}" == "android"
