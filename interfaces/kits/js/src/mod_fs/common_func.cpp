@@ -34,7 +34,7 @@
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
 #include "file_utils.h"
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #endif
@@ -349,7 +349,7 @@ string CommonFunc::Decode(const std::string &uri)
     return outPutStream.str();
 }
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
 bool IsNumeric(const string &str)
 {
     if (str.empty()) {
