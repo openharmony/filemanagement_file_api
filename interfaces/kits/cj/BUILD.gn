@@ -285,3 +285,10 @@ ohos_shared_library("cj_statvfs_ffi") {
   part_name = "file_api"
   subsystem_name = "filemanagement"
 }
+
+group("fs_ffi_packages") {
+  deps = [
+    ":cj_file_fs_ffi",
+    ":cj_statvfs_ffi",
+  ]
+}
