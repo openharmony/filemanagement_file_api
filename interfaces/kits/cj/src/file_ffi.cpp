@@ -129,13 +129,13 @@ int64_t FfiCreateFileFromNapi(napi_env env, napi_value objRAF)
         return ERR_INVALID_INSTANCE_CODE;
     }
 
-    std::shared_ptr<ModuleFileIOFileEntity>* entity = nullptr;
-    napi_status status = napi_unwrap(env, objRAF, reinterpret_cast<void **>(&entity));
-    if (status != napi_ok || entity == nullptr) {
-        LOGE("Cannot unwrap for pointer: %d", status);
+    auto fileEntity = FileManagement::LibN::NClass::GetEntityOf<ModuleFileIOFileEntity>(env, objRAF);
+    if (!fileEntity) {
+        LOGE("[File]: Cannot instantiate file because of void entity");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    auto native = FFIData::Create<CJFileEntity>(std::move((*entity)->fd_), (*entity)->path_, (*entity)->uri_);
+
+    auto native = FFIData::Create<CJFileEntity>(std::move(fileEntity->fd_), fileEntity->path_, fileEntity->uri_);
     if (native == nullptr) {
         LOGE("[File]: Create ffidata failed");
         return ERR_INVALID_INSTANCE_CODE;
