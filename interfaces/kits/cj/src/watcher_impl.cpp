@@ -229,6 +229,7 @@ void FileWatcherManager::NotifyEvent(const struct inotify_event *event, std::fun
         int errCode = memcpy_s(ret.fileName, len, fileName.c_str(), len);
         if (errCode != 0) {
             LOGE("Failed to get file name");
+            free(ret.fileName);
             continue;
         }
         callback(ret);
