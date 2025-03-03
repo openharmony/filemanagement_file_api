@@ -20,7 +20,7 @@ group("unittest") {
 }
 
 ohos_unittest("filemgmt_libn_test") {
-  module_out_path = "filemanagement/file_api"
+  module_out_path = "file_api/file_api"
   include_dirs = [ "./include" ]
 
   sources = [ "./src/n_class_test.cpp" ]
