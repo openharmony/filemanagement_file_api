@@ -55,6 +55,9 @@ void cbExec(napi_env env, void *data)
     auto connectDfsCB = static_cast<ConnectDfsCB *>(data);
     sptr<NAPIDfsListener> dfsListeners(new (std::nothrow) NAPIDfsListener());
     connectDfsCB->jsCallbackObject = dfsListeners;
+    if (connectDfsCB->jsCallbackObject == nullptr) {
+        return;
+    }
     connectDfsCB->jsCallbackObject->SetConnectDfsEnv(env);
     HILOGI("connectDfsCB set env success");
     if (connectDfsCB->dfsConnectCB.callback != nullptr) {
