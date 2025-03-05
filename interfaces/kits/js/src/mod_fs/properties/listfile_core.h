@@ -63,6 +63,7 @@ public:
     static FsResult<std::vector<std::string>> DoListFile(const std::string &path, const optional<ListFileOptions> &opt=nullopt);
 };
 
+constexpr int FILTER_MATCH = 1;
 constexpr int FILTER_DISMATCH = 0;
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_CORE_H
