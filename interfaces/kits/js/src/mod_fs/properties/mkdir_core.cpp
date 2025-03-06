@@ -209,7 +209,7 @@ static int32_t MkdirExec(const string &path, bool recursion, bool hasOption)
     return ERRNO_NOERR;
 }
 
-FsResult<void> MkdirCore::DoMkdir(const std::string& path, const std::optional<bool>& recursion)
+FsResult<void> MkdirCore::DoMkdir(const std::string &path, const std::optional<bool> &recursion)
 {
     bool hasOption = false;
     bool mkdirRecursion = false;
