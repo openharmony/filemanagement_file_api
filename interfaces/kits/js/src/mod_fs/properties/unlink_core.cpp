@@ -26,7 +26,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-FsResult<void> UnlinkCore::DoUnlink(const std::string& src)
+FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
 {
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> unlink_req = {
         new uv_fs_t, FsUtils::FsReqCleanup };
