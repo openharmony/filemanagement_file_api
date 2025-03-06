@@ -86,8 +86,6 @@ public:
 
 class FsUtils {
 public:
-    static tuple<bool, void *, int64_t> GetActualBuf(
-        void *rawBuf, size_t bufLen, const optional<int64_t> &offset = nullopt);
     static tuple<bool, size_t> GetActualLen(size_t bufLen, size_t bufOff, const optional<int64_t> &length = nullopt);
     static uint32_t ConvertFlags(const uint32_t &flags);
     static void FsReqCleanup(uv_fs_t *req);

@@ -23,28 +23,6 @@ namespace {
 const vector<string> PUBLIC_DIR_PATHS = { "/Documents" };
 }
 
-tuple<bool, void *, int64_t> FsUtils::GetActualBuf(void *rawBuf, size_t bufLen, const optional<int64_t> &offset)
-{
-    void *realBuf = nullptr;
-    int64_t opOffset = 0;
-    if (offset.has_value()) {
-        opOffset = offset.value();
-        if (opOffset < 0) {
-            HILOGE("Invalid option.offset, positive integer is desired");
-            return { false, nullptr, opOffset };
-        } else if (opOffset > static_cast<int64_t>(bufLen)) {
-            HILOGE("Invalid option.offset, buffer limit exceeded");
-            return { false, nullptr, opOffset };
-        } else {
-            realBuf = static_cast<uint8_t *>(rawBuf) + opOffset;
-        }
-    } else {
-        realBuf = rawBuf;
-    }
-
-    return { true, realBuf, opOffset };
-}
-
 tuple<bool, size_t> FsUtils::GetActualLen(size_t bufLen, size_t bufOff, const optional<int64_t> &length)
 {
     size_t retLen = bufLen - bufOff;
