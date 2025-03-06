@@ -77,7 +77,7 @@ FsResult<void> TruncateCore::DoTruncate(FileInfo &fileInfo, const std::optional<
         }
     }
     
-    auto err = Truncate(info, truncateLen);
+    auto err = Truncate(fileInfo, truncateLen);
     if (err) {
         return FsResult<void>::Error(err);
     }
