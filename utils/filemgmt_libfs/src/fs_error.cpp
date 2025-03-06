@@ -60,6 +60,4 @@ FsError::operator bool() const
     return errno_ != ERRNO_NOERR;
 }
 
-static void test() {}
-
 } // namespace OHOS::FileManagement::ModuleFileIO
