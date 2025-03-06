@@ -13,11 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FILEMGMT_LIBN_FILEMGMT_LIBFS_H
-#define FILEMGMT_LIBN_FILEMGMT_LIBFS_H
+#ifndef FILEMANAGEMENT_FS_ARRAY_BUFFER_H
+#define FILEMANAGEMENT_FS_ARRAY_BUFFER_H
 
-#include "fs_array_buffer.h"
-#include "fs_error.h"
-#include "fs_result.h"
+#include <cstddef>
 
-#endif // FILEMGMT_LIBN_FILEMGMT_LIBFS_H
+namespace OHOS::FileManagement::ModuleFileIO {
+
+struct ArrayBuffer {
+    void *buf;
+    size_t length;
+
+    ArrayBuffer(void *buffer, size_t len) : buf(buffer), length(len) {}
+};
+
+} // namespace OHOS::FileManagement::ModuleFileIO
+#endif // FILEMANAGEMENT_FS_ARRAY_BUFFER_H
