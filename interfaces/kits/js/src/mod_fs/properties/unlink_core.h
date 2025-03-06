@@ -25,7 +25,7 @@ namespace ModuleFileIO {
 
 class UnlinkCore final {
 public:
-    static FsResult<void> DoUnlink(const std::string& src);
+    static FsResult<void> DoUnlink(const std::string &src);
 };
 const std::string PROCEDURE_READTEXT_NAME = "FileIOUnlink";
 } // namespace ModuleFileIO
