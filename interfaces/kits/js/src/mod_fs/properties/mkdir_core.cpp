@@ -22,11 +22,12 @@
 #include <sstream>
 #include <unistd.h>
 
+#include "filemgmt_libhilog.h"
+
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include <sys/xattr.h>
 
 #include "bundle_mgr_proxy.h"
-#include "filemgmt_libhilog.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
