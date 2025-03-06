@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
 ohos_unittest("task_signal_test") {
-  module_out_path = "filemanagement/file_api"
+  module_out_path = "file_api/file_api"
 
   resource_config_file = "../resource/ohos_test.xml"
 
