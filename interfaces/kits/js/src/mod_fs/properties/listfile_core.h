@@ -18,6 +18,7 @@
 
 #include "filemgmt_libfs.h"
 #include "file_filter.h"
+#include "fs_file_filter.h"
 
 #include <dirent.h>
 
@@ -52,18 +53,19 @@ struct OptionArgs {
     }
 };
 
-struct ListFileOptions {
-    FileFilter filter;
-    int listNum;
+struct FsListFileOptions {
     bool recursion;
+    int listNum;
+    optional<FsFileFilter> filter;
 };
 
 class ListFileCore {
 public:
-    static FsResult<std::vector<std::string>> DoListFile(const std::string &path, const optional<ListFileOptions> &opt=nullopt);
+    static FsResult<std::vector<std::string>> DoListFile(const std::string &path, const optional<FsListFileOptions> &opt=nullopt);
 };
 
 constexpr int FILTER_MATCH = 1;
 constexpr int FILTER_DISMATCH = 0;
+const int32_t MAX_SUFFIX_LENGTH = 256;
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_CORE_H

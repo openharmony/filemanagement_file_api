@@ -30,22 +30,67 @@ namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 thread_local OptionArgs g_optionArgs_core;
 
-static void ValidFileFilterParam(FileFilter &filter, FileFilter *optArgsFilter)
+static bool CheckSuffix(const vector<string> &suffixs)
 {
-    vector<string> suffixs = filter.GetSuffix();
-    optArgsFilter->SetSuffix(suffixs);
-
-    vector<string> displayNames = filter.GetDisplayName();
-    optArgsFilter->SetDisplayName(displayNames);
-
-    int64_t fileSizeOver = filter.GetFileSizeOver();
-    optArgsFilter->SetFileSizeOver(fileSizeOver);
-
-    double lastModifiedAfter = filter.GetLastModifiedAfter();
-    optArgsFilter->SetLastModifiedAfter(lastModifiedAfter);
+    for (string suffix : suffixs) {
+        if (suffix.length() <= 1 || suffix.length() > MAX_SUFFIX_LENGTH) {
+            return false;
+        }
+        if (suffix[0] != '.') {
+            return false;
+        }
+        for (size_t i = 1; i < suffix.length(); i++) {
+            if (!isalnum(suffix[i])) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
-static bool ValidOptionParam(const optional<ListFileOptions>& opt, OptionArgs &optionArgs)
+static bool ValidFileFilterParam(FsFileFilter &fsFilter, FileFilter *filter)
+{
+    auto suffixs = fsFilter.GetSuffix();
+    if (fsFilter.GetSuffix().has_value()) {
+        vector<string> suffixs = fsFilter.GetSuffix().value();
+        if (!CheckSuffix(suffixs) || suffixs.size() == 0) {
+            HILOGE("Invalid suffix.");
+            return false;
+        }
+        filter->SetSuffix(suffixs);
+    }
+
+    if (fsFilter.GetDisplayName().has_value()) {
+        vector<string> displayNames = fsFilter.GetDisplayName().value();
+        if (displayNames.size() == 0) {
+            HILOGE("Invalid displayName.");
+            return false;
+        }
+        filter->SetDisplayName(displayNames);
+    }
+
+    if (fsFilter.GetFileSizeOver().has_value()) {
+        int64_t fileSizeOver = fsFilter.GetFileSizeOver().value();
+        if (fileSizeOver < 0) {
+            HILOGE("Failed to get fileSizeOver prop.");
+            return false;
+        }
+        filter->SetFileSizeOver(fileSizeOver);
+    }
+
+    if (fsFilter.GetLastModifiedAfter().has_value()) {
+        double lastModifiedAfter = fsFilter.GetLastModifiedAfter().value();
+        if (lastModifiedAfter < 0) {
+            HILOGE("Failed to get lastModifiedAfter prop.");
+            return false;
+        }
+        filter->SetLastModifiedAfter(lastModifiedAfter);
+    }
+
+    return true;
+}
+
+static bool ValidOptionParam(const optional<FsListFileOptions>& opt, OptionArgs &optionArgs)
 {
     if (opt.has_value()) {
         auto op = opt.value();
@@ -53,10 +98,13 @@ static bool ValidOptionParam(const optional<ListFileOptions>& opt, OptionArgs &o
             HILOGE("Failed to get listNum prop");
             return false;
         }
-        optionArgs.listNum = op.listNum;
-        optionArgs.recursion = op.recursion;
 
-        ValidFileFilterParam(op.filter, &(optionArgs.filter));
+        optionArgs.recursion = op.recursion;
+        optionArgs.listNum = op.listNum;
+
+        if (op.filter.has_value()) {
+            ValidFileFilterParam(op.filter.value(), &(optionArgs.filter));
+        }
     }
 
     return true;
@@ -233,7 +281,7 @@ static std::vector<std::string> DoListFileVector(const string &path, vector<stri
     return dirents;
 }
 
-FsResult<std::vector<std::string>> ListFileCore::DoListFile(const string &path, const optional<ListFileOptions> &opt)
+FsResult<std::vector<std::string>> ListFileCore::DoListFile(const string &path, const optional<FsListFileOptions> &opt)
 {
     vector<string> direntsRes;
     g_optionArgs_core.Clear();
