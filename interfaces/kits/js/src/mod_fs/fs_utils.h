@@ -17,6 +17,7 @@
 #define FILEMANAGEMENT_FS_UTILS_H
 
 #include <cstddef>
+#include <cstdint>
 #include <dirent.h>
 #include <fcntl.h>
 #include <memory>
@@ -38,32 +39,32 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 
-constexpr int RDONLY = UV_FS_O_RDONLY;
-constexpr int WRONLY = UV_FS_O_WRONLY;
-constexpr int RDWR = UV_FS_O_RDWR;
-constexpr int CREATE = UV_FS_O_CREAT;
-constexpr int TRUNC = UV_FS_O_TRUNC;
-constexpr int APPEND = UV_FS_O_APPEND;
-constexpr int NONBLOCK = UV_FS_O_NONBLOCK;
-constexpr int DIRECTORY = UV_FS_O_DIRECTORY;
-constexpr int NOFOLLOW = UV_FS_O_NOFOLLOW;
-constexpr int SYNC = UV_FS_O_SYNC;
+constexpr int32_t RDONLY = UV_FS_O_RDONLY;
+constexpr int32_t WRONLY = UV_FS_O_WRONLY;
+constexpr int32_t RDWR = UV_FS_O_RDWR;
+constexpr int32_t CREATE = UV_FS_O_CREAT;
+constexpr int32_t TRUNC = UV_FS_O_TRUNC;
+constexpr int32_t APPEND = UV_FS_O_APPEND;
+constexpr int32_t NONBLOCK = UV_FS_O_NONBLOCK;
+constexpr int32_t DIRECTORY = UV_FS_O_DIRECTORY;
+constexpr int32_t NOFOLLOW = UV_FS_O_NOFOLLOW;
+constexpr int32_t SYNC = UV_FS_O_SYNC;
 
-constexpr unsigned int MODE_EXIST = 00;
-constexpr unsigned int MODE_WRITE = 02;
-constexpr unsigned int MODE_READ = 04;
-constexpr unsigned int MODE_READ_WRITE = 06;
+constexpr uint32_t MODE_EXIST = 00;
+constexpr uint32_t MODE_WRITE = 02;
+constexpr uint32_t MODE_READ = 04;
+constexpr uint32_t MODE_READ_WRITE = 06;
 
-constexpr unsigned int USR_READ_ONLY = 00;
-constexpr unsigned int USR_WRITE_ONLY = 01;
-constexpr unsigned int USR_RDWR = 02;
-constexpr unsigned int USR_CREATE = 0100;
-constexpr unsigned int USR_TRUNC = 01000;
-constexpr unsigned int USR_APPEND = 02000;
-constexpr unsigned int USR_NONBLOCK = 04000;
-constexpr unsigned int USR_DIRECTORY = 0200000;
-constexpr unsigned int USR_NOFOLLOW = 0400000;
-constexpr unsigned int USR_SYNC = 04010000;
+constexpr uint32_t USR_READ_ONLY = 00;
+constexpr uint32_t USR_WRITE_ONLY = 01;
+constexpr uint32_t USR_RDWR = 02;
+constexpr uint32_t USR_CREATE = 0100;
+constexpr uint32_t USR_TRUNC = 01000;
+constexpr uint32_t USR_APPEND = 02000;
+constexpr uint32_t USR_NONBLOCK = 04000;
+constexpr uint32_t USR_DIRECTORY = 0200000;
+constexpr uint32_t USR_NOFOLLOW = 0400000;
+constexpr uint32_t USR_SYNC = 04010000;
 
 const double NS = 1e9;
 const double MS = 1e3;

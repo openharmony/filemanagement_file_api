@@ -41,7 +41,7 @@ tuple<bool, size_t> FsUtils::GetActualLen(size_t bufLen, size_t bufOff, const op
 uint32_t FsUtils::ConvertFlags(const uint32_t &flags)
 {
     // default value is usrReadOnly 00
-    unsigned int flagsABI = 0;
+    uint32_t flagsABI = 0;
     flagsABI |= ((flags & USR_WRITE_ONLY) == USR_WRITE_ONLY) ? WRONLY : 0;
     flagsABI |= ((flags & USR_RDWR) == USR_RDWR) ? RDWR : 0;
     flagsABI |= ((flags & USR_CREATE) == USR_CREATE) ? CREATE : 0;
