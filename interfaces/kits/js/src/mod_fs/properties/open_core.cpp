@@ -1,25 +1,24 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 #include "open_core.h"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <memory>
 
-#include "class_file/file_entity.h"
+#include "file_entity.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "fs_utils.h"
@@ -72,12 +71,12 @@ static tuple<bool, uint32_t> ValidAndConvertFlags(const optional<int32_t> &mode)
         int32_t invalidMode = (O_WRONLY | O_RDWR);
         if (modeValue < 0 || ((modeValue & invalidMode) == invalidMode)) {
             HILOGE("Invalid mode");
-            return {false, flags};
+            return { false, flags };
         }
         flags = static_cast<uint32_t>(modeValue);
         (void)FsUtils::ConvertFlags(flags);
     }
-    return {true, flags};
+    return { true, flags };
 }
 
 static FsResult<FsFile *> InstantiateFile(int fd, string pathOrUri, bool isUri)
@@ -134,14 +133,12 @@ static FsResult<FsFile *> InstantiateFile(int fd, string pathOrUri, bool isUri)
 
 static int OpenFileByPath(const string &path, uint32_t mode)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> open_req = {new uv_fs_t,
-                                                                       FsUtils::FsReqCleanup};
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> open_req = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;
     }
-    int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode,
-                         S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     return ret;
 }
 
@@ -156,8 +153,7 @@ static int OpenFileByDatashare(const string &path, uint32_t flags)
         return -ENOMEM;
     }
 
-    dataShareHelper =
-        DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
+    dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
     if (!dataShareHelper) {
         HILOGE("Failed to connect to datashare");
         return -E_PERMISSION;
@@ -177,31 +173,31 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, uint
         if (res < 0) {
             HILOGE("Failed to open file by Datashare error %{public}d", res);
         }
-        return {res, uri.ToString()};
+        return { res, uri.ToString() };
     } else if (bundleName == DOCS && access(realPath.c_str(), F_OK) != 0) {
         int res = OpenFileByDatashare(uri.ToString(), mode);
         if (res < 0) {
             HILOGE("Failed to open file by Datashare error %{public}d", res);
-            return {-ENOENT, uri.ToString()};
+            return { -ENOENT, uri.ToString() };
         }
-        return {res, uri.ToString()};
+        return { res, uri.ToString() };
     }
     int ret = OpenFileByPath(realPath, mode);
     if (ret < 0) {
         HILOGE("Failed to open file for libuv error %{public}d", ret);
     }
-    return {ret, uriStr};
+    return { ret, uriStr };
 }
 
 static tuple<int, string> OpenFileByBroker(const Uri &uri, uint32_t mode)
 {
     uint32_t flag = (mode % MAX_WANT_FLAG) > 0 ? AAFwk::Want::FLAG_AUTH_WRITE_URI_PERMISSION
-                                               : AAFwk::Want::FLAG_AUTH_READ_URI_PERMISSION;
+                                            : AAFwk::Want::FLAG_AUTH_READ_URI_PERMISSION;
     int ret = AAFwk::AbilityManagerClient::GetInstance()->OpenFile(uri, flag);
     if (ret < 0) {
         HILOGE("Failed to open file by Broker error %{public}d", ret);
     }
-    return {ret, uri.ToString()};
+    return { ret, uri.ToString() };
 }
 
 static tuple<int, string> OpenFileByUri(const string &path, uint32_t mode)
@@ -217,13 +213,13 @@ static tuple<int, string> OpenFileByUri(const string &path, uint32_t mode)
         int fd = -1;
         if (RemoteUri::IsRemoteUri(path, fd, mode)) {
             if (fd >= 0) {
-                return {fd, path};
+                return { fd, path };
             }
             HILOGE("Failed to open file by RemoteUri");
         }
     }
     HILOGE("Failed to open file by invalid uri");
-    return {-EINVAL, path};
+    return { -EINVAL, path };
 }
 #endif
 

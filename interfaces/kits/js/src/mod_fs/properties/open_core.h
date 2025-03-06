@@ -17,13 +17,12 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_CORE_H
 
 #include "filemgmt_libfs.h"
-#include "class_file/fs_file.h"
+#include "fs_file.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 class OpenCore final {
 public:
-    static FsResult<FsFile *> DoOpen(const std::string &path,
-                                     const std::optional<int32_t> &mode = std::nullopt);
+    static FsResult<FsFile *> DoOpen(const std::string &path, const std::optional<int32_t> &mode = std::nullopt);
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO
