@@ -257,11 +257,11 @@ static std::tuple<std::unique_ptr<BufferData>, int32_t> ReadFileToBuffer(napi_en
         return {nullptr, ENOMEM};
     }
     bufferData->length = fread(bufferData->buffer, sizeof(uint8_t), fileSize, fp);
-    if ((bufferData->length != fileSize && !feof(fp)) || ferror(fp)) {
+    if ((bufferData->length != static_cast<size_t>(fileSize) && !feof(fp)) || ferror(fp)) {
         HILOGE("Failed to read file, actual length is:%zu, fileSize:%ld", bufferData->length, fileSize);
         delete[] bufferData->buffer;
         bufferData->buffer = nullptr;
-        bufferData->length = 0;
+        bufferData->length = 0;`
         return {nullptr, EIO};
     }
     return {std::move(bufferData), 0};
