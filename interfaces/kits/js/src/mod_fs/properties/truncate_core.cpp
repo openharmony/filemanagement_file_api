@@ -25,48 +25,6 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 
-static bool IsPath(const FileInfo &fileInfo)
-{
-    auto path = fileInfo.path.get();
-    if (path == nullptr || strlen(path) == 0) {
-        return false;
-    }
-    return true;
-}
-
-static tuple<bool, int32_t> IsFd(const FileInfo &fileInfo)
-{
-    auto fdg = fileInfo.fdg.get();
-    if (fdg == nullptr) {
-        return make_tuple(false, 0);
-    }
-    return make_tuple(true, fdg->GetFD());
-}
-
-static tuple<bool, FileInfo> ValidFileInfo(const FileInfo &fileInfo)
-{
-    auto isPath = IsPath(fileInfo);
-    if (isPath) {
-        auto &path = const_cast<std::unique_ptr<char[]>&>(fileInfo.path);
-        return { true, FileInfo { true, move(path), {} } };
-    }
-    auto [isFd, fd] = IsFd(fileInfo);
-    if (isFd) {
-        if (fd < 0) {
-            HILOGE("Invalid fd");
-            return { false, FileInfo { false, {}, {} } };
-        }
-        auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
-        if (fdg == nullptr) {
-            HILOGE("Failed to request heap memory.");
-            return { false, FileInfo { false, {}, {} } };
-        }
-        return { true, FileInfo { false, {}, move(fdg) } };
-    }
-    HILOGE("Invalid parameter");
-    return { false, FileInfo { false, {}, {} } };
-};
-
 static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
 {
     if (fileInfo.isPath) {
@@ -110,10 +68,6 @@ static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
 
 FsResult<void> TruncateCore::DoTruncate(FileInfo &fileInfo, const std::optional<int64_t> &len)
 {
-    auto [succ, info] = ValidFileInfo(fileInfo);
-    if (!succ) {
-        return FsResult<void>::Error(EINVAL);
-    }
     int64_t truncateLen = 0;
     if (len.has_value()) {
         truncateLen = len.value();
