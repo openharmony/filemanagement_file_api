@@ -206,17 +206,16 @@ static tuple<int, string> OpenFileByUri(const string &path, uint32_t mode)
     string uriType = uri.GetScheme();
     if (uriType == SCHEME_FILE) {
         return OpenByFileDataUri(uri, path, mode);
-    } else if (uriType == SCHEME_BROKER) {
+    }
+    if (uriType == SCHEME_BROKER) {
         return OpenFileByBroker(uri, mode);
-    } else if (uriType == DATASHARE) {
-        // datashare:////#fdFromBinder=xx
-        int fd = -1;
-        if (RemoteUri::IsRemoteUri(path, fd, mode)) {
-            if (fd >= 0) {
-                return { fd, path };
-            }
-            HILOGE("Failed to open file by RemoteUri");
+    }
+    int fd = -1;
+    if (uriType == DATASHARE && RemoteUri::IsRemoteUri(path, fd, mode)) {
+        if (fd >= 0) {
+            return { fd, path };
         }
+        HILOGE("Failed to open file by RemoteUri");
     }
     HILOGE("Failed to open file by invalid uri");
     return { -EINVAL, path };
