@@ -18,9 +18,9 @@
 #include <sys/file.h>
 
 #include "file_uri.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "fs_utils.h"
-#include "file_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -28,13 +28,13 @@ namespace ModuleFileIO {
 using namespace std;
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-static tuple<int, unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*>> RealPathCore(const string &srcPath)
+static tuple<int, unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *>> RealPathCore(const string &srcPath)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> realpath_req = {
-        new (std::nothrow) uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> realpath_req = { new (std::nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!realpath_req) {
         HILOGE("Failed to request heap memory.");
-        return { ENOMEM, move(realpath_req)};
+        return { ENOMEM, move(realpath_req) };
     }
     int ret = uv_fs_realpath(nullptr, realpath_req.get(), srcPath.c_str(), nullptr);
     return { ret, move(realpath_req) };
@@ -188,7 +188,7 @@ FsResult<FsFile *> FsFile::Constructor()
         HILOGE("Failed to create FsFile object on heap.");
         return FsResult<FsFile *>::Error(ENOMEM);
     }
-    
+
     return FsResult<FsFile *>::Success(move(fsFilePtr));
 }
 
