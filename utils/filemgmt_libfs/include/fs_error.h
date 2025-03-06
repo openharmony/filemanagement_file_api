@@ -17,7 +17,6 @@
 #define FILEMANAGEMENT_FS_ERROR_H
 
 #include <functional>
-#include <memory>
 #include <string>
 #include <string_view>
 #include <tuple>

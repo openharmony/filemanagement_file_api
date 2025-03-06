@@ -14,7 +14,6 @@
  */
 
 #include "fs_error.h"
-#include <memory>
 #include "uv.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
