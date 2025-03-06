@@ -13,29 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#include "unlink_ani.h"
 
-#include <cinttypes>
-#include <iostream>
-#include <unistd.h>
-
-#include "fd_guard.h"
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
+#include "type_converter.h"
+#include "unlink_core.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-using namespace std;
+namespace ANI {
 
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
-};
+void UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
+{
+    auto [succ, pathStr] = TypeConverter::ToUTF8String(env, path);
+    if (!succ) {
+        HILOGE("Invalid path");
+        ErrorHandler::Throw(env, EINVAL);
+        return;
+    }
+    auto ret = UnlinkCore::DoUnlink(pathStr);
+    if (!ret.IsSuccess()) {
+        HILOGE("Unlink failed");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+        return;
+    }
+}
+
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H

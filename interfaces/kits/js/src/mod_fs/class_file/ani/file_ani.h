@@ -13,29 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_FILE_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_FILE_ANI_H
 
-#include <cinttypes>
-#include <iostream>
-#include <unistd.h>
-
-#include "fd_guard.h"
-#include "filemgmt_libhilog.h"
+#include <ani.h>
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-using namespace std;
+namespace ANI {
 
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
+class FileAni final {
+public:
+    static ani_string GetParent(ani_env *env, [[maybe_unused]] ani_object object);
+    static void LockSync(ani_env *env, [[maybe_unused]] ani_object object, ani_object exclusive);
+    static void TryLock(ani_env *env, [[maybe_unused]] ani_object object, ani_object exclusive);
+    static void UnLock(ani_env *env, [[maybe_unused]] ani_object object);
 };
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_FILE_ANI_H
