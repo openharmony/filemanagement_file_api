@@ -15,13 +15,6 @@
 
 #include "unlink_core.h"
 
-#include <cstring>
-#include <ctime>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <unistd.h>
-
 #ifdef FILE_API_TRACE
 #include "hitrace_meter.h"
 #endif
