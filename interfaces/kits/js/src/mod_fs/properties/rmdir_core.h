@@ -24,7 +24,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 class RmdirentCore final {
 public:
-    static FsResult<void> DoRmdirent(const string &fpath);
+    static FsResult<void> DoRmdirent(const std::string &fpath);
 };
 const std::string PROCEDURE_RMDIRENT_NAME = "FileIORmDirent";
 } // namespace ModuleFileIO

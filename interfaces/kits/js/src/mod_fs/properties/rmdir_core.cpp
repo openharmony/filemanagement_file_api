@@ -112,7 +112,10 @@ FsResult<void> RmdirentCore::DoRmdirent(const string &fpath)
     }
 
     auto err = RmDirent(fpath);
-    return FsResult<void>::Error(err);
+    if (err) {
+        return FsResult<void>::Error(err);
+    }
+    return FsResult<void>::Success();
 }
 } // namespace ModuleFileIO
 } // namespace FileManagement
