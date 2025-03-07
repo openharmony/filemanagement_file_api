@@ -59,7 +59,7 @@ static tuple<bool, optional<string>> ParseEncoding(ani_env *env, ani_object obj)
     if (isUndefined) {
         return { false, nullopt };
     }
-    auto [succ, encoding] = TypeConverter::ToUTF8StringPath(env, (ani_string)encoding_ref);
+    auto [succ, encoding] = TypeConverter::ToUTF8String(env, (ani_string)encoding_ref);
     if (!succ) {
         HILOGE("Invalid encoding");
         return { false, nullopt };
@@ -111,7 +111,7 @@ ani_string ReadTextAni::ReadTextSync(
         return nullptr;
     }
 
-    auto [succPath, path] = TypeConverter::ToUTF8StringPath(env, filePath);
+    auto [succPath, path] = TypeConverter::ToUTF8String(env, filePath);
     if (!succPath) {
         HILOGE("Invalid Path");
         return nullptr;
