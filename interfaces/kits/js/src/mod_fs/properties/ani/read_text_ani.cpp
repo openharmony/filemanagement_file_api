@@ -109,7 +109,6 @@ ani_string ReadTextAni::ReadTextSync(ani_env *env, [[maybe_unused]] ani_class cl
 {
     auto [succOpt, options] = ToReadTextOptions(env, obj);
     if (!succOpt) {
-        // TODO: 错误处理(EINVAL)
         HILOGE("Ivalid options");
         return nullptr;
     }
@@ -117,7 +116,6 @@ ani_string ReadTextAni::ReadTextSync(ani_env *env, [[maybe_unused]] ani_class cl
     auto [succ, path] = TypeConverter::ToUTF8StringPath(env, filePath);
     if (!succ) {
         HILOGE("Invalid Path");
-        // TODO: 错误处理(EINVAL)
         return nullptr;
     }
 
@@ -130,14 +128,12 @@ ani_string ReadTextAni::ReadTextSync(ani_env *env, [[maybe_unused]] ani_class cl
         if (status == ANI_OK && result != nullptr) {
             return result;
         } else {
-            // TODO: 错误处理
             HILOGE("Create ani_string error");
             return nullptr;
         }
     }
 
-    HILOGE("DoReadText failed");
-    // TODO：错误处理  
+    HILOGE("DoReadText failed"); 
     return nullptr;
 }
 
