@@ -40,8 +40,7 @@ static ani_object Wrap(ani_env *env, const FsFile *file)
         HILOGE("Cannot find constructor method for class %s", className);
         return {};
     }
-    std::uintptr_t ptrValue = reinterpret_cast<std::uintptr_t>(file);
-    ani_long ptr = static_cast<ani_long>(ptrValue);
+    ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(file));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
         HILOGE("New %s obj Failed!", className);
