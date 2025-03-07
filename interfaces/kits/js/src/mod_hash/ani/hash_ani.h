@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HASH_ANI_H
-#define HASH_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_HASH_PROPERTIES_HASH_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_HASH_PROPERTIES_HASH_ANI_H
 
 #include <ani.h>
 
@@ -23,15 +23,14 @@ namespace FileManagement {
 namespace ModuleFileIo {
 namespace ANI {
 
-class HashAni final
-{
-  public:
+class HashAni final {
+public:
     static ani_string HashSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_string algorithm);
 };
 
-} // ANI
-} // namespcae ModuleFileIo
-} // namespcae FileManagement
-} // namespcae OHOS
+} // namespace ANI
+} // namespace ModuleFileIo
+} // namespace FileManagement
+} // namespace OHOS
 
-#endif // HASH_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_HASH_PROPERTIES_HASH_ANI_H

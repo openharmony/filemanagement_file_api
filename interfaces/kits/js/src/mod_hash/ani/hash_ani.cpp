@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "filemgmt_libhilog.h"
 #include "hash_ani.h"
+
+#include "filemgmt_libhilog.h"
 #include "hash_core.h"
 #include "type_converter.h"
 
@@ -25,7 +26,6 @@ namespace ANI {
 
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
-using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
 ani_string HashAni::HashSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_string algorithm)
 {
@@ -47,18 +47,16 @@ ani_string HashAni::HashSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
         return nullptr;
     }
 
-    const auto& resHash = ret.GetData().value();
-
-    ani_string result = nullptr;
-    auto status = env->String_NewUTF8(resHash.c_str(), resHash.size(), &result);
-    if (status == ANI_OK && result != nullptr) {
-        return result;
-    } else {
+    const auto &res = ret.GetData().value();
+    auto [succ, result] = TypeConverter::ToAniString(env, res);
+    if (!succ) {
+        HILOGE("Convert hash value to ani_string failed");
         return nullptr;
     }
+    return result;
 }
 
-} // ANI
-} // namespcae ModuleFileIo
-} // namespcae FileManagement
-} // namespcae OHOS
+} // namespace ANI
+} // namespace ModuleFileIo
+} // namespace FileManagement
+} // namespace OHOS
