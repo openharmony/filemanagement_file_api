@@ -105,7 +105,7 @@ static int32_t RmDirent(const string &fpath)
 #endif
 
 FsResult<void> RmdirentCore::DoRmdirent(const string &fpath)
-{  
+{
     if (fpath.empty()) {
         HILOGE("Invalid path");
         return FsResult<void>::Error(EINVAL);
