@@ -29,7 +29,7 @@ using namespace std;
 
 void RmdirAni::RmdirSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
-    auto [succPath, pathStr] = TypeConverter::ToUTF8StringPath(env, path);
+    auto [succPath, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
         HILOGE("Invalid path");
         return;
