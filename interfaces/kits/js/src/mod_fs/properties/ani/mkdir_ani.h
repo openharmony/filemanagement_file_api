@@ -25,9 +25,8 @@ namespace ANI {
 
 class MkdirkAni final {
 public:
-    static ani_int MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path);
-    static ani_int MkdirSync1(
-        ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path, const ani_boolean &recursion);
+    static ani_int MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
+    static ani_int MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_boolean recursion);
 };
 
 } // namespace ANI
