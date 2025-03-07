@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef READ_TEXT_ANI_H
-#define READ_TEXT_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_READ_TEXT_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_READ_TEXT_ANI_H
 
 #include <ani.h>
 
@@ -25,12 +25,13 @@ namespace ANI {
 
 class ReadTextAni final {
 public:
-    static ani_string ReadTextSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string filePath, ani_object obj);
+    static ani_string ReadTextSync(
+        ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &filePath, const ani_object &obj);
 };
 
-} // ANI
-} // namespcae ModuleFileIo
-} // namespcae FileManagement
-} // namespcae OHOS
+} // namespace ANI
+} // namespace ModuleFileIo
+} // namespace FileManagement
+} // namespace OHOS
 
-#endif // READ_TEXT_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_READ_TEXT_ANI_H

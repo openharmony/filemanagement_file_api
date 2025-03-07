@@ -28,7 +28,7 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
-tuple<bool, optional<int64_t>> ToIntReadText(ani_env *env, ani_object obj, string tag)
+static tuple<bool, optional<int64_t>> ParseOptionalInt64Param(ani_env *env, const ani_object &obj, const string &tag)
 {
     ani_boolean isUndefined = true;
     ani_ref result_ref;
@@ -40,40 +40,36 @@ tuple<bool, optional<int64_t>> ToIntReadText(ani_env *env, ani_object obj, strin
         return { true, nullopt };
     }
     ani_int result_ref_res;
-    if (ANI_OK != env->Object_CallMethodByName_Int(static_cast<ani_object>(result_ref),
-        "intValue", ":I", &result_ref_res)) {
+    if (ANI_OK !=
+        env->Object_CallMethodByName_Int(static_cast<ani_object>(result_ref), "intValue", ":I", &result_ref_res)) {
         return { false, nullopt };
     }
     auto result = make_optional<int64_t>(static_cast<int64_t>(result_ref_res));
     return { true, move(result) };
 }
 
-bool ToEncoding(ani_env *env, ani_object obj)
+static tuple<bool, optional<string>> ParseEncoding(ani_env *env, const ani_object &obj)
 {
     ani_boolean isUndefined;
     ani_ref encoding_ref;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "encoding", &encoding_ref)) {
-        return false;
+        return { false, nullopt };
     }
     env->Reference_IsUndefined(encoding_ref, &isUndefined);
     if (isUndefined) {
-        return true;
+        return { false, nullopt };
     }
     auto [succ, encoding] = TypeConverter::ToUTF8StringPath(env, (ani_string)encoding_ref);
-    if (encoding != "utf-8") {
+    if (!succ) {
         HILOGE("Invalid encoding");
-        return false;
+        return { false, nullopt };
     }
-    return true;
+    return { true, make_optional<string>(move(encoding)) };
 }
 
-
-tuple<bool, optional<ReadTextOptions>> ToReadTextOptions(ani_env *env, ani_object obj)
+static tuple<bool, optional<ReadTextOptions>> ToReadTextOptions(ani_env *env, const ani_object &obj)
 {
     ReadTextOptions result;
-    result.offset = nullopt;
-    result.length = nullopt;
-    result.encoding = make_optional<string>("utf-8");
 
     ani_boolean isUndefined;
     env->Reference_IsUndefined(obj, &isUndefined);
@@ -82,30 +78,32 @@ tuple<bool, optional<ReadTextOptions>> ToReadTextOptions(ani_env *env, ani_objec
         return { true, nullopt };
     }
 
-    auto [succOffset, offsetRes] = ToIntReadText(env, obj, "offset");
+    auto [succOffset, offset] = ParseOptionalInt64Param(env, obj, "offset");
     if (!succOffset) {
         HILOGE("Illegal option.offset parameter");
         return { false, nullopt };
     }
-    result.offset = offsetRes;
+    result.offset = offset;
 
-    auto [succLength, lengthRes] = ToIntReadText(env, obj, "length");
+    auto [succLength, length] = ParseOptionalInt64Param(env, obj, "length");
     if (!succLength) {
         HILOGE("Illegal option.length parameter");
         return { false, nullopt };
     }
-    result.length = lengthRes;
+    result.length = length;
 
-    bool succEncoding = ToEncoding(env, obj);
+    auto [succEncoding, encoding] = ParseEncoding(env, obj);
     if (!succEncoding) {
         HILOGE("Illegal option.encoding parameter");
         return { false, nullopt };
     }
+    result.encoding = encoding;
+
     return { true, move(result) };
 }
 
-ani_string ReadTextAni::ReadTextSync(ani_env *env, [[maybe_unused]] ani_class clazz,
-    ani_string filePath, ani_object obj)
+ani_string ReadTextAni::ReadTextSync(
+    ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &filePath, const ani_object &obj)
 {
     auto [succOpt, options] = ToReadTextOptions(env, obj);
     if (!succOpt) {
@@ -113,31 +111,29 @@ ani_string ReadTextAni::ReadTextSync(ani_env *env, [[maybe_unused]] ani_class cl
         return nullptr;
     }
 
-    auto [succ, path] = TypeConverter::ToUTF8StringPath(env, filePath);
-    if (!succ) {
+    auto [succPath, path] = TypeConverter::ToUTF8StringPath(env, filePath);
+    if (!succPath) {
         HILOGE("Invalid Path");
         return nullptr;
     }
 
     auto ret = ReadTextCore::DoReadText(path, options);
-    if (ret.IsSuccess()) {
-        const auto& resText = ret.GetData().value();
-        string res = std::get<0>(resText);
-        ani_string result = nullptr;
-        auto status = env->String_NewUTF8(res.c_str(), res.size(), &result);
-        if (status == ANI_OK && result != nullptr) {
-            return result;
-        } else {
-            HILOGE("Create ani_string error");
-            return nullptr;
-        }
+    if (!ret.IsSuccess()) {
+        HILOGE("DoReadText failed");
+        return nullptr;
     }
 
-    HILOGE("DoReadText failed"); 
-    return nullptr;
+    const auto &resText = ret.GetData().value();
+    string res = std::get<0>(resText);
+    auto [succ, result] = TypeConverter::ToAniString(env, res);
+    if (!succ) {
+        HILOGE("Create ani_string error");
+        return nullptr;
+    }
+    return result;
 }
 
-} // ANI
-} // namespcae ModuleFileIo
-} // namespcae FileManagement
-} // namespcae OHOS
+} // namespace ANI
+} // namespace ModuleFileIo
+} // namespace FileManagement
+} // namespace OHOS
