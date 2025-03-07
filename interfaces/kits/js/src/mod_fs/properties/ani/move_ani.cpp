@@ -28,12 +28,12 @@ namespace ANI {
 void MoveAni::MoveFileSync(
     ani_env *env, [[maybe_unused]] ani_class clazz, ani_string src, ani_string dest, ani_object mode)
 {
-    auto [succSrc, srcPath] = ANI::TypeConverter::ToUTF8StringPath(env, src);
+    auto [succSrc, srcPath] = ANI::TypeConverter::ToUTF8String(env, src);
     if (!succSrc) {
         HILOGE("Invalid src");
         return;
     }
-    auto [succDest, destPath] = ANI::TypeConverter::ToUTF8StringPath(env, dest);
+    auto [succDest, destPath] = ANI::TypeConverter::ToUTF8String(env, dest);
     if (!succDest) {
         HILOGE("Invalid dest");
         return;
