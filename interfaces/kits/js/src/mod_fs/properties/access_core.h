@@ -24,13 +24,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-enum class AccessModeType {
-    ERROR = -1,
-    EXIST = 0,
-    WRITE = 2,
-    READ = 4,
-    READ_WRITE = 6
-};
+enum class AccessModeType { ERROR = -1, EXIST = 0, WRITE = 2, READ = 4, READ_WRITE = 6 };
 
 enum AccessFlag : int32_t {
     DEFAULT_FLAG = -1,
@@ -43,7 +37,6 @@ public:
 
     static FsResult<bool> DoAccess(const string &path, const optional<AccessModeType> &mode = nullopt);
     static FsResult<bool> DoAccess(const string &path, const AccessModeType &mode, const AccessFlag &flag);
-
 };
 
 constexpr int DIR_DEFAULT_PERM = 0770;

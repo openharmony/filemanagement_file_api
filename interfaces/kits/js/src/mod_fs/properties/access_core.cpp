@@ -163,7 +163,7 @@ static int GetMode(const std::optional<AccessModeType> &modeOpt, bool *hasMode)
     return -1;
 }
 
-static bool ValidAccessArgs(const std::string &path, const std::optional<AccessModeType> &modeOpt, 
+static bool ValidAccessArgs(const std::string &path, const std::optional<AccessModeType> &modeOpt,
                             int &finalMode, int &flag)
 {
     if (path.empty()) {
