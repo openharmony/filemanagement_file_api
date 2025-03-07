@@ -29,13 +29,13 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 ani_string HashAni::HashSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_string algorithm)
 {
-    auto [succPath, srcPath] = TypeConverter::ToUTF8StringPath(env, path);
+    auto [succPath, srcPath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
         HILOGE("Invalid path");
         return nullptr;
     }
 
-    auto [succAlg, algType] = TypeConverter::ToUTF8StringPath(env, algorithm);
+    auto [succAlg, algType] = TypeConverter::ToUTF8String(env, algorithm);
     if (!succAlg) {
         HILOGE("Invalid algorithm");
         return nullptr;
