@@ -35,16 +35,13 @@ static ani_object Wrap(ani_env *env, const FsFile *file)
         HILOGE("Cannot find class %s", className);
         return {};
     }
-
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor)) {
         HILOGE("Cannot find constructor method for class %s", className);
         return {};
     }
-
     std::uintptr_t ptrValue = reinterpret_cast<std::uintptr_t>(file);
     ani_long ptr = static_cast<ani_long>(ptrValue);
-
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
         HILOGE("New %s obj Failed!", className);
