@@ -25,13 +25,13 @@ namespace ANI {
 
 class SecurityLabelAni final {
 public:
-    static ani_int SetSecurityLabelSync(ani_env *env, [[maybe_unused]] ani_class clazz,
-        ani_string path, ani_string level);
+    static ani_int SetSecurityLabelSync(
+        ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_string level);
 };
 
-} // ANI
-} // namespcae ModuleFileIo
-} // namespcae FileManagement
-} // namespcae OHOS
+} // namespace ANI
+} // namespace ModuleFileIo
+} // namespace FileManagement
+} // namespace OHOS
 
 #endif // SECURITYLABEL_ANI_H
