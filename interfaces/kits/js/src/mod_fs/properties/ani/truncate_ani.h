@@ -23,16 +23,14 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-class TruncateAni final
-{
+class TruncateAni final {
 public:
-    static void TruncateSync(ani_env *env, ani_object obj, ani_object union_obj, 
-                            ani_object double_object);
+    static void TruncateSync(ani_env *env, ani_object obj, ani_object union_obj, ani_object double_object);
 };
 
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif //INTERFACES_KITS_JS_SRC_MOD_FS_TRUNCATE_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_TRUNCATE_ANI_H
