@@ -26,7 +26,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-ani_int MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
+ani_int MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path)
 {
     auto [succ, pathStr] = TypeConverter::ToUTF8StringPath(env, path);
     if (!succ) {
@@ -39,10 +39,10 @@ ani_int MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, an
         return -1;
     }
     return 0;
-
 }
 
-ani_int MkdirkAni::MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_boolean recursion)
+ani_int MkdirkAni::MkdirSync1(
+    ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path, const ani_boolean &recursion)
 {
     auto [succ, pathStr] = ANI::TypeConverter::ToUTF8StringPath(env, path);
     if (!succ) {
@@ -57,7 +57,7 @@ ani_int MkdirkAni::MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, an
     return 0;
 }
 
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

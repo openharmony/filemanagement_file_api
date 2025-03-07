@@ -23,18 +23,16 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-class MkdirkAni final
-{
+class MkdirkAni final {
 public:
-    static ani_int MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, 
-                           ani_string path);
-    static ani_int MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, 
-                           ani_string path, ani_boolean recursion);
+    static ani_int MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path);
+    static ani_int MkdirSync1(
+        ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path, const ani_boolean &recursion);
 };
 
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif //INTERFACES_KITS_JS_SRC_MOD_FS_MKDIR_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_MKDIR_ANI_H
