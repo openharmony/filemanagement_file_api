@@ -23,12 +23,11 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-class RmdirAni final 
-{
+class RmdirAni final {
 public:
-    static void rmdirSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
+    static void RmdirSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
 };
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
