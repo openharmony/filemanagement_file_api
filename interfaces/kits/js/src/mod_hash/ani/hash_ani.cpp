@@ -41,11 +41,9 @@ ani_string HashAni::HashSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
         return nullptr;
     }
 
-    // 核心逻辑
     auto ret = HashCore::DoHash(srcPath, algType);
     if (!ret.IsSuccess()) {
         HILOGE("DoHash failed");
-        // TODO：错误处理  
         return nullptr;
     }
 
@@ -56,7 +54,6 @@ ani_string HashAni::HashSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
     if (status == ANI_OK && result != nullptr) {
         return result;
     } else {
-        // TODO: 错误处理
         return nullptr;
     }
 }
