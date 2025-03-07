@@ -32,23 +32,22 @@ enum class AccessModeType {
     READ_WRITE = 6
 };
 
-enum class AccessFlagType {
+enum AccessFlag : int32_t {
     DEFAULT_FLAG = -1,
     LOCAL_FLAG,
 };
 
 class AccessCore {
 public:
-    inline static const std::string className_ = "__properities__";
+    inline static const string className_ = "__properities__";
 
-    static FsResult<bool> DoAccess(const string &path, const optional<AccessModeType> mode = nullopt);
-
-    static FsResult<bool> DoAccess(const string &path, const AccessModeType &mode, const AccessFlagType &flag);
+    static FsResult<bool> DoAccess(const string &path, const optional<AccessModeType> &mode = nullopt);
+    static FsResult<bool> DoAccess(const string &path, const AccessModeType &mode, const AccessFlag &flag);
 
 };
 
 constexpr int DIR_DEFAULT_PERM = 0770;
-const std::string PROCEDURE_ACCESS_NAME = "FileIOAccess";
+const string PROCEDURE_ACCESS_NAME = "FileIOAccess";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

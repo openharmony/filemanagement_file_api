@@ -15,11 +15,6 @@
 
 #include "access_core.h"
 
-#include <cstring>
-#include <ctime>
-#include <iostream>
-#include <memory>
-#include <sstream>
 #include <unistd.h>
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
@@ -60,8 +55,7 @@ const int BASE_USER_RANGE = 200000;
 
 static int UvAccess(const string &path, int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> access_req = {new uv_fs_t,
-        FsUtils::FsReqCleanup};
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> access_req = {new uv_fs_t, FsUtils::FsReqCleanup};
     if (!access_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -146,10 +140,10 @@ static int HandleLocalCheck(const string &path, int mode)
 }
 #endif
 
-static int Access(const string &path, int mode, int flag)
+static int Access(const string &path, int mode, int flag = DEFAULT_FLAG)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    if (flag == static_cast<int>(AccessFlagType::LOCAL_FLAG) && IsCloudOrDistributedFilePath(path)) {
+    if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {
         return HandleLocalCheck(path, mode);
     }
 #endif
@@ -158,10 +152,14 @@ static int Access(const string &path, int mode, int flag)
 
 static int GetMode(const std::optional<AccessModeType> &modeOpt, bool *hasMode)
 {
-    *hasMode = modeOpt.has_value();
-    if (*hasMode) {
-        return static_cast<int>(modeOpt.value());
+    if (modeOpt.has_value()) {
+        int mode = static_cast<int>(modeOpt.value());
+        *hasMode = true;
+        if ((static_cast<unsigned int>(mode) & 0x06) == static_cast<unsigned int>(mode)) {
+            return mode;
+        }
     }
+
     return -1;
 }
 
@@ -179,14 +177,14 @@ static bool ValidAccessArgs(const std::string &path, const std::optional<AccessM
         return false;
     }
     finalMode = hasMode ? mode : 0;
-    flag = static_cast<int>(AccessFlagType::DEFAULT_FLAG);
+    flag = DEFAULT_FLAG;
     return true;
 }
 
-FsResult<bool> AccessCore::DoAccess(const std::string& path, const std::optional<AccessModeType> mode)
+FsResult<bool> AccessCore::DoAccess(const std::string& path, const std::optional<AccessModeType> &mode)
 {
     int finalMode = 0;
-    int flag = static_cast<int>(AccessFlagType::DEFAULT_FLAG);
+    int flag = DEFAULT_FLAG;
     if (!ValidAccessArgs(path, mode, finalMode, flag)) {
         return FsResult<bool>::Error(EINVAL);
     }
@@ -199,7 +197,7 @@ FsResult<bool> AccessCore::DoAccess(const std::string& path, const std::optional
     return FsResult<bool>::Success(isAccess);
 }
 
-FsResult<bool> AccessCore::DoAccess(const std::string& path, const AccessModeType &mode, const AccessFlagType &flag)
+FsResult<bool> AccessCore::DoAccess(const std::string& path, const AccessModeType &mode, const AccessFlag &flag)
 {
     int finalMode = static_cast<int>(mode);
     int finalFlag = static_cast<int>(flag);
