@@ -25,8 +25,7 @@ namespace ANI {
 
 class ReadTextAni final {
 public:
-    static ani_string ReadTextSync(
-        ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &filePath, const ani_object &obj);
+    static ani_string ReadTextSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string filePath, ani_object obj);
 };
 
 } // namespace ANI

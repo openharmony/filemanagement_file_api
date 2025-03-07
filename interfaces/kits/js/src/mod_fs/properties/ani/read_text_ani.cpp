@@ -28,7 +28,7 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
-static tuple<bool, optional<int64_t>> ParseOptionalInt64Param(ani_env *env, const ani_object &obj, const string &tag)
+static tuple<bool, optional<int64_t>> ParseOptionalInt64Param(ani_env *env, ani_object obj, const string &tag)
 {
     ani_boolean isUndefined = true;
     ani_ref result_ref;
@@ -48,7 +48,7 @@ static tuple<bool, optional<int64_t>> ParseOptionalInt64Param(ani_env *env, cons
     return { true, move(result) };
 }
 
-static tuple<bool, optional<string>> ParseEncoding(ani_env *env, const ani_object &obj)
+static tuple<bool, optional<string>> ParseEncoding(ani_env *env, ani_object obj)
 {
     ani_boolean isUndefined;
     ani_ref encoding_ref;
@@ -67,7 +67,7 @@ static tuple<bool, optional<string>> ParseEncoding(ani_env *env, const ani_objec
     return { true, make_optional<string>(move(encoding)) };
 }
 
-static tuple<bool, optional<ReadTextOptions>> ToReadTextOptions(ani_env *env, const ani_object &obj)
+static tuple<bool, optional<ReadTextOptions>> ToReadTextOptions(ani_env *env, ani_object obj)
 {
     ReadTextOptions result;
 
@@ -103,7 +103,7 @@ static tuple<bool, optional<ReadTextOptions>> ToReadTextOptions(ani_env *env, co
 }
 
 ani_string ReadTextAni::ReadTextSync(
-    ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &filePath, const ani_object &obj)
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_string filePath, ani_object obj)
 {
     auto [succOpt, options] = ToReadTextOptions(env, obj);
     if (!succOpt) {
