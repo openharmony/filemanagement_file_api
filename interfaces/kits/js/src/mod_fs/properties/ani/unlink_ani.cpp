@@ -26,7 +26,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-ani_int UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path)
+ani_int UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
     auto [succ, pathStr] = TypeConverter::ToUTF8StringPath(env, path);
     if (!succ) {

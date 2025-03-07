@@ -25,7 +25,7 @@ namespace ANI {
 
 class UnlinkAni final {
 public:
-    static ani_int UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path);
+    static ani_int UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
 };
 
 } // namespace ANI
