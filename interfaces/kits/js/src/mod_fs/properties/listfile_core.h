@@ -16,27 +16,25 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_CORE_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_CORE_H
 
-#include "filemgmt_libfs.h"
-#include "file_filter.h"
-#include "fs_file_filter.h"
-
 #include <dirent.h>
+
+#include "file_filter.h"
+#include "filemgmt_libfs.h"
+#include "fs_file_filter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 
 struct NameListArg {
-    struct dirent** namelist = { nullptr };
+    struct dirent **namelist = { nullptr };
     int direntNum = 0;
 };
 
 constexpr int DEFAULT_SIZE = -1;
 constexpr int DEFAULT_MODIFY_AFTER = -1;
 struct OptionArgs {
-    FileFilter filter = FileFilterBuilder()
-        .SetFileSizeOver(DEFAULT_SIZE)
-        .SetLastModifiedAfter(DEFAULT_MODIFY_AFTER)
-        .Build();
+    FileFilter filter =
+        FileFilterBuilder().SetFileSizeOver(DEFAULT_SIZE).SetLastModifiedAfter(DEFAULT_MODIFY_AFTER).Build();
     int listNum = 0;
     int countNum = 0;
     bool recursion = false;
@@ -54,18 +52,20 @@ struct OptionArgs {
 };
 
 struct FsListFileOptions {
-    bool recursion;
-    int listNum;
-    optional<FsFileFilter> filter;
+    bool recursion = false;
+    int64_t listNum = 0;
+    optional<FsFileFilter> filter = nullopt;
 };
 
 class ListFileCore {
 public:
-    static FsResult<std::vector<std::string>> DoListFile(const std::string &path, const optional<FsListFileOptions> &opt=nullopt);
+    static FsResult<std::vector<std::string>> DoListFile(
+        const std::string &path, const optional<FsListFileOptions> &opt = nullopt);
 };
 
 constexpr int FILTER_MATCH = 1;
 constexpr int FILTER_DISMATCH = 0;
 const int32_t MAX_SUFFIX_LENGTH = 256;
+const std::string LIST_FILE_PRODUCE_NAME = "FileIOListFile";
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_CORE_H

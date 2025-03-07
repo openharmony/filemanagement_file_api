@@ -28,8 +28,8 @@ public:
     FsFileFilter() = default;
     ~FsFileFilter() = default;
 
-    FsFileFilter(const FsFileFilter &filter) = delete;
-    FsFileFilter &operator=(const FsFileFilter &filter) = delete;
+    FsFileFilter(const FsFileFilter &filter) = default;
+    FsFileFilter &operator=(const FsFileFilter &filter) = default;
 
     void SetSuffix(const std::optional<std::vector<std::string>> &suffix)
     {

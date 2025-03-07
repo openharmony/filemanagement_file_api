@@ -19,15 +19,16 @@
 #include <memory>
 #include <string>
 #include <string_view>
-#include <sys/stat.h>
 #include <thread>
 #include <tuple>
+#include <sys/stat.h>
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
+
 thread_local OptionArgs g_optionArgs_core;
 
 static bool CheckSuffix(const vector<string> &suffixs)
@@ -90,8 +91,11 @@ static bool ValidFileFilterParam(FsFileFilter &fsFilter, FileFilter *filter)
     return true;
 }
 
-static bool ValidOptionParam(const optional<FsListFileOptions>& opt, OptionArgs &optionArgs)
+static bool ValidOptionParam(const string &path, const optional<FsListFileOptions> &opt, OptionArgs &optionArgs)
 {
+    g_optionArgs_core.Clear();
+    g_optionArgs_core.path = path;
+
     if (opt.has_value()) {
         auto op = opt.value();
         if (op.listNum < 0) {
@@ -103,7 +107,11 @@ static bool ValidOptionParam(const optional<FsListFileOptions>& opt, OptionArgs 
         optionArgs.listNum = op.listNum;
 
         if (op.filter.has_value()) {
-            ValidFileFilterParam(op.filter.value(), &(optionArgs.filter));
+            bool ret = ValidFileFilterParam(op.filter.value(), &(optionArgs.filter));
+            if (!ret) {
+                HILOGE("Failed to get filter prop.");
+                return false;
+            }
         }
     }
 
@@ -225,7 +233,7 @@ static void Deleter(struct NameListArg *arg)
 
 static int FilterFileRes(const string &path, vector<string> &dirents)
 {
-    unique_ptr<struct NameListArg, decltype(Deleter)*> pNameList = { new (nothrow) struct NameListArg, Deleter };
+    unique_ptr<struct NameListArg, decltype(Deleter) *> pNameList = { new (nothrow) struct NameListArg, Deleter };
     if (!pNameList) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -244,7 +252,7 @@ static int FilterFileRes(const string &path, vector<string> &dirents)
 
 static int RecursiveFunc(const string &path, vector<string> &dirents)
 {
-    unique_ptr<struct NameListArg, decltype(Deleter)*> pNameList = { new (nothrow) struct NameListArg, Deleter };
+    unique_ptr<struct NameListArg, decltype(Deleter) *> pNameList = { new (nothrow) struct NameListArg, Deleter };
     if (!pNameList) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -271,32 +279,29 @@ static int RecursiveFunc(const string &path, vector<string> &dirents)
     return ERRNO_NOERR;
 }
 
-static std::vector<std::string> DoListFileVector(const string &path, vector<string> &dirents, bool recursion)
+static void DoListFileVector(const string &path, vector<string> &dirents, bool recursion)
 {
     if (recursion) {
         for (size_t i = 0; i < dirents.size(); i++) {
             dirents[i] = dirents[i].substr(path.length());
         }
     }
-    return dirents;
 }
 
 FsResult<std::vector<std::string>> ListFileCore::DoListFile(const string &path, const optional<FsListFileOptions> &opt)
 {
-    vector<string> direntsRes;
-    g_optionArgs_core.Clear();
-    g_optionArgs_core.path = path;
-
-    if (!ValidOptionParam(opt, g_optionArgs_core)) {
+    if (!ValidOptionParam(path, opt, g_optionArgs_core)) {
         HILOGE("Invalid options");
         return FsResult<std::vector<std::string>>::Error(EINVAL);
     }
+
+    vector<string> direntsRes;
     int ret = 0;
     ret = g_optionArgs_core.recursion ? RecursiveFunc(path, direntsRes) : FilterFileRes(path, direntsRes);
     if (ret) {
         return FsResult<std::vector<std::string>>::Error(ret);
     }
-    direntsRes = DoListFileVector(path, direntsRes, g_optionArgs_core.recursion);
+    DoListFileVector(path, direntsRes, g_optionArgs_core.recursion);
     g_optionArgs_core.Clear();
 
     return FsResult<std::vector<std::string>>::Success(direntsRes);
