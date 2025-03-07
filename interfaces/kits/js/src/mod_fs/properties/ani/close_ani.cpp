@@ -28,22 +28,21 @@ namespace ANI {
 
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
-using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
-tuple <bool, int64_t> AnalyzerFdUnion(ani_env *env, ani_object obj)
+tuple<bool, int> AnalyzerFdUnion(ani_env *env, ani_object obj)
 {
-    int64_t result = -1;
+    int result = -1;
     ani_class IntClass;
     env->FindClass("Lstd/core/Double;", &IntClass);
     ani_boolean isInt;
     env->Object_InstanceOf(obj, IntClass, &isInt);
-    if(isInt){
+    if (isInt) {
         ani_int fd;
-        if(ANI_OK != env->Object_CallMethodByName_Int(obj, "intValue", nullptr, &fd)) {          
+        if (ANI_OK != env->Object_CallMethodByName_Int(obj, "intValue", nullptr, &fd)) {
             HILOGE("Get fd value failed");
             return { false, result };
         }
-        result = (int64_t)fd;
+        result = static_cast<int>(fd);
         return { true, result };
     }
 
@@ -66,21 +65,20 @@ tuple <bool, int64_t> AnalyzerFdUnion(ani_env *env, ani_object obj)
 ani_int CloseAni::CloseSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_object obj)
 {
     auto [succ, fd] = AnalyzerFdUnion(env, obj);
-    if (!succ || fd < 0) {
+    if (!succ) {
         HILOGE("Invalid arguments");
         return -1;
     }
 
     auto ret = CloseCore::DoClose(fd);
-    if (ret.IsSuccess()) {
-        HILOGE("Close %lld success", fd);
-        return 0;
+    if (!ret.IsSuccess()) {
+        HILOGE("Close %d failed", fd);
+        return -1;
     }
-    HILOGE("Close %lld failed", fd);
-    return -1;
+    return 0;
 }
 
-} // ANI
-} // namespcae ModuleFileIo
-} // namespcae FileManagement
-} // namespcae OHOS
+} // namespace ANI
+} // namespace ModuleFileIo
+} // namespace FileManagement
+} // namespace OHOS

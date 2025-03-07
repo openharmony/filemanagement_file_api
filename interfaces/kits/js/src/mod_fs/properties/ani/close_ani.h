@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef CLOSE_ANI_H
-#define CLOSE_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_ANI_H
 
 #include <ani.h>
 
@@ -28,9 +28,9 @@ public:
     static ani_int CloseSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_object obj);
 };
 
-} // ANI
-} // namespcae ModuleFileIo
-} // namespcae FileManagement
-} // namespcae OHOS
+} // namespace ANI
+} // namespace ModuleFileIo
+} // namespace FileManagement
+} // namespace OHOS
 
-#endif // CLOSE_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_ANI_H
