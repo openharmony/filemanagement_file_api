@@ -82,7 +82,7 @@ tuple<bool, optional<double>> ParseDoubleParam(ani_env *env, ani_object obj, str
 
     ani_double result_ref_res;
     if (ANI_OK != env->Object_CallMethodByName_Double(
-                      static_cast<ani_object>(result_ref), "doubleValue", nullptr, &result_ref_res)) {
+        static_cast<ani_object>(result_ref), "doubleValue", nullptr, &result_ref_res)) {
         return { false, nullopt };
     }
     double result = static_cast<double>(result_ref_res);
@@ -110,7 +110,7 @@ tuple<bool, optional<vector<string>>> AnalyzerArrayString(ani_env *env, ani_obje
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(result_ref), "$_get",
-                          "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i)) {
+            "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i)) {
             return { false, nullopt };
         }
         auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));
