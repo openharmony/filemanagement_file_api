@@ -1,28 +1,30 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "file_ani.h"
 
 #include <string>
-#include "file_ani.h"
-#include "fs_file.h"
 #include "filemgmt_libhilog.h"
+#include "fs_file.h"
 #include "type_converter.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
+using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace std;
 
 static FsFile *Unwrap(ani_env *env, ani_object object)
@@ -30,7 +32,7 @@ static FsFile *Unwrap(ani_env *env, ani_object object)
     ani_long nativePtr;
     auto ret = env->Object_GetFieldByName_Long(object, "nativePtr", &nativePtr);
     if (ret != ANI_OK) {
-        HILOGE("Unwrap fsFile err: %{public}d", ret);
+        HILOGE("Unwrap fsFile err: %{private}d", ret);
         return nullptr;
     }
     uintptr_t ptrValue = static_cast<uintptr_t>(nativePtr);
@@ -77,7 +79,6 @@ void FileAni::Lock(ani_env *env, [[maybe_unused]] ani_object object, ani_object 
         HILOGE("Lock file failed!");
         return;
     }
-    HILOGE("Lock file success.");
 }
 
 void FileAni::TryLock(ani_env *env, [[maybe_unused]] ani_object object, ani_object exclusive)
@@ -98,7 +99,6 @@ void FileAni::TryLock(ani_env *env, [[maybe_unused]] ani_object object, ani_obje
         HILOGE("TryLock file failed!");
         return;
     }
-    HILOGE("TryLock file success.");
 }
 
 void FileAni::UnLock(ani_env *env, [[maybe_unused]] ani_object object)
@@ -113,9 +113,8 @@ void FileAni::UnLock(ani_env *env, [[maybe_unused]] ani_object object)
         HILOGE("UnLock file failed!");
         return;
     }
-    HILOGE("UnLock file success.");
 }
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
