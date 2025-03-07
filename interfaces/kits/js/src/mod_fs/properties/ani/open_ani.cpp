@@ -1,17 +1,17 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "open_ani.h"
 
@@ -25,6 +25,7 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
+using namespace OHOS::FileManagement::ModuleFileIO;
 
 static ani_object Wrap(ani_env *env, const FsFile *file)
 {
@@ -85,17 +86,17 @@ static ani_object Wrap(ani_env *env, const FsFile *file)
         HILOGE("Set name field value failed!");
         return {};
     }
-    HILOGE("File obj created");
     return obj;
 }
 
 ani_object OpenAni::OpenSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object mode)
 {
-    auto [succPath, filePath] = TypeConverter::ToUTF8StringPath(env, path);
+    auto [succPath, filePath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
         HILOGE("Invalid path");
         return {};
     }
+
     auto [succMode, modeOp] = TypeConverter::ToOptionalInt32(env, mode);
     if (!succMode) {
         HILOGE("Invalid mode");
@@ -103,12 +104,13 @@ ani_object OpenAni::OpenSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
     }
     FsResult<FsFile *> ret = OpenCore::DoOpen(filePath, modeOp);
     if (!ret.IsSuccess()) {
+        HILOGE("Open failed");
         return {};
     }
     const FsFile *file = ret.GetData().value();
     return Wrap(env, move(file));
 }
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

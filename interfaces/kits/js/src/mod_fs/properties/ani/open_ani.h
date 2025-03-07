@@ -27,9 +27,9 @@ class OpenAni final {
 public:
     static ani_object OpenSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object mode);
 };
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif //INTERFACES_KITS_JS_SRC_MOD_FS_OPEN_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_OPEN_ANI_H
