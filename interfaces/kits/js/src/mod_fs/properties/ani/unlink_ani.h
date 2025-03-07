@@ -23,16 +23,14 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-class UnlinkAni final
-{
+class UnlinkAni final {
 public:
-    static ani_int UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, 
-                           ani_string path);
+    static ani_int UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path);
 };
 
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif //INTERFACES_KITS_JS_SRC_MOD_FS_UNLINK_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_UNLINK_ANI_H

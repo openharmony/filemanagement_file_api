@@ -26,7 +26,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-ani_int UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
+ani_int UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, const ani_string &path)
 {
     auto [succ, pathStr] = TypeConverter::ToUTF8StringPath(env, path);
     if (!succ) {
@@ -34,14 +34,14 @@ ani_int UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, an
         return -1;
     }
     auto ret = UnlinkCore::DoUnlink(pathStr);
-    if(!ret.IsSuccess()) {
+    if (!ret.IsSuccess()) {
         HILOGE("Unlink faild");
         return -1;
     }
     return 0;
 }
 
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
