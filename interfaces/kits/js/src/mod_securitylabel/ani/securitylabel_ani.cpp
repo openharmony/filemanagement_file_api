@@ -42,10 +42,8 @@ ani_int SecurityLabelAni::SetSecurityLabelSync(ani_env *env, [[maybe_unused]] an
         return EINVAL;
     }
 
-    // 核心逻辑
     auto ret = DoSetSecurityLabel(srcPath, dataLevel);
     if (!ret.IsSuccess()) {
-        // TODO：错误处理
         HILOGE("file %s set securitylabel failed", srcPath.c_str());
         return -1;
     }
