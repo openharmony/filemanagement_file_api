@@ -25,7 +25,7 @@ namespace ANI {
 
 class TruncateAni final {
 public:
-    static void TruncateSync(ani_env *env, ani_object obj, ani_object union_obj, ani_object double_object);
+    static void TruncateSync(ani_env *env, ani_object obj, ani_object file, ani_object length);
 };
 
 } // namespace ANI
