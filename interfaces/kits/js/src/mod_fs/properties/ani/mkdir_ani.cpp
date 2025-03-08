@@ -28,7 +28,7 @@ namespace ANI {
 
 ani_int MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
-    auto [succ, pathStr] = TypeConverter::ToUTF8StringPath(env, path);
+    auto [succ, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (!succ) {
         HILOGE("Invalid path");
         return -1;
@@ -43,7 +43,7 @@ ani_int MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, an
 
 ani_int MkdirkAni::MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_boolean recursion)
 {
-    auto [succ, pathStr] = ANI::TypeConverter::ToUTF8StringPath(env, path);
+    auto [succ, pathStr] = ANI::TypeConverter::ToUTF8String(env, path);
     if (!succ) {
         HILOGE("Invalid path");
         return -1;

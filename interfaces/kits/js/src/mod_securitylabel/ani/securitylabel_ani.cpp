@@ -53,6 +53,6 @@ ani_int SecurityLabelAni::SetSecurityLabelSync(
 }
 
 } // namespace ANI
-} // namespace ModuleFileIo
+} // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

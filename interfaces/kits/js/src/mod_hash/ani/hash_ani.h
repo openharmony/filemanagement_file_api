@@ -29,7 +29,7 @@ public:
 };
 
 } // namespace ANI
-} // namespace ModuleFileIo
+} // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 

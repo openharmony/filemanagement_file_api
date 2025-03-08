@@ -57,17 +57,17 @@ std::optional<AccessModeType> OptToAccessModeType(const std::optional<int>& mode
     return ToAccessModeType(mode_index.value());
 }
 
-AccessFlagType ToAccessFlagType(int32_t flag_index)
+AccessFlag ToAccessFlagType(int32_t flag_index)
 {
     switch (flag_index) {
         case LOCAL_INDEX:
-            return AccessFlagType::LOCAL_FLAG;
+            return AccessFlag::LOCAL_FLAG;
         default:
-            return AccessFlagType::DEFAULT_FLAG;
+            return AccessFlag::DEFAULT_FLAG;
     }
 }
 
-std::optional<AccessFlagType> OptToAccessFlagType(const std::optional<int> &flag_index)
+std::optional<AccessFlag> OptToAccessFlagType(const std::optional<int> &flag_index)
 {
     if (!flag_index.has_value()) {
         return std::nullopt;
@@ -79,7 +79,7 @@ ani_boolean AccessAni::AccessSync3(ani_env *env, [[maybe_unused]] ani_class claz
     ani_enum_item mode, ani_enum_item flag)
 {
     ani_boolean ret = 0;
-    auto [succPath, pathStr] = TypeConverter::ToUTF8StringPath(env, path);
+    auto [succPath, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (! succPath) {
         HILOGE("Invalid path");
         return ret;

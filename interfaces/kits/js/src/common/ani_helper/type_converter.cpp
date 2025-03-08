@@ -147,4 +147,32 @@ std::tuple<bool, ArrayBuffer> TypeConverter::ToArrayBuffer(ani_env *env, ani_arr
     return { true, ArrayBuffer { std::move(buf), length } };
 }
 
+std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(
+    ani_env *env, const std::string strList[], const uint32_t length)
+{
+    ani_array_ref result = nullptr;
+    ani_class itemCls = nullptr;
+    if (env->FindClass("Lstd/core/String;", &itemCls) != ANI_OK) {
+        HILOGE("FindClass String class Fail");
+        return { false, result };
+    }
+    if (env->Array_New_Ref(itemCls, length, nullptr, &result) != ANI_OK) {
+        HILOGE("Array_New_Ref  Fail");
+        return { false, result };
+    }
+    for (int i = 0; i < length; i++) {
+        auto [ret, item] = TypeConverter::ToAniString(env, strList[i]);
+        if (!ret) {
+            HILOGE("ToAniString Fail");
+            return { false, nullptr };
+        }
+
+        if (env->Array_Set_Ref(result, i, item) != ANI_OK) {
+            HILOGE("Array_Set_Ref Fail");
+            return { false, nullptr };
+        }
+    }
+    return { true, result };
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

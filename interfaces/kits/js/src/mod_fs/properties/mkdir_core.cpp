@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,8 +70,7 @@ struct AccessArgs {
 
 static int UvAccess(const string &path, int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> access_req = {new uv_fs_t,
-        FsUtils::FsReqCleanup};
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> access_req = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!access_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -129,7 +128,7 @@ static int HandleLocalCheck(const string &path, int mode)
 {
     // check if the file of /data/storage/el2/cloud is on the local
     if (path.find(CLOUDDISK_FILE_PREFIX) == 0) {
-        char val[2] = {'\0'};
+        char val[2] = { '\0' };
         if (getxattr(path.c_str(), CLOUD_FILE_LOCATION.c_str(), val, sizeof(val)) < 0) {
             HILOGI("get cloud file location fail, err: %{public}d", errno);
             return errno;
@@ -168,8 +167,7 @@ static int AccessCore(const string &path, int mode, int flag = DEFAULT_FLAG)
 
 static int MkdirCore(const string &path)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> mkdir_req = {
-        new uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> mkdir_req = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!mkdir_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -210,7 +208,7 @@ static int32_t MkdirExec(const string &path, bool recursion, bool hasOption)
     return ERRNO_NOERR;
 }
 
-FsResult<void> MkdirCore::DoMkdir(const std::string &path, const std::optional<bool> &recursion)
+FsResult<void> MkdirCore::DoMkdir(const std::string &path, std::optional<bool> recursion)
 {
     bool hasOption = false;
     bool mkdirRecursion = false;

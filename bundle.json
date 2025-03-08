@@ -41,9 +41,12 @@
             "ipc",
             "init",
             "napi",
+            "runtime_core",
             "samgr",
             "app_file_service",
-            "os_account"
+            "os_account",
+            "openssl",
+            "libuv"
         ],
         "third_party": [
             "e2fsprogs",
@@ -56,7 +59,8 @@
           "fwk_group": [
             "//foundation/filemanagement/file_api/interfaces/kits/js:build_kits_js",
             "//foundation/filemanagement/file_api/interfaces/kits/ts/streamrw:streamrw_packages",
-            "//foundation/filemanagement/file_api/interfaces/kits/ts/streamhash:streamhash_packages"
+            "//foundation/filemanagement/file_api/interfaces/kits/ts/streamhash:streamhash_packages",
+            "//foundation/filemanagement/file_api/interfaces/kits/js:ani_file_api"
           ],
           "service_group": []
         },
@@ -95,6 +99,15 @@
                 "rust_file.h"
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/rust/include"
+            }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/utils/filemgmt_libfs:filemgmt_libfs",
+            "header": {
+              "header_files": [
+                "filemgmt_libfs.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/utils/filemgmt_libfs/include"
             }
           },
           {

@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace FileManagement {
-namespace ModuleFileIo {
+namespace ModuleFileIO {
 namespace ANI {
 
 using namespace std;
@@ -134,6 +134,6 @@ ani_string ReadTextAni::ReadTextSync(
 }
 
 } // namespace ANI
-} // namespace ModuleFileIo
+} // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
