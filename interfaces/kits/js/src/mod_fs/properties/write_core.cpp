@@ -85,6 +85,7 @@ FsResult<int64_t> WriteCore::DoWrite(const int32_t fd, const string &buffer, con
         HILOGE("Failed to resolve buf and options");
         return FsResult<int64_t>::Error(EINVAL);
     }
+
     return DoWrite(fd, buf, len, offset);
 }
 
@@ -105,6 +106,7 @@ FsResult<int64_t> WriteCore::DoWrite(const int32_t fd, const ArrayBuffer &buffer
         HILOGE("Failed to resolve buf and options");
         return FsResult<int64_t>::Error(EINVAL);
     }
+    
     return DoWrite(fd, buf, len, offset);
 }
 
