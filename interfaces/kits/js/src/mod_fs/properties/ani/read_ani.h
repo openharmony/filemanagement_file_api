@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_READ_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_READ_ANI_H
+
 #include <ani.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::ANI {
@@ -22,3 +25,4 @@ public:
     static ani_long ReadSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_arraybuffer buffer);
 };
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI
+#endif
