@@ -13,25 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef SECURITYLABEL_ANI_H
-#define SECURITYLABEL_ANI_H
-
 #include <ani.h>
+#include "bind_function.h"
+#include "hash_ani.h"
 
-namespace OHOS {
-namespace FileManagement {
-namespace ModuleFileIO {
-namespace ANI {
+using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
-class SecurityLabelAni final {
-public:
-    static ani_int SetSecurityLabelSync(
-        ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_string level);
-};
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    static const char *className = "Lfile_hash_class/hash;";
+    std::vector<ani_native_function> functions = {
+        ani_native_function { "hashSync", "Lstd/core/String;Lstd/core/String;:Lstd/core/String;",
+            reinterpret_cast<void *>(HashAni::HashSync) },
+    };
 
-} // namespace ANI
-} // namespace ModuleFileIo
-} // namespace FileManagement
-} // namespace OHOS
-
-#endif // SECURITYLABEL_ANI_H
+    *result = ANI_VERSION_1;
+    return BindClass(vm, className, functions);
+}

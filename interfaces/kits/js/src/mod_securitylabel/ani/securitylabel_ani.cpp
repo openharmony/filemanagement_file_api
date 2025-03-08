@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace FileManagement {
-namespace ModuleFileIo {
+namespace ModuleFileIO {
 namespace ANI {
 
 using namespace std;
