@@ -131,7 +131,7 @@ ani_long WriteAni::WriteSync(
 {
     auto [succOp, op] = ToWriteOptions(env, options);
     if (!succOp) {
-        HILOGE("Failed to resolve options");
+        HILOGE("Failed to resolve options!");
         return -1;
     }
 
@@ -139,7 +139,7 @@ ani_long WriteAni::WriteSync(
     if (isString) {
         auto [succBuf, buffer] = TypeConverter::ToUTF8String(env, stringBuffer);
         if (!succBuf) {
-            HILOGE("Failed to resolve stringBuffer");
+            HILOGE("Failed to resolve stringBuffer!");
             return -1;
         }
         auto ret = WriteCore::DoWrite(fd, buffer, op);
@@ -154,7 +154,7 @@ ani_long WriteAni::WriteSync(
     if (isArrayBuffer) {
         auto [succBuf, buffer] = TypeConverter::ToArrayBuffer(env, arrayBuffer);
         if (!succBuf) {
-            HILOGE("Failed to resolve arrayBuffer");
+            HILOGE("Failed to resolve arrayBuffer!");
             return -1;
         }
         auto ret = WriteCore::DoWrite(fd, buffer, op);
