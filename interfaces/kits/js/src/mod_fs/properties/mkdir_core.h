@@ -13,25 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef SECURITYLABEL_ANI_H
-#define SECURITYLABEL_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MKDIR_CORE_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MKDIR_CORE_H
 
-#include <ani.h>
+#include "filemgmt_libfs.h"
+#include "fs_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-namespace ANI {
 
-class SecurityLabelAni final {
+class MkdirCore final {
 public:
-    static ani_int SetSecurityLabelSync(
-        ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_string level);
+    static FsResult<void> DoMkdir(const std::string &path, const std::optional<bool> &recursion = std::nullopt);
 };
-
-} // namespace ANI
-} // namespace ModuleFileIo
+constexpr int DIR_DEFAULT_PERM = 0770;
+const std::string PROCEDURE_READTEXT_NAME = "FileIOMkdir";
+} // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-
-#endif // SECURITYLABEL_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MKDIR_CORE_H

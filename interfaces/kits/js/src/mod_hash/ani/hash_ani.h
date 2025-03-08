@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace FileManagement {
-namespace ModuleFileIo {
+namespace ModuleFileIO {
 namespace ANI {
 
 class HashAni final {
