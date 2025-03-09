@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace FileManagement {
-namespace ModuleFileIo {
+namespace ModuleFileIO {
 namespace ANI {
 
 using namespace std;
@@ -79,6 +79,6 @@ ani_int CloseAni::CloseSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_
 }
 
 } // namespace ANI
-} // namespace ModuleFileIo
+} // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

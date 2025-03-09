@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ namespace ModuleFileIO {
 
 class MkdirCore final {
 public:
-    static FsResult<void> DoMkdir(const std::string &path, const std::optional<bool> &recursion = std::nullopt);
+    static FsResult<void> DoMkdir(const std::string& path, std::optional<bool> recursion = std::nullopt);
 };
 constexpr int DIR_DEFAULT_PERM = 0770;
 const std::string PROCEDURE_READTEXT_NAME = "FileIOMkdir";

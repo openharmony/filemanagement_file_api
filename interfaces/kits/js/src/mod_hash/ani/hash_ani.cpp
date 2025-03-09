@@ -57,6 +57,6 @@ ani_string HashAni::HashSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
 }
 
 } // namespace ANI
-} // namespace ModuleFileIo
+} // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

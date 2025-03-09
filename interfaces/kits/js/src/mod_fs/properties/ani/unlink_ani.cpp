@@ -28,7 +28,7 @@ namespace ANI {
 
 ani_int UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
-    auto [succ, pathStr] = TypeConverter::ToUTF8StringPath(env, path);
+    auto [succ, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (!succ) {
         HILOGE("Invalid path");
         return -1;

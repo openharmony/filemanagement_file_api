@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace FileManagement {
-namespace ModuleFileIo {
+namespace ModuleFileIO {
 namespace ANI {
 
 class CloseAni final {
@@ -29,7 +29,7 @@ public:
 };
 
 } // namespace ANI
-} // namespace ModuleFileIo
+} // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 

@@ -36,6 +36,8 @@ public:
     static std::tuple<bool, ani_string> ToAniString(ani_env *env, const char *str);
     static std::tuple<bool, FileInfo> ToFileInfo(ani_env *env, const ani_object &pathOrFd);
     static std::tuple<bool, ArrayBuffer> ToArrayBuffer(ani_env *env, ani_arraybuffer &buffer);
+    static std::tuple<bool, ani_array_ref> ToAniStringList(
+        ani_env *env, const std::string strList[], const uint32_t length);
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI
