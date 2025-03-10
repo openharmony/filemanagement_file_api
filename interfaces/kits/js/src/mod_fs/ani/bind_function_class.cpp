@@ -13,25 +13,48 @@
  * limitations under the License.
  */
 
-#include <vector>
+#include <array>
 
 #include <ani.h>
+
 #include "access_ani.h"
 #include "bind_function.h"
+#include "file_ani.h"
+#include "filemgmt_libhilog.h"
+#include "close_ani.h"
 #include "copy_file_ani.h"
+#include "listfile_ani.h"
 #include "mkdir_ani.h"
 #include "move_ani.h"
-#include "stat_ani.h"
-#include "unlink_ani.h"
+#include "open_ani.h"
+#include "read_ani.h"
+#include "read_text_ani.h"
 #include "rmdir_ani.h"
+#include "stat_ani.h"
+#include "truncate_ani.h"
+#include "unlink_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
-static ani_status BindStatMethods(ani_vm *vm)
+static ani_status BindFileClassMethods(ani_env *env)
+{
+    static const char *className = "Lfile_fs_class/FileInner;";
+
+    std::array methods = {
+        ani_native_function { "getParent", nullptr, reinterpret_cast<void *>(FileAni::GetParent) },
+        ani_native_function { "lock", nullptr, reinterpret_cast<void *>(FileAni::Lock) },
+        ani_native_function { "tryLock", nullptr, reinterpret_cast<void *>(FileAni::TryLock) },
+        ani_native_function { "unlock", nullptr, reinterpret_cast<void *>(FileAni::UnLock) },
+    };
+
+    return BindClass(env, className, methods);
+}
+
+static ani_status BindStatClassMethods(ani_env *env)
 {
     static const char *className = "Lfile_fs_class/StatInner;";
 
-    std::vector<ani_native_function> methods = {
+    std::array methods = {
         ani_native_function { "isBlockDevice", ":Z", reinterpret_cast<void *>(StatAni::IsBlockDevice) },
         ani_native_function { "isCharacterDevice", ":Z", reinterpret_cast<void *>(StatAni::IsCharacterDevice) },
         ani_native_function { "isDirectory", ":Z", reinterpret_cast<void *>(StatAni::IsDirectory) },
@@ -41,38 +64,60 @@ static ani_status BindStatMethods(ani_vm *vm)
         ani_native_function { "isSymbolicLink", ":Z", reinterpret_cast<void *>(StatAni::IsSymbolicLink) },
     };
 
-    return BindClass(vm, className, methods);
+    return BindClass(env, className, methods);
 }
 
-static ani_status BindFileFs(ani_vm *vm)
+static ani_status BindStaticMethods(ani_env *env)
 {
     static const char *className = "Lfile_fs_class/fileIo;";
 
-    std::vector<ani_native_function> functions = {
-        ani_native_function { "doAccessSync", nullptr, reinterpret_cast<void *>(AccessAni::AccessSync3) },
-        ani_native_function { "unlinkSync", "Lstd/core/String;:I", reinterpret_cast<void *>(UnlinkAni::UnlinkSync) },
+    std::array methods = {
+        ani_native_function { "closeSync", nullptr, reinterpret_cast<void *>(CloseAni::CloseSync) },
+        ani_native_function { "copyFileSync", nullptr, reinterpret_cast<void *>(CopyFileAni::CopyFileSync) },
+        ani_native_function { "listFileSync", nullptr, reinterpret_cast<void *>(ListFileAni::ListFileSync) },
         ani_native_function { "mkdirSync", "Lstd/core/String;:I", reinterpret_cast<void *>(MkdirkAni::MkdirSync0) },
         ani_native_function { "mkdirSync", "Lstd/core/String;Z:I", reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
-        ani_native_function { "moveFileSync", "Lstd/core/String;Lstd/core/String;Lstd/core/Int;:V",
-            reinterpret_cast<void *>(MoveAni::MoveFileSync) },
-        ani_native_function { "copyFileSync", nullptr, reinterpret_cast<void *>(CopyFileAni::CopyFileSync) },
+        ani_native_function { "moveFileSync", nullptr, reinterpret_cast<void *>(MoveAni::MoveFileSync) },
+        ani_native_function { "openSync", nullptr, reinterpret_cast<void *>(OpenAni::OpenSync) },
+        ani_native_function { "readSync", nullptr, reinterpret_cast<void *>(ReadAni::ReadSync) },
+        ani_native_function { "readTextSync", nullptr, reinterpret_cast<void *>(ReadTextAni::ReadTextSync) },
+        ani_native_function { "rmdirSync", nullptr, reinterpret_cast<void *>(RmdirAni::RmdirSync) },
         ani_native_function { "statSync", nullptr, reinterpret_cast<void *>(StatAni::StatSync) },
-        ani_native_function { "rmdirSync", "Lstd/core/String;:V", reinterpret_cast<void *>(RmdirAni::RmdirSync) },
-    };
+        ani_native_function { "truncateSync", nullptr, reinterpret_cast<void *>(TruncateAni::TruncateSync) },
+        ani_native_function { "unlinkSync", nullptr, reinterpret_cast<void *>(UnlinkAni::UnlinkSync) },
 
-    return BindClass(vm, className, functions);
+    };
+    return BindClass(env, className, methods);
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    *result = ANI_VERSION_1;
-    ani_status ret = ANI_OK;
-    if (ANI_OK != (ret = BindStatMethods(vm))) {
-        return ret;
+    ani_env *env;
+    ani_status status = ANI_ERROR;
+    status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK) {
+        HILOGE("Unsupported ANI_VERSION_1");
+        return status;
+    }
+
+    status = BindStaticMethods(env);
+    if (status != ANI_OK) {
+        HILOGE("Cannot bind native static methods for fileio!");
+        return status;
     };
 
-    if (ANI_OK != (ret = BindFileFs(vm))) {
-        return ret;
+    status = BindFileClassMethods(env);
+    if (status != ANI_OK) {
+        HILOGE("Cannot bind native methods for File Class!");
+        return status;
     };
-    return ret;
+
+    status = BindStatClassMethods(env);
+    if (status != ANI_OK) {
+        HILOGE("Cannot bind native methods for Stat Class!");
+        return status;
+    };
+
+    *result = ANI_VERSION_1;
+    return ANI_OK;
 }
