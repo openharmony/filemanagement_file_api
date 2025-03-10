@@ -70,7 +70,6 @@ static tuple<bool, FileInfo> ValidFileInfo(const FileInfo &fileInfo)
 
 static int32_t CheckFsStat(const FileInfo &fileInfo, uv_fs_t *req)
 {
-    HILOGD("stat path, ret is %{public}s", fileInfo.path.get());
     if (fileInfo.isPath) {
         int ret = uv_fs_stat(nullptr, req, fileInfo.path.get(), nullptr);
         if (ret < 0) {

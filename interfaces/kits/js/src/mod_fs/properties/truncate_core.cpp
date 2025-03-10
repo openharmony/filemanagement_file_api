@@ -25,22 +25,33 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 
+static bool ValidFileInfo(FileInfo &fileInfo)
+{
+    if (!fileInfo.isPath) {
+        auto fd = fileInfo.fdg->GetFD();
+        if (fd < 0) {
+            HILOGE("Invalid fd");
+            return false;
+        }
+    }
+    return true;
+}
+
 static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
 {
     if (fileInfo.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> open_req = {
-            new uv_fs_t, FsUtils::FsReqCleanup };
+        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> open_req = { new uv_fs_t, FsUtils::FsReqCleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;
         }
-        int ret = uv_fs_open(nullptr, open_req.get(), fileInfo.path.get(), O_RDWR,
-                             S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+        int ret = uv_fs_open(
+            nullptr, open_req.get(), fileInfo.path.get(), O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
         if (ret < 0) {
             return ret;
         }
-        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> ftruncate_req = {
-            new uv_fs_t, FsUtils::FsReqCleanup };
+        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncate_req = { new uv_fs_t,
+            FsUtils::FsReqCleanup };
         if (!ftruncate_req) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;
@@ -51,8 +62,8 @@ static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
             return ret;
         }
     } else {
-        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> ftruncate_req = {
-            new uv_fs_t, FsUtils::FsReqCleanup };
+        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncate_req = { new uv_fs_t,
+            FsUtils::FsReqCleanup };
         if (!ftruncate_req) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;
@@ -67,7 +78,13 @@ static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
 }
 
 FsResult<void> TruncateCore::DoTruncate(FileInfo &fileInfo, const std::optional<int64_t> &len)
+
 {
+    auto succ = ValidFileInfo(fileInfo);
+    if (!succ) {
+        return FsResult<void>::Error(EINVAL);
+    }
+
     int64_t truncateLen = 0;
     if (len.has_value()) {
         truncateLen = len.value();
@@ -76,7 +93,7 @@ FsResult<void> TruncateCore::DoTruncate(FileInfo &fileInfo, const std::optional<
             return FsResult<void>::Error(EINVAL);
         }
     }
-    
+
     auto err = Truncate(fileInfo, truncateLen);
     if (err) {
         return FsResult<void>::Error(err);

@@ -56,7 +56,7 @@ FsResult<void> CloseCore::DoClose(const int32_t &fd)
     }
     auto err = CloseFd(fd);
     if (err) {
-        FsResult<void>::Error(err);
+        return FsResult<void>::Error(err);
     }
     return FsResult<void>::Success();
 }

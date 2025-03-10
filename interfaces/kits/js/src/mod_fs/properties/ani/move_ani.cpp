@@ -15,7 +15,6 @@
 
 #include "move_ani.h"
 
-#include <string>
 #include "filemgmt_libhilog.h"
 #include "move_core.h"
 #include "type_converter.h"
@@ -28,17 +27,17 @@ namespace ANI {
 void MoveAni::MoveFileSync(
     ani_env *env, [[maybe_unused]] ani_class clazz, ani_string src, ani_string dest, ani_object mode)
 {
-    auto [succSrc, srcPath] = ANI::TypeConverter::ToUTF8String(env, src);
+    auto [succSrc, srcPath] = TypeConverter::ToUTF8String(env, src);
     if (!succSrc) {
         HILOGE("Invalid src");
         return;
     }
-    auto [succDest, destPath] = ANI::TypeConverter::ToUTF8String(env, dest);
+    auto [succDest, destPath] = TypeConverter::ToUTF8String(env, dest);
     if (!succDest) {
         HILOGE("Invalid dest");
         return;
     }
-    auto [succMode, modeOp] = ANI::TypeConverter::ToOptionalInt32(env, mode);
+    auto [succMode, modeOp] = TypeConverter::ToOptionalInt32(env, mode);
     if (!succMode) {
         HILOGE("Invalid mode");
         return;
