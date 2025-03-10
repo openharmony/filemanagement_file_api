@@ -18,18 +18,53 @@
 
 #include <vector>
 #include <ani.h>
+#include "filemgmt_libhilog.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-    
+
 ANI_EXPORT ani_status BindClass(ani_vm *vm, const char *className, const std::vector<ani_native_function> &methods);
-ANI_EXPORT ani_status BindNamespace(ani_vm *vm, const char *namespaceStr,
-    const std::vector<ani_native_function>& functions);
-} //ANI
-} //ModuleFileIO
-} //FileManagement
-} //OHOS
+ANI_EXPORT ani_status BindNamespace(
+    ani_vm *vm, const char *namespaceStr, const std::vector<ani_native_function> &functions);
+
+template <std::size_t N>
+ANI_EXPORT ani_status BindClass(ani_env *env, const char *className, const std::array<ani_native_function, N> &methods)
+{
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        HILOGE("Cannot find class '%{private}s'", className);
+        return ANI_INVALID_ARGS;
+    }
+
+    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+        HILOGE("Cannot bind native methods to '%{private}s'", className);
+        return ANI_INVALID_TYPE;
+    };
+    return ANI_OK;
+}
+
+template <std::size_t N>
+ANI_EXPORT ani_status BindNamespace(
+    ani_env *env, const char *namespaceStr, const std::array<ani_native_function, N> &methods)
+{
+    ani_namespace ns;
+    if (ANI_OK != env->FindNamespace(namespaceStr, &ns)) {
+        HILOGE("Not found '%{private}s'", namespaceStr);
+        return ANI_INVALID_ARGS;
+    }
+
+    if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
+        HILOGE("Cannot bind native methods to '%{private}s'", namespaceStr);
+        return ANI_INVALID_TYPE;
+    };
+    return ANI_OK;
+}
+
+} // namespace ANI
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
 
 #endif // FILEMANAGEMENT_ANI_BIND_FUNCTION_H

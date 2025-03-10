@@ -19,7 +19,6 @@
 
 #include "access_ani.h"
 #include "bind_function.h"
-#include "file_ani.h"
 #include "filemgmt_libhilog.h"
 #include "close_ani.h"
 #include "copy_file_ani.h"
@@ -35,20 +34,6 @@
 #include "unlink_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
-
-static ani_status BindFileClassMethods(ani_env *env)
-{
-    static const char *className = "Lfile_fs_class/FileInner;";
-
-    std::array methods = {
-        ani_native_function { "getParent", nullptr, reinterpret_cast<void *>(FileAni::GetParent) },
-        ani_native_function { "lock", nullptr, reinterpret_cast<void *>(FileAni::Lock) },
-        ani_native_function { "tryLock", nullptr, reinterpret_cast<void *>(FileAni::TryLock) },
-        ani_native_function { "unlock", nullptr, reinterpret_cast<void *>(FileAni::UnLock) },
-    };
-
-    return BindClass(env, className, methods);
-}
 
 static ani_status BindStatClassMethods(ani_env *env)
 {
@@ -103,12 +88,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     status = BindStaticMethods(env);
     if (status != ANI_OK) {
         HILOGE("Cannot bind native static methods for fileio!");
-        return status;
-    };
-
-    status = BindFileClassMethods(env);
-    if (status != ANI_OK) {
-        HILOGE("Cannot bind native methods for File Class!");
         return status;
     };
 
