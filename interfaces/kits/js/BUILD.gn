@@ -764,7 +764,7 @@ generate_static_abc("ani_fs_abc") {
 
 ohos_prebuilt_etc("ani_fs_abc_etc") {
   source = "$target_out_dir/ani_fs.abc"
-  module_install_dir = "fs"
+  module_install_dir = "framework"
   subsystem_name = "filemanagement"
   part_name = "file_api"
   deps = [ ":ani_fs_abc" ]
@@ -834,7 +834,7 @@ generate_static_abc("ani_hash_abc") {
 
 ohos_prebuilt_etc("ani_hash_abc_etc") {
   source = "$target_out_dir/ani_hash.abc"
-  module_install_dir = "hash"
+  module_install_dir = "framework"
   subsystem_name = "filemanagement"
   part_name = "file_api"
   deps = [ ":ani_hash_abc" ]
@@ -902,7 +902,7 @@ generate_static_abc("ani_securitylabel_abc") {
 
 ohos_prebuilt_etc("ani_securitylabel_abc_etc") {
   source = "$target_out_dir/ani_securitylabel.abc"
-  module_install_dir = "securitylabel"
+  module_install_dir = "framework"
   subsystem_name = "filemanagement"
   part_name = "file_api"
   deps = [ ":ani_securitylabel_abc" ]
