@@ -59,7 +59,6 @@ static tuple<bool, void *, size_t, int64_t> ValidReadArg(ArrayBuffer &arrayBuffe
             return { false, nullptr, retLen, offset };
         }
     }
-    HILOGE("arrayBuffer.length: %u, retLen: %u ", bufLen, retLen);
     return { true, buf, retLen, offset };
 }
 
