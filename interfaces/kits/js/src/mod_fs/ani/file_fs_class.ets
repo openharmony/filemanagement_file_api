@@ -488,31 +488,6 @@ class fileIo {
     });
   }
 
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function openSyncTest() {
-  console.println("openSyncTest begin");
-  try {
-    let file = fileIo.openSync("/data/local/tmp/a.txt");
-    console.println(`open file without mode, fd=${file.fd}, path=${file.path}, name=${file.name}`);
-    let mode = 2;
-    file = fileIo.openSync("/data/local/tmp/a.txt", mode);
-    console.println(`open file with mode=${mode}, fd=${file.fd}, path=${file.path}, name=${file.name}`);
-  } catch (error) {
-    console.error("openSyncTest Error!", error);
-  }
-  console.println("openSyncTest end");
 }
 
 function closeSyncTest1() {
@@ -579,6 +554,20 @@ function moveSyncTest() {
   console.println("moveSyncTest begin")
   fileIo.moveFileSync("/data/local/tmp/a.txt", "/data/local/tmp/a1.txt", 1)
   console.println("moveSyncTest end")
+}
+
+function openSyncTest() {
+  console.println("openSyncTest begin");
+  try {
+    let file = fileIo.openSync("/data/local/tmp/a.txt");
+    console.println(`open file without mode, fd=${file.fd}, path=${file.path}, name=${file.name}`);
+    let mode = 2;
+    file = fileIo.openSync("/data/local/tmp/a.txt", mode);
+    console.println(`open file with mode=${mode}, fd=${file.fd}, path=${file.path}, name=${file.name}`);
+  } catch (error) {
+    console.error("openSyncTest Error!", error);
+  }
+  console.println("openSyncTest end");
 }
 
 function readSyncTest1() {
@@ -749,8 +738,6 @@ function statSyncTest2() {
   console.println("statSyncTest2 end");
 }
 
-
-
 function truncateSyncTest1() {
   console.println("truncateSyncTest1 begin");
   try {
@@ -794,8 +781,6 @@ function unlinkSyncTest() {
   }
   console.println("unlinkSyncTest end");
 }
-
-
 
 
 function main() {
