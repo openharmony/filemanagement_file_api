@@ -34,6 +34,7 @@ public:
     static std::tuple<bool, std::optional<int64_t>> ToOptionalInt64(ani_env *env, const ani_object &longOp);
     static std::tuple<bool, ani_string> ToAniString(ani_env *env, std::string str);
     static std::tuple<bool, ani_string> ToAniString(ani_env *env, const char *str);
+    static std::tuple<bool, std::optional<int32_t>> EnumToInt32(ani_env *env, const ani_enum_item &enumOp);
     static std::tuple<bool, FileInfo> ToFileInfo(ani_env *env, const ani_object &pathOrFd);
     static std::tuple<bool, ArrayBuffer> ToArrayBuffer(ani_env *env, ani_arraybuffer &buffer);
     static std::tuple<bool, ani_array_ref> ToAniStringList(

@@ -80,7 +80,7 @@ class FileInner implements File {
 }
 
 enum LocationType {
-  LOCAl = 1,
+  LOCAL = 1,
   CLOUD = 2
 }
 
@@ -119,7 +119,7 @@ class StatInner implements Stat {
   atimeNs: bigint = 0n;
   mtimeNs: bigint = 0n;
   ctimeNs: bigint = 0n;
-  location: LocationType;
+  location: LocationType = LocationType.LOCAL;
 
   private nativeStat: long = 0;
 

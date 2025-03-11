@@ -93,6 +93,22 @@ std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, const char
     return { true, std::move(result) };
 }
 
+std::tuple<bool, std::optional<int32_t>> TypeConverter::EnumToInt32(ani_env *env, const ani_enum_item &enumOp)
+{
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(enumOp, &isUndefined);
+    if (isUndefined) {
+        return { true, std::nullopt };
+    }
+
+    ani_int result;
+    if (ANI_OK != env->EnumItem_GetValue_Int(enumOp, &result)) {
+        return { false, {} };
+    }
+
+    return { true, std::make_optional(result) };
+}
+
 std::tuple<bool, FileInfo> TypeConverter::ToFileInfo(ani_env *env, const ani_object &pathOrFd)
 {
     ani_class stringClass;
