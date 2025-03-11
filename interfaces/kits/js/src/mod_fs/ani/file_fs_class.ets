@@ -17,7 +17,6 @@ export default fileIo;
 
 loadLibrary("ani_fs_class.z")
 
-
 export class BusinessError<T = void> {
   code: number = 0;
   data?: T;
@@ -25,225 +24,60 @@ export class BusinessError<T = void> {
 
 export type AsyncCallback<T, E = void> = (err: BusinessError<E>, data?: T) => void;
 
-
-enum AccessModeType {
-  EXIST = 0,
-
-  WRITE = 2,
-
-  READ = 4,
-
-  READ_WRITE = 6,
+export interface Filter {
+  suffix?: Array<string>;
+  displayName?: Array<string>;
+  mimeType?: Array<string>;
+  fileSizeOver?: number;
+  lastModifiedAfter?: number;
+  excludeMedia?: boolean;
 }
 
-enum AccessFlagType {
-  LOCAL = 0,
+export interface ListFileOptions {
+  recursion?: boolean;
+  listNum?: number;
+  filter?: Filter;
 }
 
-
-class fileIo {
-
-  static native doAccessSync(path:string, mode?:AccessModeType, flag?:AccessFlagType):boolean;
-  static native unlinkSync(path: string): int;
-  static native mkdirSync(path: string): int;
-  static native mkdirSync(path: string, recursion: boolean): int;
-  static native moveFileSync(src: String, dest: String, mode?: int): void;
-  static native rmdirSync(path: string): void;
-
-  static accessSync(path: string, mode?: AccessModeType): boolean {
-      return fileIo.doAccessSync(path, mode);
-  }
-
-  static accessSync(path: string, mode: AccessModeType, flag: AccessFlagType): boolean{
-      return fileIo.doAccessSync(path, mode, flag);
-  }
-
-  static accessSync1(path: string):boolean {
-      return fileIo.accessSync(path);
-  }
-
-  static accessSync2(path: string, mode: AccessModeType):boolean {
-      return fileIo.accessSync(path, mode);
-  }
-
-  static accessSync3(path: string, mode: AccessModeType, flag: AccessFlagType): boolean
-  {
-      return fileIo.accessSync(path, mode, flag);
-  }
-
-  static access(path: string, mode?: AccessModeType): Promise<boolean> {
-      return new Promise<boolean>((resolve:(result:boolean)=>void, reject:(e:BusinessError<void>)=>void) => {
-          if (mode === undefined) {
-              let promise = taskpool.execute(fileIo.accessSync1, path); // 这里调用同步方法
-              promise.then((ret:NullishType) => {
-                  if (ret === null || ret === undefined) { // 异常处理
-                      let err = new BusinessError<void>();
-                      err.code = -1;
-                      reject(err);
-                  } else {
-                      let result = ret as boolean;
-                      resolve(result); // 正常结果
-                  }
-              });
-          } else {
-              let promise = taskpool.execute(fileIo.accessSync2, path, mode); // 这里调用同步方法
-              promise.then((ret:NullishType) => {
-                  if (ret === null || ret === undefined) { // 异常处理
-                      let err = new BusinessError<void>();
-                      err.code = -1;
-                      reject(err);
-                  } else {
-                      let result = ret as boolean;
-                      resolve(result); // 正常结果
-                  }
-              });
-          }
-          
-          
-      });
-  }
-
-  static access(path: string, mode: AccessModeType, flag: AccessFlagType): Promise<boolean>{
-      return new Promise<boolean>((resolve:(result:boolean)=>void, reject:(e:BusinessError<void>)=>void) => {
-          let promise = taskpool.execute(fileIo.accessSync3, path, mode, flag); // 这里调用同步方法
-          promise.then((ret:NullishType) => {
-              if (ret === null || ret === undefined) { // 异常处理
-                  let err = new BusinessError<void>();
-                  err.code = -1;
-                  reject(err);
-              } else {
-                  let result = ret as boolean;
-                  resolve(result); // 正常结果
-              }
-          });
-      })
-  }
-
-  static access(path: string, callback: AsyncCallback<boolean,void>): void {
-      let promise = taskpool.execute(fileIo.accessSync1, path); // 这里调用同步方法
-      promise.then((ret:NullishType) => {
-          let err = new BusinessError<void>();
-          if (ret === null || ret === undefined) { // 异常处理
-              err.code = -1;
-              callback(err,undefined);
-          } else {
-              err.code = 0;
-              let result = ret as boolean;
-              callback(err,result); // 正常结果
-          }
-      });
-  }
-
-  static unlink(path: string): Promise<int> {
-    return new Promise<int>((resolve: (result: int) => void, reject: (e: BusinessError<void>) => void) => {
-      let promise = taskpool.execute(fileIo.unlinkSync, path); // 这里调用同步方法
-      promise.then((ret: NullishType) => {
-        let result = ret as int
-        if (ret === null || ret === undefined) { // 异常处理
-          let err = new BusinessError<void>();
-          err.code = -1;
-          reject(err);
-        } else {
-          resolve(result); // 正常结果
-        }
-      });
-    });
-  }
-
-  static unlink(path: string, callback: AsyncCallback<int, void>): void {
-    let p1 = taskpool.execute(fileIo.unlinkSync, path);
-    p1.then((ret: NullishType) => {
-        let err = new BusinessError<void>();
-        if (ret === null || ret === undefined) {
-          console.println("-------- err code = -1 -------------");
-          err.code = -1
-          callback(err, undefined)
-        }else {
-          console.println("-------- err code = 0 -------------");
-          err.code = 0
-          let r =  ret as int;
-          callback(err, r);
-        }
-    });
-  }
-
-  static mkdir(path: string): Promise<int> {
-    return new Promise<int>((resolve: (result: int) => void, reject: (e: BusinessError<void>) => void) => {
-      const mkdirSyncWrapper = (path: string) => fileIo.mkdirSync(path);
-      let promise = taskpool.execute(mkdirSyncWrapper, path); // 这里调用同步方法
-      promise.then((ret: NullishType) => {
-        let result = ret as int
-        if (ret === null || ret === undefined) { // 异常处理
-          let err = new BusinessError<void>();
-          err.code = -1;
-          reject(err);
-        } else {
-          resolve(result); // 正常结果
-        }
-      });
-    });
-  }
-
-  static mkdir(path: string, callback: AsyncCallback<int, void>): void {
-    const mkdirSyncWrapper = (path: string) => fileIo.mkdirSync(path);
-    let p1 = taskpool.execute(mkdirSyncWrapper, path);
-    p1.then((ret: NullishType) => {
-        let err = new BusinessError<void>();
-        if (ret === null || ret === undefined) {
-          console.println("-------- err code = -1 -------------");
-          err.code = -1
-          callback(err, undefined)
-        }else {
-          console.println("-------- err code = 0 -------------");
-          err.code = 0
-          let r =  ret as int;
-          callback(err, r);
-        }
-    });
-  }
-
-  static mkdir(path: string, recursion: boolean): Promise<int> {
-    return new Promise<int>((resolve: (result: int) => void, reject: (e: BusinessError<void>) => void) => {
-      const mkdirSyncWrapper = (path: string, recursion: boolean) => fileIo.mkdirSync(path, recursion);
-      let promise = taskpool.execute(mkdirSyncWrapper, path, recursion); // 这里调用同步方法
-      promise.then((ret: NullishType) => {
-        let result = ret as int
-        if (ret === null || ret === undefined) { // 异常处理
-          console.println("-------- err code = -1 -------------");
-          let err = new BusinessError<void>();
-          err.code = -1;
-          reject(err);
-        } else {
-          console.println("-------- err code = 0 -------------");
-          resolve(result); // 正常结果
-        }
-      });
-    });
-  }
-
-  static mkdir(path: string, recursion: boolean, callback: AsyncCallback<int, void>): void {
-    const mkdirSyncWrapper = (path: string, recursion: boolean,) => fileIo.mkdirSync(path, recursion);
-    let p1 = taskpool.execute(mkdirSyncWrapper, path, recursion);
-    p1.then((ret: NullishType) => {
-        let err = new BusinessError<void>();
-        if (ret === null || ret === undefined) {
-          console.println("-------- err code = -1 -------------");
-          err.code = -1
-          callback(err, undefined)
-        }else {
-          console.println("-------- err code = 0 -------------");
-          err.code = 0
-          let r =  ret as int;
-          callback(err, r);
-        }
-    });
-  }
-
-  static native copyFileSync(src: FileDataType, dest: FileDataType, mode?: int): void;
-  static native statSync(file: FileDataType): Stat;
+export interface ReadOptions {
+  offset?: number;
+  length?: number;
 }
 
-type FileDataType = String | number
+export interface ReadTextOptions extends ReadOptions {
+  encoding?: string;
+}
+
+interface File {
+  fd: int;
+  path: String;
+  name: String;
+
+  getParent(): String;
+  lock(exclusive?: boolean): void;
+  tryLock(exclusive?: boolean): void;
+  unlock(): void;
+}
+
+class FileInner implements File {
+  fd: int = -1;
+  path: String = "";
+  name: String = "";
+
+  private nativePtr: long = 0;
+
+  constructor(ptr: long) {
+    if (this.nativePtr == 0) {
+      this.nativePtr = ptr;
+    }
+  }
+
+  native getParent(): String;
+  native lock(exclusive?: boolean): void;
+  native tryLock(exclusive?: boolean): void;
+  native unlock(): void;
+
+}
 
 enum LocationType {
   LOCAl = 1,
@@ -287,12 +121,12 @@ class StatInner implements Stat {
   ctimeNs: bigint = 0n;
   location: LocationType;
 
-  private nativeStat:long = 0;
-  
-  constructor(stat:long) {
-      if(this.nativeStat == 0){
-          this.nativeStat = stat;
-      }
+  private nativeStat: long = 0;
+
+  constructor(stat: long) {
+    if (this.nativeStat == 0) {
+      this.nativeStat = stat;
+    }
   }
   
   native isBlockDevice(): boolean;
@@ -304,133 +138,562 @@ class StatInner implements Stat {
   native isSymbolicLink(): boolean;
 }
 
+type FdOrFile = int | File;
+type PathOrFd = string | int;
 
-function accessSyncTest() {
-  let file_list = ['/data/zxl/test/not_read_and_write.txt','/data/zxl/test/read.txt',
-    '/data/zxl/test/read_and_write.txt','/data/zxl/test/write.txt', '/data/zxl/test/no.txt']
+class fileIo {
+  static native closeSync(file: FdOrFile): int;
 
-  for (let filepath of file_list) {
-    console.info('test file name: ',filepath, ' start:')
-    let result1 = fileIo.accessSync(filepath, AccessModeType.EXIST, AccessFlagType.LOCAL)
-    console.info('access EXIST', result1)
-    let result2 = fileIo.accessSync(filepath, AccessModeType.WRITE, AccessFlagType.LOCAL)
-    console.info('access WRITE', result2)
-    let result3 = fileIo.accessSync(filepath, AccessModeType.READ, AccessFlagType.LOCAL)
-    console.info('access READ', result3)
-    let result4 = fileIo.accessSync(filepath, AccessModeType.READ_WRITE, AccessFlagType.LOCAL)
-    console.info('access READ_WRITE', result4) 
+  static native copyFileSync(src: PathOrFd, dest: PathOrFd, mode?: int): void;
+
+  static native listFileSync(path: string, options?: ListFileOptions): string[];
+
+  static listFileSync1(path: string): string[] {
+    return fileIo.listFileSync(path);
   }
+  static listFileSync2(path: string, options: ListFileOptions): string[] {
+    return fileIo.listFileSync(path, options);
+  }
+
+  static listFile(path: string): Promise<string[]> {
+    return new Promise<string[]>((resolve: (result: string[]) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.listFileSync1, path);
+      promise.then((ret: NullishType) => {
+        if (ret === null || ret === undefined) {
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          let r = ret as string[];
+          resolve(r);
+        }
+      });
+    });
+  }
+
+  static listFile(path: string, options: ListFileOptions): Promise<string[]> {
+    return new Promise<string[]>((resolve: (result: string[]) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.listFileSync2, path, options);
+      promise.then((ret: NullishType) => {
+        if (ret === null || ret === undefined) {
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          let r = ret as string[];
+          resolve(r);
+        }
+      });
+    });
+  }
+
+  static listFile(path: string, callback: AsyncCallback<string[], void>): void {
+    let p1 = taskpool.execute(fileIo.listFileSync1, path);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        err.code = -1;
+        callback(err, undefined);
+      } else {
+        err.code = 0;
+        let r = ret as string[];
+        callback(err, r);
+      }
+    });
+  }
+
+  static listFile(path: string, options: ListFileOptions, callback: AsyncCallback<string[], void>): void {
+    let p1 = taskpool.execute(fileIo.listFileSync2, path, options);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        err.code = -1;
+        callback(err, undefined);
+      } else {
+        err.code = 0;
+        let r = ret as string[];
+        callback(err, r);
+      }
+    });
+  }
+
+  static native mkdirSync(path: string): int;
+
+  static native mkdirSync(path: string, recursion: boolean): int;
+
+  static mkdir(path: string): Promise<int> {
+    return new Promise<int>((resolve: (result: int) => void, reject: (e: BusinessError<void>) => void) => {
+      const mkdirSyncWrapper = (path: string) => fileIo.mkdirSync(path);
+      let promise = taskpool.execute(mkdirSyncWrapper, path); // 这里调用同步方法
+      promise.then((ret: NullishType) => {
+        let result = ret as int
+        if (ret === null || ret === undefined) { // 异常处理
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          resolve(result); // 正常结果
+        }
+      });
+    });
+  }
+
+  static mkdir(path: string, callback: AsyncCallback<int, void>): void {
+    const mkdirSyncWrapper = (path: string) => fileIo.mkdirSync(path);
+    let p1 = taskpool.execute(mkdirSyncWrapper, path);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1
+        callback(err, undefined)
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0
+        let r = ret as int;
+        callback(err, r);
+      }
+    });
+  }
+
+  static mkdir(path: string, recursion: boolean): Promise<int> {
+    return new Promise<int>((resolve: (result: int) => void, reject: (e: BusinessError<void>) => void) => {
+      const mkdirSyncWrapper = (path: string, recursion: boolean) => fileIo.mkdirSync(path, recursion);
+      let promise = taskpool.execute(mkdirSyncWrapper, path, recursion); // 这里调用同步方法
+      promise.then((ret: NullishType) => {
+        let result = ret as int
+        if (ret === null || ret === undefined) { // 异常处理
+          console.println("-------- err code = -1 -------------");
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          console.println("-------- err code = 0 -------------");
+          resolve(result); // 正常结果
+        }
+      });
+    });
+  }
+
+  static mkdir(path: string, recursion: boolean, callback: AsyncCallback<int, void>): void {
+    const mkdirSyncWrapper = (path: string, recursion: boolean,) => fileIo.mkdirSync(path, recursion);
+    let p1 = taskpool.execute(mkdirSyncWrapper, path, recursion);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1
+        callback(err, undefined)
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0
+        let r = ret as int;
+        callback(err, r);
+      }
+    });
+  }
+
+  static native moveFileSync(src: String, dest: String, mode?: int): void;
+
+  static native openSync(path: String, mode?: int): File;
+
+  static native readSync(fd: int, buffer: ArrayBuffer, options?: ReadOptions): long;
+
+  static readSync1(fd: int, buffer: ArrayBuffer): long {
+    return fileIo.readSync(fd, buffer);
+  }
+  static readSync2(fd: int, buffer: ArrayBuffer, options: ReadOptions): long {
+    return fileIo.readSync(fd, buffer, options);
+  }
+
+  static read(fd: int, buffer: ArrayBuffer): Promise<long> {
+    return new Promise<long>((resolve: (result: long) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.readSync1, fd, buffer);
+      promise.then((ret: NullishType) => {
+        if (ret === null || ret === undefined) {
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          let r = ret as long;
+          resolve(r);
+        }
+      });
+    });
+  }
+
+  static read(fd: int, buffer: ArrayBuffer, options: ReadOptions): Promise<long> {
+    return new Promise<long>((resolve: (result: long) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.readSync2, fd, buffer, options);
+      promise.then((ret: NullishType) => {
+        if (ret === null || ret === undefined) {
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          let r = ret as long;
+          resolve(r);
+        }
+      });
+    });
+  }
+
+  static read(fd: int, buffer: ArrayBuffer, callback: AsyncCallback<long, void>): void {
+    let p1 = taskpool.execute(fileIo.readSync1, fd, buffer);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1;
+        callback(err, undefined);
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0;
+        let r = ret as long;
+        callback(err, r);
+      }
+    });
+  }
+
+  static read(fd: int, buffer: ArrayBuffer, options: ReadOptions, callback: AsyncCallback<long, void>): void {
+    let p1 = taskpool.execute(fileIo.readSync2, fd, buffer, options);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1;
+        callback(err, undefined);
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0;
+        let r = ret as long;
+        callback(err, r);
+      }
+    });
+  }
+
+  static native readTextSync(filePath: string, options?: ReadTextOptions): string;
+
+  static readTextSync1(filePath: string): string {
+    return fileIo.readTextSync(filePath);
+  }
+  static readTextSync2(filePath: string, options: ReadTextOptions): string {
+    return fileIo.readTextSync(filePath, options);
+  }
+
+  static readText(filePath: string): Promise<string> {
+    return new Promise<string>((resolve: (result: string) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.readTextSync1, filePath);
+      promise.then((ret: NullishType) => {
+        if (ret === null || ret === undefined) { // 异常处理
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          let r = ret as string;
+          resolve(r); // 正常结果
+        }
+      });
+    });
+  }
+
+  static readText(filePath: string, options: ReadTextOptions): Promise<string> {
+    return new Promise<string>((resolve: (result: string) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.readTextSync2, filePath, options);
+      promise.then((ret: NullishType) => {
+        if (ret === null || ret === undefined) { // 异常处理
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          let r = ret as string;
+          resolve(r); // 正常结果
+        }
+      });
+    });
+  }
+
+  static readText(filePath: string, callback: AsyncCallback<string, void>): void {
+    let p1 = taskpool.execute(fileIo.readTextSync1, filePath);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1;
+        callback(err, undefined);
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0;
+        let r = ret as string;
+        callback(err, r);
+      }
+    });
+  }
+
+  static readText(filePath: string, options: ReadTextOptions, callback: AsyncCallback<string, void>): void {
+    let p1 = taskpool.execute(fileIo.readTextSync2, filePath, options);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1;
+        callback(err, undefined);
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0;
+        let r = ret as string;
+        callback(err, r);
+      }
+    });
+  }
+
+  static native rmdirSync(path: string): void;
+
+  static native statSync(file: PathOrFd): Stat;
+
+  static native truncateSync(file: PathOrFd, len?: long): void;
+
+  static native unlinkSync(path: string): int;
+
+  static unlink(path: string): Promise<int> {
+    return new Promise<int>((resolve: (result: int) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.unlinkSync, path); // 这里调用同步方法
+      promise.then((ret: NullishType) => {
+        let result = ret as int
+        if (ret === null || ret === undefined) { // 异常处理
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          resolve(result); // 正常结果
+        }
+      });
+    });
+  }
+
+  static unlink(path: string, callback: AsyncCallback<int, void>): void {
+    let p1 = taskpool.execute(fileIo.unlinkSync, path);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1
+        callback(err, undefined)
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0
+        let r = ret as int;
+        callback(err, r);
+      }
+    });
+  }
+
 }
 
-function unlinkTest() {
-  console.println("unlinkTest begin")
-  const ret = fileIo.unlinkSync("liyuke")
-  console.println("------- end --------")
-  console.println(ret)
-  // promise异步
+function closeSyncTest1() {
+  console.println("closeSyncTest1 begin");
   try {
-      fileIo.unlink("src").then((result: int) => {
-      console.println("------- end --------")
-      console.println(result)
-    });;
+    let file = fileIo.openSync("/data/local/tmp/a.txt");
+    console.println(`open file without mode, fd=${file.fd}, path=${file.path}, name=${file.name}`);
+    let ret = fileIo.closeSync(file.fd);
+    console.println(`close file by fd, fd=${file.fd}, ret=${ret}`);
   } catch (error) {
-    console.error("Promise: Error getting temp dir:", error);
+    console.error("closeSyncTest1 Error!", error);
   }
-  // callback异步
-  let path = "/data/local/tmp/hello.txt";
-  fileIo.unlink(path, (err: BusinessError<void>, data?: int) => {
-    console.println("-------- in callback -------------");
-    if (err.code) {
-      console.error("Callback方式: Error unlink:", err);
-    } else {
-      console.log("Callback方式: unlink:", data);
-    }
-  });
-  console.println("unlinkTest end")
+  console.println("closeSyncTest1 end");
 }
 
-function mkdirTest() {
-  console.println("mkdirTest begin")
-  const ret = fileIo.mkdirSync("liyuke")
-  console.println("------- end --------")
-  console.println(ret)
-  // promise异步
+function closeSyncTest2() {
+  console.println("closeSyncTest2 begin");
   try {
-      fileIo.mkdir("src").then((result: int) => {
-      console.println("------- end --------")
-      console.println(result)
-    });;
+    let file = fileIo.openSync("/data/local/tmp/a.txt", 2);
+    console.println(`open file with mode, fd=${file.fd}, path=${file.path}, name=${file.name}`);
+    let ret = fileIo.closeSync(file);
+    console.println(`close file by file, fd=${file.fd}, ret=${ret}`);
   } catch (error) {
-    console.error("Promise: Error getting temp dir:", error);
+    console.error("closeSyncTest2 Error!", error);
   }
-
-  try {
-      fileIo.mkdir("test/111", true).then((result: int) => {
-      console.println("------- end --------")
-      console.println(result)
-    });;
-  } catch (error) {
-    console.error("Promise: Error getting temp dir:", error);
-  }
-  try {
-    fileIo.mkdir("test1/222", false).then((result: int) => {
-    console.println("------- end --------")
-    console.println(result)
-  });;
-} catch (error) {
-  console.error("Promise: Error getting temp dir:", error);
+  console.println("closeSyncTest2 end");
 }
-  // callback异步
-  let path = "/data/local/tmp/hello";
-  fileIo.mkdir(path, (err: BusinessError<void>, data?: int) => {
-    console.println("-------- in callback -------------");
-    if (err.code) {
-      console.error("Callback方式: Error mkdir:", err);
-    } else {
-      console.log("Callback方式: mkdir:", data);
-    }
-  });
 
-  path = "/data/local/tmp/111/test";
-  let recursion = true;
-  fileIo.mkdir(path, recursion, (err: BusinessError<void>, data?: int) => {
-    console.println("-------- in callback -------------");
-    if (err.code) {
-      console.error("Callback方式: Error mkdir:", err);
-    } else {
-      console.log("Callback方式: mkdir:", data);
+function copyFileTest() {
+  console.println("copyFileTest begin");
+  try {
+    fileIo.copyFileSync("/data/local/tmp/a.txt", "/data/local/tmp/b.txt");
+  } catch (error) {
+    console.error("copyFileTest Error!", error);
+  }
+  console.println("copyFileTest end");
+}
+
+function listFileTest() {
+  console.println("listFileTest begin");
+  try {
+    let files = fileIo.listFileSync("/data/local/tmp/");
+    for (const file of files) {
+      console.println(file);
     }
-  });
-  path = "/data/local/tmp/222/test";
-  recursion = false;
-  fileIo.mkdir(path, recursion, (err: BusinessError<void>, data?: int) => {
-    console.println("-------- in callback -------------");
-    if (err.code) {
-      console.error("Callback方式: Error mkdir:", err);
-    } else {
-      console.log("Callback方式: mkdir:", data);
-    }
-  });
-  console.println("mkdirTest end")
+  } catch (error) {
+    console.error("listFileTest Error!", error);
+  }
+  console.println("listFileTest end");
+}
+
+function mkdirTest1() {
+  console.println("mkdirTest1 begin")
+  try {
+    const ret = fileIo.mkdirSync("/data/local/tmp/dir01");
+    console.println(`mkdir result: ${ret}`);
+  } catch (error) {
+    console.error("mkdirTest1 Error!", error);
+  }
+  console.println("mkdirTest1 end");
 }
 
 function moveSyncTest() {
   console.println("moveSyncTest begin")
-  fileIo.moveFileSync("/data/local/tmp/a.txt", "/data/local/tmp/b.txt", 1)
+  fileIo.moveFileSync("/data/local/tmp/a.txt", "/data/local/tmp/a1.txt", 1)
   console.println("moveSyncTest end")
 }
 
-function copy_file_test(src: FileDataType, dest: FileDataType, mode?: int) {
-  fileIo.copyFileSync(src, dest, mode)
+function openSyncTest() {
+  console.println("openSyncTest begin");
+  try {
+    let file = fileIo.openSync("/data/local/tmp/a.txt");
+    console.println(`open file without mode, fd=${file.fd}, path=${file.path}, name=${file.name}`);
+    let mode = 2;
+    file = fileIo.openSync("/data/local/tmp/a.txt", mode);
+    console.println(`open file with mode=${mode}, fd=${file.fd}, path=${file.path}, name=${file.name}`);
+  } catch (error) {
+    console.error("openSyncTest Error!", error);
+  }
+  console.println("openSyncTest end");
+}
+
+function readSyncTest1() {
+  console.println("readSyncTest1 begin")
+  try {
+    let file = fileIo.openSync("/data/local/tmp/a.txt")
+    let fd = file.fd;
+    console.println(`open file, fd=${fd}`)
+    let buffer = new ArrayBuffer(100);
+    let length = fileIo.readSync(fd, buffer);
+    console.println(`read length: ${length}`)
+    let len = length as int;
+    let content = ArrayBuffer.stringify(buffer, "utf-8", 0, len);
+    console.println("-----------------------------------------------")
+    console.println(content)
+    console.println("-----------------------------------------------")
+  } catch (error) {
+    console.error("readSyncTest1 Error!", error);
+  }
+  console.println("readSyncTest1 end")
+}
+
+function readSyncTest2() {
+  console.println("readSyncTest2 begin")
+  try {
+    let file = fileIo.openSync("/data/local/tmp/a.txt")
+    let fd = file.fd;
+    console.println(`open file, fd=${fd}`)
+    let buffer = new ArrayBuffer(100);
+    let options: ReadOptions = {
+      length: 5,
+    }
+    let length = fileIo.readSync(fd, buffer, options);
+    console.println(`read length: ${length}`)
+    let len = length as int;
+    let content = ArrayBuffer.stringify(buffer, "utf-8", 0, len);
+    console.println("-----------------------------------------------")
+    console.println(content)
+    console.println("-----------------------------------------------")
+  } catch (error) {
+    console.error("readSyncTest2 Error!", error);
+  }
+  console.println("readSyncTest2 end")
+}
+
+function readSyncTest3() {
+  console.println("readSyncTest3 begin")
+  try {
+    let file = fileIo.openSync("/data/local/tmp/a.txt")
+    let fd = file.fd;
+    console.println(`open file, fd=${fd}`)
+    let buffer = new ArrayBuffer(100);
+    let options: ReadOptions = {
+      offset: 3,
+      length: 5,
+    }
+    let length = fileIo.readSync(fd, buffer, options);
+    console.println(`read length: ${length}`)
+    let len = length as int;
+    let content = ArrayBuffer.stringify(buffer, "utf-8", 0, len);
+    console.println("-----------------------------------------------")
+    console.println(content)
+    console.println("-----------------------------------------------")
+  } catch (error) {
+    console.error("readSyncTest3 Error!", error);
+  }
+  console.println("readSyncTest3 end")
+}
+
+function readTextSyncTest1() {
+  console.println("readTextSyncTest1 begin")
+  try {
+    let content = fileIo.readTextSync("/data/local/tmp/a.txt");
+    console.println("-----------------------------------------------")
+    console.println(content)
+    console.println("-----------------------------------------------")
+  } catch (error) {
+    console.error("readTextSyncTest1 Error!", error);
+  }
+  console.println("readTextSyncTest1 end")
+}
+
+function readTextSyncTest2() {
+  console.println("readTextSyncTest2 begin");
+  try {
+    let options: ReadTextOptions = {
+      length: 5,
+    }
+    let content = fileIo.readTextSync("/data/local/tmp/a.txt", options);
+    console.println("-----------------------------------------------");
+    console.println(content);
+    console.println("-----------------------------------------------");
+  } catch (error) {
+    console.error("readTextSyncTest2 Error!", error);
+  }
+  console.println("readTextSyncTest2 end");
+}
+
+function readTextSyncTest3() {
+  console.println("readTextSyncTest3 begin")
+  try {
+    let options: ReadTextOptions = {
+      offset: 3,
+      length: 5,
+    }
+    let content = fileIo.readTextSync("/data/local/tmp/a.txt", options);
+    console.println("-----------------------------------------------");
+    console.println(content);
+    console.println("-----------------------------------------------");
+  } catch (error) {
+    console.error("readTextSyncTest3 Error!", error);
+  }
+  console.println("readTextSyncTest3 end");
 }
 
 function rmdirSyncTest() {
-  console.println("rmdirSyncTest begin")
-  fileIo.rmdirSync("/data/local/hello")
-  console.println("rmdirSyncTest end")
+  console.println("rmdirSyncTest begin");
+  try {
+    fileIo.rmdirSync("/data/local/tmp/dir01");
+  } catch (error) {
+    console.error("rmdirSyncTest Error!", error);
+  }
+  console.println("rmdirSyncTest end");
 }
 
-function stat_test(file: FileDataType) {
+function statSyncTest(file: PathOrFd) {
   let stat = fileIo.statSync(file)
   console.info("stat, ino is " + stat.ino);
   console.info("stat, mode is " + stat.mode);
@@ -453,10 +716,95 @@ function stat_test(file: FileDataType) {
   console.info("stat, isSymbolicLink is " + stat.isSymbolicLink());
 }
 
-function main(){
-  console.println("---------- hello ani --------------")
-  accessSyncTest()
-  moveSyncTest()
-  rmdirSyncTest()
-  console.println("---------- hello ani end ---------------")
+function statSyncTest1() {
+  console.println("statSyncTest1 begin");
+  try {
+    statSyncTest("/data/local/tmp/a.txt");
+  } catch (error) {
+    console.error("statSyncTest1 Error!", error);
+  }
+  console.println("statSyncTest1 end");
+}
+
+function statSyncTest2() {
+  console.println("statSyncTest2 begin");
+  try {
+    let file = fileIo.openSync("/data/local/tmp/a.txt");
+    console.println(`open file fd: ${file.fd}`);
+    statSyncTest(file.fd);
+  } catch (error) {
+    console.error("statSyncTest2 Error!", error);
+  }
+  console.println("statSyncTest2 end");
+}
+
+function truncateSyncTest1() {
+  console.println("truncateSyncTest1 begin");
+  try {
+    fileIo.truncateSync(-1, 4);
+  } catch (error) {
+    console.error("truncateSyncTest1 Error!", error);
+  }
+  console.println("truncateSyncTest1 end");
+}
+
+function truncateSyncTest2() {
+  console.println("truncateSyncTest2 begin");
+  try {
+    let file = fileIo.openSync("/data/local/tmp/a.txt", 2);
+    console.println(`open file, fd=${file.fd}`);
+    fileIo.truncateSync(file.fd, 4);
+  } catch (error) {
+    console.error("truncateSyncTest2 Error!", error);
+  }
+  console.println("truncateSyncTest2 end");
+}
+
+function truncateSyncTest3() {
+  console.println("truncateSyncTest3 begin");
+  try {
+    fileIo.truncateSync("/data/local/tmp/b.txt", 4);
+  } catch (error) {
+    console.error("truncateSyncTest3 Error!", error);
+  }
+  console.println("truncateSyncTest3 end");
+}
+
+function unlinkSyncTest() {
+  console.println("unlinkSyncTest begin");
+  try {
+    const ret = fileIo.unlinkSync("/data/local/tmp/b.txt");
+    console.println(`unlink result: ${ret}`);
+
+  } catch (error) {
+    console.error("unlinkSyncTest Error!", error);
+  }
+  console.println("unlinkSyncTest end");
+}
+
+
+function main() {
+  console.println("---------- hello ani --------------");
+  openSyncTest();
+  closeSyncTest1();
+  closeSyncTest2();
+  copyFileTest();
+  listFileTest();
+  mkdirTest1();
+  moveSyncTest();
+  readSyncTest1();
+  readSyncTest2();
+  readSyncTest3();
+  readTextSyncTest1();
+  readTextSyncTest2();
+  readTextSyncTest3();
+  rmdirSyncTest();
+  statSyncTest1();
+  statSyncTest2();
+  truncateSyncTest1();
+  truncateSyncTest2();
+  truncateSyncTest3();
+  unlinkSyncTest();
+
+  console.println("---------- hello ani end ---------------");
 }
