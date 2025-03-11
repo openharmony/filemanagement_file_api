@@ -15,8 +15,8 @@
 
 #include "write_ani.h"
 
-#include <string>
-
+#include <optional>
+#include "ani_helper.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 #include "write_core.h"
@@ -28,77 +28,39 @@ namespace ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 
-static tuple<bool, optional<int64_t>> ParseOptionalInt64Param(ani_env *env, ani_object obj, const string &tag)
-{
-    ani_boolean isUndefined = true;
-    ani_ref result_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &result_ref)) {
-        return { false, nullopt };
-    }
-    env->Reference_IsUndefined(result_ref, &isUndefined);
-    if (isUndefined) {
-        return { true, nullopt };
-    }
-    ani_long result_ref_res;
-    if (ANI_OK !=
-        env->Object_CallMethodByName_Long(static_cast<ani_object>(result_ref), "longValue", ":J", &result_ref_res)) {
-        return { false, nullopt };
-    }
-    auto result = make_optional<int64_t>(static_cast<int64_t>(result_ref_res));
-    return { true, move(result) };
-}
-
-static tuple<bool, optional<string>> ParseEncoding(ani_env *env, ani_object obj)
-{
-    ani_boolean isUndefined;
-    ani_ref encoding_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "encoding", &encoding_ref)) {
-        return { false, nullopt };
-    }
-    env->Reference_IsUndefined(encoding_ref, &isUndefined);
-    if (isUndefined) {
-        return { true, nullopt };
-    }
-    auto [succ, encoding] = TypeConverter::ToUTF8String(env, (ani_string)encoding_ref);
-    if (!succ) {
-        return { false, nullopt };
-    }
-    return { true, make_optional<string>(move(encoding)) };
-}
-
 static tuple<bool, optional<WriteOptions>> ToWriteOptions(ani_env *env, ani_object obj)
 {
-    WriteOptions result;
+    WriteOptions options;
     ani_boolean isUndefined;
     env->Reference_IsUndefined(obj, &isUndefined);
     if (isUndefined) {
         return { true, nullopt };
     }
 
-    auto [succOffset, offset] = ParseOptionalInt64Param(env, obj, "offset");
+    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, "offset");
     if (!succOffset) {
         HILOGE("Illegal option.offset parameter");
         return { false, nullopt };
     }
-    result.offset = offset;
+    options.offset = offset;
 
-    auto [succLength, length] = ParseOptionalInt64Param(env, obj, "length");
+    auto [succLength, length] = AniHelper::ParseInt64Option(env, obj, "length");
     if (!succLength) {
         HILOGE("Illegal option.length parameter");
         return { false, nullopt };
     }
-    result.length = length;
+    options.length = length;
 
-    auto [succEncoding, encoding] = ParseEncoding(env, obj);
+    auto [succEncoding, encoding] = AniHelper::ParseEncoding(env, obj);
     if (!succEncoding) {
         HILOGE("Illegal option.encoding parameter");
         return { false, nullopt };
     }
-    result.encoding = encoding;
-    return { true, move(result) };
+    options.encoding = encoding;
+    return { true, make_optional<WriteOptions>(move(options)) };
 }
 
-static std::tuple<bool, ani_string> ParseBufToString(ani_env *env, const ani_object &buf)
+static std::tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object &buf)
 {
     ani_class cls;
     env->FindClass("Lstd/core/String;", &cls);
@@ -112,7 +74,7 @@ static std::tuple<bool, ani_string> ParseBufToString(ani_env *env, const ani_obj
     return { true, std::move(result) };
 }
 
-static std::tuple<bool, ani_arraybuffer> ParseBufToArrayBuffer(ani_env *env, const ani_object &buf)
+static std::tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_object &buf)
 {
     ani_class cls;
     env->FindClass("Lescompat/ArrayBuffer;", &cls);
@@ -135,7 +97,7 @@ ani_long WriteAni::WriteSync(
         return -1;
     }
 
-    auto [isString, stringBuffer] = ParseBufToString(env, buf);
+    auto [isString, stringBuffer] = ParseStringBuffer(env, buf);
     if (isString) {
         auto [succBuf, buffer] = TypeConverter::ToUTF8String(env, stringBuffer);
         if (!succBuf) {
@@ -150,7 +112,7 @@ ani_long WriteAni::WriteSync(
         return ret.GetData().value();
     }
 
-    auto [isArrayBuffer, arrayBuffer] = ParseBufToArrayBuffer(env, buf);
+    auto [isArrayBuffer, arrayBuffer] = ParseArrayBuffer(env, buf);
     if (isArrayBuffer) {
         auto [succBuf, buffer] = TypeConverter::ToArrayBuffer(env, arrayBuffer);
         if (!succBuf) {

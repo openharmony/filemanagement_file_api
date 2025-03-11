@@ -71,28 +71,28 @@ static tuple<bool, int64_t, bool, int64_t, unique_ptr<char[]>> ValidReadTextArg(
 
 static int OpenFile(const std::string& path)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> open_req = {
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> openReq = {
         new uv_fs_t, FsUtils::FsReqCleanup
     };
-    if (open_req == nullptr) {
+    if (openReq == nullptr) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;
     }
 
-    return uv_fs_open(nullptr, open_req.get(), path.c_str(), O_RDONLY,
+    return uv_fs_open(nullptr, openReq.get(), path.c_str(), O_RDONLY,
         S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
 }
 
 static int ReadFromFile(int fd, int64_t offset, string& buffer)
 {
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(buffer.size()));
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> read_req = {
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> readReq = {
         new uv_fs_t, FsUtils::FsReqCleanup };
-    if (read_req == nullptr) {
+    if (readReq == nullptr) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;
     }
-    return uv_fs_read(nullptr, read_req.get(), fd, &readbuf, 1, offset, nullptr);
+    return uv_fs_read(nullptr, readReq.get(), fd, &readbuf, 1, offset, nullptr);
 }
 
 FsResult<tuple<string, int64_t>> ReadTextCore::DoReadText(const std::string &path,

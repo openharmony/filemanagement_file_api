@@ -22,9 +22,14 @@ namespace ModuleFileIO {
 namespace ANI {
 ANI_EXPORT ani_status BindClass(ani_vm *vm, const char *className, const std::vector<ani_native_function> &methods)
 {
+    if (vm == nullptr) {
+        HILOGE("ani_vm is null!");
+        return ANI_ERROR;
+    }
+
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        HILOGE("Unsupported ANI_VERSION_1 Fail!!!");
+        HILOGE("Unsupported ANI_VERSION_1!");
         return ANI_OUT_OF_REF;
     }
 
@@ -41,9 +46,14 @@ ANI_EXPORT ani_status BindClass(ani_vm *vm, const char *className, const std::ve
     return ANI_OK;
 }
 
-ANI_EXPORT ani_status BindNamespace(ani_vm *vm, const char *namespaceStr,
-    const std::vector<ani_native_function>& functions)
+ANI_EXPORT ani_status BindNamespace(
+    ani_vm *vm, const char *namespaceStr, const std::vector<ani_native_function> &functions)
 {
+    if (vm == nullptr) {
+        HILOGE("ani_vm is null!");
+        return ANI_ERROR;
+    }
+
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         HILOGE("Unsupported ANI_VERSION_1 Fail!!!");
@@ -62,7 +72,7 @@ ANI_EXPORT ani_status BindNamespace(ani_vm *vm, const char *namespaceStr,
     };
     return ANI_OK;
 }
-} //ANI
-} //ModuleFileIO
-} //FileManagement
-} //OHOS
+} // namespace ANI
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS

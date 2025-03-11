@@ -40,35 +40,35 @@ static bool ValidFileInfo(FileInfo &fileInfo)
 static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
 {
     if (fileInfo.isPath) {
-        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> open_req = { new uv_fs_t, FsUtils::FsReqCleanup };
-        if (!open_req) {
+        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+        if (!openReq) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;
         }
         int ret = uv_fs_open(
-            nullptr, open_req.get(), fileInfo.path.get(), O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+            nullptr, openReq.get(), fileInfo.path.get(), O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
         if (ret < 0) {
             return ret;
         }
-        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncate_req = { new uv_fs_t,
+        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = { new uv_fs_t,
             FsUtils::FsReqCleanup };
-        if (!ftruncate_req) {
+        if (!ftruncateReq) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;
         }
-        ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), ret, truncateLen, nullptr);
+        ret = uv_fs_ftruncate(nullptr, ftruncateReq.get(), ret, truncateLen, nullptr);
         if (ret < 0) {
             HILOGE("Failed to truncate file by path");
             return ret;
         }
     } else {
-        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncate_req = { new uv_fs_t,
+        std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = { new uv_fs_t,
             FsUtils::FsReqCleanup };
-        if (!ftruncate_req) {
+        if (!ftruncateReq) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;
         }
-        int ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), fileInfo.fdg->GetFD(), truncateLen, nullptr);
+        int ret = uv_fs_ftruncate(nullptr, ftruncateReq.get(), fileInfo.fdg->GetFD(), truncateLen, nullptr);
         if (ret < 0) {
             HILOGE("Failed to truncate file by fd for libuv error %{public}d", ret);
             return ret;

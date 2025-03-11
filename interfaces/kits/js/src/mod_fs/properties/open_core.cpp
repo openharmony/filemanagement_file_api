@@ -133,12 +133,12 @@ static FsResult<FsFile *> InstantiateFile(int fd, string pathOrUri, bool isUri)
 
 static int OpenFileByPath(const string &path, uint32_t mode)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> open_req = { new uv_fs_t, FsUtils::FsReqCleanup };
-    if (!open_req) {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    if (!openReq) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;
     }
-    int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    int ret = uv_fs_open(nullptr, openReq.get(), path.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     return ret;
 }
 
