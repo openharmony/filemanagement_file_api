@@ -15,8 +15,6 @@
 
 #include "access_ani.h"
 
-#include <string>
-
 #include "access_core.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
@@ -49,7 +47,7 @@ AccessModeType ToAccessModeType(int32_t mode_index)
     }
 }
 
-std::optional<AccessModeType> OptToAccessModeType(const std::optional<int>& mode_index)
+std::optional<AccessModeType> OptToAccessModeType(const std::optional<int> &mode_index)
 {
     if (!mode_index.has_value()) {
         return std::nullopt;
@@ -75,31 +73,31 @@ std::optional<AccessFlag> OptToAccessFlagType(const std::optional<int> &flag_ind
     return ToAccessFlagType(flag_index.value());
 }
 
-ani_boolean AccessAni::AccessSync3(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path,
-    ani_enum_item mode, ani_enum_item flag)
+ani_boolean AccessAni::AccessSync3(
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_enum_item mode, ani_enum_item flag)
 {
     ani_boolean ret = 0;
     auto [succPath, pathStr] = TypeConverter::ToUTF8String(env, path);
-    if (! succPath) {
+    if (!succPath) {
         HILOGE("Invalid path");
         return ret;
     }
 
     auto [succMode, modeOp] = TypeConverter::ToOptionalInt32(env, mode);
-    if (! succMode) {
+    if (!succMode) {
         HILOGE("Invalid mode");
         return ret;
     }
     auto modeType = OptToAccessModeType(modeOp);
 
     auto [succFlag, flagOpt] = TypeConverter::ToOptionalInt32(env, flag);
-    if (! succFlag) {
+    if (!succFlag) {
         HILOGE("Invalid flag");
         return ret;
     }
     auto flagType = OptToAccessFlagType(flagOpt);
 
-    FsResult<bool> fsRet = FsResult<bool>::Success(false);
+    FsResult<bool> fsRet = FsResult<bool>::Error(UNKNOWN_ERR);
     if (flagOpt == std::nullopt) {
         fsRet = AccessCore::DoAccess(pathStr, modeType);
     } else {
@@ -107,7 +105,7 @@ ani_boolean AccessAni::AccessSync3(ani_env *env, [[maybe_unused]] ani_class claz
     }
 
     if (!fsRet.IsSuccess()) {
-        HILOGE("IsSuccess Fail");
+        HILOGE("DoAccess failed");
         return false;
     }
     return fsRet.GetData().value();

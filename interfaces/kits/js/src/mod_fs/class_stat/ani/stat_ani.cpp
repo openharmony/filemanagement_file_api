@@ -176,7 +176,7 @@ static FsStat *Unwrap(ani_env *env, ani_object object)
     ani_long fsStat;
     auto ret = env->Object_GetFieldByName_Long(object, "nativeStat", &fsStat);
     if (ret != ANI_OK) {
-        HILOGE("unwrap fsStat err: %{private}d", ret);
+        HILOGE("Unwrap fsStat err: %{private}d", ret);
         return nullptr;
     }
     return reinterpret_cast<FsStat *>(fsStat);
@@ -192,7 +192,7 @@ ani_object StatAni::StatSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
 
     auto ret = StatCore::DoStat(fileInfo);
     if (!ret.IsSuccess()) {
-        HILOGE("file_api statSync failed!");
+        HILOGE("DoStat failed!");
         return {};
     }
 
@@ -201,7 +201,7 @@ ani_object StatAni::StatSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
     if (status != ANI_OK) {
         delete fsStat;
         fsStat = nullptr;
-        HILOGE("file_api statSync failed!");
+        HILOGE("Wrap stat object failed!");
         return {};
     }
     return statObject;

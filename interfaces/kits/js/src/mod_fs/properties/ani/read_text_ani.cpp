@@ -15,6 +15,8 @@
 
 #include "read_text_ani.h"
 
+#include <optional>
+#include "ani_helper.h"
 #include "filemgmt_libhilog.h"
 #include "read_text_core.h"
 #include "type_converter.h"
@@ -28,78 +30,38 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
-static tuple<bool, optional<int64_t>> ParseOptionalInt64Param(ani_env *env, ani_object obj, const string &tag)
-{
-    ani_boolean isUndefined = true;
-    ani_ref result_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &result_ref)) {
-        return { false, nullopt };
-    }
-    env->Reference_IsUndefined(result_ref, &isUndefined);
-    if (isUndefined) {
-        return { true, nullopt };
-    }
-    ani_int result_ref_res;
-    if (ANI_OK !=
-        env->Object_CallMethodByName_Int(static_cast<ani_object>(result_ref), "intValue", ":I", &result_ref_res)) {
-        return { false, nullopt };
-    }
-    auto result = make_optional<int64_t>(static_cast<int64_t>(result_ref_res));
-    return { true, move(result) };
-}
-
-static tuple<bool, optional<string>> ParseEncoding(ani_env *env, ani_object obj)
-{
-    ani_boolean isUndefined;
-    ani_ref encoding_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "encoding", &encoding_ref)) {
-        return { false, nullopt };
-    }
-    env->Reference_IsUndefined(encoding_ref, &isUndefined);
-    if (isUndefined) {
-        return { false, nullopt };
-    }
-    auto [succ, encoding] = TypeConverter::ToUTF8String(env, (ani_string)encoding_ref);
-    if (!succ) {
-        HILOGE("Invalid encoding");
-        return { false, nullopt };
-    }
-    return { true, make_optional<string>(move(encoding)) };
-}
-
 static tuple<bool, optional<ReadTextOptions>> ToReadTextOptions(ani_env *env, ani_object obj)
 {
-    ReadTextOptions result;
+    ReadTextOptions options;
 
     ani_boolean isUndefined;
     env->Reference_IsUndefined(obj, &isUndefined);
     if (isUndefined) {
-        HILOGE("options is undefined");
         return { true, nullopt };
     }
 
-    auto [succOffset, offset] = ParseOptionalInt64Param(env, obj, "offset");
+    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, "offset");
     if (!succOffset) {
         HILOGE("Illegal option.offset parameter");
         return { false, nullopt };
     }
-    result.offset = offset;
+    options.offset = offset;
 
-    auto [succLength, length] = ParseOptionalInt64Param(env, obj, "length");
+    auto [succLength, length] = AniHelper::ParseInt64Option(env, obj, "length");
     if (!succLength) {
         HILOGE("Illegal option.length parameter");
         return { false, nullopt };
     }
-    result.length = length;
+    options.length = length;
 
-    auto [succEncoding, encoding] = ParseEncoding(env, obj);
+    auto [succEncoding, encoding] = AniHelper::ParseEncoding(env, obj);
     if (!succEncoding) {
         HILOGE("Illegal option.encoding parameter");
         return { false, nullopt };
     }
-    result.encoding = encoding;
+    options.encoding = encoding;
 
-    return { true, move(result) };
+    return { true, make_optional<ReadTextOptions>(move(options)) };
 }
 
 ani_string ReadTextAni::ReadTextSync(

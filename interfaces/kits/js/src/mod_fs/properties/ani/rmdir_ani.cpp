@@ -15,8 +15,6 @@
 
 #include "rmdir_ani.h"
 
-#include <string>
-
 #include "filemgmt_libhilog.h"
 #include "rmdir_core.h"
 #include "type_converter.h"
@@ -34,7 +32,11 @@ void RmdirAni::RmdirSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_str
         HILOGE("Invalid path");
         return;
     }
-    RmdirentCore::DoRmdirent(pathStr);
+    auto ret = RmdirentCore::DoRmdirent(pathStr);
+    if (!ret.IsSuccess()) {
+        HILOGE("DoRmdirent failed");
+        return;
+    }
 }
 
 } // namespace ANI

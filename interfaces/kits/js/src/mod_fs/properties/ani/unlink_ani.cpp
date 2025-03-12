@@ -15,8 +15,6 @@
 
 #include "unlink_ani.h"
 
-#include <string>
-
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 #include "unlink_core.h"
@@ -35,7 +33,7 @@ ani_int UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, an
     }
     auto ret = UnlinkCore::DoUnlink(pathStr);
     if (!ret.IsSuccess()) {
-        HILOGE("Unlink faild");
+        HILOGE("Unlink failed");
         return -1;
     }
     return 0;

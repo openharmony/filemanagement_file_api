@@ -22,7 +22,8 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI {
 
 class ReadAni final {
 public:
-    static ani_long ReadSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_arraybuffer buffer);
+    static ani_long ReadSync(
+        ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_arraybuffer buffer, ani_object options);
 };
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_READ_ANI_H

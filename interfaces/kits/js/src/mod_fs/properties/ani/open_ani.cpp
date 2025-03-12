@@ -15,7 +15,6 @@
 
 #include "open_ani.h"
 
-#include <string>
 #include "ani_helper.h"
 #include "filemgmt_libhilog.h"
 #include "open_core.h"

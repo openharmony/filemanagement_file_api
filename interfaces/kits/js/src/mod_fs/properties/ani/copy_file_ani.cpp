@@ -44,7 +44,7 @@ void CopyFileAni::CopyFileSync(
 
     auto ret = CopyFileCore::DoCopyFile(srcFile, destFile, optMode);
     if (!ret.IsSuccess()) {
-        HILOGE("file_api copy file failed!");
+        HILOGE("DoCopyFile failed!");
         return;
     }
 }

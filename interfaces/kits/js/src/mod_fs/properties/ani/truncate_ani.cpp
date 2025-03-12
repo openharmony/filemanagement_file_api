@@ -15,8 +15,6 @@
 
 #include "truncate_ani.h"
 
-#include <string>
-
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "truncate_core.h"

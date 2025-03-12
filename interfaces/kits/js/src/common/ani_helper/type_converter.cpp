@@ -15,9 +15,10 @@
 
 #include "type_converter.h"
 
-#include <securec.h>
 #include <cstring>
 #include <optional>
+
+#include <securec.h>
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -153,22 +154,18 @@ std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(
     ani_array_ref result = nullptr;
     ani_class itemCls = nullptr;
     if (env->FindClass("Lstd/core/String;", &itemCls) != ANI_OK) {
-        HILOGE("FindClass String class Fail");
         return { false, result };
     }
     if (env->Array_New_Ref(itemCls, length, nullptr, &result) != ANI_OK) {
-        HILOGE("Array_New_Ref  Fail");
         return { false, result };
     }
     for (int i = 0; i < length; i++) {
         auto [ret, item] = TypeConverter::ToAniString(env, strList[i]);
         if (!ret) {
-            HILOGE("ToAniString Fail");
             return { false, nullptr };
         }
 
         if (env->Array_Set_Ref(result, i, item) != ANI_OK) {
-            HILOGE("Array_Set_Ref Fail");
             return { false, nullptr };
         }
     }

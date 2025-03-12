@@ -25,12 +25,12 @@ namespace ANI {
 
 class AccessAni final {
 public:
-    static ani_boolean AccessSync3(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path,
-        ani_enum_item mode, ani_enum_item flag);
+    static ani_boolean AccessSync3(
+        ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_enum_item mode, ani_enum_item flag);
 };
-} // ANI
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif //INTERFACES_KITS_JS_SRC_MOD_FS_ACCESS_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_ACCESS_ANI_H

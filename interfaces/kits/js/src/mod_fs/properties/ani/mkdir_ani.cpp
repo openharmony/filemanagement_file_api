@@ -15,8 +15,6 @@
 
 #include "mkdir_ani.h"
 
-#include <string>
-
 #include "filemgmt_libhilog.h"
 #include "mkdir_core.h"
 #include "type_converter.h"
@@ -35,7 +33,7 @@ ani_int MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, an
     }
     auto ret = MkdirCore::DoMkdir(pathStr);
     if (!ret.IsSuccess()) {
-        HILOGE("Mkdir faild");
+        HILOGE("Mkdir failed");
         return -1;
     }
     return 0;
@@ -50,7 +48,7 @@ ani_int MkdirkAni::MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, an
     }
     auto ret = MkdirCore::DoMkdir(pathStr, recursion);
     if (!ret.IsSuccess()) {
-        HILOGE("Mkdir faild");
+        HILOGE("DoMkdir failed");
         return -1;
     }
     return 0;
