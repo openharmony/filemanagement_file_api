@@ -83,14 +83,14 @@ ani_boolean AccessAni::AccessSync3(
         return ret;
     }
 
-    auto [succMode, modeOp] = TypeConverter::ToOptionalInt32(env, mode);
+    auto [succMode, modeOp] = TypeConverter::EnumToInt32(env, mode);
     if (!succMode) {
         HILOGE("Invalid mode");
         return ret;
     }
     auto modeType = OptToAccessModeType(modeOp);
 
-    auto [succFlag, flagOpt] = TypeConverter::ToOptionalInt32(env, flag);
+    auto [succFlag, flagOpt] = TypeConverter::EnumToInt32(env, flag);
     if (!succFlag) {
         HILOGE("Invalid flag");
         return ret;
