@@ -15,8 +15,6 @@
 
 export default fileIo;
 
-loadLibrary("ani_fs_class.z")
-
 export class BusinessError<T = void> {
   code: number = 0;
   data?: T;
@@ -46,6 +44,23 @@ export interface ReadOptions {
 
 export interface ReadTextOptions extends ReadOptions {
   encoding?: string;
+}
+
+export interface WriteOptions {
+  offset?: long;
+  length?: long;
+  encoding?: string;
+}
+
+enum AccessModeType {
+  EXIST = 0,
+  WRITE = 2,
+  READ = 4,
+  READ_WRITE = 6,
+}
+
+enum AccessFlagType {
+  LOCAL = 0,
 }
 
 interface File {
@@ -140,8 +155,97 @@ class StatInner implements Stat {
 
 type FdOrFile = int | File;
 type PathOrFd = string | int;
+type BufferType = string | ArrayBuffer;
 
 class fileIo {
+
+  static {
+    loadLibrary("ani_fs_class.z");
+  }
+
+  static native doAccessSync(path: string, mode?: AccessModeType, flag?: AccessFlagType): boolean;
+
+  static accessSync(path: string, mode?: AccessModeType): boolean {
+    return fileIo.doAccessSync(path, mode);
+  }
+
+  static accessSync(path: string, mode: AccessModeType, flag: AccessFlagType): boolean {
+    return fileIo.doAccessSync(path, mode, flag);
+  }
+
+  static accessSync1(path: string): boolean {
+    return fileIo.accessSync(path);
+  }
+
+  static accessSync2(path: string, mode: AccessModeType): boolean {
+    return fileIo.accessSync(path, mode);
+  }
+
+  static accessSync3(path: string, mode: AccessModeType, flag: AccessFlagType): boolean {
+    return fileIo.accessSync(path, mode, flag);
+  }
+
+  static access(path: string, mode?: AccessModeType): Promise<boolean> {
+    return new Promise<boolean>((resolve: (result: boolean) => void, reject: (e: BusinessError<void>) => void) => {
+      if (mode === undefined) {
+        let promise = taskpool.execute(fileIo.accessSync1, path); // 这里调用同步方法
+        promise.then((ret: NullishType) => {
+          if (ret === null || ret === undefined) { // 异常处理
+            let err = new BusinessError<void>();
+            err.code = -1;
+            reject(err);
+          } else {
+            let result = ret as boolean;
+            resolve(result); // 正常结果
+          }
+        });
+      } else {
+        let promise = taskpool.execute(fileIo.accessSync2, path, mode); // 这里调用同步方法
+        promise.then((ret: NullishType) => {
+          if (ret === null || ret === undefined) { // 异常处理
+            let err = new BusinessError<void>();
+            err.code = -1;
+            reject(err);
+          } else {
+            let result = ret as boolean;
+            resolve(result); // 正常结果
+          }
+        });
+      }
+    });
+  }
+
+  static access(path: string, mode: AccessModeType, flag: AccessFlagType): Promise<boolean> {
+    return new Promise<boolean>((resolve: (result: boolean) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.accessSync3, path, mode, flag); // 这里调用同步方法
+      promise.then((ret: NullishType) => {
+        if (ret === null || ret === undefined) { // 异常处理
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          let result = ret as boolean;
+          resolve(result); // 正常结果
+        }
+      });
+    })
+  }
+
+  static access(path: string, callback: AsyncCallback<boolean, void>): void {
+    let promise = taskpool.execute(fileIo.accessSync1, path); // 这里调用同步方法
+    promise.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) { // 异常处理
+        err.code = -1;
+        callback(err, undefined);
+      } else {
+        err.code = 0;
+        let result = ret as boolean;
+        callback(err, result); // 正常结果
+      }
+    });
+  }
+
   static native closeSync(file: FdOrFile): int;
 
   static native copyFileSync(src: PathOrFd, dest: PathOrFd, mode?: int): void;
@@ -296,6 +400,79 @@ class fileIo {
   static native moveFileSync(src: String, dest: String, mode?: int): void;
 
   static native openSync(path: String, mode?: int): File;
+
+  static openSync1(path: String, mode: int): File {
+    return fileIo.openSync(path, mode);
+  }
+  static openSync2(path: String): File {
+    return fileIo.openSync(path);
+  }
+
+  static open(path: String, mode: int): Promise<File> {
+    return new Promise<File>((resolve: (result: File) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.openSync1, path, mode);
+      promise.then((ret: NullishType) => {
+        if (ret === null || ret === undefined) {
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          let r = ret as File;
+          resolve(r);
+        }
+      });
+    });
+  }
+
+  static open(path: String): Promise<File> {
+    return new Promise<File>((resolve: (result: File) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.openSync2, path);
+      promise.then((ret: NullishType) => {
+        if (ret === null || ret === undefined) {
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          let r = ret as File;
+          resolve(r);
+        }
+      });
+    });
+  }
+
+  static open(path: String, mode: int, callback: AsyncCallback<File, void>): void {
+    let p1 = taskpool.execute(fileIo.openSync1, path, mode);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1;
+        callback(err, undefined);
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0;
+        let r = ret as File;
+        callback(err, r);
+      }
+    });
+  }
+
+  static open(path: String, callback: AsyncCallback<File, void>): void {
+    let p1 = taskpool.execute(fileIo.openSync2, path);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1;
+        callback(err, undefined);
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0;
+        let r = ret as File;
+        callback(err, r);
+      }
+    });
+  }
 
   static native readSync(fd: int, buffer: ArrayBuffer, options?: ReadOptions): long;
 
@@ -488,323 +665,78 @@ class fileIo {
     });
   }
 
-}
+  static native writeSync(fd: int, buffer: BufferType, options?: WriteOptions): long;
 
-function closeSyncTest1() {
-  console.println("closeSyncTest1 begin");
-  try {
-    let file = fileIo.openSync("/data/local/tmp/a.txt");
-    console.println(`open file without mode, fd=${file.fd}, path=${file.path}, name=${file.name}`);
-    let ret = fileIo.closeSync(file.fd);
-    console.println(`close file by fd, fd=${file.fd}, ret=${ret}`);
-  } catch (error) {
-    console.error("closeSyncTest1 Error!", error);
+  static writeSync1(fd: int, buffer: BufferType, options: WriteOptions): long {
+    return fileIo.writeSync(fd, buffer, options);
   }
-  console.println("closeSyncTest1 end");
-}
-
-function closeSyncTest2() {
-  console.println("closeSyncTest2 begin");
-  try {
-    let file = fileIo.openSync("/data/local/tmp/a.txt", 2);
-    console.println(`open file with mode, fd=${file.fd}, path=${file.path}, name=${file.name}`);
-    let ret = fileIo.closeSync(file);
-    console.println(`close file by file, fd=${file.fd}, ret=${ret}`);
-  } catch (error) {
-    console.error("closeSyncTest2 Error!", error);
+  static writeSync2(fd: int, buffer: BufferType): long {
+    return fileIo.writeSync(fd, buffer);
   }
-  console.println("closeSyncTest2 end");
-}
 
-function copyFileTest() {
-  console.println("copyFileTest begin");
-  try {
-    fileIo.copyFileSync("/data/local/tmp/a.txt", "/data/local/tmp/b.txt");
-  } catch (error) {
-    console.error("copyFileTest Error!", error);
+  static write(fd: int, buffer: BufferType, options: WriteOptions): Promise<long> {
+    return new Promise<long>((resolve: (result: long) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.writeSync1, fd, buffer, options);
+      promise.then((ret: NullishType) => {
+        let result = ret as long
+        if (ret === null || ret === undefined) {
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
   }
-  console.println("copyFileTest end");
-}
 
-function listFileTest() {
-  console.println("listFileTest begin");
-  try {
-    let files = fileIo.listFileSync("/data/local/tmp/");
-    for (const file of files) {
-      console.println(file);
-    }
-  } catch (error) {
-    console.error("listFileTest Error!", error);
+  static write(fd: int, buffer: BufferType): Promise<long> {
+    return new Promise<long>((resolve: (result: long) => void, reject: (e: BusinessError<void>) => void) => {
+      let promise = taskpool.execute(fileIo.writeSync2, fd, buffer);
+      promise.then((ret: NullishType) => {
+        let result = ret as long
+        if (ret === null || ret === undefined) {
+          let err = new BusinessError<void>();
+          err.code = -1;
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+    });
   }
-  console.println("listFileTest end");
-}
 
-function mkdirTest1() {
-  console.println("mkdirTest1 begin")
-  try {
-    const ret = fileIo.mkdirSync("/data/local/tmp/dir01");
-    console.println(`mkdir result: ${ret}`);
-  } catch (error) {
-    console.error("mkdirTest1 Error!", error);
+  static write(fd: int, buffer: BufferType, options: WriteOptions, callback: AsyncCallback<long, void>): void {
+    let p1 = taskpool.execute(fileIo.writeSync1, fd, buffer, options);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1
+        callback(err, undefined)
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0
+        let r = ret as long;
+        callback(err, r);
+      }
+    });
   }
-  console.println("mkdirTest1 end");
-}
 
-function moveSyncTest() {
-  console.println("moveSyncTest begin")
-  fileIo.moveFileSync("/data/local/tmp/a.txt", "/data/local/tmp/a1.txt", 1)
-  console.println("moveSyncTest end")
-}
-
-function openSyncTest() {
-  console.println("openSyncTest begin");
-  try {
-    let file = fileIo.openSync("/data/local/tmp/a.txt");
-    console.println(`open file without mode, fd=${file.fd}, path=${file.path}, name=${file.name}`);
-    let mode = 2;
-    file = fileIo.openSync("/data/local/tmp/a.txt", mode);
-    console.println(`open file with mode=${mode}, fd=${file.fd}, path=${file.path}, name=${file.name}`);
-  } catch (error) {
-    console.error("openSyncTest Error!", error);
+  static write(fd: int, buffer: BufferType, callback: AsyncCallback<long, void>): void {
+    let p1 = taskpool.execute(fileIo.writeSync2, fd, buffer);
+    p1.then((ret: NullishType) => {
+      let err = new BusinessError<void>();
+      if (ret === null || ret === undefined) {
+        console.println("-------- err code = -1 -------------");
+        err.code = -1
+        callback(err, undefined)
+      } else {
+        console.println("-------- err code = 0 -------------");
+        err.code = 0
+        let r = ret as long;
+        callback(err, r);
+      }
+    });
   }
-  console.println("openSyncTest end");
-}
-
-function readSyncTest1() {
-  console.println("readSyncTest1 begin")
-  try {
-    let file = fileIo.openSync("/data/local/tmp/a.txt")
-    let fd = file.fd;
-    console.println(`open file, fd=${fd}`)
-    let buffer = new ArrayBuffer(100);
-    let length = fileIo.readSync(fd, buffer);
-    console.println(`read length: ${length}`)
-    let len = length as int;
-    let content = ArrayBuffer.stringify(buffer, "utf-8", 0, len);
-    console.println("-----------------------------------------------")
-    console.println(content)
-    console.println("-----------------------------------------------")
-  } catch (error) {
-    console.error("readSyncTest1 Error!", error);
-  }
-  console.println("readSyncTest1 end")
-}
-
-function readSyncTest2() {
-  console.println("readSyncTest2 begin")
-  try {
-    let file = fileIo.openSync("/data/local/tmp/a.txt")
-    let fd = file.fd;
-    console.println(`open file, fd=${fd}`)
-    let buffer = new ArrayBuffer(100);
-    let options: ReadOptions = {
-      length: 5,
-    }
-    let length = fileIo.readSync(fd, buffer, options);
-    console.println(`read length: ${length}`)
-    let len = length as int;
-    let content = ArrayBuffer.stringify(buffer, "utf-8", 0, len);
-    console.println("-----------------------------------------------")
-    console.println(content)
-    console.println("-----------------------------------------------")
-  } catch (error) {
-    console.error("readSyncTest2 Error!", error);
-  }
-  console.println("readSyncTest2 end")
-}
-
-function readSyncTest3() {
-  console.println("readSyncTest3 begin")
-  try {
-    let file = fileIo.openSync("/data/local/tmp/a.txt")
-    let fd = file.fd;
-    console.println(`open file, fd=${fd}`)
-    let buffer = new ArrayBuffer(100);
-    let options: ReadOptions = {
-      offset: 3,
-      length: 5,
-    }
-    let length = fileIo.readSync(fd, buffer, options);
-    console.println(`read length: ${length}`)
-    let len = length as int;
-    let content = ArrayBuffer.stringify(buffer, "utf-8", 0, len);
-    console.println("-----------------------------------------------")
-    console.println(content)
-    console.println("-----------------------------------------------")
-  } catch (error) {
-    console.error("readSyncTest3 Error!", error);
-  }
-  console.println("readSyncTest3 end")
-}
-
-function readTextSyncTest1() {
-  console.println("readTextSyncTest1 begin")
-  try {
-    let content = fileIo.readTextSync("/data/local/tmp/a.txt");
-    console.println("-----------------------------------------------")
-    console.println(content)
-    console.println("-----------------------------------------------")
-  } catch (error) {
-    console.error("readTextSyncTest1 Error!", error);
-  }
-  console.println("readTextSyncTest1 end")
-}
-
-function readTextSyncTest2() {
-  console.println("readTextSyncTest2 begin");
-  try {
-    let options: ReadTextOptions = {
-      length: 5,
-    }
-    let content = fileIo.readTextSync("/data/local/tmp/a.txt", options);
-    console.println("-----------------------------------------------");
-    console.println(content);
-    console.println("-----------------------------------------------");
-  } catch (error) {
-    console.error("readTextSyncTest2 Error!", error);
-  }
-  console.println("readTextSyncTest2 end");
-}
-
-function readTextSyncTest3() {
-  console.println("readTextSyncTest3 begin")
-  try {
-    let options: ReadTextOptions = {
-      offset: 3,
-      length: 5,
-    }
-    let content = fileIo.readTextSync("/data/local/tmp/a.txt", options);
-    console.println("-----------------------------------------------");
-    console.println(content);
-    console.println("-----------------------------------------------");
-  } catch (error) {
-    console.error("readTextSyncTest3 Error!", error);
-  }
-  console.println("readTextSyncTest3 end");
-}
-
-function rmdirSyncTest() {
-  console.println("rmdirSyncTest begin");
-  try {
-    fileIo.rmdirSync("/data/local/tmp/dir01");
-  } catch (error) {
-    console.error("rmdirSyncTest Error!", error);
-  }
-  console.println("rmdirSyncTest end");
-}
-
-function statSyncTest(file: PathOrFd) {
-  let stat = fileIo.statSync(file)
-  console.info("stat, ino is " + stat.ino);
-  console.info("stat, mode is " + stat.mode);
-  console.info("stat, uid is " + stat.uid);
-  console.info("stat, gid is " + stat.gid);
-  console.info("stat, size is " + stat.size);
-  console.info("stat, atime is " + stat.atime);
-  console.info("stat, mtime is " + stat.mtime);
-  console.info("stat, ctime is " + stat.ctime);
-  console.info("stat, atimeNs is " + stat.atimeNs);
-  console.info("stat, mtimeNs is " + stat.mtimeNs);
-  console.info("stat, ctimeNs is " + stat.ctimeNs);
-  console.info("stat, location is " + stat.location);
-  console.info("stat, isBlockDevice is " + stat.isBlockDevice());
-  console.info("stat, isCharacterDevice is " + stat.isCharacterDevice());
-  console.info("stat, isDirectory is " + stat.isDirectory());
-  console.info("stat, isFIFO is " + stat.isFIFO());
-  console.info("stat, isFile is " + stat.isFile());
-  console.info("stat, isSocket is " + stat.isSocket());
-  console.info("stat, isSymbolicLink is " + stat.isSymbolicLink());
-}
-
-function statSyncTest1() {
-  console.println("statSyncTest1 begin");
-  try {
-    statSyncTest("/data/local/tmp/a.txt");
-  } catch (error) {
-    console.error("statSyncTest1 Error!", error);
-  }
-  console.println("statSyncTest1 end");
-}
-
-function statSyncTest2() {
-  console.println("statSyncTest2 begin");
-  try {
-    let file = fileIo.openSync("/data/local/tmp/a.txt");
-    console.println(`open file fd: ${file.fd}`);
-    statSyncTest(file.fd);
-  } catch (error) {
-    console.error("statSyncTest2 Error!", error);
-  }
-  console.println("statSyncTest2 end");
-}
-
-function truncateSyncTest1() {
-  console.println("truncateSyncTest1 begin");
-  try {
-    fileIo.truncateSync(-1, 4);
-  } catch (error) {
-    console.error("truncateSyncTest1 Error!", error);
-  }
-  console.println("truncateSyncTest1 end");
-}
-
-function truncateSyncTest2() {
-  console.println("truncateSyncTest2 begin");
-  try {
-    let file = fileIo.openSync("/data/local/tmp/a.txt", 2);
-    console.println(`open file, fd=${file.fd}`);
-    fileIo.truncateSync(file.fd, 4);
-  } catch (error) {
-    console.error("truncateSyncTest2 Error!", error);
-  }
-  console.println("truncateSyncTest2 end");
-}
-
-function truncateSyncTest3() {
-  console.println("truncateSyncTest3 begin");
-  try {
-    fileIo.truncateSync("/data/local/tmp/b.txt", 4);
-  } catch (error) {
-    console.error("truncateSyncTest3 Error!", error);
-  }
-  console.println("truncateSyncTest3 end");
-}
-
-function unlinkSyncTest() {
-  console.println("unlinkSyncTest begin");
-  try {
-    const ret = fileIo.unlinkSync("/data/local/tmp/b.txt");
-    console.println(`unlink result: ${ret}`);
-
-  } catch (error) {
-    console.error("unlinkSyncTest Error!", error);
-  }
-  console.println("unlinkSyncTest end");
-}
-
-
-function main() {
-  console.println("---------- hello ani --------------");
-  openSyncTest();
-  closeSyncTest1();
-  closeSyncTest2();
-  copyFileTest();
-  listFileTest();
-  mkdirTest1();
-  moveSyncTest();
-  readSyncTest1();
-  readSyncTest2();
-  readSyncTest3();
-  readTextSyncTest1();
-  readTextSyncTest2();
-  readTextSyncTest3();
-  rmdirSyncTest();
-  statSyncTest1();
-  statSyncTest2();
-  truncateSyncTest1();
-  truncateSyncTest2();
-  truncateSyncTest3();
-  unlinkSyncTest();
-
-  console.println("---------- hello ani end ---------------");
 }

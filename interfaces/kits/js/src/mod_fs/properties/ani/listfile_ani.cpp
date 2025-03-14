@@ -56,7 +56,7 @@ tuple<bool, int> ParseIntParam(ani_env *env, ani_object obj, string tag)
     }
     env->Reference_IsUndefined(result_ref, &isUndefined);
     if (isUndefined) {
-        return { false, result };
+        return { true, result };
     }
     ani_int result_ref_res;
     if (ANI_OK !=

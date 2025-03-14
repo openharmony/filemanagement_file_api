@@ -32,6 +32,11 @@ ANI_EXPORT ani_status BindNamespace(
 template <std::size_t N>
 ANI_EXPORT ani_status BindClass(ani_env *env, const char *className, const std::array<ani_native_function, N> &methods)
 {
+    if (env == nullptr) {
+        HILOGE("ani_env is null!");
+        return ANI_ERROR;
+    }
+    
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         HILOGE("Cannot find class '%{private}s'", className);
@@ -49,6 +54,11 @@ template <std::size_t N>
 ANI_EXPORT ani_status BindNamespace(
     ani_env *env, const char *namespaceStr, const std::array<ani_native_function, N> &methods)
 {
+    if (env == nullptr) {
+        HILOGE("ani_env is null!");
+        return ANI_ERROR;
+    }
+
     ani_namespace ns;
     if (ANI_OK != env->FindNamespace(namespaceStr, &ns)) {
         HILOGE("Not found '%{private}s'", namespaceStr);
