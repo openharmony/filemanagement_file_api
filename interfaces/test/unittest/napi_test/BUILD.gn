@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 
-module_output_path = "file_api/napi"
+module_output_path = "file_api/file_api"
 ohos_js_unittest("file_api_js_test") {
   module_out_path = module_output_path
   hap_profile = "./config.json"
