@@ -18,6 +18,7 @@
 #include <fcntl.h>
 
 #include "close_core.h"
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 
@@ -29,9 +30,9 @@ namespace ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 
-tuple<bool, int> AnalyzerFdUnion(ani_env *env, ani_object obj)
+tuple<bool, int32_t> ParseFd(ani_env *env, ani_object obj)
 {
-    int result = -1;
+    int32_t result = -1;
     ani_class IntClass;
     env->FindClass("Lstd/core/Double;", &IntClass);
     ani_boolean isInt;
@@ -42,40 +43,43 @@ tuple<bool, int> AnalyzerFdUnion(ani_env *env, ani_object obj)
             HILOGE("Get fd value failed");
             return { false, result };
         }
-        result = static_cast<int>(fd);
+        result = static_cast<int32_t>(fd);
         return { true, result };
     }
 
     ani_class FileClass;
-    env->FindClass("Lfile_fs_class/FileInner;", &FileClass);
+    env->FindClass("L@ohos/file/fs/FileInner;", &FileClass);
     ani_boolean isFile;
     env->Object_InstanceOf(obj, FileClass, &isFile);
     if (isFile) {
-        ani_int fd;
-        if (ANI_OK != env->Object_GetPropertyByName_Int(obj, "fd", &fd)) {
+        ani_double fd;
+        if (ANI_OK != env->Object_GetPropertyByName_Double(obj, "fd", &fd)) {
             HILOGE("Get fd in class file failed");
             return { false, result };
         }
-        result = static_cast<int>(fd);
+        result = static_cast<int32_t>(fd);
         return { true, result };
     }
+    HILOGE("Invalid fd type");
     return { false, result };
 }
 
-ani_int CloseAni::CloseSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_object obj)
+void CloseAni::CloseSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_object obj)
 {
-    auto [succ, fd] = AnalyzerFdUnion(env, obj);
+    auto [succ, fd] = ParseFd(env, obj);
     if (!succ) {
-        HILOGE("Invalid arguments");
-        return -1;
+        HILOGE("Parse fd argument failed");
+        ErrorHandler::Throw(env, EINVAL);
+        return;
     }
 
     auto ret = CloseCore::DoClose(fd);
     if (!ret.IsSuccess()) {
         HILOGE("Close %d failed", fd);
-        return -1;
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+        return;
     }
-    return 0;
 }
 
 } // namespace ANI

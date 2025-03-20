@@ -17,6 +17,7 @@
 
 #include <optional>
 #include "ani_helper.h"
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "read_text_core.h"
 #include "type_converter.h"
@@ -69,19 +70,23 @@ ani_string ReadTextAni::ReadTextSync(
 {
     auto [succOpt, options] = ToReadTextOptions(env, obj);
     if (!succOpt) {
-        HILOGE("Ivalid options");
+        HILOGE("Invalid options");
+        ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
 
     auto [succPath, path] = TypeConverter::ToUTF8String(env, filePath);
     if (!succPath) {
         HILOGE("Invalid Path");
+        ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
 
     auto ret = ReadTextCore::DoReadText(path, options);
     if (!ret.IsSuccess()) {
         HILOGE("DoReadText failed");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return nullptr;
     }
 
@@ -89,7 +94,8 @@ ani_string ReadTextAni::ReadTextSync(
     string res = std::get<0>(resText);
     auto [succ, result] = TypeConverter::ToAniString(env, res);
     if (!succ) {
-        HILOGE("Create ani_string error");
+        HILOGE("Convert result to ani string failed");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
     return result;

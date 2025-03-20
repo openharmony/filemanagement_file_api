@@ -25,27 +25,28 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-ANI_EXPORT ani_status BindClass(ani_vm *vm, const char *className, const std::vector<ani_native_function> &methods);
-ANI_EXPORT ani_status BindNamespace(
-    ani_vm *vm, const char *namespaceStr, const std::vector<ani_native_function> &functions);
-
 template <std::size_t N>
 ANI_EXPORT ani_status BindClass(ani_env *env, const char *className, const std::array<ani_native_function, N> &methods)
 {
     if (env == nullptr) {
-        HILOGE("ani_env is null!");
-        return ANI_ERROR;
+        HILOGE("Invalid parameter env");
+        return ANI_INVALID_ARGS;
     }
-    
+
+    if (className == nullptr) {
+        HILOGE("Invalid parameter className");
+        return ANI_INVALID_ARGS;
+    }
+
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         HILOGE("Cannot find class '%{private}s'", className);
-        return ANI_INVALID_ARGS;
+        return ANI_NOT_FOUND;
     }
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         HILOGE("Cannot bind native methods to '%{private}s'", className);
-        return ANI_INVALID_TYPE;
+        return ANI_ERROR;
     };
     return ANI_OK;
 }
@@ -55,19 +56,24 @@ ANI_EXPORT ani_status BindNamespace(
     ani_env *env, const char *namespaceStr, const std::array<ani_native_function, N> &methods)
 {
     if (env == nullptr) {
-        HILOGE("ani_env is null!");
-        return ANI_ERROR;
+        HILOGE("Invalid parameter env");
+        return ANI_INVALID_ARGS;
+    }
+
+    if (namespaceStr == nullptr) {
+        HILOGE("Invalid parameter namespaceStr");
+        return ANI_INVALID_ARGS;
     }
 
     ani_namespace ns;
     if (ANI_OK != env->FindNamespace(namespaceStr, &ns)) {
-        HILOGE("Not found '%{private}s'", namespaceStr);
-        return ANI_INVALID_ARGS;
+        HILOGE("Cannot find namespace '%{private}s'", namespaceStr);
+        return ANI_NOT_FOUND;
     }
 
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         HILOGE("Cannot bind native methods to '%{private}s'", namespaceStr);
-        return ANI_INVALID_TYPE;
+        return ANI_ERROR;
     };
     return ANI_OK;
 }

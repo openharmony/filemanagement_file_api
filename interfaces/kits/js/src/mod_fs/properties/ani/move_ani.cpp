@@ -15,6 +15,7 @@
 
 #include "move_ani.h"
 
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "move_core.h"
 #include "type_converter.h"
@@ -30,21 +31,26 @@ void MoveAni::MoveFileSync(
     auto [succSrc, srcPath] = TypeConverter::ToUTF8String(env, src);
     if (!succSrc) {
         HILOGE("Invalid src");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
     auto [succDest, destPath] = TypeConverter::ToUTF8String(env, dest);
     if (!succDest) {
         HILOGE("Invalid dest");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
     auto [succMode, modeOp] = TypeConverter::ToOptionalInt32(env, mode);
     if (!succMode) {
         HILOGE("Invalid mode");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
     auto ret = MoveCore::DoMove(srcPath, destPath, modeOp);
     if (!ret.IsSuccess()) {
         HILOGE("Move failed");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return;
     }
 }

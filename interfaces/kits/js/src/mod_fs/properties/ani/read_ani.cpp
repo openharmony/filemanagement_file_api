@@ -17,6 +17,7 @@
 
 #include <optional>
 #include "ani_helper.h"
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "read_core.h"
 #include "type_converter.h"
@@ -51,26 +52,30 @@ static tuple<bool, optional<ReadOptions>> ToReadOptions(ani_env *env, ani_object
     return { true, make_optional<ReadOptions>(move(options)) };
 }
 
-ani_long ReadAni::ReadSync(
-    ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_arraybuffer buffer, ani_object options)
+ani_double ReadAni::ReadSync(
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd, ani_arraybuffer buffer, ani_object options)
 {
     auto [succBuf, arrayBuffer] = TypeConverter::ToArrayBuffer(env, buffer);
     if (!succBuf) {
         HILOGE("Failed to resolve arrayBuffer!");
+        ErrorHandler::Throw(env, EINVAL);
         return -1;
     }
 
     auto [succOp, op] = ToReadOptions(env, options);
     if (!succOp) {
         HILOGE("Failed to resolve options!");
+        ErrorHandler::Throw(env, EINVAL);
         return -1;
     }
 
-    auto ret = ReadCore::DoRead(fd, arrayBuffer, op);
+    auto ret = ReadCore::DoRead(static_cast<int32_t>(fd), arrayBuffer, op);
     if (!ret.IsSuccess()) {
         HILOGE("Read file content failed!");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return -1;
     }
-    return ret.GetData().value();
+    return static_cast<double>(ret.GetData().value());
 }
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

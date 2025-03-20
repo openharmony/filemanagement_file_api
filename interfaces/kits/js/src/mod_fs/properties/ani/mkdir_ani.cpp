@@ -15,6 +15,7 @@
 
 #include "mkdir_ani.h"
 
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "mkdir_core.h"
 #include "type_converter.h"
@@ -24,34 +25,38 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-ani_int MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
+void MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
     auto [succ, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (!succ) {
         HILOGE("Invalid path");
-        return -1;
+        ErrorHandler::Throw(env, EINVAL);
+        return;
     }
     auto ret = MkdirCore::DoMkdir(pathStr);
     if (!ret.IsSuccess()) {
         HILOGE("Mkdir failed");
-        return -1;
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+        return;
     }
-    return 0;
 }
 
-ani_int MkdirkAni::MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_boolean recursion)
+void MkdirkAni::MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_boolean recursion)
 {
     auto [succ, pathStr] = ANI::TypeConverter::ToUTF8String(env, path);
     if (!succ) {
         HILOGE("Invalid path");
-        return -1;
+        ErrorHandler::Throw(env, EINVAL);
+        return;
     }
     auto ret = MkdirCore::DoMkdir(pathStr, recursion);
     if (!ret.IsSuccess()) {
         HILOGE("DoMkdir failed");
-        return -1;
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+        return;
     }
-    return 0;
 }
 
 } // namespace ANI

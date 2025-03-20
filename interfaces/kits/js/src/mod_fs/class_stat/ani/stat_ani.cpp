@@ -15,9 +15,7 @@
 
 #include "stat_ani.h"
 
-#include <iostream>
-#include <string>
-
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "stat_core.h"
 #include "type_converter.h"
@@ -109,7 +107,8 @@ static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &
         { "<set>size", ani_double(static_cast<double>(fsStat->GetSize())) },
         { "<set>atime", ani_double(static_cast<double>(fsStat->GetAtime())) },
         { "<set>mtime", ani_double(static_cast<double>(fsStat->GetMtime())) },
-        { "<set>ctime", ani_double(static_cast<double>(fsStat->GetCtime())) } };
+        { "<set>ctime", ani_double(static_cast<double>(fsStat->GetCtime())) },
+    };
     for (auto iter : numProperties) {
         ret = SetNumProperty(env, cls, statObject, iter.first, iter.second);
         if (ret != ANI_OK) {
@@ -122,7 +121,8 @@ static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &
         { "<set>ino", ani_double(static_cast<double>(fsStat->GetIno())) },
         { "<set>atimeNs", ani_double(static_cast<double>(fsStat->GetAtimeNs())) },
         { "<set>mtimeNs", ani_double(static_cast<double>(fsStat->GetMtimeNs())) },
-        { "<set>ctimeNs", ani_double(static_cast<double>(fsStat->GetCtimeNs())) } };
+        { "<set>ctimeNs", ani_double(static_cast<double>(fsStat->GetCtimeNs())) },
+    };
     for (auto iter : bigIntProperties) {
         ret = SetBigIntProperty(env, cls, statObject, iter.first, iter.second);
         if (ret != ANI_OK) {
@@ -131,11 +131,13 @@ static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &
         }
     }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if ((ret = SetEnumLocation(env, cls, statObject, "<set>location", static_cast<Location>(fsStat->GetLocation()))) !=
         ANI_OK) {
         HILOGE("Object_CallMethod_Void Fail <set>location, err: %{private}d", ret);
         return ret;
     }
+#endif
 
     return ANI_OK;
 }
@@ -143,7 +145,7 @@ static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &
 static tuple<ani_status, ani_object> Wrap(ani_env *env, FsStat *fsStat)
 {
     ani_object statObject = {};
-    static const char *className = "Lfile_fs_class/StatInner;";
+    static const char *className = "L@ohos/file/fs/StatInner;";
     ani_class cls;
     ani_status ret;
 
@@ -187,12 +189,15 @@ ani_object StatAni::StatSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
     auto [succPath, fileInfo] = TypeConverter::ToFileInfo(env, file);
     if (!succPath) {
         HILOGE("The first argument requires filepath/fd");
+        ErrorHandler::Throw(env, EINVAL);
         return {};
     }
 
     auto ret = StatCore::DoStat(fileInfo);
     if (!ret.IsSuccess()) {
         HILOGE("DoStat failed!");
+        const FsError &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return {};
     }
 
@@ -202,8 +207,10 @@ ani_object StatAni::StatSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
         delete fsStat;
         fsStat = nullptr;
         HILOGE("Wrap stat object failed!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return {};
     }
+
     return statObject;
 }
 
@@ -211,6 +218,7 @@ ani_boolean StatAni::IsBlockDevice(ani_env *env, [[maybe_unused]] ani_object obj
 {
     auto fsStat = Unwrap(env, object);
     if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return ANI_FALSE;
     }
 
@@ -222,6 +230,7 @@ ani_boolean StatAni::IsCharacterDevice(ani_env *env, [[maybe_unused]] ani_object
 {
     auto fsStat = Unwrap(env, object);
     if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return ANI_FALSE;
     }
 
@@ -233,6 +242,7 @@ ani_boolean StatAni::IsDirectory(ani_env *env, [[maybe_unused]] ani_object objec
 {
     auto fsStat = Unwrap(env, object);
     if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return ANI_FALSE;
     }
 
@@ -244,6 +254,7 @@ ani_boolean StatAni::IsFIFO(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto fsStat = Unwrap(env, object);
     if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return ANI_FALSE;
     }
 
@@ -255,6 +266,7 @@ ani_boolean StatAni::IsFile(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto fsStat = Unwrap(env, object);
     if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return ANI_FALSE;
     }
 
@@ -266,6 +278,7 @@ ani_boolean StatAni::IsSocket(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto fsStat = Unwrap(env, object);
     if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return ANI_FALSE;
     }
 
@@ -277,6 +290,7 @@ ani_boolean StatAni::IsSymbolicLink(ani_env *env, [[maybe_unused]] ani_object ob
 {
     auto fsStat = Unwrap(env, object);
     if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return ANI_FALSE;
     }
 

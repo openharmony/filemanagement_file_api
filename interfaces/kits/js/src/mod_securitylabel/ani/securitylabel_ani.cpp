@@ -15,6 +15,7 @@
 
 #include "securitylabel_ani.h"
 
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "securitylabel_core.h"
 #include "type_converter.h"
@@ -28,28 +29,30 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleSecurityLabel;
 
-ani_int SecurityLabelAni::SetSecurityLabelSync(
+void SecurityLabelAni::SetSecurityLabelSync(
     ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_string level)
 {
     auto [succPath, srcPath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
         HILOGE("Invalid path");
-        return -1;
+        ErrorHandler::Throw(env, EINVAL);
+        return;
     }
 
     auto [succLevel, dataLevel] = TypeConverter::ToUTF8String(env, level);
     if (!succLevel) {
         HILOGE("Invalid dataLevel");
-        return -1;
+        ErrorHandler::Throw(env, EINVAL);
+        return;
     }
 
     auto ret = DoSetSecurityLabel(srcPath, dataLevel);
     if (!ret.IsSuccess()) {
         HILOGE("Set securitylabel failed");
-        return -1;
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+        return;
     }
-
-    return 0;
 }
 
 } // namespace ANI

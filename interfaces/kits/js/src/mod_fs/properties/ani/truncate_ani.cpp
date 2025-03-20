@@ -15,6 +15,7 @@
 
 #include "truncate_ani.h"
 
+#include "error_handler.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "truncate_core.h"
@@ -30,18 +31,22 @@ void TruncateAni::TruncateSync(ani_env *env, [[maybe_unused]] ani_class clazz, a
     auto [succ, fileinfo] = TypeConverter::ToFileInfo(env, file);
     if (!succ) {
         HILOGE("Invalid fd/path");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
     auto [succLen, len] = TypeConverter::ToOptionalInt64(env, length);
     if (!succLen) {
         HILOGE("Invalid truncate length");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
     auto ret = TruncateCore::DoTruncate(fileinfo, len);
     if (!ret.IsSuccess()) {
         HILOGE("Truncate failed");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return;
     }
 }

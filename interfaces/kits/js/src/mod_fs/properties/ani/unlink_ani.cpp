@@ -15,6 +15,7 @@
 
 #include "unlink_ani.h"
 
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 #include "unlink_core.h"
@@ -24,19 +25,21 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-ani_int UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
+void UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
     auto [succ, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (!succ) {
         HILOGE("Invalid path");
-        return -1;
+        ErrorHandler::Throw(env, EINVAL);
+        return;
     }
     auto ret = UnlinkCore::DoUnlink(pathStr);
     if (!ret.IsSuccess()) {
         HILOGE("Unlink failed");
-        return -1;
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+        return;
     }
-    return 0;
 }
 
 } // namespace ANI

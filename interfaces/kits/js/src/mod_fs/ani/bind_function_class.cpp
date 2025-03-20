@@ -39,7 +39,7 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
 static ani_status BindFileMethods(ani_env *env)
 {
-    static const char *className = "Lfile_fs_class/FileInner;";
+    static const char *className = "L@ohos/file/fs/FileInner;";
 
     std::array methods = {
         ani_native_function { "getParent", nullptr, reinterpret_cast<void *>(FileAni::GetParent) },
@@ -53,7 +53,7 @@ static ani_status BindFileMethods(ani_env *env)
 
 static ani_status BindStatClassMethods(ani_env *env)
 {
-    static const char *className = "Lfile_fs_class/StatInner;";
+    static const char *className = "L@ohos/file/fs/StatInner;";
 
     std::array methods = {
         ani_native_function { "isBlockDevice", ":Z", reinterpret_cast<void *>(StatAni::IsBlockDevice) },
@@ -70,15 +70,15 @@ static ani_status BindStatClassMethods(ani_env *env)
 
 static ani_status BindStaticMethods(ani_env *env)
 {
-    static const char *className = "Lfile_fs_class/fileIo;";
+    static const char *className = "L@ohos/file/fs/FileIoImpl;";
 
     std::array methods = {
         ani_native_function { "closeSync", nullptr, reinterpret_cast<void *>(CloseAni::CloseSync) },
         ani_native_function { "copyFileSync", nullptr, reinterpret_cast<void *>(CopyFileAni::CopyFileSync) },
         ani_native_function { "doAccessSync", nullptr, reinterpret_cast<void *>(AccessAni::AccessSync3) },
         ani_native_function { "listFileSync", nullptr, reinterpret_cast<void *>(ListFileAni::ListFileSync) },
-        ani_native_function { "mkdirSync", "Lstd/core/String;:I", reinterpret_cast<void *>(MkdirkAni::MkdirSync0) },
-        ani_native_function { "mkdirSync", "Lstd/core/String;Z:I", reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
+        ani_native_function { "mkdirSync", "Lstd/core/String;:V", reinterpret_cast<void *>(MkdirkAni::MkdirSync0) },
+        ani_native_function { "mkdirSync", "Lstd/core/String;Z:V", reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
         ani_native_function { "moveFileSync", nullptr, reinterpret_cast<void *>(MoveAni::MoveFileSync) },
         ani_native_function { "openSync", nullptr, reinterpret_cast<void *>(OpenAni::OpenSync) },
         ani_native_function { "readSync", nullptr, reinterpret_cast<void *>(ReadAni::ReadSync) },
@@ -94,17 +94,26 @@ static ani_status BindStaticMethods(ani_env *env)
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
+    if (vm == nullptr) {
+        HILOGE("Invalid parameter vm");
+        return ANI_INVALID_ARGS;
+    }
+
+    if (result == nullptr) {
+        HILOGE("Invalid parameter result");
+        return ANI_INVALID_ARGS;
+    }
+
     ani_env *env;
-    ani_status status = ANI_ERROR;
-    status = vm->GetEnv(ANI_VERSION_1, &env);
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
     if (status != ANI_OK) {
-        HILOGE("Unsupported ANI_VERSION_1");
-        return status;
+        HILOGE("Invalid ani version!");
+        return ANI_INVALID_VERSION;
     }
 
     status = BindStaticMethods(env);
     if (status != ANI_OK) {
-        HILOGE("Cannot bind native static methods for fileio!");
+        HILOGE("Cannot bind native static methods for BindStaticMethods!");
         return status;
     };
 
@@ -119,11 +128,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         HILOGE("Cannot bind native methods for Stat Class!");
         return status;
     };
-
-    if (result == nullptr) {
-        HILOGE("result is null!");
-        return ANI_ERROR;
-    }
 
     *result = ANI_VERSION_1;
     return ANI_OK;

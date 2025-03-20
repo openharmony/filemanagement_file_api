@@ -16,6 +16,7 @@
 #include "copy_file_ani.h"
 
 #include "copy_file_core.h"
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 
@@ -33,18 +34,22 @@ void CopyFileAni::CopyFileSync(
     auto [succDest, destFile] = TypeConverter::ToFileInfo(env, dest);
     if (!succSrc || !succDest) {
         HILOGE("The first/second argument requires filepath/fd");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
     auto [succMode, optMode] = TypeConverter::ToOptionalInt32(env, mode);
     if (!succMode) {
         HILOGE("Failed to convert mode to int32");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
     auto ret = CopyFileCore::DoCopyFile(srcFile, destFile, optMode);
     if (!ret.IsSuccess()) {
         HILOGE("DoCopyFile failed!");
+        const FsError &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return;
     }
 }

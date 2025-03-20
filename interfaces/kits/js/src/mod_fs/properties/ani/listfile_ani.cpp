@@ -15,6 +15,7 @@
 
 #include "listfile_ani.h"
 
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "listfile_core.h"
 #include "type_converter.h"
@@ -35,12 +36,12 @@ tuple<bool, bool> ParseBooleanParam(ani_env *env, ani_object obj, string tag)
         return { false, false };
     }
     env->Reference_IsUndefined(bool_ref, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return { true, false };
     }
     ani_boolean bool_ref_res;
-    if (ANI_OK !=
-        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(bool_ref), "unboxed", ":Z", &bool_ref_res)) {
+    if (ANI_OK != env->Object_CallMethodByName_Boolean(
+        static_cast<ani_object>(bool_ref), "unboxed", ":Z", &bool_ref_res)) {
         return { false, false };
     }
     return { true, static_cast<bool>(bool_ref_res) };
@@ -59,8 +60,8 @@ tuple<bool, int> ParseIntParam(ani_env *env, ani_object obj, string tag)
         return { true, result };
     }
     ani_int result_ref_res;
-    if (ANI_OK !=
-        env->Object_CallMethodByName_Int(static_cast<ani_object>(result_ref), "intValue", nullptr, &result_ref_res)) {
+    if (ANI_OK != env->Object_CallMethodByName_Int(
+        static_cast<ani_object>(result_ref), "intValue", nullptr, &result_ref_res)) {
         result = -1;
         return { false, result };
     }
@@ -89,7 +90,7 @@ tuple<bool, optional<double>> ParseDoubleParam(ani_env *env, ani_object obj, str
     return { true, make_optional<double>(result) };
 }
 
-tuple<bool, optional<vector<string>>> AnalyzerArrayString(ani_env *env, ani_object obj, string tag)
+tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object obj, string tag)
 {
     ani_boolean isUndefined;
     ani_ref result_ref;
@@ -103,14 +104,14 @@ tuple<bool, optional<vector<string>>> AnalyzerArrayString(ani_env *env, ani_obje
     }
 
     ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(result_ref), "length", &length) ||
-        length == 0) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(
+        static_cast<ani_object>(result_ref), "length", &length) || length == 0) {
         return { false, nullopt };
     }
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
-        if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(result_ref), "$_get",
-            "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i)) {
+        if (ANI_OK != env->Object_CallMethodByName_Ref(
+            static_cast<ani_object>(result_ref), "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i)) {
             return { false, nullopt };
         }
         auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));
@@ -122,7 +123,7 @@ tuple<bool, optional<vector<string>>> AnalyzerArrayString(ani_env *env, ani_obje
     return { true, make_optional<vector<string>>(move(strings)) };
 }
 
-tuple<bool, optional<FsFileFilter>> AnalyzeFilter(ani_env *env, ani_object obj)
+tuple<bool, optional<FsFileFilter>> ParseFilter(ani_env *env, ani_object obj)
 {
     FsFileFilter filter;
 
@@ -140,14 +141,14 @@ tuple<bool, optional<FsFileFilter>> AnalyzeFilter(ani_env *env, ani_object obj)
     }
     filter.SetFileSizeOver(lastModifiedAfter);
 
-    auto [succSuffix, suffix] = AnalyzerArrayString(env, obj, "suffix");
+    auto [succSuffix, suffix] = ParseArrayString(env, obj, "suffix");
     if (!succSuffix) {
         HILOGE("Illegal option.suffix parameter");
         return { false, move(filter) };
     }
     filter.SetSuffix(move(suffix));
 
-    auto [succDisplayName, displayName] = AnalyzerArrayString(env, obj, "displayName");
+    auto [succDisplayName, displayName] = ParseArrayString(env, obj, "displayName");
     if (!succDisplayName) {
         HILOGE("Illegal option.displayName parameter");
         return { false, move(filter) };
@@ -157,7 +158,7 @@ tuple<bool, optional<FsFileFilter>> AnalyzeFilter(ani_env *env, ani_object obj)
     return { true, move(filter) };
 }
 
-tuple<bool, optional<FsListFileOptions>> AnalyzeArgs(ani_env *env, ani_object obj)
+tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
 {
     FsListFileOptions result;
     ani_boolean isUndefined;
@@ -189,7 +190,7 @@ tuple<bool, optional<FsListFileOptions>> AnalyzeArgs(ani_env *env, ani_object ob
     if (isUndefined) {
         return { true, make_optional<FsListFileOptions>(result) };
     }
-    auto [succFilter, filterFilterClass] = AnalyzeFilter(env, static_cast<ani_object>(filter_ref));
+    auto [succFilter, filterFilterClass] = ParseFilter(env, static_cast<ani_object>(filter_ref));
     if (!succFilter) {
         HILOGE("Invalid filter");
         return { false, nullopt };
@@ -204,18 +205,22 @@ ani_array_ref ListFileAni::ListFileSync(ani_env *env, [[maybe_unused]] ani_class
     auto [succPath, srcPath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
         HILOGE("Invalid path");
+        ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
 
-    auto [succOpt, opt] = AnalyzeArgs(env, obj);
+    auto [succOpt, opt] = ParseArgs(env, obj);
     if (!succOpt) {
         HILOGE("Invalid options Arguments");
+        ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
 
     auto ret = ListFileCore::DoListFile(srcPath, opt);
     if (!ret.IsSuccess()) {
         HILOGE("DoListFile failed");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return nullptr;
     }
 
@@ -223,7 +228,8 @@ ani_array_ref ListFileAni::ListFileSync(ani_env *env, [[maybe_unused]] ani_class
     const std::string *strArray = fileList.data();
     auto [succ, result] = TypeConverter::ToAniStringList(env, strArray, fileList.size());
     if (!succ) {
-        HILOGE("list file result value to ani_string list failed");
+        HILOGE("Convert list file result to ani string array failed");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
     return result;

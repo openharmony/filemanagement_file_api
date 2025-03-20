@@ -13,24 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef SECURITYLABEL_ANI_H
-#define SECURITYLABEL_ANI_H
+#include "error_handler.h"
 
-#include <ani.h>
+namespace OHOS::FileManagement::ModuleFileIO::ANI {
 
-namespace OHOS {
-namespace FileManagement {
-namespace ModuleFileIO {
-namespace ANI {
+ani_status ErrorHandler::Throw(ani_env *env, int32_t code, const std::string &errMsg)
+{
+    const char *className = "L@ohos/base/BusinessError;";
+    const char *name = "BusinessError";
+    return Throw(env, className, name, code, errMsg);
+}
 
-class SecurityLabelAni final {
-public:
-    static void SetSecurityLabelSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_string level);
-};
-
-} // namespace ANI
-} // namespace ModuleFileIO
-} // namespace FileManagement
-} // namespace OHOS
-
-#endif // SECURITYLABEL_ANI_H
+} // namespace OHOS::FileManagement::ModuleFileIO::ANI
