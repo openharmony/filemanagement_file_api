@@ -45,7 +45,7 @@ constexpr unsigned int MODE_READ = 04;
 constexpr unsigned int MODE_READ_WRITE = 06;
 
 constexpr unsigned int MODE_LOCAL = 00;
-constexpr unsigned int MODE_C_LOCAl = 01;
+constexpr unsigned int MODE_C_LOCAL = 01;
 constexpr unsigned int MODE_CLOUD = 02;
 
 constexpr unsigned int USR_READ_ONLY = 00;
