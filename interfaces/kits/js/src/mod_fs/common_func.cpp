@@ -106,8 +106,8 @@ void InitLocationType(napi_env env, napi_value exports)
 {
     char propertyName[] = "LocationType";
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_STATIC_PROPERTY("LOCAl", NVal::CreateInt32(env, MODE_C_LOCAL).val_),
-        DECLARE_NAPI_STATIC_PROPERTY("CLOUD", NVal::CreateInt32(env, MODE_CLOUD).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("LOCAl", NVal::CreateInt32(env, MODE_LOCATION_LOCAL).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("CLOUD", NVal::CreateInt32(env, MODE_LOCATION_CLOUD).val_),
     };
     napi_value obj = nullptr;
     napi_status status = napi_create_object(env, &obj);
