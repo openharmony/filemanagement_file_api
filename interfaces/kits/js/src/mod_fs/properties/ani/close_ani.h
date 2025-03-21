@@ -25,7 +25,7 @@ namespace ANI {
 
 class CloseAni final {
 public:
-    static ani_int CloseSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_object obj);
+    static void CloseSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_object obj);
 };
 
 } // namespace ANI

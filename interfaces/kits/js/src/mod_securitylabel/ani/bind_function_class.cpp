@@ -19,15 +19,41 @@
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+static ani_status BindStaticMethods(ani_env *env)
 {
-    *result = ANI_VERSION_1;
-
-    static const char *className = "Lfile_securitylabel_class/securitylabel;";
-    std::vector<ani_native_function> functions = {
-        ani_native_function { "setSecurityLabelSync", "Lstd/core/String;Lstd/core/String;:I",
+    static const char *className = "L@ohos/file/securityLabel/securitylabelImpl;";
+    std::array methods = {
+        ani_native_function { "setSecurityLabelSync", "Lstd/core/String;Lstd/core/String;:V",
             reinterpret_cast<void *>(SecurityLabelAni::SetSecurityLabelSync) },
     };
+    return BindClass(env, className, methods);
+}
 
-    return BindClass(vm, className, functions);
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    if (vm == nullptr) {
+        HILOGE("Invalid parameter vm");
+        return ANI_INVALID_ARGS;
+    }
+
+    if (result == nullptr) {
+        HILOGE("Invalid parameter result");
+        return ANI_INVALID_ARGS;
+    }
+
+    ani_env *env;
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK) {
+        HILOGE("Invalid ani version!");
+        return ANI_INVALID_VERSION;
+    }
+
+    status = BindStaticMethods(env);
+    if (status != ANI_OK) {
+        HILOGE("Cannot bind native static methods for securitylabel!");
+        return status;
+    };
+
+    *result = ANI_VERSION_1;
+    return ANI_OK;
 }

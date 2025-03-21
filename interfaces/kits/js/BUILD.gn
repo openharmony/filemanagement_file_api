@@ -625,6 +625,7 @@ group("ani_file_api") {
     ":ani_fs_class",
     ":ani_hash_class",
     ":ani_securitylabel_class",
+    ":ohos_file_fs_abc",
   ]
 }
 
@@ -669,7 +670,7 @@ ohos_shared_library("ani_fs_class") {
     "src/mod_fs/properties/copy_listener",
   ]
   sources = [
-    "src/common/ani_helper/bind_function.cpp",
+    "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/ani/bind_function_class.cpp",
@@ -707,7 +708,7 @@ ohos_shared_library("ani_fs_class") {
     "src/mod_fs/properties/write_core.cpp",
   ]
   deps = [
-    ":ani_fs_abc_etc",
+    ":ohos_file_fs_abc_etc",
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
@@ -752,24 +753,24 @@ ohos_shared_library("ani_fs_class") {
     cfi_cross_dso = true
     debug = false
   }
+  output_extension = "so"
   subsystem_name = "filemanagement"
   part_name = "file_api"
 }
 
-generate_static_abc("ani_fs_abc") {
-  arktsconfig = "src/mod_fs/ani/arktsconfig.json"
-  dst_file = "$target_out_dir/ani_fs.abc"
-  out_puts = [ "$target_out_dir/ani_fs.abc" ]
+generate_static_abc("ohos_file_fs_abc") {
+  base_url = "./src/mod_fs/ani/ets"
+  files = [ "./src/mod_fs/ani/ets/@ohos.file.fs.ets" ]
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/ani_fs.abc"
+  device_dst_file = "/system/framework/ohos_file_fs_abc.abc"
 }
 
-ohos_prebuilt_etc("ani_fs_abc_etc") {
-  source = "$target_out_dir/ani_fs.abc"
+ohos_prebuilt_etc("ohos_file_fs_abc_etc") {
+  source = "$target_out_dir/ohos_file_fs_abc.abc"
   module_install_dir = "framework"
   subsystem_name = "filemanagement"
   part_name = "file_api"
-  deps = [ ":ani_fs_abc" ]
+  deps = [ ":ohos_file_fs_abc" ]
 }
 
 ohos_shared_library("ani_hash_class") {
@@ -779,7 +780,7 @@ ohos_shared_library("ani_hash_class") {
     "src/mod_hash/ani",
   ]
   sources = [
-    "src/common/ani_helper/bind_function.cpp",
+    "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",
     "src/common/file_helper/fd_guard.cpp",
     "src/common/file_helper/hash_file.cpp",
@@ -790,7 +791,7 @@ ohos_shared_library("ani_hash_class") {
   ]
 
   deps = [
-    ":ani_hash_abc_etc",
+    ":ohos_file_hash_abc_etc",
     "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
@@ -822,24 +823,24 @@ ohos_shared_library("ani_hash_class") {
     cfi_cross_dso = true
     debug = false
   }
+  output_extension = "so"
   subsystem_name = "filemanagement"
   part_name = "file_api"
 }
 
-generate_static_abc("ani_hash_abc") {
-  arktsconfig = "src/mod_hash/ani/arktsconfig.json"
-  dst_file = "$target_out_dir/ani_hash.abc"
-  out_puts = [ "$target_out_dir/ani_hash.abc" ]
+generate_static_abc("ohos_file_hash_abc") {
+  base_url = "./src/mod_hash/ani/ets"
+  files = [ "./src/mod_hash/ani/ets/@ohos.file.hash.ets" ]
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/ani_hash.abc"
+  device_dst_file = "/system/framework/ohos_file_hash_abc.abc"
 }
 
-ohos_prebuilt_etc("ani_hash_abc_etc") {
-  source = "$target_out_dir/ani_hash.abc"
+ohos_prebuilt_etc("ohos_file_hash_abc_etc") {
+  source = "$target_out_dir/ohos_file_hash_abc.abc"
   module_install_dir = "framework"
   subsystem_name = "filemanagement"
   part_name = "file_api"
-  deps = [ ":ani_hash_abc" ]
+  deps = [ ":ohos_file_hash_abc" ]
 }
 
 ohos_shared_library("ani_securitylabel_class") {
@@ -849,7 +850,7 @@ ohos_shared_library("ani_securitylabel_class") {
     "src/mod_securitylabel",
   ]
   sources = [
-    "src/common/ani_helper/bind_function.cpp",
+    "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/fs_utils.cpp",
@@ -859,7 +860,7 @@ ohos_shared_library("ani_securitylabel_class") {
   ]
 
   deps = [
-    ":ani_securitylabel_abc_etc",
+    ":ohos_file_securityLabel_abc_etc",
     "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
@@ -890,22 +891,22 @@ ohos_shared_library("ani_securitylabel_class") {
     cfi_cross_dso = true
     debug = false
   }
+  output_extension = "so"
   subsystem_name = "filemanagement"
   part_name = "file_api"
 }
 
-generate_static_abc("ani_securitylabel_abc") {
-  arktsconfig = "src/mod_securitylabel/ani/arktsconfig.json"
-  dst_file = "$target_out_dir/ani_securitylabel.abc"
-  out_puts = [ "$target_out_dir/ani_securitylabel.abc" ]
+generate_static_abc("ohos_file_securityLabel_abc") {
+  base_url = "./src/mod_securitylabel/ani/ets"
+  files = [ "./src/mod_securitylabel/ani/ets/@ohos.file.securityLabel.ets" ]
   is_boot_abc = "True"
-  device_dst_file = "/system/framework/ani_securitylabel.abc"
+  device_dst_file = "/system/framework/ohos_file_securityLabel_abc.abc"
 }
 
-ohos_prebuilt_etc("ani_securitylabel_abc_etc") {
-  source = "$target_out_dir/ani_securitylabel.abc"
+ohos_prebuilt_etc("ohos_file_securityLabel_abc_etc") {
+  source = "$target_out_dir/ohos_file_securityLabel_abc.abc"
   module_install_dir = "framework"
   subsystem_name = "filemanagement"
   part_name = "file_api"
-  deps = [ ":ani_securitylabel_abc" ]
+  deps = [ ":ohos_file_securityLabel_abc" ]
 }

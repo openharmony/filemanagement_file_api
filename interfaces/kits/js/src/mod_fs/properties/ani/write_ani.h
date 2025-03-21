@@ -25,8 +25,8 @@ namespace ANI {
 
 class WriteAni final {
 public:
-    static ani_long WriteSync(
-        ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_object buf, ani_object options);
+    static ani_double WriteSync(
+        ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd, ani_object buf, ani_object options);
 };
 } // namespace ANI
 } // namespace ModuleFileIO

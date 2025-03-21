@@ -16,6 +16,7 @@
 #include "access_ani.h"
 
 #include "access_core.h"
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 
@@ -80,12 +81,14 @@ ani_boolean AccessAni::AccessSync3(
     auto [succPath, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
         HILOGE("Invalid path");
+        ErrorHandler::Throw(env, EINVAL);
         return ret;
     }
 
     auto [succMode, modeOp] = TypeConverter::EnumToInt32(env, mode);
     if (!succMode) {
         HILOGE("Invalid mode");
+        ErrorHandler::Throw(env, EINVAL);
         return ret;
     }
     auto modeType = OptToAccessModeType(modeOp);
@@ -93,6 +96,7 @@ ani_boolean AccessAni::AccessSync3(
     auto [succFlag, flagOpt] = TypeConverter::EnumToInt32(env, flag);
     if (!succFlag) {
         HILOGE("Invalid flag");
+        ErrorHandler::Throw(env, EINVAL);
         return ret;
     }
     auto flagType = OptToAccessFlagType(flagOpt);
@@ -106,6 +110,8 @@ ani_boolean AccessAni::AccessSync3(
 
     if (!fsRet.IsSuccess()) {
         HILOGE("DoAccess failed");
+        const auto &err = fsRet.GetError();
+        ErrorHandler::Throw(env, err);
         return false;
     }
     return fsRet.GetData().value();

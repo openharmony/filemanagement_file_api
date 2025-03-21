@@ -30,8 +30,8 @@ inline const std::string EMPTY_STRING = "";
 class TypeConverter {
 public:
     static std::tuple<bool, std::string> ToUTF8String(ani_env *env, const ani_string &path);
-    static std::tuple<bool, std::optional<int32_t>> ToOptionalInt32(ani_env *env, const ani_object &intOp);
-    static std::tuple<bool, std::optional<int64_t>> ToOptionalInt64(ani_env *env, const ani_object &longOp);
+    static std::tuple<bool, std::optional<int32_t>> ToOptionalInt32(ani_env *env, const ani_object &value);
+    static std::tuple<bool, std::optional<int64_t>> ToOptionalInt64(ani_env *env, const ani_object &value);
     static std::tuple<bool, ani_string> ToAniString(ani_env *env, std::string str);
     static std::tuple<bool, ani_string> ToAniString(ani_env *env, const char *str);
     static std::tuple<bool, std::optional<int32_t>> EnumToInt32(ani_env *env, const ani_enum_item &enumOp);

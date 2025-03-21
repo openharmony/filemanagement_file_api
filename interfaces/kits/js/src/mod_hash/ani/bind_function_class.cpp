@@ -19,14 +19,41 @@
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+static ani_status BindStaticMethods(ani_env *env)
 {
-    static const char *className = "Lfile_hash_class/hash;";
-    std::vector<ani_native_function> functions = {
+    static const char *className = "L@ohos/file/hash/hashImpl;";
+    std::array methods = {
         ani_native_function { "hashSync", "Lstd/core/String;Lstd/core/String;:Lstd/core/String;",
             reinterpret_cast<void *>(HashAni::HashSync) },
     };
+    return BindClass(env, className, methods);
+}
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    if (vm == nullptr) {
+        HILOGE("Invalid parameter vm");
+        return ANI_INVALID_ARGS;
+    }
+
+    if (result == nullptr) {
+        HILOGE("Invalid parameter result");
+        return ANI_INVALID_ARGS;
+    }
+
+    ani_env *env;
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK) {
+        HILOGE("Invalid ani version!");
+        return ANI_INVALID_VERSION;
+    }
+
+    status = BindStaticMethods(env);
+    if (status != ANI_OK) {
+        HILOGE("Cannot bind native static methods for hash!");
+        return status;
+    };
 
     *result = ANI_VERSION_1;
-    return BindClass(vm, className, functions);
+    return ANI_OK;
 }

@@ -15,6 +15,7 @@
 
 #include "rmdir_ani.h"
 
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "rmdir_core.h"
 #include "type_converter.h"
@@ -30,11 +31,14 @@ void RmdirAni::RmdirSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_str
     auto [succPath, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
         HILOGE("Invalid path");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
     auto ret = RmdirentCore::DoRmdirent(pathStr);
     if (!ret.IsSuccess()) {
         HILOGE("DoRmdirent failed");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return;
     }
 }

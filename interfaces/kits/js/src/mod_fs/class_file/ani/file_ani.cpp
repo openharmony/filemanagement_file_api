@@ -15,7 +15,7 @@
 
 #include "file_ani.h"
 
-#include <string>
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "fs_file.h"
 #include "type_converter.h"
@@ -45,17 +45,21 @@ ani_string FileAni::GetParent(ani_env *env, [[maybe_unused]] ani_object object)
     auto fsFile = Unwrap(env, object);
     if (fsFile == nullptr) {
         HILOGE("Cannot unwrap fsfile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return {};
     }
     auto ret = fsFile->GetParent();
     if (!ret.IsSuccess()) {
         HILOGE("Cannot get file parent!");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return {};
     }
     auto value = ret.GetData().value();
     auto [succ, parent] = TypeConverter::ToAniString(env, value);
     if (!succ) {
         HILOGE("Cannot convert file parent to ani string!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return {};
     }
     return parent;
@@ -72,11 +76,14 @@ void FileAni::Lock(ani_env *env, [[maybe_unused]] ani_object object, ani_object 
     auto fsFile = Unwrap(env, object);
     if (fsFile == nullptr) {
         HILOGE("Cannot unwrap fsfile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
     auto ret = fsFile->Lock(exc);
     if (!ret.IsSuccess()) {
         HILOGE("Lock file failed!");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return;
     }
 }
@@ -92,11 +99,14 @@ void FileAni::TryLock(ani_env *env, [[maybe_unused]] ani_object object, ani_obje
     auto fsFile = Unwrap(env, object);
     if (fsFile == nullptr) {
         HILOGE("Cannot unwrap fsfile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
     auto ret = fsFile->TryLock(exc);
     if (!ret.IsSuccess()) {
         HILOGE("TryLock file failed!");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return;
     }
 }
@@ -106,11 +116,14 @@ void FileAni::UnLock(ani_env *env, [[maybe_unused]] ani_object object)
     auto fsFile = Unwrap(env, object);
     if (fsFile == nullptr) {
         HILOGE("Cannot unwrap fsfile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
     auto ret = fsFile->UnLock();
     if (!ret.IsSuccess()) {
         HILOGE("UnLock file failed!");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return;
     }
 }

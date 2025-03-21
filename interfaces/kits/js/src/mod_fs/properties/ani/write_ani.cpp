@@ -17,6 +17,7 @@
 
 #include <optional>
 #include "ani_helper.h"
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 #include "write_core.h"
@@ -88,12 +89,13 @@ static std::tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const an
     return { true, std::move(result) };
 }
 
-ani_long WriteAni::WriteSync(
-    ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_object buf, ani_object options)
+ani_double WriteAni::WriteSync(
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd, ani_object buf, ani_object options)
 {
     auto [succOp, op] = ToWriteOptions(env, options);
     if (!succOp) {
         HILOGE("Failed to resolve options!");
+        ErrorHandler::Throw(env, EINVAL);
         return -1;
     }
 
@@ -102,14 +104,17 @@ ani_long WriteAni::WriteSync(
         auto [succBuf, buffer] = TypeConverter::ToUTF8String(env, stringBuffer);
         if (!succBuf) {
             HILOGE("Failed to resolve stringBuffer!");
+            ErrorHandler::Throw(env, EINVAL);
             return -1;
         }
-        auto ret = WriteCore::DoWrite(fd, buffer, op);
+        auto ret = WriteCore::DoWrite(static_cast<int32_t>(fd), buffer, op);
         if (!ret.IsSuccess()) {
             HILOGE("write buffer failed!");
+            const auto &err = ret.GetError();
+            ErrorHandler::Throw(env, err);
             return -1;
         }
-        return ret.GetData().value();
+        return static_cast<double>(ret.GetData().value());
     }
 
     auto [isArrayBuffer, arrayBuffer] = ParseArrayBuffer(env, buf);
@@ -117,16 +122,20 @@ ani_long WriteAni::WriteSync(
         auto [succBuf, buffer] = TypeConverter::ToArrayBuffer(env, arrayBuffer);
         if (!succBuf) {
             HILOGE("Failed to resolve arrayBuffer!");
+            ErrorHandler::Throw(env, EINVAL);
             return -1;
         }
-        auto ret = WriteCore::DoWrite(fd, buffer, op);
+        auto ret = WriteCore::DoWrite(static_cast<int32_t>(fd), buffer, op);
         if (!ret.IsSuccess()) {
             HILOGE("write buffer failed!");
+            const auto &err = ret.GetError();
+            ErrorHandler::Throw(env, err);
             return -1;
         }
-        return ret.GetData().value();
+        return static_cast<double>(ret.GetData().value());
     }
     HILOGE("Unsupported buffer type!");
+    ErrorHandler::Throw(env, EINVAL);
     return -1;
 }
 } // namespace ANI

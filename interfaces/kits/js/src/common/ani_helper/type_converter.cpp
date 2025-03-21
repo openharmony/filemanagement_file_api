@@ -15,6 +15,7 @@
 
 #include "type_converter.h"
 
+#include <cstdint>
 #include <cstring>
 #include <optional>
 
@@ -27,6 +28,9 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI {
 
 std::tuple<bool, std::string> TypeConverter::ToUTF8String(ani_env *env, const ani_string &path)
 {
+    if (env == nullptr) {
+        return { false, EMPTY_STRING };
+    }
     ani_size sz {};
     std::string result;
     auto status = env->String_GetUTF8Size(path, &sz);
@@ -42,40 +46,61 @@ std::tuple<bool, std::string> TypeConverter::ToUTF8String(ani_env *env, const an
     return { true, std::move(result) };
 }
 
-std::tuple<bool, std::optional<int32_t>> TypeConverter::ToOptionalInt32(ani_env *env, const ani_object &intOp)
+std::tuple<bool, std::optional<int32_t>> TypeConverter::ToOptionalInt32(ani_env *env, const ani_object &value)
 {
+    if (env == nullptr) {
+        return { false, {} };
+    }
     ani_boolean isUndefined;
-    env->Reference_IsUndefined(intOp, &isUndefined);
+    env->Reference_IsUndefined(value, &isUndefined);
     if (isUndefined) {
         return { true, std::nullopt };
     }
 
-    ani_int result;
-    if (ANI_OK != env->Object_CallMethodByName_Int(intOp, "intValue", nullptr, &result)) {
-        return { false, {} };
+    ani_double doubleValue;
+    if (ANI_OK == env->Object_CallMethodByName_Double(value, "doubleValue", nullptr, &doubleValue)) {
+        return { true, std::make_optional(static_cast<int32_t>(doubleValue)) };
     }
 
-    return { true, std::make_optional(result) };
+    ani_int intValue;
+    if (ANI_OK == env->Object_CallMethodByName_Int(value, "intValue", nullptr, &intValue)) {
+        return { true, std::make_optional(intValue) };
+    }
+
+    return { false, {} };
 }
 
-std::tuple<bool, std::optional<int64_t>> TypeConverter::ToOptionalInt64(ani_env *env, const ani_object &longOp)
+std::tuple<bool, std::optional<int64_t>> TypeConverter::ToOptionalInt64(ani_env *env, const ani_object &value)
 {
+    if (env == nullptr) {
+        return { false, {} };
+    }
+
     ani_boolean isUndefined;
-    env->Reference_IsUndefined(longOp, &isUndefined);
+    env->Reference_IsUndefined(value, &isUndefined);
     if (isUndefined) {
         return { true, std::nullopt };
     }
 
-    ani_long result;
-    if (ANI_OK != env->Object_CallMethodByName_Long(longOp, "longValue", nullptr, &result)) {
-        return { false, {} };
+    ani_double doubleValue;
+    if (ANI_OK == env->Object_CallMethodByName_Double(value, "doubleValue", nullptr, &doubleValue)) {
+        return { true, std::make_optional(static_cast<int64_t>(doubleValue)) };
     }
 
-    return { true, std::make_optional(result) };
+    ani_long longValue;
+    if (ANI_OK == env->Object_CallMethodByName_Long(value, "longValue", nullptr, &longValue)) {
+        return { true, std::make_optional(longValue) };
+    }
+
+    return { false, {} };
 }
 
 std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::string str)
 {
+    if (env == nullptr) {
+        return { false, {} };
+    }
+
     ani_string result;
     if (ANI_OK != env->String_NewUTF8(str.c_str(), str.size(), &result)) {
         return { false, {} };
@@ -85,6 +110,10 @@ std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::strin
 
 std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, const char *str)
 {
+    if (env == nullptr) {
+        return { false, {} };
+    }
+
     size_t length = std::strlen(str);
     ani_string result;
     if (ANI_OK != env->String_NewUTF8(str, length, &result)) {
@@ -109,13 +138,47 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::EnumToInt32(ani_env *env
     return { true, std::make_optional(result) };
 }
 
-std::tuple<bool, FileInfo> TypeConverter::ToFileInfo(ani_env *env, const ani_object &pathOrFd)
+static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrFd)
 {
-    ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    ani_boolean isFd = false;
+
+    ani_class DoubleClass;
+    env->FindClass("Lstd/core/Double;", &DoubleClass);
+    env->Object_InstanceOf(pathOrFd, DoubleClass, &isFd);
+    if (isFd) {
+        ani_double doubleValue;
+        if (ANI_OK != env->Object_CallMethodByName_Double(pathOrFd, "doubleValue", nullptr, &doubleValue)) {
+            HILOGE("Parse file path failed");
+            return { false, 0 };
+        }
+        int32_t fd = static_cast<int32_t>(doubleValue);
+        return { true, fd };
+    }
 
     ani_class IntClass;
     env->FindClass("Lstd/core/Int;", &IntClass);
+    env->Object_InstanceOf(pathOrFd, IntClass, &isFd);
+    if (isFd) {
+        ani_int fd;
+        if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "intValue", nullptr, &fd)) {
+            HILOGE("Parse file path failed");
+            return { false, 0 };
+        }
+        return { true, fd };
+    }
+
+    return { false, 0 };
+}
+
+std::tuple<bool, FileInfo> TypeConverter::ToFileInfo(ani_env *env, const ani_object &pathOrFd)
+{
+    if (env == nullptr) {
+        HILOGE("Invalid parameter env");
+        return { false, FileInfo { false, {}, {} } };
+    }
+
+    ani_class stringClass;
+    env->FindClass("Lstd/core/String;", &stringClass);
 
     ani_boolean isPath = false;
     env->Object_InstanceOf(pathOrFd, stringClass, &isPath);
@@ -135,14 +198,8 @@ std::tuple<bool, FileInfo> TypeConverter::ToFileInfo(ani_env *env, const ani_obj
         return { true, FileInfo { true, move(chars), {} } };
     }
 
-    ani_boolean isFd = false;
-    env->Object_InstanceOf(pathOrFd, IntClass, &isFd);
+    auto [isFd, fd] = ParseFd(env, pathOrFd);
     if (isFd) {
-        ani_int fd;
-        if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "intValue", nullptr, &fd)) {
-            HILOGE("Parse file path failed");
-            return { false, FileInfo { false, {}, {} } };
-        }
         auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
         if (fdg == nullptr) {
             HILOGE("Failed to request heap memory.");
@@ -150,11 +207,16 @@ std::tuple<bool, FileInfo> TypeConverter::ToFileInfo(ani_env *env, const ani_obj
         }
         return { true, FileInfo { false, {}, move(fdg) } };
     }
+
     return { false, FileInfo { false, {}, {} } };
 }
 
 std::tuple<bool, ArrayBuffer> TypeConverter::ToArrayBuffer(ani_env *env, ani_arraybuffer &buffer)
 {
+    if (env == nullptr) {
+        return { false, ArrayBuffer { nullptr, 0 } };
+    }
+
     void *buf = nullptr;
     ani_size length = 0;
 
@@ -167,6 +229,10 @@ std::tuple<bool, ArrayBuffer> TypeConverter::ToArrayBuffer(ani_env *env, ani_arr
 std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(
     ani_env *env, const std::string strList[], const uint32_t length)
 {
+    if (env == nullptr) {
+        return { false, nullptr };
+    }
+
     ani_array_ref result = nullptr;
     ani_class itemCls = nullptr;
     if (env->FindClass("Lstd/core/String;", &itemCls) != ANI_OK) {
