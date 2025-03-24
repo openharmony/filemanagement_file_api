@@ -33,6 +33,7 @@
 #include "file_ani.h"
 #include "filemgmt_libhilog.h"
 #include "fsync_ani.h"
+#include "fs_watcher_ani.h"
 #include "listfile_ani.h"
 #include "lseek_ani.h"
 #include "lstat_ani.h"
@@ -55,6 +56,7 @@
 #include "truncate_ani.h"
 #include "unlink_ani.h"
 #include "utimes_ani.h"
+#include "watcher_ani.h"
 #include "write_ani.h"
 #include "xattr_ani.h"
 
@@ -70,6 +72,18 @@ static ani_status BindRafFileMethods(ani_env *env)
         ani_native_function { "close", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::Close) },
         ani_native_function { "writeSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::WriteSync) },
         ani_native_function { "readSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::ReadSync) },
+    };
+
+    return BindClass(env, className, methods);
+}
+
+static ani_status BindWatcherClassMethods(ani_env *env)
+{
+    static const char *className = "L@ohos/file/fs/WatcherInner;";
+
+    std::array methods = {
+        ani_native_function { "start", nullptr, reinterpret_cast<void *>(FsWatcherAni::Start) },
+        ani_native_function { "stop", nullptr, reinterpret_cast<void *>(FsWatcherAni::Stop) },
     };
 
     return BindClass(env, className, methods);
@@ -158,6 +172,7 @@ static ani_status BindStaticMethods(ani_env *env)
             reinterpret_cast<void *>(CreateRandomAccessFileAni::CreateRandomAccessFileSync) },
         ani_native_function {
             "createStreamSync", nullptr, reinterpret_cast<void *>(CreateStreamAni::CreateStreamSync) },
+        ani_native_function { "createWatcherSync", nullptr, reinterpret_cast<void *>(WatcherAni::CreateWatcherSync) },
         ani_native_function { "disConnectDfs", nullptr, reinterpret_cast<void *>(DisConnectDfsAni::DisConnectDfsSync) },
         ani_native_function { "doAccessSync", nullptr, reinterpret_cast<void *>(AccessAni::AccessSync3) },
         ani_native_function { "dup", nullptr, reinterpret_cast<void *>(DupAni::Dup) },
@@ -242,6 +257,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     if ((status = BindTaskSignalClassMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native methods for TaskSignal Class!");
+        return status;
+    };
+
+    if ((status = BindWatcherClassMethods(env)) != ANI_OK) {
+        HILOGE("Cannot bind native methods for Watcher Class");
         return status;
     };
 
