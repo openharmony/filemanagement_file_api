@@ -95,10 +95,10 @@ HWTEST_F(RustTest, RustTest_ReaderIterator_0003, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of NextLine() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNF
 */
-HWTEST_F(RustTest, RustTest_NextLine_0001, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_NextLine_0001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_NextLine_0001";
 
@@ -119,10 +119,10 @@ HWTEST_F(RustTest, RustTest_NextLine_0001, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of NextLine() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNF
 */
-HWTEST_F(RustTest, RustTest_NextLine_0002, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_NextLine_0002, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_NextLine_0002";
 
@@ -159,10 +159,10 @@ HWTEST_F(RustTest, RustTest_NextLine_0003, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Lseek() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGCS3
 */
-HWTEST_F(RustTest, RustTest_Lseek_0001, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Lseek_0001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0001";
 
@@ -182,10 +182,10 @@ HWTEST_F(RustTest, RustTest_Lseek_0001, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Lseek() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGCS3
 */
-HWTEST_F(RustTest, RustTest_Lseek_0002, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Lseek_0002, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0002";
 
@@ -208,10 +208,10 @@ HWTEST_F(RustTest, RustTest_Lseek_0002, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Lseek() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGCS3
 */
-HWTEST_F(RustTest, RustTest_Lseek_0003, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Lseek_0003, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0003";
 
@@ -254,10 +254,10 @@ HWTEST_F(RustTest, RustTest_Lseek_0004, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Lseek() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGCS3
 */
-HWTEST_F(RustTest, RustTest_Lseek_0005, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Lseek_0005, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0005";
 
@@ -280,10 +280,10 @@ HWTEST_F(RustTest, RustTest_Lseek_0005, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Lseek() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGCS3
 */
-HWTEST_F(RustTest, RustTest_Lseek_0006, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Lseek_0006, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0006";
 
@@ -303,10 +303,10 @@ HWTEST_F(RustTest, RustTest_Lseek_0006, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Lseek() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGCS3
 */
-HWTEST_F(RustTest, RustTest_Lseek_0007, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Lseek_0007, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0007";
 
@@ -322,10 +322,10 @@ HWTEST_F(RustTest, RustTest_Lseek_0007, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNJ
 */
-HWTEST_F(RustTest, RustTest_Mkdirs_0001, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Mkdirs_0001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0001";
 
@@ -347,10 +347,10 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0001, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNJ
 */
-HWTEST_F(RustTest, RustTest_Mkdirs_0002, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Mkdirs_0002, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0002";
 
@@ -372,10 +372,10 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0002, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNJ
 */
-HWTEST_F(RustTest, RustTest_Mkdirs_0003, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Mkdirs_0003, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0003";
 
@@ -393,10 +393,10 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0003, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNJ
 */
-HWTEST_F(RustTest, RustTest_Mkdirs_0004, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Mkdirs_0004, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0004";
 
@@ -412,10 +412,10 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0004, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNJ
 */
-HWTEST_F(RustTest, RustTest_Mkdirs_0005, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Mkdirs_0005, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0005";
 
@@ -432,10 +432,10 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0005, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNJ
 */
-HWTEST_F(RustTest, RustTest_Mkdirs_0006, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Mkdirs_0006, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0006";
 
@@ -452,10 +452,10 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0006, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNJ
 */
-HWTEST_F(RustTest, RustTest_Mkdirs_0007, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Mkdirs_0007, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0007";
 
@@ -472,10 +472,10 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0007, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNJ
 */
-HWTEST_F(RustTest, RustTest_Mkdirs_0008, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_Mkdirs_0008, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0008";
 
@@ -492,10 +492,10 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0008, testing::ext::TestSize.Level1)
 * @tc.desc: Test function of GetParent() interface for SUCCESS.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
-* @tc.level Level 1
+* @tc.level Level 0
 * @tc.require: AR000IGDNL
 */
-HWTEST_F(RustTest, RustTest_GetParent_0001, testing::ext::TestSize.Level1)
+HWTEST_F(RustTest, RustTest_GetParent_0001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_GetParent_0001";
 
