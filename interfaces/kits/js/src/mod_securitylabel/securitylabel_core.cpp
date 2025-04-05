@@ -13,29 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#include "securitylabel_core.h"
 
-#include <cinttypes>
-#include <iostream>
-#include <unistd.h>
-
-#include "fd_guard.h"
 #include "filemgmt_libhilog.h"
+#include "security_label.h"
 
 namespace OHOS {
 namespace FileManagement {
-namespace ModuleFileIO {
+namespace ModuleSecurityLabel {
 using namespace std;
+FsResult<void> DoSetSecurityLabel(const string &path, const string &dataLevel)
+{
+    if (DATA_LEVEL.find(dataLevel) == DATA_LEVEL.end()) {
+        HILOGE("Invalid Argument of dataLevelEnum");
+        return FsResult<void>::Error(EINVAL);
+    }
 
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
-};
-} // namespace ModuleFileIO
+    bool ret = SecurityLabel::SetSecurityLabel(path, dataLevel);
+    if (!ret) {
+        return FsResult<void>::Error(errno);
+    }
+
+    return FsResult<void>::Success();
+}
+
+FsResult<string> DoGetSecurityLabel(const string &path)
+{
+    string ret = SecurityLabel::GetSecurityLabel(path);
+    return FsResult<string>::Success(move(ret));
+}
+
+} // namespace ModuleSecurityLabel
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H

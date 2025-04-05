@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#include "mkdtemp_core.h"
 
-#include <cinttypes>
-#include <iostream>
-#include <unistd.h>
-
-#include "fd_guard.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -28,14 +23,22 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
-};
+FsResult<string> MkdtempCore::DoMkdtemp(const string &path)
+{
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> mkdtempReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    if (!mkdtempReq) {
+        HILOGE("Failed to request heap memory.");
+        return FsResult<string>::Error(ENOMEM);
+    }
+    int ret = uv_fs_mkdtemp(nullptr, mkdtempReq.get(), const_cast<char *>(path.c_str()), nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to create a temporary directory with path");
+        return FsResult<string>::Error(ret);
+    }
+
+    return FsResult<string>::Success(move(mkdtempReq->path));
+}
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H

@@ -13,29 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#include "utimes_ani.h"
 
-#include <cinttypes>
-#include <iostream>
-#include <unistd.h>
-
-#include "fd_guard.h"
+#include "error_handler.h"
 #include "filemgmt_libhilog.h"
-
+#include "type_converter.h"
+#include "utimes_core.h"
+ 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-using namespace std;
-
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
-};
+namespace ANI {
+ 
+void UtimesAni::Utimes(
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_double mtime)
+{
+    auto [succPath, newPath] = TypeConverter::ToUTF8String(env, path);
+    if (!succPath) {
+        HILOGE("Invalid path");
+        ErrorHandler::Throw(env, EINVAL);
+        return;
+    }
+    auto ret = UtimesCore::DoUtimes(newPath, static_cast<double>(mtime));
+    if (!ret.IsSuccess()) {
+        HILOGE("Utimes failed");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+        return;
+    }
+}
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H

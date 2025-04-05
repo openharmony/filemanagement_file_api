@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#include "unlink_core.h"
 
-#include <cinttypes>
-#include <iostream>
-#include <unistd.h>
+#ifdef FILE_API_TRACE
+#include "hitrace_meter.h"
+#endif
 
-#include "fd_guard.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -28,14 +26,23 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
-};
+FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
+{
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> unlink_req = {
+        new uv_fs_t, FsUtils::FsReqCleanup };
+    if (!unlink_req) {
+        HILOGE("Failed to request heap memory.");
+        return FsResult<void>::Error(ENOMEM);
+    }
+    int ret = uv_fs_unlink(nullptr, unlink_req.get(), src.c_str(), nullptr);
+    if (ret < 0) {
+        HILOGD("Failed to unlink with path");
+        return FsResult<void>::Error(ret);
+    }
+
+    return FsResult<void>::Success();
+}
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H

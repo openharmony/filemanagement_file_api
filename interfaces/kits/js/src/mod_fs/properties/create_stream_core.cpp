@@ -13,29 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#include "create_stream_core.h"
 
-#include <cinttypes>
-#include <iostream>
-#include <unistd.h>
+#include <memory>
 
-#include "fd_guard.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "fs_utils.h"
+#include "stream_instantiator.h"
+#include "stream_entity.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
-};
+FsResult<FsStream *> CreateStreamCore::DoCreateStream(const std::string &path, const std::string &mode)
+{
+    FILE *file = fopen(path.c_str(), mode.c_str());
+    if (!file) {
+        HILOGE("Failed to fopen file by path");
+        return FsResult<FsStream *>::Error(errno);
+    }
+
+    return StreamInstantiator::InstantiateStream(move(file));
+}
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H

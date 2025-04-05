@@ -13,29 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#include "symlink_core.h"
 
-#include <cinttypes>
-#include <iostream>
+#include <cstring>
+#include <fcntl.h>
+#include <tuple>
 #include <unistd.h>
 
-#include "fd_guard.h"
 #include "filemgmt_libhilog.h"
+#include "fs_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
-};
+FsResult<void> SymlinkCore::DoSymlink(const string &target, const string &srcPath)
+{
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> symlinkReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    if (!symlinkReq) {
+        HILOGE("Failed to request heap memory.");
+        return FsResult<void>::Error(ENOMEM);
+    }
+    int ret = uv_fs_symlink(nullptr, symlinkReq.get(), srcPath.c_str(), target.c_str(), 0, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to create a link for old path");
+        return FsResult<void>::Error(ret);
+    }
+    return FsResult<void>::Success();
+}
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H

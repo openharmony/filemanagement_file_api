@@ -13,29 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MKDTEMP_CORE_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MKDTEMP_CORE_H
 
-#include <cinttypes>
-#include <iostream>
-#include <unistd.h>
-
-#include "fd_guard.h"
-#include "filemgmt_libhilog.h"
+#include "filemgmt_libfs.h"
+#include "fs_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-using namespace std;
 
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
+class MkdtempCore final {
+public:
+    static FsResult<std::string> DoMkdtemp(const std::string &path);
 };
+const std::string PROCEDURE_MKDTEMP_NAME = "FileIOMkdtemp";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MKDTEMP_CORE_H

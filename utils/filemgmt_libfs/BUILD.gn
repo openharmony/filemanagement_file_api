@@ -1,0 +1,72 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
+
+config("libfs_public_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "include",
+    "${utils_path}/common/include",
+  ]
+}
+
+ohos_shared_library("filemgmt_libfs") {
+  cflags_cc = [ "-std=c++17" ]
+  if (!use_mingw_win && !use_mac) {
+    cflags = [
+      "-fdata-sections",
+      "-ffunction-sections",
+      "-Oz",
+    ]
+    cflags_cc += [
+      "-fvisibility-inlines-hidden",
+      "-Oz",
+    ]
+    branch_protector_ret = "pac_ret"
+    sanitize = {
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+  }
+
+  sources = [ "src/fs_error.cpp" ]
+
+  if (use_mingw_win) {
+    defines = [ "WIN_PLATFORM" ]
+  }
+  if (use_mac) {
+    defines = [ "IOS_PLATFORM" ]
+  }
+
+  public_configs = [ ":libfs_public_config" ]
+
+  deps = [ "${utils_path}/filemgmt_libhilog:filemgmt_libhilog" ]
+
+  external_deps = [
+    "hilog:libhilog",
+    "libuv:uv",
+  ]
+
+  use_exceptions = true
+
+  subsystem_name = "filemanagement"
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "file_api"
+}

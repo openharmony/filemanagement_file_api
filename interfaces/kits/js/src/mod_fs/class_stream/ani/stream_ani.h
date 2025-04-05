@@ -13,29 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_STREAM_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_STREAM_ANI_H
 
-#include <cinttypes>
-#include <iostream>
-#include <unistd.h>
-
-#include "fd_guard.h"
-#include "filemgmt_libhilog.h"
+#include <ani.h>
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-using namespace std;
+namespace ANI {
 
-const int64_t INVALID_POS = -1;
-struct RandomAccessFileEntity {
-    unique_ptr<DistributedFS::FDGuard> fd = {nullptr};
-    int64_t filePointer = 0;
-    int64_t start = INVALID_POS;
-    int64_t end = INVALID_POS;
+class StreamAni final {
+public:
+    static void Close(ani_env *env, [[maybe_unused]] ani_object object);
+    static void Flush(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_double Write(ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options);
+    static ani_double Read(
+        ani_env *env, [[maybe_unused]] ani_object object, ani_arraybuffer buffer, ani_object options);
+    static ani_double Seek(ani_env *env, [[maybe_unused]] ani_object object, ani_double offset, ani_object whence);
 };
+} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
+
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_STREAM_ANI_H
