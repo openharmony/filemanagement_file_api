@@ -78,8 +78,6 @@ private:
     unique_ptr<RandomAccessFileEntity> rafEntity;
     explicit FsRandomAccessFile(unique_ptr<RandomAccessFileEntity> entity) : rafEntity(move(entity)) {}
 };
-const string readProcedureName = "FileIORandomAccessFileRead";
-const string writeProcedureName = "FileIORandomAccessFileWrite";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

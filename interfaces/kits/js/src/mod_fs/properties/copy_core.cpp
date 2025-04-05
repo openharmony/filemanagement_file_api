@@ -681,7 +681,7 @@ void CopyCore::ReadNotifyEvent(std::shared_ptr<FileInfosCore> infos)
     int len = 0;
     int64_t index = 0;
     auto callback = GetRegisteredListener(infos);
-    while (((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {}
+    while (infos->run && ((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {}
     while (infos->run && index < len) {
         event = reinterpret_cast<inotify_event *>(buf + index);
         auto [needContinue, errCode, needSend] = HandleProgress(event, infos, callback);
