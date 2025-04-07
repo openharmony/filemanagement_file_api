@@ -86,7 +86,7 @@ export default namespace hash {
 class HashImpl {
 
   static {
-    loadLibrary("ani_hash_class");
+    loadLibrary("ani_file_hash");
   }
 
   static native hashSync(path: string, algorithm: string): string;

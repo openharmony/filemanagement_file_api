@@ -42,7 +42,7 @@ FsFile *FileWrapper::Unwrap(ani_env *env, ani_object object)
 
 ani_object FileWrapper::Wrap(ani_env *env, const FsFile *file)
 {
-    static const char *className = "L@ohos/file/fs/FileInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/FileInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         HILOGE("Cannot find class %s", className);

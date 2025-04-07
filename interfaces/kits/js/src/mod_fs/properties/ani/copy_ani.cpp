@@ -37,7 +37,7 @@ static void SetProgressListenerCb(ani_env *env, ani_ref &callback, CopyOptions &
     opts.listenerCb = [vm, &callback](uint64_t progressSize, uint64_t totalSize) -> void {
         ani_status ret;
         ani_object progress = {};
-        static const char *className = "L@ohos/file/fs/ProgressInner;";
+        static const char *className = "L@ohos/file/fs/fileIo/ProgressInner;";
         ani_class cls;
 
         auto env = AniHelper::GetThreadEnv(vm);
@@ -47,7 +47,8 @@ static void SetProgressListenerCb(ani_env *env, ani_ref &callback, CopyOptions &
         }
 
         if (progressSize > MAX_VALUE || totalSize > MAX_VALUE) {
-            HILOGE("progressSize or totalSize exceed MAX_VALUE: %{private}llu %{private}llu", progressSize, totalSize);
+            HILOGE("progressSize or totalSize exceed MAX_VALUE: %{private}" PRIu64 " %{private}" PRIu64, progressSize,
+                totalSize);
         }
 
         if ((ret = env->FindClass(className, &cls)) != ANI_OK) {

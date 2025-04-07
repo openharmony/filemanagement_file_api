@@ -43,7 +43,7 @@ FsStream *StreamWrapper::Unwrap(ani_env *env, ani_object object)
 
 ani_object StreamWrapper::Wrap(ani_env *env, const FsStream *stream)
 {
-    static const char *className = "L@ohos/file/fs/StreamInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/StreamInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         HILOGE("Cannot find class %s", className);

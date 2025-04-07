@@ -624,10 +624,9 @@ group("build_kits_js") {
 
 group("ani_file_api") {
   deps = [
-    ":ani_fs_class",
-    ":ani_hash_class",
-    ":ani_securitylabel_class",
-    ":ohos_file_fs_abc",
+    ":ani_file_fs",
+    ":ani_file_hash",
+    ":ani_file_securitylabel",
   ]
 }
 
@@ -658,7 +657,7 @@ config("ani_config") {
   ]
 }
 
-ohos_shared_library("ani_fs_class") {
+ohos_shared_library("ani_file_fs") {
   public_configs = [ ":ani_config" ]
   include_dirs = [
     "include/ipc",
@@ -852,7 +851,7 @@ ohos_prebuilt_etc("ohos_file_fs_abc_etc") {
   deps = [ ":ohos_file_fs_abc" ]
 }
 
-ohos_shared_library("ani_hash_class") {
+ohos_shared_library("ani_file_hash") {
   public_configs = [ ":ani_config" ]
   include_dirs = [
     "src/mod_hash",
@@ -922,7 +921,7 @@ ohos_prebuilt_etc("ohos_file_hash_abc_etc") {
   deps = [ ":ohos_file_hash_abc" ]
 }
 
-ohos_shared_library("ani_securitylabel_class") {
+ohos_shared_library("ani_file_securitylabel") {
   public_configs = [ ":ani_config" ]
   include_dirs = [
     "src/mod_securitylabel/ani",

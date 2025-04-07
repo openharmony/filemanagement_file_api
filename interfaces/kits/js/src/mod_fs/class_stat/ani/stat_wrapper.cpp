@@ -147,7 +147,7 @@ static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &
 tuple<ani_status, ani_object> StatWrapper::Wrap(ani_env *env, FsStat *fsStat)
 {
     ani_object statObject = {};
-    static const char *className = "L@ohos/file/fs/StatInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/StatInner;";
     ani_class cls;
     ani_status ret;
 
