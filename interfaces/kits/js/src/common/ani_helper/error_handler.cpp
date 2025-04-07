@@ -17,11 +17,11 @@
 
 namespace OHOS::FileManagement::ModuleFileIO::ANI {
 
-ani_status ErrorHandler::Throw(ani_env *env, int32_t code, const std::string &errMsg)
+ani_status ErrorHandler::Throw(
+    ani_env *env, int32_t code, const std::string &errMsg, const std::optional<ani_object> &errData)
 {
     const char *className = "L@ohos/base/BusinessError;";
-    const char *name = "BusinessError";
-    return Throw(env, className, name, code, errMsg);
+    return Throw(env, className, code, errMsg, errData);
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI
