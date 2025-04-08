@@ -104,7 +104,7 @@ function closeSync(file: number | File): void {
 function connectDfs(networkId: string, listeners: DfsListeners): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
     let promise = taskpool.execute((networkId: string, listeners: DfsListeners): void =>
-    FileIoImpl.doConnectDfs(networkId, listeners), networkId, listeners);
+    FileIoImpl.connectDfs(networkId, listeners), networkId, listeners);
     promise.then<void>((): void => {
       resolve(undefined);
     }).catch((e: BusinessError<void>): void => {
@@ -115,7 +115,7 @@ function connectDfs(networkId: string, listeners: DfsListeners): Promise<void> {
 
 function disconnectDfs(networkId: string): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
-    let promise = taskpool.execute((networkId: string): void => FileIoImpl.doDisConnectDfs(networkId), networkId);
+    let promise = taskpool.execute((networkId: string): void => FileIoImpl.disConnectDfs(networkId), networkId);
     promise.then<void>((): void => {
       resolve(undefined);
     }).catch((e: BusinessError<void>): void => {
@@ -1957,11 +1957,11 @@ class FileIoImpl {
 
   static native copySync(srcUri: string, destUri: string, options?: CopyOptions): void;
 
-  static native doConnectDfs(networkId: string, listeners: DfsListeners): void;
+  static native connectDfs(networkId: string, listeners: DfsListeners): void;
 
   static native copyFileSync(src: string | number, dest: string | number, mode?: number): void;
 
-  static native doDisConnectDfs(networkId: string): void;
+  static native disConnectDfs(networkId: string): void;
 
   static native fdatasyncSync(fd: number): void;
   
