@@ -155,6 +155,7 @@ ohos_shared_library("fs") {
     "src/mod_fs/common_func.cpp",
     "src/mod_fs/module.cpp",
     "src/mod_fs/properties/close.cpp",
+    "src/mod_fs/properties/dfs_listener/file_dfs_listener_stub.cpp",
     "src/mod_fs/properties/fdatasync.cpp",
     "src/mod_fs/properties/fsync.cpp",
     "src/mod_fs/properties/lstat.cpp",
