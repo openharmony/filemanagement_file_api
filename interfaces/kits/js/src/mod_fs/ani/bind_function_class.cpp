@@ -21,8 +21,10 @@
 #include "bind_function.h"
 #include "close_ani.h"
 #include "copy_ani.h"
+#include "connectdfs_ani.h"
 #include "copy_file_ani.h"
 #include "create_randomaccessfile_ani.h"
+#include "disconnectdfs_ani.h"
 #include "fdatasync_ani.h"
 #include "create_stream_ani.h"
 #include "fdopen_stream_ani.h"
@@ -182,6 +184,9 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "unlinkSync", nullptr, reinterpret_cast<void *>(UnlinkAni::UnlinkSync) },
         ani_native_function { "writeSync", nullptr, reinterpret_cast<void *>(WriteAni::WriteSync) },
         ani_native_function { "utimes", nullptr, reinterpret_cast<void *>(UtimesAni::Utimes) },
+        ani_native_function { "doConnectDfs", nullptr, reinterpret_cast<void *>(ConnectDfsAni::ConnectDfsSync) },
+        ani_native_function {
+            "doDisConnectDfs", nullptr, reinterpret_cast<void *>(DisConnectDfsAni::DisConnectDfsSync) }
     };
     return BindClass(env, className, methods);
 }
@@ -229,12 +234,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         HILOGE("Cannot bind native methods for RafFile Class");
         return status;
     };
-    
+
     if ((status = BindStreamMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native methods for Stream Class!");
         return status;
     };
-    
+
     if ((status = BindTaskSignalClassMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native methods for TaskSignal Class!");
         return status;

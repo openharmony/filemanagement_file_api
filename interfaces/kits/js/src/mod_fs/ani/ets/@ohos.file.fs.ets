@@ -101,6 +101,29 @@ function closeSync(file: number | File): void {
   return FileIoImpl.closeSync(file)
 }
 
+function connectDfs(networkId: string, listeners: DfsListeners): Promise<void> {
+  return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
+    let promise = taskpool.execute((networkId: string, listeners: DfsListeners): void =>
+    FileIoImpl.doConnectDfs(networkId, listeners), networkId, listeners);
+    promise.then<void>((): void => {
+      resolve(undefined);
+    }).catch((e: BusinessError<void>): void => {
+      reject(e);
+    });
+  });
+}
+
+function disconnectDfs(networkId: string): Promise<void> {
+  return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
+    let promise = taskpool.execute((networkId: string): void => FileIoImpl.doDisConnectDfs(networkId), networkId);
+    promise.then<void>((): void => {
+      resolve(undefined);
+    }).catch((e: BusinessError<void>): void => {
+      reject(e);
+    });
+  });
+}
+
 function getxattrSync(path: string, key: string): string {
   return FileIoImpl.getxattrSync(path, key)
 }
@@ -1188,6 +1211,10 @@ export interface Progress {
   totalSize: number;
 }
 
+export interface DfsListeners {
+  onStatus(networkId: string, status: number): void;
+}
+
 class ProgressInner implements Progress {
   processedSize: number;
   totalSize: number;
@@ -1930,7 +1957,11 @@ class FileIoImpl {
 
   static native copySync(srcUri: string, destUri: string, options?: CopyOptions): void;
 
+  static native doConnectDfs(networkId: string, listeners: DfsListeners): void;
+
   static native copyFileSync(src: string | number, dest: string | number, mode?: number): void;
+
+  static native doDisConnectDfs(networkId: string): void;
 
   static native fdatasyncSync(fd: number): void;
   
