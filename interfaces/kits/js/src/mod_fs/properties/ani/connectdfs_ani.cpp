@@ -19,7 +19,7 @@
 #include "error_handler.h"
 #include "type_converter.h"
 
-namespace  OHOS {
+namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
@@ -89,7 +89,7 @@ void ANIDfsListener::OnStatus(const std::string &networkId, int32_t status)
         return;
     }
 }
-}
-}
-}
-}
+} // namespace ANI
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS

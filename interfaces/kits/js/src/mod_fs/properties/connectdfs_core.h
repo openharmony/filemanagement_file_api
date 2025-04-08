@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_FILE_API_CONNECTDFS_CORE_H
-#define FILEMANAGEMENT_FILE_API_CONNECTDFS_CORE_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CONNECTDFS_CORE_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CONNECTDFS_CORE_H
 #include <chrono>
 #include <set>
 #include <sys/inotify.h>
@@ -33,9 +33,9 @@ public:
     static FsResult<void> ConnectDfsExec(const std::string &networkId, sptr<FileDfsListenerStub> listener);
 };
 
-}
-}
-}
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
 
-#endif //FILEMANAGEMENT_FILE_API_CONNECTDFS_CORE_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CONNECTDFS_CORE_H
 

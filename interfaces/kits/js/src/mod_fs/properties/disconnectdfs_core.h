@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_FILE_API_DISCONNECTDFS_CORE_H
-#define FILEMANAGEMENT_FILE_API_DISCONNECTDFS_CORE_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_DISCONNECTDFS_CORE_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_DISCONNECTDFS_CORE_H
 
 #include "filemgmt_libfs.h"
 #include "fs_utils.h"
@@ -26,8 +26,8 @@ class DisConnectDfsCore final {
 public:
     static FsResult<void> DisConnectDfsExec(const std::string &networkId);
 };
-}
-}
-}
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
 
-#endif //FILEMANAGEMENT_FILE_API_DISCONNECTDFS_CORE_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_DISCONNECTDFS_CORE_H

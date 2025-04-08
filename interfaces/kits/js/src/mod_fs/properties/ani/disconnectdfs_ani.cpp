@@ -19,7 +19,7 @@
 #include "error_handler.h"
 #include "type_converter.h"
 
-namespace  OHOS {
+namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
@@ -40,7 +40,7 @@ void DisConnectDfsAni::DisConnectDfsSync(ani_env *env, [[maybe_unused]] ani_clas
         return;
     }
 }
-}
-}
-}
-}
+} // namespace ANI
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS

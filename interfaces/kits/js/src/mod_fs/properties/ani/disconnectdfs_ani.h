@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_FILE_API_DISCONNECTDFS_ANI_H
-#define FILEMANAGEMENT_FILE_API_DISCONNECTDFS_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_DISCONNECTDFS_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_DISCONNECTDFS_ANI_H
 
 #include <ani.h>
 #include "dfs_listener/file_dfs_listener_stub.h"
@@ -31,8 +31,8 @@ public:
     static void DisConnectDfsSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string networkId);
 };
 
-}
-}
-}
-}
-#endif //FILEMANAGEMENT_FILE_API_DISCONNECTDFS_ANI_H
+} // namespace ANI
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_DISCONNECTDFS_ANI_H

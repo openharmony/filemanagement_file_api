@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_FILE_API_CONNECTDFS_ANI_H
-#define FILEMANAGEMENT_FILE_API_CONNECTDFS_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_CONNECTDFS_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_CONNECTDFS_ANI_H
 
 #include <ani.h>
 #include <string>
@@ -47,8 +47,8 @@ public:
                                ani_object listener);
 };
 
-}
-}
-}
-}
-#endif //FILEMANAGEMENT_FILE_API_CONNECTDFS_ANI_H
+} // namespace ANI
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_CONNECTDFS_ANI_H
