@@ -44,6 +44,10 @@ constexpr unsigned int MODE_WRITE = 02;
 constexpr unsigned int MODE_READ = 04;
 constexpr unsigned int MODE_READ_WRITE = 06;
 
+constexpr unsigned int MODE_LOCAL = 00;
+constexpr unsigned int MODE_LOCATION_LOCAL = 01;
+constexpr unsigned int MODE_LOCATION_CLOUD = 02;
+
 constexpr unsigned int USR_READ_ONLY = 00;
 constexpr unsigned int USR_WRITE_ONLY = 01;
 constexpr unsigned int USR_RDWR = 02;
@@ -75,6 +79,8 @@ public:
 #endif
 
 void InitAccessModeType(napi_env env, napi_value exports);
+void InitAccessFlagType(napi_env env, napi_value exports);
+void InitLocationType(napi_env env, napi_value exports);
 void InitOpenMode(napi_env env, napi_value exports);
 void InitWhenceType(napi_env env, napi_value exports);
 
