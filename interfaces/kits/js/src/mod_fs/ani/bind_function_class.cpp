@@ -184,9 +184,8 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "unlinkSync", nullptr, reinterpret_cast<void *>(UnlinkAni::UnlinkSync) },
         ani_native_function { "writeSync", nullptr, reinterpret_cast<void *>(WriteAni::WriteSync) },
         ani_native_function { "utimes", nullptr, reinterpret_cast<void *>(UtimesAni::Utimes) },
-        ani_native_function { "doConnectDfs", nullptr, reinterpret_cast<void *>(ConnectDfsAni::ConnectDfsSync) },
-        ani_native_function {
-            "doDisConnectDfs", nullptr, reinterpret_cast<void *>(DisConnectDfsAni::DisConnectDfsSync) }
+        ani_native_function { "connectDfs", nullptr, reinterpret_cast<void *>(ConnectDfsAni::ConnectDfsSync) },
+        ani_native_function { "disConnectDfs", nullptr, reinterpret_cast<void *>(DisConnectDfsAni::DisConnectDfsSync) }
     };
     return BindClass(env, className, methods);
 }
