@@ -521,7 +521,7 @@ void CopyCore::UnregisterListener(std::shared_ptr<FileInfosCore> fileInfos)
     jsCbMap_.erase(*fileInfos);
 }
 
-void CopyCore::ReceiveComplete(UvEntryCore *entry)
+void CopyCore::ReceiveComplete(std::shared_ptr<UvEntryCore> entry)
 {
     if (entry == nullptr) {
         HILOGE("entry pointer is nullptr.");
@@ -561,7 +561,7 @@ UvEntryCore *CopyCore::GetUVEntry(std::shared_ptr<FileInfosCore> infos)
 
 void CopyCore::OnFileReceive(std::shared_ptr<FileInfosCore> infos)
 {
-    UvEntryCore *entry = GetUVEntry(infos);
+    std::shared_ptr<UvEntryCore> entry(GetUVEntry(infos));
     if (entry == nullptr) {
         HILOGE("failed to get uv entry");
         return;
@@ -693,7 +693,7 @@ void CopyCore::ReadNotifyEvent(std::shared_ptr<FileInfosCore> infos)
             index += static_cast<int64_t>(sizeof(struct inotify_event) + event->len);
             continue;
         }
-        if (callback->progressSize == callback->totalSize) {
+        if (!callback || (callback->progressSize == callback->totalSize)) {
             infos->run = false;
             return;
         }

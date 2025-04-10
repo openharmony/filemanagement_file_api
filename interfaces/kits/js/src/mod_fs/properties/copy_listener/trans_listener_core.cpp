@@ -250,7 +250,7 @@ std::string TransListenerCore::GetNetworkIdFromUri(const std::string &uri)
     return uri.substr(uri.find(NETWORK_PARA) + NETWORK_PARA.size(), uri.size());
 }
 
-void TransListenerCore::CallbackComplete(UvEntryCore *entry)
+void TransListenerCore::CallbackComplete(std::shared_ptr<UvEntryCore> entry)
 {
     if (entry == nullptr) {
         HILOGE("entry pointer is nullptr.");
@@ -268,7 +268,7 @@ int32_t TransListenerCore::OnFileReceive(uint64_t totalBytes, uint64_t processed
         return ENOMEM;
     }
 
-    UvEntryCore *entry = new (std::nothrow) UvEntryCore(callback_);
+    std::shared_ptr<UvEntryCore> entry = std::make_shared<UvEntryCore>(callback_);
     if (entry == nullptr) {
         HILOGE("entry ptr is nullptr");
         return ENOMEM;

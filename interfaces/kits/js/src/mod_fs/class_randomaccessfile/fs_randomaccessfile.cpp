@@ -106,7 +106,7 @@ tuple<bool, void *, size_t, int64_t> ValidReadArg(ArrayBuffer &buffer, const opt
         return { false, nullptr, retLen, offset };
     }
     optional<size_t> lengthOp = nullopt;
-    optional<size_t> offsetOp = nullopt;
+    optional<int64_t> offsetOp = nullopt;
     if (options.has_value()) {
         ReadOptions op = options.value();
         lengthOp = op.length;
@@ -161,7 +161,7 @@ tuple<bool, void *, size_t, int64_t> ValidWriteArg(
     }
 
     optional<size_t> lengthOp = nullopt;
-    optional<size_t> offsetOp = nullopt;
+    optional<int64_t> offsetOp = nullopt;
     if (options.has_value()) {
         WriteOptions op = options.value();
         lengthOp = op.length;

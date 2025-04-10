@@ -155,7 +155,7 @@ private:
     static void GetNotifyEvent(std::shared_ptr<FileInfosCore> infos);
     static void StartNotify(std::shared_ptr<FileInfosCore> infos, std::shared_ptr<CallbackObjectCore> callback);
     static UvEntryCore *GetUVEntry(std::shared_ptr<FileInfosCore> infos);
-    static void ReceiveComplete(UvEntryCore *entry);
+    static void ReceiveComplete(std::shared_ptr<UvEntryCore> entry);
     static std::shared_ptr<CallbackObjectCore> GetRegisteredListener(std::shared_ptr<FileInfosCore> infos);
     static void CloseNotifyFd(std::shared_ptr<FileInfosCore> infos, std::shared_ptr<CallbackObjectCore> callback);
     static void CloseNotifyFdLocked(std::shared_ptr<FileInfosCore> infos,
