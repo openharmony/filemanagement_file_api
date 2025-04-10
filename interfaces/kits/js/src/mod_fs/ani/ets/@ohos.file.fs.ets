@@ -197,6 +197,27 @@ function copyDir(src: string, dest: string, mode: number, callback: AsyncCallbac
   });
 }
 
+function copyDir(arg0: Object, arg1: Object, arg2: NullishType, arg3: NullishType): void {
+  let src = arg0 as string;
+  let dest = arg1 as string;
+  if (typeof arg2 === 'number' && typeof arg3 === 'function') {
+    let mode: number = 0;
+    try {
+      mode = arg2 as number;
+    } catch (error) {
+      mode = (arg2 as int) + 0;
+    }
+    let callback = arg3 as AsyncCallback<void, Array<ConflictFiles>>;
+    copyDir(src, dest, mode, callback);
+    return;
+  }
+  if (typeof arg2 === 'function') {
+    let callback = arg2 as AsyncCallback<void, Array<ConflictFiles>>;
+    copyDir(src, dest, callback);
+    return;
+  }
+}
+
 function mkdirSync(path: string): void {
   return FileIoImpl.mkdirSync(path)
 }
