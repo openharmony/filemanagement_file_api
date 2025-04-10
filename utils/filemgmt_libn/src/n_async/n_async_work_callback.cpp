@@ -120,6 +120,7 @@ static void CallbackComplete(napi_env env, napi_status status, void *data)
     napi_value callback = ctx->cb_.Deref(env).val_;
     if (!bool(ctx->cb_)) {
         HILOGE("failed to get ref.");
+        napi_close_handle_scope(env, scope);
         return;
     }
     
