@@ -44,7 +44,7 @@ static tuple<bool, void *, size_t, int64_t> ValidWriteArg(
     }
 
     optional<size_t> lengthOp = nullopt;
-    optional<size_t> offsetOp = nullopt;
+    optional<int64_t> offsetOp = nullopt;
     if (options.has_value()) {
         WriteOptions op = options.value();
         lengthOp = op.length;
