@@ -104,7 +104,7 @@ function closeSync(file: number | File): void {
 function connectDfs(networkId: string, listeners: DfsListeners): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
     let promise = taskpool.execute((networkId: string, listeners: DfsListeners): void =>
-    FileIoImpl.connectDfs(networkId, listeners), networkId, listeners);
+      FileIoImpl.connectDfs(networkId, listeners), networkId, listeners);
     promise.then<void>((): void => {
       resolve(undefined);
     }).catch((e: BusinessError<void>): void => {
@@ -133,7 +133,7 @@ function getxattr(path: string, key: string): Promise<string> {
     let promise = taskpool.execute(FileIoImpl.getxattrSync, path, key);
     promise.then((ret: NullishType): void => {
       let result = ret as string;
-        resolve(result);
+      resolve(result);
     }).catch((e: BusinessError): void => {
       reject(e);
     });
@@ -142,6 +142,80 @@ function getxattr(path: string, key: string): Promise<string> {
 
 function dup(fd: number): File {
   return FileIoImpl.dup(fd);
+}
+
+function copyDirSync(src: string, dest: string, mode?: number): void {
+  return FileIoImpl.copyDirSync(src, dest, mode);
+}
+
+function copyDir(src: string, dest: string, mode?: number): Promise<void> {
+  return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<Array<ConflictFiles>>) => void): void => {
+    if (mode === undefined) {
+      let promise = taskpool.execute((src: string, dest: string): undefined =>
+        FileIoImpl.copyDirSync(src, dest), src, dest);
+      promise.then((ret: NullishType): void => {
+        resolve(undefined);
+      }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
+        reject(e);
+      });
+    } else {
+      let promise = taskpool.execute((src: string, dest: string, mode: number): undefined =>
+        FileIoImpl.copyDirSync(src, dest, mode), src, dest, mode);
+      promise.then((ret: NullishType): void => {
+        resolve(undefined);
+      }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
+        reject(e);
+      });
+    }
+
+  });
+}
+
+function copyDir(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+  let promise = taskpool.execute((src: string, dest: string): undefined =>
+    FileIoImpl.copyDirSync(src, dest), src, dest);
+  promise.then((ret: NullishType): void => {
+    let e = new BusinessError<Array<ConflictFiles>>();
+    e.code = 0;
+    e.data = new Array<ConflictFiles>(0);
+    callback(e, undefined);
+  }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
+    callback(e, undefined);
+  });
+}
+
+function copyDir(src: string, dest: string, mode: number, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+  let promise = taskpool.execute((src: string, dest: string, mode: number): undefined =>
+    FileIoImpl.copyDirSync(src, dest, mode), src, dest, mode);
+  promise.then((ret: NullishType): void => {
+    let e = new BusinessError<Array<ConflictFiles>>();
+    e.code = 0;
+    e.data = new Array<ConflictFiles>(0);
+    callback(e, undefined);
+  }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
+    callback(e, undefined);
+  });
+}
+
+function copyDir(arg0: Object, arg1: Object, arg2: NullishType, arg3: NullishType): void {
+  let src = arg0 as string;
+  let dest = arg1 as string;
+  if (typeof arg2 === 'number' && typeof arg3 === 'function') {
+    let mode: number = 0;
+    try {
+      mode = arg2 as number;
+    } catch (error) {
+      mode = (arg2 as int) + 0;
+    }
+    let callback = arg3 as AsyncCallback<void, Array<ConflictFiles>>;
+    copyDir(src, dest, mode, callback);
+    return;
+  }
+  if (typeof arg2 === 'function') {
+    let callback = arg2 as AsyncCallback<void, Array<ConflictFiles>>;
+    copyDir(src, dest, callback);
+    return;
+  }
 }
 
 function mkdirSync(path: string): void {
@@ -239,14 +313,15 @@ function moveDirSync(src: string, dest: string, mode?: number): void {
 }
 
 function moveDir(src: string, dest: string, mode?: number): Promise<void> {
-  return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
+  return new Promise<void>((resolve: (result: undefined) => void,
+    reject: (e: BusinessError<Array<ConflictFiles>>) => void): void => {
     if (mode === undefined) {
       let promise = taskpool.execute((src: string, dest: string): undefined => {
         return FileIoImpl.movedirSync(src, dest);
       }, src, dest);
       promise.then((ret: NullishType): void => {
         resolve(undefined);
-      }).catch((e: BusinessError): void => {
+      }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
         reject(e);
       });
     } else {
@@ -255,37 +330,60 @@ function moveDir(src: string, dest: string, mode?: number): Promise<void> {
       }, src, dest, mode);
       promise.then((ret: NullishType): void => {
         resolve(undefined);
-      }).catch((e: BusinessError): void => {
+      }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
         reject(e);
       });
     }
   })
 }
 
-function moveDir(src: string, dest: string, callback: AsyncCallback<void>): void {
+function moveDir(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
   let promise = taskpool.execute((src: string, dest: string): undefined => {
     return FileIoImpl.movedirSync(src, dest);
   }, src, dest);
   promise.then((ret: NullishType): void => {
-    let e = new BusinessError<void>();
+    let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
+    e.data = new Array<ConflictFiles>(0);
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
     callback(e, undefined);
   });
 }
 
-function moveDir(src: string, dest: string, mode: number, callback: AsyncCallback<void>): void {
+function moveDir(src: string, dest: string, mode: number, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
   let promise = taskpool.execute((src: string, dest: string, mode: number): undefined => {
     return FileIoImpl.movedirSync(src, dest, mode);
   }, src, dest, mode);
   promise.then((ret: NullishType): void => {
-    let e = new BusinessError<void>();
+    let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
+    e.data = new Array<ConflictFiles>(0);
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
     callback(e, undefined);
   });
+}
+
+function moveDir(arg0: Object, arg1: Object, arg2: NullishType, arg3: NullishType): void {
+  let src = arg0 as string;
+  let dest = arg1 as string;
+  if (typeof arg2 === 'number' && typeof arg3 === 'function') {
+    let mode: number = 0;
+    try {
+      mode = arg2 as number;
+    } catch (error) {
+      mode = (arg2 as int) + 0;
+    }
+    let callback = arg3 as AsyncCallback<void, Array<ConflictFiles>>;
+    moveDir(src, dest, mode, callback);
+    return;
+  }
+  if (typeof arg2 === 'function') {
+    let callback = arg2 as AsyncCallback<void, Array<ConflictFiles>>;
+    moveDir(src, dest, callback);
+    return;
+  }
 }
 
 function mkdtempSync(prefix: string): string {
@@ -297,7 +395,7 @@ function mkdtemp(prefix: string): Promise<string> {
     let promise = taskpool.execute(FileIoImpl.mkdtempSync, prefix);
     promise.then((ret: NullishType): void => {
       let result = ret as string;
-        resolve(result);
+      resolve(result);
     }).catch((e: BusinessError): void => {
       reject(e);
     });
@@ -871,7 +969,7 @@ function rename(oldPath: string, newPath: string): Promise<void> {
 }
 function createRandomAccessFileSync(file: string | File, mode?: number,
   options?: RandomAccessFileOptions): RandomAccessFile {
-    return FileIoImpl.createRandomAccessFileSync(file, mode, options);
+  return FileIoImpl.createRandomAccessFileSync(file, mode, options);
 }
 
 function createRandomAccessFile(file: string | File, mode?: number,
@@ -907,7 +1005,7 @@ function createRandomAccessFile(file: string | File, mode?: number,
     });
   });
 }
-function fdopenStream(fd: number, mode: string): Promise<Stream>{
+function fdopenStream(fd: number, mode: string): Promise<Stream> {
   return new Promise<Stream>((resolve: (result: Stream) => void, reject: (e: BusinessError<void>) => void) => {
     let promise = taskpool.execute(FileIoImpl.fdopenStreamSync, fd, mode);
     promise.then((ret: NullishType): void => {
@@ -991,7 +1089,7 @@ function createStream(path: string, mode: string): Promise<Stream> {
   });
 }
 
-function createStream(path: string, mode: string, callback: AsyncCallback<Stream>): void{
+function createStream(path: string, mode: string, callback: AsyncCallback<Stream>): void {
   let promise = taskpool.execute(FileIoImpl.createStreamSync, path, mode);
   promise.then((ret: NullishType): void => {
     let e = new BusinessError<void>();
@@ -1004,7 +1102,7 @@ function createStream(path: string, mode: string, callback: AsyncCallback<Stream
   });
 }
 
-function createStreamSync(path: string, mode: string): Stream{
+function createStreamSync(path: string, mode: string): Stream {
   return FileIoImpl.createStreamSync(path, mode);
 }
 function createReadStream(path: string, options?: ReadStreamOptions): ReadStream {
@@ -1168,6 +1266,21 @@ function lseek(fd: number, offset: number, whence?: WhenceType): number {
   return FileIoImpl.lseekSync(fd, offset, whence);
 }
 
+export interface ConflictFiles {
+  srcFile: string;
+  destFile: string;
+}
+
+class ConflictFilesInner implements ConflictFiles {
+  srcFile: string = "";
+  destFile: string = "";
+
+  constructor(src: string, dest: string) {
+    this.srcFile = src;
+    this.destFile = dest;
+  }
+}
+
 export interface Filter {
   suffix?: Array<string>;
   displayName?: Array<string>;
@@ -1299,7 +1412,7 @@ class RandomAccessFileInner implements RandomAccessFile {
   native close(): void;
 
   writeSync(buffer: ArrayBuffer | string, options?: WriteOptions): number {
-    let length = options? this.writeSync0(buffer, options) : this.writeSync0(buffer);
+    let length = options ? this.writeSync0(buffer, options) : this.writeSync0(buffer);
     this.filePointer += length;
     return length;
   }
@@ -1353,7 +1466,7 @@ class RandomAccessFileInner implements RandomAccessFile {
   }
 
   readSync(buffer: ArrayBuffer, options?: ReadOptions): number {
-    const length = options? this.readSync0(buffer, options) : this.readSync0(buffer);
+    const length = options ? this.readSync0(buffer, options) : this.readSync0(buffer);
     this.filePointer += length;
     return length;
   }
@@ -1435,7 +1548,7 @@ class FileInner implements File {
 
   native getParent(): String;
   native lockSync(exclusive?: boolean): void;
-  
+
   lock(exclusive?: boolean): Promise<void> {
     return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
       if (exclusive === undefined) {
@@ -1472,7 +1585,7 @@ class FileInner implements File {
       callback(e, undefined);
     });
   }
-  
+
   lock(exclusive: boolean, callback: AsyncCallback<void>): void {
     let promise = taskpool.execute((exclusive: boolean): undefined => {
       return this.lockSync(exclusive);
@@ -1959,24 +2072,26 @@ class FileIoImpl {
 
   static native connectDfs(networkId: string, listeners: DfsListeners): void;
 
+  static native copyDirSync(src: string, dest: string, mode?: number): void;
+
   static native copyFileSync(src: string | number, dest: string | number, mode?: number): void;
 
   static native disConnectDfs(networkId: string): void;
 
   static native fdatasyncSync(fd: number): void;
-  
+
   static native getxattrSync(path: string, key: string): string;
 
   static native createStreamSync(path: string, mode: string): Stream;
-  
+
   static native fdopenStreamSync(fd: number, mode: string): Stream;
-  
+
   static native dup(fd: number): File;
 
   static native listFileSync(path: string, options?: ListFileOptions): string[];
 
   static native lstatSync(path: string): Stat;
-  
+
   static native lseekSync(fd: number, offset: number, whence?: WhenceType): number;
 
   static native mkdirSync(path: string): void;
@@ -1984,7 +2099,7 @@ class FileIoImpl {
   static native mkdirSync(path: string, recursion: boolean): void;
 
   static native movedirSync(src: string, dest: string, mode?: number): void;
-  
+
   static native mkdtempSync(prefix: string): string;
 
   static native moveFileSync(src: String, dest: String, mode?: number): void;
@@ -1992,7 +2107,7 @@ class FileIoImpl {
   static native openSync(path: String, mode?: number): File;
 
   static native readlinesSync(filePath: string, options?: Options): ReaderIterator;
-  
+
   static native readSync(fd: number, buffer: ArrayBuffer, options?: ReadOptions): number;
 
   static native readTextSync(filePath: string, options?: ReadTextOptions): string;
@@ -2010,11 +2125,11 @@ class FileIoImpl {
   static native writeSync(fd: number, buffer: string | ArrayBuffer, options?: WriteOptions): number;
 
   static native fsyncSync(fd: number): void;
-  
+
   static native renameSync(oldPath: string, newPath: string): void;
 
   static native createRandomAccessFileSync(file: string | File, mode?: number,
-                                             options?: RandomAccessFileOptions): RandomAccessFile;
+    options?: RandomAccessFileOptions): RandomAccessFile;
 
   static native symlinkSync(target: string, srcPath: string): void;
 

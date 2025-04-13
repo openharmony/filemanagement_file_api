@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 
-#include "movedir_ani.h"
+#include "copy_dir_ani.h"
 
 #include <optional>
+#include "copy_dir_core.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
-#include "movedir_core.h"
 #include "type_converter.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
+using namespace std;
+using namespace OHOS::FileManagement::ModuleFileIO;
 
-static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ErrFiles &files)
+static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ConflictFiles &files)
 {
     static const char *className = "L@ohos/file/fs/ConflictFilesInner;";
     ani_class cls;
@@ -64,7 +66,7 @@ static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ErrFiles &fil
 }
 
 static tuple<bool, optional<ani_object>> ToConflictFilesArray(
-    ani_env *env, const optional<deque<struct ErrFiles>> &errFiles)
+    ani_env *env, const optional<vector<struct ConflictFiles>> &errFiles)
 {
     if (!errFiles.has_value()) {
         return { true, nullopt };
@@ -108,27 +110,35 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
     return { true, make_optional<ani_object>(move(arr)) };
 }
 
-void MoveDirAni::MoveDirSync(
+void CopyDirAni::CopyDirSync(
     ani_env *env, [[maybe_unused]] ani_class clazz, ani_string src, ani_string dest, ani_object mode)
 {
+    error_code errCode;
+
     auto [succSrc, srcPath] = TypeConverter::ToUTF8String(env, src);
+    if (!succSrc) {
+        HILOGE("Invalid src, errCode = %{public}d", errCode.value());
+        ErrorHandler::Throw(env, EINVAL);
+        return;
+    }
+
     auto [succDest, destPath] = TypeConverter::ToUTF8String(env, dest);
-    if (!succSrc || !succDest) {
-        HILOGE("The first/second argument requires filepath");
+    if (!succDest) {
+        HILOGE("Invalid dest, errCode = %{public}d", errCode.value());
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
     auto [succMode, optMode] = TypeConverter::ToOptionalInt32(env, mode);
     if (!succMode) {
-        HILOGE("Failed to convert mode to int32");
+        HILOGE("Invalid mode");
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
-    auto [fsResult, errFiles] = MoveDirCore::DoMoveDir(srcPath, destPath, optMode);
+    auto [fsResult, errFiles] = CopyDirCore::DoCopyDir(srcPath, destPath, optMode);
     if (!fsResult.IsSuccess()) {
-        HILOGE("DoMoveDir failed!");
+        HILOGE("DoCopyFile failed!");
         auto [succ, errData] = ToConflictFilesArray(env, errFiles);
         if (!succ) {
             HILOGE("Convert conflict files array failed");
