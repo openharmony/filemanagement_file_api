@@ -172,7 +172,11 @@ struct AsyncReadBufferCallbackInfo {
     int result = DEFAULT_RESULT;
     int errorType = -1;
     int32_t len = 0;
+#ifdef WEARABLE_PRODUCT
+    std::unique_ptr<char[]> contents = nullptr;
+#else
     std::string contents = "";
+#endif
 };
 
 class FileNExporter final : public NExporter {
