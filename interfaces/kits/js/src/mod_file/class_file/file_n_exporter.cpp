@@ -905,7 +905,11 @@ void ReadArrayBufferExec(napi_env env, void *data)
             if (read(fdg.GetFD(), buffer.get(), len) != FAILED) {
                 asyncCallbackInfo->result = SUCCESS;
                 asyncCallbackInfo->len = len;
+#ifdef WEARABLE_PRODUCT
+                asyncCallbackInfo->contents = std::move(buffer);
+#else
                 asyncCallbackInfo->contents = std::string(buffer.get());
+#endif
             }
         }
     } else if (statPath == ENOENT) {
