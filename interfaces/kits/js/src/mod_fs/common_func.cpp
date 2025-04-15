@@ -78,6 +78,55 @@ void InitAccessModeType(napi_env env, napi_value exports)
     }
 }
 
+void InitAccessFlagType(napi_env env, napi_value exports)
+{
+    char propertyName[] = "AccessFlagType";
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("LOCAL", NVal::CreateInt32(env, MODE_LOCAL).val_),
+    };
+    napi_value obj = nullptr;
+    napi_status status = napi_create_object(env, &obj);
+    if (status != napi_ok) {
+        HILOGE("Failed to create object at initializing AccessFlagType");
+        return;
+    }
+    status = napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    if (status != napi_ok) {
+        HILOGE("Failed to set properties of character at initializing AccessFlagType");
+        return;
+    }
+    status = napi_set_named_property(env, exports, propertyName, obj);
+    if (status != napi_ok) {
+        HILOGE("Failed to set direction property at initializing AccessFlagType");
+        return;
+    }
+}
+ 
+void InitLocationType(napi_env env, napi_value exports)
+{
+    char propertyName[] = "LocationType";
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("LOCAl", NVal::CreateInt32(env, MODE_LOCATION_LOCAL).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("CLOUD", NVal::CreateInt32(env, MODE_LOCATION_CLOUD).val_),
+    };
+    napi_value obj = nullptr;
+    napi_status status = napi_create_object(env, &obj);
+    if (status != napi_ok) {
+        HILOGE("Failed to create object at initializing LocationType");
+        return;
+    }
+    status = napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    if (status != napi_ok) {
+        HILOGE("Failed to set properties of character at initializing LocationType");
+        return;
+    }
+    status = napi_set_named_property(env, exports, propertyName, obj);
+    if (status != napi_ok) {
+        HILOGE("Failed to set direction property at initializing LocationType");
+        return;
+    }
+}
+
 void InitOpenMode(napi_env env, napi_value exports)
 {
     char propertyName[] = "OpenMode";
