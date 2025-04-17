@@ -45,7 +45,6 @@ bool WatchEventListener::IsStrictEquals(const shared_ptr<IWatcherCallback> &othe
 
     ani_boolean isSame = false;
     ani_status status = env->Reference_StrictEquals(callback, otherListener->callback, &isSame);
-    AniHelper::DetachThreadEnv(vm);
     if (status != ANI_OK) {
         HILOGE("Compare ref for strict equality failed. status = %{public}d", static_cast<int32_t>(status));
         return false;
@@ -64,8 +63,8 @@ void WatchEventListener::InvokeCallback(const string &fileName, uint32_t event, 
     watchEvent->fileName = fileName;
     watchEvent->event = event;
     watchEvent->cookie = cookie;
-    SendWatchEvent(*watchEvent);
-    AniHelper::DetachThreadEnv(vm);
+    auto task = [this, watchEvent]() { SendWatchEvent(*watchEvent); };
+    AniHelper::SendEventToMainThread(task);
 }
 
 inline static const int32_t ANI_SCOPE_SIZE = 16;

@@ -108,6 +108,19 @@ std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::strin
     return { true, std::move(result) };
 }
 
+std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::string str, size_t size)
+{
+    if (env == nullptr) {
+        return { false, {} };
+    }
+
+    ani_string result;
+    if (ANI_OK != env->String_NewUTF8(str.c_str(), size, &result)) {
+        return { false, {} };
+    }
+    return { true, std::move(result) };
+}
+
 std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, const char *str)
 {
     if (env == nullptr) {

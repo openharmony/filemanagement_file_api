@@ -50,17 +50,24 @@ private:
     tuple<bool, int> CheckEventWatched(const string &fileName, const uint32_t &event);
     void NotifyEvent(const struct inotify_event *event);
     int CloseNotifyFd();
+    int CloseNotifyFdLocked();
     int NotifyToWatchNewEvents(const string &fileName, const int &wd, const uint32_t &watchEvents);
     void ReadNotifyEvent();
+    void ReadNotifyEventLocked();
     void DestroyTaskThead();
 
 private:
+    static mutex watchMutex_;
+
     mutex taskMutex_;
+    mutex readMutex_;
+
     atomic<bool> taskRunning_ = false;
     thread taskThead_;
 
-    mutex watchMutex_;
     bool run_ = false;
+    bool reading_ = false;
+    bool closed_ = false;
     int32_t notifyFd_ = -1;
     int32_t eventFd_ = -1;
     unordered_set<shared_ptr<WatcherInfo>> watcherInfoSet_;
