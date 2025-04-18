@@ -14,21 +14,23 @@
  */
 
 #include <ani.h>
+#include "ani_signature.h"
 #include "bind_function.h"
 #include "securitylabel_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static ani_status BindStaticMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/securityLabel/SecurityLabelImpl;";
+    auto classDesc = Impl::SecurityLabelImpl::classDesc.c_str();
     std::array methods = {
-        ani_native_function { "setSecurityLabelSync", "Lstd/core/String;Lstd/core/String;:V",
-            reinterpret_cast<void *>(SecurityLabelAni::SetSecurityLabelSync) },
-        ani_native_function { "getSecurityLabelSync", "Lstd/core/String;:Lstd/core/String;",
-            reinterpret_cast<void *>(SecurityLabelAni::GetSecurityLabelSync) },
+        ani_native_function {
+            "setSecurityLabelSync", nullptr, reinterpret_cast<void *>(SecurityLabelAni::SetSecurityLabelSync) },
+        ani_native_function {
+            "getSecurityLabelSync", nullptr, reinterpret_cast<void *>(SecurityLabelAni::GetSecurityLabelSync) },
     };
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)

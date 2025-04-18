@@ -15,20 +15,22 @@
 
 #include <array>
 #include <ani.h>
+#include "ani_signature.h"
 #include "bind_function.h"
 #include "statvfs_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static ani_status BindStaticMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/statvfs/StatvfsImpl;";
+    auto classDesc = Impl::StatvfsImpl::classDesc.c_str();
 
     std::array methods = {
         ani_native_function { "getFreeSizeSync", nullptr, reinterpret_cast<void *>(StatvfsAni::GetFreeSizeSync) },
         ani_native_function { "getTotalSizeSync", nullptr, reinterpret_cast<void *>(StatvfsAni::GetTotalSizeSync) },
     };
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)

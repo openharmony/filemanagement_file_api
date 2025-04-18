@@ -16,6 +16,7 @@
 #include "copy_ani.h"
 
 #include "ani_helper.h"
+#include "ani_signature.h"
 #include "copy_core.h"
 #include "error_handler.h"
 #include "file_utils.h"
@@ -28,6 +29,7 @@ namespace ModuleFileIO {
 namespace ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static void SetProgressListenerCb(ani_env *env, ani_ref &callback, CopyOptions &opts)
 {
@@ -37,7 +39,7 @@ static void SetProgressListenerCb(ani_env *env, ani_ref &callback, CopyOptions &
     opts.listenerCb = [vm, &callback](uint64_t progressSize, uint64_t totalSize) -> void {
         ani_status ret;
         ani_object progress = {};
-        static const char *className = "L@ohos/file/fs/fileIo/ProgressInner;";
+        auto classDesc = FS::ProgressInner::classDesc.c_str();
         ani_class cls;
 
         auto env = AniHelper::GetThreadEnv(vm);
@@ -51,19 +53,21 @@ static void SetProgressListenerCb(ani_env *env, ani_ref &callback, CopyOptions &
                 totalSize);
         }
 
-        if ((ret = env->FindClass(className, &cls)) != ANI_OK) {
-            HILOGE("Not found %{private}s, err: %{private}d", className, ret);
+        if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
+            HILOGE("Not found %{private}s, err: %{private}d", classDesc, ret);
             return;
         }
 
+        auto ctorDesc = FS::ProgressInner::ctorDesc.c_str();
+        auto ctorSig = FS::ProgressInner::ctorSig.c_str();
         ani_method ctor;
-        if ((ret = env->Class_FindMethod(cls, "<ctor>", "DD:V", &ctor)) != ANI_OK) {
+        if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
             HILOGE("Not found ctor, err: %{private}d", ret);
             return;
         }
 
         if ((ret = env->Object_New(cls, ctor, &progress, ani_double(static_cast<double>(progressSize)),
-                                   ani_double(static_cast<double>(totalSize)))) != ANI_OK) {
+            ani_double(static_cast<double>(totalSize)))) != ANI_OK) {
             HILOGE("New ProgressInner Fail, err: %{private}d", ret);
             return;
         }
@@ -89,7 +93,7 @@ static bool SetTaskSignal(ani_env *env, ani_ref &copySignal, CopyOptions &opts)
     }
 
     ret = env->Object_SetFieldByName_Long(static_cast<ani_object>(copySignal), "nativeTaskSignal",
-                                          reinterpret_cast<ani_long>(taskSignalEntityCore.get()));
+        reinterpret_cast<ani_long>(taskSignalEntityCore.get()));
     if (ret != ANI_OK) {
         HILOGE("Object set nativeTaskSignal err: %{private}d", ret);
         return false;

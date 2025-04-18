@@ -18,6 +18,7 @@
 #include <ani.h>
 
 #include "access_ani.h"
+#include "ani_signature.h"
 #include "bind_function.h"
 #include "close_ani.h"
 #include "connectdfs_ani.h"
@@ -61,10 +62,11 @@
 #include "xattr_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static ani_status BindRafFileMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/RandomAccessFileInner;";
+    auto classDesc = FS::RandomAccessFileInner::classDesc.c_str();
 
     std::array methods = {
         ani_native_function {
@@ -77,24 +79,24 @@ static ani_status BindRafFileMethods(ani_env *env)
             "getWriteStream", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::GetWriteStream) },
     };
 
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 static ani_status BindWatcherClassMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/WatcherInner;";
+    auto classDesc = FS::WatcherInner::classDesc.c_str();
 
     std::array methods = {
         ani_native_function { "start", nullptr, reinterpret_cast<void *>(FsWatcherAni::Start) },
         ani_native_function { "stop", nullptr, reinterpret_cast<void *>(FsWatcherAni::Stop) },
     };
 
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 static ani_status BindFileMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/FileInner;";
+    auto classDesc = FS::FileInner::classDesc.c_str();
 
     std::array methods = {
         ani_native_function { "getParent", nullptr, reinterpret_cast<void *>(FileAni::GetParent) },
@@ -103,40 +105,40 @@ static ani_status BindFileMethods(ani_env *env)
         ani_native_function { "unlock", nullptr, reinterpret_cast<void *>(FileAni::UnLock) },
     };
 
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 static ani_status BindReaderIteratorMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/ReaderIteratorInner;";
+    auto classDesc = FS::ReaderIteratorInner::classDesc.c_str();
 
     std::array methods = {
         ani_native_function { "next", nullptr, reinterpret_cast<void *>(ReaderIteratorAni::Next) },
     };
 
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 static ani_status BindStatClassMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/StatInner;";
+    auto classDesc = FS::StatInner::classDesc.c_str();
 
     std::array methods = {
-        ani_native_function { "isBlockDevice", ":Z", reinterpret_cast<void *>(StatAni::IsBlockDevice) },
-        ani_native_function { "isCharacterDevice", ":Z", reinterpret_cast<void *>(StatAni::IsCharacterDevice) },
-        ani_native_function { "isDirectory", ":Z", reinterpret_cast<void *>(StatAni::IsDirectory) },
-        ani_native_function { "isFIFO", ":Z", reinterpret_cast<void *>(StatAni::IsFIFO) },
-        ani_native_function { "isFile", ":Z", reinterpret_cast<void *>(StatAni::IsFile) },
-        ani_native_function { "isSocket", ":Z", reinterpret_cast<void *>(StatAni::IsSocket) },
-        ani_native_function { "isSymbolicLink", ":Z", reinterpret_cast<void *>(StatAni::IsSymbolicLink) },
+        ani_native_function { "isBlockDevice", nullptr, reinterpret_cast<void *>(StatAni::IsBlockDevice) },
+        ani_native_function { "isCharacterDevice", nullptr, reinterpret_cast<void *>(StatAni::IsCharacterDevice) },
+        ani_native_function { "isDirectory", nullptr, reinterpret_cast<void *>(StatAni::IsDirectory) },
+        ani_native_function { "isFIFO", nullptr, reinterpret_cast<void *>(StatAni::IsFIFO) },
+        ani_native_function { "isFile", nullptr, reinterpret_cast<void *>(StatAni::IsFile) },
+        ani_native_function { "isSocket", nullptr, reinterpret_cast<void *>(StatAni::IsSocket) },
+        ani_native_function { "isSymbolicLink", nullptr, reinterpret_cast<void *>(StatAni::IsSymbolicLink) },
     };
 
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 static ani_status BindStreamMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/StreamInner;";
+    auto classDesc = FS::StreamInner::classDesc.c_str();
 
     std::array methods = {
         ani_native_function { "closeSync", nullptr, reinterpret_cast<void *>(StreamAni::Close) },
@@ -146,24 +148,28 @@ static ani_status BindStreamMethods(ani_env *env)
         ani_native_function { "seek", nullptr, reinterpret_cast<void *>(StreamAni::Seek) },
     };
 
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 static ani_status BindTaskSignalClassMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/TaskSignal;";
+    auto classDesc = FS::TaskSignal::classDesc.c_str();
 
     std::array methods = {
-        ani_native_function { "cancel", ":V", reinterpret_cast<void *>(TaskSignalAni::Cancel) },
+        ani_native_function { "cancel", nullptr, reinterpret_cast<void *>(TaskSignalAni::Cancel) },
         ani_native_function { "onCancelNative", nullptr, reinterpret_cast<void *>(TaskSignalAni::OnCancel) },
     };
 
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
+
+const static string mkdirCtorSig0 = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+const static string mkdirCtorSig1 =
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::booleanType });
 
 static ani_status BindStaticMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/FileIoImpl;";
+    auto classDesc = Impl::FileIoImpl::classDesc.c_str();
 
     std::array methods = {
         ani_native_function { "closeSync", nullptr, reinterpret_cast<void *>(CloseAni::CloseSync) },
@@ -187,8 +193,8 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "listFileSync", nullptr, reinterpret_cast<void *>(ListFileAni::ListFileSync) },
         ani_native_function { "lseekSync", nullptr, reinterpret_cast<void *>(LseekAni::LseekSync) },
         ani_native_function { "lstatSync", nullptr, reinterpret_cast<void *>(LstatAni::LstatSync) },
-        ani_native_function { "mkdirSync", "Lstd/core/String;:V", reinterpret_cast<void *>(MkdirkAni::MkdirSync0) },
-        ani_native_function { "mkdirSync", "Lstd/core/String;Z:V", reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
+        ani_native_function { "mkdirSync", mkdirCtorSig0.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync0) },
+        ani_native_function { "mkdirSync", mkdirCtorSig1.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
         ani_native_function { "mkdtempSync", nullptr, reinterpret_cast<void *>(MkdtempAni::MkdtempSync) },
         ani_native_function { "movedirSync", nullptr, reinterpret_cast<void *>(MoveDirAni::MoveDirSync) },
         ani_native_function { "moveFileSync", nullptr, reinterpret_cast<void *>(MoveAni::MoveFileSync) },
@@ -206,7 +212,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "utimes", nullptr, reinterpret_cast<void *>(UtimesAni::Utimes) },
         ani_native_function { "writeSync", nullptr, reinterpret_cast<void *>(WriteAni::WriteSync) },
     };
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)

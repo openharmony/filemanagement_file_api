@@ -1301,21 +1301,6 @@ function lseek(fd: number, offset: number, whence?: WhenceType): number {
   return FileIoImpl.lseekSync(fd, offset, whence);
 }
 
-export interface ConflictFiles {
-  srcFile: string;
-  destFile: string;
-}
-
-class ConflictFilesInner implements ConflictFiles {
-  srcFile: string = "";
-  destFile: string = "";
-
-  constructor(src: string, dest: string) {
-    this.srcFile = src;
-    this.destFile = dest;
-  }
-}
-
 export interface Filter {
   suffix?: Array<string>;
   displayName?: Array<string>;
@@ -2043,8 +2028,6 @@ export enum WhenceType {
   SEEK_END = 2
 }
 
-}
-
 export interface Watcher {
   start(): void;
   stop(): void;
@@ -2062,6 +2045,23 @@ class WatcherInner implements Watcher {
   native start(): void;
 
   native stop(): void;
+}
+
+} // namespace fileIo
+
+export interface ConflictFiles {
+  srcFile: string;
+  destFile: string;
+}
+
+class ConflictFilesInner implements ConflictFiles {
+  srcFile: string = "";
+  destFile: string = "";
+
+  constructor(src: string, dest: string) {
+    this.srcFile = src;
+    this.destFile = dest;
+  }
 }
 
 export interface WatchEvent {
@@ -2180,7 +2180,7 @@ export class FileIoImpl {
 
   static native createStreamSync(path: string, mode: string): fileIo.Stream;
 
-  static native createWatcherSync(path: string, events: number, listener: WatchEventListener): Watcher;
+  static native createWatcherSync(path: string, events: number, listener: WatchEventListener): fileIo.Watcher;
   
   static native fdopenStreamSync(fd: number, mode: string): fileIo.Stream;
   

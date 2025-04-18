@@ -17,6 +17,7 @@
 
 #include <fcntl.h>
 
+#include "ani_signature.h"
 #include "close_core.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
@@ -29,15 +30,17 @@ namespace ANI {
 
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 tuple<bool, int32_t> ParseFd(ani_env *env, ani_object obj)
 {
     int32_t result = -1;
-    ani_class IntClass;
-    env->FindClass("Lstd/core/Double;", &IntClass);
-    ani_boolean isInt;
-    env->Object_InstanceOf(obj, IntClass, &isInt);
-    if (isInt) {
+    auto doubleClassDesc = BoxedTypes::Double::classDesc.c_str();
+    ani_class doubleClass;
+    env->FindClass(doubleClassDesc, &doubleClass);
+    ani_boolean isDouble;
+    env->Object_InstanceOf(obj, doubleClass, &isDouble);
+    if (isDouble) {
         ani_int fd;
         if (ANI_OK != env->Object_CallMethodByName_Int(obj, "intValue", nullptr, &fd)) {
             HILOGE("Get fd value failed");
@@ -47,10 +50,11 @@ tuple<bool, int32_t> ParseFd(ani_env *env, ani_object obj)
         return { true, result };
     }
 
-    ani_class FileClass;
-    env->FindClass("L@ohos/file/fs/fileIo/FileInner;", &FileClass);
+    auto fileClassDesc = FS::FileInner::classDesc.c_str();
+    ani_class fileClass;
+    env->FindClass(fileClassDesc, &fileClass);
     ani_boolean isFile;
-    env->Object_InstanceOf(obj, FileClass, &isFile);
+    env->Object_InstanceOf(obj, fileClass, &isFile);
     if (isFile) {
         ani_double fd;
         if (ANI_OK != env->Object_GetPropertyByName_Double(obj, "fd", &fd)) {

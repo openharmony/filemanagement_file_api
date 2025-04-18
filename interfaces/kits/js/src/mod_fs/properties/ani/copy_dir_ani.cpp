@@ -16,6 +16,7 @@
 #include "copy_dir_ani.h"
 
 #include <optional>
+#include "ani_signature.h"
 #include "copy_dir_core.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
@@ -27,20 +28,23 @@ namespace ModuleFileIO {
 namespace ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ConflictFiles &files)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/ConflictFilesInner;";
+    auto classDesc = FS::ConflictFilesInner::classDesc.c_str();
     ani_class cls;
     ani_status ret;
-    if ((ret = env->FindClass(className, &cls)) != ANI_OK) {
-        HILOGE("Cannot find class %{private}s, err: %{private}d", className, ret);
+    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
+        HILOGE("Cannot find class %{private}s, err: %{private}d", classDesc, ret);
         return { false, nullptr };
     }
 
+    auto ctorDesc = FS::ConflictFilesInner::ctorDesc.c_str();
+    auto ctorSig = FS::ConflictFilesInner::ctorSig.c_str();
     ani_method ctor;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;Lstd/core/String;:V", &ctor)) != ANI_OK) {
-        HILOGE("Cannot find class %{private}s constructor method, err: %{private}d", className, ret);
+    if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
+        HILOGE("Cannot find class %{private}s constructor method, err: %{private}d", classDesc, ret);
         return { false, nullptr };
     }
 
@@ -71,18 +75,20 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
     if (!errFiles.has_value()) {
         return { true, nullopt };
     }
-    static const char *className = "Lescompat/Array;";
+    auto classDesc = BuiltInTypes::Array::classDesc.c_str();
     ani_class cls = nullptr;
     ani_status ret;
 
-    if ((ret = env->FindClass(className, &cls)) != ANI_OK) {
-        HILOGE("Cannot find class %{private}s, err: %{private}d", className, ret);
+    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
+        HILOGE("Cannot find class %{private}s, err: %{private}d", classDesc, ret);
         return { false, nullopt };
     }
 
+    auto ctorDesc = BuiltInTypes::Array::ctorDesc.c_str();
+    auto ctorSig = BuiltInTypes::Array::ctorSig.c_str();
     ani_method ctor;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
-        HILOGE("Cannot find class %{private}s constructor method, err: %{private}d", className, ret);
+    if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
+        HILOGE("Cannot find class %{private}s constructor method, err: %{private}d", classDesc, ret);
         return { false, nullopt };
     }
 
@@ -93,6 +99,8 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
         return { false, nullopt };
     }
 
+    auto setterDesc = BuiltInTypes::Array::setterDesc.c_str();
+    auto setterSig = BuiltInTypes::Array::objectSetterSig.c_str();
     ani_size index = 0;
     for (const auto &errFile : files) {
         auto [succ, fileObj] = ToConflictFiles(env, errFile);
@@ -100,7 +108,7 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
             return { false, nullopt };
         }
 
-        if ((ret = env->Object_CallMethodByName_Void(arr, "$_set", "ILstd/core/Object;:V", index, fileObj)) != ANI_OK) {
+        if ((ret = env->Object_CallMethodByName_Void(arr, setterDesc, setterSig, index, fileObj)) != ANI_OK) {
             HILOGE("Add element to Array failed, err: %{private}d", ret);
             return { false, nullopt };
         }
@@ -150,6 +158,7 @@ void CopyDirAni::CopyDirSync(
         return;
     }
 }
+
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
