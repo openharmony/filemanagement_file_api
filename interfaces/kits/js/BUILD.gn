@@ -377,6 +377,10 @@ ohos_shared_library("file") {
     "hilog:libhilog",
     "napi:ace_napi",
   ]
+
+  if (file_api_read_optimize) {
+    defines = [ "WEARABLE_PRODUCT" ]
+  }
 }
 
 ohos_shared_library("statfs") {

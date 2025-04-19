@@ -19,7 +19,9 @@
         "SystemCapability.FileManagement.File.DistributedFile",
         "SystemCapability.FileManagement.File.Environment.FolderObtain"
       ],
-      "features": [],
+      "features": [
+        "file_api_read_optimize"
+      ],
       "adapted_system_type": [ "mini","small","standard" ],
       "rom": "4096KB",
       "ram": "4096KB",
