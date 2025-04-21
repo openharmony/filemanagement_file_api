@@ -1105,6 +1105,7 @@ function createStream(path: string, mode: string, callback: AsyncCallback<Stream
 function createStreamSync(path: string, mode: string): Stream {
   return FileIoImpl.createStreamSync(path, mode);
 }
+
 function createReadStream(path: string, options?: ReadStreamOptions): ReadStream {
   return new ReadStream(path, options)
 }
@@ -1113,6 +1114,9 @@ function createWriteStream(path: string, options?: WriteStreamOptions): WriteStr
   return new WriteStream(path, options);
 }
 
+function createWatcher(path: string, events: number, listener: WatchEventListener): Watcher {
+  return FileIoImpl.createWatcherSync(path, events, listener);
+}
 
 function symlink(target: string, srcPath: string, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((target: string, srcPath: string): undefined => {
@@ -2058,6 +2062,46 @@ enum WhenceType {
   SEEK_END = 2
 }
 
+export interface Watcher {
+  start(): void;
+  stop(): void;
+}
+
+class WatcherInner implements Watcher {
+  private nativePtr: long = 0;
+
+  constructor(ptr: long) {
+    if (this.nativePtr === 0) {
+      this.nativePtr = ptr;
+    }
+  }
+
+  native start(): void;
+
+  native stop(): void;
+}
+
+export interface WatchEvent {
+  fileName: string;
+  event: number;
+  cookie: number;
+}
+
+class WatchEventInner implements WatchEvent {
+  fileName: string;
+  event: number;
+  cookie: number;
+
+  constructor(fileName: string, event: number, cookie: number) {
+    this.fileName = fileName;
+    this.event = event;
+    this.cookie = cookie;
+  }
+
+}
+
+export type WatchEventListener = (event: WatchEvent) => void;
+
 class FileIoImpl {
 
   static {
@@ -2083,6 +2127,8 @@ class FileIoImpl {
   static native getxattrSync(path: string, key: string): string;
 
   static native createStreamSync(path: string, mode: string): Stream;
+
+  static native createWatcherSync(path: string, events: number, listener: WatchEventListener): Watcher;
 
   static native fdopenStreamSync(fd: number, mode: string): Stream;
 
