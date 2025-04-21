@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Huawei Device Co., Ltd.
+# Copyright (C) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,29 +14,33 @@
 import("//build/test.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
-group("unittest") {
-  testonly = true
-  deps = [ ":filemgmt_libn_test" ]
-}
-
 ohos_unittest("filemgmt_libn_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
   module_out_path = "file_api/file_api"
   include_dirs = [ "./include" ]
 
-  sources = [ "./src/n_class_test.cpp" ]
+  sources = [
+    "./src/n_class_test.cpp",
+    "./src/napi_mock.cpp",
+  ]
 
   deps = [
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "c_utils:utilsbase",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
+
+  defines = [ "ENABLE_NAPI_MOCK" ]
 }
