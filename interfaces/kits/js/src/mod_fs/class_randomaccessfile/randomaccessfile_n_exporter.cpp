@@ -275,8 +275,10 @@ napi_value RandomAccessFileNExporter::WriteSync(napi_env env, napi_callback_info
 
 struct AsyncIORafWriteArg {
     NRef rafRefWriteArrayBuf;
+    std::unique_ptr<char[]> guardWriteStr_ = nullptr;
     int actLen = 0;
     explicit AsyncIORafWriteArg(NVal refWriteArrayBuf) : rafRefWriteArrayBuf(refWriteArrayBuf) {}
+    explicit AsyncIORafWriteArg(std::unique_ptr<char[]> &&guardWriteStr) : guardWriteStr_(move(guardWriteStr)) {}
     ~AsyncIORafWriteArg() = default;
 };
 
@@ -286,7 +288,8 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
     void *buf = nullptr;
     size_t len = 0;
     int64_t offset = 0;
-    tie(succ, ignore, buf, len, offset) =
+    unique_ptr<char[]> bufGuard = nullptr;
+    tie(succ, bufGuard, buf, len, offset) =
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::FIRST], funcArg[NARG_POS::SECOND]);
     if (!succ) {
         HILOGE("Invalid buffer/options");
@@ -294,7 +297,7 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
         return nullptr;
     }
 
-    auto arg = CreateSharedPtr<AsyncIORafWriteArg>(NVal(env, funcArg[NARG_POS::FIRST]));
+    auto arg = CreateSharedPtr<AsyncIORafWriteArg>(move(bufGuard));
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
@@ -319,9 +322,8 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
-        } else {
-            return { NVal::CreateInt64(env, arg->actLen) };
         }
+        return { NVal::CreateInt64(env, arg->actLen) };
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
