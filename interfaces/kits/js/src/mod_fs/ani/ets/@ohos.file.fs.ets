@@ -15,6 +15,21 @@
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import stream from '@ohos.util.stream';
 
+namespace fileIo {
+  export namespace OpenMode {
+    export const READ_ONLY = 0o0;
+    export const WRITE_ONLY = 0o1;
+    export const READ_WRITE = 0o2;
+    export const CREATE = 0o100;
+    export const TRUNC = 0o1000;
+    export const APPEND = 0o2000;
+    export const NONBLOCK = 0o4000;
+    export const DIR = 0o200000;
+    export const NOFOLLOW = 0o400000;
+    export const SYNC = 0o4010000;
+  }
+}
+
 function access(path: string, mode?: AccessModeType): Promise<boolean> {
   return new Promise<boolean>((resolve: (result: boolean) => void, reject: (e: BusinessError<void>) => void) => {
     if (mode === undefined) {
@@ -1874,19 +1889,6 @@ class StreamInner implements Stream {
   native seek(offset: number, whence?: number): number;
 }
 
-enum OpenMode {
-  READ_ONLY = 0o0,
-  WRITE_ONLY = 0o1,
-  READ_WRITE = 0o2,
-  CREATE = 0o100,
-  TRUNC = 0o1000,
-  APPEND = 0o2000,
-  NONBLOCK = 0o4000,
-  DIR = 0o200000,
-  NOFOLLOW = 0o400000,
-  SYNC = 0o4010000,
-}
-
 export interface ReadStreamOptions {
   start?: number;
   end?: number;
@@ -2041,16 +2043,16 @@ export class WriteStream extends stream.Writable {
     if (mode === undefined) {
       return modeStr;
     }
-    if ((mode as number) & OpenMode.WRITE_ONLY) {
+    if ((mode as number) & fileIo.OpenMode.WRITE_ONLY) {
       modeStr = 'w';
     }
-    if ((mode as number) & OpenMode.READ_WRITE) {
+    if ((mode as number) & fileIo.OpenMode.READ_WRITE) {
       modeStr = 'w+';
     }
-    if (((mode as number) & OpenMode.WRITE_ONLY) && ((mode as number) & OpenMode.APPEND)) {
+    if (((mode as number) & fileIo.OpenMode.WRITE_ONLY) && ((mode as number) & fileIo.OpenMode.APPEND)) {
       modeStr = 'a';
     }
-    if (((mode as number) & OpenMode.READ_WRITE) && ((mode as number) & OpenMode.APPEND)) {
+    if (((mode as number) & fileIo.OpenMode.READ_WRITE) && ((mode as number) & fileIo.OpenMode.APPEND)) {
       modeStr = 'a+';
     }
     return modeStr;
