@@ -108,7 +108,7 @@ std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::strin
     return { true, std::move(result) };
 }
 
-static std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::string str, size_t size)
+std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::string str, size_t size)
 {
     if (env == nullptr) {
         return { false, {} };
