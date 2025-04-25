@@ -1230,7 +1230,7 @@ export type ProgressListener = (progress: Progress) => void;
 export class TaskSignal {
   private nativeTaskSignal: long = 0;
   private native onCancelNative(): void;
-  private onCancelResolve: (path: string) => void;
+  private onCancelResolve: (path: string) => void = (path: string): void => {};
   private onCancelCallback(path: string): void {
     if (this.onCancelResolve) {
       this.onCancelResolve(path);
