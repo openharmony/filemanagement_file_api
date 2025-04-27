@@ -130,6 +130,7 @@ public:
     static std::map<FileInfos, std::shared_ptr<JsCallbackObject>> jsCbMap_;
     static void UnregisterListener(std::shared_ptr<FileInfos> fileInfos);
     static std::recursive_mutex mutex_;
+    static bool IsMtpDeviceFilePath(const std::string &path);
 
 private:
     // operator of napi
