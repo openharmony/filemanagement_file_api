@@ -53,6 +53,7 @@ const std::string NETWORK_PARA = "?networkid=";
 const string PROCEDURE_COPY_NAME = "FileFSCopy";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
 const std::string MEDIA = "media";
+const std::string MTP_PATH_PREFIX = "/storage/External/mtp";
 const int SLEEP_TIME = 100000;
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
@@ -984,7 +985,6 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
 
 bool Copy::IsMtpDeviceFilePath(const std::string &path)
 {
-    const std::string MTP_PATH_PREFIX = "/storage/External/mtp";
     return path.rfind(MTP_PATH_PREFIX, 0) != std::string::npos;
 }
 } // namespace ModuleFileIO
