@@ -91,8 +91,8 @@ ani_string ReadTextAni::ReadTextSync(
     }
 
     const auto &resText = ret.GetData().value();
-    string res = std::get<0>(resText);
-    size_t size = std::get<1>(resText);
+    string res = std::get<0>(resText); // 取字符串
+    size_t size = std::get<1>(resText); // 取读取字符数
     auto [succ, result] = TypeConverter::ToAniString(env, res, size);
     if (!succ) {
         HILOGE("Convert result to ani string failed");
