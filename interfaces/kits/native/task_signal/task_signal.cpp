@@ -46,7 +46,7 @@ int32_t TaskSignal::Cancel()
         return ret;
     } else {
         if (filePath_.rfind(MTP_PATH_PREFIX, 0) != std::string::npos) {
-            std::string value;
+            std::string value = "";
             if (setxattr(filePath_.c_str(), CANCEL_XATTR_KEY, value.c_str(), value.size(), 0) < 0) {
                 HILOGE("cancelcopy setxattr fail, errno is %{public}d", errno);
             }
