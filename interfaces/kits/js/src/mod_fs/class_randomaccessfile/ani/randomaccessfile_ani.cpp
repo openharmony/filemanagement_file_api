@@ -28,6 +28,10 @@ namespace ANI {
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace std;
 
+const int BUF_SIZE = 1024;
+const string READ_STREAM_CLASS = "ReadStream";
+const string WRITE_STREAM_CLASS = "WriteStream";
+
 static FsRandomAccessFile *Unwrap(ani_env *env, ani_object object)
 {
     ani_long nativePtr;
@@ -160,8 +164,8 @@ void RandomAccessFileAni::Close(ani_env *env, [[maybe_unused]] ani_object object
     }
 }
 
-ani_double RandomAccessFileAni::WriteSync(ani_env *env, [[maybe_unused]] ani_object object,
-                                          ani_object buf, ani_object options)
+ani_double RandomAccessFileAni::WriteSync(
+    ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options)
 {
     auto rafFile = Unwrap(env, object);
     if (rafFile == nullptr) {
@@ -215,8 +219,8 @@ ani_double RandomAccessFileAni::WriteSync(ani_env *env, [[maybe_unused]] ani_obj
     return -1;
 }
 
-ani_double RandomAccessFileAni::ReadSync(ani_env *env, [[maybe_unused]] ani_object object,
-                                         ani_arraybuffer buf, ani_object options)
+ani_double RandomAccessFileAni::ReadSync(
+    ani_env *env, [[maybe_unused]] ani_object object, ani_arraybuffer buf, ani_object options)
 {
     auto rafFile = Unwrap(env, object);
     if (rafFile == nullptr) {
@@ -239,7 +243,7 @@ ani_double RandomAccessFileAni::ReadSync(ani_env *env, [[maybe_unused]] ani_obje
         return -1;
     }
 
-    auto ret = rafFile-> ReadSync(arrayBuffer, op);
+    auto ret = rafFile->ReadSync(arrayBuffer, op);
     if (!ret.IsSuccess()) {
         HILOGE("Read file content failed!");
         const auto &err = ret.GetError();
@@ -247,6 +251,232 @@ ani_double RandomAccessFileAni::ReadSync(ani_env *env, [[maybe_unused]] ani_obje
         return -1;
     }
     return static_cast<double>(ret.GetData().value());
+}
+
+static ani_string GetFilePath(ani_env *env, const int fd)
+{
+    auto dstFd = dup(fd);
+    if (dstFd < 0) {
+        HILOGE("Failed to get valid fd, fail reason: %{public}s, fd: %{public}d", strerror(errno), fd);
+        return nullptr;
+    }
+
+    string path = "/proc/self/fd/" + to_string(dstFd);
+    auto buf = CreateUniquePtr<char[]>(BUF_SIZE);
+    int readLinkRes = readlink(path.c_str(), buf.get(), BUF_SIZE);
+    if (readLinkRes < 0) {
+        close(dstFd);
+        return nullptr;
+    }
+
+    close(dstFd);
+    auto [succ, filePath] = TypeConverter::ToAniString(env, string(buf.get()));
+    if (!succ) {
+        return nullptr;
+    }
+    return move(filePath);
+}
+
+static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t end)
+{
+    static const char *className = "L@ohos/file/fs/ReadStreamOptionsInner;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        HILOGE("Cannot find class %s", className);
+        return nullptr;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
+        // if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", className);
+        return nullptr;
+    }
+    ani_object obj;
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
+        HILOGE("New %s obj Failed", className);
+        return nullptr;
+    }
+
+    ani_field startField = nullptr;
+    ani_field endField = nullptr;
+    if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
+        HILOGE("Cannot find start in class %s", className);
+        return nullptr;
+    }
+    if (ANI_OK != env->Class_FindField(cls, "end", &endField)) {
+        HILOGE("Cannot find end in class %s", className);
+        return nullptr;
+    }
+
+    if (start >= 0) {
+        env->Object_SetField_Int(obj, startField, start);
+    }
+    if (end >= 0) {
+        env->Object_SetField_Int(obj, endField, end);
+    }
+    if (obj == nullptr) {
+        HILOGE("CreateReadStreamOptions is nullptr");
+    }
+
+    return move(obj);
+}
+
+static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flags)
+{
+    static const char *className = "L@ohos/file/fs/WriteStreamOptionsInner;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        HILOGE("Cannot find class %s", className);
+        return nullptr;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", className);
+        return nullptr;
+    }
+    ani_object obj;
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
+        HILOGE("New %s obj Failed", className);
+        return nullptr;
+    }
+
+    ani_field modeField = nullptr;
+    ani_field startField = nullptr;
+    if (ANI_OK != env->Class_FindField(cls, "mode", &modeField)) {
+        HILOGE("Cannot find mode in class %s", className);
+        return nullptr;
+    }
+    if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
+        HILOGE("Cannot find start in class %s", className);
+        return nullptr;
+    }
+
+    env->Object_SetField_Int(obj, modeField, flags);
+    if (start >= 0) {
+        env->Object_SetField_Int(obj, startField, start);
+    }
+
+    return move(obj);
+}
+
+static ani_object CreateReadStream(ani_env *env, ani_string filePath, ani_object options)
+{
+    static const char *className = "L@ohos/file/fs/fileIo/ReadStream;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        HILOGE("Cannot find class %s", className);
+        return nullptr;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/ReadStreamOptions;:V", &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", className);
+        return nullptr;
+    }
+    ani_object obj;
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
+        HILOGE("New %s obj Failed", className);
+        return nullptr;
+    }
+
+    return move(obj);
+}
+
+static ani_object CreateWriteStream(ani_env *env, ani_string filePath, ani_object options)
+{
+    static const char *className = "L@ohos/file/fs/fileIo/WriteStream;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        HILOGE("Cannot find class %s", className);
+        return nullptr;
+    }
+    ani_method ctor;
+    if (ANI_OK !=
+        env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/WriteStreamOptions;:V", &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", className);
+        return nullptr;
+    }
+    ani_object obj;
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
+        HILOGE("New %s obj Failed", className);
+        return nullptr;
+    }
+
+    return move(obj);
+}
+
+static ani_object CreateStream(ani_env *env, const string &streamName, RandomAccessFileEntity *rafEntity, int flags)
+{
+    ani_string filePath = GetFilePath(env, rafEntity->fd.get()->GetFD());
+    if (!filePath) {
+        HILOGE("Get file path failed, errno=%{public}d", errno);
+        ErrorHandler::Throw(env, errno);
+        return nullptr;
+    }
+
+    if (streamName == READ_STREAM_CLASS) {
+        ani_object obj = CreateReadStreamOptions(env, rafEntity->start, rafEntity->end);
+        return CreateReadStream(env, filePath, obj);
+    }
+    if (streamName == WRITE_STREAM_CLASS) {
+        ani_object obj = CreateWriteStreamOptions(env, rafEntity->start, flags);
+        return CreateWriteStream(env, filePath, obj);
+    }
+
+    return nullptr;
+}
+
+ani_object RandomAccessFileAni::GetReadStream(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto rafFile = Unwrap(env, object);
+    if (rafFile == nullptr) {
+        HILOGE("Cannot unwrap rafFile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto entity = rafFile->GetRAFEntity();
+    if (!entity) {
+        HILOGE("Get RandomAccessFileEntity failed!");
+        ErrorHandler::Throw(env, EIO);
+        return nullptr;
+    }
+
+    int flags = fcntl(entity->fd.get()->GetFD(), F_GETFL);
+    unsigned int uflags = static_cast<unsigned int>(flags);
+    if (((uflags & O_ACCMODE) != O_RDONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
+        HILOGE("Failed to check Permission");
+        ErrorHandler::Throw(env, EACCES);
+        return nullptr;
+    }
+
+    return CreateStream(env, READ_STREAM_CLASS, entity, flags);
+}
+
+ani_object RandomAccessFileAni::GetWriteStream(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto rafFile = Unwrap(env, object);
+    if (rafFile == nullptr) {
+        HILOGE("Cannot unwrap rafFile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto entity = rafFile->GetRAFEntity();
+    if (!entity) {
+        HILOGE("Get RandomAccessFileEntity failed!");
+        ErrorHandler::Throw(env, EIO);
+        return nullptr;
+    }
+
+    int flags = fcntl(entity->fd.get()->GetFD(), F_GETFL);
+    unsigned int uflags = static_cast<unsigned int>(flags);
+    if (((uflags & O_ACCMODE) != O_RDONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
+        HILOGE("Failed to check Permission");
+        ErrorHandler::Throw(env, EACCES);
+        return nullptr;
+    }
+
+    return CreateStream(env, READ_STREAM_CLASS, entity, flags);
 }
 
 } // namespace ANI
