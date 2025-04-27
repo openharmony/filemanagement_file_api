@@ -17,12 +17,16 @@
 
 #include "distributed_file_daemon_manager.h"
 #include "filemgmt_libhilog.h"
+#include <sys/xattr.h>
 
 namespace OHOS {
 namespace DistributedFS {
 namespace ModuleTaskSignal {
 using namespace FileManagement;
 constexpr int CANCEL_ERR = -3;
+const char CANCEL_XATTR_KEY[] = {"user.cancelcopy"};
+const std::string MTP_PATH_PREFIX = "/storage/External/mtp";
+
 int32_t TaskSignal::Cancel()
 {
     HILOGD("TaskSignal Cancel in.");
@@ -40,6 +44,13 @@ int32_t TaskSignal::Cancel()
         }
         OnCancel();
         return ret;
+    } else {
+        if (filePath_.rfind(MTP_PATH_PREFIX, 0) != std::string::npos) {
+            std::string value = "";
+            if (setxattr(filePath_.c_str(), CANCEL_XATTR_KEY, value.c_str(), value.size(), 0) < 0) {
+                HILOGE("cancelcopy setxattr fail, errno is %{public}d", errno);
+            }
+        }
     }
     needCancel_.store(true);
     return 0;

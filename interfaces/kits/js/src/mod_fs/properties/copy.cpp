@@ -53,6 +53,7 @@ const std::string NETWORK_PARA = "?networkid=";
 const string PROCEDURE_COPY_NAME = "FileFSCopy";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
 const std::string MEDIA = "media";
+const std::string MTP_PATH_PREFIX = "/storage/External/mtp";
 const int SLEEP_TIME = 100000;
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
@@ -97,6 +98,10 @@ static int OpenSrcFile(const string &srcPth, std::shared_ptr<FileInfos> infos, i
         srcFd = open(srcPth.c_str(), O_RDONLY);
         if (srcFd < 0) {
             HILOGE("Error opening src file descriptor. errno = %{public}d", errno);
+            bool isCanceled = (infos->taskSignal != nullptr) && (infos->taskSignal->CheckCancelIfNeed(srcPth));
+            if (isCanceled && Copy::IsMtpDeviceFilePath(srcPth)) {
+                return ECANCELED;
+            }
             return errno;
         }
     }
@@ -850,6 +855,9 @@ tuple<int, std::shared_ptr<FileInfos>> Copy::CreateFileInfos(
         auto taskSignalEntity = NClass::GetEntityOf<TaskSignalEntity>(infos->env, infos->copySignal.val_);
         if (taskSignalEntity != nullptr) {
             infos->taskSignal = taskSignalEntity->taskSignal_;
+            if (IsMtpDeviceFilePath(infos->srcPath)) {
+                infos->taskSignal->SetFileInfoOfRemoteTask("", infos->srcPath);
+            }
         }
     }
     return { ERRNO_NOERR, infos };
@@ -973,6 +981,11 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH)]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
     }
+}
+
+bool Copy::IsMtpDeviceFilePath(const std::string &path)
+{
+    return path.rfind(MTP_PATH_PREFIX, 0) != std::string::npos;
 }
 } // namespace ModuleFileIO
 } // namespace FileManagement
