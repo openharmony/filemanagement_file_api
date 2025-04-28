@@ -15,9 +15,9 @@
 
 #include "environment_ani.h"
 
+#include "environment_core.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
-#include "environment_core.h"
 #include "type_converter.h"
 
 namespace OHOS {
