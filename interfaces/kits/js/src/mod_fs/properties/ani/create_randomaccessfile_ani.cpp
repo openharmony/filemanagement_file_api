@@ -31,7 +31,7 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 static ani_object Wrap(ani_env *env, const FsRandomAccessFile *rafFile)
 {
-    static const char *className = "L@ohos/file/fs/RandomAccessFileInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/RandomAccessFileInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         HILOGE("Cannot find class %s", className);
@@ -82,7 +82,7 @@ static tuple<bool, bool> JudgeFile(ani_env *env, ani_object obj)
     }
 
     ani_class fileClass;
-    env->FindClass("L@ohos/file/fs/FileInner;", &fileClass);
+    env->FindClass("L@ohos/file/fs/fileIo/FileInner;", &fileClass);
     ani_boolean isFile = false;
     env->Object_InstanceOf(obj, fileClass, &isFile);
     if (isFile) {

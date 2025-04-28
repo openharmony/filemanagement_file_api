@@ -28,7 +28,6 @@ namespace fileIo {
     export const NOFOLLOW = 0o400000;
     export const SYNC = 0o4010000;
   }
-}
 
 function access(path: string, mode?: AccessModeType): Promise<boolean> {
   return new Promise<boolean>((resolve: (result: boolean) => void, reject: (e: BusinessError<void>) => void) => {
@@ -489,23 +488,13 @@ function openSync(path: string, mode?: number): File {
 
 function open(path: String, mode?: number): Promise<File> {
   return new Promise<File>((resolve: (result: File) => void, reject: (e: BusinessError<void>) => void) => {
-    if (mode === undefined) {
-      let promise = taskpool.execute(FileIoImpl.openSync, path);
-      promise.then((ret: NullishType): void => {
-        let file = ret as File;
-        resolve(file);
-      }).catch((e: BusinessError): void => {
-        reject(e);
-      });
-    } else {
-      let promise = taskpool.execute(FileIoImpl.openSync, path, mode);
-      promise.then((ret: NullishType): void => {
-        let file = ret as File;
-        resolve(file);
-      }).catch((e: BusinessError): void => {
-        reject(e);
-      });
-    }
+    let promise = taskpool.execute(FileIoImpl.openSync, path, mode);
+    promise.then((ret: NullishType): void => {
+      let file = ret as File;
+      resolve(file);
+    }).catch((e: BusinessError): void => {
+      reject(e);
+    });
   });
 }
 
@@ -949,6 +938,19 @@ function fsync(fd: number): Promise<void> {
   });
 }
 
+function fsync(fd: number, callback: AsyncCallback<void>): void {
+  let promise = taskpool.execute((fd: number): undefined => {
+    return FileIoImpl.fsyncSync(fd);
+  }, fd);
+  promise.then((ret: NullishType): void => {
+    let e = new BusinessError<void>();
+    e.code = 0;
+    callback(e, undefined);
+  }).catch((e: BusinessError): void => {
+    callback(e, undefined);
+  });
+}
+
 function symlinkSync(target: string, srcPath: string): void {
   return FileIoImpl.symlinkSync(target, srcPath);
 }
@@ -982,6 +984,20 @@ function rename(oldPath: string, newPath: string): Promise<void> {
     });
   });
 }
+
+function rename(oldPath: string, newPath: string, callback: AsyncCallback<void>): void {
+  let promise = taskpool.execute((oldPath: string, newPath: string): undefined => {
+    return FileIoImpl.renameSync(oldPath, newPath);
+  }, oldPath, newPath);
+  promise.then((ret: NullishType): void => {
+    let e = new BusinessError<void>();
+    e.code = 0;
+    callback(e, undefined);
+  }).catch((e: BusinessError): void => {
+    callback(e, undefined);
+  });
+}
+
 function createRandomAccessFileSync(file: string | File, mode?: number,
   options?: RandomAccessFileOptions): RandomAccessFile {
   return FileIoImpl.createRandomAccessFileSync(file, mode, options);
@@ -1309,35 +1325,6 @@ export interface Filter {
   excludeMedia?: boolean;
 }
 
-export interface ListFileOptions {
-  recursion?: boolean;
-  listNum?: number;
-  filter?: Filter;
-}
-
-export interface ReadOptions {
-  offset?: number;
-  length?: number;
-}
-
-export interface ReadTextOptions extends ReadOptions {
-  encoding?: string;
-}
-
-export interface Options {
-  encoding?: string;
-}
-
-export interface WriteOptions extends Options {
-  offset?: number;
-  length?: number;
-}
-
-export interface RandomAccessFileOptions {
-  start?: number;
-  end?: number;
-}
-
 export interface Progress {
   processedSize: number;
   totalSize: number;
@@ -1347,7 +1334,7 @@ export interface DfsListeners {
   onStatus(networkId: string, status: number): void;
 }
 
-class ProgressInner implements Progress {
+export class ProgressInner implements Progress {
   processedSize: number;
   totalSize: number;
 
@@ -1382,14 +1369,14 @@ export interface CopyOptions {
   copySignal?: TaskSignal;
 }
 
-enum AccessModeType {
+export enum AccessModeType {
   EXIST = 0,
   WRITE = 2,
   READ = 4,
   READ_WRITE = 6,
 }
 
-enum AccessFlagType {
+export enum AccessFlagType {
   LOCAL = 0,
 }
 
@@ -1409,7 +1396,7 @@ export interface RandomAccessFile {
   readSync(buffer: ArrayBuffer, options?: ReadOptions): number;
 }
 
-class RandomAccessFileInner implements RandomAccessFile {
+export class RandomAccessFileInner implements RandomAccessFile {
   fd: number = -1;
   filePointer: number = -1;
 
@@ -1552,7 +1539,7 @@ export interface File {
   unlock(): void;
 }
 
-class FileInner implements File {
+export class FileInner implements File {
   fd: number = -1;
   path: String = "";
   name: String = "";
@@ -1623,17 +1610,13 @@ class FileInner implements File {
 
 }
 
-enum LocationType {
+export enum LocationType {
   LOCAL = 1,
   CLOUD = 2
 }
 
-export interface ReaderIteratorResult {
-  done: boolean;
-  value: string;
-}
 
-class ReaderIteratorResultInner implements ReaderIteratorResult {
+export class ReaderIteratorResultInner implements ReaderIteratorResult {
   private nativePtr: long = 0;
 
   constructor(ptr: long) {
@@ -1650,7 +1633,7 @@ export interface ReaderIterator {
   next(): ReaderIteratorResult;
 }
 
-class ReaderIteratorInner implements ReaderIterator {
+export class ReaderIteratorInner implements ReaderIterator {
   private nativePtr: long = 0;
 
   constructor(ptr: long) {
@@ -1685,7 +1668,7 @@ export interface Stat {
   isSymbolicLink(): boolean;
 }
 
-class StatInner implements Stat {
+export class StatInner implements Stat {
   ino: bigint = 0n;
   mode: number;
   uid: number;
@@ -1734,7 +1717,7 @@ export interface Stream {
   seek(offset: number, whence?: number): number;
 }
 
-class StreamInner implements Stream {
+export class StreamInner implements Stream {
   private nativePtr: long = 0;
 
   constructor(ptr: long) {
@@ -2058,10 +2041,12 @@ export class WriteStream extends stream.Writable {
     return modeStr;
   }
 }
-enum WhenceType {
+export enum WhenceType {
   SEEK_SET = 0,
   SEEK_CUR = 1,
   SEEK_END = 2
+}
+
 }
 
 export interface Watcher {
@@ -2090,7 +2075,7 @@ export interface WatchEvent {
 }
 
 class WatchEventInner implements WatchEvent {
-  fileName: string;
+  fileName: string = '';
   event: number;
   cookie: number;
 
@@ -2104,17 +2089,77 @@ class WatchEventInner implements WatchEvent {
 
 export type WatchEventListener = (event: WatchEvent) => void;
 
-class FileIoImpl {
+export interface Options {
+  encoding?: string;
+}
+
+export interface ReadOptions {
+  offset?: number;
+  length?: number;
+}
+
+export interface ReadTextOptions extends ReadOptions {
+  encoding?: string;
+}
+
+export interface WriteOptions extends Options {
+  offset?: number;
+  length?: number;
+}
+
+export interface RandomAccessFileOptions {
+  start?: number;
+  end?: number;
+}
+
+export interface ListFileOptions {
+  recursion?: boolean;
+  listNum?: number;
+  filter?: Filter;
+}
+
+
+
+
+export interface WriteStreamOptions {
+  mode?: number;
+  start?: number;
+}
+
+export interface ReadStreamOptions {
+  start?: number;
+  end?: number;
+}
+
+export interface ReaderIteratorResult {
+  done: boolean;
+  value: string;
+}
+
+export interface Filter {
+  suffix?: Array<string>;
+  displayName?: Array<string>;
+  mimeType?: Array<string>;
+  fileSizeOver?: number;
+  lastModifiedAfter?: number;
+  excludeMedia?: boolean;
+}
+
+type TaskSignal = fileIo.TaskSignal;
+type DfsListeners = fileIo.DfsListeners;
+
+
+export class FileIoImpl {
 
   static {
-    loadLibrary("ani_fs_class");
+    loadLibrary("ani_file_fs");
   }
 
-  static native doAccessSync(path: string, mode?: AccessModeType, flag?: AccessFlagType): boolean;
+  static native doAccessSync(path: string, mode?: fileIo.AccessModeType, flag?: fileIo.AccessFlagType): boolean;
 
-  static native closeSync(file: number | File): void;
+  static native closeSync(file: number | fileIo.File): void;
 
-  static native copySync(srcUri: string, destUri: string, options?: CopyOptions): void;
+  static native copySync(srcUri: string, destUri: string, options?: fileIo.CopyOptions): void;
 
   static native connectDfs(networkId: string, listeners: DfsListeners): void;
 
@@ -2128,19 +2173,19 @@ class FileIoImpl {
 
   static native getxattrSync(path: string, key: string): string;
 
-  static native createStreamSync(path: string, mode: string): Stream;
+  static native createStreamSync(path: string, mode: string): fileIo.Stream;
 
   static native createWatcherSync(path: string, events: number, listener: WatchEventListener): Watcher;
-
-  static native fdopenStreamSync(fd: number, mode: string): Stream;
-
-  static native dup(fd: number): File;
+  
+  static native fdopenStreamSync(fd: number, mode: string): fileIo.Stream;
+  
+  static native dup(fd: number): fileIo.File;
 
   static native listFileSync(path: string, options?: ListFileOptions): string[];
 
-  static native lstatSync(path: string): Stat;
-
-  static native lseekSync(fd: number, offset: number, whence?: WhenceType): number;
+  static native lstatSync(path: string): fileIo.Stat;
+  
+  static native lseekSync(fd: number, offset: number, whence?: fileIo.WhenceType): number;
 
   static native mkdirSync(path: string): void;
 
@@ -2152,10 +2197,10 @@ class FileIoImpl {
 
   static native moveFileSync(src: String, dest: String, mode?: number): void;
 
-  static native openSync(path: String, mode?: number): File;
+  static native openSync(path: String, mode?: number): fileIo.File;
 
-  static native readlinesSync(filePath: string, options?: Options): ReaderIterator;
-
+  static native readlinesSync(filePath: string, options?: Options): fileIo.ReaderIterator;
+  
   static native readSync(fd: number, buffer: ArrayBuffer, options?: ReadOptions): number;
 
   static native readTextSync(filePath: string, options?: ReadTextOptions): string;
@@ -2164,7 +2209,7 @@ class FileIoImpl {
 
   static native setxattrSync(path: string, key: string, value: string): void;
 
-  static native statSync(file: string | number): Stat;
+  static native statSync(file: string | number): fileIo.Stat;
 
   static native truncateSync(file: string | number, len?: number): void;
 
@@ -2176,8 +2221,8 @@ class FileIoImpl {
 
   static native renameSync(oldPath: string, newPath: string): void;
 
-  static native createRandomAccessFileSync(file: string | File, mode?: number,
-    options?: RandomAccessFileOptions): RandomAccessFile;
+  static native createRandomAccessFileSync(file: string | fileIo.File, mode?: number,
+    options?: RandomAccessFileOptions): fileIo.RandomAccessFile;
 
   static native symlinkSync(target: string, srcPath: string): void;
 

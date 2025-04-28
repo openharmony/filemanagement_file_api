@@ -64,7 +64,7 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 
 static ani_status BindRafFileMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/RandomAccessFileInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/RandomAccessFileInner;";
 
     std::array methods = {
         ani_native_function {
@@ -91,7 +91,7 @@ static ani_status BindWatcherClassMethods(ani_env *env)
 
 static ani_status BindFileMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/FileInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/FileInner;";
 
     std::array methods = {
         ani_native_function { "getParent", nullptr, reinterpret_cast<void *>(FileAni::GetParent) },
@@ -105,7 +105,7 @@ static ani_status BindFileMethods(ani_env *env)
 
 static ani_status BindReaderIteratorMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/ReaderIteratorInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/ReaderIteratorInner;";
 
     std::array methods = {
         ani_native_function { "next", nullptr, reinterpret_cast<void *>(ReaderIteratorAni::Next) },
@@ -116,7 +116,7 @@ static ani_status BindReaderIteratorMethods(ani_env *env)
 
 static ani_status BindStatClassMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/StatInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/StatInner;";
 
     std::array methods = {
         ani_native_function { "isBlockDevice", ":Z", reinterpret_cast<void *>(StatAni::IsBlockDevice) },
@@ -133,7 +133,7 @@ static ani_status BindStatClassMethods(ani_env *env)
 
 static ani_status BindStreamMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/StreamInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/StreamInner;";
 
     std::array methods = {
         ani_native_function { "closeSync", nullptr, reinterpret_cast<void *>(StreamAni::Close) },
@@ -148,7 +148,7 @@ static ani_status BindStreamMethods(ani_env *env)
 
 static ani_status BindTaskSignalClassMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/TaskSignal;";
+    static const char *className = "L@ohos/file/fs/fileIo/TaskSignal;";
 
     std::array methods = {
         ani_native_function { "cancel", ":V", reinterpret_cast<void *>(TaskSignalAni::Cancel) },

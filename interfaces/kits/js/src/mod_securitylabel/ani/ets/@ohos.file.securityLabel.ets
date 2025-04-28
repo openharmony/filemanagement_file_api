@@ -78,7 +78,7 @@ export default securityLabel;
 class SecurityLabelImpl {
 
   static {
-    loadLibrary("ani_securitylabel_class");
+    loadLibrary("ani_file_securitylabel");
   }
 
   static native setSecurityLabelSync(path: string, type: securityLabel.DataLevel): void;

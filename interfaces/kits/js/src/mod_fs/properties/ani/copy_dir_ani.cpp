@@ -30,7 +30,7 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ConflictFiles &files)
 {
-    static const char *className = "L@ohos/file/fs/ConflictFilesInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/ConflictFilesInner;";
     ani_class cls;
     ani_status ret;
     if ((ret = env->FindClass(className, &cls)) != ANI_OK) {

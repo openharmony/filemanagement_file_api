@@ -29,7 +29,7 @@ using namespace std;
 
 ani_object ReaderIteratorAni::Wrap(ani_env *env, const FsReaderIterator *it)
 {
-    static const char *className = "L@ohos/file/fs/ReaderIteratorInner;";
+    static const char *className = "L@ohos/file/fs/fileIo/ReaderIteratorInner;";
 
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {

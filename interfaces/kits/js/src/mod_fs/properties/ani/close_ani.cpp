@@ -48,7 +48,7 @@ tuple<bool, int32_t> ParseFd(ani_env *env, ani_object obj)
     }
 
     ani_class FileClass;
-    env->FindClass("L@ohos/file/fs/FileInner;", &FileClass);
+    env->FindClass("L@ohos/file/fs/fileIo/FileInner;", &FileClass);
     ani_boolean isFile;
     env->Object_InstanceOf(obj, FileClass, &isFile);
     if (isFile) {
