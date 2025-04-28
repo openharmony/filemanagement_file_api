@@ -124,16 +124,13 @@ FsResult<tuple<string, int64_t>> ReadTextCore::DoReadText(const std::string &pat
 
     len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     string buffer(len, '\0');
-    // HILOGE("TEST: before ReadFromFile res.length: %{public}d", buffer.length());
     int readRet = ReadFromFile(sfd.GetFD(), offset, buffer);
     if (readRet < 0) {
         HILOGE("Failed to read file by fd: %{public}d", fd);
         return FsResult<tuple<string, int64_t>>::Error(readRet);
     }
 
-    // HILOGE("TEST: after ReadFromFile res.length: %{public}d", buffer.length());
     return FsResult<tuple<string, int64_t>>::Success(make_tuple(move(buffer), readRet));
-    // return FsResult<tuple<string, int64_t>>::Success(make_tuple(buffer.c_str(), readRet));
 }
 
 } // namespace ModuleFileIO
