@@ -46,7 +46,6 @@ ani_string EnvironmentAni::GetStorageDataDirSync(ani_env *env, [[maybe_unused]] 
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
-
     return result;
 }
 
@@ -67,7 +66,6 @@ ani_string EnvironmentAni::GetUserDataDirSync(ani_env *env, [[maybe_unused]] ani
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
-
     return result;
 }
 
@@ -88,7 +86,6 @@ ani_string EnvironmentAni::GetUserDownloadDirSync(ani_env *env, [[maybe_unused]]
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
-
     return result;
 }
 
@@ -109,7 +106,6 @@ ani_string EnvironmentAni::GetUserDesktopDirSync(ani_env *env, [[maybe_unused]] 
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
-
     return result;
 }
 
@@ -130,7 +126,6 @@ ani_string EnvironmentAni::GetUserDocumentDirSync(ani_env *env, [[maybe_unused]]
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
-
     return result;
 }
 
@@ -151,7 +146,6 @@ ani_string EnvironmentAni::GetExternalStorageDirSync(ani_env *env, [[maybe_unuse
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
-
     return result;
 }
 
@@ -172,7 +166,6 @@ ani_string EnvironmentAni::GetUserHomeDirSync(ani_env *env, [[maybe_unused]] ani
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
-
     return result;
 }
 

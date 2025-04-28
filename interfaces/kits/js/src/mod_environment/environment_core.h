@@ -23,7 +23,6 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleEnvironment {
 using namespace ModuleFileIO;
-
 FsResult<std::string> DoGetStorageDataDir();
 FsResult<std::string> DoGetUserDataDir();
 FsResult<std::string> DoGetUserDownloadDir();
@@ -31,7 +30,6 @@ FsResult<std::string> DoGetUserDesktopDir();
 FsResult<std::string> DoGetUserDocumentDir();
 FsResult<std::string> DoGetExternalStorageDir();
 FsResult<std::string> DoGetUserHomeDir();
-
 } // namespace ModuleEnvironment
 } // namespace FileManagement
 } // namespace OHOS

@@ -990,7 +990,7 @@ ohos_prebuilt_etc("ohos_file_securityLabel_abc_etc") {
   deps = [ ":ohos_file_securityLabel_abc" ]
 }
 
-ohos_shared_library("ani_environment_class") {
+ohos_shared_library("ani_file_environment") {
   public_configs = [ ":ani_config" ]
   include_dirs = [
     "src/mod_environment/ani",
