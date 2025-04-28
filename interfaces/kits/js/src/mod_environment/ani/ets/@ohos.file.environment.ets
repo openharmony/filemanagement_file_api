@@ -90,7 +90,7 @@ export default Environment;
 class EnvironmentImpl {
 
   static {
-    loadLibrary("ani_environment_class");
+    loadLibrary("ani_file_environment");
   }
 
   static native getStorageDataDirSync(): string;

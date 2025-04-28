@@ -14,6 +14,10 @@
  */
 
 #include "environment_core.h"
+
+#include <string>
+#include <unistd.h>
+
 #include "accesstoken_kit.h"
 #include "account_error_no.h"
 #include "filemgmt_libhilog.h"
@@ -21,8 +25,7 @@
 #include "os_account_manager.h"
 #include "parameter.h"
 #include "tokenid_kit.h"
-#include <string>
-#include <unistd.h>
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleEnvironment {
@@ -39,7 +42,7 @@ const std::string DOWNLOAD_PATH = "/Download";
 const std::string DESKTOP_PATH = "/Desktop";
 const std::string DOCUMENTS_PATH = "/Documents";
 const std::string DEFAULT_USERNAME = "currentUser";
-const char *g_fileManagerFullMountEnableParameter = "const.filemanager.full_mount.enable";
+const char *FILE_MANAMER_FULL_MOUNT_ENABLE_PARAMETER = "const.filemanager.full_mount.enable";
 static bool IsSystemApp()
 {
     uint64_t fullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
@@ -76,7 +79,7 @@ static std::string GetPublicPath(const std::string &directoryName)
 static bool CheckFileManagerFullMountEnable()
 {
     char value[] = "false";
-    int retSystem = GetParameter(g_fileManagerFullMountEnableParameter, "false", value, sizeof(value));
+    int retSystem = GetParameter(FILE_MANAMER_FULL_MOUNT_ENABLE_PARAMETER, "false", value, sizeof(value));
     if (retSystem > 0 && !std::strcmp(value, "true")) {
         return true;
     }
@@ -125,7 +128,6 @@ FsResult<std::string> DoGetUserDataDir()
     auto userDataPath = std::make_shared<std::string>();
     (*userDataPath).append("/storage/media/").append(std::to_string(GetUserId())).append("/local");
     return FsResult<std::string>::Success(std::move(*userDataPath));
-
 }
 
 FsResult<std::string> DoGetUserDownloadDir()
@@ -141,7 +143,6 @@ FsResult<std::string> DoGetUserDownloadDir()
         return FsResult<std::string>::Error(E_UNKNOWN_ERROR);
     }
     return FsResult<std::string>::Success(std::move(downloadPath));
-
 }
 
 FsResult<std::string> DoGetUserDesktopDir()
@@ -181,7 +182,6 @@ FsResult<std::string> DoGetExternalStorageDir()
         return FsResult<std::string>::Error(res);
     }
     return FsResult<std::string>::Success(std::move(EXTERNAL_STORAGE_PATH));
-
 }
 
 FsResult<std::string> DoGetUserHomeDir()
@@ -198,7 +198,6 @@ FsResult<std::string> DoGetUserHomeDir()
     }
     std::string result = PC_STORAGE_PATH + userName;
     return FsResult<std::string>::Success(std::move(result));
-
 }
 } // namespace ModuleEnvironment
 } // namespace FileManagement
