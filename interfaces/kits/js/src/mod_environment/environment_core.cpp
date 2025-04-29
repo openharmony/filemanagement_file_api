@@ -30,18 +30,18 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleEnvironment {
 namespace {
-const std::string STORAGE_DATA_PATH = "/data";
-const std::string PC_STORAGE_PATH = "/storage/Users/";
-const std::string EXTERNAL_STORAGE_PATH = "/storage/External";
-const std::string USER_APP_DATA_PATH = "/appdata";
-const std::string READ_WRITE_DOWNLOAD_PERMISSION = "ohos.permission.READ_WRITE_DOWNLOAD_DIRECTORY";
-const std::string READ_WRITE_DESKTOP_PERMISSION = "ohos.permission.READ_WRITE_DESKTOP_DIRECTORY";
-const std::string READ_WRITE_DOCUMENTS_PERMISSION = "ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY";
-const std::string FILE_ACCESS_MANAGER_PERMISSION = "ohos.permission.FILE_ACCESS_MANAGER";
-const std::string DOWNLOAD_PATH = "/Download";
-const std::string DESKTOP_PATH = "/Desktop";
-const std::string DOCUMENTS_PATH = "/Documents";
-const std::string DEFAULT_USERNAME = "currentUser";
+const std::string g_storageDataPath = "/data";
+const std::string g_pcStoragePath = "/storage/Users/";
+const std::string g_externalStoragePath = "/storage/External";
+const std::string g_userAppDataPath = "/appdata";
+const std::string g_readWriteDownloadPermission = "ohos.permission.READ_WRITE_DOWNLOAD_DIRECTORY";
+const std::string g_readWriteDesktopPermission = "ohos.permission.READ_WRITE_DESKTOP_DIRECTORY";
+const std::string g_readWriteDocumentsPermission = "ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY";
+const std::string g_fileAccessManagerPermission = "ohos.permission.FILE_ACCESS_MANAGER";
+const std::string g_downloadPath = "/Download";
+const std::string g_desktopPath = "/Desktop";
+const std::string g_documentsPath = "/Documents";
+const std::string g_defaultUserName = "currentUser";
 const char *g_fileManagerFullMountEnableParameter = "const.filemanager.full_mount.enable";
 static bool IsSystemApp()
 {
@@ -67,13 +67,13 @@ static std::string GetUserName()
     if (errCode != ERR_OK || userName.empty()) {
         HILOGE("Get userName Failed");
     }
-    userName = DEFAULT_USERNAME;
+    userName = g_defaultUserName;
     return userName;
 }
 
 static std::string GetPublicPath(const std::string &directoryName)
 {
-    return PC_STORAGE_PATH + GetUserName() + directoryName;
+    return g_pcStoragePath + GetUserName() + directoryName;
 }
 
 static bool CheckFileManagerFullMountEnable()
@@ -93,7 +93,7 @@ static int CheckInvalidAccess(const std::string &permission)
         HILOGE("Capability not supported");
         return E_DEVICENOTSUPPORT;
     }
-    if (permission == FILE_ACCESS_MANAGER_PERMISSION) {
+    if (permission == g_fileAccessManagerPermission) {
         if (!IsSystemApp()) {
             return E_PERMISSION_SYS;
         }
@@ -111,7 +111,7 @@ FsResult<std::string> DoGetStorageDataDir()
     if (!IsSystemApp()) {
         return FsResult<std::string>::Error(E_PERMISSION_SYS);
     }
-    return FsResult<std::string>::Success(std::move(STORAGE_DATA_PATH));
+    return FsResult<std::string>::Success(std::move(g_storageDataPath));
 }
 
 int GetUserId()
@@ -137,7 +137,7 @@ FsResult<std::string> DoGetUserDownloadDir()
         return FsResult<std::string>::Error(E_DEVICENOTSUPPORT);
     }
 
-    static std::string downloadPath = GetPublicPath(DOWNLOAD_PATH);
+    static std::string downloadPath = GetPublicPath(g_downloadPath);
     if (downloadPath.empty()) {
         HILOGE("Unknown error");
         return FsResult<std::string>::Error(E_UNKNOWN_ERROR);
@@ -152,7 +152,7 @@ FsResult<std::string> DoGetUserDesktopDir()
         return FsResult<std::string>::Error(E_DEVICENOTSUPPORT);
     }
 
-    static std::string desktopPath = GetPublicPath(DESKTOP_PATH);
+    static std::string desktopPath = GetPublicPath(g_desktopPath);
     if (desktopPath.empty()) {
         HILOGE("Unknown error");
         return FsResult<std::string>::Error(E_UNKNOWN_ERROR);
@@ -167,7 +167,7 @@ FsResult<std::string> DoGetUserDocumentDir()
         return FsResult<std::string>::Error(E_DEVICENOTSUPPORT);
     }
 
-    static std::string documentsPath = GetPublicPath(DOCUMENTS_PATH);
+    static std::string documentsPath = GetPublicPath(g_documentsPath);
     if (documentsPath.empty()) {
         HILOGE("Unknown error");
         return FsResult<std::string>::Error(E_UNKNOWN_ERROR);
@@ -177,16 +177,16 @@ FsResult<std::string> DoGetUserDocumentDir()
 
 FsResult<std::string> DoGetExternalStorageDir()
 {
-    auto res = CheckInvalidAccess(FILE_ACCESS_MANAGER_PERMISSION);
+    auto res = CheckInvalidAccess(g_fileAccessManagerPermission);
     if (res) {
         return FsResult<std::string>::Error(res);
     }
-    return FsResult<std::string>::Success(std::move(EXTERNAL_STORAGE_PATH));
+    return FsResult<std::string>::Success(std::move(g_externalStoragePath));
 }
 
 FsResult<std::string> DoGetUserHomeDir()
 {
-    auto res = CheckInvalidAccess(FILE_ACCESS_MANAGER_PERMISSION);
+    auto res = CheckInvalidAccess(g_fileAccessManagerPermission);
     if (res) {
         return FsResult<std::string>::Error(res);
     }
@@ -196,7 +196,7 @@ FsResult<std::string> DoGetUserHomeDir()
         HILOGE("Unknown error");
         return FsResult<std::string>::Error(E_UNKNOWN_ERROR);
     }
-    std::string result = PC_STORAGE_PATH + userName;
+    std::string result = g_pcStoragePath + userName;
     return FsResult<std::string>::Success(std::move(result));
 }
 } // namespace ModuleEnvironment
