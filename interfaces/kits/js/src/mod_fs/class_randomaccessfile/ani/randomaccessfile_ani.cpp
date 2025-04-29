@@ -287,7 +287,6 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
     }
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
-        // if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         HILOGE("Cannot find constructor method for class %s", className);
         return nullptr;
     }
