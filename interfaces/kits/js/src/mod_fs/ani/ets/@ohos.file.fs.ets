@@ -1394,6 +1394,8 @@ export interface RandomAccessFile {
   read(buffer: ArrayBuffer, callback: AsyncCallback<number>): void;
   read(buffer: ArrayBuffer, options: ReadOptions, callback: AsyncCallback<number>): void;
   readSync(buffer: ArrayBuffer, options?: ReadOptions): number;
+  getReadStream(): ReadStream;
+  getWriteStream(): WriteStream;
 }
 
 export class RandomAccessFileInner implements RandomAccessFile {
@@ -1524,6 +1526,9 @@ export class RandomAccessFileInner implements RandomAccessFile {
       callback(e, 0);
     });
   }
+
+  native getReadStream(): ReadStream;
+  native getWriteStream(): WriteStream;
 }
 
 export interface File {
@@ -1872,16 +1877,6 @@ export class StreamInner implements Stream {
   native seek(offset: number, whence?: number): number;
 }
 
-export interface ReadStreamOptions {
-  start?: number;
-  end?: number;
-}
-
-export interface WriteStreamOptions {
-  mode?: number;
-  start?: number;
-}
-
 export class ReadStream extends stream.Readable {
   private pathInner: string;
   private bytesReadInner: number;
@@ -2041,6 +2036,7 @@ export class WriteStream extends stream.Writable {
     return modeStr;
   }
 }
+
 export enum WhenceType {
   SEEK_SET = 0,
   SEEK_CUR = 1,
@@ -2118,9 +2114,6 @@ export interface ListFileOptions {
   filter?: Filter;
 }
 
-
-
-
 export interface WriteStreamOptions {
   mode?: number;
   start?: number;
@@ -2129,6 +2122,18 @@ export interface WriteStreamOptions {
 export interface ReadStreamOptions {
   start?: number;
   end?: number;
+}
+
+export class ReadStreamOptionsInner implements ReadStreamOptions {
+  constructor() {}
+  start?: number;
+  end?: number;
+}
+
+export class WriteStreamOptionsInner implements WriteStreamOptions {
+  constructor() {}
+  mode?: number;
+  start?: number;
 }
 
 export interface ReaderIteratorResult {

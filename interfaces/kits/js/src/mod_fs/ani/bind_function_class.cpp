@@ -72,6 +72,9 @@ static ani_status BindRafFileMethods(ani_env *env)
         ani_native_function { "close", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::Close) },
         ani_native_function { "writeSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::WriteSync) },
         ani_native_function { "readSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::ReadSync) },
+        ani_native_function { "getReadStream", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::GetReadStream) },
+        ani_native_function {
+            "getWriteStream", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::GetWriteStream) },
     };
 
     return BindClass(env, className, methods);

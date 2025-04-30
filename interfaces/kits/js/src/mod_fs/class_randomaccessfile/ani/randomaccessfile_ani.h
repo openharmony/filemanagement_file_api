@@ -28,11 +28,13 @@ public:
     static void SetFilePointer(ani_env *env, [[maybe_unused]] ani_object object, ani_double fp);
     static void Close(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_double WriteSync(ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options);
-    static ani_double ReadSync(ani_env *env, [[maybe_unused]] ani_object object,
-                               ani_arraybuffer buf, ani_object options);
+    static ani_double ReadSync(
+        ani_env *env, [[maybe_unused]] ani_object object, ani_arraybuffer buf, ani_object options);
+    static ani_object GetReadStream(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_object GetWriteStream(ani_env *env, [[maybe_unused]] ani_object object);
 };
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif //INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_ANI_RANDOMACCESSFILE_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_ANI_RANDOMACCESSFILE_ANI_H
