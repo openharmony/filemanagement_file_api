@@ -988,3 +988,68 @@ ohos_prebuilt_etc("ohos_file_securityLabel_abc_etc") {
   part_name = "file_api"
   deps = [ ":ohos_file_securityLabel_abc" ]
 }
+
+ohos_shared_library("ani_file_environment") {
+  public_configs = [ ":ani_config" ]
+  include_dirs = [
+    "src/mod_environment/ani",
+    "src/mod_environment",
+  ]
+  sources = [
+    "src/common/ani_helper/error_handler.cpp",
+    "src/common/ani_helper/type_converter.cpp",
+    "src/common/file_helper/fd_guard.cpp",
+    "src/mod_fs/fs_utils.cpp",
+    "src/mod_environment/ani/bind_function_class.cpp",
+    "src/mod_environment/ani/environment_ani.cpp",
+    "src/mod_environment/environment_core.cpp",
+  ]
+
+  deps = [
+    ":ohos_file_environment_abc_etc",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "hilog:libhilog",
+    "libuv:uv",
+    "ipc:ipc_core",
+    "init:libbegetutil",
+    "openssl:libcrypto_shared",
+    "os_account:os_account_innerkits",
+    "runtime_core:ani",
+    "runtime_core:libarkruntime",
+  ]
+  use_exceptions = true
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  output_extension = "so"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+}
+
+generate_static_abc("ohos_file_environment_abc") {
+  base_url = "./src/mod_environment/ani/ets"
+  files = [ "./src/mod_environment/ani/ets/@ohos.file.environment.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ohos_file_environment_abc.abc"
+}
+
+ohos_prebuilt_etc("ohos_file_environment_abc_etc") {
+  source = "$target_out_dir/ohos_file_environment_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+  deps = [ ":ohos_file_environment_abc" ]
+}
