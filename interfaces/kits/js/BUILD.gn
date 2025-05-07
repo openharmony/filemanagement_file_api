@@ -627,6 +627,7 @@ group("ani_file_api") {
     ":ani_file_fs",
     ":ani_file_hash",
     ":ani_file_securitylabel",
+    ":ani_file_statvfs",
   ]
 }
 
@@ -1052,4 +1053,72 @@ ohos_prebuilt_etc("ohos_file_environment_abc_etc") {
   subsystem_name = "filemanagement"
   part_name = "file_api"
   deps = [ ":ohos_file_environment_abc" ]
+}
+
+ohos_shared_library("ani_file_statvfs") {
+  public_configs = [ ":ani_config" ]
+  include_dirs = [
+    "src/mod_statvfs/ani",
+    "src/mod_statvfs",
+  ]
+  sources = [
+    "src/common/ani_helper/error_handler.cpp",
+    "src/common/ani_helper/type_converter.cpp",
+    "src/common/file_helper/fd_guard.cpp",
+    "src/mod_fs/fs_utils.cpp",
+    "src/mod_statvfs/ani/bind_function_class.cpp",
+    "src/mod_statvfs/ani/statvfs_ani.cpp",
+    "src/mod_statvfs/statvfs_core.cpp",
+  ]
+
+  deps = [
+    ":ohos_file_statvfs_abc_etc",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+  external_deps = [
+    "hilog:libhilog",
+    "libuv:uv",
+    "runtime_core:ani",
+    "runtime_core:libarkruntime",
+  ]
+  use_exceptions = true
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Oz",
+  ]
+  cflags_cc = [
+    "-fvisibility-inlines-hidden",
+    "-Oz",
+  ]
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  output_extension = "so"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+}
+
+generate_static_abc("ohos_file_statvfs_abc") {
+  base_url = "./src/mod_statvfs/ani/ets"
+  files = [ "./src/mod_statvfs/ani/ets/@ohos.file.statvfs.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ohos_file_statvfs_abc.abc"
+}
+
+ohos_prebuilt_etc("ohos_file_statvfs_abc_etc") {
+  source = "$target_out_dir/ohos_file_statvfs_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+  deps = [ ":ohos_file_statvfs_abc" ]
 }
