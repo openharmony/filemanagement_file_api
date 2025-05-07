@@ -644,7 +644,6 @@ config("ani_config") {
   ]
 
   cflags = [
-    "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-Oz",
@@ -653,7 +652,6 @@ config("ani_config") {
     "-std=c++17",
     "-fvisibility-inlines-hidden",
     "-Oz",
-    "-Wno-unused-function",
   ]
 }
 
@@ -810,18 +808,6 @@ ohos_shared_library("ani_file_fs") {
     "samgr:samgr_proxy",
   ]
 
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-std=c++17",
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-    "-Wno-unused-function",
-  ]
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -882,16 +868,7 @@ ohos_shared_library("ani_file_hash") {
     "runtime_core:libarkruntime",
   ]
   use_exceptions = true
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
+
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -950,16 +927,7 @@ ohos_shared_library("ani_file_securitylabel") {
     "runtime_core:libarkruntime",
   ]
   use_exceptions = true
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
+
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
