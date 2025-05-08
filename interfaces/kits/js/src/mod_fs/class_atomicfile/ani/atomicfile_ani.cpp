@@ -212,24 +212,6 @@ ani_object AtomicFileAni::OpenRead(ani_env *env, [[maybe_unused]] ani_object obj
     return CreateStream(env, object, READ_STREAM_CLASS, entity->baseFileName);
 }
 
-static tuple<ani_status, ani_arraybuffer> WrapBufferData(ani_env *env, unique_ptr<BufferData> bufferData)
-{
-    ani_arraybuffer externalBuffer = nullptr;
-
-    uint8_t* buffer = bufferData->buffer;
-    size_t length = bufferData->length;
-    HILOGE("AtomicFile Arraybuffer: %s", buffer);
-    ani_status ret = env->CreateArrayBuffer(length, reinterpret_cast<void **>(&buffer), &externalBuffer);
-    bufferData.release();
-
-    if (ret != ANI_OK) {
-        HILOGE("CreateArrayBufferExternal err: %{private}d", ret);
-        return { ret, nullptr };
-    }
-
-    return { ANI_OK, externalBuffer };
-}
-
 ani_arraybuffer AtomicFileAni::ReadFully(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto aotomicFile = Unwrap(env, object);
