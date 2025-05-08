@@ -29,7 +29,7 @@ using namespace std;
 std::shared_ptr<FILE> FsStream::GetFilePtr()
 {
     std::lock_guard<std::mutex> lock(mtx);
-    if (!streamEntity->fp) {
+    if (!streamEntity || !streamEntity->fp) {
         return nullptr;
     }
     return streamEntity->fp;
