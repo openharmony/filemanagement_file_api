@@ -15,6 +15,16 @@
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import stream from '@ohos.util.stream';
 
+const UNKNOWN_ERR: number = 13900042
+const UNKNOWN_MSG: string = "Unknown error"
+
+function createBusinessError(code: number, msg: string): BusinessError {
+  let err = new BusinessError();
+  err.code = code;
+  err.message = msg;
+  return err;
+}
+
 namespace fileIo {
   export namespace OpenMode {
     export const READ_ONLY = 0o0;
@@ -2035,6 +2045,51 @@ export class WriteStream extends stream.Writable {
     }
     return modeStr;
   }
+}
+
+export class AtomicFile {
+  static {
+    loadLibrary("ani_file_fs");
+  }
+
+  private nativePtr: long = 0;
+  private native getPath(): string;
+  private writeStream: WriteStream;
+
+  native constructor(path: string);
+
+  native getBaseFile(): File;
+
+  native openRead(): ReadStream;
+
+  native readFully(): ArrayBuffer;
+
+  native nativeStartWrite(): WriteStream;
+  startWrite(): WriteStream {
+    let ws = this.nativeStartWrite();
+    this.writeStream = ws;
+    return this.writeStream;
+  }
+
+  native nativeFinishWrite(): void;
+  finishWrite(): void {
+    if (!this.writeStream) {
+      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+    }
+    this.writeStream.close();
+    this.nativeFinishWrite();
+  };
+
+  native nativeFailWrite(): void;
+  failWrite(): void {
+    if (!this.writeStream) {
+      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+    }
+    this.writeStream.close();
+    this.nativeFailWrite();
+  };
+
+  native delete(): void;
 }
 
 export enum WhenceType {

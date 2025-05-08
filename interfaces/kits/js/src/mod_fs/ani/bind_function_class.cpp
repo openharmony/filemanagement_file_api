@@ -18,6 +18,7 @@
 #include <ani.h>
 
 #include "access_ani.h"
+#include "atomicfile_ani.h"
 #include "bind_function.h"
 #include "close_ani.h"
 #include "connectdfs_ani.h"
@@ -161,6 +162,25 @@ static ani_status BindTaskSignalClassMethods(ani_env *env)
     return BindClass(env, className, methods);
 }
 
+static ani_status BindAtomicFileMethods(ani_env *env)
+{
+    static const char *className = "L@ohos/file/fs/fileIo/AtomicFile;";
+
+    std::array methods = {
+        ani_native_function { "getPath", nullptr, reinterpret_cast<void *>(AtomicFileAni::GetPath) },
+        ani_native_function { "getBaseFile", nullptr, reinterpret_cast<void *>(AtomicFileAni::GetBaseFile) },
+        ani_native_function { "readFully", nullptr, reinterpret_cast<void *>(AtomicFileAni::ReadFully) },
+        ani_native_function { "nativeStartWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::StartWrite) },
+        ani_native_function { "nativeFinishWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::FinishWrite) },
+        ani_native_function { "nativeFailWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::FailWrite) },
+        ani_native_function { "delete", nullptr, reinterpret_cast<void *>(AtomicFileAni::Delete) },
+        ani_native_function { "<ctor>", "Lstd/core/String;:V", reinterpret_cast<void *>(AtomicFileAni::Constructor) },
+        ani_native_function { "openRead", nullptr, reinterpret_cast<void *>(AtomicFileAni::OpenRead) },
+    };
+
+    return BindClass(env, className, methods);
+}
+
 static ani_status BindStaticMethods(ani_env *env)
 {
     static const char *className = "L@ohos/file/fs/FileIoImpl;";
@@ -265,6 +285,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     if ((status = BindWatcherClassMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native methods for Watcher Class");
+        return status;
+    };
+
+    if ((status = BindAtomicFileMethods(env)) != ANI_OK) {
+        HILOGE("Cannot bind native methods for AtomicFile Class!");
         return status;
     };
 
