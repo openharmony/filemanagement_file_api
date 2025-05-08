@@ -628,6 +628,7 @@ group("ani_file_api") {
     ":ani_file_hash",
     ":ani_file_securitylabel",
     ":ani_file_statvfs",
+    ":ani_file_environment",
   ]
 }
 
