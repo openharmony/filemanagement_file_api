@@ -28,3 +28,59 @@ int uv_fs_read(uv_loop_t* loop, uv_fs_t* req,
 {
     return Uvfs::ins->uv_fs_read(loop, req, file, bufs, nbufs, off, cb);
 }
+
+int uv_fs_readlink(uv_loop_t* loop, uv_fs_t* req, const char* path, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_readlink(loop, req, path, cb);
+}
+
+int uv_fs_stat(uv_loop_t* loop, uv_fs_t* req, const char* path, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_stat(loop, req, path, cb);
+}
+
+int uv_fs_utime(uv_loop_t* loop, uv_fs_t* req, const char* path, double atime,
+    double mtime, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_utime(loop, req, path, atime, mtime, cb);
+}
+
+int uv_fs_scandir(uv_loop_t* loop, uv_fs_t* req, const char* path, int flags,
+    uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_scandir(loop, req, path, flags, cb);
+}
+
+int uv_fs_scandir_next(uv_fs_t* req, uv_dirent_t* ent)
+{
+    return Uvfs::ins->uv_fs_scandir_next(req, ent);
+}
+
+int uv_fs_rmdir(uv_loop_t* loop, uv_fs_t* req, const char* path, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_rmdir(loop, req, path, cb);
+}
+
+int uv_fs_symlink(uv_loop_t* loop, uv_fs_t* req, const char* path,
+    const char* new_path, int flags, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_symlink(loop, req, path, new_path, flags, cb);
+}
+
+int uv_fs_open(uv_loop_t* loop, uv_fs_t* req, const char* path, int flags,
+    int mode, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_open(loop, req, path, flags, mode, cb);
+}
+
+int uv_fs_ftruncate(uv_loop_t* loop, uv_fs_t* req, uv_file fd,
+    int64_t offset, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_ftruncate(loop, req, fd, offset, cb);
+}
+
+int uv_fs_write(uv_loop_t* loop, uv_fs_t* req, uv_file fd, const uv_buf_t bufs[],
+    unsigned int nbufs, int64_t offset, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_write(loop, req, fd, bufs, nbufs, offset, cb);
+}

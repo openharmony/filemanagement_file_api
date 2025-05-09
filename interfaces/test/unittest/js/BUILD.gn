@@ -20,6 +20,7 @@ ohos_unittest("ani_file_fs_test") {
 
   module_out_path = "file_api/file_api"
   include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "mock/uv_fs_read_mock.h",
   ]
@@ -27,7 +28,13 @@ ohos_unittest("ani_file_fs_test") {
   sources = [
     "mod_fs/properties/mock/uv_fs_mock.cpp",
     "mod_fs/properties/access_core_test.cpp",
+    "mod_fs/properties/dup_core_test.cpp",
     "mod_fs/properties/read_core_test.cpp",
+    "mod_fs/properties/rmdir_core_test.cpp",
+    "mod_fs/properties/symlink_core_test.cpp",
+    "mod_fs/properties/truncate_core_test.cpp",
+    "mod_fs/properties/utimes_core_test.cpp",
+    "mod_fs/properties/write_core_test.cpp",
   ]
 
   deps = [
@@ -36,6 +43,7 @@ ohos_unittest("ani_file_fs_test") {
     "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
     "${file_api_path}/interfaces/kits/js:ani_file_fs",
   ]
 
