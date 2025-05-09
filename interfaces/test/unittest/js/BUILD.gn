@@ -22,7 +22,7 @@ ohos_unittest("ani_file_fs_test") {
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
-    "mock/uv_fs_read_mock.h",
+    "mock/uv_fs_mock.h",
   ]
 
   sources = [
