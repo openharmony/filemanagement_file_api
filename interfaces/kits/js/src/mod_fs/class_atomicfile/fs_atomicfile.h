@@ -42,8 +42,8 @@ public:
     FsResult<FsFile *> GetBaseFile();
     FsResult<unique_ptr<BufferData>> ReadFully();
     FsResult<string> StartWrite();
-    void FinishWrite();
-    void FailWrite();
+    FsResult<void> FinishWrite();
+    FsResult<void> FailWrite();
     FsResult<void> Delete();
     static void FinalizeCallback(void *finalizeData, [[maybe_unused]] void *finalizeHint);
 

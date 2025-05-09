@@ -290,7 +290,11 @@ void AtomicFileAni::FinishWrite(ani_env *env, [[maybe_unused]] ani_object object
         return;
     }
 
-    aotomicFile->FinishWrite();
+    auto ret = aotomicFile->FinishWrite();
+    if (!ret.IsSuccess()) {
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+    }
     return;
 }
 
@@ -308,7 +312,11 @@ void AtomicFileAni::FailWrite(ani_env *env, [[maybe_unused]] ani_object object)
         return;
     }
 
-    aotomicFile->FailWrite();
+    auto ret = aotomicFile->FailWrite();
+    if (!ret.IsSuccess()) {
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+    }
     return;
 }
 

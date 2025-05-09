@@ -167,26 +167,28 @@ FsResult<string> FsAtomicFile::StartWrite()
     return FsResult<string>::Success(entity->newFileName);
 }
 
-void FsAtomicFile::FinishWrite()
+FsResult<void> FsAtomicFile::FinishWrite()
 {
     if (std::rename(entity->newFileName.c_str(), entity->baseFileName.c_str()) != 0) {
         HILOGE("rename failed");
+        return FsResult<void>::Error(errno);
     }
     std::string tmpNewFileName = entity->baseFileName;
     entity->newFileName = tmpNewFileName.append(TEMP_FILE_SUFFIX);
 
-    return;
+    return FsResult<void>::Success();
 }
 
-void FsAtomicFile::FailWrite()
+FsResult<void> FsAtomicFile::FailWrite()
 {
     if (!fs::remove(entity->newFileName)) {
         HILOGW("Failed to remove file");
+        return FsResult<void>::Error(errno);
     }
     std::string tmpNewFileName = entity->baseFileName;
     entity->newFileName = tmpNewFileName.append(TEMP_FILE_SUFFIX);
 
-    return;
+    return FsResult<void>::Success();
 }
 
 FsResult<void> FsAtomicFile::Delete()

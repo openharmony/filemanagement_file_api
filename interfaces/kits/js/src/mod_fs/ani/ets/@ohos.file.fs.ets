@@ -1888,8 +1888,8 @@ export class StreamInner implements Stream {
 }
 
 export class ReadStream extends stream.Readable {
-  private pathInner: string;
-  private bytesReadInner: number;
+  path: string;
+  bytesRead: number;
   private offset: number;
   private start?: number;
   private end?: number;
@@ -1897,20 +1897,12 @@ export class ReadStream extends stream.Readable {
 
   constructor(path: string, options?: ReadStreamOptions) {
     super();
-    this.pathInner = path;
-    this.bytesReadInner = 0;
+    this.path = path;
+    this.bytesRead = 0;
     this.start = options?.start;
     this.end = options?.end;
-    this.stream = createStreamSync(this.pathInner, 'r');
+    this.stream = createStreamSync(this.path, 'r');
     this.offset = this.start ?? 0;
-  }
-
-  get path(): string {
-    return this.pathInner;
-  }
-
-  get bytesRead(): number {
-    return this.bytesReadInner;
   }
 
   seek(offset: number, whence?: WhenceType): number {
@@ -1954,7 +1946,7 @@ export class ReadStream extends stream.Readable {
     this.stream?.read(buffer, { offset: off, length: readSize })
       .then((readOut: number) => {
         if (readOut > 0) {
-          this.bytesReadInner += readOut;
+          this.bytesRead += readOut;
           this.push(new Uint8Array(buffer.slice(0, readOut)));
         }
         if (readOut !== readSize || readOut < size) {
@@ -1966,8 +1958,8 @@ export class ReadStream extends stream.Readable {
 }
 
 export class WriteStream extends stream.Writable {
-  private pathInner: string;
-  private bytesWrittenInner: number;
+  path: string;
+  bytesWritten: number;
   private offset: number;
   private mode: string;
   private start?: number;
@@ -1975,20 +1967,12 @@ export class WriteStream extends stream.Writable {
 
   constructor(path: string, options?: WriteStreamOptions) {
     super();
-    this.pathInner = path;
-    this.bytesWrittenInner = 0;
+    this.path = path;
+    this.bytesWritten = 0;
     this.start = options?.start;
     this.mode = this.convertOpenMode(options?.mode);
-    this.stream = createStreamSync(this.pathInner, this.mode);
+    this.stream = createStreamSync(this.path, this.mode);
     this.offset = this.start ?? 0;
-  }
-
-  get path(): string {
-    return this.pathInner;
-  }
-
-  get bytesWritten(): number {
-    return this.bytesWrittenInner;
   }
 
   seek(offset: number, whence?: WhenceType): number {
@@ -2018,7 +2002,7 @@ export class WriteStream extends stream.Writable {
     this.stream?.write(chunk, { offset: this.offset })
       .then((writeIn: number) => {
         this.offset += writeIn;
-        this.bytesWrittenInner += writeIn;
+        this.bytesWritten += writeIn;
         callback();
       })
       .finally(() => {
