@@ -624,6 +624,7 @@ group("build_kits_js") {
 
 group("ani_file_api") {
   deps = [
+    ":ani_file_environment",
     ":ani_file_fs",
     ":ani_file_hash",
     ":ani_file_securitylabel",
