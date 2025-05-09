@@ -1994,6 +1994,10 @@ export class WriteStream extends stream.Writable {
     this.stream?.close();
   }
 
+  closeSync(): void {
+    this.stream?.closeSync();
+  }
+
   doInitialize(callback: () => void): void {
     callback();
   }
@@ -2038,7 +2042,7 @@ export class AtomicFile {
 
   private nativePtr: long = 0;
   private native getPath(): string;
-  private writeStream: WriteStream;
+  private writeStream: WriteStream | null = null;
 
   native constructor(path: string);
 
@@ -2052,7 +2056,7 @@ export class AtomicFile {
   startWrite(): WriteStream {
     let ws = this.nativeStartWrite();
     this.writeStream = ws;
-    return this.writeStream;
+    return ws;
   }
 
   native nativeFinishWrite(): void;
@@ -2062,6 +2066,7 @@ export class AtomicFile {
     }
     this.writeStream.close();
     this.nativeFinishWrite();
+    this.writeStream = null;
   };
 
   native nativeFailWrite(): void;
@@ -2071,6 +2076,7 @@ export class AtomicFile {
     }
     this.writeStream.close();
     this.nativeFailWrite();
+    this.writeStream = null;
   };
 
   native delete(): void;

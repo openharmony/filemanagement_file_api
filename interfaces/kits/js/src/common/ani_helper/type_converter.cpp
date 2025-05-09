@@ -241,6 +241,10 @@ std::tuple<bool, ArrayBuffer> TypeConverter::ToArrayBuffer(ani_env *env, ani_arr
 
 std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, void *buffer, size_t length)
 {
+    if (env == nullptr) {
+        return { false, nullptr };
+    }
+
     static const char *className = "Lescompat/ArrayBuffer;";
     ani_status ret;
     ani_class cls;
@@ -261,8 +265,8 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
         return { false, nullptr };
     }
 
-    if (env == nullptr) {
-        return { false, nullptr };
+    if (!buffer || !length) {
+        return { true, static_cast<ani_arraybuffer>(obj) };
     }
 
     void *buf = nullptr;

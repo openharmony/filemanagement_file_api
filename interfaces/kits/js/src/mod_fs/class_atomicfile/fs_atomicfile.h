@@ -25,7 +25,7 @@ namespace ModuleFileIO {
 using namespace std;
 
 struct BufferData {
-    uint8_t* buffer = nullptr;
+    uint8_t *buffer = nullptr;
     size_t length = 0;
 
     ~BufferData()
@@ -36,7 +36,7 @@ struct BufferData {
 
 class FsAtomicFile final {
 public:
-    FsAtomicFileEntity* GetEntity();
+    FsAtomicFileEntity *GetEntity();
     static FsResult<FsAtomicFile *> Constructor(string path);
     string GetPath();
     FsResult<FsFile *> GetBaseFile();
@@ -52,6 +52,6 @@ private:
     explicit FsAtomicFile(unique_ptr<FsAtomicFileEntity> entity) : entity(move(entity)) {}
 };
 } // namespace ModuleFileIO
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_ATOMICFILE_FS_ATOMICFILE_H

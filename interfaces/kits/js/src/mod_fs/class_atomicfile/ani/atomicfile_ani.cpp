@@ -35,7 +35,8 @@ const std::string READ_STREAM_CLASS = "ReadStream";
 const std::string WRITE_STREAM_CLASS = "WriteStream";
 const std::string TEMP_FILE_SUFFIX = "_XXXXXX";
 
-void AtomicFileAni::Constructor(ani_env *env, ani_object obj, ani_string pathObj){
+void AtomicFileAni::Constructor(ani_env *env, ani_object obj, ani_string pathObj)
+{
     auto [succ, filePath] = TypeConverter::ToUTF8String(env, pathObj);
     if (!succ) {
         HILOGE("Invalid path");
@@ -50,15 +51,15 @@ void AtomicFileAni::Constructor(ani_env *env, ani_object obj, ani_string pathObj
         return;
     }
 
-    if (ANI_OK != env->Object_SetFieldByName_Long(
-        obj, "nativePtr", reinterpret_cast<ani_long>(ret.GetData().value()))) {
+    if (ANI_OK !=
+        env->Object_SetFieldByName_Long(obj, "nativePtr", reinterpret_cast<ani_long>(ret.GetData().value()))) {
         HILOGE("Failed to wrap entity for obj AtomicFile");
         ErrorHandler::Throw(env, EIO);
         return;
     }
 }
 
-static FsAtomicFile* Unwrap(ani_env *env, ani_object object)
+static FsAtomicFile *Unwrap(ani_env *env, ani_object object)
 {
     ani_long file;
     auto ret = env->Object_GetFieldByName_Long(object, "nativePtr", &file);
@@ -91,14 +92,16 @@ ani_string AtomicFileAni::GetPath(ani_env *env, [[maybe_unused]] ani_object obje
 
 ani_object AtomicFileAni::GetBaseFile(ani_env *env, [[maybe_unused]] ani_object object)
 {
-    auto aotomicFile = Unwrap(env, object);
-    if (aotomicFile == nullptr) {
-        ErrorHandler::Throw(env, E_PARAMS);
+    auto atomicFile = Unwrap(env, object);
+    if (atomicFile == nullptr) {
+        HILOGE("Failed to get atomicFile");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
 
-    auto ret = aotomicFile->GetBaseFile();
+    auto ret = atomicFile->GetBaseFile();
     if (!ret.IsSuccess()) {
+        HILOGE("Failed to GetBaseFile");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
         return nullptr;
@@ -107,6 +110,7 @@ ani_object AtomicFileAni::GetBaseFile(ani_env *env, [[maybe_unused]] ani_object 
     const FsFile *fsFile = ret.GetData().value();
     auto result = FileWrapper::Wrap(env, move(fsFile));
     if (result == nullptr) {
+        HILOGE("Failed to wrap");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
@@ -145,8 +149,7 @@ static ani_object CreateWriteStream(ani_env *env, ani_string filePath)
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK !=
-        env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;:V", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;:V", &ctor)) {
         HILOGE("Cannot find constructor method for class %s", className);
         return nullptr;
     }
@@ -162,14 +165,9 @@ static ani_object CreateWriteStream(ani_env *env, ani_string filePath)
 static ani_object CreateStream(
     ani_env *env, [[maybe_unused]] ani_object object, const std::string &streamName, const std::string &fineName)
 {
-    auto aotomicFile = Unwrap(env, object);
-    if (aotomicFile == nullptr) {
-        ErrorHandler::Throw(env, E_PARAMS);
-        return nullptr;
-    }
-
     auto [succ, filePath] = TypeConverter::ToAniString(env, fineName);
     if (!succ) {
+        HILOGE("Failed to ani_string");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
@@ -177,6 +175,7 @@ static ani_object CreateStream(
     if (streamName == READ_STREAM_CLASS) {
         auto stream = CreateReadStream(env, filePath);
         if (stream == nullptr) {
+            HILOGE("Failed to create read stream");
             ErrorHandler::Throw(env, UNKNOWN_ERR);
             return nullptr;
         }
@@ -185,6 +184,7 @@ static ani_object CreateStream(
     if (streamName == WRITE_STREAM_CLASS) {
         auto stream = CreateWriteStream(env, filePath);
         if (stream == nullptr) {
+            HILOGE("Failed to create write stream");
             ErrorHandler::Throw(env, UNKNOWN_ERR);
             return nullptr;
         }
@@ -197,13 +197,14 @@ static ani_object CreateStream(
 
 ani_object AtomicFileAni::OpenRead(ani_env *env, [[maybe_unused]] ani_object object)
 {
-    auto aotomicFile = Unwrap(env, object);
-    if (aotomicFile == nullptr) {
-        ErrorHandler::Throw(env, E_PARAMS);
+    auto atomicFile = Unwrap(env, object);
+    if (atomicFile == nullptr) {
+        HILOGE("Failed to get atomicFile");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
 
-    auto entity = aotomicFile->GetEntity();
+    auto entity = atomicFile->GetEntity();
     if (entity == nullptr) {
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
@@ -214,23 +215,26 @@ ani_object AtomicFileAni::OpenRead(ani_env *env, [[maybe_unused]] ani_object obj
 
 ani_arraybuffer AtomicFileAni::ReadFully(ani_env *env, [[maybe_unused]] ani_object object)
 {
-    auto aotomicFile = Unwrap(env, object);
-    if (aotomicFile == nullptr) {
-        ErrorHandler::Throw(env, E_PARAMS);
+    auto atomicFile = Unwrap(env, object);
+    if (atomicFile == nullptr) {
+        HILOGE("Failed to get atomicFile");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
 
-    auto ret = aotomicFile->ReadFully();
+    auto ret = atomicFile->ReadFully();
     if (!ret.IsSuccess()) {
+        HILOGE("Failed to read fully");
         ErrorHandler::Throw(env, ret.GetError());
         return nullptr;
     }
 
     auto &bufferData = ret.GetData().value();
-    uint8_t* buffer = bufferData->buffer;
+    uint8_t *buffer = bufferData->buffer;
     size_t length = bufferData->length;
     auto [succ, obj] = TypeConverter::ToAniArrayBuffer(env, buffer, length);
     if (!succ) {
+        HILOGE("Failed to ani_arrayBuffer");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
@@ -240,14 +244,16 @@ ani_arraybuffer AtomicFileAni::ReadFully(ani_env *env, [[maybe_unused]] ani_obje
 
 ani_object AtomicFileAni::StartWrite(ani_env *env, [[maybe_unused]] ani_object object)
 {
-    auto aotomicFile = Unwrap(env, object);
-    if (aotomicFile == nullptr) {
-        ErrorHandler::Throw(env, E_PARAMS);
+    auto atomicFile = Unwrap(env, object);
+    if (atomicFile == nullptr) {
+        HILOGE("Failed to get atomicFile");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
 
-    auto entity = aotomicFile->GetEntity();
+    auto entity = atomicFile->GetEntity();
     if (entity == nullptr) {
+        HILOGE("Failed to get atomicFile entity");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
@@ -267,7 +273,7 @@ ani_object AtomicFileAni::StartWrite(ani_env *env, [[maybe_unused]] ani_object o
         return nullptr;
     }
 
-    ani_object writeStream =  CreateStream(env, object, WRITE_STREAM_CLASS, entity->newFileName);
+    ani_object writeStream = CreateStream(env, object, WRITE_STREAM_CLASS, entity->newFileName);
     if (writeStream == nullptr) {
         HILOGE("Failed to create write stream");
         return nullptr;
@@ -278,20 +284,23 @@ ani_object AtomicFileAni::StartWrite(ani_env *env, [[maybe_unused]] ani_object o
 
 void AtomicFileAni::FinishWrite(ani_env *env, [[maybe_unused]] ani_object object)
 {
-    auto aotomicFile = Unwrap(env, object);
-    if (aotomicFile == nullptr) {
+    auto atomicFile = Unwrap(env, object);
+    if (atomicFile == nullptr) {
+        HILOGE("Failed to get atomicFile");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
 
-    auto entity = aotomicFile->GetEntity();
+    auto entity = atomicFile->GetEntity();
     if (entity == nullptr) {
+        HILOGE("Failed to get atomicFile entity");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
 
-    auto ret = aotomicFile->FinishWrite();
+    auto ret = atomicFile->FinishWrite();
     if (!ret.IsSuccess()) {
+        HILOGE("Failed to finish write");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
     }
@@ -300,20 +309,23 @@ void AtomicFileAni::FinishWrite(ani_env *env, [[maybe_unused]] ani_object object
 
 void AtomicFileAni::FailWrite(ani_env *env, [[maybe_unused]] ani_object object)
 {
-    auto aotomicFile = Unwrap(env, object);
-    if (aotomicFile == nullptr) {
+    auto atomicFile = Unwrap(env, object);
+    if (atomicFile == nullptr) {
+        HILOGE("Failed to get atomicFile");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
 
-    auto entity = aotomicFile->GetEntity();
+    auto entity = atomicFile->GetEntity();
     if (entity == nullptr) {
+        HILOGE("Failed to get atomicFile entity");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
 
-    auto ret = aotomicFile->FailWrite();
+    auto ret = atomicFile->FailWrite();
     if (!ret.IsSuccess()) {
+        HILOGE("Failed to fail write");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
     }
@@ -322,14 +334,16 @@ void AtomicFileAni::FailWrite(ani_env *env, [[maybe_unused]] ani_object object)
 
 void AtomicFileAni::Delete(ani_env *env, [[maybe_unused]] ani_object object)
 {
-    auto aotomicFile = Unwrap(env, object);
-    if (aotomicFile == nullptr) {
-        ErrorHandler::Throw(env, E_PARAMS);
+    auto atomicFile = Unwrap(env, object);
+    if (atomicFile == nullptr) {
+        HILOGE("Failed to get atomicFile");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
 
-    auto ret = aotomicFile->Delete();
+    auto ret = atomicFile->Delete();
     if (!ret.IsSuccess()) {
+        HILOGE("Failed to delete");
         ErrorHandler::Throw(env, ret.GetError());
         return;
     }

@@ -22,6 +22,7 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
+
 class AtomicFileAni final {
 public:
     static void Constructor(ani_env *env, ani_object obj, ani_string pathObj);
@@ -38,4 +39,5 @@ public:
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
+
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_ATOMICFILE_ANI_H

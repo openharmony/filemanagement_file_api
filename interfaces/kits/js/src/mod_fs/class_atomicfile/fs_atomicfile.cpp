@@ -37,7 +37,7 @@ const std::string READ_STREAM_CLASS = "ReadStream";
 const std::string WRITE_STREAM_CLASS = "WriteStream";
 const std::string TEMP_FILE_SUFFIX = "_XXXXXX";
 
-FsAtomicFileEntity* FsAtomicFile::GetEntity()
+FsAtomicFileEntity *FsAtomicFile::GetEntity()
 {
     if (!entity) {
         return nullptr;
@@ -84,7 +84,7 @@ FsResult<FsFile *> FsAtomicFile::GetBaseFile()
     return FileInstantiator::InstantiateFile(fd, entity->baseFileName, false);
 }
 
-static std::tuple<std::unique_ptr<BufferData>, int32_t> ReadFileToBuffer(FILE* fp)
+static std::tuple<std::unique_ptr<BufferData>, int32_t> ReadFileToBuffer(FILE *fp)
 {
     int fd = fileno(fp);
     if (fd < 0) {
@@ -105,7 +105,7 @@ static std::tuple<std::unique_ptr<BufferData>, int32_t> ReadFileToBuffer(FILE* f
     }
 
     auto bufferData = std::make_unique<BufferData>();
-    bufferData->buffer = new(std::nothrow) uint8_t[fileSize];
+    bufferData->buffer = new (std::nothrow) uint8_t[fileSize];
     if (bufferData->buffer == nullptr) {
         HILOGE("Failed to allocate memory");
         return { nullptr, ENOMEM };
@@ -135,8 +135,7 @@ FsResult<unique_ptr<BufferData>> FsAtomicFile::ReadFully()
         return FsResult<unique_ptr<BufferData>>::Error(errno);
     }
 
-    auto file = std::unique_ptr<FILE, decltype(&std::fclose)>(
-        std::fopen(result, "rb"), &std::fclose);
+    auto file = std::unique_ptr<FILE, decltype(&std::fclose)>(std::fopen(result, "rb"), &std::fclose);
     if (!file) {
         HILOGE("Failed to open file, err:%{public}d", errno);
         return FsResult<unique_ptr<BufferData>>::Error(errno);
@@ -232,5 +231,5 @@ FsResult<FsAtomicFile *> FsAtomicFile::Constructor(string path)
     return FsResult<FsAtomicFile *>::Success(file);
 }
 } // namespace ModuleFileIO
-} // namespace DistributedFS
+} // namespace FileManagement
 } // namespace OHOS
