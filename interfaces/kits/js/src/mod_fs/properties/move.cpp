@@ -152,14 +152,8 @@ static int RenameFile(const string &src, const string &dest)
 static int MoveFile(const string &src, const string &dest, int mode)
 {
     uv_fs_t access_req;
-    int ret = uv_fs_access(nullptr, &access_req, src.c_str(), W_OK, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to move src file due to doesn't exist or hasn't write permission");
-        uv_fs_req_cleanup(&access_req);
-        return ret;
-    }
     if (mode == MODE_THROW_ERR) {
-        ret = uv_fs_access(nullptr, &access_req, dest.c_str(), 0, nullptr);
+        int ret = uv_fs_access(nullptr, &access_req, dest.c_str(), 0, nullptr);
         uv_fs_req_cleanup(&access_req);
         if (ret == 0) {
             HILOGE("Failed to move file due to existing destPath with MODE_THROW_ERR.");
