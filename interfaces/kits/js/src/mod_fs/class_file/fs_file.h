@@ -62,7 +62,7 @@ public:
 #endif
     static FsResult<FsFile *> Constructor();
     FsResult<int32_t> GetFD() const;
-    bool RemoveEntity();
+    void RemoveEntity();
 
 private:
     unique_ptr<FileEntity> fileEntity;

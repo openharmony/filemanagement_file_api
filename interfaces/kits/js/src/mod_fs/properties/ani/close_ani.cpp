@@ -85,7 +85,6 @@ void CloseAni::CloseSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_obj
         ErrorHandler::Throw(env, err);
         return;
     }
-    return;
 }
 
 } // namespace ANI
