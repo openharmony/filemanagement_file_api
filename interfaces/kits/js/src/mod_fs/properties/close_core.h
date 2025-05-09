@@ -17,6 +17,7 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_CORE_H
 
 #include "filemgmt_libfs.h"
+#include "fs_file.h"
 #include "fs_utils.h"
 #include "fs_result.h"
 
@@ -25,6 +26,7 @@ namespace OHOS::FileManagement::ModuleFileIO {
 class CloseCore final {
 public:
     static FsResult<void> DoClose(const int32_t &fd);
+    static FsResult<void> DoClose(FsFile *file);
 };
 
 const std::string PROCEDURE_CLOSE_NAME = "FileIOClose";

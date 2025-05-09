@@ -60,4 +60,22 @@ FsResult<void> CloseCore::DoClose(const int32_t &fd)
     }
     return FsResult<void>::Success();
 }
+
+FsResult<void> CloseCore::DoClose(FsFile *file)
+{
+    auto ret = file->GetFD();
+    if (!ret.IsSuccess()) {
+        return FsResult<void>::Error(EINVAL);
+    }
+    auto err = CloseFd(ret.GetData().value());
+    if (err) {
+        return FsResult<void>::Error(err);
+    }
+
+    bool succ = file->RemoveEntity();
+    if (!succ) {
+        return FsResult<void>::Error(EINVAL);
+    }
+    return FsResult<void>::Success();
+}
 } // namespace OHOS::FileManagement::ModuleFileIO
