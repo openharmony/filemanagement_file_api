@@ -2064,7 +2064,7 @@ export class AtomicFile {
     if (!this.writeStream) {
       throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
     }
-    this.writeStream.close();
+    this.writeStream?.close();
     this.nativeFinishWrite();
     this.writeStream = null;
   };
@@ -2074,7 +2074,7 @@ export class AtomicFile {
     if (!this.writeStream) {
       throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
     }
-    this.writeStream.close();
+    this.writeStream?.close();
     this.nativeFailWrite();
     this.writeStream = null;
   };
