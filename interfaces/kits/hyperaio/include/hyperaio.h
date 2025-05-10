@@ -23,6 +23,9 @@
 namespace OHOS {
 namespace HyperAio {
 #define IOURING_APP_PERMISSION      (1U << 0)
+#ifndef EOK
+#define EOK (0)
+#endif
 
 struct ReadInfo {
     int32_t fd;
