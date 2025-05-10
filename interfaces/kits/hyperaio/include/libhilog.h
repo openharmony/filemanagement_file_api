@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMGMT_LIBHILOG_H
-#define FILEMGMT_LIBHILOG_H
+#ifndef HYPERAIO_LIBHILOG_H
+#define HYPERAIO_LIBHILOG_H
 
 #include "hilog/log.h"
 
@@ -26,7 +26,7 @@ namespace OHOS {
 #endif
 
 #ifndef LOG_TAG
-#define LOG_TAG "FileManagement"
+#define LOG_TAG "HyperAio"
 #endif
 
 #if defined __FILE_NAME__

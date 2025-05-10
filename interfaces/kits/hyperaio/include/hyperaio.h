@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace HyperAio {
-#define IOURING_APP_PERMISSION      (1U << 0)
+#define HYPERAIO_APP_PERMISSION      (1U << 0)
 #ifndef EOK
 #define EOK (0)
 #endif

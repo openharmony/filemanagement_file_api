@@ -44,7 +44,7 @@ uint32_t HyperAio::SupportIouring()
 {
     uint32_t flags = 0;
     if (HasAccessIouringPermission()) {
-        flags |= IOURING_APP_PERMISSION;
+        flags |= HYERAIO_APP_PERMISSION;
     }
     return flags;
 }
@@ -93,7 +93,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
     }
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
-    for(uint32_t i = 0; i < totalReqs; i++){
+    for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&uring_);
         if (sqe == nullptr) {
             HILOGE("get sqe failed");
@@ -134,8 +134,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
     }
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
-    for(uint32_t i = 0; i < totalReqs; i++)
-    {
+    for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&uring_);
         if (sqe == nullptr) {
             HILOGE("get sqe failed");
@@ -175,8 +174,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
     }
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
-    for(uint32_t i = 0; i < totalReqs; i++)
-    {
+    for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&uring_);
         if (sqe == nullptr) {
             HILOGE("get sqe failed");
