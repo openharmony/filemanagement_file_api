@@ -61,7 +61,7 @@ ohos_shared_library("HyperAio") {
     "access_token:libaccesstoken_sdk"
   ]
 
-  innerapi_tags = [ "platformsdk" ]
+  install_images = [ "system" ]
   part_name = "file_api"
   subsystem_name = "filemanagement"
 }
