@@ -18,5 +18,6 @@ group("unittest") {
     "filemgmt_libn_test:filemgmt_libn_test",
     "remote_uri:remote_uri_test",
     "task_signal:task_signal_test",
+    "hyperaio:hyperaio_test"
   ]
 }
