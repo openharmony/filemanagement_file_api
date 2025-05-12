@@ -57,6 +57,8 @@ ani_object CreateStreamAni::CreateStreamSync(
     const FsStream *stream = ret.GetData().value();
     auto result = StreamWrapper::Wrap(env, move(stream));
     if (result == nullptr) {
+        delete stream;
+        stream = nullptr;
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }

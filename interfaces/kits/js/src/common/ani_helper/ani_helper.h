@@ -22,6 +22,7 @@
 
 #include <ani.h>
 
+#include "ani_signature.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "file_utils.h"
@@ -30,6 +31,7 @@
 
 namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace std;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static thread_local shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler;
 
@@ -107,8 +109,10 @@ public:
         if (isUndefined) {
             return { true, nullopt };
         }
+        static const string longValueSig = Builder::BuildSignatureDescriptor({}, BasicTypes::longType);
         ani_long value;
-        status = env->Object_CallMethodByName_Long(static_cast<ani_object>(property), "longValue", ":J", &value);
+        status = env->Object_CallMethodByName_Long(
+            static_cast<ani_object>(property), "longValue", longValueSig.c_str(), &value);
         if (status != ANI_OK) {
             return { false, nullopt };
         }
@@ -147,8 +151,7 @@ public:
             return env;
         }
 
-        ani_option interopEnabled { "--interop=enable", nullptr };
-        ani_options aniArgs { 1, &interopEnabled };
+        ani_options aniArgs { 0, nullptr };
         auto status = vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
         if (status != ANI_OK) {
             status = vm->GetEnv(ANI_VERSION_1, &env);
@@ -156,10 +159,7 @@ public:
                 HILOGE("vm GetEnv, err: %{private}d", status);
                 return nullptr;
             }
-
-            return env;
         }
-
         return env;
     }
 

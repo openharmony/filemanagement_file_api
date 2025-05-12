@@ -49,15 +49,15 @@ ani_object LstatAni::LstatSync(ani_env *env, [[maybe_unused]] ani_class clazz, a
     }
 
     auto fsStat = ret.GetData().value();
-    auto [status, statObject] = StatWrapper::Wrap(env, fsStat);
-    if (status != ANI_OK) {
+    auto statObject = StatWrapper::Wrap(env, fsStat);
+    if (statObject == nullptr) {
         delete fsStat;
         fsStat = nullptr;
         HILOGE("Wrap stat object failed!");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return {};
     }
-    
+
     return statObject;
 }
 } // namespace ANI
