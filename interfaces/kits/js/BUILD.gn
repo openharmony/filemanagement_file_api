@@ -856,6 +856,8 @@ ohos_shared_library("ani_file_hash") {
   include_dirs = [
     "src/mod_hash",
     "src/mod_hash/ani",
+    "src/mod_hash/class_hashstream",
+    "src/mod_hash/class_hashstream/ani",
   ]
   sources = [
     "src/common/ani_helper/error_handler.cpp",
@@ -865,6 +867,8 @@ ohos_shared_library("ani_file_hash") {
     "src/mod_fs/fs_utils.cpp",
     "src/mod_hash/ani/bind_function_class.cpp",
     "src/mod_hash/ani/hash_ani.cpp",
+    "src/mod_hash/class_hashstream/ani/hashstream_ani.cpp",
+    "src/mod_hash/class_hashstream/hs_hashstream.cpp",
     "src/mod_hash/hash_core.cpp",
   ]
 
