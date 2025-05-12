@@ -46,12 +46,12 @@ export default namespace hash {
   }
 
   export class HashStream extends stream.Transform {
-    hs: hash.HashStream;
+    hs: HashStreamImpl;
     hashBuf?: ArrayBuffer;
 
     constructor(algorithm: string) {
       super();
-      this.hs = new hash.HashStream(algorithm);
+      this.hs = new HashStreamImpl(algorithm);
     }
 
     digest(): string {
@@ -81,6 +81,18 @@ export default namespace hash {
       callback();
     }
   }
+}
+
+export class HashStreamImpl extends stream.Transform {
+
+  static {
+    loadLibrary("ani_file_hash");
+  }
+  private nativePtr: long = 0;
+
+  native constructor(alg: string);
+  native digest(): string;
+  native update(data: ArrayBuffer): void;
 }
 
 class HashImpl {
