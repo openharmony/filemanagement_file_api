@@ -57,19 +57,19 @@ namespace HyperAio {
 #endif
 
 #define HILOGF(fmt, ...)            \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, HYPERAIO_LOG_DOMAIN, LOG_TAG, \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, HYPERAIO_LOG_DOMAIN, HYPERAIO_LOG_TAG, \
     "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
 #define HILOGE(fmt, ...)            \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, HYPERAIO_LOG_DOMAIN, LOG_TAG, \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, HYPERAIO_LOG_DOMAIN, HYPERAIO_LOG_TAG, \
     "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
 #define HILOGW(fmt, ...)            \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, HYPERAIO_LOG_DOMAIN, LOG_TAG, \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, HYPERAIO_LOG_DOMAIN, HYPERAIO_LOG_TAG, \
     "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
 #define HILOGI(fmt, ...)            \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, HYPERAIO_LOG_DOMAIN, LOG_TAG, \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, HYPERAIO_LOG_DOMAIN, HYPERAIO_LOG_TAG, \
     "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
 #define HILOGD(fmt, ...)            \
-    ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, HYPERAIO_LOG_DOMAIN, LOG_TAG, \
+    ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, HYPERAIO_LOG_DOMAIN, HYPERAIO_LOG_TAG, \
     "[%{public}s:%{public}d->%{public}s] " fmt, FILEMGMT_FILE_NAME, __LINE__, __FUNCTION__, ##__VA_ARGS__))
 } // namespace HyperAio
 } // namespace OHOS
