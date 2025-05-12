@@ -1341,7 +1341,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
 
   writeSync(buffer: ArrayBuffer | string, options?: WriteOptions): number {
     let length = options ? this.writeSync0(buffer, options) : this.writeSync0(buffer);
-    this.filePointer += length;
+    this.filePointer += (options?.offset?? 0) + length;
     return length;
   }
 
@@ -1391,7 +1391,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
 
   readSync(buffer: ArrayBuffer, options?: ReadOptions): number {
     const length = options ? this.readSync0(buffer, options) : this.readSync0(buffer);
-    this.filePointer += length;
+    this.filePointer += (options?.offset?? 0) + length;
     return length;
   }
 
