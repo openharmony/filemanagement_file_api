@@ -51,7 +51,7 @@ tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
         return { true, result, nullptr };
     }
 
-    FsFile * file = FileWrapper::Unwrap(env, obj);
+    FsFile *file = FileWrapper::Unwrap(env, obj);
     if (file != nullptr) {
         return { true, -1, file };
     }
