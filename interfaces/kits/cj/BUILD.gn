@@ -15,50 +15,6 @@ import("//build/ohos.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
 ohos_shared_library("cj_file_fs_ffi") {
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  defines = []
-  cflags = [
-    "-fvisibility=hidden",
-    "-fdata-sections",
-    "-ffunction-sections",
-    "-Oz",
-  ]
-  cflags_cc = [
-    "-fvisibility-inlines-hidden",
-    "-Oz",
-  ]
-  if (is_mingw || is_mac || is_linux) {
-    defines += [ "PREVIEW" ]
-  }
-
-  if (current_os == "ohos" && current_cpu == "x86_64") {
-    defines += [ "SIMULATOR" ]
-  }
-  if (is_ohos) {
-    defines += [ "OHOS_PLATFORM" ]
-    if (use_musl && !is_asan) {
-      defines += [ "HOOK_ENABLE" ]
-    }
-  } else if (is_mingw) {
-    defines += [ "WINDOWS_PLATFORM" ]
-    cflags_cc += [ "-std=c++17" ]
-  } else if (is_mac) {
-    defines += [ "MAC_PLATFORM" ]
-  } else if (is_linux) {
-    defines += [ "LINUX_PLATFORM" ]
-    cflags_cc += [ "-std=c++17" ]
-  } else if (is_arkui_x && target_os == "ios") {
-    defines += [ "IOS_PLATFORM" ]
-  }
-
   include_dirs = [
     "${src_path}/common",
     "${src_path}/common/file_helper",
@@ -78,84 +34,101 @@ ohos_shared_library("cj_file_fs_ffi") {
     "${file_api_path}/interfaces/kits/rust/include",
   ]
 
-  if (!defined(defines)) {
-    defines = []
-  }
+  sources = [
+    "../js/src/common/file_helper/fd_guard.cpp",
+    "../js/src/mod_fs/class_file/file_n_exporter.cpp",
+    "../js/src/mod_fs/class_stream/stream_n_exporter.cpp",
+    "../js/src/mod_fs/common_func.cpp",
+    "src/copy.cpp",
+    "src/copy_dir.cpp",
+    "src/copy_file.cpp",
+    "src/fdatasync.cpp",
+    "src/file_ffi.cpp",
+    "src/file_fs_ffi.cpp",
+    "src/file_fs_impl.cpp",
+    "src/file_impl.cpp",
+    "src/fsync.cpp",
+    "src/list_file.cpp",
+    "src/lseek.cpp",
+    "src/mkdtemp.cpp",
+    "src/move_file.cpp",
+    "src/randomAccessFile_impl.cpp",
+    "src/readerIterator_impl.cpp",
+    "src/stat_ffi.cpp",
+    "src/stat_impl.cpp",
+    "src/stream_ffi.cpp",
+    "src/stream_impl.cpp",
+    "src/symlink.cpp",
+    "src/task_signal_impl.cpp",
+    "src/translistener.cpp",
+    "src/uni_error.cpp",
+    "src/utils.cpp",
+    "src/watcher_impl.cpp",
+    "src/xattr.cpp",
+    "src/xattr_ffi.cpp",
+  ]
 
+  deps = [
+    "${file_api_path}/interfaces/kits/js:build_kits_js",
+    "${file_api_path}/interfaces/kits/js:fs",
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
+
+  cflags_cc = [ "-std=c++17" ]
   use_exceptions = true
-
-  if (product_name != "ohos-sdk") {
-    deps = [
-      "${file_api_path}/interfaces/kits/js:build_kits_js",
-      "${file_api_path}/interfaces/kits/js:fs",
-      "${file_api_path}/interfaces/kits/native:remote_uri_native",
-      "${file_api_path}/interfaces/kits/native:task_signal_native",
-      "${file_api_path}/interfaces/kits/rust:rust_file",
-      "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
-      "${utils_path}/filemgmt_libn:filemgmt_libn",
-    ]
-    external_deps = [
-      "ability_base:zuri",
-      "ability_runtime:ability_manager",
-      "ability_runtime:abilitykit_native",
-      "access_token:libtokenid_sdk",
-      "app_file_service:fileuri_native",
-      "bounds_checking_function:libsec_shared",
-      "bundle_framework:appexecfwk_base",
-      "bundle_framework:appexecfwk_core",
-      "c_utils:utils",
-      "data_share:datashare_common",
-      "data_share:datashare_consumer",
-      "dfs_service:distributed_file_daemon_kit_inner",
-      "hilog:libhilog",
-      "ipc:ipc_core",
-      "napi:ace_napi",
-      "napi:cj_bind_ffi",
-      "napi:cj_bind_native",
-      "samgr:samgr_proxy",
-    ]
-    sources = [
-      "../js/src/common/file_helper/fd_guard.cpp",
-      "../js/src/mod_fs/class_file/file_n_exporter.cpp",
-      "../js/src/mod_fs/class_stream/stream_n_exporter.cpp",
-      "../js/src/mod_fs/common_func.cpp",
-      "src/copy.cpp",
-      "src/copy_dir.cpp",
-      "src/copy_file.cpp",
-      "src/fdatasync.cpp",
-      "src/file_ffi.cpp",
-      "src/file_fs_ffi.cpp",
-      "src/file_fs_impl.cpp",
-      "src/file_impl.cpp",
-      "src/fsync.cpp",
-      "src/list_file.cpp",
-      "src/lseek.cpp",
-      "src/mkdtemp.cpp",
-      "src/move_file.cpp",
-      "src/randomAccessFile_impl.cpp",
-      "src/readerIterator_impl.cpp",
-      "src/stat_ffi.cpp",
-      "src/stream_ffi.cpp",
-      "src/stream_impl.cpp",
-      "src/symlink.cpp",
-      "src/task_signal_impl.cpp",
-      "src/translistener.cpp",
-      "src/uni_error.cpp",
-      "src/utils.cpp",
-      "src/watcher_impl.cpp",
-    ]
-  } else {
-    defines += [ "PREVIEWER" ]
-    sources = [ "src/file_fs_mock.cpp" ]
-    external_deps = [ "napi:cj_bind_ffi" ]
+  if (use_mingw_win) {
+    defines = [ "WIN_PLATFORM" ]
+  }
+  if (use_mac) {
+    defines = [ "IOS_PLATFORM" ]
   }
 
-  if (current_os == "ohos") {
-    defines += [ "OHOS_PLATFORM" ]
-  }
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "access_token:libtokenid_sdk",
+    "app_file_service:fileuri_native",
+    "bounds_checking_function:libsec_shared",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+    "samgr:samgr_proxy",
+  ]
 
-  if (current_os == "mingw") {
-    defines += [ "WINDOWS_PLATFORM" ]
+  if (!use_mingw_win && !use_mac) {
+    cflags = [
+      "-fvisibility=hidden",
+      "-fdata-sections",
+      "-ffunction-sections",
+      "-Oz",
+    ]
+    cflags_cc += [
+      "-fvisibility-inlines-hidden",
+      "-Oz",
+    ]
+    defines = [ "FILE_API_TRACE" ]
+    branch_protector_ret = "pac_ret"
+    sanitize = {
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
   }
 
   innerapi_tags = [ "platformsdk" ]
@@ -164,16 +137,6 @@ ohos_shared_library("cj_file_fs_ffi") {
 }
 
 ohos_shared_library("cj_statvfs_ffi") {
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-
-  defines = []
   cflags = [
     "-fvisibility=hidden",
     "-fdata-sections",
@@ -184,102 +147,34 @@ ohos_shared_library("cj_statvfs_ffi") {
     "-fvisibility-inlines-hidden",
     "-Oz",
   ]
-  if (is_mingw || is_mac || is_linux) {
-    defines += [ "PREVIEW" ]
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
   }
 
-  if (current_os == "ohos" && current_cpu == "x86_64") {
-    defines += [ "SIMULATOR" ]
-  }
-  if (is_ohos) {
-    defines += [ "OHOS_PLATFORM" ]
-    if (use_musl && !is_asan) {
-      defines += [ "HOOK_ENABLE" ]
-    }
-  } else if (is_mingw) {
-    defines += [ "WINDOWS_PLATFORM" ]
-    cflags_cc += [ "-std=c++17" ]
-  } else if (is_mac) {
-    defines += [ "MAC_PLATFORM" ]
-  } else if (is_linux) {
-    defines += [ "LINUX_PLATFORM" ]
-    cflags_cc += [ "-std=c++17" ]
-  } else if (is_arkui_x && target_os == "ios") {
-    defines += [ "IOS_PLATFORM" ]
-  }
+  include_dirs = [ "${file_api_path}/interfaces/kits/cj/src" ]
 
-  include_dirs = [
-    "${src_path}/common",
-    "${src_path}/common/napi",
-    "${src_path}/common/napi/n_async",
-    "${src_path}/common/file_helper",
-    "${src_path}/mod_fs",
-    "${src_path}/mod_fs/class_randomaccessfile",
-    "${src_path}/mod_fs/class_readeriterator",
-    "${src_path}/mod_fs/properties",
-    "${utils_path}/common/include",
-    "${utils_path}/filemgmt_libhilog",
-    "${utils_path}/filemgmt_libh",
-    "${utils_path}/filemgmt_libn/include",
-    "${file_api_path}/interfaces/kits/cj/src",
-    "${file_api_path}/interfaces/kits/native/remote_uri",
-    "${file_api_path}/interfaces/kits/native/task_signal",
-    "${file_api_path}/interfaces/kits/rust/include",
+  sources = [
+    "src/statvfs_ffi.cpp",
+    "src/statvfs_impl.cpp",
+    "src/uni_error.cpp",
   ]
 
-  if (!defined(defines)) {
-    defines = []
-  }
-
-  use_exceptions = true
-
-  if (product_name != "ohos-sdk") {
-    deps = [
-      "${file_api_path}/interfaces/kits/js:build_kits_js",
-      "${file_api_path}/interfaces/kits/js:fs",
-      "${file_api_path}/interfaces/kits/native:remote_uri_native",
-      "${file_api_path}/interfaces/kits/native:task_signal_native",
-      "${file_api_path}/interfaces/kits/rust:rust_file",
-      "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
-      "${utils_path}/filemgmt_libn:filemgmt_libn",
-    ]
-    external_deps = [
-      "ability_base:zuri",
-      "ability_runtime:ability_manager",
-      "ability_runtime:abilitykit_native",
-      "access_token:libtokenid_sdk",
-      "app_file_service:fileuri_native",
-      "bounds_checking_function:libsec_shared",
-      "bundle_framework:appexecfwk_base",
-      "bundle_framework:appexecfwk_core",
-      "c_utils:utils",
-      "data_share:datashare_common",
-      "data_share:datashare_consumer",
-      "dfs_service:distributed_file_daemon_kit_inner",
-      "hilog:libhilog",
-      "ipc:ipc_core",
-      "napi:ace_napi",
-      "napi:cj_bind_ffi",
-      "napi:cj_bind_native",
-      "samgr:samgr_proxy",
-    ]
-    sources = [
-      "src/statvfs_ffi.cpp",
-      "src/statvfs_impl.cpp",
-      "src/uni_error.cpp",
-    ]
-  } else {
-    defines += [ "PREVIEWER" ]
-    external_deps = [ "napi:cj_bind_ffi" ]
-  }
-
-  if (current_os == "ohos") {
-    defines += [ "OHOS_PLATFORM" ]
-  }
-
-  if (current_os == "mingw") {
-    defines += [ "WINDOWS_PLATFORM" ]
-  }
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"

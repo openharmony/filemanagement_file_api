@@ -179,4 +179,17 @@ bool FfiOHOSStatIsSymbolicLink(int64_t id)
     }
     return instance->IsSymbolicLink();
 }
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+RetDataI32 FfiOHOSStatGetLocation(int64_t id)
+{
+    LOGI("FS_TEST:: FfiOHOSStatGetLocation");
+    auto instance = FFIData::GetData<StatImpl>(id);
+    if (!instance) {
+        LOGE("StatImpl instance not exist %{public}" PRId64, id);
+        return {.code = ERR_INVALID_INSTANCE_CODE, .data = 0};
+    }
+    return instance->GetLocation();
+}
+#endif
 }

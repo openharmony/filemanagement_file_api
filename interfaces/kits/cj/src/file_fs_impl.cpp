@@ -15,6 +15,15 @@
 
 #include "file_fs_impl.h"
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include <sys/xattr.h>
+
+#include "bundle_mgr_proxy.h"
+#include "ipc_skeleton.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+#endif
+
 using namespace OHOS;
 using namespace OHOS::FFI;
 using namespace OHOS::FileManagement;
@@ -22,6 +31,18 @@ using namespace OHOS::CJSystemapi;
 using namespace OHOS::CJSystemapi::FileFs;
 
 namespace {
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+const std::string CLOUDDISK_FILE_PREFIX = "/data/storage/el2/cloud";
+const std::string DISTRIBUTED_FILE_PREFIX = "/data/storage/el2/distributedfiles";
+const std::string PACKAGE_NAME_FLAG = "<PackageName>";
+const std::string USER_ID_FLAG = "<currentUserId>";
+const std::string PHYSICAL_PATH_PREFIX = "/mnt/hmdfs/<currentUserId>/account/device_view/local/data/<PackageName>";
+const std::string CLOUD_FILE_LOCATION = "user.cloud.location";
+const char POSITION_LOCAL = '1';
+const char POSITION_BOTH = '3';
+const int BASE_USER_RANGE = 200000;
+#endif
 
 std::tuple<int, FileInfo> ParseFile(int32_t file)
 {
@@ -106,25 +127,100 @@ std::tuple<bool, FileInfo, int> ParseRandomFile(std::string file)
     return { true, FileInfo { true, move(filePath), move(fdg) }, ERRNO_NOERR };
 }
 
-std::tuple<int, bool> GetFsAccess(const FileInfo &fileInfo)
+std::tuple<int32_t, bool> UvAccess(const std::string &path, int mode)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> stat_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!stat_req) {
         LOGE("Failed to request heap memory.");
-        return {ENOMEM, false};
+        return {GetErrorCode(ENOMEM), false};
     }
     bool isAccess = false;
-    int ret = uv_fs_access(nullptr, stat_req.get(), fileInfo.path.get(), 0, nullptr);
+    int ret = uv_fs_access(nullptr, stat_req.get(), path.c_str(), mode, nullptr);
     if (ret < 0 && (std::string_view(uv_err_name(ret)) != "ENOENT")) {
         LOGE("Failed to access file by path");
-        return {ret, false};
+        return {GetErrorCode(ret), false};
     }
     if (ret == 0) {
         isAccess = true;
     }
     return {SUCCESS_CODE, isAccess};
 }
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+bool IsCloudOrDistributedFilePath(const std::string &path)
+{
+    return path.find(CLOUDDISK_FILE_PREFIX) == 0 || path.find(DISTRIBUTED_FILE_PREFIX) == 0;
+}
+
+int GetCurrentUserId()
+{
+    int uid = IPCSkeleton::GetCallingUid();
+    int userId = uid / BASE_USER_RANGE;
+    return userId;
+}
+
+sptr<OHOS::AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
+{
+    sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
+        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        LOGE("Fail to get system ability mgr");
+        return nullptr;
+    }
+    sptr<OHOS::IRemoteObject> remoteObject =
+        systemAbilityManager->GetSystemAbility(OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        LOGE("Fail to get bundle manager proxy");
+        return nullptr;
+    }
+    return iface_cast<OHOS::AppExecFwk::BundleMgrProxy>(remoteObject);
+}
+
+std::string GetSelfBundleName()
+{
+    sptr<OHOS::AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    if (!bundleMgrProxy) {
+        LOGE("BundleMgrProxy is nullptr");
+        return "";
+    }
+    OHOS::AppExecFwk::BundleInfo bundleInfo;
+    auto ret = bundleMgrProxy->GetBundleInfoForSelf(0, bundleInfo);
+    if (ret != 0) {
+        LOGE("BundleName get fail");
+        return "";
+    }
+    return bundleInfo.name;
+}
+
+std::tuple<int32_t, bool> HandleLocalCheck(const std::string &path, int mode)
+{
+    // check if the file of /data/storage/el2/cloud is on the local
+    if (path.find(CLOUDDISK_FILE_PREFIX) == 0) {
+        char val[2] = {'\0'};
+        if (getxattr(path.c_str(), CLOUD_FILE_LOCATION.c_str(), val, sizeof(val)) < 0) {
+            LOGE("Get cloud file location fail, err: %{public}d", errno);
+            return {GetErrorCode(errno), false};
+        }
+        if (val[0] == POSITION_LOCAL || val[0] == POSITION_BOTH) {
+            return {SUCCESS_CODE, true};
+        }
+        return {GetErrorCode(ENOENT), false};
+    }
+    // check if the distributed file of /data/storage/el2/distributedfiles is on the local,
+    // convert into physical path(/mnt/hmdfs/<currentUserId>/account/device_view/local/data/<PackageName>) and check
+    if (path.find(DISTRIBUTED_FILE_PREFIX) == 0) {
+        int userId = GetCurrentUserId();
+        std::string bundleName = GetSelfBundleName();
+        std::string relativePath = path.substr(DISTRIBUTED_FILE_PREFIX.length());
+        std::string physicalPath = PHYSICAL_PATH_PREFIX + relativePath;
+        physicalPath.replace(physicalPath.find(USER_ID_FLAG), USER_ID_FLAG.length(), std::to_string(userId));
+        physicalPath.replace(physicalPath.find(PACKAGE_NAME_FLAG), PACKAGE_NAME_FLAG.length(), bundleName);
+        return UvAccess(physicalPath, mode);
+    }
+    return {GetErrorCode(ENOENT), false};
+}
+#endif
 }
 
 namespace OHOS {
@@ -147,6 +243,10 @@ std::tuple<int, sptr<StatImpl>> FileFsImpl::Stat(int32_t file)
     if (!nativeStat) {
         return {GetErrorCode(ENOMEM), nullptr};
     }
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    auto fileInfoPtr = std::make_shared<FileInfo>(std::move(fileInfo));
+    nativeStat->SetFileInfo(fileInfoPtr);
+#endif
     return {SUCCESS_CODE, nativeStat};
 }
 
@@ -169,6 +269,10 @@ std::tuple<int32_t, sptr<StatImpl>> FileFsImpl::Stat(std::string file)
     if (!nativeStat) {
         return {GetErrorCode(ENOMEM), nullptr};
     }
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    auto fileInfoPtr = std::make_shared<FileInfo>(std::move(fileInfo));
+    nativeStat->SetFileInfo(fileInfoPtr);
+#endif
     return {SUCCESS_CODE, nativeStat};
 }
 
@@ -915,18 +1019,14 @@ RetDataI64 FileFsImpl::WriteCur(int32_t fd, void* buf, size_t length, std::strin
     return ret;
 }
 
-std::tuple<int32_t, bool> FileFsImpl::Access(std::string path)
+std::tuple<int32_t, bool> FileFsImpl::Access(std::string path, int32_t mode, int32_t flag)
 {
-    auto [fileState, fileInfo] = ParseFile(path);
- 
-    if (fileState != SUCCESS_CODE) {
-        return {GetErrorCode(ENOMEM), false};
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {
+        return HandleLocalCheck(path, mode);
     }
-    auto [accessState, access] = GetFsAccess(fileInfo);
-    if (accessState < 0) {
-        return {GetErrorCode(accessState), false};
-    }
-    return {SUCCESS_CODE, access};
+#endif
+    return UvAccess(path, mode);
 }
 
 int FileFsImpl::Truncate(std::string file, int64_t len)

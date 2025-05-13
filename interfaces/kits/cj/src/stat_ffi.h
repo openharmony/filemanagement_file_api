@@ -37,6 +37,9 @@ extern "C" {
     FFI_EXPORT bool FfiOHOSStatIsFile(int64_t id);
     FFI_EXPORT bool FfiOHOSStatIsSocket(int64_t id);
     FFI_EXPORT bool FfiOHOSStatIsSymbolicLink(int64_t id);
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    FFI_EXPORT RetDataI32 FfiOHOSStatGetLocation(int64_t id);
+#endif
 }
 
 #endif // OHOS_FILE_FS_STAT_FFI_H

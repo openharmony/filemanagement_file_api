@@ -33,11 +33,28 @@ namespace FileFs {
 
 constexpr int S_PREMISSION = 00000777;
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+const size_t MAX_ATTR_NAME = 64;
+const std::string CLOUD_LOCATION_ATTR = "user.cloud.location";
+enum Location {
+    LOCAL = 1 << 0,
+    CLOUD = 1 << 1
+};
+#endif
+
 class StatImpl : public OHOS::FFI::FFIData {
 public:
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 
     explicit StatImpl(uv_stat_t stat) : real_(std::move(stat)) {}
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    RetDataI32 GetLocation();
+
+    void SetFileInfo(std::shared_ptr<FileInfo> info)
+    {
+        fileInfo_ = info;
+    }
+#endif
 
     inline int64_t GetIno() const
     {
@@ -122,6 +139,9 @@ public:
 
 private:
     uv_stat_t real_;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    std::shared_ptr<FileInfo> fileInfo_ = nullptr;
+#endif
 
     friend class OHOS::FFI::RuntimeType;
     friend class OHOS::FFI::TypeBase;

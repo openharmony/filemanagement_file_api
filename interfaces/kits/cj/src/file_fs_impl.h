@@ -61,6 +61,10 @@ struct FileStruct {
     FileFs::FileEntity *fileEntity;
 };
 namespace FileFs {
+enum AccessFlag : int32_t {
+    DEFAULT_FLAG = -1,
+    LOCAL_FLAG,
+};
 class FileFsImpl {
 public:
     static std::tuple<int32_t, sptr<StatImpl>> Stat(int32_t file);
@@ -81,7 +85,7 @@ public:
     static RetDataI64 ReadCur(int32_t fd, char* buf, int64_t bufLen, size_t length);
     static RetDataI64 Write(int32_t fd, void* buf, size_t length, int64_t offset, std::string encode);
     static RetDataI64 WriteCur(int32_t fd, void* buf, size_t length, std::string encode);
-    static std::tuple<int32_t, bool> Access(std::string path);
+    static std::tuple<int32_t, bool> Access(std::string path, int32_t mode = 0, int32_t flag = DEFAULT_FLAG);
     static int Truncate(std::string file, int64_t len);
     static int Truncate(int32_t file, int64_t len);
     static int Close(int32_t file);

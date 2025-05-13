@@ -650,6 +650,22 @@ RetDataBool FfiOHOSFileFsAccess(const char* path)
     return ret;
 }
 
+RetDataBool FfiOHOSFileFsAccessExt(const char* path, int32_t mode, int32_t flag)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsAccessExt");
+    RetDataBool ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
+    auto [status, accessStatus] = FileFsImpl::Access(path, mode, flag);
+    ret.code = status;
+    if (status != SUCCESS_CODE) {
+        LOGI("FS_TEST::FfiOHOSFileFsAccessExt error");
+        ret.data = false;
+        return ret;
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsAccessExt success");
+    ret.data = accessStatus;
+    return ret;
+}
+
 int32_t FfiOHOSFileFsTruncateByString(const char* file, int64_t len)
 {
     LOGI("FS_TEST::FfiOHOSFileFsTruncateByString");
