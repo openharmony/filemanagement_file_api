@@ -35,7 +35,7 @@ FsResult<void> SymlinkCore::DoSymlink(const string &target, const string &srcPat
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);
     }
-    int ret = uv_fs_symlink(nullptr, symlinkReq.get(), srcPath.c_str(), target.c_str(), 0, nullptr);
+    int ret = uv_fs_symlink(nullptr, symlinkReq.get(), target.c_str(), srcPath.c_str(), 0, nullptr);
     if (ret < 0) {
         HILOGE("Failed to create a link for old path");
         return FsResult<void>::Error(ret);
