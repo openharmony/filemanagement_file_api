@@ -56,8 +56,26 @@ FsResult<void> CloseCore::DoClose(const int32_t &fd)
     }
     auto err = CloseFd(fd);
     if (err) {
+        HILOGE("Failed to close fd");
         return FsResult<void>::Error(err);
     }
+    return FsResult<void>::Success();
+}
+
+FsResult<void> CloseCore::DoClose(FsFile *file)
+{
+    auto ret = file->GetFD();
+    if (!ret.IsSuccess()) {
+        HILOGE("Failed to get fd");
+        return FsResult<void>::Error(EINVAL);
+    }
+    auto err = CloseFd(ret.GetData().value());
+    if (err) {
+        HILOGE("Failed to close file");
+        return FsResult<void>::Error(err);
+    }
+
+    file->RemoveEntity();
     return FsResult<void>::Success();
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

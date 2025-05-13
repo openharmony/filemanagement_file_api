@@ -40,6 +40,11 @@ static tuple<int, unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *>> RealPa
     return { ret, move(realpath_req) };
 }
 
+void FsFile::RemoveEntity()
+{
+    fileEntity = nullptr;
+}
+
 FsResult<int32_t> FsFile::GetFD() const
 {
     if (!fileEntity) {
