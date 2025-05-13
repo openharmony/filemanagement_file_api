@@ -15,14 +15,16 @@
 
 #include "fs_watcher_wrapper.h"
 
+#include "ani_signature.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace std;
+using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 FsWatcher *FsWatcherWrapper::Unwrap(ani_env *env, ani_object object)
 {
@@ -39,21 +41,27 @@ FsWatcher *FsWatcherWrapper::Unwrap(ani_env *env, ani_object object)
 
 ani_object FsWatcherWrapper::Wrap(ani_env *env, const FsWatcher *watcher)
 {
-    static const char *className = "L@ohos/file/fs/WatcherInner;";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (watcher == nullptr) {
+        HILOGE("FsWatcher pointer is null!");
         return nullptr;
     }
+    auto classDesc = FS::WatcherInner::classDesc.c_str();
+    ani_class cls;
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
+        return nullptr;
+    }
+    auto ctorDesc = FS::WatcherInner::ctorDesc.c_str();
+    auto ctorSig = FS::WatcherInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(watcher));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", className);
+        HILOGE("New %s obj Failed!", classDesc);
         return nullptr;
     }
     return obj;

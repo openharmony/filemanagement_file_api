@@ -14,14 +14,16 @@
  */
 
 #include <ani.h>
+#include "ani_signature.h"
 #include "bind_function.h"
 #include "environment_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static ani_status BindStaticMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/environment/EnvironmentImpl;";
+    auto classDesc = Impl::EnvironmentImpl::classDesc.c_str();
     std::array methods = {
         ani_native_function {
             "getStorageDataDirSync", nullptr, reinterpret_cast<void *>(EnvironmentAni::GetStorageDataDirSync) },
@@ -38,7 +40,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function {
             "getUserHomeDirSync", nullptr, reinterpret_cast<void *>(EnvironmentAni::GetUserHomeDirSync) },
     };
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)

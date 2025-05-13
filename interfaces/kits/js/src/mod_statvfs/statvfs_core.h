@@ -13,15 +13,23 @@
  * limitations under the License.
  */
 
-#include "error_handler.h"
+#ifndef INTERFACES_KITS_JS_SRC_MOD_STATVFS_STATVFS_CORE_H
+#define INTERFACES_KITS_JS_SRC_MOD_STATVFS_STATVFS_CORE_H
 
-namespace OHOS::FileManagement::ModuleFileIO::ANI {
+#include "filemgmt_libfs.h"
 
-ani_status ErrorHandler::Throw(
-    ani_env *env, int32_t code, const std::string &errMsg, const std::optional<ani_object> &errData)
-{
-    auto classDesc = BuiltInTypes::BusinessError::classDesc.c_str();
-    return Throw(env, classDesc, code, errMsg, errData);
-}
+namespace OHOS {
+namespace FileManagement {
+namespace ModuleStatvfs {
+using namespace ModuleFileIO;
 
-} // namespace OHOS::FileManagement::ModuleFileIO::ANI
+class StatvfsCore final {
+public:
+    static FsResult<int64_t> DoGetFreeSize(const string &path);
+    static FsResult<int64_t> DoGetTotalSize(const string &path);
+};
+
+} // namespace ModuleStatvfs
+} // namespace FileManagement
+} // namespace OHOS
+#endif // INTERFACES_KITS_JS_SRC_MOD_STATVFS_STATVFS_CORE_H

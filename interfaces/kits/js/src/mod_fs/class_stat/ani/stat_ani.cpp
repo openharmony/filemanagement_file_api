@@ -34,7 +34,7 @@ ani_object StatAni::StatSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
     if (!succPath) {
         HILOGE("The first argument requires filepath/fd");
         ErrorHandler::Throw(env, EINVAL);
-        return {};
+        return nullptr;
     }
 
     auto ret = StatCore::DoStat(fileInfo);
@@ -42,17 +42,17 @@ ani_object StatAni::StatSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
         HILOGE("DoStat failed!");
         const FsError &err = ret.GetError();
         ErrorHandler::Throw(env, err);
-        return {};
+        return nullptr;
     }
 
     auto fsStat = ret.GetData().value();
-    auto [status, statObject] = StatWrapper::Wrap(env, fsStat);
-    if (status != ANI_OK) {
+    auto statObject = StatWrapper::Wrap(env, fsStat);
+    if (statObject == nullptr) {
         delete fsStat;
         fsStat = nullptr;
         HILOGE("Wrap stat object failed!");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
-        return {};
+        return nullptr;
     }
 
     return statObject;

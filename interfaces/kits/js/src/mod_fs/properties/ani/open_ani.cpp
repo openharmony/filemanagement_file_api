@@ -53,6 +53,8 @@ ani_object OpenAni::OpenSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
     const FsFile *file = ret.GetData().value();
     auto result = FileWrapper::Wrap(env, move(file));
     if (result == nullptr) {
+        delete file;
+        file = nullptr;
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }

@@ -15,6 +15,7 @@
 
 #include "watch_event_wrapper.h"
 
+#include "ani_signature.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 
@@ -22,20 +23,23 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace std;
+using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 ani_object WatchEventWrapper::Wrap(ani_env *env, const WatchEvent &evt)
 {
-    static const char *className = "L@ohos/file/fs/WatchEventInner;";
+    auto classDesc = FS::WatchEventInner::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+    auto ctorDesc = FS::WatchEventInner::ctorDesc.c_str();
+    auto ctorSig = FS::WatchEventInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;DD:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
 
@@ -50,7 +54,7 @@ ani_object WatchEventWrapper::Wrap(ani_env *env, const WatchEvent &evt)
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, fileName, event, cookie)) {
-        HILOGE("Create %s obj failed!", className);
+        HILOGE("Create %s obj failed!", classDesc);
         return nullptr;
     }
     return obj;
