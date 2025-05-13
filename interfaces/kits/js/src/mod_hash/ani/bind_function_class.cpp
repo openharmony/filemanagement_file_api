@@ -15,6 +15,7 @@
 
 #include <ani.h>
 #include "bind_function.h"
+#include "hashstream_ani.h"
 #include "hash_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
