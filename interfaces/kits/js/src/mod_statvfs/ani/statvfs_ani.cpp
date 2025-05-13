@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "create_stream_ani.h"
+#include "statvfs_ani.h"
 
-#include "create_stream_core.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
-#include "stream_wrapper.h"
+#include "statvfs_core.h"
 #include "type_converter.h"
 
 namespace OHOS {
@@ -28,41 +27,46 @@ namespace ANI {
 
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleStatvfs;
 
-ani_object CreateStreamAni::CreateStreamSync(
-    ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_string mode)
+ani_double StatvfsAni::GetFreeSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
     auto [succPath, srcPath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
         HILOGE("Invalid path");
         ErrorHandler::Throw(env, EINVAL);
-        return nullptr;
+        return 0;
     }
 
-    auto [succMode, openMode] = TypeConverter::ToUTF8String(env, mode);
-    if (!succMode) {
-        HILOGE("Invalid mode");
-        ErrorHandler::Throw(env, EINVAL);
-        return nullptr;
-    }
-
-    FsResult<FsStream *> ret = CreateStreamCore::DoCreateStream(srcPath, openMode);
+    auto ret = StatvfsCore::DoGetFreeSize(srcPath);
     if (!ret.IsSuccess()) {
-        HILOGE("create stream failed");
+        HILOGE("Get freesize failed");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
-        return nullptr;
+        return 0;
     }
 
-    const FsStream *stream = ret.GetData().value();
-    auto result = StreamWrapper::Wrap(env, move(stream));
-    if (result == nullptr) {
-        delete stream;
-        stream = nullptr;
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
-        return nullptr;
+    return static_cast<double>(ret.GetData().value());
+}
+
+ani_double StatvfsAni::GetTotalSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
+{
+    auto [succPath, srcPath] = TypeConverter::ToUTF8String(env, path);
+    if (!succPath) {
+        HILOGE("Invalid path");
+        ErrorHandler::Throw(env, EINVAL);
+        return 0;
     }
-    return result;
+
+    auto ret = StatvfsCore::DoGetTotalSize(srcPath);
+    if (!ret.IsSuccess()) {
+        HILOGE("Get totalsize failed");
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
+        return 0;
+    }
+
+    return static_cast<double>(ret.GetData().value());
 }
 
 } // namespace ANI

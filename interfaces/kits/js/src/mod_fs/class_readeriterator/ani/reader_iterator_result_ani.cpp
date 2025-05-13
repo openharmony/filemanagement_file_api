@@ -15,6 +15,7 @@
 
 #include "reader_iterator_result_ani.h"
 
+#include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
@@ -23,27 +24,36 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace std;
+using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 ani_object ReaderIteratorResultAni::Wrap(ani_env *env, const ReaderIteratorResult *result)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/ReaderIteratorResultInner;";
+    if (result == nullptr) {
+        HILOGE("ReaderIteratorResult pointer is null!");
+        return nullptr;
+    }
 
+    auto classDesc = FS::ReaderIteratorResultInner::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::ReaderIteratorResultInner::ctorDesc.c_str();
+    auto ctorSig = FS::ReaderIteratorResultInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
+
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(result));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", className);
+        HILOGE("New %s obj Failed!", classDesc);
         return nullptr;
     }
 

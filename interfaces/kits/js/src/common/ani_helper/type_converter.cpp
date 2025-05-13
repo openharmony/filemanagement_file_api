@@ -21,10 +21,12 @@
 
 #include <securec.h>
 
+#include "ani_signature.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::ANI {
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 std::tuple<bool, std::string> TypeConverter::ToUTF8String(ani_env *env, const ani_string &path)
 {
@@ -155,9 +157,10 @@ static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrF
 {
     ani_boolean isFd = false;
 
-    ani_class DoubleClass;
-    env->FindClass("Lstd/core/Double;", &DoubleClass);
-    env->Object_InstanceOf(pathOrFd, DoubleClass, &isFd);
+    auto doubleClassDesc = BoxedTypes::Double::classDesc.c_str();
+    ani_class doubleClass;
+    env->FindClass(doubleClassDesc, &doubleClass);
+    env->Object_InstanceOf(pathOrFd, doubleClass, &isFd);
     if (isFd) {
         ani_double doubleValue;
         if (ANI_OK != env->Object_CallMethodByName_Double(pathOrFd, "doubleValue", nullptr, &doubleValue)) {
@@ -168,9 +171,10 @@ static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrF
         return { true, fd };
     }
 
-    ani_class IntClass;
-    env->FindClass("Lstd/core/Int;", &IntClass);
-    env->Object_InstanceOf(pathOrFd, IntClass, &isFd);
+    auto intClassDesc = BoxedTypes::Int::classDesc.c_str();
+    ani_class intClass;
+    env->FindClass(intClassDesc, &intClass);
+    env->Object_InstanceOf(pathOrFd, intClass, &isFd);
     if (isFd) {
         ani_int fd;
         if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "intValue", nullptr, &fd)) {
@@ -190,8 +194,9 @@ std::tuple<bool, FileInfo> TypeConverter::ToFileInfo(ani_env *env, const ani_obj
         return { false, FileInfo { false, {}, {} } };
     }
 
+    auto stringClassDesc = BuiltInTypes::String::classDesc.c_str();
     ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    env->FindClass(stringClassDesc, &stringClass);
 
     ani_boolean isPath = false;
     env->Object_InstanceOf(pathOrFd, stringClass, &isPath);
@@ -292,12 +297,13 @@ std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(
         return { false, nullptr };
     }
 
+    auto classDesc = BuiltInTypes::String::classDesc.c_str();
     ani_array_ref result = nullptr;
-    ani_class itemCls = nullptr;
-    if (env->FindClass("Lstd/core/String;", &itemCls) != ANI_OK) {
+    ani_class cls = nullptr;
+    if (env->FindClass(classDesc, &cls) != ANI_OK) {
         return { false, result };
     }
-    if (env->Array_New_Ref(itemCls, length, nullptr, &result) != ANI_OK) {
+    if (env->Array_New_Ref(cls, length, nullptr, &result) != ANI_OK) {
         return { false, result };
     }
     for (uint32_t i = 0; i < length; i++) {

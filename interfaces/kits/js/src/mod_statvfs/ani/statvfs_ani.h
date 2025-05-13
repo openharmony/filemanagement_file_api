@@ -13,26 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_STAT_WRAPPER_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_STAT_WRAPPER_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_STATVFS_ANI_STATVFS_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_STATVFS_ANI_STATVFS_ANI_H
 
 #include <ani.h>
-
-#include "fs_stat.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-using namespace std;
 
-class StatWrapper final {
+class StatvfsAni final {
 public:
-    static ani_object Wrap(ani_env *env, FsStat *fsStat);
-    static FsStat *Unwrap(ani_env *env, ani_object object);
+    static ani_double GetFreeSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
+    static ani_double GetTotalSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
 };
+
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_STAT_WRAPPER_H
+
+#endif // INTERFACES_KITS_JS_SRC_MOD_STATVFS_ANI_STATVFS_ANI_H

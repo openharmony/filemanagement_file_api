@@ -19,6 +19,7 @@
 #include <string>
 
 #include "ani_helper.h"
+#include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "fs_stream.h"
@@ -29,8 +30,9 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace std;
+using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static tuple<bool, optional<ReadOptions>> ToReadOptions(ani_env *env, ani_object obj)
 {
@@ -91,8 +93,9 @@ static tuple<bool, optional<WriteOptions>> ToWriteOptions(ani_env *env, ani_obje
 
 static std::tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object &buf)
 {
+    auto classDesc = BuiltInTypes::String::classDesc.c_str();
     ani_class cls;
-    env->FindClass("Lstd/core/String;", &cls);
+    env->FindClass(classDesc, &cls);
 
     ani_boolean isString;
     env->Object_InstanceOf(buf, cls, &isString);
@@ -105,8 +108,9 @@ static std::tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_ob
 
 static std::tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_object &buf)
 {
+    auto classDesc = BuiltInTypes::ArrayBuffer::classDesc.c_str();
     ani_class cls;
-    env->FindClass("Lescompat/ArrayBuffer;", &cls);
+    env->FindClass(classDesc, &cls);
 
     ani_boolean isArrayBuffer;
     env->Object_InstanceOf(buf, cls, &isArrayBuffer);

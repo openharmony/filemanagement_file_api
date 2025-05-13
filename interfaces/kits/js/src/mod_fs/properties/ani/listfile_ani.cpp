@@ -15,6 +15,7 @@
 
 #include "listfile_ani.h"
 
+#include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "listfile_core.h"
@@ -27,6 +28,7 @@ namespace ANI {
 
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 tuple<bool, bool> ParseBooleanParam(ani_env *env, ani_object obj, string tag)
 {
@@ -39,9 +41,11 @@ tuple<bool, bool> ParseBooleanParam(ani_env *env, ani_object obj, string tag)
     if (isUndefined) {
         return { true, false };
     }
+    auto unboxedDesc = BoxedTypes::Boolean::unboxedDesc.c_str();
+    auto unboxedSig = BoxedTypes::Boolean::unboxedSig.c_str();
     ani_boolean bool_ref_res;
     if (ANI_OK != env->Object_CallMethodByName_Boolean(
-        static_cast<ani_object>(bool_ref), "unboxed", ":Z", &bool_ref_res)) {
+        static_cast<ani_object>(bool_ref), unboxedDesc, unboxedSig, &bool_ref_res)) {
         return { false, false };
     }
     return { true, static_cast<bool>(bool_ref_res) };
@@ -108,10 +112,12 @@ tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object 
         static_cast<ani_object>(result_ref), "length", &length) || length == 0) {
         return { false, nullopt };
     }
+    auto getterDesc = BuiltInTypes::Array::getterDesc.c_str();
+    auto getterSig = BuiltInTypes::Array::objectGetterSig.c_str();
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(result_ref), "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i)) {
+            static_cast<ani_object>(result_ref), getterDesc, getterSig, &stringEntryRef, (ani_int)i)) {
             return { false, nullopt };
         }
         auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));

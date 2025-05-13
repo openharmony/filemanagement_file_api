@@ -15,6 +15,7 @@
 
 #include "reader_iterator_ani.h"
 
+#include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "reader_iterator_result_ani.h"
@@ -24,27 +25,36 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace std;
+using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 ani_object ReaderIteratorAni::Wrap(ani_env *env, const FsReaderIterator *it)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/ReaderIteratorInner;";
+    if (it == nullptr) {
+        HILOGE("FsReaderIterator pointer is null!");
+        return nullptr;
+    }
 
+    auto classDesc = FS::ReaderIteratorInner::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::ReaderIteratorInner::ctorDesc.c_str();
+    auto ctorSig = FS::ReaderIteratorInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
+
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(it));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", className);
+        HILOGE("New %s obj Failed!", classDesc);
         return nullptr;
     }
 
@@ -69,7 +79,7 @@ ani_object ReaderIteratorAni::Next(ani_env *env, [[maybe_unused]] ani_object obj
     auto fsReaderIterator = Unwrap(env, object);
     if (fsReaderIterator == nullptr) {
         ErrorHandler::Throw(env, UNKNOWN_ERR);
-        return ANI_FALSE;
+        return nullptr;
     }
 
     auto ret = fsReaderIterator->Next();
@@ -77,7 +87,7 @@ ani_object ReaderIteratorAni::Next(ani_env *env, [[maybe_unused]] ani_object obj
         HILOGE("Cannot get readeriterator next!");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
-        return {};
+        return nullptr;
     }
     auto nextRet = ret.GetData().value();
     auto result = ReaderIteratorResultAni::Wrap(env, &nextRet);

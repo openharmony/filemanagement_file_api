@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
+#include <array>
 #include <ani.h>
 #include "ani_signature.h"
 #include "bind_function.h"
-#include "securitylabel_ani.h"
+#include "statvfs_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static ani_status BindStaticMethods(ani_env *env)
 {
-    auto classDesc = Impl::SecurityLabelImpl::classDesc.c_str();
+    auto classDesc = Impl::StatvfsImpl::classDesc.c_str();
+
     std::array methods = {
-        ani_native_function {
-            "setSecurityLabelSync", nullptr, reinterpret_cast<void *>(SecurityLabelAni::SetSecurityLabelSync) },
-        ani_native_function {
-            "getSecurityLabelSync", nullptr, reinterpret_cast<void *>(SecurityLabelAni::GetSecurityLabelSync) },
+        ani_native_function { "getFreeSizeSync", nullptr, reinterpret_cast<void *>(StatvfsAni::GetFreeSizeSync) },
+        ani_native_function { "getTotalSizeSync", nullptr, reinterpret_cast<void *>(StatvfsAni::GetTotalSizeSync) },
     };
     return BindClass(env, classDesc, methods);
 }
@@ -52,9 +52,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_INVALID_VERSION;
     }
 
-    status = BindStaticMethods(env);
-    if (status != ANI_OK) {
-        HILOGE("Cannot bind native static methods for securitylabel!");
+    if ((status = BindStaticMethods(env)) != ANI_OK) {
+        HILOGE("Cannot bind native static methods for statvfs!");
         return status;
     };
 

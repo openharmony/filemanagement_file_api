@@ -20,11 +20,13 @@
 #include <string>
 #include <ani.h>
 #include "ani_helper.h"
+#include "ani_signature.h"
 #include "filemgmt_libhilog.h"
 #include "fs_error.h"
 #include "type_converter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::ANI {
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 class ErrorHandler {
 public:
@@ -90,8 +92,10 @@ private:
             return { ANI_NOT_FOUND, nullptr };
         }
 
+        auto ctorDesc = BaseType::ctorDesc.c_str();
+        auto ctorSig = BaseType::ctorSig0.c_str();
         ani_method ctor;
-        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
+        if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
             HILOGE("Cannot find constructor for class '%{private}s'", className);
             return { ANI_NOT_FOUND, nullptr };
         }

@@ -16,6 +16,7 @@
 #include "randomaccessfile_ani.h"
 
 #include "ani_helper.h"
+#include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "fs_randomaccessfile.h"
@@ -25,8 +26,9 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace std;
+using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 const int BUF_SIZE = 1024;
 const string READ_STREAM_CLASS = "ReadStream";
@@ -105,7 +107,8 @@ static tuple<bool, optional<WriteOptions>> ToWriteOptions(ani_env *env, ani_obje
 static tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object &buf)
 {
     ani_class cls;
-    env->FindClass("Lstd/core/String;", &cls);
+    auto classDesc = BuiltInTypes::String::classDesc.c_str();
+    env->FindClass(classDesc, &cls);
 
     ani_boolean isString;
     env->Object_InstanceOf(buf, cls, &isString);
@@ -119,7 +122,8 @@ static tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object 
 static tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_object &buf)
 {
     ani_class cls;
-    env->FindClass("Lescompat/ArrayBuffer;", &cls);
+    auto classDesc = BuiltInTypes::ArrayBuffer::classDesc.c_str();
+    env->FindClass(classDesc, &cls);
 
     ani_boolean isArrayBuffer;
     env->Object_InstanceOf(buf, cls, &isArrayBuffer);
