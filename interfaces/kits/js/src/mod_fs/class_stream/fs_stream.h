@@ -31,7 +31,7 @@ namespace ModuleFileIO {
 using namespace std;
 
 struct WriteOptions {
-    optional<int64_t> length = nullopt;
+    optional<size_t> length = nullopt;
     optional<int64_t> offset = nullopt;
     optional<std::string> encoding = nullopt;
 };
