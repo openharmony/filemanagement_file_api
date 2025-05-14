@@ -68,8 +68,8 @@ FsResult<FsFile *> FsAtomicFile::GetBaseFile()
         return FsResult<FsFile *>::Error(UNKNOWN_ERR);
     }
 
-    char realPath[PATH_MAX];
-    char *result = realpath(entity->baseFileName.c_str(), realPath);
+    auto realPath = std::make_unique<char[]>(PATH_MAX);
+    char *result = realpath(entity->baseFileName.c_str(), realPath.get());
     if (result == nullptr) {
         HILOGE("Failed to resolve real path, err:%{public}d", errno);
         return FsResult<FsFile *>::Error(errno);
@@ -128,8 +128,8 @@ FsResult<unique_ptr<BufferData>> FsAtomicFile::ReadFully()
         return FsResult<unique_ptr<BufferData>>::Error(UNKNOWN_ERR);
     }
 
-    char realPath[PATH_MAX];
-    char *result = realpath(entity->baseFileName.c_str(), realPath);
+    auto realPath = std::make_unique<char[]>(PATH_MAX);
+    char *result = realpath(entity->baseFileName.c_str(), realPath.get());
     if (result == nullptr) {
         HILOGE("Failed to resolve file real path, err:%{public}d", errno);
         return FsResult<unique_ptr<BufferData>>::Error(errno);

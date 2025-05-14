@@ -234,25 +234,9 @@ static ani_status BindStaticMethods(ani_env *env)
     return BindClass(env, classDesc, methods);
 }
 
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+static ani_status DoBindMethods(ani_env *env)
 {
-    if (vm == nullptr) {
-        HILOGE("Invalid parameter vm");
-        return ANI_INVALID_ARGS;
-    }
-
-    if (result == nullptr) {
-        HILOGE("Invalid parameter result");
-        return ANI_INVALID_ARGS;
-    }
-
-    ani_env *env;
-    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
-    if (status != ANI_OK) {
-        HILOGE("Invalid ani version!");
-        return ANI_INVALID_VERSION;
-    }
-
+    ani_status status;
     if ((status = BindStaticMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native static methods for BindStaticMethods!");
         return status;
@@ -297,6 +281,33 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         HILOGE("Cannot bind native methods for AtomicFile Class!");
         return status;
     };
+
+    return ANI_OK;
+}
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    if (vm == nullptr) {
+        HILOGE("Invalid parameter vm");
+        return ANI_INVALID_ARGS;
+    }
+
+    if (result == nullptr) {
+        HILOGE("Invalid parameter result");
+        return ANI_INVALID_ARGS;
+    }
+
+    ani_env *env;
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK) {
+        HILOGE("Invalid ani version!");
+        return ANI_INVALID_VERSION;
+    }
+
+    status = DoBindMethods(env);
+    if (status != ANI_OK) {
+        return status;
+    }
 
     *result = ANI_VERSION_1;
     return ANI_OK;
