@@ -145,7 +145,7 @@ tuple<bool, optional<FsFileFilter>> ParseFilter(ani_env *env, ani_object obj)
         HILOGE("Illegal option.lastModifiedAfter parameter");
         return { false, move(filter) };
     }
-    filter.SetFileSizeOver(lastModifiedAfter);
+    filter.SetLastModifiedAfter(lastModifiedAfter);
 
     auto [succSuffix, suffix] = ParseArrayString(env, obj, "suffix");
     if (!succSuffix) {
