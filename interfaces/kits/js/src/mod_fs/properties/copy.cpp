@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,7 @@ const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
 const std::string MEDIA = "media";
 const std::string MTP_PATH_PREFIX = "/storage/External/mtp";
 const int SLEEP_TIME = 100000;
+const int OPEN_TRUC_VERSION = 20;
 constexpr int DISMATCH = 0;
 constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
@@ -62,6 +63,7 @@ constexpr size_t MAX_SIZE = 1024 * 1024 * 4;
 constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(300);
 std::recursive_mutex Copy::mutex_;
 std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
+uint32_t g_apiCompatibleVersion = 0;
 
 static int OpenSrcFile(const string &srcPth, std::shared_ptr<FileInfos> infos, int32_t &srcFd)
 {
@@ -272,7 +274,20 @@ int Copy::CopyFile(const string &src, const string &dest, std::shared_ptr<FileIn
     if (srcFd < 0) {
         return ret;
     }
-    auto destFd = open(dest.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+
+    #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    if (g_apiCompatibleVersion == 0) {
+        g_apiCompatibleVersion = CommonFunc::GetApiCompatibleVersion();
+    }
+    #endif
+
+    int32_t destFd = -1;
+    if (g_apiCompatibleVersion >= OPEN_TRUC_VERSION) {
+        destFd = open(dest.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+    } else {
+        destFd = open(dest.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+    }
+
     if (destFd < 0) {
         HILOGE("Error opening dest file descriptor. errno = %{public}d", errno);
         close(srcFd);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,10 @@
 #include "filemgmt_libn.h"
 #include "file_utils.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+#include "bundle_mgr_proxy.h"
 #include "ipc_skeleton.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 #include "tokenid_kit.h"
 #endif
 
@@ -44,6 +47,9 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+const uint32_t API_VERSION_MOD = 1000;
+#endif
 
 namespace {
     const std::vector<std::string> PUBLIC_DIR_PATHS = {
@@ -460,6 +466,39 @@ bool CommonFunc::IsSystemApp()
 {
     uint64_t fullTokenId = OHOS::IPCSkeleton::GetSelfTokenID();
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+}
+
+uint32_t CommonFunc::GetApiCompatibleVersion()
+{
+    uint32_t apiCompatibleVersion = 0;
+    OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
+        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        HILOGE("systemAbilityManager is null");
+        return apiCompatibleVersion;
+    }
+
+    OHOS::sptr<OHOS::IRemoteObject> remoteObject =
+        systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        HILOGE("remoteObject is null");
+        return apiCompatibleVersion;
+    }
+
+    sptr<AppExecFwk::IBundleMgr> iBundleMgr = OHOS::iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (iBundleMgr == nullptr) {
+        HILOGE("IBundleMgr is null");
+        return apiCompatibleVersion;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    auto res = iBundleMgr->GetBundleInfoForSelf(0, bundleInfo);
+    if (res == ERR_OK) {
+        apiCompatibleVersion = bundleInfo.targetVersion % API_VERSION_MOD;
+    } else {
+        HILOGE("Call for GetApiCompatibleVersion failed, err:%{public}d", res);
+    }
+    return apiCompatibleVersion;
 }
 #endif
 
