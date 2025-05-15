@@ -79,8 +79,8 @@ public:
     static RetDataCArrConflictFiles MoveDir(std::string src, std::string dest, int32_t mode);
     static RetDataI64 Read(int32_t fd, char* buf, int64_t bufLen, size_t length, int64_t offset);
     static RetDataI64 ReadCur(int32_t fd, char* buf, int64_t bufLen, size_t length);
-    static RetDataI64 Write(int32_t fd, char* buf, size_t length, int64_t offset, std::string encode);
-    static RetDataI64 WriteCur(int32_t fd, char* buf, size_t length, std::string encode);
+    static RetDataI64 Write(int32_t fd, void* buf, size_t length, int64_t offset, std::string encode);
+    static RetDataI64 WriteCur(int32_t fd, void* buf, size_t length, std::string encode);
     static std::tuple<int32_t, bool> Access(std::string path);
     static int Truncate(std::string file, int64_t len);
     static int Truncate(int32_t file, int64_t len);
