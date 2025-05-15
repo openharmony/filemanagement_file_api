@@ -115,6 +115,9 @@ const Type FS::WatchEventInner::classType = Builder::BuildClass("@ohos.file.fs.W
 const string FS::WatchEventInner::classDesc = FS::WatchEventInner::classType.Descriptor();
 const string FS::WatchEventInner::ctorSig =
     Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::doubleType, BasicTypes::doubleType });
+// FS::LocationType
+const Type FS::LocationType::classType = Builder::BuildClass("@ohos.file.fs.fileIo.LocationType");
+const string FS::LocationType::classDesc = FS::LocationType::classType.Descriptor();
 // Impl::EnvironmentImpl
 const Type Impl::EnvironmentImpl::classType = Builder::BuildClass("@ohos.file.environment.EnvironmentImpl");
 const string Impl::EnvironmentImpl::classDesc = Impl::EnvironmentImpl::classType.Descriptor();

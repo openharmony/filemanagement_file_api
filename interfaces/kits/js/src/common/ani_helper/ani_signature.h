@@ -176,6 +176,11 @@ struct WatchEventInner : public BaseType {
     static const string ctorSig;
 };
 
+struct LocationType : public BaseType{
+    static const Type classType;
+    static const string classDesc;
+};
+
 } // namespace FS
 
 namespace Impl {
