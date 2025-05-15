@@ -195,15 +195,15 @@ void FileWatcher::ReadNotifyEvent(WatcherCallback callback)
     while (index < len) {
         event = reinterpret_cast<inotify_event *>(buf + index);
         if (sizeof(struct inotify_event) > (len - index)) {
-            HILOGE("out of bounds access, len: %lu, index: %d, inotify: %zu",
-                    static_cast<unsigned long>(len), index, sizeof(struct inotify_event));
+            HILOGE("out of bounds access, len:%{public}d, index: %{public}d, inotify: %{public}zu",
+                   len, index, sizeof(struct inotify_event));
             break;
         }
-        if (static_cast<unsigned int>(event->len) > 
-           (static_cast<unsigned int>(len - index - sizeof(struct inotify_event)))) {
-            HILOGE("out of bounds access, index: %d, inotify: %zu, event :%lu, len: %lu",
-                    index, sizeof(struct inotify_event),
-                    static_cast<unsigned long>(event->len), static_cast<unsigned long>(len));
+        if (event->len > (static_cast<unsigned int>(len - index - sizeof(struct inotify_event)))) {
+            HILOGE("out of bounds access, index: %{public}d, inotify: %{public}zu, "
+                   "event :%{public}u, len: %{public}d",
+                   index, sizeof(struct inotify_event),
+                   event->len, len);
             break;
         }
         NotifyEvent(event, callback);
