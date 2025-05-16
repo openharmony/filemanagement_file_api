@@ -681,6 +681,7 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties",
     "src/mod_fs/properties/ani",
     "src/mod_fs/properties/copy_listener",
+    "src/mod_fs/properties/copy_listener/ani",
   ]
   sources = [
     "src/common/ani_helper/ani_signature.cpp",
@@ -709,7 +710,9 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/class_stream/fs_stream.cpp",
     "src/mod_fs/class_stream/stream_instantiator.cpp",
     "src/mod_fs/class_tasksignal/ani/task_signal_ani.cpp",
-    "src/mod_fs/class_tasksignal/task_signal_entity_core.cpp",
+    "src/mod_fs/class_tasksignal/ani/task_signal_listener_ani.cpp",
+    "src/mod_fs/class_tasksignal/ani/task_signal_wrapper.cpp",
+    "src/mod_fs/class_tasksignal/fs_task_signal.cpp",
     "src/mod_fs/class_watcher/ani/fs_watcher_ani.cpp",
     "src/mod_fs/class_watcher/ani/fs_watcher_wrapper.cpp",
     "src/mod_fs/class_watcher/ani/watch_event_listener.cpp",
@@ -755,6 +758,7 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties/copy_core.cpp",
     "src/mod_fs/properties/copy_dir_core.cpp",
     "src/mod_fs/properties/copy_file_core.cpp",
+    "src/mod_fs/properties/copy_listener/ani/progress_listener_ani.cpp",
     "src/mod_fs/properties/copy_listener/trans_listener_core.cpp",
     "src/mod_fs/properties/create_randomaccessfile_core.cpp",
     "src/mod_fs/properties/create_stream_core.cpp",

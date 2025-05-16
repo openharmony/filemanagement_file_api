@@ -1263,20 +1263,29 @@ export type ProgressListener = (progress: Progress) => void;
 
 export class TaskSignal {
   private nativeTaskSignal: long = 0;
+
   private native onCancelNative(): void;
-  private onCancelResolve: (path: string) => void = (path: string): void => {};
+
+  private onCancelResolve: (path: string) => void;
   private onCancelCallback(path: string): void {
     if (this.onCancelResolve) {
       this.onCancelResolve(path);
     }
   }
+
   native cancel(): void;
+
   onCancel(): Promise<string> {
-    return new Promise<string>((resolve: (path: string) => void, reject: (e: BusinessError<void>) => void): void => {
+    return new Promise<string>((resolve: (result: string) => void, reject: (e: BusinessError<void>) => void): void => {
       this.onCancelResolve = resolve;
-      this.onCancelNative();
+      try {
+        this.onCancelNative();
+      } catch (e: BusinessError<void>) {
+        reject(e);
+      }
     });
   }
+
 }
 
 export interface CopyOptions {
