@@ -71,6 +71,8 @@ struct CommonFunc {
     static unsigned int ConvertCjFlags(unsigned int &flags);
     static void FsReqCleanup(uv_fs_t* req);
     static std::string GetModeFromFlags(unsigned int flags);
+    static std::tuple<int, void *, size_t, int64_t> GetWriteArg(
+        void *buffer, int64_t length, int64_t offset, const std::string& encode);
 };
 
 struct ConflictFiles {

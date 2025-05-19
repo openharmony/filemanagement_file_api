@@ -301,7 +301,7 @@ RetDataI64 FfiOHOSFileFsReadCur(int32_t fd, char* buffer, int64_t bufLen, size_t
 RetDataI64 FfiOHOSFileFsWrite(int32_t fd, char* buffer, size_t length, int64_t offset, const char* encode)
 {
     LOGI("FS_TEST::FfiOHOSFileFsWrite");
-    auto ret = FileFsImpl::Write(fd, buffer, length, offset, encode);
+    auto ret = FileFsImpl::Write(fd, reinterpret_cast<void *>(buffer), length, offset, encode);
     if (ret.code != SUCCESS_CODE) {
         ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
         return ret;
@@ -313,7 +313,7 @@ RetDataI64 FfiOHOSFileFsWrite(int32_t fd, char* buffer, size_t length, int64_t o
 RetDataI64 FfiOHOSFileFsWriteCur(int32_t fd, char* buffer, size_t length, const char* encode)
 {
     LOGI("FS_TEST::FfiOHOSFileFsWriteCur");
-    auto ret = FileFsImpl::WriteCur(fd, buffer, length, encode);
+    auto ret = FileFsImpl::WriteCur(fd, reinterpret_cast<void *>(buffer), length, encode);
     if (ret.code != SUCCESS_CODE) {
         ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
         return ret;

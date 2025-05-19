@@ -845,24 +845,17 @@ RetDataI64 FileFsImpl::ReadCur(int32_t fd, char* buf, int64_t bufLen, size_t len
     return ret;
 }
 
-RetDataI64 FileFsImpl::Write(int32_t fd, char* buf, size_t length, int64_t offset, std::string encode)
+RetDataI64 FileFsImpl::Write(int32_t fd, void* buf, size_t length, int64_t offset, std::string encode)
 {
     LOGI("FS_TEST::FileFsImpl::Write start");
     RetDataI64 ret = { .code = EINVAL, .data = 0 };
     if (fd < 0) {
         LOGE("Invalid fd");
         return ret;
-    } else if (length > UINT_MAX) {
-        LOGE("Invalid arraybuffer");
-        return ret;
-    }
-    if (offset < 0) {
-        LOGE("option.offset shall be positive number");
-        return ret;
     }
 
-    auto [state, bufGuard, buff, len, offsetResult] =
-        FileFs::GetWriteArg(buf, length, offset, encode);
+    auto [state, buff, len, offsetResult] =
+        CommonFunc::GetWriteArg(buf, length, offset, encode);
     if (state != SUCCESS_CODE) {
         LOGE("Failed to resolve buf and options");
         return {state, 0};
@@ -887,7 +880,7 @@ RetDataI64 FileFsImpl::Write(int32_t fd, char* buf, size_t length, int64_t offse
     return ret;
 }
 
-RetDataI64 FileFsImpl::WriteCur(int32_t fd, char* buf, size_t length, std::string encode)
+RetDataI64 FileFsImpl::WriteCur(int32_t fd, void* buf, size_t length, std::string encode)
 {
     LOGI("FS_TEST::FileFsImpl::Write start");
     RetDataI64 ret = { .code = EINVAL, .data = 0 };
@@ -895,13 +888,9 @@ RetDataI64 FileFsImpl::WriteCur(int32_t fd, char* buf, size_t length, std::strin
         LOGE("Invalid fd");
         return ret;
     }
-    if (length > UINT_MAX) {
-        LOGE("Invalid arraybuffer");
-        return ret;
-    }
 
-    auto [state, bufGuard, buff, len, offsetResult] =
-        FileFs::GetWriteArg(buf, length, 0, encode);
+    auto [state, buff, len, offsetResult] =
+        CommonFunc::GetWriteArg(buf, length, 0, encode);
     if (state != SUCCESS_CODE) {
         LOGE("Failed to resolve buf and options");
         return {state, 0};

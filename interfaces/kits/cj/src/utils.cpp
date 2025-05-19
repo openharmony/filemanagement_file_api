@@ -14,6 +14,9 @@
  */
 
 #include "utils.h"
+#include "cj_common_ffi.h"
+#include "macro.h"
+#include "uni_error.h"
 
 namespace OHOS {
 namespace CJSystemapi {
@@ -59,6 +62,23 @@ string CommonFunc::GetModeFromFlags(unsigned int flags)
         mode += ((flags & O_APPEND) ? appendMode : "");
     }
     return mode;
+}
+
+std::tuple<int, void *, size_t, int64_t> CommonFunc::GetWriteArg(
+    void *buffer, int64_t length, int64_t offset, const std::string& encode)
+{
+    if (buffer == nullptr) {
+        return { EINVAL, nullptr, 0, offset };
+    }
+    if (length > UINT_MAX) {
+        LOGE("The Size of buffer is too large");
+        return { EINVAL, nullptr, 0, offset };
+    }
+    if (offset < 0) {
+        LOGE("option.offset shall be positive number");
+        return { EINVAL, nullptr, 0, offset };
+    }
+    return { SUCCESS_CODE, buffer, length, offset };
 }
 
 }
