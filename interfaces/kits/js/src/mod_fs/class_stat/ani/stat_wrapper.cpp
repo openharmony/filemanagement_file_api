@@ -90,7 +90,13 @@ static ani_enum_item GetLocationEnumIndex(ani_env *env, const Location &value)
         return nullptr;
     }
 
-    size_t index = static_cast<size_t>(value) - 1;
+    size_t valueAsSizeT = static_cast<size_t>(value);
+    if (valueAsSizeT < 1) {
+        HILOGE("Invalid Location value: %{private}zu", valueAsSizeT);
+        return nullptr;
+    }
+
+    size_t index = valueAsSizeT - 1;
 
     ani_enum_item enumItem;
     ret = env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
