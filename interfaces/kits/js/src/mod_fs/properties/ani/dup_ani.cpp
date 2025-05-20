@@ -33,7 +33,8 @@ ani_object DupAni::Dup(ani_env *env, [[maybe_unused]] ani_class clazz, ani_doubl
     FsResult<FsFile *> ret = DupCore::DoDup(static_cast<int32_t>(fd));
     if (!ret.IsSuccess()) {
         HILOGE("Dup file failed");
-        ErrorHandler::Throw(env, EINVAL);
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return nullptr;
     }
     const FsFile *file = ret.GetData().value();
