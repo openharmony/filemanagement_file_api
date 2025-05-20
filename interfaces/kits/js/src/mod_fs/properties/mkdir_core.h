@@ -28,7 +28,7 @@ public:
     static FsResult<void> DoMkdir(const std::string& path, std::optional<bool> recursion = std::nullopt);
 };
 constexpr int DIR_DEFAULT_PERM = 0770;
-const std::string PROCEDURE_READTEXT_NAME = "FileIOMkdir";
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
