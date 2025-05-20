@@ -46,7 +46,7 @@ public:
                                       std::shared_ptr<CallbackObjectCore> callback);
 private:
     static std::string GetNetworkIdFromUri(const std::string &uri);
-    static void CallbackComplete(UvEntryCore *entry);
+    static void CallbackComplete(std::shared_ptr<UvEntryCore> entry);
     static void RmDir(const std::string &path);
     static std::string CreateDfsCopyPath();
     static std::string GetFileName(const std::string &path);

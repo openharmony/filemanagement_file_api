@@ -69,13 +69,17 @@ static tuple<bool, uint32_t> ValidAndConvertFlags(const optional<int32_t> &mode)
     uint32_t flags = O_RDONLY;
     if (mode.has_value()) {
         auto modeValue = mode.value();
-        int32_t invalidMode = (O_WRONLY | O_RDWR);
-        if (modeValue < 0 || ((modeValue & invalidMode) == invalidMode)) {
+        if (modeValue < 0) {
             HILOGE("Invalid mode");
             return { false, flags };
         }
         flags = static_cast<uint32_t>(modeValue);
-        (void)FsUtils::ConvertFlags(flags);
+        uint32_t invalidMode = (O_WRONLY | O_RDWR);
+        if ((modeValue & invalidMode) == invalidMode) {
+            HILOGE("Invalid mode");
+            return { false, flags };
+        }
+        flags = FsUtils::ConvertFlags(flags);
     }
     return { true, flags };
 }

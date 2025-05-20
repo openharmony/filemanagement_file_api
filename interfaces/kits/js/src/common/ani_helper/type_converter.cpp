@@ -241,7 +241,7 @@ std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(
     if (env->Array_New_Ref(itemCls, length, nullptr, &result) != ANI_OK) {
         return { false, result };
     }
-    for (int i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < length; i++) {
         auto [ret, item] = TypeConverter::ToAniString(env, strList[i]);
         if (!ret) {
             return { false, nullptr };

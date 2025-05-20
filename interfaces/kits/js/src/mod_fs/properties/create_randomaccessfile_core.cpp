@@ -113,8 +113,7 @@ static tuple<bool, uint32_t, int64_t, int64_t> ValidAndConvertFlags(const option
             HILOGE("Invalid flags");
             return {false, flags, start, end};
         }
-        flags = static_cast<uint32_t>(modeValue);
-        (void)FsUtils::ConvertFlags(flags);
+        flags = FsUtils::ConvertFlags(static_cast<uint32_t>(modeValue));
     }
     if (options.has_value()) {
         auto [succOpt, start, end] = ValidRafOptions(options);

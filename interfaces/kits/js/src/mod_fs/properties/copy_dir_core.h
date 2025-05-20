@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_COPYDIR_CORE_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_COPYDIR_CORE_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_COPY_DIR_CORE_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_COPY_DIR_CORE_H
 
 #include <optional>
 #include <string>
@@ -56,4 +56,4 @@ struct ConflictFiles {
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_COPYDIR_CORE_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_COPY_DIR_CORE_H

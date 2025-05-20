@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "copydir_ani.h"
+#include "copy_dir_ani.h"
 
 #include <optional>
-#include "copydir_core.h"
+#include "copy_dir_core.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
