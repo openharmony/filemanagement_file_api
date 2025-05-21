@@ -60,12 +60,12 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::ToOptionalInt32(ani_env 
     }
 
     ani_double doubleValue;
-    if (ANI_OK == env->Object_CallMethodByName_Double(value, "doubleValue", nullptr, &doubleValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Double(value, "toDouble", nullptr, &doubleValue)) {
         return { true, std::make_optional(static_cast<int32_t>(doubleValue)) };
     }
 
     ani_int intValue;
-    if (ANI_OK == env->Object_CallMethodByName_Int(value, "intValue", nullptr, &intValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Int(value, "toInt", nullptr, &intValue)) {
         return { true, std::make_optional(intValue) };
     }
 
@@ -85,12 +85,12 @@ std::tuple<bool, std::optional<int64_t>> TypeConverter::ToOptionalInt64(ani_env 
     }
 
     ani_double doubleValue;
-    if (ANI_OK == env->Object_CallMethodByName_Double(value, "doubleValue", nullptr, &doubleValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Double(value, "toDouble", nullptr, &doubleValue)) {
         return { true, std::make_optional(static_cast<int64_t>(doubleValue)) };
     }
 
     ani_long longValue;
-    if (ANI_OK == env->Object_CallMethodByName_Long(value, "longValue", nullptr, &longValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Long(value, "toLong", nullptr, &longValue)) {
         return { true, std::make_optional(longValue) };
     }
 
@@ -163,7 +163,7 @@ static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrF
     env->Object_InstanceOf(pathOrFd, doubleClass, &isFd);
     if (isFd) {
         ani_double doubleValue;
-        if (ANI_OK != env->Object_CallMethodByName_Double(pathOrFd, "doubleValue", nullptr, &doubleValue)) {
+        if (ANI_OK != env->Object_CallMethodByName_Double(pathOrFd, "toDouble", nullptr, &doubleValue)) {
             HILOGE("Parse file path failed");
             return { false, 0 };
         }
@@ -177,7 +177,7 @@ static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrF
     env->Object_InstanceOf(pathOrFd, intClass, &isFd);
     if (isFd) {
         ani_int fd;
-        if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "intValue", nullptr, &fd)) {
+        if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "toInt", nullptr, &fd)) {
             HILOGE("Parse file path failed");
             return { false, 0 };
         }

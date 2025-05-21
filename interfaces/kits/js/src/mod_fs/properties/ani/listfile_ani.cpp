@@ -65,7 +65,7 @@ tuple<bool, int> ParseIntParam(ani_env *env, ani_object obj, string tag)
     }
     ani_int result_ref_res;
     if (ANI_OK != env->Object_CallMethodByName_Int(
-        static_cast<ani_object>(result_ref), "intValue", nullptr, &result_ref_res)) {
+        static_cast<ani_object>(result_ref), "toInt", nullptr, &result_ref_res)) {
         result = -1;
         return { false, result };
     }
@@ -87,7 +87,7 @@ tuple<bool, optional<double>> ParseDoubleParam(ani_env *env, ani_object obj, str
 
     ani_double result_ref_res;
     if (ANI_OK != env->Object_CallMethodByName_Double(
-        static_cast<ani_object>(result_ref), "doubleValue", nullptr, &result_ref_res)) {
+        static_cast<ani_object>(result_ref), "toDouble", nullptr, &result_ref_res)) {
         return { false, nullopt };
     }
     double result = static_cast<double>(result_ref_res);
