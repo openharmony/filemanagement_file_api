@@ -22,11 +22,16 @@
 
 #include <ani.h>
 
+#include "event_handler.h"
+#include "event_runner.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace std;
+
+static thread_local shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler;
 
 class AniHelper {
 public:
@@ -129,15 +134,21 @@ public:
         return { true, make_optional<string>(move(encoding)) };
     }
 
-    static ani_env* GetThreadEnv(ani_vm *vm)
+    static ani_env *&GetThreadEnvStorage()
     {
-        static thread_local ani_env *env {nullptr};
+        static thread_local ani_env *env { nullptr };
+        return env;
+    }
+
+    static ani_env *GetThreadEnv(ani_vm *vm)
+    {
+        auto &env = GetThreadEnvStorage();
         if (env != nullptr) {
             return env;
         }
 
-        ani_option interopEnabled {"--interop=enable", nullptr};
-        ani_options aniArgs {1, &interopEnabled};
+        ani_option interopEnabled { "--interop=enable", nullptr };
+        ani_options aniArgs { 1, &interopEnabled };
         auto status = vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
         if (status != ANI_OK) {
             status = vm->GetEnv(ANI_VERSION_1, &env);
@@ -150,6 +161,45 @@ public:
         }
 
         return env;
+    }
+
+    static void DetachThreadEnv(ani_vm *vm)
+    {
+        if (vm && GetThreadEnvStorage()) {
+            auto status = vm->DetachCurrentThread();
+            if (status != ANI_OK) {
+                HILOGE("Detach thread env from vm failed! status: %{private}d", status);
+                return;
+            }
+            GetThreadEnvStorage() = nullptr;
+        }
+    }
+
+    static bool SendEventToMainThread(const function<void()> func)
+    {
+        if (func == nullptr) {
+            HILOGE("func is nullptr!");
+            return false;
+        }
+
+        if (mainHandler == nullptr) {
+            shared_ptr<OHOS::AppExecFwk::EventRunner> runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+            if (!runner) {
+                HILOGE("get main event runner failed!");
+                return false;
+            }
+            mainHandler = CreateSharedPtr<OHOS::AppExecFwk::EventHandler>(runner);
+            if (mainHandler == nullptr) {
+                HILOGE("Failed to request heap memory.");
+                return false;
+            }
+        }
+        bool succ = mainHandler->PostTask(func, "", 0, OHOS::AppExecFwk::EventQueue::Priority::HIGH, {});
+        if (!succ) {
+            HILOGE("Failed to post task to main thread.");
+            return false;
+        }
+        return true;
     }
 };
 
