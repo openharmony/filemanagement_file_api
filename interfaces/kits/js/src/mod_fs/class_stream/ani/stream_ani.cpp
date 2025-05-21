@@ -190,8 +190,9 @@ ani_double StreamAni::Write(ani_env *env, [[maybe_unused]] ani_object object, an
         }
         auto ret = fsStream->Write(buffer, op);
         if (!ret.IsSuccess()) {
-            HILOGE("write buffer failed!");
-            ErrorHandler::Throw(env, EINVAL);
+            HILOGE("write string failed!");
+            const auto &err = ret.GetError();
+            ErrorHandler::Throw(env, err);
             return -1;
         }
         return ret.GetData().value();
@@ -207,9 +208,9 @@ ani_double StreamAni::Write(ani_env *env, [[maybe_unused]] ani_object object, an
         }
         auto ret = fsStream->Write(buffer, op);
         if (!ret.IsSuccess()) {
+            HILOGE("write buffer failed!");
             const auto &err = ret.GetError();
             ErrorHandler::Throw(env, err);
-            HILOGE("write buffer failed!");
             return -1;
         }
         return static_cast<double>(ret.GetData().value());

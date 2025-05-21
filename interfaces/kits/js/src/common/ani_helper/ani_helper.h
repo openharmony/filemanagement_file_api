@@ -175,7 +175,7 @@ public:
         }
     }
 
-    static bool SendEventToMainThread(const function<void()> func)
+    static bool SendEventToMainThread(const function<void()> &func)
     {
         if (func == nullptr) {
             HILOGE("func is nullptr!");

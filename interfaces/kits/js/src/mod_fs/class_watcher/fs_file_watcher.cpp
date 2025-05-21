@@ -28,6 +28,8 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 
+mutex FsFileWatcher::watchMutex_;
+
 FsFileWatcher::FsFileWatcher() {}
 
 FsFileWatcher::~FsFileWatcher() {}
@@ -115,12 +117,10 @@ int32_t FsFileWatcher::NotifyToWatchNewEvents(const string &fileName, const int3
 int32_t FsFileWatcher::CloseNotifyFd()
 {
     int32_t closeRet = ERRNO_NOERR;
-    int32_t fd = notifyFd_;
 
     if (watcherInfoSet_.size() == 0) {
         run_ = false;
-        notifyFd_ = -1;
-        closeRet = close(fd);
+        closeRet = close(notifyFd_);
         if (closeRet != 0) {
             HILOGE("Failed to stop notify close fd errCode:%{public}d", errno);
         }
@@ -132,7 +132,22 @@ int32_t FsFileWatcher::CloseNotifyFd()
         eventFd_ = -1;
         DestroyTaskThead();
     }
+
+    closed_ = false;
     return closeRet;
+}
+
+int FsFileWatcher::CloseNotifyFdLocked()
+{
+    {
+        lock_guard<mutex> lock(readMutex_);
+        closed_ = true;
+        if (reading_) {
+            HILOGE("close while reading");
+            return ERRNO_NOERR;
+        }
+    }
+    return CloseNotifyFd();
 }
 
 int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
@@ -150,17 +165,26 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
         HILOGE("The Watched file does not exist, and the remaining monitored events will be invalid.");
         return ERRNO_NOERR;
     }
-    if (inotify_rm_watch(notifyFd_, info->wd) == -1) {
-        int32_t rmErr = errno;
+    int oldWd = -1;
+    {
+        lock_guard<mutex> lock(readMutex_);
+        if (!(closed_ && reading_)) {
+            oldWd = inotify_rm_watch(notifyFd_, info->wd);
+        } else {
+            HILOGE("rm watch fail");
+        }
+    }
+    if (oldWd == -1) {
+        int rmErr = errno;
         if (access(info->fileName.c_str(), F_OK) == 0) {
             HILOGE("Failed to stop notify errCode:%{public}d", rmErr);
             wdFileNameMap_.erase(info->fileName);
-            CloseNotifyFd();
+            CloseNotifyFdLocked();
             return rmErr;
         }
     }
     wdFileNameMap_.erase(info->fileName);
-    return CloseNotifyFd();
+    return CloseNotifyFdLocked();
 }
 
 void FsFileWatcher::ReadNotifyEvent()
@@ -180,6 +204,28 @@ void FsFileWatcher::ReadNotifyEvent()
         event = reinterpret_cast<inotify_event *>(buf + index);
         NotifyEvent(event);
         index += sizeof(struct inotify_event) + static_cast<int32_t>(event->len);
+    }
+}
+
+void FsFileWatcher::ReadNotifyEventLocked()
+{
+    {
+        lock_guard<mutex> lock(readMutex_);
+        if (closed_) {
+            HILOGE("read after close");
+            return;
+        }
+        reading_ = true;
+    }
+    ReadNotifyEvent();
+    {
+        lock_guard<mutex> lock(readMutex_);
+        reading_ = false;
+        if (closed_) {
+            HILOGE("close after read");
+            CloseNotifyFd();
+            return;
+        }
     }
 }
 
@@ -213,7 +259,7 @@ void FsFileWatcher::GetNotifyEvent()
                 return;
             }
             if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
-                ReadNotifyEvent();
+                ReadNotifyEventLocked();
             }
         } else if (ret < 0 && errno == EINTR) {
             continue;
