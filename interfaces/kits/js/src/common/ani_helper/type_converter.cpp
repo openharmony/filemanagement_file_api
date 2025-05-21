@@ -59,11 +59,6 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::ToOptionalInt32(ani_env 
         return { true, std::nullopt };
     }
 
-    ani_double doubleValue;
-    if (ANI_OK == env->Object_CallMethodByName_Double(value, "toDouble", nullptr, &doubleValue)) {
-        return { true, std::make_optional(static_cast<int32_t>(doubleValue)) };
-    }
-
     ani_int intValue;
     if (ANI_OK == env->Object_CallMethodByName_Int(value, "toInt", nullptr, &intValue)) {
         return { true, std::make_optional(intValue) };
@@ -82,11 +77,6 @@ std::tuple<bool, std::optional<int64_t>> TypeConverter::ToOptionalInt64(ani_env 
     env->Reference_IsUndefined(value, &isUndefined);
     if (isUndefined) {
         return { true, std::nullopt };
-    }
-
-    ani_double doubleValue;
-    if (ANI_OK == env->Object_CallMethodByName_Double(value, "toDouble", nullptr, &doubleValue)) {
-        return { true, std::make_optional(static_cast<int64_t>(doubleValue)) };
     }
 
     ani_long longValue;
@@ -156,20 +146,6 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::EnumToInt32(ani_env *env
 static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrFd)
 {
     ani_boolean isFd = false;
-
-    auto doubleClassDesc = BoxedTypes::Double::classDesc.c_str();
-    ani_class doubleClass;
-    env->FindClass(doubleClassDesc, &doubleClass);
-    env->Object_InstanceOf(pathOrFd, doubleClass, &isFd);
-    if (isFd) {
-        ani_double doubleValue;
-        if (ANI_OK != env->Object_CallMethodByName_Double(pathOrFd, "toDouble", nullptr, &doubleValue)) {
-            HILOGE("Parse file path failed");
-            return { false, 0 };
-        }
-        int32_t fd = static_cast<int32_t>(doubleValue);
-        return { true, fd };
-    }
 
     auto intClassDesc = BoxedTypes::Int::classDesc.c_str();
     ani_class intClass;
