@@ -14,34 +14,16 @@
  */
 
 #include "stream_impl.h"
-#include "securec.h"
-
 #include <memory>
 #include <tuple>
+#include "securec.h"
+#include "utils.h"
 
 using namespace std;
 
 namespace OHOS {
 namespace CJSystemapi {
 namespace FileFs {
-
-std::tuple<int, std::unique_ptr<char[]>, size_t> DecodeString(const std::string& buffer, const std::string& encode)
-{
-    std::unique_ptr<char[]> buf = std::make_unique<char[]>(buffer.length() + 1);
-    if (!buf) {
-        return { ENOMEM, nullptr, 0};
-    }
-
-    for (size_t i = 0; i < buffer.length(); i++) {
-        buf[i] = buffer[i];
-    }
-
-    if (encode == "utf-8") {
-        return make_tuple(SUCCESS_CODE, move(buf), buffer.length());
-    } else {
-        return { EINVAL, nullptr, 0};
-    }
-}
 
 std::tuple<int, size_t> GetActualLen(size_t bufLen, size_t bufOff, int64_t offset, int64_t length)
 {
@@ -57,37 +39,6 @@ std::tuple<int, size_t> GetActualLen(size_t bufLen, size_t bufOff, int64_t offse
     }
     retLen = static_cast<size_t>(length);
     return { SUCCESS_CODE, retLen };
-}
-
-tuple<int, unique_ptr<char[]>, void *, size_t, int64_t> GetWriteArg(const std::string& buffer, int64_t length,
-    int64_t offset, const std::string& encode)
-{
-    void *buf = nullptr;
-
-    auto [decodeState, bufferGuard, bufLen] = DecodeString(buffer, encode);
-    if (decodeState != SUCCESS_CODE) {
-        LOGE("Illegal write buffer or encoding");
-        return { decodeState, nullptr, nullptr, 0, 0 };
-    } else {
-        buf = bufferGuard.get();
-    }
-    if (bufLen > UINT_MAX) {
-        LOGE("The Size of buffer is too large");
-        return { false, nullptr, nullptr, 0, 0 };
-    }
-
-    auto [lenState, retLen] = GetActualLen(bufLen, 0, offset, length);
-    if (lenState != SUCCESS_CODE) {
-        LOGE("Failed to get actual length");
-        return { lenState, nullptr, nullptr, 0, 0 };
-    }
-
-    if (offset < 0) {
-        LOGE("option.offset shall be positive number");
-        return { EINVAL, nullptr, nullptr, 0, 0 };
-    }
-
-    return { SUCCESS_CODE, move(bufferGuard), buf, retLen, offset };
 }
 
 tuple<int, std::unique_ptr<char[]>, size_t, int64_t> GetReadArg(size_t bufLen, int64_t length, int64_t offset)
@@ -193,13 +144,13 @@ tuple<int, int64_t> StreamImpl::Read(uint8_t* buffer, size_t buLen, int64_t leng
     return ReadImpl(buf, len, filp, buffer);
 }
 
-tuple<int, int64_t> StreamImpl::WriteCur(const std::string& buffer, int64_t length, const std::string& encode)
+tuple<int, int64_t> StreamImpl::WriteCur(void* buffer, int64_t length, const std::string& encode)
 {
     FILE *filp = nullptr;
     filp = fp_.get();
 
-    auto [state, bufGuard, buf, len, offsetResult] =
-        GetWriteArg(buffer, length, 0.0, encode);
+    auto [state, buf, len, offsetResult] =
+        CommonFunc::GetWriteArg(buffer, length, 0, encode);
     if (state != SUCCESS_CODE) {
         LOGE("Failed to resolve buf and options");
         return {GetErrorCode(state), 0};
@@ -213,14 +164,13 @@ tuple<int, int64_t> StreamImpl::WriteCur(const std::string& buffer, int64_t leng
     return {SUCCESS_CODE, static_cast<int64_t>(writeLen)};
 }
 
-tuple<int, int64_t> StreamImpl::Write(const std::string& buffer, int64_t length, int64_t offset,
-    const std::string& encode)
+tuple<int, int64_t> StreamImpl::Write(void* buffer, int64_t length, int64_t offset, const std::string& encode)
 {
     FILE *filp = nullptr;
     filp = fp_.get();
 
-    auto [state, bufGuard, buf, len, offsetResult] =
-        GetWriteArg(buffer, length, offset, encode);
+    auto [state, buf, len, offsetResult] =
+        CommonFunc::GetWriteArg(buffer, length, offset, encode);
     if (state != SUCCESS_CODE) {
         LOGE("Failed to resolve buf and options");
         return {GetErrorCode(state), 0};
