@@ -19,11 +19,10 @@
 #include <cstring>
 #include <optional>
 
-#include <securec.h>
-
 #include "ani_signature.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "securec.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
