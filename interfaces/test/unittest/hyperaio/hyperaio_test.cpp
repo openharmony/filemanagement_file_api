@@ -49,8 +49,8 @@ namespace {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartOpenReqs_0000";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
-        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
+        EXPECT_EQ((result & HYPERAIO_APP_PERMISSION) == 0, true);
+        if ((result & HYPERAIO_APP_PERMISSION) == 0) {
             return;
         }
         result = hyperAio_->CtxInit(nullptr);
@@ -71,8 +71,8 @@ namespace {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartOpenReqs_0001";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
-        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
+        EXPECT_EQ((result & HYPERAIO_APP_PERMISSION) == 0, true);
+        if ((result & HYPERAIO_APP_PERMISSION) == 0) {
             return;
         }
         result = hyperAio_->CtxInit(&callBack);
@@ -99,8 +99,8 @@ namespace {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartOpenReqs_0002";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
-        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
+        EXPECT_EQ((result & HYPERAIO_APP_PERMISSION) == 0, true);
+        if ((result & HYPERAIO_APP_PERMISSION) == 0) {
             return;
         }
         OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
@@ -123,8 +123,8 @@ namespace {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartReadReqs_0000";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
-        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
+        EXPECT_EQ((result & HYPERAIO_APP_PERMISSION) == 0, true);
+        if ((result & HYPERAIO_APP_PERMISSION) == 0) {
             return;
         }
         result = hyperAio_->CtxInit(nullptr);
@@ -145,8 +145,8 @@ namespace {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartReadReqs_0001";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
-        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
+        EXPECT_EQ((result & HYPERAIO_APP_PERMISSION) == 0, true);
+        if ((result & HYPERAIO_APP_PERMISSION) == 0) {
             return;
         }
         result = hyperAio_->CtxInit(&callBack);
@@ -173,8 +173,8 @@ namespace {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartReadReqs_0002";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
-        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
+        EXPECT_EQ((result & HYPERAIO_APP_PERMISSION) == 0, true);
+        if ((result & HYPERAIO_APP_PERMISSION) == 0) {
             return;
         }
         ReadInfo readInfo = {0, len, 0, nullptr, userData};
@@ -197,8 +197,8 @@ namespace {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartCancelReqs_0000";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
-        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
+        EXPECT_EQ((result & HYPERAIO_APP_PERMISSION) == 0, true);
+        if ((result & HYPERAIO_APP_PERMISSION) == 0) {
             return;
         }
         result = hyperAio_->CtxInit(nullptr);
@@ -219,8 +219,8 @@ namespace {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartCancelReqs_0001";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
-        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
+        EXPECT_EQ((result & HYPERAIO_APP_PERMISSION) == 0, true);
+        if ((result & HYPERAIO_APP_PERMISSION) == 0) {
             return;
         }
         result = hyperAio_->CtxInit(&callBack);
@@ -247,8 +247,8 @@ namespace {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartCancelReqs_0002";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
-        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
+        EXPECT_EQ((result & HYPERAIO_APP_PERMISSION) == 0, true);
+        if ((result & HYPERAIO_APP_PERMISSION) == 0) {
             return;
         }
         CancelInfo cancelInfo = {userData, 0};
