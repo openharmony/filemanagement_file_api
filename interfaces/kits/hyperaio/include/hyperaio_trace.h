@@ -28,7 +28,7 @@ public:
     ~HyperaioTrace();
     void End();
 private:
-    std::string value;
+    std::string value_;
     bool isFinished_{false};
 };
 } // namespace HyperAio
