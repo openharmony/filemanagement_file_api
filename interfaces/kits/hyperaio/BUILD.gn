@@ -47,7 +47,10 @@ ohos_shared_library("HyperAio") {
     }
   }
 
-  sources = [ "src/hyperaio.cpp" ]
+  sources = [ 
+    "src/hyperaio.cpp",
+    "src/hyperaio_trace.cpp"
+  ]
 
   public_configs = [ ":hyperaio_config" ]
 
@@ -58,7 +61,8 @@ ohos_shared_library("HyperAio") {
     "liburing:liburing",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "access_token:libaccesstoken_sdk"
+    "access_token:libaccesstoken_sdk",
+    "hitrace:hitrace_meter",
   ]
 
   install_images = [ "system" ]

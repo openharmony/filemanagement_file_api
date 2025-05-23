@@ -18,6 +18,7 @@
 #include <chrono>
 #include <thread>
 #include "accesstoken_kit.h"
+#include "hyperaio_trace.h"
 #include "libhilog.h"
 #include "ipc_skeleton.h"
 
@@ -42,6 +43,7 @@ static bool HasAccessIouringPermission()
 
 uint32_t HyperAio::SupportIouring()
 {
+    HyperAioTrace trace("SupportIouring");
     uint32_t flags = 0;
     if (HasAccessIouringPermission()) {
         flags |= HYERAIO_APP_PERMISSION;
@@ -51,6 +53,7 @@ uint32_t HyperAio::SupportIouring()
 
 int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
 {
+    HyperAioTrace trace("CtxInit");
     if (callBack == nullptr) {
         HILOGE("callBack is null");
         return -EINVAL;
@@ -84,6 +87,7 @@ struct io_uring_sqe* HyperAio::GetSqeWithRetry(struct io_uring *ring)
 
 int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 {
+    HyperAioTrace trace("StartOpenReqs" + std::to_string(req->reqNum));
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
@@ -125,6 +129,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 
 int32_t HyperAio::StartReadReqs(ReadReqs *req)
 {
+    HyperAioTrace trace("StartReadReqs" + std::to_string(req->reqNum));
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
@@ -165,6 +170,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
 
 int32_t HyperAio::StartCancelReqs(CancelReqs *req)
 {
+    HyperAioTrace trace("StartCancelReqs" + std::to_string(req->reqNum));
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
