@@ -21,14 +21,14 @@ namespace HyperAio {
 HyperaioTrace::HyperaioTrace(const std::string& value, bool isShowLog) : value_(value)
 {
     if (isShowLog) {
-        HILOGEI("%{public}s", value_.c_str());
+        HILOGI("%{public}s", value_.c_str());
     }
     StartTrace(HITRACE_TAG_OHOS, "[HyperAio]" + value);
 }
 
 void HyperaioTrace::End()
 {
-    if(!isFinished_) {
+    if (!isFinished_) {
         FinishTrace(HITRACE_TAG_OHOS);
         isFinished_ = true;
     }
