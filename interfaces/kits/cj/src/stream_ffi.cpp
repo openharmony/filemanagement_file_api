@@ -51,7 +51,8 @@ RetDataI64 FfiOHOSStreamWriteCur(int64_t id, const char* buffer, int64_t length,
         LOGE("Stream instance not exist %{public}" PRId64, id);
         return ret;
     }
-    auto [state, writeLen] = instance->WriteCur(buffer, length, encode);
+    auto [state, writeLen] =
+        instance->WriteCur(reinterpret_cast<void *>(const_cast<char*>(buffer)), length, encode);
     ret.code = state;
     if (state != SUCCESS_CODE) {
         ret.data = 0;
@@ -70,7 +71,8 @@ RetDataI64 FfiOHOSStreamWrite(int64_t id, const char* buffer, int64_t length, in
         LOGE("Stream instance not exist %{public}" PRId64, id);
         return ret;
     }
-    auto [state, writeLen] = instance->Write(buffer, length, offset, encode);
+    auto [state, writeLen] =
+        instance->Write(reinterpret_cast<void *>(const_cast<char*>(buffer)), length, offset, encode);
     ret.code = state;
     if (state != SUCCESS_CODE) {
         ret.data = 0;
