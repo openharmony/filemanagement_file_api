@@ -36,10 +36,15 @@ public:
     void SetTaskSignalListener(TaskSignalListener *signalListener);
     void MarkRemoteTask();
     void SetFileInfoOfRemoteTask(const std::string &sessionName, const std::string &filePath);
+    void MarkDfsTask();
+    void SetCopyTaskUri(const std::string &srcUri, const std::string &dstUri);
     std::atomic_bool needCancel_{ false };
     std::atomic_bool remoteTask_{ false };
+    std::atomic_bool dfsCopyTask_{ false };
     std::string sessionName_ = std::string("");
     std::string filePath_ = std::string("");
+    std::string srcUri_ = std::string("");
+    std::string dstUri_ = std::string("");
 private:
     TaskSignalListener *signalListener_;
 };

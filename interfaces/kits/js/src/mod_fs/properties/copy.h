@@ -45,41 +45,10 @@ struct ReceiveInfo {
 struct JsCallbackObject {
     napi_env env = nullptr;
     LibN::NRef nRef;
-    int32_t notifyFd = -1;
-    int32_t eventFd = -1;
-    std::vector<std::pair<int, std::shared_ptr<ReceiveInfo>>> wds;
     uint64_t totalSize = 0;
     uint64_t progressSize = 0;
     uint64_t maxProgressSize = 0;
-    int32_t errorCode = 0;
-    std::thread notifyHandler;
-    std::mutex readMutex;
-    std::condition_variable cv;
-    std::mutex cvLock;
-    bool reading = false;
-    bool closed = false;
     explicit JsCallbackObject(napi_env env, LibN::NVal jsVal) : env(env), nRef(jsVal) {}
-
-    void CloseFd()
-    {
-        if (eventFd != -1) {
-            close(eventFd);
-            eventFd = -1;
-        }
-        if (notifyFd == -1) {
-            return;
-        }
-        for (auto item : wds) {
-            inotify_rm_watch(notifyFd, item.first);
-        }
-        close(notifyFd);
-        notifyFd = -1;
-    }
-
-    ~JsCallbackObject()
-    {
-        CloseFd();
-    }
 };
 
 struct FileInfos {
@@ -130,7 +99,6 @@ public:
     static std::map<FileInfos, std::shared_ptr<JsCallbackObject>> jsCbMap_;
     static void UnregisterListener(std::shared_ptr<FileInfos> fileInfos);
     static std::recursive_mutex mutex_;
-    static bool IsMtpDeviceFilePath(const std::string &path);
 
 private:
     // operator of napi
