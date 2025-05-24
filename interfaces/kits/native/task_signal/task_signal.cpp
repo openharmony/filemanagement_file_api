@@ -17,26 +17,32 @@
 
 #include "distributed_file_daemon_manager.h"
 #include "filemgmt_libhilog.h"
-#include <sys/xattr.h>
+#include "copy/file_copy_manager.h"
 
 namespace OHOS {
 namespace DistributedFS {
 namespace ModuleTaskSignal {
 using namespace FileManagement;
-constexpr int CANCEL_ERR = -3;
-const char CANCEL_XATTR_KEY[] = {"user.cancelcopy"};
-const std::string MTP_PATH_PREFIX = "/storage/External/mtp";
-
 int32_t TaskSignal::Cancel()
 {
     HILOGD("TaskSignal Cancel in.");
-    if (remoteTask_.load()) {
-        if (sessionName_.empty()) {
-            HILOGE("TaskSignal::Cancel sessionName is empty");
-            return CANCEL_ERR;
+    if (dfsCopyTask_.load()) {
+        auto ret = Storage::DistributedFile::FileCopyManager::GetInstance()->Cancel(srcUri_, dstUri_);
+        if (ret != 0) {
+            HILOGE("Cancel failed, ret = %{public}d", ret);
+            return ret;
         }
-        auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().
+        OnCancel();
+        return ret;
+    } 
+    if (remoteTask_.load()) {
+        int32_t ret = 0;
+        if (sessionName_.empty()) {
+            ret = Storage::DistributedFile::FileCopyManager::GetInstance()->Cancel(srcUri_, dstUri_);
+        } else {
+            ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().
                 CancelCopyTask(sessionName_);
+        }
         HILOGD("taskSignal.cancel sessionName = %{public}s", sessionName_.c_str());
         if (ret != 0) {
             HILOGI("CancelCopyTask failed, ret = %{public}d", ret);
@@ -44,13 +50,6 @@ int32_t TaskSignal::Cancel()
         }
         OnCancel();
         return ret;
-    } else {
-        if (filePath_.rfind(MTP_PATH_PREFIX, 0) != std::string::npos) {
-            std::string value = "";
-            if (setxattr(filePath_.c_str(), CANCEL_XATTR_KEY, value.c_str(), value.size(), 0) < 0) {
-                HILOGE("cancelcopy setxattr fail, errno is %{public}d", errno);
-            }
-        }
     }
     needCancel_.store(true);
     return 0;
@@ -89,11 +88,22 @@ void TaskSignal::MarkRemoteTask()
     remoteTask_.store(true);
 }
 
+void TaskSignal::MarkDfsTask()
+{
+    dfsCopyTask_.store(true);
+}
+
 void TaskSignal::SetFileInfoOfRemoteTask(const std::string &sessionName, const std::string &filePath)
 {
     HILOGD("SetFileInfoOfRemoteTask sessionName = %{public}s", sessionName.c_str());
     sessionName_ = sessionName;
     filePath_ = filePath;
+}
+
+void TaskSignal::SetCopyTaskUri(const std::string &srcUri, const std::string &dstUri)
+{
+    srcUri_ = srcUri;
+    dstUri_ = dstUri;
 }
 } // namespace ModuleTaskSignal
 } // namespace DistributedFS

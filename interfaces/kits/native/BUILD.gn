@@ -96,6 +96,7 @@ ohos_shared_library("task_signal_native") {
     deps = [ "${utils_path}/filemgmt_libhilog:filemgmt_libhilog" ]
 
     external_deps = [
+      "ability_runtime:abilitykit_native",
       "c_utils:utils",
       "dfs_service:distributed_file_daemon_kit_inner",
       "hilog:libhilog",

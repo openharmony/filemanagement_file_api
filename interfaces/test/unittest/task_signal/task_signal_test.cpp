@@ -134,5 +134,25 @@ HWTEST_F(TaskSignalTest, Task_Signal_MarkRemoteTask_0000, testing::ext::TestSize
     auto ret = signal->Cancel();
     EXPECT_EQ(ret, 4);
 }
+
+/**
+ * @tc.name: Task_Signal_MarkDfsTask_0000
+ * @tc.desc: Test function of MarkDfsTask() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: NAN
+ */
+HWTEST_F(TaskSignalTest, Task_Signal_MarkDfsTask_0000, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TaskSignalTest-begin Task_Signal_MarkDfsTask_0000";
+    auto signal = std::make_shared<TaskSignal>();
+    signal->MarkDfsTask();
+    std::string localUri = "/data/test/test.txt";
+    std::string dstUri = "/data/test/test.txt";
+    signal->SetCopyTaskUri(localUri, dstUri);
+    auto ret = signal->Cancel();
+    EXPECT_EQ(ret, 0);
+}
 } // namespace DistributedFS
 } // namespace OHOS
