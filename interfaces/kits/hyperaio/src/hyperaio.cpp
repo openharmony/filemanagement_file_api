@@ -245,23 +245,23 @@ uint32_t HyperAio::SupportIouring()
 }
 int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
 {
-    return EINVAL;
+    return -ENOTSUP;
 }
 int32_t HyperAio::StartReadReqs(ReadReqs *req)
 {
-    return EINVAL;
+    return -ENOTSUP;
 }
 int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 {
-    return EINVAL;
+    return -ENOTSUP;
 }
 int32_t HyperAio::StartCancelReqs(CancelReqs *req)
 {
-    return EINVAL;
+    return -ENOTSUP;
 }
 int32_t HyperAio::DestroyCtx()
 {
-    return EINVAL;
+    return -ENOTSUP;
 }
 #endif
 }

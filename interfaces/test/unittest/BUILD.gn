@@ -21,7 +21,7 @@ group("unittest") {
     "remote_uri:remote_uri_test",
     "task_signal:task_signal_test",
   ]
-  if (file_api_feature_inner_hyperaio) {
+  if (file_api_feature_hyperaio) {
     deps += [ "hyperaio:hyperaio_test" ]
   }
 }
