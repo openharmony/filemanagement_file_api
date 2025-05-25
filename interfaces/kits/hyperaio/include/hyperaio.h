@@ -44,7 +44,7 @@ struct ReadReqs {
 struct OpenInfo {
     int32_t dfd;
     int32_t flags;
-    mode_t mode;
+    uint32_t mode;
     void *path;
     uint64_t userData;
 };
