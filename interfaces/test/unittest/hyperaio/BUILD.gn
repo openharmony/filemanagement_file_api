@@ -36,6 +36,8 @@ ohos_unittest("hyperaio_test") {
     "c_utils:utilsbase",
     "ipc:ipc_core",
     "googletest:gtest_main",
-    "liburing:liburing",
   ]
+  if (file_api_feature_inner_hyperaio) {
+    deps += [ "liburing:liburing" ]
+  }
 }

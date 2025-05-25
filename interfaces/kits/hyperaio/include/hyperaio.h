@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <thread>
+#ifdef HYPERAIO_USE_LIBURING
 #include "liburing.h"
 
 namespace OHOS {

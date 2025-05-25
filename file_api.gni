@@ -26,4 +26,5 @@ use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 
 declare_args() {
     file_api_read_optimize = false
+    file_api_feature_inner_hyperaio = false
 }

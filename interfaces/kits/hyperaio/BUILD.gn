@@ -15,9 +15,10 @@ import("//build/ohos.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
 group("group_hyperaio") {
-  deps = [
-    ":HyperAio",
-  ]
+  deps = [ ]
+  if (file_api_feature_inner_hyperaio) {
+    deps += [ ":HyperAio" ]
+  }
 }
 
 config("hyperaio_config") {
@@ -59,13 +60,17 @@ ohos_shared_library("HyperAio") {
   external_deps = [
     "c_utils:utils",
     "liburing:liburing",
-    "hilog:libhilog",
     "ipc:ipc_core",
     "access_token:libaccesstoken_sdk",
     "hitrace:hitrace_meter",
   ]
-
+  if (file_api_feature_inner_hyperaio) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   install_images = [ "system" ]
   part_name = "file_api"
   subsystem_name = "filemanagement"
+  if (file_api_feature_inner_hyperaio) {
+    defines = [ "HYPERAIO_USE_LIBURING" ]
+  }
 }

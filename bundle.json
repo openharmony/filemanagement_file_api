@@ -20,7 +20,8 @@
         "SystemCapability.FileManagement.File.Environment.FolderObtain"
       ],
       "features": [
-        "file_api_read_optimize"
+        "file_api_read_optimize",
+        "file_api_feature_inner_hyperaio"
       ],
       "adapted_system_type": [ "mini","small","standard" ],
       "rom": "4096KB",
