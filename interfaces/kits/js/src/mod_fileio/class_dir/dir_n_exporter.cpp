@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,15 +21,15 @@
 #include <mutex>
 #include <sstream>
 
+#include "class_dirent/dirent_entity.h"
+#include "class_dirent/dirent_n_exporter.h"
+#include "common_func.h"
 #include "dir_entity.h"
+#include "n_async_work_callback.h"
+#include "n_async_work_promise.h"
+#include "n_class.h"
+#include "n_func_arg.h"
 #include "securec.h"
-#include "../../common/napi/n_async/n_async_work_callback.h"
-#include "../../common/napi/n_async/n_async_work_promise.h"
-#include "../../common/napi/n_class.h"
-#include "../../common/napi/n_func_arg.h"
-#include "../class_dirent/dirent_entity.h"
-#include "../class_dirent/dirent_n_exporter.h"
-#include "../common_func.h"
 
 namespace OHOS {
 namespace DistributedFS {
