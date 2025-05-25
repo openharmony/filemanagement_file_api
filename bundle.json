@@ -20,7 +20,8 @@
         "SystemCapability.FileManagement.File.Environment.FolderObtain"
       ],
       "features": [
-        "file_api_read_optimize"
+        "file_api_read_optimize",
+        "file_api_feature_hyperaio"
       ],
       "adapted_system_type": [ "mini","small","standard" ],
       "rom": "4096KB",
@@ -45,7 +46,8 @@
             "napi",
             "samgr",
             "app_file_service",
-            "os_account"
+            "os_account",
+            "liburing"
         ],
         "third_party": [
             "e2fsprogs",
@@ -59,7 +61,8 @@
             "//foundation/filemanagement/file_api/interfaces/kits/js:build_kits_js",
             "//foundation/filemanagement/file_api/interfaces/kits/ts/streamrw:streamrw_packages",
             "//foundation/filemanagement/file_api/interfaces/kits/ts/streamhash:streamhash_packages",
-            "//foundation/filemanagement/file_api/interfaces/kits/cj:fs_ffi_packages"
+            "//foundation/filemanagement/file_api/interfaces/kits/cj:fs_ffi_packages",
+            "//foundation/filemanagement/file_api/interfaces/kits/hyperaio:group_hyperaio"
           ],
           "service_group": []
         },
@@ -71,6 +74,15 @@
                 "remote_uri.h"
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/native/remote_uri"
+            }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/hyperaio:HyperAio",
+            "header": {
+              "header_files": [
+                "hyperaio.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/hyperaio/include"
             }
           },
           {
