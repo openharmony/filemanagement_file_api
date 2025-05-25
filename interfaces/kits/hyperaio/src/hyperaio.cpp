@@ -24,6 +24,7 @@
 
 namespace OHOS {
 namespace HyperAio {
+#ifdef HYPERAIO_USE_LIBURING
 const uint32_t URING_QUEUE_SIZE = 512;
 const uint32_t DELAY = 20;
 const uint32_t BATCH_SIZE = 128;
@@ -236,5 +237,32 @@ int32_t HyperAio::DestroyCtx()
     initialized_.store(false);
     return EOK;
 }
+#else
+
+uint32_t HyperAio::SupportIouring()
+{
+    return 0;
+}
+int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
+{
+    return EINVAL;
+}
+int32_t HyperAio::StartReadReqs(ReadReqs *req)
+{
+    return EINVAL;
+}
+int32_t HyperAio::StartOpenReqs(OpenReqs *req)
+{
+    return EINVAL;
+}
+int32_t HyperAio::StartCancelReqs(CancelReqs *req)
+{
+    return EINVAL;
+}
+int32_t HyperAio::DestroyCtx()
+{
+    return EINVAL;
+}
+#endif
 }
 }

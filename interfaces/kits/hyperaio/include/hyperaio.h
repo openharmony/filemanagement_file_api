@@ -20,7 +20,7 @@
 #include <thread>
 #ifdef HYPERAIO_USE_LIBURING
 #include "liburing.h"
-
+#endif
 namespace OHOS {
 namespace HyperAio {
 #define HYPERAIO_APP_PERMISSION      (1U << 0)
@@ -85,13 +85,15 @@ public:
     int32_t StartCancelReqs(CancelReqs *req);
     int32_t DestroyCtx();
 private:
-    io_uring uring_;
     ProcessIoResultCallBack ioResultCallBack_ = nullptr;
+#ifdef HYPERAIO_USE_LIBURING
+    io_uring uring_;
     std::thread harvestThread_;
     std::atomic<bool> stopThread_;
     std::atomic<bool> initialized_;
     void HarvestRes();
     struct io_uring_sqe* GetSqeWithRetry(struct io_uring *ring);
+#endif
 };
 }
 }

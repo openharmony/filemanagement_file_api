@@ -23,8 +23,6 @@
 namespace {
     using namespace std;
     using namespace OHOS::HyperAio;
-    const uint64_t userData = 12345;
-    const uint32_t len = 1024;
     class HyperAioTest : public testing::Test {
     public:
         static void SetUpTestCase(void) {};
@@ -32,6 +30,9 @@ namespace {
         void SetUp() {};
         void TearDown() {};
     };
+#ifdef HYPERAIO_USE_LIBURING
+    const uint64_t userData = 12345;
+    const uint32_t len = 1024;
     std::function<void(std::unique_ptr<IoResponse>)> callBack = [](std::unique_ptr<IoResponse> response) {
         GTEST_LOG_(INFO) << "HyperAioTest callBack";
     };
@@ -257,4 +258,5 @@ namespace {
         EXPECT_EQ(result, -EPERM);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartCancelReqs_0002";
     }
+#endif
 }
