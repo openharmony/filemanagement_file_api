@@ -11,12 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/native"
-aafwk_path = "${aafwk_kits_path}/frameworks/kits"
-arkui_napi_path = "//foundation/arkui/napi"
 file_api_path = "//foundation/filemanagement/file_api"
-filemanagement_service_path = "//foundation/filemanagement/dfs_service/services"
-hiviewdfx_hilog_path = "//base/hiviewdfx/hilog"
 src_path = "${file_api_path}/interfaces/kits/js/src"
 utils_path = "${file_api_path}/utils"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,11 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "class_watcher/watcher_entity.h"
+#include "class_watcher/watcher_n_exporter.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
-#include "../class_watcher/watcher_entity.h"
-#include "../class_watcher/watcher_n_exporter.h"
+
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
