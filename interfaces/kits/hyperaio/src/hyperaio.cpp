@@ -47,7 +47,7 @@ uint32_t HyperAio::SupportIouring()
     HyperaioTrace trace("SupportIouring");
     uint32_t flags = 0;
     if (HasAccessIouringPermission()) {
-        flags |= HYPERAIO_APP_PERMISSION;
+        flags |= IOURING_APP_PERMISSION;
     }
     return flags;
 }
