@@ -26,86 +26,77 @@ using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
-class FDataSyncCoreTest : public testing::Test {
+class FDataSyncCoreMockTest : public testing::Test {
 public:
-    static filesystem::path tempFilePath;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
+    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
-filesystem::path FDataSyncCoreTest::tempFilePath;
-
-void FDataSyncCoreTest::SetUpTestCase(void)
+void FDataSyncCoreMockTest::SetUpTestCase(void)
 {
-    tempFilePath = filesystem::temp_directory_path() / "fdatasync_test_file.txt";
-    ofstream(tempFilePath) << "Test content\n123\n456";
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    uvMock = std::make_shared<UvfsMock>();
+    Uvfs::ins = uvMock;
 }
 
-void FDataSyncCoreTest::TearDownTestCase(void)
+void FDataSyncCoreMockTest::TearDownTestCase(void)
 {
-    filesystem::remove(tempFilePath);
     GTEST_LOG_(INFO) << "TearDownTestCase";
+    Uvfs::ins = nullptr;
+    uvMock = nullptr;
 }
 
-void FDataSyncCoreTest::SetUp(void)
+void FDataSyncCoreMockTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void FDataSyncCoreTest::TearDown(void)
+void FDataSyncCoreMockTest::TearDown(void)
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
- * @tc.name: FDataSyncCoreTest_DoFDataSync_001
+ * @tc.name: FDataSyncCoreMockTest_DoFDataSync_001
  * @tc.desc: Test function of FDataSyncCore::DoFDataSync interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FDataSyncCoreTest, FDataSyncCoreTest_DoFDataSync_001, testing::ext::TestSize.Level1)
+HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin FDataSyncCoreTest_DoFDataSync_001";
+    GTEST_LOG_(INFO) << "NClassTest-begin FDataSyncCoreMockTest_DoFDataSync_001";
 
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(1));
+    int fd = 3;
 
-    string path = tempFilePath.string();
-    auto fd = open(path.c_str(), O_RDWR | O_CREAT, 0666);
+    EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(1));
     auto res = FDataSyncCore::DoFDataSync(fd);
     EXPECT_EQ(res.IsSuccess(), true);
-    close(fd);
 
-    GTEST_LOG_(INFO) << "NClassTest-end FDataSyncCoreTest_DoFDataSync_001";
+    GTEST_LOG_(INFO) << "NClassTest-end FDataSyncCoreMockTest_DoFDataSync_001";
 }
 
 /**
- * @tc.name: FDataSyncCoreTest_DoFDataSync_002
+ * @tc.name: FDataSyncCoreMockTest_DoFDataSync_002
  * @tc.desc: Test function of FDataSyncCore::DoFDataSync interface for FAILED.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FDataSyncCoreTest, FDataSyncCoreTest_DoFDataSync_002, testing::ext::TestSize.Level1)
+HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin FDataSyncCoreTest_DoFDataSync_002";
+    GTEST_LOG_(INFO) << "NClassTest-begin FDataSyncCoreMockTest_DoFDataSync_002";
 
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(-1));
+    int fd = 3;
 
-    string path = tempFilePath.string();
-    auto fd = open(path.c_str(), O_RDWR | O_CREAT, 0666);
+    EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(-1));
     auto res = FDataSyncCore::DoFDataSync(fd);
     EXPECT_EQ(res.IsSuccess(), false);
-    close(fd);
 
-    GTEST_LOG_(INFO) << "NClassTest-end FDataSyncCoreTest_DoFDataSync_002";
+    GTEST_LOG_(INFO) << "NClassTest-end FDataSyncCoreMockTest_DoFDataSync_002";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

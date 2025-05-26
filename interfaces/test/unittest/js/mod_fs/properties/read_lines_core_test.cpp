@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "mock/uv_fs_mock.h"
 #include "read_lines_core.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -99,78 +98,6 @@ HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_002, testing::ext::Tes
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "NClassTest-end ReadLinesCoreTest_DoReadLines_002";
-}
-
-/**
- * @tc.name: ReadLinesCoreTest_DoReadLines_003
- * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_003, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadLinesCoreTest_DoReadLines_003";
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
-
-    string path = tempFilePath.string();
-    Options option;
-    option.encoding = "utf-8";
-    auto res = ReadLinesCore::DoReadLines(path, option);
-    EXPECT_EQ(res.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "NClassTest-end ReadLinesCoreTest_DoReadLines_003";
-}
-
-/**
- * @tc.name: ReadLinesCoreTest_DoReadLines_004
- * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_004, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadLinesCoreTest_DoReadLines_004";
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
-
-    string path = tempFilePath.string();
-    Options option;
-    option.encoding = "utf-8";
-    auto res = ReadLinesCore::DoReadLines(path);
-    EXPECT_EQ(res.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "NClassTest-end ReadLinesCoreTest_DoReadLines_004";
-}
-
-/**
- * @tc.name: ReadLinesCoreTest_DoReadLines_005
- * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for FAILED.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_005, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadLinesCoreTest_DoReadLines_005";
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
-
-    string path = tempFilePath.string();
-    Options option;
-    option.encoding = "utf-8";
-    auto res = ReadLinesCore::DoReadLines(path, option);
-    EXPECT_EQ(res.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "NClassTest-end ReadLinesCoreTest_DoReadLines_005";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
