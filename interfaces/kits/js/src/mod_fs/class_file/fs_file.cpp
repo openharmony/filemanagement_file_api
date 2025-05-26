@@ -148,7 +148,7 @@ FsResult<void> FsFile::TryLock(bool exclusive) const
     }
 
     int ret = 0;
-    auto mode = exclusive ? LOCK_EX : LOCK_SH;
+    auto mode = static_cast<uint32_t>(exclusive ? LOCK_EX : LOCK_SH);
     ret = flock(fileEntity->fd_.get()->GetFD(), mode | LOCK_NB);
     if (ret < 0) {
         HILOGE("Failed to try to lock file");
