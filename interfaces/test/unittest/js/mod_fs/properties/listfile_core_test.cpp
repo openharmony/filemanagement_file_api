@@ -39,17 +39,18 @@ static void create_file(const fs::path& path, const std::vector<uint8_t>& data, 
     std::cout << "已创建文件: " << path << std::endl;
 }
 
-static void writeBuffer(const string filename)
+static void WriteBuffer(const string filename)
 {
-    const int target_size = 1024;
-    std::vector<char> buffer(target_size, 0);
+    const int targetSize = 1024;
+    std::vector<char> buffer(targetSize, 0);
     std::ofstream file(filename, std::ios::binary);
     file.write(buffer.data(), buffer.size());
 }
 
 class ListFileCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void) {
+    static void SetUpTestCase(void)
+    {
         fs::create_directory(EMPTY_PATH);
         const std::vector<fs::path> directories = {
             "/data/test/ListFileCoreTest",                     // 单级目录
@@ -59,22 +60,23 @@ public:
 
         // 为每个文件类型创建3个文件
         for (int i = 0; i < 3; ++i) {
-            create_file(directories[i] / ("text_" + std::to_string(i+1) + ".txt"),
-                       {'F','i','l','e',' ',char('0'+i+1)}, false);
+            create_file(directories[i] / ("text_" + std::to_string(i + 1) + ".txt"),
+                {'F', 'i', 'l', 'e', ' ', char('0' + i + 1)}, false);
 
-            create_file(directories[i] / ("image_" + std::to_string(i+1) + ".png"),
-                       {0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A});
+            create_file(directories[i] / ("image_" + std::to_string(i + 1) + ".png"),
+                {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A});
 
-            create_file(directories[i] / ("photo_" + std::to_string(i+1) + ".jpg"),
-                       {0xFF,0xD8,0xFF,0xE0,0x00,0x10,0x4A,0x46});
+            create_file(directories[i] / ("photo_" + std::to_string(i + 1) + ".jpg"),
+                {0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46});
 
-            create_file(directories[i] / ("data_" + std::to_string(i+1) + ".data"),
-                       {0xAB,0xCD,0xEF, char(i), char(i+1), char(i+2)});
+            create_file(directories[i] / ("data_" + std::to_string(i + 1) + ".data"),
+                {0xAB, 0xCD, 0xEF, char(i), char(i + 1), char(i + 2)});
         }
 
-        writeBuffer("/data/test/ListFileCoreTest/text_1.txt");
+        WriteBuffer("/data/test/ListFileCoreTest/text_1.txt");
     };
-    static void TearDownTestCase() {
+    static void TearDownTestCase()
+    {
         rmdir(DIR_PATH);
         rmdir(EMPTY_PATH);
     };
@@ -449,9 +451,9 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0015, testing::ext::TestSize.Level
     FsListFileOptions opt;
     FsFileFilter filter;
 
-    const size_t TARGET_LENGTH = 257;
+    const size_t targetLength = 257;
     std::string str = ".";
-    for (size_t i = 1; i < TARGET_LENGTH; ++i) {
+    for (size_t i = 1; i < targetLength; ++i) {
         str += std::to_string(i % 10);
     }
 

@@ -13,8 +13,6 @@
 * limitations under the License.
 */
 
-// #include <fcntl.h>
-// #include <cstdio>
 #include <gtest/gtest.h>
 #include <read_text_core.h>
 
@@ -30,12 +28,14 @@ const string content = "hello world";
 
 class ReadTextCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void) {
+    static void SetUpTestCase(void)
+    {
         int32_t fd = open(FILE_PATH, CREATE | O_RDWR, 0644);
         write(fd, content.c_str(), content.length());
         close(fd);
     };
-    static void TearDownTestCase() {
+    static void TearDownTestCase()
+    {
         rmdir(FILE_PATH);
     };
     void SetUp() {};
