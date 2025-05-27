@@ -17,22 +17,23 @@
 #include "create_stream_core.h"
 #include "fs_utils.h"
 
-#define STREAM_FILE_PATH "/data/test/FsStreamCoreTest.txt"
-
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
+
+static const string streamFilePath = "/data/test/FsStreamCoreTest.txt";
+
 class FsStreamTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
-        int32_t fd = open(STREAM_FILE_PATH, CREATE | O_RDWR, 0644);
+        int32_t fd = open(streamFilePath.c_str(), CREATE | O_RDWR, 0644);
         close(fd);
     };
     static void TearDownTestCase()
     {
-        rmdir(STREAM_FILE_PATH);
+        rmdir(streamFilePath.c_str());
     };
     void SetUp() {};
     void TearDown() {};
@@ -48,15 +49,15 @@ public:
  */
 HWTEST_F(FsStreamTest, FsStreamCloseTest_0001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamCloseTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamCloseTest_0001";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamCloseTest_0001";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamCloseTest_0001";
 }
 
 /**
@@ -69,8 +70,8 @@ HWTEST_F(FsStreamTest, FsStreamCloseTest_0001, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamCloseTest_0002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamCloseTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamCloseTest_0002";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -82,7 +83,7 @@ HWTEST_F(FsStreamTest, FsStreamCloseTest_0002, testing::ext::TestSize.Level1)
     auto err = retCs.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900005);
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamCloseTest_0002";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamCloseTest_0002";
 }
 
 /**
@@ -95,8 +96,8 @@ HWTEST_F(FsStreamTest, FsStreamCloseTest_0002, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamFlushTest_0001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamFlushTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamFlushTest_0001";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -108,7 +109,7 @@ HWTEST_F(FsStreamTest, FsStreamFlushTest_0001, testing::ext::TestSize.Level1)
     auto err = retFl.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900005);
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamFlushTest_0001";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamFlushTest_0001";
 }
 
 /**
@@ -121,8 +122,8 @@ HWTEST_F(FsStreamTest, FsStreamFlushTest_0001, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamFlushTest_0002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamFlushTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamFlushTest_0002";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -132,7 +133,7 @@ HWTEST_F(FsStreamTest, FsStreamFlushTest_0002, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamFlushTest_0002";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamFlushTest_0002";
 }
 
 /**
@@ -145,8 +146,8 @@ HWTEST_F(FsStreamTest, FsStreamFlushTest_0002, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamSeekTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamSeekTest_0001";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -158,7 +159,7 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
     auto err = retSk.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900002);
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamSeekTest_0001";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamSeekTest_0001";
 }
 
 /**
@@ -171,8 +172,8 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamSeekTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamSeekTest_0002";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -185,7 +186,7 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamSeekTest_0002";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamSeekTest_0002";
 }
 
 /**
@@ -198,8 +199,8 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamSeekTest_0003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamSeekTest_0003";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamSeekTest_0003";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -212,7 +213,7 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0003, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamSeekTest_0003";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamSeekTest_0003";
 }
 
 /**
@@ -225,8 +226,8 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0003, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamSeekTest_0004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamSeekTest_0004";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamSeekTest_0004";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -236,7 +237,7 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0004, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamSeekTest_0004";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamSeekTest_0004";
 }
 
 /**
@@ -249,8 +250,8 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0004, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0001";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -261,7 +262,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1)
     EXPECT_FALSE(retWr.IsSuccess());
     EXPECT_EQ(retWr.GetError().GetErrNo(), 13900005);
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0001";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0001";
 }
 
 /**
@@ -274,8 +275,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0002";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -287,7 +288,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1)
     EXPECT_FALSE(retWr.IsSuccess());
     EXPECT_EQ(retWr.GetError().GetErrNo(), 13900005);
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0002";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0002";
 }
 
 /**
@@ -300,8 +301,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0003";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0003";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -315,7 +316,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0003, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0003";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0003";
 }
 
 /**
@@ -328,8 +329,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0003, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0004";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0004";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -344,7 +345,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0004, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0004";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0004";
 }
 
 /**
@@ -357,8 +358,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0004, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0005, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0005";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0005";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -372,7 +373,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0005, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0005";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0005";
 }
 
 /**
@@ -385,8 +386,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0005, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0006, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0006";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0006";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -401,7 +402,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0006, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0004";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0004";
 }
 
 #if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__) || defined(__LP64__)
@@ -415,8 +416,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0006, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0007, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0007";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0007";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -430,7 +431,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0007, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0005";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0005";
 }
 
 /**
@@ -443,8 +444,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0007, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0008, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0008";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0008";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -458,7 +459,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0008, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0008";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0008";
 }
 #endif
 
@@ -472,8 +473,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0008, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0009, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0009";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0009";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -487,7 +488,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0009, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0009";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0009";
 }
 
 /**
@@ -500,8 +501,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0009, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0010, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0010";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0010";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -516,7 +517,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0010, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0010";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0010";
 }
 
 /**
@@ -529,8 +530,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0010, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0013, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0013";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0013";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -541,7 +542,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0013, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0013";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0013";
 }
 
 /**
@@ -554,8 +555,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0013, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0014, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0014";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0014";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -567,7 +568,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0014, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0014";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0014";
 }
 
 /**
@@ -580,8 +581,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0014, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0015, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0015";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0015";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -599,7 +600,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0015, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0015";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0015";
 }
 
 /**
@@ -612,8 +613,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0015, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0016, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0016";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamWriteTest_0016";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -632,7 +633,7 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0016, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0016";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamWriteTest_0016";
 }
 
 /**
@@ -645,8 +646,8 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0016, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamReadTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamReadTest_0001";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -659,7 +660,7 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
     EXPECT_FALSE(retRd.IsSuccess());
     EXPECT_EQ(retRd.GetError().GetErrNo(), 13900005);
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamReadTest_0001";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamReadTest_0001";
 }
 
 /**
@@ -672,8 +673,8 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamReadTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamReadTest_0002";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -689,7 +690,7 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0002, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamReadTest_0002";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamReadTest_0002";
 }
 
 #if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__) || defined(__LP64__)
@@ -703,8 +704,8 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0002, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamReadTest_0003";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamReadTest_0003";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -719,7 +720,7 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0003, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamReadTest_0003";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamReadTest_0003";
 }
 #endif
 
@@ -733,8 +734,8 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0003, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamReadTest_0004";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamReadTest_0004";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -750,7 +751,7 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0004, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamReadTest_0004";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamReadTest_0004";
 }
 
 /**
@@ -763,8 +764,8 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0004, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0005, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamReadTest_0005";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamReadTest_0005";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "w");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -777,7 +778,7 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0005, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamReadTest_0005";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamReadTest_0005";
 }
 
 /**
@@ -790,8 +791,8 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0005, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0006, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamReadTest_0006";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamTest-begin FsStreamReadTest_0006";
+    auto ret = CreateStreamCore::DoCreateStream(streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -810,7 +811,7 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0006, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamReadTest_0006";
+    GTEST_LOG_(INFO) << "FsStreamTest-end FsStreamReadTest_0006";
 }
 
 } // namespace ModuleFileIO
