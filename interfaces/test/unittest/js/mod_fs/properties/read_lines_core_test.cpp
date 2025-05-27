@@ -16,7 +16,6 @@
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 #include "read_lines_core.h"
 
@@ -69,7 +68,7 @@ void ReadLinesCoreTest::TearDown(void)
  */
 HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadLinesCoreTest_DoReadLines_001";
+    GTEST_LOG_(INFO) << "ReadLinesCoreTest-begin ReadLinesCoreTest_DoReadLines_001";
 
     string path = "ReadLinesCoreTest_DoReadLines_001";
     Options option;
@@ -77,7 +76,7 @@ HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_001, testing::ext::Tes
     auto res = ReadLinesCore::DoReadLines(path, option);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "NClassTest-end ReadLinesCoreTest_DoReadLines_001";
+    GTEST_LOG_(INFO) << "ReadLinesCoreTest-end ReadLinesCoreTest_DoReadLines_001";
 }
 
 /**
@@ -89,7 +88,7 @@ HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_001, testing::ext::Tes
  */
 HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadLinesCoreTest_DoReadLines_002";
+    GTEST_LOG_(INFO) << "ReadLinesCoreTest-begin ReadLinesCoreTest_DoReadLines_002";
 
     string path = "ReadLinesCoreTest_DoReadLines_002";
     Options option;
@@ -97,7 +96,7 @@ HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_002, testing::ext::Tes
     auto res = ReadLinesCore::DoReadLines(path, option);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "NClassTest-end ReadLinesCoreTest_DoReadLines_002";
+    GTEST_LOG_(INFO) << "ReadLinesCoreTest-end ReadLinesCoreTest_DoReadLines_002";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

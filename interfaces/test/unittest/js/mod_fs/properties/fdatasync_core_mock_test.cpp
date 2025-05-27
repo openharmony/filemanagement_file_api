@@ -15,8 +15,8 @@
 
 #include <filesystem>
 #include <fstream>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "fdatasync_core.h"
 #include "mock/uv_fs_mock.h"
@@ -68,7 +68,7 @@ void FDataSyncCoreMockTest::TearDown(void)
  */
 HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin FDataSyncCoreMockTest_DoFDataSync_001";
+    GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-begin FDataSyncCoreMockTest_DoFDataSync_001";
 
     int fd = 3;
 
@@ -76,7 +76,7 @@ HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_001, testing::
     auto res = FDataSyncCore::DoFDataSync(fd);
     EXPECT_EQ(res.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "NClassTest-end FDataSyncCoreMockTest_DoFDataSync_001";
+    GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-end FDataSyncCoreMockTest_DoFDataSync_001";
 }
 
 /**
@@ -88,7 +88,7 @@ HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_001, testing::
  */
 HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin FDataSyncCoreMockTest_DoFDataSync_002";
+    GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-begin FDataSyncCoreMockTest_DoFDataSync_002";
 
     int fd = 3;
 
@@ -96,7 +96,7 @@ HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_002, testing::
     auto res = FDataSyncCore::DoFDataSync(fd);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "NClassTest-end FDataSyncCoreMockTest_DoFDataSync_002";
+    GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-end FDataSyncCoreMockTest_DoFDataSync_002";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

@@ -15,8 +15,8 @@
 
 #include <filesystem>
 #include <fstream>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "mock/uv_fs_mock.h"
 #include "read_lines_core.h"
@@ -75,7 +75,7 @@ void ReadLinesCoreMockTest::TearDown(void)
  */
 HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadLinesCoreMockTest_DoReadLines_001";
+    GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-begin ReadLinesCoreMockTest_DoReadLines_001";
 
     string path = tempFilePath.string();
     Options option;
@@ -85,7 +85,7 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_001, testing::
     auto res = ReadLinesCore::DoReadLines(path, option);
     EXPECT_EQ(res.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "NClassTest-end ReadLinesCoreMockTest_DoReadLines_001";
+    GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_001";
 }
 
 /**
@@ -97,17 +97,15 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_001, testing::
  */
 HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadLinesCoreMockTest_DoReadLines_002";
+    GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-begin ReadLinesCoreMockTest_DoReadLines_002";
 
     string path = tempFilePath.string();
-    Options option;
-    option.encoding = "utf-8";
 
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
     auto res = ReadLinesCore::DoReadLines(path);
     EXPECT_EQ(res.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "NClassTest-end ReadLinesCoreMockTest_DoReadLines_002";
+    GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_002";
 }
 
 /**
@@ -119,7 +117,7 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_002, testing::
  */
 HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadLinesCoreMockTest_DoReadLines_003";
+    GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-begin ReadLinesCoreMockTest_DoReadLines_003";
 
     string path = tempFilePath.string();
     Options option;
@@ -129,7 +127,7 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_003, testing::
     auto res = ReadLinesCore::DoReadLines(path, option);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "NClassTest-end ReadLinesCoreMockTest_DoReadLines_003";
+    GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_003";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
