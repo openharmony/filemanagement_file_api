@@ -38,7 +38,7 @@ public:
     virtual int uv_fs_scandir_next(uv_fs_t *req, uv_dirent_t *ent) = 0;
     virtual int uv_fs_rmdir(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb) = 0;
     virtual int uv_fs_symlink(
-        uv_loop_t *loop, uv_fs_t *req, const char *path, const char *new_path, int flags, uv_fs_cb cb) = 0;
+        uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, int flags, uv_fs_cb cb) = 0;
     virtual int uv_fs_open(uv_loop_t *loop, uv_fs_t *req, const char *path, int flags, int mode, uv_fs_cb cb) = 0;
     virtual int uv_fs_ftruncate(uv_loop_t *loop, uv_fs_t *req, uv_file fd, int64_t offset, uv_fs_cb cb) = 0;
     virtual int uv_fs_write(uv_loop_t *loop, uv_fs_t *req, uv_file fd, const uv_buf_t bufs[], unsigned int nbufs,
@@ -62,7 +62,7 @@ public:
     MOCK_METHOD2(uv_fs_scandir_next, int(uv_fs_t *req, uv_dirent_t *ent));
     MOCK_METHOD4(uv_fs_rmdir, int(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb));
     MOCK_METHOD6(uv_fs_symlink,
-        int(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *new_path, int flags, uv_fs_cb cb));
+        int(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, int flags, uv_fs_cb cb));
     MOCK_METHOD6(uv_fs_open, int(uv_loop_t *loop, uv_fs_t *req, const char *path, int flags, int mode, uv_fs_cb cb));
     MOCK_METHOD5(uv_fs_ftruncate, int(uv_loop_t *loop, uv_fs_t *req, uv_file fd, int64_t offset, uv_fs_cb cb));
     MOCK_METHOD7(uv_fs_write, int(uv_loop_t *loop, uv_fs_t *req, uv_file fd, const uv_buf_t bufs[], unsigned int nbufs,
