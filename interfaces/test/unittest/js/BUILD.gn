@@ -19,22 +19,22 @@ ohos_unittest("ani_file_fs_test") {
   testonly = true
 
   module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
   include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
-    "${file_api_path}/interfaces/test/unittest/js/mod_fs/properties/mock",
   ]
 
   sources = [
-    "mod_fs/properties/mock/uv_fs_mock.cpp",
-    "mod_fs/properties/access_core_test.cpp",
-    "mod_fs/properties/dup_core_test.cpp",
-    "mod_fs/properties/read_core_test.cpp",
-    "mod_fs/properties/rmdir_core_test.cpp",
-    "mod_fs/properties/symlink_core_test.cpp",
-    "mod_fs/properties/truncate_core_test.cpp",
-    "mod_fs/properties/utimes_core_test.cpp",
-    "mod_fs/properties/write_core_test.cpp",
+    "mod_fs/class_stream/fs_stream_test.cpp",
   ]
 
   deps = [
@@ -43,35 +43,20 @@ ohos_unittest("ani_file_fs_test") {
     "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
-    "${utils_path}/filemgmt_libn:filemgmt_libn",
     "${file_api_path}/interfaces/kits/js:ani_file_fs",
   ]
 
   external_deps = [
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "data_share:datashare_common",
-    "data_share:datashare_consumer",
-    "dfs_service:distributed_file_daemon_kit_inner",
-    "dfs_service:libdistributedfileutils",
-    "eventhandler:libeventhandler",
-    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "libuv:uv",
-    "runtime_core:ani",
-    "runtime_core:libarkruntime",
-    "samgr:samgr_proxy",
   ]
 
   defines = [
     "private=public",
   ]
-
-  cflags_cc = [ "-DENABLE_NAPI_MOCK" ]
 }
