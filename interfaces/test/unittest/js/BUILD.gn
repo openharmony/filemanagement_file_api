@@ -34,6 +34,11 @@ ohos_unittest("ani_file_fs_test") {
   ]
 
   sources = [
+    "mod_fs/properties/close_core_test.cpp",
+    "mod_fs/properties/create_stream_core_test.cpp",
+    "mod_fs/properties/fdopen_stream_core_test.cpp",
+    "mod_fs/properties/listfile_core_test.cpp",
+    "mod_fs/properties/read_text_core_test.cpp",
     "mod_fs/class_stream/fs_stream_test.cpp",
   ]
 
