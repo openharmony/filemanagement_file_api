@@ -25,6 +25,7 @@ namespace OHOS::FileManagement::ModuleFileIO {
 class Uvfs {
 public:
     static inline std::shared_ptr<Uvfs> ins = nullptr;
+
 public:
     virtual ~Uvfs() = default;
     virtual int uv_fs_read(uv_loop_t *loop, uv_fs_t *req, uv_file file, const uv_buf_t bufs[], unsigned int nbufs,

@@ -28,13 +28,13 @@ using namespace std;
 
 FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> unlink_req = {
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> unlinkReq = {
         new uv_fs_t, FsUtils::FsReqCleanup };
-    if (!unlink_req) {
+    if (!unlinkReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);
     }
-    int ret = uv_fs_unlink(nullptr, unlink_req.get(), src.c_str(), nullptr);
+    int ret = uv_fs_unlink(nullptr, unlinkReq.get(), src.c_str(), nullptr);
     if (ret < 0) {
         HILOGD("Failed to unlink with path");
         return FsResult<void>::Error(ret);

@@ -29,7 +29,7 @@ void UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_s
 {
     auto [succ, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (!succ) {
-        HILOGE("Invalid path");
+        HILOGE("Invalid path from ETS first argument");
         ErrorHandler::Throw(env, EINVAL);
         return;
     }

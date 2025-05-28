@@ -23,13 +23,20 @@ ohos_unittest("ani_file_fs_test") {
   resource_config_file = "../resource/ohos_test.xml"
 
   include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
   ]
 
   sources = [
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_test.cpp",
     "mod_fs/properties/create_randomaccessfile_core_test.cpp",
+    "mod_fs/class_stream/fs_stream_test.cpp",
   ]
 
   deps = [
