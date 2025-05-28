@@ -24,6 +24,6 @@ class FDataSyncCore final {
 public:
     static FsResult<void> DoFDataSync(const int32_t &fd);
 };
-const std::string PROCEDURE_FDATASYNC_NAME = "FileIOFdatasync";
+
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDATASYNC_CORE_H

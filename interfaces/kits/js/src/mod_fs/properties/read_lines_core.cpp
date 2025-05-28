@@ -25,9 +25,9 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-static int CheckOptionArg(optional<Options> option)
+static int CheckOptionArg(Options option)
 {
-    auto encoding = option->encoding;
+    auto encoding = option.encoding;
     if (encoding != "utf-8") {
         return EINVAL;
     }
@@ -79,7 +79,7 @@ static FsResult<FsReaderIterator *> InstantiateReaderIterator(void *iterator, in
 FsResult<FsReaderIterator *> ReadLinesCore::DoReadLines(const string &path, optional<Options> option)
 {
     if (option.has_value()) {
-        int ret = CheckOptionArg(option);
+        int ret = CheckOptionArg(option.value());
         if (ret) {
             HILOGE("Invalid option.encoding parameter");
             return FsResult<FsReaderIterator *>::Error(ret);
@@ -98,11 +98,7 @@ FsResult<FsReaderIterator *> ReadLinesCore::DoReadLines(const string &path, opti
         HILOGE("Failed to get size of the file");
         return FsResult<FsReaderIterator *>::Error(ret);
     }
-    auto readeriterator = InstantiateReaderIterator(iterator, offset);
-    if (!readeriterator.IsSuccess()) {
-        return FsResult<FsReaderIterator *>::Error(ENOMEM);
-    }
-    return FsResult<FsReaderIterator *>::Success(readeriterator.GetData().value());
+    return InstantiateReaderIterator(iterator, offset);
 }
 
 } // namespace ModuleFileIO
