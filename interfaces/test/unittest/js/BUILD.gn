@@ -75,3 +75,111 @@ ohos_unittest("ani_file_fs_test") {
 
   cflags_cc = [ "-DENABLE_NAPI_MOCK" ]
 }
+
+ohos_unittest("ani_file_fs_mock_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/class_stream/mock",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/properties/mock",
+  ]
+
+  sources = [
+    "mod_fs/class_stream/fs_stream_mock_test.cpp",
+    "mod_fs/class_stream/mock/c_mock.cpp",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${file_api_path}/interfaces/kits/js:ani_file_fs",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "app_file_service:fileuri_native",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "libuv:uv",
+  ]
+
+  defines = [
+    "private=public",
+  ]
+}
+
+ohos_unittest("ani_file_hash_test") {
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  sources = [ 
+    "mod_hash/hash_core_test.cpp",
+  ]
+
+  include_dirs = [
+    "mock/libuv",
+    "${file_api_path}/interfaces/kits/js/src/mod_hash",
+  ]
+
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${file_api_path}/interfaces/kits/js:ani_file_hash",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "libuv:uv",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}
+
+ohos_unittest("ani_file_securitylabel_test") {
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  sources = [ 
+    "mod_securitylabel/securitylabel_core_test.cpp",
+  ]
+
+  include_dirs = [
+    "mock/libuv",
+    "${file_api_path}/interfaces/kits/js/src/mod_securitylabel",
+  ]
+
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${file_api_path}/interfaces/kits/js:ani_file_securitylabel",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "libuv:uv",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}
