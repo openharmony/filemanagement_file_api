@@ -37,7 +37,6 @@ public:
         const std::string &path, std::optional<Options> option = std::nullopt);
 };
 
-const std::string PROCEDURE_READLINES_NAME = "FileIOReadLines";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

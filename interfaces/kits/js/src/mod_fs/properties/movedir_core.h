@@ -58,7 +58,6 @@ public:
         const std::string &src, const std::string &dest, std::optional<int32_t> mode = std::nullopt);
 };
 
-const std::string PROCEDURE_MOVEDIR_NAME = "FileIOMoveDir";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

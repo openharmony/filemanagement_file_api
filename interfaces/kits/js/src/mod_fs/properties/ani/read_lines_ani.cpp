@@ -53,7 +53,7 @@ ani_object ReadLinesAni::ReadLinesSync(
 {
     auto [succPath, filePath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
-        HILOGE("Invalid path");
+        HILOGE("Invalid path from ETS first argument");
         ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
@@ -64,6 +64,7 @@ ani_object ReadLinesAni::ReadLinesSync(
         ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
+
     FsResult<FsReaderIterator *> ret = ReadLinesCore::DoReadLines(filePath, opt);
     if (!ret.IsSuccess()) {
         HILOGE("Readlines failed");
@@ -71,6 +72,7 @@ ani_object ReadLinesAni::ReadLinesSync(
         ErrorHandler::Throw(env, err);
         return nullptr;
     }
+
     const FsReaderIterator *readerIterator = ret.GetData().value();
     auto result = ReaderIteratorAni::Wrap(env, move(readerIterator));
     if (result == nullptr) {
@@ -79,6 +81,7 @@ ani_object ReadLinesAni::ReadLinesSync(
     }
     return result;
 }
+
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement

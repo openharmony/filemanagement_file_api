@@ -80,14 +80,31 @@ static ani_status SetBigIntProperty(
     return env->Object_CallMethod_Void(statObject, setter, object);
 }
 
-static ani_int GetLocationEnumIndex(const Location &value)
+static ani_enum_item GetLocationEnumIndex(ani_env *env, const Location &value)
 {
-    switch (value) {
-        case LOCAL:
-            return ani_int(0);
-        case CLOUD:
-            return ani_int(1);
+    ani_enum enumType;
+    auto classDesc = FS::LocationType::classDesc.c_str();
+    ani_status ret = env->FindEnum(classDesc, &enumType);
+    if (ret != ANI_OK) {
+        HILOGE("FindEnum %{private}s failed, err: %{private}d", classDesc, ret);
+        return nullptr;
     }
+
+    size_t valueAsSizeT = static_cast<size_t>(value);
+    if (valueAsSizeT < 1) {
+        HILOGE("Invalid Location value: %{private}zu", valueAsSizeT);
+        return nullptr;
+    }
+
+    size_t index = valueAsSizeT - 1;
+
+    ani_enum_item enumItem;
+    ret = env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
+    if (ret != ANI_OK) {
+        HILOGE("Enum_GetEnumItemByIndex failed, index: %{private}zu, err: %{private}d", index, ret);
+        return nullptr;
+    }
+    return enumItem;
 }
 
 static ani_status SetEnumLocation(
@@ -100,7 +117,7 @@ static ani_status SetEnumLocation(
         return ret;
     }
 
-    return env->Object_CallMethod_Void(object, setter, GetLocationEnumIndex(value));
+    return env->Object_CallMethod_Void(object, setter, GetLocationEnumIndex(env, value));
 }
 
 const static string MODE_SETTER = Builder::BuildSetterName("mode");

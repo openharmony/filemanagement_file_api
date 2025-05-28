@@ -33,6 +33,7 @@ void MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_s
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
+
     auto ret = MkdirCore::DoMkdir(pathStr);
     if (!ret.IsSuccess()) {
         HILOGE("Mkdir failed");
@@ -50,6 +51,7 @@ void MkdirkAni::MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, ani_s
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
+
     auto ret = MkdirCore::DoMkdir(pathStr, recursion);
     if (!ret.IsSuccess()) {
         HILOGE("DoMkdir failed");
