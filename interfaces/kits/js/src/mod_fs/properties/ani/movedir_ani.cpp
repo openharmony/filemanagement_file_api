@@ -129,7 +129,7 @@ void MoveDirAni::MoveDirSync(
 
     auto [succMode, optMode] = TypeConverter::ToOptionalInt32(env, mode);
     if (!succMode) {
-        HILOGE("Failed to convert mode to int32");
+        HILOGE("Invalid mode");
         ErrorHandler::Throw(env, EINVAL);
         return;
     }

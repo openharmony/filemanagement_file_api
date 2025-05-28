@@ -24,7 +24,6 @@
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
-using namespace std;
 
 FsResult<void> FDataSyncCore::DoFDataSync(const int32_t &fd)
 {
