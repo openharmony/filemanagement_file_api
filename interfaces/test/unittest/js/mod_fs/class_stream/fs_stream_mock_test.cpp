@@ -18,26 +18,27 @@
 #include "create_stream_core.h"
 #include "fs_utils.h"
 
-#define STREAM_FILE_PATH "/data/test/FsStreamCoreTest.txt"
-
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
+
+static const string g_streamFilePath = "/data/test/FsStreamCoreTest.txt";
+
 class FsStreamMockTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
         mock_ = std::make_shared<CMock>();
         ICMock::ins = mock_;
-        int32_t fd = open(STREAM_FILE_PATH, CREATE | O_RDWR, 0644);
+        int32_t fd = open(g_streamFilePath.c_str(), CREATE | O_RDWR, 0644);
         close(fd);
     };
     static void TearDownTestCase()
     {
         ICMock::ins = nullptr;
         mock_ = nullptr;
-        rmdir(STREAM_FILE_PATH);
+        rmdir(g_streamFilePath.c_str());
     };
     void SetUp() {};
     void TearDown() {};
@@ -55,8 +56,8 @@ public:
  */
 HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamSeekTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamSeekTest_0001";
+    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -68,7 +69,7 @@ HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamSeekTest_0001";
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamSeekTest_0001";
 }
 
 /**
@@ -81,8 +82,8 @@ HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamSeekTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamSeekTest_0002";
+    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -95,7 +96,7 @@ HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamSeekTest_0002";
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamSeekTest_0002";
 }
 
 /**
@@ -108,8 +109,8 @@ HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
  */
 HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamWriteTest_0001";
+    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -123,7 +124,7 @@ HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0001";
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamWriteTest_0001";
 }
 
 /**
@@ -136,8 +137,8 @@ HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1
  */
 HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamWriteTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "w+");
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamWriteTest_0002";
+    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "w+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -146,13 +147,13 @@ HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1
     WriteOptions opt;
     opt.offset = 5;
     string buf = "FsStreamWriteTest_0002";
-    auto retWr = result->Write(ArrayBuffer(static_cast<void *>(buf.data()), 22), opt);
+    auto retWr = result->Write(ArrayBuffer(static_cast<void *>(buf.data()), buf.length()), opt);
     EXPECT_FALSE(retWr.IsSuccess());
 
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamWriteTest_0002";
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamWriteTest_0002";
 }
 
 /**
@@ -165,8 +166,8 @@ HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1
  */
 HWTEST_F(FsStreamMockTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FsStreamReadTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(STREAM_FILE_PATH, "r+");
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamReadTest_0001";
+    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "r+");
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
@@ -180,10 +181,11 @@ HWTEST_F(FsStreamMockTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
     auto retRd = result->Read(arrayBuffer, opt);
     EXPECT_FALSE(retRd.IsSuccess());
 
+    free(buffer);
     auto retCs = result->Close();
     ASSERT_TRUE(retCs.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FsStreamReadTest_0001";
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamReadTest_0001";
 }
 
 } // namespace ModuleFileIO

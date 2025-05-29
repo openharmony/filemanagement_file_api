@@ -18,23 +18,25 @@
 #include <unistd.h>
 #include "securitylabel_core.h"
 
-#define FILE_PATH "/data/test/SecurityLabelCoreTest.txt"
-
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleSecurityLabel {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+
+static const string g_filePath = "/data/test/SecurityLabelCoreTest.txt";
+static const string g_validFilePath = "/data/test/validFilePath";
+
 class SecurityLabelCoreTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
-        int32_t fd = open(FILE_PATH, O_CREAT | O_RDWR, 0644);
+        int32_t fd = open(g_filePath.c_str(), O_CREAT | O_RDWR, 0644);
         close(fd);
     };
     static void TearDownTestCase()
     {
-        rmdir(FILE_PATH);
+        rmdir(g_filePath.c_str());
     };
     void SetUp() {};
     void TearDown() {};
@@ -51,7 +53,7 @@ public:
 HWTEST_F(SecurityLabelCoreTest, DoSetSecurityLabel_0001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SecurityLabelCoreTest-begin DoSetSecurityLabel_0001";
-    auto ret = DoSetSecurityLabel(FILE_PATH, "abc");
+    auto ret = DoSetSecurityLabel(g_filePath, "abc");
     EXPECT_FALSE(ret.IsSuccess());
 
     auto err = ret.GetError();
@@ -70,8 +72,8 @@ HWTEST_F(SecurityLabelCoreTest, DoSetSecurityLabel_0001, testing::ext::TestSize.
  */
 HWTEST_F(SecurityLabelCoreTest, DoSetSecurityLabel_0002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "SecurityLabelCoreTest-begin DoSetDoSetSecurityLabel_0002SecurityLabel_0001";
-    auto ret = DoSetSecurityLabel("FILE_PATH", "s1");
+    GTEST_LOG_(INFO) << "SecurityLabelCoreTest-begin DoSetSecurityLabel_0002";
+    auto ret = DoSetSecurityLabel(g_validFilePath, "s1");
     EXPECT_FALSE(ret.IsSuccess());
 
     auto err = ret.GetError();
@@ -91,7 +93,7 @@ HWTEST_F(SecurityLabelCoreTest, DoSetSecurityLabel_0002, testing::ext::TestSize.
 HWTEST_F(SecurityLabelCoreTest, DoSetSecurityLabel_0003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SecurityLabelCoreTest-begin DoSetSecurityLabel_0003";
-    auto ret = DoSetSecurityLabel(FILE_PATH, "s2");
+    auto ret = DoSetSecurityLabel(g_filePath, "s2");
     ASSERT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "SecurityLabelCoreTest-end DoSetSecurityLabel_0003";
@@ -108,7 +110,7 @@ HWTEST_F(SecurityLabelCoreTest, DoSetSecurityLabel_0003, testing::ext::TestSize.
 HWTEST_F(SecurityLabelCoreTest, DoGetSecurityLabel_0001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SecurityLabelCoreTest-begin DoGetSecurityLabel_0001";
-    auto ret = DoGetSecurityLabel("FILE_PATH");
+    auto ret = DoGetSecurityLabel(g_validFilePath);
     EXPECT_TRUE(ret.IsSuccess());
 
     const string level = ret.GetData().value();
@@ -128,7 +130,7 @@ HWTEST_F(SecurityLabelCoreTest, DoGetSecurityLabel_0001, testing::ext::TestSize.
 HWTEST_F(SecurityLabelCoreTest, DoGetSecurityLabel_0002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SecurityLabelCoreTest-begin DoGetSecurityLabel_0002";
-    auto ret = DoGetSecurityLabel(FILE_PATH);
+    auto ret = DoGetSecurityLabel(g_filePath);
     EXPECT_TRUE(ret.IsSuccess());
 
     const string level = ret.GetData().value();

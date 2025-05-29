@@ -18,22 +18,22 @@
 #include <unistd.h>
 #include "hash_core.h"
 
-#define FILE_PATH "/data/test/HashCoreTest.txt"
-
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
+
+static const string g_filePath = "/data/test/HashCoreTest.txt";
 class HashCoreTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
-        int32_t fd = open(FILE_PATH, O_CREAT | O_RDWR, 0644);
+        int32_t fd = open(g_filePath.c_str(), O_CREAT | O_RDWR, 0644);
         close(fd);
     };
     static void TearDownTestCase()
     {
-        rmdir(FILE_PATH);
+        rmdir(g_filePath.c_str());
     };
     void SetUp() {};
     void TearDown() {};
@@ -51,7 +51,7 @@ HWTEST_F(HashCoreTest, DoHashTest_0001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HashCoreTest-begin DoHashTest_0001";
     string alg = "sha128";
-    auto ret = HashCore::DoHash(FILE_PATH, alg);
+    auto ret = HashCore::DoHash(g_filePath, alg);
     EXPECT_FALSE(ret.IsSuccess());
 
     auto err = ret.GetError();
@@ -71,7 +71,7 @@ HWTEST_F(HashCoreTest, DoHashTest_0001, testing::ext::TestSize.Level1)
 HWTEST_F(HashCoreTest, DoHashTest_0002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HashCoreTest-begin DoHashTest_0002";
-    auto ret = HashCore::DoHash(FILE_PATH, "md5");
+    auto ret = HashCore::DoHash(g_filePath, "md5");
     ASSERT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "HashCoreTest-end DoHashTest_0002";
@@ -88,7 +88,7 @@ HWTEST_F(HashCoreTest, DoHashTest_0002, testing::ext::TestSize.Level1)
 HWTEST_F(HashCoreTest, DoHashTest_0003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HashCoreTest-begin DoHashTest_0003";
-    auto ret = HashCore::DoHash(FILE_PATH, "sha1");
+    auto ret = HashCore::DoHash(g_filePath, "sha1");
     ASSERT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "HashCoreTest-end DoHashTest_0003";
@@ -105,7 +105,7 @@ HWTEST_F(HashCoreTest, DoHashTest_0003, testing::ext::TestSize.Level1)
 HWTEST_F(HashCoreTest, DoHashTest_0004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "HashCoreTest-begin DoHashTest_0004";
-    auto ret = HashCore::DoHash(FILE_PATH, "sha256");
+    auto ret = HashCore::DoHash(g_filePath, "sha256");
     ASSERT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "HashCoreTest-end DoHashTest_0004";
