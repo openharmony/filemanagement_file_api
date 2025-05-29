@@ -34,7 +34,7 @@ const uint32_t RETRIES = 3;
 class HyperAio::Impl {
 public:
     io_uring uring_;
-}
+};
 
 static bool HasAccessIouringPermission()
 {
@@ -58,7 +58,7 @@ uint32_t HyperAio::SupportIouring()
     return flags;
 }
 
-struct io_uring_sqe* HyperAio::GetSqeWithRetry(struct io_uring *ring)
+struct io_uring_sqe* GetSqeWithRetry(struct io_uring *ring)
 {
     struct io_uring_sqe *sqe;
     for (uint32_t i = 0; i < RETRIES; i++) {
@@ -77,14 +77,14 @@ int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
     std::lock_guard<std::mutex> lock(initmtx);
     HyperaioTrace trace("CtxInit");
     if (initialized_.load()) {
-        HILOGE("HyperAio has benn initialized");
+        HILOGE("HyperAio has been initialized");
         return EOK;
     }
     if (callBack == nullptr) {
         HILOGE("callBack is null");
         return -EINVAL;
     }
-    if (pImpl == nullptr) {
+    if (pImpl_ == nullptr) {
         pImpl_ = std::make_shared<Impl>();
     }
     int32_t ret = io_uring_queue_init(URING_QUEUE_SIZE, &pImpl_->uring_, 0);
@@ -100,9 +100,11 @@ int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
     return EOK;
 }
 
-
 int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 {
+    if (pImpl_ == nullptr) {
+        return;
+    }
     HyperaioTrace trace("StartOpenReqs" + std::to_string(req->reqNum));
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
@@ -145,6 +147,9 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 
 int32_t HyperAio::StartReadReqs(ReadReqs *req)
 {
+    if (pImpl_ == nullptr) {
+        return -EINVAL;
+    }
     HyperaioTrace trace("StartReadReqs" + std::to_string(req->reqNum));
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
@@ -186,6 +191,9 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
 
 int32_t HyperAio::StartCancelReqs(CancelReqs *req)
 {
+    if (pImpl_ == nullptr) {
+        return -EINVAL;
+    }
     HyperaioTrace trace("StartCancelReqs" + std::to_string(req->reqNum));
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
@@ -227,7 +235,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
 
 void HyperAio::HarvestRes()
 {
-    if (pImpl == nullptr) {
+    if (pImpl_ == nullptr) {
         return;
     }
     while (!stopThread_.load()) {
@@ -247,11 +255,17 @@ void HyperAio::HarvestRes()
 
 int32_t HyperAio::DestroyCtx()
 {
+    if (!initialized_.load()) {
+        HILOGE("HyperAio is not initialized");
+        return -EPERM;
+    }
     stopThread_.store(true);
     if (harvestThread_.joinable()) {
         harvestThread_.join();
     }
-    io_uring_queue_exit(&pImpl_->uring_);
+    if (pImpl_ != nullptr) {
+        io_uring_queue_exit(&pImpl_->uring_);
+    }
     initialized_.store(false);
     return EOK;
 }
