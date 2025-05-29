@@ -111,7 +111,7 @@ int uv_fs_unlink(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb)
 
 void uv_fs_req_cleanup(uv_fs_t *req)
 {
-    return Uvfs::ins->uv_fs_req_cleanup(req);
+    return;
 }
 
 int uv_fs_rename(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, uv_fs_cb cb)

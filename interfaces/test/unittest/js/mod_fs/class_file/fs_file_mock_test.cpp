@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "fs_file.h"
-#include "../properties/mock/uv_fs_mock.h"
-#include "../properties/mock/system_mock.h"
-#include "file_entity.h"
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include "file_entity.h"
+#include "fs_file.h"
+#include "system_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;

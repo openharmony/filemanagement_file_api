@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "open_core.h"
-
 #include <gtest/gtest.h>
+
+#include "open_core.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
