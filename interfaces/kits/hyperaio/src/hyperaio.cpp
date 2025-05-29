@@ -103,7 +103,7 @@ int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
 int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 {
     if (pImpl_ == nullptr) {
-        return;
+        return -EINVAL;
     }
     HyperaioTrace trace("StartOpenReqs" + std::to_string(req->reqNum));
     if (req == nullptr || req->reqs == nullptr) {
