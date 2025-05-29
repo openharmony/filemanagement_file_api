@@ -52,7 +52,7 @@ void CreateRandomAccessFileCoreTest::TearDown(void)
 
 /**
  * @tc.name: CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_001
- * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FALSE.
+ * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile to verify an invalid mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -137,13 +137,15 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
 
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(fd, opts);
     EXPECT_EQ(res.IsSuccess(), false);
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_004";
 }
 
 /**'
  * @tc.name: CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_005
- * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FALSE.
+ * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile to verify the path is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
