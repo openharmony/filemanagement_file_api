@@ -16,7 +16,7 @@
 #ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_CLASS_STREAM_MOCK_C_MOCK_H
 #define INTERFACES_TEST_UNITTEST_JS_MOD_FS_CLASS_STREAM_MOCK_C_MOCK_H
 
-#include <stdio.h>
+#include <cstdio>
 #include <sys/stat.h>
 #include <gmock/gmock.h>
 

@@ -28,5 +28,4 @@ long ftell(FILE *stream)
 {
     return ICMock::ins->ftell(stream);
 }
-
 }

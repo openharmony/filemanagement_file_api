@@ -23,8 +23,8 @@ namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace std;
 namespace fs = std::filesystem;
 
-string filePath = "/data/test/FsAtomicfileTest.txt";
-string deleteFile = "/data/test/FsAtomicfileDelTest.txt";
+string g_filePath = "/data/test/FsAtomicfileTest.txt";
+string g_deleteFile = "/data/test/FsAtomicfileDelTest.txt";
 
 class FsAtomicfileTest : public testing::Test {
 public:
@@ -36,7 +36,7 @@ public:
 
 void FsAtomicfileTest::SetUpTestCase(void)
 {
-    ofstream tempfile(filePath);
+    ofstream tempfile(g_filePath);
     tempfile << "hello world";
     tempfile.close();
     GTEST_LOG_(INFO) << "SetUpTestCase";
@@ -44,7 +44,7 @@ void FsAtomicfileTest::SetUpTestCase(void)
 
 void FsAtomicfileTest::TearDownTestCase(void)
 {
-    filesystem::remove(filePath);
+    filesystem::remove(g_filePath);
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -69,12 +69,12 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_GetPath_001, testing::ext::TestSize.
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_GetPath_001";
 
-    auto ret = FsAtomicFile::Constructor(filePath);
+    auto ret = FsAtomicFile::Constructor(g_filePath);
     ASSERT_TRUE(ret.IsSuccess());
 
     shared_ptr<FsAtomicFile> stream(move(ret.GetData().value()));
     string path = stream->GetPath();
-    EXPECT_EQ(path, filePath);
+    EXPECT_EQ(path, g_filePath);
 
     GTEST_LOG_(INFO) << "FsAtomicfileTest-end FsAtomicfileTest_GetPath_001";
 }
@@ -90,7 +90,7 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_GetBaseFile_001, testing::ext::TestS
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_GetBaseFile_001";
 
-    auto ret = FsAtomicFile::Constructor(filePath);
+    auto ret = FsAtomicFile::Constructor(g_filePath);
     ASSERT_TRUE(ret.IsSuccess());
 
     shared_ptr<FsAtomicFile> stream(move(ret.GetData().value()));
@@ -181,7 +181,7 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_StartWrite_001, testing::ext::TestSi
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_StartWrite_001";
 
-    auto ret = FsAtomicFile::Constructor(filePath);
+    auto ret = FsAtomicFile::Constructor(g_filePath);
     ASSERT_TRUE(ret.IsSuccess());
 
     shared_ptr<FsAtomicFile> stream(move(ret.GetData().value()));
@@ -248,7 +248,7 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_FinishWrite_001, testing::ext::TestS
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_FinishWrite_001";
 
-    auto ret = FsAtomicFile::Constructor(filePath);
+    auto ret = FsAtomicFile::Constructor(g_filePath);
     ASSERT_TRUE(ret.IsSuccess());
 
     shared_ptr<FsAtomicFile> stream(move(ret.GetData().value()));
@@ -276,7 +276,7 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_FailWrite_001, testing::ext::TestSiz
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_FailWrite_001";
 
-    auto ret = FsAtomicFile::Constructor(filePath);
+    auto ret = FsAtomicFile::Constructor(g_filePath);
     ASSERT_TRUE(ret.IsSuccess());
 
     shared_ptr<FsAtomicFile> stream(move(ret.GetData().value()));
@@ -304,7 +304,7 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_Delete_001, testing::ext::TestSize.L
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_Delete_001";
 
-    auto ret = FsAtomicFile::Constructor(deleteFile);
+    auto ret = FsAtomicFile::Constructor(g_deleteFile);
     ASSERT_TRUE(ret.IsSuccess());
 
     shared_ptr<FsAtomicFile> stream(move(ret.GetData().value()));
@@ -332,7 +332,7 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_ReadFully_001, testing::ext::TestSiz
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_ReadFully_001";
 
-    auto ret = FsAtomicFile::Constructor(filePath);
+    auto ret = FsAtomicFile::Constructor(g_filePath);
     ASSERT_TRUE(ret.IsSuccess());
 
     shared_ptr<FsAtomicFile> stream(move(ret.GetData().value()));
