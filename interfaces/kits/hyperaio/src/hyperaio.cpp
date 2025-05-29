@@ -256,8 +256,7 @@ void HyperAio::HarvestRes()
 int32_t HyperAio::DestroyCtx()
 {
     if (!initialized_.load()) {
-        HILOGE("HyperAio is not initialized");
-        return -EPERM;
+        return EOK;
     }
     stopThread_.store(true);
     if (harvestThread_.joinable()) {
