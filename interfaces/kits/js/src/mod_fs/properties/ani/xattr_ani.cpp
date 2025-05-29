@@ -37,14 +37,14 @@ void XattrAni::SetXattrSync(
 
     auto [keySucc, keyStr] = TypeConverter::ToUTF8String(env, key);
     if (!keySucc) {
-        HILOGE("Invalid key");
+        HILOGE("Invalid xattr key");
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
     auto [valueSucc, valueStr] = TypeConverter::ToUTF8String(env, value);
     if (!valueSucc) {
-        HILOGE("Invalid value");
+        HILOGE("Invalid xattr value");
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
@@ -69,7 +69,7 @@ ani_string XattrAni::GetXattrSync(ani_env *env, [[maybe_unused]] ani_class clazz
 
     auto [keySucc, keyStr] = TypeConverter::ToUTF8String(env, key);
     if (!keySucc) {
-        HILOGE("Invalid key");
+        HILOGE("Invalid xattr key");
         ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
