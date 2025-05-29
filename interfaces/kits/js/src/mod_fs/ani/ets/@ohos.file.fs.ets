@@ -15,6 +15,16 @@
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import stream from '@ohos.util.stream';
 
+const UNKNOWN_ERR: number = 13900042
+const UNKNOWN_MSG: string = "Unknown error"
+
+function createBusinessError(code: number, msg: string): BusinessError {
+  let err = new BusinessError();
+  err.code = code;
+  err.message = msg;
+  return err;
+}
+
 namespace fileIo {
   export namespace OpenMode {
     export const READ_ONLY = 0o0;
@@ -1756,8 +1766,8 @@ export class StreamInner implements Stream {
 }
 
 export class ReadStream extends stream.Readable {
-  private pathInner: string;
-  private bytesReadInner: number;
+  path: string;
+  bytesRead: number;
   private offset: number;
   private start?: number;
   private end?: number;
@@ -1765,20 +1775,12 @@ export class ReadStream extends stream.Readable {
 
   constructor(path: string, options?: ReadStreamOptions) {
     super();
-    this.pathInner = path;
-    this.bytesReadInner = 0;
+    this.path = path;
+    this.bytesRead = 0;
     this.start = options?.start;
     this.end = options?.end;
-    this.stream = createStreamSync(this.pathInner, 'r');
+    this.stream = createStreamSync(this.path, 'r');
     this.offset = this.start ?? 0;
-  }
-
-  get path(): string {
-    return this.pathInner;
-  }
-
-  get bytesRead(): number {
-    return this.bytesReadInner;
   }
 
   seek(offset: number, whence?: WhenceType): number {
@@ -1822,7 +1824,7 @@ export class ReadStream extends stream.Readable {
     this.stream?.read(buffer, { offset: off, length: readSize })
       .then((readOut: number) => {
         if (readOut > 0) {
-          this.bytesReadInner += readOut;
+          this.bytesRead += readOut;
           this.push(new Uint8Array(buffer.slice(0, readOut)));
         }
         if (readOut !== readSize || readOut < size) {
@@ -1834,8 +1836,8 @@ export class ReadStream extends stream.Readable {
 }
 
 export class WriteStream extends stream.Writable {
-  private pathInner: string;
-  private bytesWrittenInner: number;
+  path: string;
+  bytesWritten: number;
   private offset: number;
   private mode: string;
   private start?: number;
@@ -1843,20 +1845,12 @@ export class WriteStream extends stream.Writable {
 
   constructor(path: string, options?: WriteStreamOptions) {
     super();
-    this.pathInner = path;
-    this.bytesWrittenInner = 0;
+    this.path = path;
+    this.bytesWritten = 0;
     this.start = options?.start;
     this.mode = this.convertOpenMode(options?.mode);
-    this.stream = createStreamSync(this.pathInner, this.mode);
+    this.stream = createStreamSync(this.path, this.mode);
     this.offset = this.start ?? 0;
-  }
-
-  get path(): string {
-    return this.pathInner;
-  }
-
-  get bytesWritten(): number {
-    return this.bytesWrittenInner;
   }
 
   seek(offset: number, whence?: WhenceType): number {
@@ -1878,6 +1872,10 @@ export class WriteStream extends stream.Writable {
     this.stream?.close();
   }
 
+  closeSync(): void {
+    this.stream?.closeSync();
+  }
+
   doInitialize(callback: () => void): void {
     callback();
   }
@@ -1886,7 +1884,7 @@ export class WriteStream extends stream.Writable {
     this.stream?.write(chunk, { offset: this.offset })
       .then((writeIn: number) => {
         this.offset += writeIn;
-        this.bytesWrittenInner += writeIn;
+        this.bytesWritten += writeIn;
         callback();
       })
       .finally(() => {
@@ -1913,6 +1911,53 @@ export class WriteStream extends stream.Writable {
     }
     return modeStr;
   }
+}
+
+export class AtomicFile {
+  static {
+    loadLibrary("ani_file_fs");
+  }
+
+  private nativePtr: long = 0;
+  private native getPath(): string;
+  private writeStream: WriteStream | null = null;
+
+  native constructor(path: string);
+
+  native getBaseFile(): File;
+
+  native openRead(): ReadStream;
+
+  native readFully(): ArrayBuffer;
+
+  native nativeStartWrite(): WriteStream;
+  startWrite(): WriteStream {
+    let ws = this.nativeStartWrite();
+    this.writeStream = ws;
+    return ws;
+  }
+
+  native nativeFinishWrite(): void;
+  finishWrite(): void {
+    if (!this.writeStream) {
+      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+    }
+    this.writeStream?.close();
+    this.nativeFinishWrite();
+    this.writeStream = null;
+  };
+
+  native nativeFailWrite(): void;
+  failWrite(): void {
+    if (!this.writeStream) {
+      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+    }
+    this.writeStream?.close();
+    this.nativeFailWrite();
+    this.writeStream = null;
+  };
+
+  native delete(): void;
 }
 
 export enum WhenceType {
