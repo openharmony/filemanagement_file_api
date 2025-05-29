@@ -17,6 +17,8 @@ group("file_api_unittest") {
     "class_file:class_file_test",
     "filemgmt_libn_test:filemgmt_libn_test",
     "js:ani_file_fs_test",
+    "js:ani_file_fs_mock_test",
+    "js:ani_file_statvfs_test",
     "remote_uri:remote_uri_test",
     "task_signal:task_signal_test",
   ]
