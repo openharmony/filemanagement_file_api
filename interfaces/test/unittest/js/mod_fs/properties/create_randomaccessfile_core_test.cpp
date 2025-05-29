@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "create_randomaccessfile_core.h"
-
 #include <gtest/gtest.h>
+
+#include "create_randomaccessfile_core.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;

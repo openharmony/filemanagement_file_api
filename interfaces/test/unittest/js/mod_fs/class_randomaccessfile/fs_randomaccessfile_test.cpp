@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "fs_randomaccessfile.h"
-#include "file_entity.h"
-
 #include <gtest/gtest.h>
+
+#include "file_entity.h"
+#include "fs_randomaccessfile.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;

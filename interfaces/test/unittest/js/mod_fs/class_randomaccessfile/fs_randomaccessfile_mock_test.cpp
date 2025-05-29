@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "fs_randomaccessfile.h"
-#include "../properties/mock/uv_fs_mock.h"
-#include "file_entity.h"
-
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include "file_entity.h"
+#include "fs_randomaccessfile.h"
+#include "uv_fs_mock.h"
+
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;

@@ -30,10 +30,6 @@ using namespace std;
 
 static tuple<bool, FileInfo, int> ParseStringToFileInfo(const string &path)
 {
-    if (path.empty()) {
-        HILOGE("The first argument requires filepath/file");
-        return { false, FileInfo { false, nullptr, nullptr }, EINVAL};
-    }
     OHOS::DistributedFS::FDGuard sfd;
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(sfd, false);
     if (fdg == nullptr) {
