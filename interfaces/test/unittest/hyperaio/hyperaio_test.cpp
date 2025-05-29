@@ -36,7 +36,92 @@ namespace {
     std::function<void(std::unique_ptr<IoResponse>)> callBack = [](std::unique_ptr<IoResponse> response) {
         GTEST_LOG_(INFO) << "HyperAioTest callBack";
     };
-
+    /**
+     * @tc.name: HyperAio_SupportIouring_0000
+     * @tc.desc: Test function of SupportIouring() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_SupportIouring_0000, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_SupportIouring_0000";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->SupportIouring();
+        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
+        if ((result & IOURING_APP_PERMISSION) == 0) {
+            return;
+        }
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_SupportIouring_0000";
+    }
+    /**
+     * @tc.name: HyperAio_CtxInit_0000
+     * @tc.desc: Test function of CtxInit() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_CtxInit_0000, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CtxInit_0000";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->SupportIouring();
+        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
+        if ((result & IOURING_APP_PERMISSION) == 0) {
+            return;
+        }
+        result = hyperAio_->CtxInit(nullptr);
+        EXPECT_EQ(result, -EINVAL);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0000";
+    }
+    /**
+     * @tc.name: HyperAio_CtxInit_0001
+     * @tc.desc: Test function of CtxInit() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_CtxInit_0001, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CtxInit_0001";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->SupportIouring();
+        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
+        if ((result & IOURING_APP_PERMISSION) == 0) {
+            return;
+        }
+        result = hyperAio_->CtxInit(callBack);
+        EXPECT_EQ(result, EOK);
+        result = hyperAio_->CtxInit(callBack);
+        EXPECT_EQ(result, EOK);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0001";
+    }
+    /**
+     * @tc.name: HyperAio_CtxInit_0002
+     * @tc.desc: Test function of CtxInit() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_CtxInit_0002, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CtxInit_0002";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->SupportIouring();
+        EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
+        if ((result & IOURING_APP_PERMISSION) == 0) {
+            return;
+        }
+        result = hyperAio_->CtxInit(nullptr);
+        EXPECT_EQ(result, -EINVAL);
+        result = hyperAio_->CtxInit(callBack);
+        EXPECT_EQ(result, EOK);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0002";
+    }
     /**
      * @tc.name: HyperAio_StartOpenReqs_0000
      * @tc.desc: Test function of StartOpenReqs() interface for SUCCESS.
