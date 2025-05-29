@@ -30,7 +30,7 @@ using namespace std;
 
 static tuple<bool, FileInfo, int> ParseStringToFileInfo(const string &path)
 {
-    if (strlen(path.c_str()) < 0) {
+    if (path.empty()) {
         HILOGE("The first argument requires filepath/file");
         return { false, FileInfo { false, nullptr, nullptr }, EINVAL};
     }
