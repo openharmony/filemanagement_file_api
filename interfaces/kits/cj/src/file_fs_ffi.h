@@ -50,6 +50,7 @@ extern "C" {
     FFI_EXPORT int32_t FfiOHOSFileFsRename(const char* oldFile, const char* newFile);
     FFI_EXPORT int32_t FfiOHOSFileFsUnlink(const char* path);
     FFI_EXPORT RetDataBool FfiOHOSFileFsAccess(const char* path);
+    FFI_EXPORT RetDataBool FfiOHOSFileFsAccessExt(const char* path, int32_t mode, int32_t flag);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsOpen(const char* path, uint64_t mode);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsRead(int32_t fd, char* buffer, int64_t bufLen, size_t length, int64_t offset);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsReadCur(int32_t fd, char* buffer, int64_t bufLen, size_t length);
