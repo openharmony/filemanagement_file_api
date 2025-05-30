@@ -20,8 +20,6 @@ ohos_unittest("ani_file_fs_test") {
 
   module_out_path = "file_api/file_api"
 
-  resource_config_file = "../resource/ohos_test.xml"
-
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
@@ -40,6 +38,8 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/listfile_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
     "mod_fs/class_stream/fs_stream_test.cpp",
+    "mod_fs/properties/lstat_core_test.cpp",
+    "mod_fs/properties/copy_dir_core_test.cpp",
   ]
 
   deps = [
@@ -55,6 +55,53 @@ ohos_unittest("ani_file_fs_test") {
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
     "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "libuv:uv",
+  ]
+
+  defines = [
+    "private=public",
+  ]
+}
+
+ohos_unittest("ani_file_fs_mock_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
+  module_out_path = "file_api/file_api"
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/properties/mock",
+  ]
+
+  sources = [
+    "mod_fs/properties/mock/uv_fs_mock.cpp",
+    "mod_fs/properties/lstat_core_mock_test.cpp",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${file_api_path}/interfaces/kits/js:ani_file_fs",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "app_file_service:fileuri_native",
+    "c_utils:utils",
+    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
