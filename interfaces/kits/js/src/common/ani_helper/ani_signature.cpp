@@ -60,6 +60,7 @@ const string BuiltInTypes::Array::objectSetterSig =
 // BuiltInTypes::ArrayBuffer
 const Type BuiltInTypes::ArrayBuffer::classType = Builder::BuildClass("escompat.ArrayBuffer");
 const string BuiltInTypes::ArrayBuffer::classDesc = BuiltInTypes::ArrayBuffer::classType.Descriptor();
+const string BuiltInTypes::ArrayBuffer::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
 // BuiltInTypes::BigInt
 const Type BuiltInTypes::BigInt::classType = Builder::BuildClass("escompat.BigInt");
 const string BuiltInTypes::BigInt::classDesc = BuiltInTypes::BigInt::classType.Descriptor();
@@ -115,6 +116,18 @@ const Type FS::WatchEventInner::classType = Builder::BuildClass("@ohos.file.fs.W
 const string FS::WatchEventInner::classDesc = FS::WatchEventInner::classType.Descriptor();
 const string FS::WatchEventInner::ctorSig =
     Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::doubleType, BasicTypes::doubleType });
+// FS::ReadStream
+const Type FS::ReadStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ReadStream");
+const string FS::ReadStream::classDesc = FS::ReadStream::classType.Descriptor();
+const string FS::ReadStream::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+// FS::WriteStream
+const Type FS::WriteStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.WriteStream");
+const string FS::WriteStream::classDesc = FS::WriteStream::classType.Descriptor();
+const string FS::WriteStream::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+// FS::AtomicFile
+const Type FS::AtomicFile::classType = Builder::BuildClass("@ohos.file.fs.fileIo.AtomicFile");
+const string FS::AtomicFile::classDesc = FS::AtomicFile::classType.Descriptor();
+const string FS::AtomicFile::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 // FS::LocationType
 const Type FS::LocationType::classType = Builder::BuildClass("@ohos.file.fs.fileIo.LocationType");
 const string FS::LocationType::classDesc = FS::LocationType::classType.Descriptor();

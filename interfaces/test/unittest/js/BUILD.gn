@@ -34,6 +34,7 @@ ohos_unittest("ani_file_fs_test") {
   ]
 
   sources = [
+    "mod_fs/class_atomicfile/fs_atomicfile_test.cpp",
     "mod_fs/properties/close_core_test.cpp",
     "mod_fs/properties/create_stream_core_test.cpp",
     "mod_fs/properties/fdopen_stream_core_test.cpp",

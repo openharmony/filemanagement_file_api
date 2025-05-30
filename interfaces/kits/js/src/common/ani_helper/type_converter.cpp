@@ -225,16 +225,18 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
         return { false, nullptr };
     }
 
-    static const char *className = "Lescompat/ArrayBuffer;";
+    auto classDesc = BuiltInTypes::ArrayBuffer::classDesc.c_str();
     ani_status ret;
     ani_class cls;
-    if ((ret = env->FindClass(className, &cls)) != ANI_OK) {
-        HILOGE("Not found %{private}s, err: %{private}d", className, ret);
+    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
+        HILOGE("Not found %{private}s, err: %{private}d", classDesc, ret);
         return { false, nullptr };
     }
 
+    auto ctorDesc = BuiltInTypes::ArrayBuffer::ctorDesc.c_str();
+    auto ctorSig = BuiltInTypes::ArrayBuffer::ctorSig.c_str();
     ani_method ctor;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
         HILOGE("Not found ctor, err: %{private}d", ret);
         return { false, nullptr };
     }
