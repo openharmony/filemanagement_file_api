@@ -265,20 +265,15 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
     return { true, static_cast<ani_arraybuffer>(obj) };
 }
 
-std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(
+std::tuple<bool, ani_array> TypeConverter::ToAniStringList(
     ani_env *env, const std::string strList[], const uint32_t length)
 {
     if (env == nullptr) {
         return { false, nullptr };
     }
 
-    auto classDesc = BuiltInTypes::String::classDesc.c_str();
-    ani_array_ref result = nullptr;
-    ani_class cls = nullptr;
-    if (env->FindClass(classDesc, &cls) != ANI_OK) {
-        return { false, result };
-    }
-    if (env->Array_New_Ref(cls, length, nullptr, &result) != ANI_OK) {
+    ani_array result = nullptr;
+    if (env->Array_New(length, nullptr, &result) != ANI_OK) {
         return { false, result };
     }
     for (uint32_t i = 0; i < length; i++) {
@@ -287,7 +282,7 @@ std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(
             return { false, nullptr };
         }
 
-        if (env->Array_Set_Ref(result, i, item) != ANI_OK) {
+        if (env->Array_Set(result, i, item) != ANI_OK) {
             return { false, nullptr };
         }
     }
