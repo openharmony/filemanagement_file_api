@@ -14,20 +14,21 @@
  */
 
 #include <ani.h>
+#include "ani_signature.h"
 #include "bind_function.h"
 #include "hashstream_ani.h"
 #include "hash_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static ani_status BindStaticMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/hash/HashImpl;";
+    auto classDesc = Impl::HashImpl::classDesc.c_str();
     std::array methods = {
-        ani_native_function { "hashSync", "Lstd/core/String;Lstd/core/String;:Lstd/core/String;",
-            reinterpret_cast<void *>(HashAni::HashSync) },
+        ani_native_function { "hashSync", nullptr, reinterpret_cast<void *>(HashAni::HashSync) },
     };
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 
 static ani_status BindHashStreamMethods(ani_env *env)

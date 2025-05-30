@@ -28,8 +28,8 @@ using namespace std;
 
 class StatWrapper final {
 public:
-    static tuple<ani_status, ani_object> Wrap(ani_env *env, FsStat *fsStat);
-    static FsStat* Unwrap(ani_env *env, ani_object object);
+    static ani_object Wrap(ani_env *env, FsStat *fsStat);
+    static FsStat *Unwrap(ani_env *env, ani_object object);
 };
 } // namespace ANI
 } // namespace ModuleFileIO

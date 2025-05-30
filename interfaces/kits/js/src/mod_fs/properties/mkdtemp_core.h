@@ -27,7 +27,7 @@ class MkdtempCore final {
 public:
     static FsResult<std::string> DoMkdtemp(const std::string &path);
 };
-const std::string PROCEDURE_MKDTEMP_NAME = "FileIOMkdtemp";
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

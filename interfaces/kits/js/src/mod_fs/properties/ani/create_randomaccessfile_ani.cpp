@@ -16,6 +16,7 @@
 #include "create_randomaccessfile_ani.h"
 
 #include "ani_helper.h"
+#include "ani_signature.h"
 #include "create_randomaccessfile_core.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
@@ -25,44 +26,57 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static ani_object Wrap(ani_env *env, const FsRandomAccessFile *rafFile)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/RandomAccessFileInner;";
+    if (rafFile == nullptr) {
+        HILOGE("FsRandomAccessFile pointer is null!");
+        return nullptr;
+    }
+
+    auto classDesc = FS::RandomAccessFileInner::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::RandomAccessFileInner::ctorDesc.c_str();
+    auto ctorSig = FS::RandomAccessFileInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
+
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(rafFile));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", className);
+        HILOGE("New %s obj Failed!", classDesc);
         return nullptr;
     }
+
     const auto &fdRet = rafFile->GetFD();
     if (!fdRet.IsSuccess()) {
         HILOGE("GetFD Failed!");
         return nullptr;
     }
+
     const auto &fd = fdRet.GetData().value();
     if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "fd", static_cast<double>(fd))) {
         HILOGE("Set fd field value failed!");
         return nullptr;
     }
+
     const auto &fpRet = rafFile->GetFPointer();
     if (!fpRet.IsSuccess()) {
         HILOGE("GetFPointer Failed!");
         return nullptr;
     }
+
     const auto &fp = fpRet.GetData().value();
     if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "filePointer", static_cast<double>(fp))) {
         HILOGE("Set fp field value failed!");
@@ -73,16 +87,18 @@ static ani_object Wrap(ani_env *env, const FsRandomAccessFile *rafFile)
 
 static tuple<bool, bool> JudgeFile(ani_env *env, ani_object obj)
 {
+    auto stringTypeDesc = BuiltInTypes::String::classDesc.c_str();
     ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    env->FindClass(stringTypeDesc, &stringClass);
     ani_boolean isString = false;
     env->Object_InstanceOf(obj, stringClass, &isString);
     if (isString) {
         return { true, true };
     }
 
+    auto fileClassDesc = FS::FileInner::classDesc.c_str();
     ani_class fileClass;
-    env->FindClass("L@ohos/file/fs/fileIo/FileInner;", &fileClass);
+    env->FindClass(fileClassDesc, &fileClass);
     ani_boolean isFile = false;
     env->Object_InstanceOf(obj, fileClass, &isFile);
     if (isFile) {
@@ -118,8 +134,8 @@ static tuple<bool, optional<RandomAccessFileOptions>> ToRafOptions(ani_env *env,
     return { true, make_optional<RandomAccessFileOptions>(move(options)) };
 }
 
-static ani_object CreateRandomAccessFileByString(ani_env *env, ani_object file, ani_object mode,
-    optional<RandomAccessFileOptions> op)
+static ani_object CreateRandomAccessFileByString(
+    ani_env *env, ani_object file, ani_object mode, optional<RandomAccessFileOptions> op)
 {
     auto [succPath, path] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(file));
     if (!succPath) {
@@ -142,14 +158,16 @@ static ani_object CreateRandomAccessFileByString(ani_env *env, ani_object file, 
     const FsRandomAccessFile *refFile = ret.GetData().value();
     auto result = Wrap(env, move(refFile));
     if (result == nullptr) {
+        delete refFile;
+        refFile = nullptr;
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
     return result;
 }
 
-ani_object CreateRandomAccessFileAni::CreateRandomAccessFileSync(ani_env *env, [[maybe_unused]] ani_class clazz,
-                                                                 ani_object file, ani_object mode, ani_object options)
+ani_object CreateRandomAccessFileAni::CreateRandomAccessFileSync(
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_object file, ani_object mode, ani_object options)
 {
     auto [succOp, op] = ToRafOptions(env, options);
     if (!succOp) {
@@ -185,6 +203,8 @@ ani_object CreateRandomAccessFileAni::CreateRandomAccessFileSync(ani_env *env, [
         const FsRandomAccessFile *refFile = ret.GetData().value();
         auto result = Wrap(env, move(refFile));
         if (result == nullptr) {
+            delete refFile;
+            refFile = nullptr;
             ErrorHandler::Throw(env, UNKNOWN_ERR);
             return nullptr;
         }

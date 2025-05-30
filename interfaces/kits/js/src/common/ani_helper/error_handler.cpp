@@ -20,8 +20,8 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI {
 ani_status ErrorHandler::Throw(
     ani_env *env, int32_t code, const std::string &errMsg, const std::optional<ani_object> &errData)
 {
-    const char *className = "L@ohos/base/BusinessError;";
-    return Throw(env, className, code, errMsg, errData);
+    auto classDesc = BuiltInTypes::BusinessError::classDesc.c_str();
+    return Throw(env, classDesc, code, errMsg, errData);
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

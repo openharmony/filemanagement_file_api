@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("unittest") {
+group("file_api_unittest") {
   testonly = true
   deps = [
     "class_file:class_file_test",
     "filemgmt_libn_test:filemgmt_libn_test",
+    "js:ani_file_fs_test",
     "remote_uri:remote_uri_test",
     "task_signal:task_signal_test",
   ]

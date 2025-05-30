@@ -199,7 +199,7 @@
           }
         ],
         "test": [
-          "//foundation/filemanagement/file_api/interfaces/test/unittest:unittest"
+          "//foundation/filemanagement/file_api/interfaces/test/unittest:file_api_unittest"
         ]
       }
     }

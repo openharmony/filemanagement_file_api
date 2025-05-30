@@ -17,9 +17,11 @@
 
 #include <fcntl.h>
 
+#include "ani_signature.h"
 #include "close_core.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
+#include "file_wrapper.h"
 #include "type_converter.h"
 
 namespace OHOS {
@@ -29,51 +31,57 @@ namespace ANI {
 
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-tuple<bool, int32_t> ParseFd(ani_env *env, ani_object obj)
+tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
 {
     int32_t result = -1;
-    ani_class IntClass;
-    env->FindClass("Lstd/core/Double;", &IntClass);
-    ani_boolean isInt;
-    env->Object_InstanceOf(obj, IntClass, &isInt);
-    if (isInt) {
+    auto doubleClassDesc = BoxedTypes::Double::classDesc.c_str();
+    ani_class doubleClass;
+    env->FindClass(doubleClassDesc, &doubleClass);
+    ani_boolean isDouble;
+    env->Object_InstanceOf(obj, doubleClass, &isDouble);
+    if (isDouble) {
         ani_int fd;
-        if (ANI_OK != env->Object_CallMethodByName_Int(obj, "intValue", nullptr, &fd)) {
+        if (ANI_OK != env->Object_CallMethodByName_Int(obj, "toInt", nullptr, &fd)) {
             HILOGE("Get fd value failed");
-            return { false, result };
+            return { false, result, nullptr };
         }
         result = static_cast<int32_t>(fd);
-        return { true, result };
+        return { true, result, nullptr };
     }
 
-    ani_class FileClass;
-    env->FindClass("L@ohos/file/fs/fileIo/FileInner;", &FileClass);
-    ani_boolean isFile;
-    env->Object_InstanceOf(obj, FileClass, &isFile);
-    if (isFile) {
-        ani_double fd;
-        if (ANI_OK != env->Object_GetPropertyByName_Double(obj, "fd", &fd)) {
-            HILOGE("Get fd in class file failed");
-            return { false, result };
-        }
-        result = static_cast<int32_t>(fd);
-        return { true, result };
+    FsFile *file = FileWrapper::Unwrap(env, obj);
+    if (file != nullptr) {
+        return { true, -1, file };
     }
-    HILOGE("Invalid fd type");
-    return { false, result };
+
+    HILOGE("Cannot unwrap fsfile!");
+    ErrorHandler::Throw(env, UNKNOWN_ERR);
+    return { false, -1, nullptr };
 }
 
 void CloseAni::CloseSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_object obj)
 {
-    auto [succ, fd] = ParseFd(env, obj);
+    auto [succ, fd, file] = ParseFdOrFile(env, obj);
     if (!succ) {
         HILOGE("Parse fd argument failed");
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
-    auto ret = CloseCore::DoClose(fd);
+    if (file == nullptr) {
+        auto ret = CloseCore::DoClose(fd);
+        if (!ret.IsSuccess()) {
+            HILOGE("Close %d failed", fd);
+            const auto &err = ret.GetError();
+            ErrorHandler::Throw(env, err);
+            return;
+        }
+        return;
+    }
+
+    auto ret = CloseCore::DoClose(file);
     if (!ret.IsSuccess()) {
         HILOGE("Close %d failed", fd);
         const auto &err = ret.GetError();

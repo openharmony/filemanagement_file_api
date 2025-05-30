@@ -66,6 +66,8 @@ ani_object WatcherAni::CreateWatcherSync(
     const FsWatcher *watcher = ret.GetData().value();
     auto result = FsWatcherWrapper::Wrap(env, move(watcher));
     if (result == nullptr) {
+        delete watcher;
+        watcher = nullptr;
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }

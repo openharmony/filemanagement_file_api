@@ -60,18 +60,18 @@ static tuple<bool, string, string, int> ValidMoveArg(const string &src, const st
 {
     if (CheckDir(src)) {
         HILOGE("Invalid src");
-        return { false, nullptr, nullptr, 0 };
+        return { false, "", "", 0 };
     }
     if (CheckDir(dest)) {
         HILOGE("Invalid dest");
-        return { false, nullptr, nullptr, 0 };
+        return { false, "", "", 0 };
     }
     int modeType = 0;
     if (mode.has_value()) {
         modeType = mode.value();
         if ((modeType != MODE_FORCE_MOVE && modeType != MODE_THROW_ERR)) {
             HILOGE("Invalid mode");
-            return { false, nullptr, nullptr, 0 };
+            return { false, "", "", 0 };
         }
     }
     return { true, move(src), move(dest), modeType };
