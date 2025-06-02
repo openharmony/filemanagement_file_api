@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,17 @@
  */
 
 #include "open.h"
+
 #include <cstring>
 #include <fcntl.h>
 #include <tuple>
 #include <unistd.h>
-#include "remote_uri.h"
 
-#include "../../common/napi/n_async/n_async_work_callback.h"
-#include "../../common/napi/n_async/n_async_work_promise.h"
-#include "../../common/napi/n_func_arg.h"
-#include "../common_func.h"
+#include "common_func.h"
+#include "n_async/n_async_work_callback.h"
+#include "n_async/n_async_work_promise.h"
+#include "n_func_arg.h"
+#include "remote_uri.h"
 
 namespace OHOS {
 namespace DistributedFS {

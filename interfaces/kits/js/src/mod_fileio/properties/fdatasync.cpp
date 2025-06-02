@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,18 @@
  */
 
 #include "fdatasync.h"
+
 #include <cstring>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <tuple>
 #include <unistd.h>
 
-#include "../../common/napi/n_async/n_async_work_callback.h"
-#include "../../common/napi/n_async/n_async_work_promise.h"
-#include "../../common/napi/n_func_arg.h"
+#include <sys/stat.h>
+
+#include "n_async_work_callback.h"
+#include "n_async_work_promise.h"
+#include "n_func_arg.h"
+
 namespace OHOS {
 namespace DistributedFS {
 namespace ModuleFileIO {

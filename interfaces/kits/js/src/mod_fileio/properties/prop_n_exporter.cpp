@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 #include <sstream>
 #include <unistd.h>
 
-#include "../common_func.h"
 #include "chmod.h"
 #include "chown.h"
 #include "close.h"
+#include "common_func.h"
 #include "copy_file.h"
 #include "create_stream.h"
 #include "fchmod.h"
@@ -40,8 +40,8 @@
 #include "lseek.h"
 #include "lstat.h"
 #include "mkdtemp.h"
-#include "open.h"
 #include "open_dir.h"
+#include "open.h"
 #include "posix_fallocate.h"
 #include "read_dir.h"
 #include "read_text.h"
