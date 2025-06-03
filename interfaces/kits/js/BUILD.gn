@@ -629,6 +629,7 @@ group("build_kits_js") {
 group("ani_file_api") {
   deps = [
     ":ani_file_fs",
+    ":ani_file_securitylabel",
   ]
 }
 
@@ -733,4 +734,66 @@ ohos_prebuilt_etc("ohos_file_fs_abc_etc") {
   subsystem_name = "filemanagement"
   part_name = "file_api"
   deps = [ ":ohos_file_fs_abc" ]
+}
+
+ohos_shared_library("ani_file_securitylabel") {
+  public_configs = [ ":ani_config" ]
+  include_dirs = [
+    "src/mod_securitylabel/ani",
+    "src/mod_securitylabel",
+  ]
+  sources = [
+    "src/common/ani_helper/ani_signature.cpp",
+    "src/common/ani_helper/error_handler.cpp",
+    "src/common/ani_helper/type_converter.cpp",
+    "src/common/file_helper/fd_guard.cpp",
+    "src/mod_fs/fs_utils.cpp",
+    "src/mod_securitylabel/ani/bind_function_class.cpp",
+    "src/mod_securitylabel/ani/securitylabel_ani.cpp",
+    "src/mod_securitylabel/securitylabel_core.cpp",
+  ]
+
+  deps = [
+    ":ohos_file_securityLabel_abc_etc",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "hilog:libhilog",
+    "libuv:uv",
+    "runtime_core:ani",
+    "runtime_core:ani_helpers",
+    "runtime_core:libarkruntime",
+  ]
+  use_exceptions = true
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  output_extension = "so"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+}
+
+generate_static_abc("ohos_file_securityLabel_abc") {
+  base_url = "./src/mod_securitylabel/ani/ets"
+  files = [ "./src/mod_securitylabel/ani/ets/@ohos.file.securityLabel.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ohos_file_securityLabel_abc.abc"
+}
+
+ohos_prebuilt_etc("ohos_file_securityLabel_abc_etc") {
+  source = "$target_out_dir/ohos_file_securityLabel_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+  deps = [ ":ohos_file_securityLabel_abc" ]
 }
