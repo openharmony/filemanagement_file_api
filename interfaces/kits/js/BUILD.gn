@@ -623,3 +623,101 @@ group("build_kits_js") {
     ":statvfs",
   ]
 }
+
+
+group("ani_file_api") {
+  deps = [
+    ":ani_file_fs",
+  ]
+}
+
+config("ani_config") {
+  include_dirs = [
+    "./include",
+    "${file_api_path}/interfaces/kits/rust/include",
+    "${utils_path}/common/include",
+    "${utils_path}/filemgmt_libfs/include",
+    "${utils_path}/filemgmt_libhilog",
+    "src/common",
+    "src/common/ani_helper",
+    "src/common/file_helper",
+    "src/mod_fs",
+  ]
+
+  cflags = [
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Oz",
+  ]
+  cflags_cc = [
+    "-std=c++17",
+    "-fvisibility-inlines-hidden",
+    "-Oz",
+  ]
+}
+
+ohos_shared_library("ani_file_fs") {
+  public_configs = [ ":ani_config" ]
+  include_dirs = [
+  ]
+  sources = [
+  ]
+  deps = [
+    ":ohos_file_fs_abc_etc",
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+  use_exceptions = true
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "app_file_service:fileuri_native",
+    "bounds_checking_function:libsec_static",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "dfs_service:libdistributedfileutils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "ipc:ipc_core",
+    "libuv:uv",
+    "runtime_core:ani",
+    "runtime_core:ani_helpers",
+    "runtime_core:libarkruntime",
+    "samgr:samgr_proxy",
+  ]
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  output_extension = "so"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+}
+
+generate_static_abc("ohos_file_fs_abc") {
+  base_url = "./src/mod_fs/ani/ets"
+  files = [ "./src/mod_fs/ani/ets/@ohos.file.fs.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ohos_file_fs_abc.abc"
+}
+
+ohos_prebuilt_etc("ohos_file_fs_abc_etc") {
+  source = "$target_out_dir/ohos_file_fs_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+  deps = [ ":ohos_file_fs_abc" ]
+}
