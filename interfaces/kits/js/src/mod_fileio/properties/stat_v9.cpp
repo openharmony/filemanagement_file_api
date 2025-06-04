@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,16 @@
 #include <memory>
 #include <tuple>
 
-#include "class_stat_v9/stat_entity_v9.h"
-#include "class_stat_v9/stat_n_exporter_v9.h"
-#include "file_helper/fd_guard.h"
-#include "n_async_work_callback.h"
-#include "n_async_work_promise.h"
-#include "n_class.h"
-#include "n_func_arg.h"
-#include "n_val.h"
-#include "uni_error.h"
+#include "../../common/file_helper/fd_guard.h"
+#include "../../common/napi/n_async/n_async_work_callback.h"
+#include "../../common/napi/n_async/n_async_work_promise.h"
+#include "../../common/napi/n_class.h"
+#include "../../common/napi/n_func_arg.h"
+#include "../../common/napi/n_val.h"
+#include "../../common/uni_error.h"
+
+#include "../class_stat_v9/stat_entity_v9.h"
+#include "../class_stat_v9/stat_n_exporter_v9.h"
 
 namespace OHOS {
 namespace DistributedFS {

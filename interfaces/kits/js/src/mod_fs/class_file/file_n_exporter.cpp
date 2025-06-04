@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,20 @@
  * limitations under the License.
  */
 
+#include "file_entity.h"
 #include "file_n_exporter.h"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <sys/file.h>
 #include <tuple>
 
-#include <sys/file.h>
-
-#include "common_func.h"
-#include "file_entity.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
-
+#include "../common_func.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "file_uri.h"
 #endif

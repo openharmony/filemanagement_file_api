@@ -58,11 +58,13 @@ ohos_shared_library("fileio") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "src/common",
+    "${arkui_napi_path}/interfaces/kits",
     "src/common/file_helper",
     "src/common/napi",
     "src/common/napi/n_async",
-    "src/mod_fileio",
+    "//third_party/node/src",
+    "//third_party/libuv/include",
+    "//third_party/openssl/include",
     "${utils_path}/common/include",
   ]
 
@@ -114,6 +116,7 @@ ohos_shared_library("fileio") {
   deps = [
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   use_exceptions = true
@@ -121,12 +124,8 @@ ohos_shared_library("fileio") {
   external_deps = [
     "ability_base:zuri",
     "bounds_checking_function:libsec_shared",
-    "c_utils:utils",
     "hilog:libhilog",
-    "libuv:uv",
     "napi:ace_napi",
-    "node:node_header_notice",
-    "openssl:libcrypto_shared",
   ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
@@ -138,12 +137,14 @@ ohos_shared_library("fs") {
   relative_install_dir = "module/file"
 
   include_dirs = [
+    "${filemanagement_service_path}/distributedfiledaemon/include/ipc",
     "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_fs",
     "${src_path}/mod_fs/properties",
     "${src_path}/mod_fs/properties/copy_listener",
     "${utils_path}/common/include",
+    "//third_party/libuv/include",
   ]
 
   sources = [
@@ -209,7 +210,10 @@ ohos_shared_library("fs") {
       debug = false
     }
 
-    include_dirs += [ "${file_api_path}/interfaces/kits/rust/include" ]
+    include_dirs += [
+      "${file_api_path}/interfaces/kits/rust/include",
+      "${filemanagement_service_path}/distributedfiledaemon/include/ipc",
+    ]
     sources += [
       "src/mod_fs/class_atomicfile/atomicfile_n_exporter.cpp",
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
@@ -257,7 +261,6 @@ ohos_shared_library("fs") {
       "hisysevent:libhisysevent",
       "hitrace:hitrace_meter",
       "ipc:ipc_core",
-      "libuv:uv",
       "samgr:samgr_proxy",
     ]
     deps += [
@@ -295,7 +298,6 @@ ohos_shared_library("hash") {
   relative_install_dir = "module/file"
 
   include_dirs = [
-    "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_hash",
     "${src_path}/mod_hash/class_hashstream",
@@ -313,13 +315,13 @@ ohos_shared_library("hash") {
   deps = [
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "napi:ace_napi",
-    "openssl:libcrypto_shared",
   ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
@@ -351,11 +353,11 @@ ohos_shared_library("file") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "src/common",
+    "${arkui_napi_path}/interfaces/kits",
     "src/common/napi",
     "src/common/napi/n_async",
     "src/common/file_helper",
-    "src/mod_file",
+    "//third_party/node/src",
   ]
 
   sources = file_common_src
@@ -374,7 +376,6 @@ ohos_shared_library("file") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "napi:ace_napi",
-    "node:node_header_notice",
   ]
 
   if (file_api_read_optimize) {
@@ -587,9 +588,9 @@ ohos_shared_library("document") {
   relative_install_dir = "module"
 
   include_dirs = [
-    "src/common",
-    "src/common/napi",
+    "${arkui_napi_path}/interfaces/kits",
     "src/common/napi/n_async",
+    "//third_party/node/src",
   ]
 
   sources = [
@@ -606,7 +607,6 @@ ohos_shared_library("document") {
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",
-    "node:node_header_notice",
   ]
 }
 

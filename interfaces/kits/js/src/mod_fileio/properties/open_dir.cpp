@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,19 +14,18 @@
  */
 
 #include "open_dir.h"
-
 #include <memory>
 #include <string>
 #include <tuple>
 
-#include "class_dir/dir_entity.h"
-#include "class_dir/dir_n_exporter.h"
-#include "n_async_work_callback.h"
-#include "n_async_work_promise.h"
-#include "n_class.h"
-#include "n_func_arg.h"
-#include "n_val.h"
-#include "uni_error.h"
+#include "../../common/napi/n_async/n_async_work_callback.h"
+#include "../../common/napi/n_async/n_async_work_promise.h"
+#include "../../common/napi/n_class.h"
+#include "../../common/napi/n_func_arg.h"
+#include "../../common/napi/n_val.h"
+#include "../../common/uni_error.h"
+#include "../class_dir/dir_entity.h"
+#include "../class_dir/dir_n_exporter.h"
 
 namespace OHOS {
 namespace DistributedFS {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_PROPERTIES_OPEN_V9_H
 
 #include "iremote_broker.h"
-#include "uni_header.h"
+#include "../../common/napi/uni_header.h"
 
 namespace OHOS {
 namespace DistributedFS {

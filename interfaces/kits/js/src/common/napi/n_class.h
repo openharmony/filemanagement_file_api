@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 #ifndef INTERFACES_KITS_JS_SRC_COMMON_NAPI_N_CLASS_H
 #define INTERFACES_KITS_JS_SRC_COMMON_NAPI_N_CLASS_H
 
+#include "uni_header.h"
+
 #include <map>
 
-#include "log.h"
-#include "uni_header.h"
+#include "../log.h"
 
 namespace OHOS {
 namespace DistributedFS {

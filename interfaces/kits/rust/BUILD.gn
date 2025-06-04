@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 
 config("public_config") {
-  include_dirs = [ "./include" ]
+  include_dirs = [ "include/rust_file.h" ]
 }
 
 ohos_rust_shared_ffi("rust_file") {
@@ -24,10 +24,8 @@ ohos_rust_shared_ffi("rust_file") {
   sources = [ "src/lib.rs" ]
   crate_name = "rust_file"
   rustflags = [ "-Zstack-protector=all" ]
-  external_deps = [
-    "hilog:hilog_rust",
-    "rust_libc:lib",
-  ]
+  deps = [ "//third_party/rust/crates/libc:lib" ]
+  external_deps = [ "hilog:hilog_rust" ]
   innerapi_tags = [ "platformsdk" ]
   public_configs = [ ":public_config" ]
 }
