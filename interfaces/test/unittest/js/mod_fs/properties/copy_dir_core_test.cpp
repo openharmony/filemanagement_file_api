@@ -34,12 +34,14 @@ public:
     void SetUp();
     void TearDown();
 
-    void CreateTestFile(const filesystem::path& path, const string& content = "test") {
+    void CreateTestFile(const filesystem::path& path, const string& content = "test")
+    {
         ofstream file(path);
         file << content;
     }
 
-    void CreateTestDirStructure() {
+    void CreateTestDirStructure()
+    {
         filesystem::create_directories(srcPath / "subdir1");
         filesystem::create_directories(srcPath / "subdir2");
         CreateTestFile(srcPath / "file1.txt");
