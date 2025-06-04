@@ -20,8 +20,6 @@ ohos_unittest("ani_file_fs_test") {
 
   module_out_path = "file_api/file_api"
 
-  resource_config_file = "../resource/ohos_test.xml"
-
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
@@ -73,8 +71,6 @@ ohos_unittest("ani_file_fs_mock_test") {
 
   module_out_path = "file_api/file_api"
 
-  resource_config_file = "../resource/ohos_test.xml"
-
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
@@ -119,8 +115,6 @@ ohos_unittest("ani_file_fs_mock_test") {
 
 ohos_unittest("ani_file_statvfs_test") {
   module_out_path = "file_api/file_api"
-
-  resource_config_file = "../resource/ohos_test.xml"
 
   sources = [
     "mod_statvfs/statvfs_core_test.cpp",
