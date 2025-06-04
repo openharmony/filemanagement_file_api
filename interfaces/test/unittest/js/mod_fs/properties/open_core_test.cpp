@@ -61,7 +61,7 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_001";
 
-    string path = "/test/path.txt";
+    string path = "/test/open_test.txt";
     int32_t mode = -1;
     
     auto res = OpenCore::DoOpen(path, mode);
@@ -81,7 +81,7 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_002";
 
-    string path = "/test/path.txt";
+    string path = "/test/open_test.txt";
     int32_t mode = 3;
     
     auto res = OpenCore::DoOpen(path, mode);
@@ -101,7 +101,7 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_003";
 
-    string path = "file://media/image.jpg";
+    string path = "file://media/open_test.jpg";
     int32_t mode = 0;
     
     auto res = OpenCore::DoOpen(path, mode);
@@ -121,7 +121,7 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_004";
 
-    string path = "file://docs/non_existent.pdf";
+    string path = "file://docs/open_test.pdf";
     int32_t mode = 0;
 
     auto res = OpenCore::DoOpen(path, mode);
@@ -141,7 +141,7 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_005";
 
-    string path = "content://com.example.provider/file.txt";
+    string path = "content://com.example.provider/open_test.txt";
     int32_t mode = 0;
 
     auto res = OpenCore::DoOpen(path, mode);
@@ -161,7 +161,7 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_006";
 
-    string path = "datashare://media/image.jpg";
+    string path = "datashare://media/open_test.jpg";
     int32_t mode = 0;
 
     auto res = OpenCore::DoOpen(path, mode);
@@ -181,7 +181,7 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_007, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_007";
 
-    string path = "invalid://path/to/file";
+    string path = "invalid://path/dir_test";
     int32_t mode = 0;
 
     auto res = OpenCore::DoOpen(path, mode);

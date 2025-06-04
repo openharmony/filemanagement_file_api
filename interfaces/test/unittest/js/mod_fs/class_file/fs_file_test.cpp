@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "fs_file.h"
 #include "file_entity.h"
+#include "fs_file.h"
 
 #include <gtest/gtest.h>
 
@@ -29,7 +29,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-private:
     std::unique_ptr<FileEntity> fileEntity;
     std::unique_ptr<FsFile> fsFile;
 };
@@ -52,7 +51,7 @@ void FsFileTest::SetUp(void)
     const int fdValue = 3;
     const bool isClosed = false;
     fileEntity->fd_ = std::make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
-    fileEntity->path_ = "/data/testdir/testfile.txt";
+    fileEntity->path_ = "/data/test/file_test.txt";
     fileEntity->uri_ = "";
     fsFile = std::make_unique<FsFile>(std::move(fileEntity));
 }
@@ -220,6 +219,60 @@ HWTEST_F(FsFileTest, FsFileTest_UnLock_009, testing::ext::TestSize.Level1)
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_UnLock_009";
+}
+
+/**
+ * @tc.name: FsFileTest_GetName_010
+ * @tc.desc: Test function of GetName() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_GetName_010, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetName_010";
+
+    fsFile->fileEntity->uri_ = "file://storage/file_test.txt";
+    auto result = fsFile->GetName();
+    EXPECT_EQ(result.IsSuccess(), true);
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_GetName_010";
+}
+
+/**
+ * @tc.name: FsFileTest_GetParent_011
+ * @tc.desc: Test function of GetParent() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_GetParent_011, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetParent_011";
+
+    fsFile->fileEntity->uri_ = "file://storage/file_test.txt";
+    auto result = fsFile->GetParent();
+    EXPECT_EQ(result.IsSuccess(), true);
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_GetParent_011";
+}
+
+/**
+ * @tc.name: FsFileTest_GetPath_012
+ * @tc.desc: Test function of GetPath() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_GetPath_012, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetPath_012";
+
+    fsFile->fileEntity->uri_ = "file://storage/file_test.txt";
+    auto result = fsFile->GetPath();
+    EXPECT_EQ(result.IsSuccess(), true);
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_GetPath_012";
 }
 
 }

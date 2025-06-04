@@ -70,7 +70,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_001, testing::ext::TestSize.L
 {
     GTEST_LOG_(INFO) << "OpenCoreMockTest-begin OpenCoreMockTest_DoOpen_001";
 
-    string path = "/test/path.txt";
+    string path = "/test/open_test.txt";
     int32_t mode = 0;
     
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(0));
@@ -91,7 +91,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_002, testing::ext::TestSize.L
 {
     GTEST_LOG_(INFO) << "OpenCoreMockTest-begin OpenCoreMockTest_DoOpen_002";
 
-    string path = "file://test/path.txt";
+    string path = "file://test/open_test.txt";
     int32_t mode = 0;
 
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(0));
@@ -112,7 +112,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_003, testing::ext::TestSize.L
 {
     GTEST_LOG_(INFO) << "OpenCoreMockTest-begin OpenCoreMockTest_DoOpen_003";
 
-    string path = "file://test/path.txt";
+    string path = "file://test/open_test.txt";
     int32_t mode = 0;
 
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(-1));
@@ -133,7 +133,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_004, testing::ext::TestSize.L
 {
     GTEST_LOG_(INFO) << "OpenCoreMockTest-begin OpenCoreMockTest_DoOpen_004";
 
-    string path = "/test/path.txt";
+    string path = "/test/open_test.txt";
     int32_t mode = 0;
 
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(-1));
