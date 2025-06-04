@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_PROPERTIES_TRUNCATE_V9_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_PROPERTIES_TRUNCATE_V9_H
 
-#include "log.h"
-#include "n_async_work_callback.h"
-#include "n_async_work_promise.h"
-#include "n_func_arg.h"
+#include "../../common/log.h"
+#include "../../common/napi/n_async/n_async_work_callback.h"
+#include "../../common/napi/n_async/n_async_work_promise.h"
+#include "../../common/napi/n_func_arg.h"
 
 namespace OHOS {
 namespace DistributedFS {
