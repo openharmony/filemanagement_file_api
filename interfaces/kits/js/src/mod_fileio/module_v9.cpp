@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 #include <memory>
 #include <vector>
 
-#include "../common/log.h"
 #include "class_file/file_n_exporter.h"
 #include "class_stat_v9/stat_n_exporter_v9.h"
 #include "common_func.h"
+#include "log.h"
 #include "properties/prop_n_exporter_v9.h"
 
 using namespace std;

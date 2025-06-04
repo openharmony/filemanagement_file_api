@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,6 @@
 import("//build/config/clang/clang.gni")
 import("//build/ohos.gni")
 
-ace_root = "//foundation/arkui/ace_engine"
 is_ohos_standard_system = is_standard_system && !is_arkui_x
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
@@ -53,19 +52,19 @@ template("gen_obj") {
 
     if (use_mingw_win) {
       objcopy_tool = objcopy_mingw
-      script = "$ace_root/build/tools/build_resource_to_bytecode.py"
+      script = "//build/config/components/ace_engine/build_resource_to_bytecode.py"
     } else if (use_mac || target_os == "ios") {
       objcopy_tool = objcopy_clang
-      script = "$ace_root/build/tools/build_resource_to_bytecode.py"
+      script = "//build/config/components/ace_engine/build_resource_to_bytecode.py"
     } else if (use_linux) {
       objcopy_tool = objcopy_x86_64
-      script = "$ace_root/build/tools/build_resource_to_bytecode.py"
+      script = "//build/config/components/ace_engine/build_resource_to_bytecode.py"
     } else if (target_cpu == "x86_64") {
       objcopy_tool = objcopy_x86_64
-      script = "$ace_root/build/tools/run_objcopy.py"
+      script = "//build/scripts/run_objcopy.py"
     } else {
       objcopy_tool = objcopy_default
-      script = "$ace_root/build/tools/run_objcopy.py"
+      script = "//build/scripts/run_objcopy.py"
     }
 
     args = [

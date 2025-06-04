@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FILEIO_PROPERTIES_LSEEK_H
 #define INTERFACES_KITS_JS_SRC_MOD_FILEIO_PROPERTIES_LSEEK_H
 
-#include "../../common/napi/n_val.h"
+#include "n_val.h"
 
 namespace OHOS {
 namespace DistributedFS {
