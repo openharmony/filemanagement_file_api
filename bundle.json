@@ -51,6 +51,7 @@
             "node",
             "openssl",
             "os_account",
+            "runtime_core",
             "rust_libc",
             "samgr"
         ],
