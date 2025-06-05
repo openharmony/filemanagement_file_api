@@ -388,7 +388,18 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
 
     CallFunctionByName(env, writeStream, "closeSync");
 
-    std::rename(rafEntity->newFileName.c_str(), rafEntity->baseFileName.c_str());
+    int32_t result = std::rename(rafEntity->newFileName.c_str(), rafEntity->baseFileName.c_str());
+    if (result != 0) {
+        HILOGE("Failed to rename file, ret:%{public}d", result);
+        status = napi_delete_reference(env, rafEntity->writeStreamObj);
+        if (status != napi_ok) {
+            HILOGE("Failed to delete reference");
+            NError(UNKROWN_ERR).ThrowErr(env, "Failed to delete reference");
+            return nullptr;
+        }
+        NError(UNKROWN_ERR).ThrowErr(env, "Failed to rename file");
+        return nullptr;
+    }
     std::string tmpNewFileName = rafEntity->baseFileName;
     rafEntity->newFileName = tmpNewFileName.append(TEMP_FILE_SUFFIX);
     status = napi_delete_reference(env, rafEntity->writeStreamObj);
@@ -424,6 +435,14 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
 
     if (!fs::remove(rafEntity->newFileName)) {
         HILOGW("Failed to remove file");
+        status = napi_delete_reference(env, rafEntity->writeStreamObj);
+        if (status != napi_ok) {
+            HILOGE("Failed to delete reference");
+            NError(UNKROWN_ERR).ThrowErr(env, "Failed to delete reference");
+            return nullptr;
+        }
+        NError(UNKROWN_ERR).ThrowErr(env, "Failed to remove file");
+        return nullptr;
     }
     std::string tmpNewFileName = rafEntity->baseFileName;
     rafEntity->newFileName = tmpNewFileName.append(TEMP_FILE_SUFFIX);
