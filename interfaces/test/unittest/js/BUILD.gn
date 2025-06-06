@@ -77,6 +77,7 @@ ohos_unittest("ani_file_fs_test") {
   ]
 
   sources = [
+    "mod_fs/properties/listfile_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
   ]
 
