@@ -29,6 +29,7 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/mkdir_core_mock_test.cpp",
     "mod_fs/properties/mock/system_mock.cpp",
     "mod_fs/properties/mock/uv_fs_mock.cpp",
+    "mod_fs/properties/unlink_core_mock_test.cpp",
   ]
 
   deps = [

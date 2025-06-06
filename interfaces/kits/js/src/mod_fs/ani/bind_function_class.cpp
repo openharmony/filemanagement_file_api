@@ -20,6 +20,7 @@
 #include "ani_signature.h"
 #include "bind_function.h"
 #include "mkdir_ani.h"
+#include "unlink_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
@@ -35,6 +36,7 @@ static ani_status BindStaticMethods(ani_env *env)
     std::array methods = {
         ani_native_function { "mkdirSync", mkdirCtorSig0.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync0) },
         ani_native_function { "mkdirSync", mkdirCtorSig1.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
+        ani_native_function { "unlinkSync", nullptr, reinterpret_cast<void *>(UnlinkAni::UnlinkSync) },
     };
     return BindClass(env, classDesc, methods);
 }

@@ -675,7 +675,9 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/ani/bind_function_class.cpp",
     "src/mod_fs/fs_utils.cpp",
     "src/mod_fs/properties/ani/mkdir_ani.cpp",
+    "src/mod_fs/properties/ani/unlink_ani.cpp",
     "src/mod_fs/properties/mkdir_core.cpp",
+    "src/mod_fs/properties/unlink_core.cpp",
   ]
   deps = [
     ":ohos_file_fs_abc_etc",
