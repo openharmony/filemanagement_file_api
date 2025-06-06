@@ -479,7 +479,7 @@ ani_object RandomAccessFileAni::GetWriteStream(ani_env *env, [[maybe_unused]] an
         return nullptr;
     }
 
-    return CreateStream(env, READ_STREAM_CLASS, entity, flags);
+    return CreateStream(env, WRITE_STREAM_CLASS, entity, flags);
 }
 
 } // namespace ANI
