@@ -33,7 +33,10 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-static thread_local shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler;
+inline shared_ptr<OHOS::AppExecFwk::EventHandler>& GetMainHandler() {
+    thread_local shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler;
+    return mainHandler;
+}
 
 class AniHelper {
 public:
@@ -46,6 +49,7 @@ public:
         if (status != ANI_OK) {
             return status;
         }
+
         if constexpr (is_same_v<T, int> || is_same_v<T, int32_t> || is_same_v<T, ani_int>) {
             status = env->Object_SetField_Int(obj, field, value);
         } else if constexpr (is_same_v<T, int64_t> || is_same_v<T, ani_long>) {
@@ -182,6 +186,7 @@ public:
             return false;
         }
 
+        auto& mainHandler = GetMainHandler();
         if (mainHandler == nullptr) {
             shared_ptr<OHOS::AppExecFwk::EventRunner> runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
             if (!runner) {

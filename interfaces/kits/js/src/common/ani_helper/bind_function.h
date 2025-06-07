@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_ANI_BIND_FUNCTION_H
-#define FILEMANAGEMENT_ANI_BIND_FUNCTION_H
+#ifndef INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_BIND_FUNCTION_H
+#define INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_BIND_FUNCTION_H
 
 #include <vector>
 #include <ani.h>
@@ -83,4 +83,4 @@ ANI_EXPORT ani_status BindNamespace(
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // FILEMANAGEMENT_ANI_BIND_FUNCTION_H
+#endif // INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_BIND_FUNCTION_H

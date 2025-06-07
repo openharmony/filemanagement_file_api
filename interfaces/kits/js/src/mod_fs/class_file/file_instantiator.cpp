@@ -58,8 +58,8 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         objFile = nullptr;
         return FsResult<FsFile *>::Error(EIO);
     }
-    auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
 
+    auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
         close(fd);

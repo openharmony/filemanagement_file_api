@@ -75,7 +75,8 @@ HWTEST_F(FsStatMockTest, FsStatMockTest_GetLocation_001, testing::ext::TestSize.
     statEntity->fileInfo_ = std::make_unique<FileInfo>();
     statEntity->fileInfo_->isPath = true;
     statEntity->fileInfo_->path = std::make_unique<char[]>(100);
-    strcpy(statEntity->fileInfo_->path.get(), "/test/path");
+    strncpy(stat->fileInfo_->path.get(), "/test/path", 99);
+    statEntity->fileInfo_->path.get()[99] = '\0';
     fsStat = std::make_unique<FsStat>(std::move(statEntity));
 
     EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1));

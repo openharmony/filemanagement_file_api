@@ -25,11 +25,13 @@ namespace ModuleFileIO {
 using namespace std;
 class CloseCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void) {
+    static void SetUpTestCase(void)
+    {
         int32_t fd = open(FILE_PATH, CREATE | O_RDWR, 0644);
         close(fd);
     };
-    static void TearDownTestCase() {
+    static void TearDownTestCase()
+    {
         rmdir(FILE_PATH);
     };
     void SetUp() {};
@@ -56,66 +58,6 @@ HWTEST_F(CloseCoreTest, DoCloseTestFd_0001, testing::ext::TestSize.Level1)
 
     GTEST_LOG_(INFO) << "CloseCoreTest-end DoCloseTestFd_0001";
 }
-
-// /**
-// * @tc.name: DoCloseTestFd_0002
-// * @tc.desc: Test function of DoClose() interface for sucess.
-// * @tc.size: MEDIUM
-// * @tc.type: FUNC
-// * @tc.level Level 1
-// * @tc.require: AR000IGDNF
-// */
-// HWTEST_F(CloseCoreTest, DoCloseTestFd_0002, testing::ext::TestSize.Level1)
-// {
-//     GTEST_LOG_(INFO) << "CloseCoreTest-begin DoCloseTestFd_0002";
-//     int32_t fd = open(FILE_PATH, O_RDWR);
-//     if (fd <= 0) {
-//         close(fd);
-//         ASSERT_TRUE(false);
-//     }
-
-//     auto ret = CloseCore::DoClose(fd);
-//     EXPECT_TRUE(ret.IsSuccess());
-
-//     int32_t fdEnd = open(FILE_PATH, O_RDWR);
-//     if (fdEnd <= 0) {
-//         close(fdEnd);
-//         ASSERT_TRUE(false);
-//     }
-//     EXPECT_EQ(fdEnd, fd);
-
-//     ret = CloseCore::DoClose(fd);
-//     EXPECT_TRUE(ret.IsSuccess());
-
-//     GTEST_LOG_(INFO) << "CloseCoreTest-end DoCloseTestFd_0002";
-// }
-
-// /**
-// * @tc.name: DoCloseTestFd_0003
-// * @tc.desc: Test function of DoClose() interface for failed.
-// * @tc.size: MEDIUM
-// * @tc.type: FUNC
-// * @tc.level Level 1
-// * @tc.require: AR000IGDNF
-// */
-// HWTEST_F(CloseCoreTest, DoCloseTestFd_0003, testing::ext::TestSize.Level1)
-// {
-//     GTEST_LOG_(INFO) << "CloseCoreTest-begin DoCloseTestFd_0003";
-//     int32_t fd = open(FILE_PATH, O_RDWR);
-//     if (fd <= 0) {
-//         close(fd);
-//         ASSERT_TRUE(false);
-//     }
-//     auto ret = CloseCore::DoClose(fd);
-//     EXPECT_TRUE(ret.IsSuccess());
-
-//     ret = CloseCore::DoClose(fd);
-//     EXPECT_FALSE(ret.IsSuccess());
-//     auto err = ret.GetError();
-//     EXPECT_EQ(err.GetErrNo(), 13900008);
-
-//     GTEST_LOG_(INFO) << "CloseCoreTest-end DoCloseTestFd_0003";
-// }
 
 /**
 * @tc.name: DoCloseTestFile_0001

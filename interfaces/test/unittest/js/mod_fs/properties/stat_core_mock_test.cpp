@@ -163,7 +163,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_005, testing::ext::TestSize.L
     FileInfo fileinfo;
     string buffer = "Hello, World!";
     fileinfo.path = std::make_unique<char[]>(buffer.size() + 1);
-    std::strcpy(fileinfo.path.get(), buffer.c_str());
+    std::memcpy(fileinfo.path.get(), buffer.c_str(), buffer.size() + 1);
     fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(-1);
     fileinfo.isPath = true;
 

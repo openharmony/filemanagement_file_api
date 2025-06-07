@@ -59,7 +59,10 @@ void AccessCoreTest::TearDown(void)
 }
 
 // 递归创建多级目录的辅助函数
-bool CreateDirectoryRecursive(const std::string& path) {
+bool CreateDirectoryRecursive(const std::string& path)
+{
+    const mode_t DIR_PERMISSIONS = 0755;
+
     if (path.empty()) {
         return false;
     }
@@ -71,17 +74,21 @@ bool CreateDirectoryRecursive(const std::string& path) {
         pos++;
     }
 
-    while ((pos = path.find('/', pos)) != std::string::npos) {
+    while ((pos = path.find('/', pos)) != std::string::npos)
+    {
         dir = path.substr(0, pos++);
-        if (dir.empty()) continue;
-        if (mkdir(dir.c_str(), 0755) == -1) {
+        if (dir.empty()) {
+            continue;
+        }
+        if (mkdir(dir.c_str(), DIR_PERMISSIONS) == -1) {
             if (errno != EEXIST) {
                 return false;
             }
         }
     }
 
-    if (mkdir(path.c_str(), 0755) == -1 && errno != EEXIST) {
+    if (mkdir(path.c_str(), DIR_PERMISSIONS) == -1 && errno != EEXIST)
+    {
         return false;
     }
     return true;

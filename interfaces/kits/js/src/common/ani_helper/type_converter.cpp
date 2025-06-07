@@ -114,7 +114,7 @@ std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::strin
 
 std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, const char *str)
 {
-    if (env == nullptr) {
+    if (env == nullptr || str == nullptr) {
         return { false, {} };
     }
 
@@ -229,19 +229,19 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
     ani_status ret;
     ani_class cls;
     if ((ret = env->FindClass(className, &cls)) != ANI_OK) {
-        HILOGE("Not found %{private}s, err: %{private}d", className, ret);
+        HILOGE("Not found %{private}s, err: %{public}d", className, ret);
         return { false, nullptr };
     }
 
     ani_method ctor;
     if ((ret = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
-        HILOGE("Not found ctor, err: %{private}d", ret);
+        HILOGE("Not found ctor, err: %{public}d", ret);
         return { false, nullptr };
     }
 
     ani_object obj;
     if ((ret = env->Object_New(cls, ctor, &obj, length)) != ANI_OK) {
-        HILOGE("New Uint8Array err: %{private}d", ret);
+        HILOGE("New Uint8Array err: %{public}d", ret);
         return { false, nullptr };
     }
 

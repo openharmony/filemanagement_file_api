@@ -32,11 +32,11 @@ static void create_file(const fs::path& path, const std::vector<uint8_t>& data, 
     fs::create_directories(path.parent_path()); // 确保目录存在
     std::ofstream file(path, binary ? std::ios::binary : std::ios::out);
     if (!file) {
-        std::cerr << "创建文件失败: " << path << std::endl;
+        GTEST_LOG_(INFO) << "create_directories failed";
         return;
     }
     file.write(reinterpret_cast<const char*>(data.data()), data.size());
-    std::cout << "已创建文件: " << path << std::endl;
+    GTEST_LOG_(INFO) << "create_directories success";
 }
 
 static void WriteBuffer(const string filename)
@@ -97,7 +97,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0001, testing::ext::TestSize.Level
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin DoListFileCoreTest_0001";
     FsListFileOptions opt;
     FsFileFilter filter;
-    // filter.SetSuffix({"txt"}); // 无效后缀（缺少`.`）
     std::vector<std::string> suffixVector = {"txt"};
     std::optional<std::vector<std::string>> optionalSuffix = suffixVector;
     filter.SetSuffix(optionalSuffix);

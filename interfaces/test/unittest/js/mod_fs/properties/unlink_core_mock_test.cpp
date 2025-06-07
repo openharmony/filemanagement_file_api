@@ -26,7 +26,7 @@ using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
-class UnlinkCoreTest : public testing::Test {
+class UnlinkCoreMockTest : public testing::Test {
 public:
     static filesystem::path tempFilePath;
     static void SetUpTestCase(void);
@@ -36,9 +36,9 @@ public:
     static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
-filesystem::path UnlinkCoreTest::tempFilePath;
+filesystem::path UnlinkCoreMockTest::tempFilePath;
 
-void UnlinkCoreTest::SetUpTestCase(void)
+void UnlinkCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     tempFilePath = filesystem::temp_directory_path() / "unlink_test_file.txt";
@@ -47,7 +47,7 @@ void UnlinkCoreTest::SetUpTestCase(void)
     Uvfs::ins = uvMock;
 }
 
-void UnlinkCoreTest::TearDownTestCase(void)
+void UnlinkCoreMockTest::TearDownTestCase(void)
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
     filesystem::remove(tempFilePath);
@@ -55,26 +55,26 @@ void UnlinkCoreTest::TearDownTestCase(void)
     uvMock = nullptr;
 }
 
-void UnlinkCoreTest::SetUp(void)
+void UnlinkCoreMockTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void UnlinkCoreTest::TearDown(void)
+void UnlinkCoreMockTest::TearDown(void)
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
- * @tc.name: UnlinkCoreTest_DoUnlink_001
+ * @tc.name: UnlinkCoreMockTest_DoUnlink_001
  * @tc.desc: Test function of UnlinkCore::DoUnlink interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_001, testing::ext::TestSize.Level1)
+HWTEST_F(UnlinkCoreMockTest, UnlinkCoreMockTest_DoUnlink_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin UnlinkCoreTest_DoUnlink_001";
+    GTEST_LOG_(INFO) << "UnlinkCoreMockTest-begin UnlinkCoreMockTest_DoUnlink_001";
 
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(1));
 
@@ -82,19 +82,19 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_001, testing::ext::TestSize.Lev
     auto res = UnlinkCore::DoUnlink(path);
     EXPECT_EQ(res.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "NClassTest-end UnlinkCoreTest_DoUnlink_001";
+    GTEST_LOG_(INFO) << "UnlinkCoreMockTest-end UnlinkCoreMockTest_DoUnlink_001";
 }
 
 /**
- * @tc.name: UnlinkCoreTest_DoUnlink_002
+ * @tc.name: UnlinkCoreMockTest_DoUnlink_002
  * @tc.desc: Test function of UnlinkCore::DoUnlink interface for FAILED.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_002, testing::ext::TestSize.Level1)
+HWTEST_F(UnlinkCoreMockTest, UnlinkCoreMockTest_DoUnlink_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin UnlinkCoreTest_DoUnlink_002";
+    GTEST_LOG_(INFO) << "UnlinkCoreMockTest-begin UnlinkCoreMockTest_DoUnlink_002";
 
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(-1));
 
@@ -102,7 +102,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_002, testing::ext::TestSize.Lev
     auto res = UnlinkCore::DoUnlink(path);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "NClassTest-end UnlinkCoreTest_DoUnlink_002";
+    GTEST_LOG_(INFO) << "UnlinkCoreMockTest-end UnlinkCoreMockTest_DoUnlink_002";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

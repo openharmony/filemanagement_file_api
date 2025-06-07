@@ -121,7 +121,7 @@ HWTEST_F(RmdirCoreTest, RmdirCoreTest_DoRmdirent_004, testing::ext::TestSize.Lev
     std::filesystem::create_directories("test_dir");
     std::ofstream("test_dir/test_file.txt") << "test";
 
-    std::filesystem::permissions("test_dir", 
+    std::filesystem::permissions("test_dir",
         std::filesystem::perms::owner_write | std::filesystem::perms::owner_exec,
         std::filesystem::perm_options::replace);
 

@@ -57,8 +57,9 @@ void MoveCoreMockTest::TearDown(void)
 }
 
 extern "C" {
-    const char* uv_err_name(int err) {
-    return "EXDEV";
+    const char* uv_err_name(int err)
+    {
+        return "EXDEV";
     }
 }
 
@@ -401,7 +402,6 @@ HWTEST_F(MoveCoreMockTest, MoveCoreMockTest_DoMove_0013, testing::ext::TestSize.
 
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
-    // EXPECT_CALL(*uvMock, uv_err_name(_)).WillRepeatedly(Return("EXDEV"));
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(-1)).WillOnce(Return(1));
 
@@ -434,7 +434,6 @@ HWTEST_F(MoveCoreMockTest, MoveCoreMockTest_DoMove_0014, testing::ext::TestSize.
 
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
-    // EXPECT_CALL(*uvMock, uv_err_name(_)).WillRepeatedly(Return("EXDEV"));
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(1));
 

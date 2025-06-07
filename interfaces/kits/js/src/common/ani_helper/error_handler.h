@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_ANI_ERROR_HANDLER_H
-#define FILEMANAGEMENT_ANI_ERROR_HANDLER_H
+#ifndef INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ERROR_HANDLER_H
+#define INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ERROR_HANDLER_H
 
 #include <cstdint>
 #include <string>
@@ -141,4 +141,4 @@ private:
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI
 
-#endif // FILEMANAGEMENT_ANI_ERROR_HANDLER_H
+#endif // INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ERROR_HANDLER_H

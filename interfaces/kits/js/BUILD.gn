@@ -636,7 +636,6 @@ group("ani_file_api") {
 
 config("ani_config") {
   include_dirs = [
-    "./include",
     "${file_api_path}/interfaces/kits/rust/include",
     "${utils_path}/common/include",
     "${utils_path}/filemgmt_libfs/include",
@@ -662,7 +661,6 @@ config("ani_config") {
 ohos_shared_library("ani_file_fs") {
   public_configs = [ ":ani_config" ]
   include_dirs = [
-    "include/ipc",
     "src/mod_fs/ani",
     "src/mod_fs/class_file",
     "src/mod_fs/class_file/ani",
