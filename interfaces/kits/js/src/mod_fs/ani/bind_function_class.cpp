@@ -22,6 +22,7 @@
 #include "file_ani.h"
 #include "listfile_ani.h"
 #include "mkdir_ani.h"
+#include "move_ani.h"
 #include "open_ani.h"
 #include "read_text_ani.h"
 #include "unlink_ani.h"
@@ -56,6 +57,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "listFileSync", nullptr, reinterpret_cast<void *>(ListFileAni::ListFileSync) },
         ani_native_function { "mkdirSync", mkdirCtorSig0.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync0) },
         ani_native_function { "mkdirSync", mkdirCtorSig1.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
+        ani_native_function { "moveFileSync", nullptr, reinterpret_cast<void *>(MoveAni::MoveFileSync) },
         ani_native_function { "openSync", nullptr, reinterpret_cast<void *>(OpenAni::OpenSync) },
         ani_native_function { "readTextSync", nullptr, reinterpret_cast<void *>(ReadTextAni::ReadTextSync) },
         ani_native_function { "unlinkSync", nullptr, reinterpret_cast<void *>(UnlinkAni::UnlinkSync) },
