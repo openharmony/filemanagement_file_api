@@ -17,12 +17,12 @@
 #include <cerrno>
 #include <string>
 #include <vector>
-#include <liburing.h>
+#include "liburing.h"
 #include "hyperaio.h"
 
-namespace {
+namespace OHOS::HyperAio{
     using namespace std;
-    using namespace OHOS::HyperAio;
+    using namespace testing;
     class HyperAioTest : public testing::Test {
     public:
         static void SetUpTestCase(void) {};
@@ -35,7 +35,7 @@ namespace {
     const uint32_t len = 1024;
     HyperAio::ProcessIoResultCallBack callBack = [](std::unique_ptr<IoResponse> response) {
         GTEST_LOG_(INFO) << "HyperAioTest callBack";
-    }
+    };
     /**
      * @tc.name: HyperAio_SupportIouring_0000
      * @tc.desc: Test function of SupportIouring() interface for SUCCESS.
@@ -87,7 +87,7 @@ namespace {
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CtxInit_0001";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
-        result = hyperAio_->CtxInit(nullptr);
+        int32_t result = hyperAio_->CtxInit(nullptr);
         EXPECT_EQ(result, -EINVAL);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0001";
     }
@@ -103,12 +103,12 @@ namespace {
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CtxInit_0002";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
-        result = hyperAio_->CtxInit(callBack);
+        result = hyperAio_->CtxInit(&callBack);
         EXPECT_EQ(result, 0);
         hyperAio_->DestroyCtx();
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0002";
     }
-        /**
+    /**
      * @tc.name: HyperAio_CtxInit_0003
      * @tc.desc: Test function of CtxInit() interface for SUCCESS.
      * @tc.size: MEDIUM
@@ -139,10 +139,11 @@ namespace {
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartOpenReqs_0000";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
-        result = hyperAio_->CtxInit(&callBack);
+        int32_t result = hyperAio_->CtxInit(&callBack);
         EXPECT_EQ(result, 0);
         result = hyperAio_->StartOpenReqs(nullptr);
         EXPECT_EQ(result, -EINVAL);
+        hyperAio_->DestroyCtx();
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0000";
     }
 
@@ -160,7 +161,7 @@ namespace {
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
         OpenReqs openReqs = {1, &openInfo};
-        result = hyperAio_->StartOpenReqs(&openReqs);
+        int32_t result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, -EPERM);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0001";
     }
@@ -183,12 +184,12 @@ namespace {
         OpenReqs openReqs = {1, &openInfo};
         result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, 0);
-        result = hyperAio_->DestoryCtx();
+        result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0002";
     }
 
-        /**
+    /**
      * @tc.name: HyperAio_StartOpenReqs_0003
      * @tc.desc: Test function of StartOpenReqs() interface for SUCCESS.
      * @tc.size: MEDIUM
@@ -202,18 +203,18 @@ namespace {
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->CtxInit(&callBack);
         EXPECT_EQ(result, 0);
-        OpenInfo* openInfo = new OpenInfo[300];
+        OpenInfo* openInfos = new OpenInfo[300];
         for (int i = 0; i < 300; ++i) {
-            openInfo[i].dfd = 0;
-            openInfo[i].flags = o_RDWR;
-            openInfo[i].mode = 0;
-            openInfo[i].path = nullptr;
-            openInfo[i].userData = userData + i;
+            openInfos[i].dfd = 0;
+            openInfos[i].flags = o_RDWR;
+            openInfos[i].mode = 0;
+            openInfos[i].path = nullptr;
+            openInfos[i].userData = userData + i;
         }
         OpenReqs openReqs = {300, openInfos};
         result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, 0);
-        result = hyperAio_->DestoryCtx();
+        result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0003";
     }
@@ -233,7 +234,7 @@ namespace {
         int32_t result = hyperAio_->CtxInit(&callBack);
         result = hyperAio_->StartReadReqs(nullptr);
         EXPECT_EQ(result, -EINVAL);
-        result = hyperAio_->DestoryCtx();
+        result = hyperAio_->DestroyCtx();
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartReadReqs_0000";
     }
 
@@ -249,7 +250,7 @@ namespace {
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartReadReqs_0001";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
-        result = hyperAio_->CtxInit(&callBack);
+        int32_t result = hyperAio_->CtxInit(&callBack);
         EXPECT_EQ(result, 0);
         hyperAio_->initialized_.store(false);
         ReadInfo readInfo = {0, len, 0, nullptr, userData};
@@ -315,7 +316,7 @@ namespace {
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartCancelReqs_0001";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
-        result = hyperAio_->CtxInit(&callBack);
+        int32_t result = hyperAio_->CtxInit(&callBack);
         hyperAio_->initialized_.store(false);
         CancelInfo cancelInfo = {userData, 0};
         CancelReqs cancelReqs = {1, &cancelInfo};

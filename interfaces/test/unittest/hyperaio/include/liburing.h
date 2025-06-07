@@ -29,7 +29,7 @@ struct io_uring_cqe {
 
 struct io_uring {
     int32_t data;
-}
+};
 
 inline struct io_uring_sqe *io_uring_get_sqe(struct io_uring *ring)
 {
@@ -70,6 +70,16 @@ inline void io_uring_prep_cancel(struct io_uring_sqe *sqe,
 }
 
 inline int io_uring_wait_cqe(struct io_uring *ring, struct io_uring_cqe **cqe_ptr)
+{
+    *cqe_ptr = new io_uring_cqe;
+    (*cqe_ptr)->data = 0;
+    (*cqe_ptr)->user_data = 0;
+    (*cqe_ptr)->res = 0;
+    (*cqe_ptr)->flags = 0;
+    return 1;
+}
+
+inline void io_uring_cqe_seen(struct io_uring *ring, struct io_uring_cqe *cqe)
 {
     return;
 }
