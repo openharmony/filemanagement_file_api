@@ -19,6 +19,7 @@
 
 #include "ani_signature.h"
 #include "bind_function.h"
+#include "file_ani.h"
 #include "listfile_ani.h"
 #include "mkdir_ani.h"
 #include "read_text_ani.h"
@@ -27,6 +28,20 @@
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
+
+static ani_status BindFileMethods(ani_env *env)
+{
+    auto classDesc = FS::FileInner::classDesc.c_str();
+
+    std::array methods = {
+        ani_native_function { "getParent", nullptr, reinterpret_cast<void *>(FileAni::GetParent) },
+        ani_native_function { "lockSync", nullptr, reinterpret_cast<void *>(FileAni::LockSync) },
+        ani_native_function { "tryLock", nullptr, reinterpret_cast<void *>(FileAni::TryLock) },
+        ani_native_function { "unlock", nullptr, reinterpret_cast<void *>(FileAni::UnLock) },
+    };
+
+    return BindClass(env, classDesc, methods);
+}
 
 const static string mkdirCtorSig0 = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 const static string mkdirCtorSig1 =
@@ -52,6 +67,11 @@ static ani_status DoBindMethods(ani_env *env)
     ani_status status;
     if ((status = BindStaticMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native static methods for BindStaticMethods!");
+        return status;
+    };
+
+    if ((status = BindFileMethods(env)) != ANI_OK) {
+        HILOGE("Cannot bind native methods for file Class");
         return status;
     };
 
