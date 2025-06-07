@@ -87,6 +87,7 @@ ohos_unittest("ani_file_fs_test") {
   sources = [
     "mod_fs/class_file/fs_file_test.cpp",
     "mod_fs/class_stat/fs_stat_test.cpp",
+    "mod_fs/properties/close_core_test.cpp",
     "mod_fs/properties/listfile_core_test.cpp",
     "mod_fs/properties/move_core_test.cpp",
     "mod_fs/properties/open_core_test.cpp",

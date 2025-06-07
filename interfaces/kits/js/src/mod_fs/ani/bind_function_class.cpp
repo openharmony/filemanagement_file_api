@@ -19,6 +19,7 @@
 
 #include "ani_signature.h"
 #include "bind_function.h"
+#include "close_ani.h"
 #include "file_ani.h"
 #include "listfile_ani.h"
 #include "mkdir_ani.h"
@@ -72,6 +73,7 @@ static ani_status BindStaticMethods(ani_env *env)
     auto classDesc = Impl::FileIoImpl::classDesc.c_str();
 
     std::array methods = {
+        ani_native_function { "closeSync", nullptr, reinterpret_cast<void *>(CloseAni::CloseSync) },
         ani_native_function { "listFileSync", nullptr, reinterpret_cast<void *>(ListFileAni::ListFileSync) },
         ani_native_function { "mkdirSync", mkdirCtorSig0.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync0) },
         ani_native_function { "mkdirSync", mkdirCtorSig1.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
