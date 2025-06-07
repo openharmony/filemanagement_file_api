@@ -666,6 +666,8 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/ani",
     "src/mod_fs/class_file",
     "src/mod_fs/class_file/ani",
+    "src/mod_fs/class_stat",
+    "src/mod_fs/class_stat/ani",
     "src/mod_fs/properties",
     "src/mod_fs/properties/ani",
   ]
@@ -679,6 +681,10 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/class_file/ani/file_wrapper.cpp",
     "src/mod_fs/class_file/file_instantiator.cpp",
     "src/mod_fs/class_file/fs_file.cpp",
+    "src/mod_fs/class_stat/ani/stat_ani.cpp",
+    "src/mod_fs/class_stat/ani/stat_wrapper.cpp",
+    "src/mod_fs/class_stat/fs_stat.cpp",
+    "src/mod_fs/class_stat/stat_instantiator.cpp",
     "src/mod_fs/fs_utils.cpp",
     "src/mod_fs/properties/ani/listfile_ani.cpp",
     "src/mod_fs/properties/ani/mkdir_ani.cpp",
@@ -692,6 +698,7 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties/move_core.cpp",
     "src/mod_fs/properties/open_core.cpp",
     "src/mod_fs/properties/read_text_core.cpp",
+    "src/mod_fs/properties/stat_core.cpp",
     "src/mod_fs/properties/unlink_core.cpp",
     "src/mod_fs/properties/write_core.cpp",
   ]

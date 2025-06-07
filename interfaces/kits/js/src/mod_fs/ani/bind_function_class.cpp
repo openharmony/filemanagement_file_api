@@ -25,6 +25,7 @@
 #include "move_ani.h"
 #include "open_ani.h"
 #include "read_text_ani.h"
+#include "stat_ani.h"
 #include "unlink_ani.h"
 #include "write_ani.h"
 
@@ -40,6 +41,23 @@ static ani_status BindFileMethods(ani_env *env)
         ani_native_function { "lockSync", nullptr, reinterpret_cast<void *>(FileAni::LockSync) },
         ani_native_function { "tryLock", nullptr, reinterpret_cast<void *>(FileAni::TryLock) },
         ani_native_function { "unlock", nullptr, reinterpret_cast<void *>(FileAni::UnLock) },
+    };
+
+    return BindClass(env, classDesc, methods);
+}
+
+static ani_status BindStatClassMethods(ani_env *env)
+{
+    auto classDesc = FS::StatInner::classDesc.c_str();
+
+    std::array methods = {
+        ani_native_function { "isBlockDevice", nullptr, reinterpret_cast<void *>(StatAni::IsBlockDevice) },
+        ani_native_function { "isCharacterDevice", nullptr, reinterpret_cast<void *>(StatAni::IsCharacterDevice) },
+        ani_native_function { "isDirectory", nullptr, reinterpret_cast<void *>(StatAni::IsDirectory) },
+        ani_native_function { "isFIFO", nullptr, reinterpret_cast<void *>(StatAni::IsFIFO) },
+        ani_native_function { "isFile", nullptr, reinterpret_cast<void *>(StatAni::IsFile) },
+        ani_native_function { "isSocket", nullptr, reinterpret_cast<void *>(StatAni::IsSocket) },
+        ani_native_function { "isSymbolicLink", nullptr, reinterpret_cast<void *>(StatAni::IsSymbolicLink) },
     };
 
     return BindClass(env, classDesc, methods);
@@ -76,6 +94,11 @@ static ani_status DoBindMethods(ani_env *env)
 
     if ((status = BindFileMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native methods for file Class");
+        return status;
+    };
+
+    if ((status = BindStatClassMethods(env)) != ANI_OK) {
+        HILOGE("Cannot bind native methods for Stat Class!");
         return status;
     };
 
