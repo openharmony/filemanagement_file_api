@@ -20,9 +20,10 @@
 #include "liburing.h"
 #include "hyperaio.h"
 
-namespace OHOS::HyperAio{
+namespace OHOS::HyperAio {
     using namespace std;
     using namespace testing;
+
     class HyperAioTest : public testing::Test {
     public:
         static void SetUpTestCase(void) {};
@@ -103,7 +104,7 @@ namespace OHOS::HyperAio{
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CtxInit_0002";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
-        result = hyperAio_->CtxInit(&callBack);
+        int32_t result = hyperAio_->CtxInit(&callBack);
         EXPECT_EQ(result, 0);
         hyperAio_->DestroyCtx();
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0002";
@@ -120,7 +121,7 @@ namespace OHOS::HyperAio{
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CtxInit_0003";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
-        result = hyperAio_->CtxInit(nullptr);
+        int32_t result = hyperAio_->CtxInit(nullptr);
         EXPECT_EQ(result, -EINVAL);
         result = hyperAio_->CtxInit(&callBack);
         EXPECT_EQ(result, 0);
@@ -206,7 +207,7 @@ namespace OHOS::HyperAio{
         OpenInfo* openInfos = new OpenInfo[300];
         for (int i = 0; i < 300; ++i) {
             openInfos[i].dfd = 0;
-            openInfos[i].flags = o_RDWR;
+            openInfos[i].flags = O_RDWR;
             openInfos[i].mode = 0;
             openInfos[i].path = nullptr;
             openInfos[i].userData = userData + i;

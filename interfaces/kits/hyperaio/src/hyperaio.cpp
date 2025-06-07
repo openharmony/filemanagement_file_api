@@ -150,7 +150,6 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
     if (pImpl_ == nullptr) {
         return -EINVAL;
     }
-    HyperaioTrace trace("StartReadReqs" + std::to_string(req->reqNum));
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
@@ -158,6 +157,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
+    HyperaioTrace trace("StartReadReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
     for (uint32_t i = 0; i < totalReqs; i++) {
@@ -194,7 +194,6 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
     if (pImpl_ == nullptr) {
         return -EINVAL;
     }
-    HyperaioTrace trace("StartCancelReqs" + std::to_string(req->reqNum));
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
@@ -202,6 +201,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
+    HyperaioTrace trace("StartCancelReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
     for (uint32_t i = 0; i < totalReqs; i++) {
