@@ -19,7 +19,11 @@ ohos_unittest("hyperaio_test") {
 
   resource_config_file = "../resource/ohos_test.xml"
 
-  sources = [ "hyperaio_test.cpp" ]
+  sources = [ 
+    "hyperaio_test.cpp",
+    "${file_api_path}/interfaces/kits/hyperaio/src/hyperaio.cpp",
+    "${file_api_path}/interfaces/kits/hyperaio/src/hyperaio_trace.cpp"
+  ]
 
   include_dirs = [
     "include",
@@ -27,7 +31,6 @@ ohos_unittest("hyperaio_test") {
   ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/hyperaio:HyperAio",
   ]
 
   external_deps = [
@@ -35,9 +38,14 @@ ohos_unittest("hyperaio_test") {
     "c_utils:utils",
     "c_utils:utilsbase",
     "ipc:ipc_core",
+    "hilog:libhilog",
     "googletest:gtest_main",
+    "hitrace:hitrace_meter"
+  ]
+  defines = [
+    "private = public"
   ]
   if (file_api_feature_hyperaio) {
-    external_deps += [ "liburing:liburing" ]
+    defines += [ "HYPERAIO_USE_LIBURING" ]
   }
 }
