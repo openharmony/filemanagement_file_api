@@ -30,6 +30,9 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 ani_object OpenAni::OpenSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object mode)
 {
+#ifdef FILE_API_TRACE
+    HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
+#endif
     auto [succPath, filePath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
         HILOGE("Invalid path");

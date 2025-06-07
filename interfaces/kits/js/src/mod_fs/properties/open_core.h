@@ -26,5 +26,4 @@ public:
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO
-
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_OPEN_CORE_H

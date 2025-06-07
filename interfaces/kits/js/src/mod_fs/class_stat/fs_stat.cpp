@@ -139,6 +139,7 @@ int32_t FsStat::GetLocation()
     } else {
         size = fgetxattr(entity->fileInfo_->fdg->GetFD(), CLOUD_LOCATION_ATTR.c_str(), value.get(), MAX_ATTR_NAME);
     }
+
     Location defaultLocation = LOCAL;
     if (size <= 0) {
         if (errno != ENODATA && errno != EOPNOTSUPP) {

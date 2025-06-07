@@ -79,13 +79,13 @@ static tuple<bool, string, string, int> ValidMoveArg(const string &src, const st
 
 static int CopyAndDeleteFile(const string &src, const string &dest)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> stat_req = {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> statReq = {
         new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
-    if (!stat_req) {
+    if (!statReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int ret = uv_fs_stat(nullptr, stat_req.get(), src.c_str(), nullptr);
+    int ret = uv_fs_stat(nullptr, statReq.get(), src.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to stat srcPath");
         return ret;
@@ -105,35 +105,35 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
         return errCode.value();
     }
 #else
-    uv_fs_t copyfile_req;
-    ret = uv_fs_copyfile(nullptr, &copyfile_req, src.c_str(), dest.c_str(), MODE_FORCE_MOVE, nullptr);
-    uv_fs_req_cleanup(&copyfile_req);
+    uv_fs_t copyfileReq;
+    ret = uv_fs_copyfile(nullptr, &copyfileReq, src.c_str(), dest.c_str(), MODE_FORCE_MOVE, nullptr);
+    uv_fs_req_cleanup(&copyfileReq);
     if (ret < 0) {
         HILOGE("Failed to move file using copyfile interface.");
         return ret;
     }
 #endif
-    uv_fs_t unlink_req;
-    ret = uv_fs_unlink(nullptr, &unlink_req, src.c_str(), nullptr);
+    uv_fs_t unlinkReq;
+    ret = uv_fs_unlink(nullptr, &unlinkReq, src.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to unlink src file");
-        int result = uv_fs_unlink(nullptr, &unlink_req, dest.c_str(), nullptr);
+        int result = uv_fs_unlink(nullptr, &unlinkReq, dest.c_str(), nullptr);
         if (result < 0) {
             HILOGE("Failed to unlink dest file");
             return result;
         }
-        uv_fs_req_cleanup(&unlink_req);
+        uv_fs_req_cleanup(&unlinkReq);
         return ret;
     }
-    uv_fs_req_cleanup(&unlink_req);
+    uv_fs_req_cleanup(&unlinkReq);
     return ERRNO_NOERR;
 }
 
 static int RenameFile(const string &src, const string &dest)
 {
     int ret = 0;
-    uv_fs_t rename_req;
-    ret = uv_fs_rename(nullptr, &rename_req, src.c_str(), dest.c_str(), nullptr);
+    uv_fs_t renameReq;
+    ret = uv_fs_rename(nullptr, &renameReq, src.c_str(), dest.c_str(), nullptr);
     if (ret < 0 && (string_view(uv_err_name(ret)) == "EXDEV")) {
         return CopyAndDeleteFile(src, dest);
     }
@@ -146,16 +146,16 @@ static int RenameFile(const string &src, const string &dest)
 
 static int MoveFile(const string &src, const string &dest, int mode)
 {
-    uv_fs_t access_req;
-    int ret = uv_fs_access(nullptr, &access_req, src.c_str(), W_OK, nullptr);
+    uv_fs_t accessReq;
+    int ret = uv_fs_access(nullptr, &accessReq, src.c_str(), W_OK, nullptr);
     if (ret < 0) {
         HILOGE("Failed to move src file due to doesn't exist or hasn't write permission");
-        uv_fs_req_cleanup(&access_req);
+        uv_fs_req_cleanup(&accessReq);
         return ret;
     }
     if (mode == MODE_THROW_ERR) {
-        ret = uv_fs_access(nullptr, &access_req, dest.c_str(), 0, nullptr);
-        uv_fs_req_cleanup(&access_req);
+        ret = uv_fs_access(nullptr, &accessReq, dest.c_str(), 0, nullptr);
+        uv_fs_req_cleanup(&accessReq);
         if (ret == 0) {
             HILOGE("Failed to move file due to existing destPath with MODE_THROW_ERR.");
             return EEXIST;
@@ -165,7 +165,7 @@ static int MoveFile(const string &src, const string &dest, int mode)
             return ret;
         }
     } else {
-        uv_fs_req_cleanup(&access_req);
+        uv_fs_req_cleanup(&accessReq);
     }
     return RenameFile(src, dest);
 }

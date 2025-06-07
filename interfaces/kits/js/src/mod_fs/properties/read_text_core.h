@@ -36,7 +36,6 @@ public:
         const optional<ReadTextOptions> &options = nullopt);
 };
 
-const string PROCEDURE_READTEXT_NAME = "FileIOReadText";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

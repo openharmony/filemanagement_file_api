@@ -25,6 +25,6 @@ class StatCore final {
 public:
     static FsResult<FsStat *> DoStat(const FileInfo &fileinfo);
 };
-const std::string PROCEDURE_STAT_NAME = "FileIOStat";
+
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_STAT_CORE_H

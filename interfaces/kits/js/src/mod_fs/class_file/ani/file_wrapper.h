@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_FILE_WRAPPER_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_FILE_WRAPPER_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_ANI_FILE_WRAPPER_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_ANI_FILE_WRAPPER_H
 
 #include <ani.h>
 #include "fs_file.h"
@@ -34,4 +34,4 @@ public:
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_FILE_WRAPPER_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_ANI_FILE_WRAPPER_H

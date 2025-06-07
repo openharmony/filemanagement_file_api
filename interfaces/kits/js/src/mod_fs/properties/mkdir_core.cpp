@@ -39,22 +39,22 @@ using namespace std;
 
 static int UvAccess(const string &path, int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> access_req = { new uv_fs_t, FsUtils::FsReqCleanup };
-    if (!access_req) {
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> accessReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    if (!accessReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    return uv_fs_access(nullptr, access_req.get(), path.c_str(), mode, nullptr);
+    return uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
 }
 
 static int MkdirCore(const string &path)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> mkdir_req = { new uv_fs_t, FsUtils::FsReqCleanup };
-    if (!mkdir_req) {
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> mkdirReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    if (!mkdirReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    return uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
+    return uv_fs_mkdir(nullptr, mkdirReq.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
 }
 
 static int32_t MkdirExec(const string &path, bool recursion, bool hasOption)

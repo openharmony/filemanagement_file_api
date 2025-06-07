@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_OPEN_ANI_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_OPEN_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_OPEN_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_OPEN_ANI_H
 
 #include <ani.h>
 
@@ -27,9 +27,10 @@ class OpenAni final {
 public:
     static ani_object OpenSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object mode);
 };
+
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_OPEN_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_OPEN_ANI_H

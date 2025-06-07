@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_ANI_ANI_HELPER_H
-#define FILEMANAGEMENT_ANI_ANI_HELPER_H
+#ifndef INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ANI_HELPER_H
+#define INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ANI_HELPER_H
 
 #include <optional>
 #include <string>
@@ -204,5 +204,4 @@ public:
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI
-
-#endif // FILEMANAGEMENT_ANI_ANI_HELPER_H
+#endif // INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ANI_HELPER_H

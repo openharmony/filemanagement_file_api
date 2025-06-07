@@ -31,7 +31,7 @@ public:
 };
 constexpr int MODE_FORCE_MOVE = 0;
 constexpr int MODE_THROW_ERR = 1;
-const std::string PROCEDURE_MOVE_NAME = "FileIOMove";
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

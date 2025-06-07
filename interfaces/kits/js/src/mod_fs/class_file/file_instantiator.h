@@ -13,8 +13,8 @@
 * limitations under the License.
 */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_INSTANTIATOR_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_INSTANTIATOR_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_INSTANTIATOR_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_INSTANTIATOR_H
 
 #include "filemgmt_libfs.h"
 #include "fs_file.h"
@@ -32,4 +32,4 @@ public:
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_INSTANTIATOR_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILE_FILE_INSTANTIATOR_H

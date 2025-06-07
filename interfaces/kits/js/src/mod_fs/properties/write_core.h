@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_WRITE_CORE_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_WRITE_CORE_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_WRITE_CORE_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_WRITE_CORE_H
 
 #include "filemgmt_libfs.h"
 #include "filemgmt_libhilog.h"
@@ -42,8 +42,7 @@ private:
     static FsResult<int64_t> DoWrite(const int32_t fd, void *buf, const size_t len, const int64_t offset);
 };
 
-const string PROCEDURE_WRITE_NAME = "FileIOWrite";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_WRITE_CORE_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_WRITE_CORE_H

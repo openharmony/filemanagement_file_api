@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_WRITE_ANI_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_WRITE_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_WRITE_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_WRITE_ANI_H
 
 #include <ani.h>
 
@@ -28,9 +28,10 @@ public:
     static ani_double WriteSync(
         ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd, ani_object buf, ani_object options);
 };
+
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_WRITE_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_WRITE_ANI_H

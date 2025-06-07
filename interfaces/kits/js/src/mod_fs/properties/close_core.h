@@ -29,7 +29,6 @@ public:
     static FsResult<void> DoClose(FsFile *file);
 };
 
-const std::string PROCEDURE_CLOSE_NAME = "FileIOClose";
 } // namespace OHOS::FileManagement::ModuleFileIO
 
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_CORE_H

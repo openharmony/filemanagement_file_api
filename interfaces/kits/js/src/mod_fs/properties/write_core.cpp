@@ -70,7 +70,7 @@ static tuple<bool, void *, size_t, int64_t> ValidWriteArg(
 FsResult<int64_t> WriteCore::DoWrite(const int32_t fd, const string &buffer, const optional<WriteOptions> &options)
 {
     if (fd < 0) {
-        HILOGE("Invalid fd");
+        HILOGE("Invalid fd from JS first argument");
         return FsResult<int64_t>::Error(EINVAL);
     }
 
@@ -92,7 +92,7 @@ FsResult<int64_t> WriteCore::DoWrite(const int32_t fd, const string &buffer, con
 FsResult<int64_t> WriteCore::DoWrite(const int32_t fd, const ArrayBuffer &buffer, const optional<WriteOptions> &options)
 {
     if (fd < 0) {
-        HILOGE("Invalid fd");
+        HILOGE("Invalid fd from JS first argument");
         return FsResult<int64_t>::Error(EINVAL);
     }
 
@@ -113,11 +113,11 @@ FsResult<int64_t> WriteCore::DoWrite(const int32_t fd, const ArrayBuffer &buffer
 FsResult<int64_t> WriteCore::DoWrite(const int32_t fd, void *buf, const size_t len, const int64_t offset)
 {
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> write_req = { new uv_fs_t, FsUtils::FsReqCleanup };
-    if (!write_req) {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> writeReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    if (!writeReq) {
         return FsResult<int64_t>::Error(ENOMEM);
     }
-    int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
+    int ret = uv_fs_write(nullptr, writeReq.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);
         return FsResult<int64_t>::Error(ret);

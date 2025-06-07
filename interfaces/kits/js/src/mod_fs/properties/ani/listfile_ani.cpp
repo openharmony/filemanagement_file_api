@@ -32,84 +32,84 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 tuple<bool, bool> ParseBooleanParam(ani_env *env, ani_object obj, string tag)
 {
-    ani_ref bool_ref;
+    ani_ref boolRef;
     ani_boolean isUndefined;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &bool_ref)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &boolRef)) {
         return { false, false };
     }
-    env->Reference_IsUndefined(bool_ref, &isUndefined);
+    env->Reference_IsUndefined(boolRef, &isUndefined);
     if (isUndefined) {
         return { true, false };
     }
     auto unboxedDesc = BoxedTypes::Boolean::unboxedDesc.c_str();
     auto unboxedSig = BoxedTypes::Boolean::unboxedSig.c_str();
-    ani_boolean bool_ref_res;
+    ani_boolean boolRef_res;
     if (ANI_OK != env->Object_CallMethodByName_Boolean(
-        static_cast<ani_object>(bool_ref), unboxedDesc, unboxedSig, &bool_ref_res)) {
+        static_cast<ani_object>(boolRef), unboxedDesc, unboxedSig, &boolRef_res)) {
         return { false, false };
     }
-    return { true, static_cast<bool>(bool_ref_res) };
+    return { true, static_cast<bool>(boolRef_res) };
 }
 
 tuple<bool, int> ParseIntParam(ani_env *env, ani_object obj, string tag)
 {
     int result = 0;
     ani_boolean isUndefined;
-    ani_ref result_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &result_ref)) {
+    ani_ref resultRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef)) {
         return { false, result };
     }
-    env->Reference_IsUndefined(result_ref, &isUndefined);
+    env->Reference_IsUndefined(resultRef, &isUndefined);
     if (isUndefined) {
         return { true, result };
     }
-    ani_int result_ref_res;
+    ani_int resultRefRes;
     if (ANI_OK != env->Object_CallMethodByName_Int(
-        static_cast<ani_object>(result_ref), "toInt", nullptr, &result_ref_res)) {
+        static_cast<ani_object>(resultRef), "toInt", nullptr, &resultRefRes)) {
         result = -1;
         return { false, result };
     }
-    result = static_cast<int>(result_ref_res);
+    result = static_cast<int>(resultRefRes);
     return { true, result };
 }
 
 tuple<bool, optional<double>> ParseDoubleParam(ani_env *env, ani_object obj, string tag)
 {
     ani_boolean isUndefined;
-    ani_ref result_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &result_ref)) {
+    ani_ref resultRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef)) {
         return { false, nullopt };
     }
-    env->Reference_IsUndefined(result_ref, &isUndefined);
+    env->Reference_IsUndefined(resultRef, &isUndefined);
     if (isUndefined) {
         return { true, nullopt };
     }
 
-    ani_double result_ref_res;
+    ani_double resultRefRes;
     if (ANI_OK != env->Object_CallMethodByName_Double(
-        static_cast<ani_object>(result_ref), "toDouble", nullptr, &result_ref_res)) {
+        static_cast<ani_object>(resultRef), "toDouble", nullptr, &resultRefRes)) {
         return { false, nullopt };
     }
-    double result = static_cast<double>(result_ref_res);
+    double result = static_cast<double>(resultRefRes);
     return { true, make_optional<double>(result) };
 }
 
 tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object obj, string tag)
 {
     ani_boolean isUndefined;
-    ani_ref result_ref;
+    ani_ref resultRef;
     vector<string> strings;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &result_ref)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef)) {
         return { false, nullopt };
     }
-    env->Reference_IsUndefined(result_ref, &isUndefined);
+    env->Reference_IsUndefined(resultRef, &isUndefined);
     if (isUndefined) {
         return { true, nullopt };
     }
 
     ani_double length;
     if (ANI_OK != env->Object_GetPropertyByName_Double(
-        static_cast<ani_object>(result_ref), "length", &length) || length == 0) {
+        static_cast<ani_object>(resultRef), "length", &length) || length == 0) {
         return { false, nullopt };
     }
     auto getterDesc = BuiltInTypes::Array::getterDesc.c_str();
@@ -117,7 +117,7 @@ tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object 
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(result_ref), getterDesc, getterSig, &stringEntryRef, (ani_int)i)) {
+            static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)i)) {
             return { false, nullopt };
         }
         auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));
@@ -187,16 +187,16 @@ tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
     }
     result.listNum = (int)listNumRes;
 
-    ani_ref filter_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "filter", &filter_ref)) {
+    ani_ref filterRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "filter", &filterRef)) {
         HILOGE("Invalid filter");
         return { false, nullopt };
     }
-    env->Reference_IsUndefined(filter_ref, &isUndefined);
+    env->Reference_IsUndefined(filterRef, &isUndefined);
     if (isUndefined) {
         return { true, make_optional<FsListFileOptions>(result) };
     }
-    auto [succFilter, filterFilterClass] = ParseFilter(env, static_cast<ani_object>(filter_ref));
+    auto [succFilter, filterFilterClass] = ParseFilter(env, static_cast<ani_object>(filterRef));
     if (!succFilter) {
         HILOGE("Invalid filter");
         return { false, nullopt };

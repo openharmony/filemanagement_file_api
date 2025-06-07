@@ -66,6 +66,6 @@ public:
 constexpr int FILTER_MATCH = 1;
 constexpr int FILTER_DISMATCH = 0;
 const int32_t MAX_SUFFIX_LENGTH = 256;
-const std::string LIST_FILE_PRODUCE_NAME = "FileIOListFile";
+
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_CORE_H

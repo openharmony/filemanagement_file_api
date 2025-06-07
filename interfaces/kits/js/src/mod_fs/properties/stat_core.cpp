@@ -94,13 +94,13 @@ FsResult<FsStat *> StatCore::DoStat(const FileInfo &fileinfo)
         return FsResult<FsStat *>::Error(EINVAL);
     }
 
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> stat_req = { new (std::nothrow) uv_fs_t,
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> statReq = { new (std::nothrow) uv_fs_t,
         FsUtils::FsReqCleanup };
-    if (!stat_req) {
+    if (!statReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<FsStat *>::Error(ENOMEM);
     }
-    auto err = CheckFsStat(info, stat_req.get());
+    auto err = CheckFsStat(info, statReq.get());
     if (err) {
         return FsResult<FsStat *>::Error(err);
     }
@@ -111,9 +111,9 @@ FsResult<FsStat *> StatCore::DoStat(const FileInfo &fileinfo)
         HILOGE("Failed to request heap memory.");
         return FsResult<FsStat *>::Error(ENOMEM);
     }
-    auto stat = StatInstantiator::InstantiateStat(stat_req->statbuf, arg);
+    auto stat = StatInstantiator::InstantiateStat(statReq->statbuf, arg);
 #else
-    auto stat = StatInstantiator::InstantiateStat(stat_req->statbuf);
+    auto stat = StatInstantiator::InstantiateStat(statReq->statbuf);
 #endif
     if (stat == nullptr) {
         return FsResult<FsStat *>::Error(ENOMEM);

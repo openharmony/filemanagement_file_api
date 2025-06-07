@@ -27,12 +27,12 @@ using namespace std;
 
 static int32_t CloseFd(int fd)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> close_req = { new uv_fs_t, FsUtils::FsReqCleanup };
-    if (!close_req) {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> closeReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    if (!closeReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
+    int ret = uv_fs_close(nullptr, closeReq.get(), fd, nullptr);
     if (ret < 0) {
         HILOGE("Failed to close file with ret: %{public}d", ret);
         return ret;
