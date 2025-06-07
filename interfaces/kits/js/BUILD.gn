@@ -678,10 +678,12 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties/ani/mkdir_ani.cpp",
     "src/mod_fs/properties/ani/read_text_ani.cpp",
     "src/mod_fs/properties/ani/unlink_ani.cpp",
+    "src/mod_fs/properties/ani/write_ani.cpp",
     "src/mod_fs/properties/listfile_core.cpp",
     "src/mod_fs/properties/mkdir_core.cpp",
     "src/mod_fs/properties/read_text_core.cpp",
     "src/mod_fs/properties/unlink_core.cpp",
+    "src/mod_fs/properties/write_core.cpp",
   ]
   deps = [
     ":ohos_file_fs_abc_etc",

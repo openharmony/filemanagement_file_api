@@ -1937,25 +1937,25 @@ export class AtomicFile {
   //   return ws;
   // }
 
-  native nativeFinishWrite(): void;
-  finishWrite(): void {
-    if (!this.writeStream) {
-      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
-    }
-    this.writeStream?.close();
-    this.nativeFinishWrite();
-    this.writeStream = null;
-  };
+  // native nativeFinishWrite(): void;
+  // finishWrite(): void {
+  //   if (!this.writeStream) {
+  //     throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+  //   }
+  //   this.writeStream?.close();
+  //   this.nativeFinishWrite();
+  //   this.writeStream = null;
+  // };
 
-  native nativeFailWrite(): void;
-  failWrite(): void {
-    if (!this.writeStream) {
-      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
-    }
-    this.writeStream?.close();
-    this.nativeFailWrite();
-    this.writeStream = null;
-  };
+  // native nativeFailWrite(): void;
+  // failWrite(): void {
+  //   if (!this.writeStream) {
+  //     throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+  //   }
+  //   this.writeStream?.close();
+  //   this.nativeFailWrite();
+  //   this.writeStream = null;
+  // };
 
   native delete(): void;
 }

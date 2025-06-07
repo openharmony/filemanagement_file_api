@@ -23,6 +23,7 @@
 #include "mkdir_ani.h"
 #include "read_text_ani.h"
 #include "unlink_ani.h"
+#include "write_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
@@ -41,6 +42,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "mkdirSync", mkdirCtorSig1.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
         ani_native_function { "readTextSync", nullptr, reinterpret_cast<void *>(ReadTextAni::ReadTextSync) },
         ani_native_function { "unlinkSync", nullptr, reinterpret_cast<void *>(UnlinkAni::UnlinkSync) },
+        ani_native_function { "writeSync", nullptr, reinterpret_cast<void *>(WriteAni::WriteSync) },
     };
     return BindClass(env, classDesc, methods);
 }
