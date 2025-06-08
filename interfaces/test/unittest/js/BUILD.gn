@@ -1,0 +1,186 @@
+# Copyright (C) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
+
+ohos_unittest("ani_file_fs_mock_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
+  module_out_path = "file_api/file_api"
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/properties/mock",
+  ]
+
+  sources = [
+    "mod_fs/class_file/fs_file_mock_test.cpp",
+    "mod_fs/class_stat/fs_stat_mock_test.cpp",
+    "mod_fs/properties/access_core_mock_test.cpp",
+    "mod_fs/properties/copy_file_core_mock_test.cpp",
+    "mod_fs/properties/mkdir_core_mock_test.cpp",
+    "mod_fs/properties/move_core_mock_test.cpp",
+    "mod_fs/properties/mock/system_mock.cpp",
+    "mod_fs/properties/mock/uv_fs_mock.cpp",
+    "mod_fs/properties/open_core_mock_test.cpp",
+    "mod_fs/properties/read_core_mock_test.cpp",
+    "mod_fs/properties/stat_core_mock_test.cpp",
+    "mod_fs/properties/truncate_core_mock_test.cpp",
+    "mod_fs/properties/unlink_core_mock_test.cpp",
+    "mod_fs/properties/write_core_mock_test.cpp",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${file_api_path}/interfaces/kits/js:ani_file_fs",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "app_file_service:fileuri_native",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "libuv:uv",
+  ]
+
+  defines = [
+    "private=public",
+  ]
+}
+
+ohos_unittest("ani_file_fs_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+  ]
+
+  sources = [
+    "mod_fs/class_file/fs_file_test.cpp",
+    "mod_fs/class_stat/fs_stat_test.cpp",
+    "mod_fs/properties/access_core_test.cpp",
+    "mod_fs/properties/close_core_test.cpp",
+    "mod_fs/properties/copy_file_core_test.cpp",
+    "mod_fs/properties/listfile_core_test.cpp",
+    "mod_fs/properties/move_core_test.cpp",
+    "mod_fs/properties/open_core_test.cpp",
+    "mod_fs/properties/read_core_test.cpp",
+    "mod_fs/properties/read_text_core_test.cpp",
+    "mod_fs/properties/rmdir_core_test.cpp",
+    "mod_fs/properties/stat_core_test.cpp",
+    "mod_fs/properties/truncate_core_test.cpp",
+    "mod_fs/properties/write_core_test.cpp",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${file_api_path}/interfaces/kits/js:ani_file_fs",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "app_file_service:fileuri_native",
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "libuv:uv",
+  ]
+
+  defines = [
+    "private=public",
+  ]
+}
+
+ohos_unittest("ani_file_hash_test") {
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  sources = [ 
+    "mod_hash/hash_core_test.cpp",
+  ]
+
+  include_dirs = [
+    "mock/libuv",
+    "${file_api_path}/interfaces/kits/js/src/mod_hash",
+  ]
+
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${file_api_path}/interfaces/kits/js:ani_file_hash",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "libuv:uv",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}
+
+ohos_unittest("ani_file_securitylabel_test") {
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  sources = [ 
+    "mod_securitylabel/securitylabel_core_test.cpp",
+  ]
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_securitylabel",
+  ]
+
+  deps = [
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${file_api_path}/interfaces/kits/js:ani_file_securitylabel",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}

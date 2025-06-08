@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
@@ -622,4 +623,277 @@ group("build_kits_js") {
     ":statfs",
     ":statvfs",
   ]
+}
+
+
+group("ani_file_api") {
+  deps = [
+    ":ani_file_fs",
+    ":ani_file_hash",
+    ":ani_file_securitylabel",
+  ]
+}
+
+config("ani_config") {
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/rust/include",
+    "${utils_path}/common/include",
+    "${utils_path}/filemgmt_libfs/include",
+    "${utils_path}/filemgmt_libhilog",
+    "src/common",
+    "src/common/ani_helper",
+    "src/common/file_helper",
+    "src/mod_fs",
+  ]
+
+  cflags = [
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Oz",
+  ]
+  cflags_cc = [
+    "-std=c++17",
+    "-fvisibility-inlines-hidden",
+    "-Oz",
+  ]
+}
+
+ohos_shared_library("ani_file_fs") {
+  public_configs = [ ":ani_config" ]
+  include_dirs = [
+    "src/mod_fs/ani",
+    "src/mod_fs/class_file",
+    "src/mod_fs/class_file/ani",
+    "src/mod_fs/class_stat",
+    "src/mod_fs/class_stat/ani",
+    "src/mod_fs/properties",
+    "src/mod_fs/properties/ani",
+  ]
+  sources = [
+    "src/common/ani_helper/ani_signature.cpp",
+    "src/common/ani_helper/error_handler.cpp",
+    "src/common/ani_helper/type_converter.cpp",
+    "src/common/file_helper/fd_guard.cpp",
+    "src/mod_fs/ani/bind_function_class.cpp",
+    "src/mod_fs/class_file/ani/file_ani.cpp",
+    "src/mod_fs/class_file/ani/file_wrapper.cpp",
+    "src/mod_fs/class_file/file_instantiator.cpp",
+    "src/mod_fs/class_file/fs_file.cpp",
+    "src/mod_fs/class_stat/ani/stat_ani.cpp",
+    "src/mod_fs/class_stat/ani/stat_wrapper.cpp",
+    "src/mod_fs/class_stat/fs_stat.cpp",
+    "src/mod_fs/class_stat/stat_instantiator.cpp",
+    "src/mod_fs/fs_utils.cpp",
+    "src/mod_fs/properties/access_core.cpp",
+    "src/mod_fs/properties/ani/access_ani.cpp",
+    "src/mod_fs/properties/ani/close_ani.cpp",
+    "src/mod_fs/properties/ani/copy_file_ani.cpp",
+    "src/mod_fs/properties/ani/listfile_ani.cpp",
+    "src/mod_fs/properties/ani/mkdir_ani.cpp",
+    "src/mod_fs/properties/ani/move_ani.cpp",
+    "src/mod_fs/properties/ani/open_ani.cpp",
+    "src/mod_fs/properties/ani/read_ani.cpp",
+    "src/mod_fs/properties/ani/read_text_ani.cpp",
+    "src/mod_fs/properties/ani/rmdir_ani.cpp",
+    "src/mod_fs/properties/ani/truncate_ani.cpp",
+    "src/mod_fs/properties/ani/unlink_ani.cpp",
+    "src/mod_fs/properties/ani/write_ani.cpp",
+    "src/mod_fs/properties/close_core.cpp",
+    "src/mod_fs/properties/copy_file_core.cpp",
+    "src/mod_fs/properties/listfile_core.cpp",
+    "src/mod_fs/properties/mkdir_core.cpp",
+    "src/mod_fs/properties/move_core.cpp",
+    "src/mod_fs/properties/open_core.cpp",
+    "src/mod_fs/properties/read_core.cpp",
+    "src/mod_fs/properties/read_text_core.cpp",
+    "src/mod_fs/properties/rmdir_core.cpp",
+    "src/mod_fs/properties/stat_core.cpp",
+    "src/mod_fs/properties/truncate_core.cpp",
+    "src/mod_fs/properties/unlink_core.cpp",
+    "src/mod_fs/properties/write_core.cpp",
+  ]
+  deps = [
+    ":ohos_file_fs_abc_etc",
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+  use_exceptions = true
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "app_file_service:fileuri_native",
+    "bounds_checking_function:libsec_static",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "dfs_service:libdistributedfileutils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "ipc:ipc_core",
+    "libuv:uv",
+    "runtime_core:ani",
+    "runtime_core:ani_helpers",
+    "runtime_core:libarkruntime",
+    "samgr:samgr_proxy",
+  ]
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  output_extension = "so"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+}
+
+generate_static_abc("ohos_file_fs_abc") {
+  base_url = "./src/mod_fs/ani/ets"
+  files = [ "./src/mod_fs/ani/ets/@ohos.file.fs.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ohos_file_fs_abc.abc"
+}
+
+ohos_prebuilt_etc("ohos_file_fs_abc_etc") {
+  source = "$target_out_dir/ohos_file_fs_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+  deps = [ ":ohos_file_fs_abc" ]
+}
+
+ohos_shared_library("ani_file_hash") {
+  public_configs = [ ":ani_config" ]
+  include_dirs = [
+    "src/mod_hash",
+    "src/mod_hash/ani",
+  ]
+  sources = [
+    "src/common/ani_helper/ani_signature.cpp",
+    "src/common/ani_helper/error_handler.cpp",
+    "src/common/ani_helper/type_converter.cpp",
+    "src/common/file_helper/fd_guard.cpp",
+    "src/common/file_helper/hash_file.cpp",
+    "src/mod_fs/fs_utils.cpp",
+    "src/mod_hash/ani/bind_function_class.cpp",
+    "src/mod_hash/ani/hash_ani.cpp",
+    "src/mod_hash/hash_core.cpp",
+  ]
+
+  deps = [
+    ":ohos_file_hash_abc_etc",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "hilog:libhilog",
+    "libuv:uv",
+    "openssl:libcrypto_shared",
+    "runtime_core:ani",
+    "runtime_core:ani_helpers",
+    "runtime_core:libarkruntime",
+  ]
+  use_exceptions = true
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  output_extension = "so"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+}
+
+generate_static_abc("ohos_file_hash_abc") {
+  base_url = "./src/mod_hash/ani/ets"
+  files = [ "./src/mod_hash/ani/ets/@ohos.file.hash.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ohos_file_hash_abc.abc"
+}
+
+ohos_prebuilt_etc("ohos_file_hash_abc_etc") {
+  source = "$target_out_dir/ohos_file_hash_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+  deps = [ ":ohos_file_hash_abc" ]
+}
+
+ohos_shared_library("ani_file_securitylabel") {
+  public_configs = [ ":ani_config" ]
+  include_dirs = [
+    "src/mod_securitylabel/ani",
+    "src/mod_securitylabel",
+  ]
+  sources = [
+    "src/common/ani_helper/ani_signature.cpp",
+    "src/common/ani_helper/error_handler.cpp",
+    "src/common/ani_helper/type_converter.cpp",
+    "src/common/file_helper/fd_guard.cpp",
+    "src/mod_fs/fs_utils.cpp",
+    "src/mod_securitylabel/ani/bind_function_class.cpp",
+    "src/mod_securitylabel/ani/securitylabel_ani.cpp",
+    "src/mod_securitylabel/securitylabel_core.cpp",
+  ]
+
+  deps = [
+    ":ohos_file_securityLabel_abc_etc",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "hilog:libhilog",
+    "libuv:uv",
+    "runtime_core:ani",
+    "runtime_core:ani_helpers",
+    "runtime_core:libarkruntime",
+  ]
+  use_exceptions = true
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  output_extension = "so"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+}
+
+generate_static_abc("ohos_file_securityLabel_abc") {
+  base_url = "./src/mod_securitylabel/ani/ets"
+  files = [ "./src/mod_securitylabel/ani/ets/@ohos.file.securityLabel.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ohos_file_securityLabel_abc.abc"
+}
+
+ohos_prebuilt_etc("ohos_file_securityLabel_abc_etc") {
+  source = "$target_out_dir/ohos_file_securityLabel_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "filemanagement"
+  part_name = "file_api"
+  deps = [ ":ohos_file_securityLabel_abc" ]
 }
