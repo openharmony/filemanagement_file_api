@@ -74,7 +74,6 @@ struct io_uring_sqe* GetSqeWithRetry(struct io_uring *ring)
 
 int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
 {
-    std::lock_guard<std::mutex> lock(initmtx);
     HyperaioTrace trace("CtxInit");
     if (initialized_.load()) {
         HILOGE("HyperAio has been initialized");

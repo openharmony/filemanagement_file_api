@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef UNITTEST_HYPERAIO_INCLUDE_LIBURING_H
+#define UNITTEST_HYPERAIO_INCLUDE_LIBURING_H
+
 namespace OHOS {
 namespace HyperAio {
 #define O_RDWR      02
@@ -52,19 +55,19 @@ inline void io_uring_sqe_set_data(struct io_uring_sqe *sqe, void *data)
 }
 
 inline void io_uring_prep_openat(struct io_uring_sqe *sqe, int dfd,
-                const char *path, int flags, mode_t mode)
+    const char *path, int flags, mode_t mode)
 {
     return;
 }
 
 inline void io_uring_prep_read(struct io_uring_sqe *sqe, int fd,
-                void *buf, unsigned nbytes, uint64_t offset)
+    void *buf, unsigned nbytes, uint64_t offset)
 {
     return;
 }
 
 inline void io_uring_prep_cancel(struct io_uring_sqe *sqe,
-                void *user_data, int flags)
+    void *user_data, int flags)
 {
     return;
 }
@@ -81,6 +84,7 @@ inline int io_uring_wait_cqe(struct io_uring *ring, struct io_uring_cqe **cqe_pt
 
 inline void io_uring_cqe_seen(struct io_uring *ring, struct io_uring_cqe *cqe)
 {
+    delete cqe;
     return;
 }
 

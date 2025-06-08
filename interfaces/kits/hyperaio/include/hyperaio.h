@@ -91,7 +91,6 @@ public:
     int32_t StartCancelReqs(CancelReqs *req);
     int32_t DestroyCtx();
 private:
-    std::mutex initmtx;
     DECLARE_PIMPL(HyperAio);
     ProcessIoResultCallBack ioResultCallBack_ = nullptr;
     std::thread harvestThread_;
