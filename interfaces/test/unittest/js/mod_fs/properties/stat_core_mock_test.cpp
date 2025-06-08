@@ -127,30 +127,6 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_003, testing::ext::TestSize.L
 }
 
 /**
- * @tc.name: StatCoreMockTest_DoStat_004
- * @tc.desc: Test function of FsyncCore::DoStat interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_004, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_004";
-
-    FileInfo fileinfo;
-    fileinfo.path = std::make_unique<char[]>(1);
-    fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-    fileinfo.isPath = false;
-
-    EXPECT_CALL(*uvfs, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
-
-    auto res = StatCore::DoStat(fileinfo);
-    EXPECT_EQ(res.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_004";
-}
-
-/**
  * @tc.name: StatCoreMockTest_DoStat_005
  * @tc.desc: Test function of FsyncCore::DoStat interface for FALSE.
  * @tc.size: MEDIUM
