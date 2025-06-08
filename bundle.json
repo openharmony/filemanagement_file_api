@@ -115,6 +115,15 @@
             }
           },
           {
+            "name": "//foundation/filemanagement/file_api/utils/filemgmt_libfs:filemgmt_libfs",
+            "header": {
+              "header_files": [
+                "filemgmt_libfs.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/utils/filemgmt_libfs/include"
+            }
+          },
+          {
             "name": "//foundation/filemanagement/file_api/utils/filemgmt_libn:filemgmt_libn",
             "header": {
               "header_files": [
