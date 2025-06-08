@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "securec.h"
 #include "stat_core.h"
 #include "uv_fs_mock.h"
 
@@ -162,8 +163,9 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_005, testing::ext::TestSize.L
 
     FileInfo fileinfo;
     string buffer = "Hello, World!";
-    fileinfo.path = std::make_unique<char[]>(buffer.size() + 1);
-    std::memcpy(fileinfo.path.get(), buffer.c_str(), buffer.size() + 1);
+    int pathLength = buffer.size() + 1;
+    fileinfo.path = std::make_unique<char[]>(pathLength);
+    memcpy_s(fileinfo.path.get(), pathLength, buffer.c_str(), buffer.size());
     fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(-1);
     fileinfo.isPath = true;
 

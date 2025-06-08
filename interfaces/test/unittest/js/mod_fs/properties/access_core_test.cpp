@@ -25,6 +25,8 @@ using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
+const mode_t DIR_PERMISSIONS = 0755;
+
 class AccessCoreTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -61,8 +63,6 @@ void AccessCoreTest::TearDown(void)
 // 递归创建多级目录的辅助函数
 bool CreateDirectoryRecursive(const std::string& path)
 {
-    const mode_t DIR_PERMISSIONS = 0755;
-
     if (path.empty()) {
         return false;
     }

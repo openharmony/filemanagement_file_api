@@ -16,6 +16,7 @@
 #include "fs_stat.h"
 #include "../properties/mock/system_mock.h"
 #include "fs_stat_entity.h"
+#include "securec.h"
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -74,8 +75,10 @@ HWTEST_F(FsStatMockTest, FsStatMockTest_GetLocation_001, testing::ext::TestSize.
     statEntity = std::make_unique<StatEntity>();
     statEntity->fileInfo_ = std::make_unique<FileInfo>();
     statEntity->fileInfo_->isPath = true;
-    statEntity->fileInfo_->path = std::make_unique<char[]>(100);
-    strncpy(stat->fileInfo_->path.get(), "/test/path", 99);
+    int length = 100;
+    string testPath = "/test/path";
+    statEntity->fileInfo_->path = std::make_unique<char[]>(length);
+    strncpy_s(statEntity->fileInfo_->path.get(), length, testPath.c_str(), testPath.size());
     statEntity->fileInfo_->path.get()[99] = '\0';
     fsStat = std::make_unique<FsStat>(std::move(statEntity));
 
