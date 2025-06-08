@@ -17,13 +17,15 @@
 #define FILEMANAGEMENT_FILE_API_INTERFACES_KITS_IOURING_HYPER_AIO_H
 
 #include <functional>
+#include <memory>
+#include <mutex>
 #include <thread>
-#ifdef HYPERAIO_USE_LIBURING
-#include "liburing.h"
-#endif
+
+
 namespace OHOS {
 namespace HyperAio {
 #define IOURING_APP_PERMISSION      (1U << 0)
+
 #ifndef EOK
 #define EOK (0)
 #endif
@@ -75,6 +77,10 @@ struct IoResponse {
     }
 };
 
+#define DECLARE_PIMPL(ClassName) \
+    class Impl; \
+    std::shared_ptr<Impl> pImpl_
+
 class HyperAio {
 public:
     using ProcessIoResultCallBack = std::function<void(std::unique_ptr<IoResponse>)>;
@@ -85,15 +91,12 @@ public:
     int32_t StartCancelReqs(CancelReqs *req);
     int32_t DestroyCtx();
 private:
+    DECLARE_PIMPL(HyperAio);
     ProcessIoResultCallBack ioResultCallBack_ = nullptr;
-#ifdef HYPERAIO_USE_LIBURING
-    io_uring uring_;
     std::thread harvestThread_;
-    std::atomic<bool> stopThread_;
-    std::atomic<bool> initialized_;
+    std::atomic<bool> stopThread_ = true;
+    std::atomic<bool> initialized_ = false;
     void HarvestRes();
-    struct io_uring_sqe* GetSqeWithRetry(struct io_uring *ring);
-#endif
 };
 }
 }

@@ -47,16 +47,12 @@ ohos_shared_library("HyperAio") {
       debug = false
     }
   }
-
   sources = [ 
     "src/hyperaio.cpp",
     "src/hyperaio_trace.cpp"
   ]
-
   public_configs = [ ":hyperaio_config" ]
-
   deps = [ ]
-
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",

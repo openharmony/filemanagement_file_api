@@ -21,7 +21,9 @@
 #include "hyperaio_trace.h"
 #include "libhilog.h"
 #include "ipc_skeleton.h"
-
+#ifdef HYPERAIO_USE_LIBURING
+#include "liburing.h"
+#endif
 namespace OHOS {
 namespace HyperAio {
 #ifdef HYPERAIO_USE_LIBURING
@@ -29,6 +31,10 @@ const uint32_t URING_QUEUE_SIZE = 512;
 const uint32_t DELAY = 20;
 const uint32_t BATCH_SIZE = 128;
 const uint32_t RETRIES = 3;
+class HyperAio::Impl {
+public:
+    io_uring uring_;
+};
 
 static bool HasAccessIouringPermission()
 {
@@ -39,6 +45,7 @@ static bool HasAccessIouringPermission()
         HILOGE("have no ALLOW_IOURING permission");
         return false;
     }
+
     return true;
 }
 
@@ -49,30 +56,11 @@ uint32_t HyperAio::SupportIouring()
     if (HasAccessIouringPermission()) {
         flags |= IOURING_APP_PERMISSION;
     }
+
     return flags;
 }
 
-int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
-{
-    HyperaioTrace trace("CtxInit");
-    if (callBack == nullptr) {
-        HILOGE("callBack is null");
-        return -EINVAL;
-    }
-    int32_t ret = io_uring_queue_init(URING_QUEUE_SIZE, &uring_, 0);
-    if (ret < 0) {
-        HILOGE("init io_uring failed, ret = %{public}d", ret);
-        return ret;
-    }
-    ioResultCallBack_ = *callBack;
-    stopThread_.store(false);
-    harvestThread_ = std::thread(&HyperAio::HarvestRes, this);
-    initialized_.store(true);
-    HILOGI("init hyperaio success");
-    return EOK;
-}
-
-struct io_uring_sqe* HyperAio::GetSqeWithRetry(struct io_uring *ring)
+struct io_uring_sqe* GetSqeWithRetry(struct io_uring *ring)
 {
     struct io_uring_sqe *sqe;
     for (uint32_t i = 0; i < RETRIES; i++) {
@@ -86,20 +74,57 @@ struct io_uring_sqe* HyperAio::GetSqeWithRetry(struct io_uring *ring)
     return nullptr;
 }
 
+int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
+{
+    HyperaioTrace trace("CtxInit");
+    if (initialized_.load()) {
+        HILOGE("HyperAio has been initialized");
+        return EOK;
+    }
+
+    if (callBack == nullptr) {
+        HILOGE("callBack is null");
+        return -EINVAL;
+    }
+
+    if (pImpl_ == nullptr) {
+        pImpl_ = std::make_shared<Impl>();
+    }
+
+    int32_t ret = io_uring_queue_init(URING_QUEUE_SIZE, &pImpl_->uring_, 0);
+    if (ret < 0) {
+        HILOGE("init io_uring failed, ret = %{public}d", ret);
+        return ret;
+    }
+
+    ioResultCallBack_ = *callBack;
+    stopThread_.store(false);
+    harvestThread_ = std::thread(&HyperAio::HarvestRes, this);
+    initialized_.store(true);
+    HILOGI("init hyperaio success");
+    return EOK;
+}
+
 int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 {
-    HyperaioTrace trace("StartOpenReqs" + std::to_string(req->reqNum));
+    if (pImpl_ == nullptr) {
+        return -EINVAL;
+    }
+
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
+
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
+
+    HyperaioTrace trace("StartOpenReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
     for (uint32_t i = 0; i < totalReqs; i++) {
-        struct io_uring_sqe *sqe = GetSqeWithRetry(&uring_);
+        struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
             HILOGE("get sqe failed");
             return -ENOMEM;
@@ -111,7 +136,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         count++;
         if (count >= BATCH_SIZE) {
             count = 0;
-            int32_t ret = io_uring_submit(&uring_);
+            int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit open reqs failed, ret = %{public}d", ret);
                 return ret;
@@ -119,7 +144,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         }
     }
     if (count > 0 && count < BATCH_SIZE) {
-        int32_t ret = io_uring_submit(&uring_);
+        int32_t ret = io_uring_submit(&pImpl_->uring_);
         if (ret < 0) {
             HILOGE("submit open reqs failed, ret = %{public}d", ret);
             return ret;
@@ -130,18 +155,24 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 
 int32_t HyperAio::StartReadReqs(ReadReqs *req)
 {
-    HyperaioTrace trace("StartReadReqs" + std::to_string(req->reqNum));
+    if (pImpl_ == nullptr) {
+        return -EINVAL;
+    }
+
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
+
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
+
+    HyperaioTrace trace("StartReadReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
     for (uint32_t i = 0; i < totalReqs; i++) {
-        struct io_uring_sqe *sqe = GetSqeWithRetry(&uring_);
+        struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
             HILOGE("get sqe failed");
             return -ENOMEM;
@@ -152,7 +183,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         count++;
         if (count >= BATCH_SIZE) {
             count = 0;
-            int32_t ret = io_uring_submit(&uring_);
+            int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit read reqs failed, ret = %{public}d", ret);
                 return ret;
@@ -160,29 +191,36 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         }
     }
     if (count > 0 && count < BATCH_SIZE) {
-        int32_t ret = io_uring_submit(&uring_);
+        int32_t ret = io_uring_submit(&pImpl_->uring_);
         if (ret < 0) {
             HILOGE("submit read reqs failed, ret = %{public}d", ret);
             return ret;
         }
     }
+
     return EOK;
 }
 
 int32_t HyperAio::StartCancelReqs(CancelReqs *req)
 {
-    HyperaioTrace trace("StartCancelReqs" + std::to_string(req->reqNum));
+    if (pImpl_ == nullptr) {
+        return -EINVAL;
+    }
+
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
+
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
+
+    HyperaioTrace trace("StartCancelReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
     for (uint32_t i = 0; i < totalReqs; i++) {
-        struct io_uring_sqe *sqe = GetSqeWithRetry(&uring_);
+        struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
             HILOGE("get sqe failed");
             return -ENOMEM;
@@ -193,7 +231,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         count++;
         if (count >= BATCH_SIZE) {
             count = 0;
-            int32_t ret = io_uring_submit(&uring_);
+            int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit cancel reqs failed, ret = %{public}d", ret);
                 return ret;
@@ -201,7 +239,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         }
     }
     if (count > 0 && count < BATCH_SIZE) {
-        int32_t ret = io_uring_submit(&uring_);
+        int32_t ret = io_uring_submit(&pImpl_->uring_);
         if (ret < 0) {
             HILOGE("submit cancel reqs failed, ret = %{public}d", ret);
             return ret;
@@ -212,15 +250,20 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
 
 void HyperAio::HarvestRes()
 {
+    if (pImpl_ == nullptr) {
+        HILOGI("pImpl is null");
+        return;
+    }
+
     while (!stopThread_.load()) {
         struct io_uring_cqe *cqe;
-        int32_t ret = io_uring_wait_cqe(&uring_, &cqe);
+        int32_t ret = io_uring_wait_cqe(&pImpl_->uring_, &cqe);
         if (ret < 0 || cqe == nullptr) {
             HILOGI("wait cqe failed, ret = %{public}d", ret);
             continue;
         }
         auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
-        io_uring_cqe_seen(&uring_, cqe);
+        io_uring_cqe_seen(&pImpl_->uring_, cqe);
         if (ioResultCallBack_) {
             ioResultCallBack_(std::move(response));
         }
@@ -229,11 +272,19 @@ void HyperAio::HarvestRes()
 
 int32_t HyperAio::DestroyCtx()
 {
+    if (!initialized_.load()) {
+        return EOK;
+    }
+
     stopThread_.store(true);
     if (harvestThread_.joinable()) {
         harvestThread_.join();
     }
-    io_uring_queue_exit(&uring_);
+
+    if (pImpl_ != nullptr) {
+        io_uring_queue_exit(&pImpl_->uring_);
+    }
+
     initialized_.store(false);
     return EOK;
 }
