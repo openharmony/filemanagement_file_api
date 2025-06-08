@@ -34,7 +34,7 @@ namespace OHOS::HyperAio {
 #ifdef HYPERAIO_USE_LIBURING
     const uint64_t userData = 12345;
     const uint32_t len = 1024;
-    const uint32_t batchSize =300;
+    const uint32_t batchSize = 300;
     HyperAio::ProcessIoResultCallBack callBack = [](std::unique_ptr<IoResponse> response) {
         GTEST_LOG_(INFO) << "HyperAioTest callBack";
     };
@@ -205,7 +205,7 @@ namespace OHOS::HyperAio {
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->CtxInit(&callBack);
         EXPECT_EQ(result, 0);
-        std::unique_ptr<OpenInfo[]> openInfos(new OpenInfo[batchSize]);
+        auto openInfos = std::make_unique<OpenInfo[]>(batchSize);
         for (int i = 0; i < batchSize; ++i) {
             openInfos[i].dfd = 0;
             openInfos[i].flags = O_RDWR;
@@ -213,7 +213,7 @@ namespace OHOS::HyperAio {
             openInfos[i].path = nullptr;
             openInfos[i].userData = userData + i;
         }
-        OpenReqs openReqs = {batchSize, openInfos};
+        OpenReqs openReqs = {batchSize, openInfos.get()};
         result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, 0);
         result = hyperAio_->DestroyCtx();

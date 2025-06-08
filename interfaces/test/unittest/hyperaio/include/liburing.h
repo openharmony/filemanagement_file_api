@@ -95,3 +95,4 @@ inline void io_uring_queue_exit(struct io_uring *ring)
 
 }
 }
+#endif
