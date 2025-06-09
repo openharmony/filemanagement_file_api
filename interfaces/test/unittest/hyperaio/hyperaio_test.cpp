@@ -161,10 +161,16 @@ namespace OHOS::HyperAio {
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartOpenReqs_0001";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        hyperAio_->initialized_.store(false);
         OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
         OpenReqs openReqs = {1, &openInfo};
         int32_t result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, -EPERM);
+        hyperAio_->initialized_.store(true);
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0001";
     }
 
