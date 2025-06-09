@@ -166,7 +166,7 @@ namespace OHOS::HyperAio {
         hyperAio_->initialized_.store(false);
         OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
         OpenReqs openReqs = {1, &openInfo};
-        int32_t result = hyperAio_->StartOpenReqs(&openReqs);
+        result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, -EPERM);
         hyperAio_->initialized_.store(true);
         result = hyperAio_->DestroyCtx();
