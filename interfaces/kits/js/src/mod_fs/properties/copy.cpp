@@ -364,6 +364,27 @@ void Copy::CopyComplete(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCall
     }
 }
 
+int32_t Copy::ExecCopy(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallbackObject> callback)
+{
+    Storage::DistributedFile::ProcessCallback processListener;
+    if (infos->hasListener) {
+        processListener = [infos, callback](uint64_t processSize, uint64_t totalSize) -> void {
+            callback->progressSize = processSize;
+            callback->totalSize = totalSize;
+            OnFileReceive(infos);
+        };
+    }
+    if (infos->taskSignal != nullptr) {
+        infos->taskSignal->MarkDfsTask();
+        infos->taskSignal->SetCopyTaskUri(infos->srcUri, infos->destUri);
+    }
+    LOGI("Copy begin");
+    auto result = Storage::DistributedFile::FileCopyManager::GetInstance()->Copy(infos->srcUri, infos->destUri,
+        processListener);
+    LOGI("Copy end, result = %{public}d", result);
+    return result;
+}
+
 napi_value Copy::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -379,20 +400,7 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [infos, callback]() -> NError {
-        std::function<void(uint64_t processSize, uint64_t totalSize)> processListener =
-            [infos, callback](uint64_t processSize, uint64_t totalSize) -> void {
-            callback->progressSize = processSize;
-            callback->totalSize = totalSize;
-            OnFileReceive(infos);
-        };
-        if (infos->taskSignal != nullptr) {
-            infos->taskSignal->MarkDfsTask();
-            infos->taskSignal->SetCopyTaskUri(infos->srcUri, infos->destUri);
-        }
-        LOGI("Copy begin");
-        auto result = Storage::DistributedFile::FileCopyManager::GetInstance()->Copy(infos->srcUri, infos->destUri,
-            processListener);
-        LOGI("Copy end, result = %{public}d", result);
+        auto result = ExecCopy(infos, callback);
         auto it = softbusErr2ErrCodeTable.find(result);
         if (it != softbusErr2ErrCodeTable.end()) {
             result = it->second;
