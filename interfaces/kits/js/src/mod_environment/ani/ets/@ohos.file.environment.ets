@@ -22,8 +22,8 @@ namespace Environment {
         promise.then((ret: NullishType): void => {
             let result = ret as string;
             resolve(result);
-        }).catch((e: BusinessError): void => {
-            reject(e);
+        }).catch((e: Error): void => {
+            reject(e as BusinessError);
         });
         });
   }
@@ -35,8 +35,8 @@ namespace Environment {
         e.code = 0;
         let result = ret as string;
         callback(e, result);
-      }).catch((e: BusinessError): void => {
-        callback(e, "");
+      }).catch((e: Error): void => {
+        callback(e as BusinessError, "");
       });
   }
 
@@ -46,8 +46,8 @@ namespace Environment {
         promise.then((ret: NullishType): void => {
             let result = ret as string;
             resolve(result);
-        }).catch((e: BusinessError): void => {
-            reject(e);
+        }).catch((e: Error): void => {
+            reject(e as BusinessError);
         });
         });
   }
@@ -58,8 +58,8 @@ namespace Environment {
         e.code = 0;
         let result = ret as string;
         callback(e, result);
-      }).catch((e: BusinessError): void => {
-        callback(e, "");
+      }).catch((e: Error): void => {
+        callback(e as BusinessError, "");
       });
   }
 
