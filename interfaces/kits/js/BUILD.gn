@@ -625,7 +625,6 @@ group("build_kits_js") {
   ]
 }
 
-
 group("ani_file_api") {
   deps = [
     ":ani_file_fs",
@@ -798,7 +797,9 @@ ohos_shared_library("ani_file_hash") {
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "libuv:uv",
     "openssl:libcrypto_shared",
     "runtime_core:ani",
@@ -861,7 +862,9 @@ ohos_shared_library("ani_file_securitylabel") {
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "libuv:uv",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
