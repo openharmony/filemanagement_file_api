@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "fs_stat.h"
-#include "../properties/mock/system_mock.h"
-#include "fs_stat_entity.h"
-#include "securec.h"
-
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include "fs_stat_entity.h"
+#include "fs_stat.h"
+#include "securec.h"
+#include "system_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
