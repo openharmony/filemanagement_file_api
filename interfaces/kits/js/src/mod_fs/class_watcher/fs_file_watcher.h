@@ -18,14 +18,13 @@
 #include <mutex>
 #include <string>
 #include <thread>
-#include <unordered_map>
-#include <unordered_set>
 
 #include <sys/inotify.h>
 
 #include "filemgmt_libfs.h"
 #include "fs_watch_entity.h"
 #include "singleton.h"
+#include "watcher_data_cache.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -34,31 +33,32 @@ constexpr int BUF_SIZE = 1024;
 
 class FsFileWatcher : public Singleton<FsFileWatcher> {
 public:
-    FsFileWatcher();
-    ~FsFileWatcher();
     int32_t GetNotifyId();
     bool InitNotify();
     int StartNotify(shared_ptr<WatcherInfo> info);
     int StopNotify(shared_ptr<WatcherInfo> info);
     void GetNotifyEvent();
     void AsyncGetNotifyEvent();
-    bool AddWatcherInfo(const string &fileName, shared_ptr<WatcherInfo> info);
-    bool CheckEventValid(const uint32_t &event);
+    bool AddWatcherInfo(shared_ptr<WatcherInfo> info);
+    bool CheckEventValid(uint32_t event);
+
+public:
+    FsFileWatcher() = default;
+    ~FsFileWatcher() = default;
+    FsFileWatcher(const FsFileWatcher &) = delete;
+    FsFileWatcher &operator=(const FsFileWatcher &) = delete;
 
 private:
     uint32_t RemoveWatcherInfo(shared_ptr<WatcherInfo> info);
-    tuple<bool, int> CheckEventWatched(const string &fileName, const uint32_t &event);
     void NotifyEvent(const struct inotify_event *event);
     int CloseNotifyFd();
     int CloseNotifyFdLocked();
-    int NotifyToWatchNewEvents(const string &fileName, const int &wd, const uint32_t &watchEvents);
+    int NotifyToWatchNewEvents(const string &fileName, int wd, uint32_t watchEvents);
     void ReadNotifyEvent();
     void ReadNotifyEventLocked();
     void DestroyTaskThead();
 
 private:
-    static mutex watchMutex_;
-
     mutex taskMutex_;
     mutex readMutex_;
 
@@ -70,11 +70,7 @@ private:
     bool closed_ = false;
     int32_t notifyFd_ = -1;
     int32_t eventFd_ = -1;
-    unordered_set<shared_ptr<WatcherInfo>> watcherInfoSet_;
-    unordered_map<string, pair<int, uint32_t>> wdFileNameMap_;
-
-    FsFileWatcher(const FsFileWatcher &) = delete;
-    FsFileWatcher &operator=(const FsFileWatcher &) = delete;
+    WatcherDataCache dataCache_;
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO
