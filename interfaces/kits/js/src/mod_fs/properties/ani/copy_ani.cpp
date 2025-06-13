@@ -140,8 +140,18 @@ void CopyAni::CopySync(
     auto [succDest, dest] = TypeConverter::ToUTF8String(env, destUri);
     auto [succOpts, opts] = ParseOptions(env, options);
 
-    if (!succSrc || !succDest || !succOpts) {
-        HILOGE("The first/second/third argument requires uri/uri/napi_function");
+    if (!succSrc) {
+        HILOGE("The first argument requires uri");
+        ErrorHandler::Throw(env, E_PARAMS);
+        return;
+    }
+    if (!succDest) {
+        HILOGE("The second argument requires uri");
+        ErrorHandler::Throw(env, E_PARAMS);
+        return;
+    }
+    if (!succOpts) {
+        HILOGE("The third argument requires listener function");
         ErrorHandler::Throw(env, E_PARAMS);
         return;
     }

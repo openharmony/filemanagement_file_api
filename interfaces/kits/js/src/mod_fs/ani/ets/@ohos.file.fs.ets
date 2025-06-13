@@ -1266,7 +1266,7 @@ export class TaskSignal {
 
   private native onCancelNative(): void;
 
-  private onCancelResolve: (path: string) => void;
+  private onCancelResolve: (path: string) => void = (path: string): void => {};
   private onCancelCallback(path: string): void {
     if (this.onCancelResolve) {
       this.onCancelResolve(path);
@@ -1282,6 +1282,8 @@ export class TaskSignal {
         this.onCancelNative();
       } catch (e: BusinessError<void>) {
         reject(e);
+      } catch (e: Error) {
+        reject(e as BusinessError);
       }
     });
   }
