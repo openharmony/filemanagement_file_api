@@ -194,7 +194,7 @@ void FileWatcher::ReadNotifyEvent(WatcherCallback callback)
     while (((len = read(notifyFd_, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
     while (index < len) {
         event = reinterpret_cast<inotify_event *>(buf + index);
-        if (sizeof(struct inotify_event) > (len - index)) {
+        if ((len - index) < sizeof(struct inotify_event)) {
             HILOGE("out of bounds access, len:%{public}d, index: %{public}d, inotify: %{public}zu",
                    len, index, sizeof(struct inotify_event));
             break;
