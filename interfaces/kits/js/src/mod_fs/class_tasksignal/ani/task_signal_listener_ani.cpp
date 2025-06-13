@@ -55,7 +55,7 @@ void TaskSignalListenerAni::SendCancelEvent(const string &filepath) const
     }
     auto ret = env->Object_CallMethodByName_Void(signalObj, "onCancelCallback", nullptr, aniPath);
     if (ret != ANI_OK) {
-        HILOGE("Call onCancelCallback failed, err: %{private}d", ret);
+        HILOGE("Call onCancelCallback failed, err: %{public}d", ret);
         return;
     }
 }
