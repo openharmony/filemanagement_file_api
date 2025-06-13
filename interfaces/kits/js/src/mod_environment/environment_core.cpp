@@ -42,7 +42,7 @@ const std::string DOWNLOAD_PATH = "/Download";
 const std::string DESKTOP_PATH = "/Desktop";
 const std::string DOCUMENTS_PATH = "/Documents";
 const std::string DEFAULT_USERNAME = "currentUser";
-const char *FILE_MANAMER_FULL_MOUNT_ENABLE_PARAMETER = "const.filemanager.full_mount.enable";
+const char *FILE_MANAGER_FULL_MOUNT_ENABLE_PARAMETER = "const.filemanager.full_mount.enable";
 static bool IsSystemApp()
 {
     uint64_t fullTokenId = OHOS::IPCSkeleton::GetCallingFullTokenID();
@@ -79,7 +79,7 @@ static std::string GetPublicPath(const std::string &directoryName)
 static bool CheckFileManagerFullMountEnable()
 {
     char value[] = "false";
-    int retSystem = GetParameter(FILE_MANAMER_FULL_MOUNT_ENABLE_PARAMETER, "false", value, sizeof(value));
+    int retSystem = GetParameter(FILE_MANAGER_FULL_MOUNT_ENABLE_PARAMETER, "false", value, sizeof(value));
     if (retSystem > 0 && !std::strcmp(value, "true")) {
         return true;
     }
