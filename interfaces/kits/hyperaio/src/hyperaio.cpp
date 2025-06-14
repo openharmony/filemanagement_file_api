@@ -137,17 +137,17 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(openInfo->userData));
         io_uring_prep_openat(sqe, openInfo->dfd, static_cast<const char *>(openInfo->path),
             openInfo->flags, openInfo->mode);
-        HILOGI("open path = %{public}s, flags = %{public}d, mode = %{public}u, userData = %{public}lu",
+        HILOGI("open flags = %{public}d, mode = %{public}u, userData = %{public}lu",
             static_cast<const char *>(openInfo->path), openInfo->flags, openInfo->mode, openInfo->userData);
         count++;
-        openReqCount_++;
         if (count >= BATCH_SIZE) {
-            count = 0;
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit open reqs failed, ret = %{public}d", ret);
                 return ret;
             }
+            openReqCount_ += count;
+            count = 0;
         }
     }
     if (count > 0 && count < BATCH_SIZE) {
@@ -156,6 +156,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
             HILOGE("submit open reqs failed, ret = %{public}d", ret);
             return ret;
         }
+        openReqCount_ += count;
     }
     return EOK;
 }
@@ -190,14 +191,14 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         HILOGI("read fd = %{public}d, len = %{public}u, offset = %{public}lu, userData = %{public}lu",
             readInfo->fd, readInfo->len, readInfo->offset, readInfo->userData);
         count++;
-        readReqCount_++;
         if (count >= BATCH_SIZE) {
-            count = 0;
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit read reqs failed, ret = %{public}d", ret);
                 return ret;
             }
+            readReqCount_ += count;
+            count = 0;
         }
     }
     if (count > 0 && count < BATCH_SIZE) {
@@ -206,6 +207,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
             HILOGE("submit read reqs failed, ret = %{public}d", ret);
             return ret;
         }
+        readReqCount_ += count;
     }
 
     return EOK;
@@ -238,17 +240,15 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         struct CancelInfo *cancelInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(cancelInfo->userData));
         io_uring_prep_cancel(sqe, reinterpret_cast<void *>(cancelInfo->targetUserData), 0);
-        HILOGI("cancel targetUserData = %{public}lu, userData = %{public}lu",
-            cancelInfo->targetUserData, cancelInfo->userData);
         count++;
-        cancelReqCount_++;
         if (count >= BATCH_SIZE) {
-            count = 0;
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit cancel reqs failed, ret = %{public}d", ret);
                 return ret;
             }
+            cancelReqCount_ += count;
+            count = 0;
         }
     }
     if (count > 0 && count < BATCH_SIZE) {
@@ -257,6 +257,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
             HILOGE("submit cancel reqs failed, ret = %{public}d", ret);
             return ret;
         }
+        cancelReqCount_ += count;
     }
     return EOK;
 }
@@ -291,12 +292,15 @@ int32_t HyperAio::DestroyCtx()
     HILOGI("openReqCount = %{public}u, readReqCount = %{public}u, cancelReqCount = %{public}u, cqeCount = %{public}u",
         openReqCount_.load(), readReqCount_.load(), cancelReqCount_.load(), cqeCount_.load());
     if (!initialized_.load()) {
+        HILOGI("not initialized");
         return EOK;
     }
 
     stopThread_.store(true);
     if (harvestThread_.joinable()) {
+        HILOGI("start harvest thread join");
         harvestThread_.join();
+        HILOGI("join success");
     }
 
     if (pImpl_ != nullptr) {
