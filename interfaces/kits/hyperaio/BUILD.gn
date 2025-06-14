@@ -59,6 +59,7 @@ ohos_shared_library("HyperAio") {
     "ipc:ipc_core",
     "access_token:libaccesstoken_sdk",
     "hitrace:hitrace_meter",
+    "hisysevent:libhisysevent",
   ]
   if (file_api_feature_hyperaio) {
     external_deps += [ "liburing:liburing" ]

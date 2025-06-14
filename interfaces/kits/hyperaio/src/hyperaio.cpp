@@ -31,6 +31,10 @@ const uint32_t URING_QUEUE_SIZE = 512;
 const uint32_t DELAY = 20;
 const uint32_t BATCH_SIZE = 128;
 const uint32_t RETRIES = 3;
+std::atomic<uint32_t> openReqCount_{0};
+std::atomic<uint32_t> readReqCount_{0};
+std::atomic<uint32_t> cancelReqCount_{0};
+std::atomic<uint32_t> cqeCount_{0};
 class HyperAio::Impl {
 public:
     io_uring uring_;
@@ -133,7 +137,10 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(openInfo->userData));
         io_uring_prep_openat(sqe, openInfo->dfd, static_cast<const char *>(openInfo->path),
             openInfo->flags, openInfo->mode);
+        HILOGI("open path = %{public}s, flags = %{public}d, mode = %{public}u, userData = %{public}lu",
+            static_cast<const char *>(openInfo->path), openInfo->flags, openInfo->mode, openInfo->userData);
         count++;
+        openReqCount_++;
         if (count >= BATCH_SIZE) {
             count = 0;
             int32_t ret = io_uring_submit(&pImpl_->uring_);
@@ -180,7 +187,10 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         struct ReadInfo *readInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(readInfo->userData));
         io_uring_prep_read(sqe, readInfo->fd, readInfo->buf, readInfo->len, readInfo->offset);
+        HILOGI("read fd = %{public}d, len = %{public}u, offset = %{public}lu, userData = %{public}lu",
+            readInfo->fd, readInfo->len, readInfo->offset, readInfo->userData);
         count++;
+        readReqCount_++;
         if (count >= BATCH_SIZE) {
             count = 0;
             int32_t ret = io_uring_submit(&pImpl_->uring_);
@@ -228,7 +238,10 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         struct CancelInfo *cancelInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(cancelInfo->userData));
         io_uring_prep_cancel(sqe, reinterpret_cast<void *>(cancelInfo->targetUserData), 0);
+        HILOGI("cancel targetUserData = %{public}lu, userData = %{public}lu",
+            cancelInfo->targetUserData, cancelInfo->userData);
         count++;
+        cancelReqCount_++;
         if (count >= BATCH_SIZE) {
             count = 0;
             int32_t ret = io_uring_submit(&pImpl_->uring_);
@@ -262,7 +275,9 @@ void HyperAio::HarvestRes()
             HILOGI("wait cqe failed, ret = %{public}d", ret);
             continue;
         }
+        cqeCount_++;
         auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
+        HILOGI("get cqe, user_data = %{public}lld, res = %{public}d, flags = %{public}u")
         io_uring_cqe_seen(&pImpl_->uring_, cqe);
         if (ioResultCallBack_) {
             ioResultCallBack_(std::move(response));
@@ -286,6 +301,7 @@ int32_t HyperAio::DestroyCtx()
     }
 
     initialized_.store(false);
+    HILOGI("destory hyperaio success");
     return EOK;
 }
 #else
