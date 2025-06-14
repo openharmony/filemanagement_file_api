@@ -188,7 +188,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         struct ReadInfo *readInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(readInfo->userData));
         io_uring_prep_read(sqe, readInfo->fd, readInfo->buf, readInfo->len, readInfo->offset);
-        HILOGI("read fd = %{public}d, len = %{public}u, offset = %{public}lu, userData = %{public}lu",
+        HILOGI("read len = %{public}u, offset = %{public}lu, userData = %{public}lu",
             readInfo->fd, readInfo->len, readInfo->offset, readInfo->userData);
         count++;
         if (count >= BATCH_SIZE) {
