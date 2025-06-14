@@ -304,7 +304,7 @@ int32_t HyperAio::DestroyCtx()
     }
 
     initialized_.store(false);
-    HILOGI("destory hyperaio success");
+    HILOGI("destroy hyperaio success");
     return EOK;
 }
 #else
