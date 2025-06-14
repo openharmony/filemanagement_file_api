@@ -288,6 +288,8 @@ void HyperAio::HarvestRes()
 
 int32_t HyperAio::DestroyCtx()
 {
+    HILOGI("openReqCount = %{public}u, readReqCount = %{public}u, cancelReqCount = %{public}u, cqeCount = %{public}u",
+        openReqCount_.load(), readReqCount_.load(), cancelReqCount_.load(), cqeCount_.load());
     if (!initialized_.load()) {
         return EOK;
     }
