@@ -34,7 +34,7 @@ int32_t TaskSignal::Cancel()
         }
         OnCancel();
         return ret;
-    } 
+    }
     if (remoteTask_.load()) {
         int32_t ret = 0;
         if (sessionName_.empty()) {
