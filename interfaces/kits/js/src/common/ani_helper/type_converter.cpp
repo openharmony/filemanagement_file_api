@@ -59,7 +59,7 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::ToOptionalInt32(ani_env 
     }
 
     ani_int intValue;
-    if (ANI_OK == env->Object_CallMethodByName_Int(value, "toInt", nullptr, &intValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Int(value, "intValue", nullptr, &intValue)) {
         return { true, std::make_optional(intValue) };
     }
 
@@ -79,7 +79,7 @@ std::tuple<bool, std::optional<int64_t>> TypeConverter::ToOptionalInt64(ani_env 
     }
 
     ani_long longValue;
-    if (ANI_OK == env->Object_CallMethodByName_Long(value, "toLong", nullptr, &longValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Long(value, "longValue", nullptr, &longValue)) {
         return { true, std::make_optional(longValue) };
     }
 
@@ -152,7 +152,7 @@ static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrF
     env->Object_InstanceOf(pathOrFd, cls, &isFd);
     if (isFd) {
         ani_int fd;
-        if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "toInt", nullptr, &fd)) {
+        if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "intValue", nullptr, &fd)) {
             HILOGE("Parse file path failed");
             return { false, 0 };
         }

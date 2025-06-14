@@ -116,7 +116,7 @@ public:
         static const string longValueSig = Builder::BuildSignatureDescriptor({}, BasicTypes::longType);
         ani_long value;
         status = env->Object_CallMethodByName_Long(
-            static_cast<ani_object>(property), "toLong", longValueSig.c_str(), &value);
+            static_cast<ani_object>(property), "longValue", longValueSig.c_str(), &value);
         if (status != ANI_OK) {
             return { false, nullopt };
         }
