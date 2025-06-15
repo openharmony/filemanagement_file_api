@@ -89,6 +89,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "readSync", nullptr, reinterpret_cast<void *>(ReadAni::ReadSync) },
         ani_native_function { "readTextSync", nullptr, reinterpret_cast<void *>(ReadTextAni::ReadTextSync) },
         ani_native_function { "rmdirSync", nullptr, reinterpret_cast<void *>(RmdirAni::RmdirSync) },
+        ani_native_function { "statSync", nullptr, reinterpret_cast<void *>(StatAni::StatSync) },
         ani_native_function { "truncateSync", nullptr, reinterpret_cast<void *>(TruncateAni::TruncateSync) },
         ani_native_function { "unlinkSync", nullptr, reinterpret_cast<void *>(UnlinkAni::UnlinkSync) },
         ani_native_function { "writeSync", nullptr, reinterpret_cast<void *>(WriteAni::WriteSync) },
