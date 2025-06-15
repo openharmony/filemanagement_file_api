@@ -114,16 +114,13 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
     if (pImpl_ == nullptr) {
         return -EINVAL;
     }
-
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
-
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
-
     HyperaioTrace trace("StartOpenReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
@@ -168,16 +165,13 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
     if (pImpl_ == nullptr) {
         return -EINVAL;
     }
-
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
-
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
-
     HyperaioTrace trace("StartReadReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
@@ -222,16 +216,13 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
     if (pImpl_ == nullptr) {
         return -EINVAL;
     }
-
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
-
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
-
     HyperaioTrace trace("StartCancelReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
@@ -286,11 +277,14 @@ void HyperAio::HarvestRes()
         auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
         HILOGI("get cqe, user_data = %{public}lld, res = %{public}d, flags = %{public}u",
             cqe->user_data, cqe->res, cqe->flags);
+        HyperaioTrace trace("harvest: userdata " + std::to_string(cqe->user_data)
+            + " res " + std::to_string(cqe->res) + "flags " + std::to_string(cqe->flags));
         io_uring_cqe_seen(&pImpl_->uring_, cqe);
         if (ioResultCallBack_) {
             ioResultCallBack_(std::move(response));
         }
     }
+    HILOGI("exit harvest thread");
 }
 
 int32_t HyperAio::DestroyCtx()
