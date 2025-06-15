@@ -134,7 +134,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(openInfo->userData));
         io_uring_prep_openat(sqe, openInfo->dfd, static_cast<const char *>(openInfo->path),
             openInfo->flags, openInfo->mode);
-        HILOGI("open flags = %{public}d, mode = %{public}u, userData = %{public}lu",
+        HILOGD("open flags = %{public}d, mode = %{public}u, userData = %{public}lu",
             openInfo->flags, openInfo->mode, openInfo->userData);
         HyperaioTrace trace("open flags:" + std::to_string(openInfo->flags) + "mode:" + std::to_string(openInfo->mode)
             + "userData:" + std::to_string(openInfo->userData));
@@ -184,7 +184,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         struct ReadInfo *readInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(readInfo->userData));
         io_uring_prep_read(sqe, readInfo->fd, readInfo->buf, readInfo->len, readInfo->offset);
-        HILOGI("read len = %{public}u, offset = %{public}lu, userData = %{public}lu",
+        HILOGD("read len = %{public}u, offset = %{public}lu, userData = %{public}lu",
             readInfo->len, readInfo->offset, readInfo->userData);
         HyperaioTrace trace("read len:" + std::to_string(readInfo->len) + "offset:" + std::to_string(readInfo->offset)
             + "userData:" + std::to_string(readInfo->userData));
@@ -235,6 +235,8 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         struct CancelInfo *cancelInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(cancelInfo->userData));
         io_uring_prep_cancel(sqe, reinterpret_cast<void *>(cancelInfo->targetUserData), 0);
+        HILOGD("cancel userData = %{public}lu,  targetUserData = %{public}lu",
+            cancelInfo->userData, cancelInfo->targetUserData);
         HyperaioTrace trace("cancel userData:" + std::to_string(cancelInfo->userData)
             + "targetUserData:" + std::to_string(cancelInfo->targetUserData));
         count++;
