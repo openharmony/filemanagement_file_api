@@ -277,8 +277,6 @@ void HyperAio::HarvestRes()
         }
         cqeCount_++;
         auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
-        HILOGI("get cqe, user_data = %{public}llu, res = %{public}d, flags = %{public}u",
-            cqe->user_data, cqe->res, cqe->flags);
         HyperaioTrace trace("harvest: userdata " + std::to_string(cqe->user_data)
             + " res " + std::to_string(cqe->res) + "flags " + std::to_string(cqe->flags));
         io_uring_cqe_seen(&pImpl_->uring_, cqe);
