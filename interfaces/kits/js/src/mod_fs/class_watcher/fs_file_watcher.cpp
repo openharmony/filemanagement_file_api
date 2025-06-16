@@ -113,9 +113,7 @@ int32_t FsFileWatcher::CloseNotifyFd()
             HILOGE("Failed to close eventfd errCode:%{public}d", errno);
         }
         eventFd_ = -1;
-        HILOGI("Note: DestroyTaskThead begin...");
         DestroyTaskThead();
-        HILOGI("Note: DestroyTaskThead done!");
     }
 
     closed_ = false;
@@ -235,40 +233,38 @@ void FsFileWatcher::GetNotifyEvent()
 
     run_ = true;
     nfds_t nfds = 2;
-    struct pollfd fds[2];
+    struct pollfd fds[2] = { { 0 } };
     fds[0].fd = eventFd_;
-    fds[0].events = 0;
+    fds[0].events = POLLIN;
     fds[1].fd = notifyFd_;
     fds[1].events = POLLIN;
     int32_t ret = 0;
 
     while (run_) {
-        ret = poll(fds, nfds, 500);
-
+        ret = poll(fds, nfds, pollTimeoutMs);
         if (ret > 0) {
             if (static_cast<unsigned short>(fds[0].revents) & POLLNVAL) {
                 run_ = false;
-                return;
+                break;
             }
-
+            if (static_cast<unsigned short>(fds[0].revents) & POLLIN) {
+                run_ = false;
+                break;
+            }
             if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
                 ReadNotifyEventLocked();
             }
             continue;
         }
-
         if (ret == 0) {
-            // Note: 超时了
             continue;
         }
-
         if (ret < 0 && errno == EINTR) {
             continue;
         }
-
         if (ret < 0 && errno != EINTR) {
             HILOGE("Failed to poll NotifyFd, errno=%{public}d", errno);
-            return;
+            break;
         }
     }
 }
@@ -312,15 +308,20 @@ bool FsFileWatcher::CheckEventValid(uint32_t event)
 void FsFileWatcher::DestroyTaskThead()
 {
     if (taskThead_.joinable()) {
-        taskThead_.join();
+        if (taskThead_.get_id() != std::this_thread::get_id()) {
+            taskThead_.join();
+        } else {
+            taskThead_.detach();
+        }
     }
 
-    lock_guard<mutex> lock(taskMutex_);
-    if (taskRunning_) {
-        taskRunning_ = false;
+    {
+        lock_guard<mutex> lock(taskMutex_);
+        if (taskRunning_) {
+            taskRunning_ = false;
+            run_ = false;
+        }
     }
-
-    // Note: 可能需要加上状态控制
     dataCache_.ClearCache();
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

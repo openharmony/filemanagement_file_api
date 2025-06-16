@@ -59,6 +59,8 @@ private:
     void DestroyTaskThead();
 
 private:
+    static constexpr int32_t pollTimeoutMs = 500;
+
     mutex taskMutex_;
     mutex readMutex_;
 
