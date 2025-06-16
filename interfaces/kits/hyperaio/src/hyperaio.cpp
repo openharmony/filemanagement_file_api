@@ -53,7 +53,8 @@ static bool HasAccessIouringPermission()
     return true;
 }
 
-static bool ValidateReqNum(uint32_t reqNum) {
+static bool ValidateReqNum(uint32_t reqNum)
+{
     return reqNum > 0 && reqNum <= URING_QUEUE_SIZE;
 }
 
