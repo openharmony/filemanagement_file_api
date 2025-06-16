@@ -63,10 +63,9 @@ bool WatcherDataCache::RemoveFileWatcher(const std::string &fileName)
     wdFileNameCache_.erase(iter);
 
     watcherInfoCache_.erase(std::remove_if(watcherInfoCache_.begin(), watcherInfoCache_.end(),
-                                [&fileName](const std::shared_ptr<WatcherInfo> &info) {
-                                    return info->fileName == fileName;
-                                }),
-        watcherInfoCache_.end());
+        [&fileName](const std::shared_ptr<WatcherInfo> &info) {
+            return info->fileName == fileName;
+        }), watcherInfoCache_.end());
 
     return true;
 }
