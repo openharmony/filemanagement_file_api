@@ -73,6 +73,7 @@ ohos_unittest("ani_file_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
   ]
 
   sources = [
@@ -83,15 +84,16 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/class_stream/fs_stream_test.cpp",
     "mod_fs/properties/access_core_test.cpp",
     "mod_fs/properties/close_core_test.cpp",
+    "mod_fs/properties/copy_core_test.cpp",
     "mod_fs/properties/copy_dir_core_test.cpp",
     "mod_fs/properties/create_randomaccessfile_core_test.cpp",
     "mod_fs/properties/create_stream_core_test.cpp",
     "mod_fs/properties/dup_core_test.cpp",
     "mod_fs/properties/fdopen_stream_core_test.cpp",
     "mod_fs/properties/listfile_core_test.cpp",
-    "mod_fs/properties/read_core_test.cpp",
     "mod_fs/properties/lstat_core_test.cpp",
     "mod_fs/properties/open_core_test.cpp",
+    "mod_fs/properties/read_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
     "mod_fs/properties/rmdir_core_test.cpp",
     "mod_fs/properties/truncate_core_test.cpp",
