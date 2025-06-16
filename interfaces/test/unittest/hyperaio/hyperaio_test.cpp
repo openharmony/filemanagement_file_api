@@ -343,7 +343,7 @@ namespace OHOS::HyperAio {
             readInfos[i].fd = 0;
             readInfos[i].len = len;
             readInfos[i].offset = 0;
-            readInfos[i].buf = nullptr; 
+            readInfos[i].buf = nullptr;
             readInfos[i].userData = userData + i;
         }
         ReadReqs readReqs = {batchSize, readInfos.get()};
@@ -373,7 +373,7 @@ namespace OHOS::HyperAio {
             readInfos[i].fd = 0;
             readInfos[i].len = len;
             readInfos[i].offset = 0;
-            readInfos[i].buf = nullptr; 
+            readInfos[i].buf = nullptr;
             readInfos[i].userData = userData + i;
         }
         ReadReqs readReqs = {Threshold, readInfos.get()};
@@ -500,6 +500,23 @@ namespace OHOS::HyperAio {
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartCancelReqs_0004";
+    }
+
+    /**
+     * @tc.name: HyperAio_DestoryCtx_0000
+     * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_DestoryCtx_0000, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_DestoryCtx_0000";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_DestoryCtx_0000";
     }
 #endif
 }
