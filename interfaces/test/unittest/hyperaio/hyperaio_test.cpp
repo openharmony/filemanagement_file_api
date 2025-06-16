@@ -35,6 +35,7 @@ namespace OHOS::HyperAio {
     const uint64_t userData = 12345;
     const uint32_t len = 1024;
     const uint32_t batchSize = 300;
+    const uint32_t Threshold = 600;
     HyperAio::ProcessIoResultCallBack callBack = [](std::unique_ptr<IoResponse> response) {
         GTEST_LOG_(INFO) << "HyperAioTest callBack";
     };
@@ -228,6 +229,36 @@ namespace OHOS::HyperAio {
     }
 
     /**
+     * @tc.name: HyperAio_StartOpenReqs_0004
+     * @tc.desc: Test function of StartOpenReqs() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0004, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartOpenReqs_0004";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        auto openInfos = std::make_unique<OpenInfo[]>(Threshold);
+        for (int i = 0; i < Threshold; ++i) {
+            openInfos[i].dfd = 0;
+            openInfos[i].flags = O_RDWR;
+            openInfos[i].mode = 0;
+            openInfos[i].path = nullptr;
+            openInfos[i].userData = userData + i;
+        }
+        OpenReqs openReqs = {Threshold, openInfos.get()};
+        result = hyperAio_->StartOpenReqs(&openReqs);
+        EXPECT_EQ(result, -EINVAL);
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0004";
+    }
+
+    /**
      * @tc.name: HyperAio_StartReadReqs_0000
      * @tc.desc: Test function of StartReadReqs() interface for SUCCESS.
      * @tc.size: MEDIUM
@@ -294,6 +325,65 @@ namespace OHOS::HyperAio {
     }
 
     /**
+     * @tc.name: HyperAio_StartReadReqs_0003
+     * @tc.desc: Test function of StartReadReqs() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0003, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartReadReqs_0003";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        auto readInfos = std::make_unique<ReadInfo[]>(batchSize);
+        for (int i = 0; i < batchSize; ++i) {
+            readInfos[i].fd = 0;
+            readInfos[i].len = len;
+            readInfos[i].offset = 0;
+            readInfos[i].buf = nullptr; 
+            readInfos[i].userData = userData + i;
+        }
+        ReadReqs readReqs = {batchSize, readInfos.get()};
+        result = hyperAio_->StartReadReqs(&readReqs);
+        EXPECT_EQ(result, 0);
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartReadReqs_0003";
+    }
+
+    /**
+     * @tc.name: HyperAio_StartReadReqs_0004
+     * @tc.desc: Test function of StartReadReqs() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0004, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartReadReqs_0004";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        auto readInfos = std::make_unique<ReadInfo[]>(Threshold);
+        for (int i = 0; i < Threshold; ++i) {
+            readInfos[i].fd = 0;
+            readInfos[i].len = len;
+            readInfos[i].offset = 0;
+            readInfos[i].buf = nullptr; 
+            readInfos[i].userData = userData + i;
+        }
+        ReadReqs readReqs = {Threshold, readInfos.get()};
+        result = hyperAio_->StartReadReqs(&readReqs);
+        EXPECT_EQ(result, -EINVAL);
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartReadReqs_0004";
+    }
+    /**
      * @tc.name: HyperAio_StartCancelReqs_0000
      * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
      * @tc.size: MEDIUM
@@ -356,6 +446,60 @@ namespace OHOS::HyperAio {
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartCancelReqs_0002";
+    }
+
+    /**
+     * @tc.name: HyperAio_StartCancelReqs_0003
+     * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0003, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartCancelReqs_0003";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        auto cancelInfos = std::make_unique<CancelInfo[]>(batchSize);
+        for (int i = 0; i < batchSize; ++i) {
+            cancelInfos[i].userData = userData + i;
+            cancelInfos[i].targetUserData = userData + i;
+        }
+        CancelReqs cancelReqs = {batchSize, cancelInfos.get()};
+        result = hyperAio_->StartCancelReqs(&cancelReqs);
+        EXPECT_EQ(result, 0);
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartCancelReqs_0003";
+    }
+
+    /**
+     * @tc.name: HyperAio_StartCancelReqs_0004
+     * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0004, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartCancelReqs_0004";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        auto cancelInfos = std::make_unique<CancelInfo[]>(Threshold);
+        for (int i = 0; i < Threshold; ++i) {
+            cancelInfos[i].userData = userData + i;
+            cancelInfos[i].targetUserData = userData + i;
+        }
+        CancelReqs cancelReqs = {Threshold, cancelInfos.get()};
+        result = hyperAio_->StartCancelReqs(&cancelReqs);
+        EXPECT_EQ(result, -EINVAL);
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartCancelReqs_0004";
     }
 #endif
 }
