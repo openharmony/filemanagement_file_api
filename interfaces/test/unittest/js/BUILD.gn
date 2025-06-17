@@ -37,6 +37,8 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_test.cpp",
     "mod_fs/class_stat/fs_stat_test.cpp",
     "mod_fs/class_stream/fs_stream_test.cpp",
+    "mod_fs/class_tasksignal/fs_task_signal_test.cpp",
+    "mod_fs/properties/access_core_test.cpp",
     "mod_fs/properties/close_core_test.cpp",
     "mod_fs/properties/copy_core_test.cpp",
     "mod_fs/properties/copy_dir_core_test.cpp",
