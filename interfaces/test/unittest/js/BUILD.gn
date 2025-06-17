@@ -50,6 +50,11 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/open_core_test.cpp",
     "mod_fs/properties/read_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
+    "mod_fs/properties/rmdir_core_test.cpp",
+    "mod_fs/properties/trans_listener_test.cpp",
+    "mod_fs/properties/truncate_core_test.cpp",
+    "mod_fs/properties/utimes_core_test.cpp",
+    "mod_fs/properties/write_core_test.cpp",
   ]
 
   deps = [
@@ -65,6 +70,8 @@ ohos_unittest("ani_file_fs_test") {
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
     "c_utils:utils",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "dfs_service:libdistributedfileutils",
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -101,10 +108,16 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/class_stream/fs_stream_mock_test.cpp",
     "mod_fs/class_stream/mock/c_mock.cpp",
     "mod_fs/properties/create_randomaccessfile_core_mock_test.cpp",
+    "mod_fs/properties/dup_core_mock_test.cpp",
     "mod_fs/properties/lstat_core_mock_test.cpp",
     "mod_fs/properties/mock/system_mock.cpp",
     "mod_fs/properties/mock/uv_fs_mock.cpp",
     "mod_fs/properties/open_core_mock_test.cpp",
+    "mod_fs/properties/read_core_mock_test.cpp",
+    "mod_fs/properties/symlink_core_mock_test.cpp",
+    "mod_fs/properties/trans_listener_mock_test.cpp",
+    "mod_fs/properties/truncate_core_mock_test.cpp",
+    "mod_fs/properties/utimes_core_mock_test.cpp",
   ]
 
   deps = [
