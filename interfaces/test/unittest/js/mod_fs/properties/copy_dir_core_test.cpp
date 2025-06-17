@@ -15,7 +15,6 @@
 
 #include <filesystem>
 #include <fstream>
-
 #include <gtest/gtest.h>
 
 #include "copy_dir_core.h"
@@ -38,15 +37,6 @@ public:
     {
         ofstream file(path);
         file << content;
-    }
-
-    void CreateTestDirStructure()
-    {
-        filesystem::create_directories(srcPath / "subdir1");
-        filesystem::create_directories(srcPath / "subdir2");
-        CreateTestFile(srcPath / "file1.txt");
-        CreateTestFile(srcPath / "subdir1" / "file2.txt");
-        CreateTestFile(srcPath / "subdir2" / "file3.txt");
     }
 };
 
