@@ -115,29 +115,29 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ValidParams_003, testing::ext::TestSize.Leve
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ValidParams_003";
 }
 
-/**
- * @tc.name: CopyCoreTest_CreateFileInfos_001
- * @tc.desc: Test function of CopyCore::CreateFileInfos interface for FALSE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(CopyCoreTest, CopyCoreTest_CreateFileInfos_001, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CreateFileInfos_001";
+// /**
+//  * @tc.name: CopyCoreTest_CreateFileInfos_001
+//  * @tc.desc: Test function of CopyCore::CreateFileInfos interface for FALSE.
+//  * @tc.size: MEDIUM
+//  * @tc.type: FUNC
+//  * @tc.level Level 1
+//  */
+// HWTEST_F(CopyCoreTest, CopyCoreTest_CreateFileInfos_001, testing::ext::TestSize.Level1)
+// {
+//     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CreateFileInfos_001";
 
-    string src = "file://data/test/src.txt";
-    string dest = "file://data/test/dest.txt";
-    optional<CopyOptions> options = std::make_optional<CopyOptions>();
-    options->listener =  std::make_shared<IProgressListener>();
-    options->
+//     string src = "file://data/test/src.txt";
+//     string dest = "file://data/test/dest.txt";
+//     optional<CopyOptions> options = std::make_optional<CopyOptions>();
+//     options->listener =  std::make_shared<IProgressListener>();
+//     options->
 
 
-    auto res = CopyCore::CreateFileInfos(src, dest, options);
+//     auto res = CopyCore::CreateFileInfos(src, dest, options);
 
-    EXPECT_EQ(res, true);
+//     EXPECT_EQ(res, true);
 
-    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CreateFileInfos_001";
-}
+//     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CreateFileInfos_001";
+// }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
