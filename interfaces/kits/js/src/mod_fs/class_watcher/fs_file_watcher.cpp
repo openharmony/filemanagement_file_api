@@ -50,6 +50,11 @@ bool FsFileWatcher::InitNotify()
 
 int32_t FsFileWatcher::StartNotify(shared_ptr<WatcherInfo> info)
 {
+    if (!info) {
+        HILOGE("Invalid param: info");
+        return EINVAL;
+    }
+
     if (notifyFd_ < 0) {
         HILOGE("Failed to start notify notifyFd_:%{public}d", notifyFd_);
         return EIO;
@@ -135,6 +140,11 @@ int FsFileWatcher::CloseNotifyFdLocked()
 
 int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
 {
+    if (!info) {
+        HILOGE("Invalid param: info");
+        return EINVAL;
+    }
+
     if (notifyFd_ < 0) {
         HILOGE("Failed to stop notify notifyFd_:%{public}d", notifyFd_);
         return EIO;
@@ -271,16 +281,29 @@ void FsFileWatcher::GetNotifyEvent()
 
 bool FsFileWatcher::AddWatcherInfo(shared_ptr<WatcherInfo> info)
 {
+    if (!info) {
+        HILOGE("Invalid param: info");
+        return false;
+    }
     return dataCache_.AddWatcherInfo(info);
 }
 
 uint32_t FsFileWatcher::RemoveWatcherInfo(shared_ptr<WatcherInfo> info)
 {
+    if (!info) {
+        HILOGE("Invalid param: info");
+        return EINVAL;
+    }
     return dataCache_.RemoveWatcherInfo(info);
 }
 
 void FsFileWatcher::NotifyEvent(const struct inotify_event *event)
 {
+    if (!event) {
+        HILOGE("Invalid inotify event");
+        return;
+    }
+
     auto [matched, fileName, watcherInfos] = dataCache_.FindWatcherInfos(event->wd, event->mask);
     if (!matched) {
         HILOGE("Cannot find matched watcherInfos");
