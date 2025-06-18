@@ -146,10 +146,10 @@ static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrF
 {
     ani_boolean isFd = false;
 
-    auto intClassDesc = BoxedTypes::Int::classDesc.c_str();
-    ani_class intClass;
-    env->FindClass(intClassDesc, &intClass);
-    env->Object_InstanceOf(pathOrFd, intClass, &isFd);
+    auto classDesc = BoxedTypes::Double::classDesc.c_str();
+    ani_class cls;
+    env->FindClass(classDesc, &cls);
+    env->Object_InstanceOf(pathOrFd, cls, &isFd);
     if (isFd) {
         ani_int fd;
         if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "toInt", nullptr, &fd)) {
@@ -217,6 +217,52 @@ std::tuple<bool, ArrayBuffer> TypeConverter::ToArrayBuffer(ani_env *env, ani_arr
         return { false, ArrayBuffer { nullptr, 0 } };
     }
     return { true, ArrayBuffer { std::move(buf), length } };
+}
+
+std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, void *buffer, size_t length)
+{
+    if (env == nullptr) {
+        return { false, nullptr };
+    }
+
+    static const char *className = "Lescompat/ArrayBuffer;";
+    ani_status ret;
+    ani_class cls;
+    if ((ret = env->FindClass(className, &cls)) != ANI_OK) {
+        HILOGE("Not found %{private}s, err: %{private}d", className, ret);
+        return { false, nullptr };
+    }
+
+    ani_method ctor;
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
+        HILOGE("Not found ctor, err: %{private}d", ret);
+        return { false, nullptr };
+    }
+
+    ani_object obj;
+    if ((ret = env->Object_New(cls, ctor, &obj, length)) != ANI_OK) {
+        HILOGE("New Uint8Array err: %{private}d", ret);
+        return { false, nullptr };
+    }
+
+    if (!buffer || !length) {
+        return { true, static_cast<ani_arraybuffer>(obj) };
+    }
+
+    void *buf = nullptr;
+    ani_size len = 0;
+
+    if ((ANI_OK != env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(obj), &buf, &len)) && (!buf)) {
+        return { false, nullptr };
+    }
+
+    int res = memcpy_s(buf, length, buffer, length);
+    if (res != 0) {
+        return { false, nullptr };
+    }
+    len = length;
+
+    return { true, static_cast<ani_arraybuffer>(obj) };
 }
 
 std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(

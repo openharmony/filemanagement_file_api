@@ -662,6 +662,8 @@ ohos_shared_library("ani_file_fs") {
   include_dirs = [
     "include/ipc",
     "src/mod_fs/ani",
+    "src/mod_fs/class_atomicfile",
+    "src/mod_fs/class_atomicfile/ani",
     "src/mod_fs/class_file",
     "src/mod_fs/class_file/ani",
     "src/mod_fs/class_randomaccessfile",
@@ -686,6 +688,8 @@ ohos_shared_library("ani_file_fs") {
     "src/common/ani_helper/type_converter.cpp",
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/ani/bind_function_class.cpp",
+    "src/mod_fs/class_atomicfile/ani/atomicfile_ani.cpp",
+    "src/mod_fs/class_atomicfile/fs_atomicfile.cpp",
     "src/mod_fs/class_file/ani/file_ani.cpp",
     "src/mod_fs/class_file/ani/file_wrapper.cpp",
     "src/mod_fs/class_file/file_instantiator.cpp",
@@ -847,6 +851,8 @@ ohos_shared_library("ani_file_hash") {
   include_dirs = [
     "src/mod_hash",
     "src/mod_hash/ani",
+    "src/mod_hash/class_hashstream",
+    "src/mod_hash/class_hashstream/ani",
   ]
   sources = [
     "src/common/ani_helper/ani_signature.cpp",
@@ -857,6 +863,8 @@ ohos_shared_library("ani_file_hash") {
     "src/mod_fs/fs_utils.cpp",
     "src/mod_hash/ani/bind_function_class.cpp",
     "src/mod_hash/ani/hash_ani.cpp",
+    "src/mod_hash/class_hashstream/ani/hashstream_ani.cpp",
+    "src/mod_hash/class_hashstream/hs_hashstream.cpp",
     "src/mod_hash/hash_core.cpp",
   ]
 

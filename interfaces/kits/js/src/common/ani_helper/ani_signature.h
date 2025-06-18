@@ -212,6 +212,16 @@ struct StatvfsImpl : public BaseType {
 
 } // namespace Impl
 
+namespace HASH {
+
+struct HashStreamImpl : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+};
+
+} // namespace HASH
+
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature
 
 #endif // INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ANI_SIGNATURE_H

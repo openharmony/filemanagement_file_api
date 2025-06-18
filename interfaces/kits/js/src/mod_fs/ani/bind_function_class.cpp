@@ -19,6 +19,7 @@
 
 #include "access_ani.h"
 #include "ani_signature.h"
+#include "atomicfile_ani.h"
 #include "bind_function.h"
 #include "close_ani.h"
 #include "connectdfs_ani.h"
@@ -163,6 +164,24 @@ static ani_status BindTaskSignalClassMethods(ani_env *env)
     return BindClass(env, classDesc, methods);
 }
 
+static ani_status BindAtomicFileMethods(ani_env *env)
+{
+    static const char *className = "L@ohos/file/fs/fileIo/AtomicFile;";
+
+    std::array methods = {
+        ani_native_function { "getPath", nullptr, reinterpret_cast<void *>(AtomicFileAni::GetPath) },
+        ani_native_function { "getBaseFile", nullptr, reinterpret_cast<void *>(AtomicFileAni::GetBaseFile) },
+        ani_native_function { "readFully", nullptr, reinterpret_cast<void *>(AtomicFileAni::ReadFully) },
+        ani_native_function { "nativeStartWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::StartWrite) },
+        ani_native_function { "nativeFinishWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::FinishWrite) },
+        ani_native_function { "nativeFailWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::FailWrite) },
+        ani_native_function { "delete", nullptr, reinterpret_cast<void *>(AtomicFileAni::Delete) },
+        ani_native_function { "<ctor>", "Lstd/core/String;:V", reinterpret_cast<void *>(AtomicFileAni::Constructor) },
+        ani_native_function { "openRead", nullptr, reinterpret_cast<void *>(AtomicFileAni::OpenRead) },
+    };
+
+    return BindClass(env, className, methods);
+}
 const static string mkdirCtorSig0 = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 const static string mkdirCtorSig1 =
     Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::booleanType });
@@ -215,25 +234,9 @@ static ani_status BindStaticMethods(ani_env *env)
     return BindClass(env, classDesc, methods);
 }
 
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+static ani_status DoBindMethods(ani_env *env)
 {
-    if (vm == nullptr) {
-        HILOGE("Invalid parameter vm");
-        return ANI_INVALID_ARGS;
-    }
-
-    if (result == nullptr) {
-        HILOGE("Invalid parameter result");
-        return ANI_INVALID_ARGS;
-    }
-
-    ani_env *env;
-    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
-    if (status != ANI_OK) {
-        HILOGE("Invalid ani version!");
-        return ANI_INVALID_VERSION;
-    }
-
+    ani_status status;
     if ((status = BindStaticMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native static methods for BindStaticMethods!");
         return status;
@@ -273,6 +276,38 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         HILOGE("Cannot bind native methods for Watcher Class");
         return status;
     };
+
+    if ((status = BindAtomicFileMethods(env)) != ANI_OK) {
+        HILOGE("Cannot bind native methods for AtomicFile Class!");
+        return status;
+    };
+
+    return ANI_OK;
+}
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    if (vm == nullptr) {
+        HILOGE("Invalid parameter vm");
+        return ANI_INVALID_ARGS;
+    }
+
+    if (result == nullptr) {
+        HILOGE("Invalid parameter result");
+        return ANI_INVALID_ARGS;
+    }
+
+    ani_env *env;
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK) {
+        HILOGE("Invalid ani version!");
+        return ANI_INVALID_VERSION;
+    }
+
+    status = DoBindMethods(env);
+    if (status != ANI_OK) {
+        return status;
+    }
 
     *result = ANI_VERSION_1;
     return ANI_OK;

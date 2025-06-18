@@ -133,5 +133,9 @@ const string Impl::SecurityLabelImpl::classDesc = Impl::SecurityLabelImpl::class
 // Impl::StatvfsImpl
 const Type Impl::StatvfsImpl::classType = Builder::BuildClass("@ohos.file.statvfs.StatvfsImpl");
 const string Impl::StatvfsImpl::classDesc = Impl::StatvfsImpl::classType.Descriptor();
+// HASH::HashStreamImpl
+const Type HASH::HashStreamImpl::classType = Builder::BuildClass("@ohos.file.hash.HashStreamImpl");
+const string HASH::HashStreamImpl::classDesc = HASH::HashStreamImpl::classType.Descriptor();
+const string HASH::HashStreamImpl::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature
