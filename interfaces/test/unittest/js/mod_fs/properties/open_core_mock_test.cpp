@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include "mock/uv_fs_mock.h"
-#include "open_core.h"
-
 #include <filesystem>
 #include <fstream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include "mock/uv_fs_mock.h"
+#include "open_core.h"
+#include "unistd_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -72,7 +73,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_001, testing::ext::TestSize.L
 
     string path = "/test/open_test.txt";
     int32_t mode = 0;
-    
+
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(0));
     auto res = OpenCore::DoOpen(path, mode);
     EXPECT_EQ(res.IsSuccess(), true);
@@ -94,8 +95,12 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_002, testing::ext::TestSize.L
     string path = "file://test/open_test.txt";
     int32_t mode = 0;
 
+    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).WillRepeatedly(testing::Return(0));
     auto res = OpenCore::DoOpen(path, mode);
+    testing::Mock::VerifyAndClearExpectations(&unistdMock);
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "OpenCoreMockTest-end OpenCoreMockTest_DoOpen_002";
@@ -115,8 +120,12 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_003, testing::ext::TestSize.L
     string path = "file://test/open_test.txt";
     int32_t mode = 0;
 
+    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).WillRepeatedly(testing::Return(0));
     auto res = OpenCore::DoOpen(path, mode);
+    testing::Mock::VerifyAndClearExpectations(&unistdMock);
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "OpenCoreMockTest-end OpenCoreMockTest_DoOpen_003";
