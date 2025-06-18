@@ -260,7 +260,7 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode, de
         if (mode == DIRMODE_DIRECTORY_REPLACE) {
             int removeRes = RmDirectory(destStr);
             if (removeRes) {
-                HILOGE("Failed to remove dest directory in DIRMODE_DIRECTORY_REPLACE");
+                HILOGE("Failed to remove dest directory in DIRMODE_DIRECTORY_REPLACE, ret %{public}d", removeRes);
                 return removeRes;
             }
         }
@@ -277,7 +277,7 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode, de
         }
         int removeRes = RmDirectory(src);
         if (removeRes) {
-            HILOGE("Failed to remove src directory");
+            HILOGE("Failed to remove src directory, ret %{public}d", removeRes);
             return removeRes;
         }
     }

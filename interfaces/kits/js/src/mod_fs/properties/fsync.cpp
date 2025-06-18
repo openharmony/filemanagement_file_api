@@ -51,7 +51,7 @@ napi_value Fsync::Sync(napi_env env, napi_callback_info info)
     }
     int ret = uv_fs_fsync(nullptr, fsync_req.get(), fd, nullptr);
     if (ret < 0) {
-        HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
+        HILOGE("Failed to transfer data associated with file descriptor: %{public}d, ret:%{public}d", fd, ret);
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -83,7 +83,7 @@ napi_value Fsync::Async(napi_env env, napi_callback_info info)
         }
         int ret = uv_fs_fsync(nullptr, fsync_req.get(), fd, nullptr);
         if (ret < 0) {
-            HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
+            HILOGE("Failed to transfer data associated with file descriptor: %{public}d, ret %{public}d", fd, ret);
             return NError(ret);
         } else {
             return NError(ERRNO_NOERR);

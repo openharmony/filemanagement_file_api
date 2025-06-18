@@ -143,7 +143,7 @@ static int RenameFile(const string &src, const string &dest)
         return CopyAndDeleteFile(src, dest);
     }
     if (ret < 0) {
-        HILOGE("Failed to move file using rename syscall.");
+        HILOGE("Failed to move file using rename syscall, ret:%{public}d", ret);
         return ret;
     }
     return ERRNO_NOERR;
@@ -160,7 +160,7 @@ static int MoveFile(const string &src, const string &dest, int mode)
             return EEXIST;
         }
         if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
-            HILOGE("Failed to access destPath with MODE_THROW_ERR.");
+            HILOGE("Failed to access destPath with MODE_THROW_ERR, ret:%{public}d", ret);
             return ret;
         }
     } else {
@@ -207,6 +207,7 @@ napi_value Move::Async(napi_env env, napi_callback_info info)
     auto cbExec = [srcPath = string(src.get()), destPath = string(dest.get()), mode = mode]() -> NError {
         int ret = MoveFile(srcPath, destPath, mode);
         if (ret) {
+            HILOGE("Failed movefile ret %{public}d", ret);
             return NError(ret);
         }
         return NError(ERRNO_NOERR);

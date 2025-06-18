@@ -60,7 +60,7 @@ napi_value Rename::Sync(napi_env env, napi_callback_info info)
     }
     int ret = uv_fs_rename(nullptr, rename_req.get(), src.get(), dest.get(), nullptr);
     if (ret < 0) {
-        HILOGE("Failed to rename file with path");
+        HILOGE("Failed to rename file with path ret %{public}d", ret);
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -100,7 +100,7 @@ napi_value Rename::Async(napi_env env, napi_callback_info info)
         }
         int ret = uv_fs_rename(nullptr, rename_req.get(), opath.c_str(), npath.c_str(), nullptr);
         if (ret < 0) {
-            HILOGE("Failed to rename file with path");
+            HILOGE("Failed to rename file with path ret %{public}d", ret);
             return NError(ret);
         }
         return NError(ERRNO_NOERR);
