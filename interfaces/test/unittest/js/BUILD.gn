@@ -20,8 +20,6 @@ ohos_unittest("ani_file_fs_test") {
 
   module_out_path = "file_api/file_api"
 
-  resource_config_file = "../resource/ohos_test.xml"
-
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
@@ -35,12 +33,15 @@ ohos_unittest("ani_file_fs_test") {
 
   sources = [
     "mod_fs/class_file/fs_file_test.cpp",
+    "mod_fs/class_randomaccessfile/fs_randomaccessfile_test.cpp",
+    "mod_fs/class_stream/fs_stream_test.cpp",
     "mod_fs/properties/close_core_test.cpp",
+    "mod_fs/properties/create_randomaccessfile_core_test.cpp",
     "mod_fs/properties/create_stream_core_test.cpp",
     "mod_fs/properties/fdopen_stream_core_test.cpp",
     "mod_fs/properties/listfile_core_test.cpp",
+    "mod_fs/properties/open_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
-    "mod_fs/class_stream/fs_stream_test.cpp",
   ]
 
   deps = [
@@ -73,8 +74,6 @@ ohos_unittest("ani_file_fs_mock_test") {
 
   module_out_path = "file_api/file_api"
 
-  resource_config_file = "../resource/ohos_test.xml"
-
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
@@ -88,6 +87,8 @@ ohos_unittest("ani_file_fs_mock_test") {
 
   sources = [
     "mod_fs/class_file/fs_file_mock_test.cpp",
+    "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
+    "mod_fs/properties/create_randomaccessfile_core_mock_test.cpp",
     "mod_fs/properties/mock/system_mock.cpp",
     "mod_fs/properties/mock/uv_fs_mock.cpp",
     "mod_fs/properties/open_core_mock_test.cpp",

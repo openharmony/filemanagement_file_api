@@ -15,6 +15,16 @@
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import stream from '@ohos.util.stream';
 
+const UNKNOWN_ERR: number = 13900042
+const UNKNOWN_MSG: string = "Unknown error"
+
+function createBusinessError(code: number, msg: string): BusinessError {
+  let err = new BusinessError();
+  err.code = code;
+  err.message = msg;
+  return err;
+}
+
 namespace fileIo {
   export namespace OpenMode {
     export const READ_ONLY = 0o0;
@@ -37,8 +47,8 @@ function access(path: string, mode?: AccessModeType): Promise<boolean> {
     promise.then((ret: NullishType): void => {
       let result = ret as boolean;
       resolve(result);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -52,8 +62,8 @@ function access(path: string, callback: AsyncCallback<boolean>): void {
     e.code = 0;
     let result = ret as boolean;
     callback(e, result);
-  }).catch((e: BusinessError): void => {
-    callback(e, false);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, false);
   });
 }
 
@@ -65,8 +75,8 @@ function access(path: string, mode: AccessModeType, flag: AccessFlagType): Promi
     promise.then((ret: NullishType): void => {
       let result = ret as boolean;
       resolve(result);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   })
 }
@@ -84,8 +94,8 @@ function close(file: number | File): Promise<void> {
     let promise = taskpool.execute((file: number | File): undefined => FileIoImpl.closeSync(file), file);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -96,8 +106,8 @@ function close(file: number | File, callback: AsyncCallback<void>): void {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -111,8 +121,8 @@ function connectDfs(networkId: string, listeners: DfsListeners): Promise<void> {
       FileIoImpl.connectDfs(networkId, listeners), networkId, listeners);
     promise.then<void>((): void => {
       resolve(undefined);
-    }).catch((e: BusinessError<void>): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError<void>);
     });
   });
 }
@@ -122,8 +132,8 @@ function disconnectDfs(networkId: string): Promise<void> {
     let promise = taskpool.execute((networkId: string): void => FileIoImpl.disConnectDfs(networkId), networkId);
     promise.then<void>((): void => {
       resolve(undefined);
-    }).catch((e: BusinessError<void>): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError<void>);
     });
   });
 }
@@ -140,8 +150,8 @@ function getxattr(path: string, key: string): Promise<string> {
     promise.then((ret: NullishType): void => {
       let result = ret as string;
       resolve(result);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -161,8 +171,8 @@ function copyDir(src: string, dest: string, mode?: number): Promise<void> {
       FileIoImpl.copyDirSync(src, dest, mode), src, dest, mode);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError<Array<ConflictFiles>>);
     });
   });
 }
@@ -175,8 +185,8 @@ function copyDir(src: string, dest: string, callback: AsyncCallback<void, Array<
     e.code = 0;
     e.data = new Array<ConflictFiles>(0);
     callback(e, undefined);
-  }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError<Array<ConflictFiles>>, undefined);
   });
 }
 
@@ -188,8 +198,8 @@ function copyDir(src: string, dest: string, mode: number, callback: AsyncCallbac
     e.code = 0;
     e.data = new Array<ConflictFiles>(0);
     callback(e, undefined);
-  }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError<Array<ConflictFiles>>, undefined);
   });
 }
 
@@ -227,7 +237,7 @@ function fdatasync(fd: number): Promise<void> {
     let promise = taskpool.execute((fd: number): undefined => FileIoImpl.fdatasyncSync(fd), fd);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
+    }).catch((e: Error): void => {
       reject(e as BusinessError<void>);
     });
   });
@@ -239,8 +249,8 @@ function fdatasync(fd: number, callback: AsyncCallback<void>): void {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -263,7 +273,7 @@ function mkdir(path: string): Promise<void> {
     let promise = taskpool.execute((path: string): undefined => mkdirSync1(path), path);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
+    }).catch((e: Error): void => {
       reject(e as BusinessError<void>);
     });
   });
@@ -275,8 +285,8 @@ function mkdir(path: string, callback: AsyncCallback<void>): void {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -299,8 +309,8 @@ function mkdir(path: string, recursion: boolean, callback: AsyncCallback<void>):
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -316,8 +326,8 @@ function moveDir(src: string, dest: string, mode?: number): Promise<void> {
     }, src, dest, mode);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError<Array<ConflictFiles>>);
     });
   })
 }
@@ -331,8 +341,8 @@ function moveDir(src: string, dest: string, callback: AsyncCallback<void, Array<
     e.code = 0;
     e.data = new Array<ConflictFiles>(0);
     callback(e, undefined);
-  }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError<Array<ConflictFiles>>, undefined);
   });
 }
 
@@ -345,8 +355,8 @@ function moveDir(src: string, dest: string, mode: number, callback: AsyncCallbac
     e.code = 0;
     e.data = new Array<ConflictFiles>(0);
     callback(e, undefined);
-  }).catch((e: BusinessError<Array<ConflictFiles>>): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError<Array<ConflictFiles>>, undefined);
   });
 }
 
@@ -383,8 +393,8 @@ function mkdtemp(prefix: string): Promise<string> {
     promise.then((ret: NullishType): void => {
       let result = ret as string;
       resolve(result);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -398,8 +408,8 @@ function mkdtemp(prefix: string, callback: AsyncCallback<string>): void {
     e.code = 0;
     let result = ret as string;
     callback(e, result);
-  }).catch((e: BusinessError): void => {
-    callback(e, "");
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, "");
   });
 }
 
@@ -414,8 +424,8 @@ function moveFile(src: string, dest: string, mode?: number): Promise<void> {
     }, src, dest, mode);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -428,8 +438,8 @@ function moveFile(src: string, dest: string, mode: number, callback: AsyncCallba
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -441,8 +451,8 @@ function moveFile(src: string, dest: string, callback: AsyncCallback<void>): voi
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -458,8 +468,8 @@ function open(path: String, mode?: number): Promise<File> {
     promise.then((ret: NullishType): void => {
       let file = ret as File;
       resolve(file);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -473,9 +483,9 @@ function open(path: String, mode: number, callback: AsyncCallback<File, void>): 
     e.code = 0;
     let file = ret as File;
     callback(e, file);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: Error): void => {
     let f: File = new FileInner(0);
-    callback(e, f);
+    callback(e as BusinessError, f);
   });
 }
 
@@ -488,9 +498,9 @@ function open(path: String, callback: AsyncCallback<File, void>): void {
     e.code = 0;
     let file = ret as File;
     callback(e, file);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: Error): void => {
     let f: File = new FileInner(0);
-    callback(e, f);
+    callback(e as BusinessError, f);
   });
 }
 
@@ -506,8 +516,8 @@ function write(fd: number, buffer: string | ArrayBuffer, options?: WriteOptions)
     promise.then((ret: NullishType): void => {
       let result = ret as number
       resolve(result);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -522,8 +532,8 @@ function write(fd: number, buffer: string | ArrayBuffer, options: WriteOptions,
     e.code = 0;
     let result = ret as number;
     callback(e, result);
-  }).catch((e: BusinessError): void => {
-    callback(e, 0);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, 0);
   });
 }
 
@@ -536,8 +546,8 @@ function write(fd: number, buffer: string | ArrayBuffer, callback: AsyncCallback
     e.code = 0;
     let result = ret as number;
     callback(e, result);
-  }).catch((e: BusinessError): void => {
-    callback(e, 0);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, 0);
   });
 }
 
@@ -553,8 +563,8 @@ function read(fd: number, buffer: ArrayBuffer, options?: ReadOptions): Promise<n
     promise.then((ret: NullishType) => {
       let result = ret as number;
       resolve(result);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -568,8 +578,8 @@ function read(fd: number, buffer: ArrayBuffer, callback: AsyncCallback<number, v
     e.code = 0;
     let result = ret as number;
     callback(e, result);
-  }).catch((e: BusinessError): void => {
-    callback(e, 0);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, 0);
   });
 }
 
@@ -582,8 +592,8 @@ function read(fd: number, buffer: ArrayBuffer, options: ReadOptions, callback: A
     e.code = 0;
     let result = ret as number;
     callback(e, result);
-  }).catch((e: BusinessError): void => {
-    callback(e, 0);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, 0);
   });
 }
 
@@ -600,8 +610,8 @@ function readLines(filePath: string, options?: Options): Promise<ReaderIterator>
     promise.then((ret: NullishType): void => {
       let it = ret as ReaderIterator;
       resolve(it);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -615,9 +625,9 @@ function readLines(filePath: string, callback: AsyncCallback<ReaderIterator>): v
     e.code = 0;
     let it = ret as ReaderIterator;
     callback(e, it);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: Error): void => {
     let r: ReaderIterator = new ReaderIteratorInner(0);
-    callback(e, r);
+    callback(e as BusinessError, r);
   });
 }
 
@@ -630,9 +640,9 @@ function readLines(filePath: string, options: Options, callback: AsyncCallback<R
     e.code = 0;
     let it = ret as ReaderIterator;
     callback(e, it);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: Error): void => {
     let r: ReaderIterator = new ReaderIteratorInner(0);
-    callback(e, r);
+    callback(e as BusinessError, r);
   });
 }
 
@@ -646,8 +656,8 @@ function rmdir(path: string): Promise<void> {
     let promise = taskpool.execute((path: string): void => FileIoImpl.rmdirSync(path), path);
     promise.then((ret: NullishType) => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -658,8 +668,8 @@ function rmdir(path: string, callback: AsyncCallback<void>): void {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -674,8 +684,8 @@ function truncate(file: string | number, len?: number): Promise<void> {
     }, file, len);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   })
 }
@@ -688,8 +698,8 @@ function truncate(file: string | number, callback: AsyncCallback<void>): void {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -701,8 +711,8 @@ function truncate(file: string | number, len: number, callback: AsyncCallback<vo
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -716,8 +726,8 @@ function unlink(path: string): Promise<void> {
     let promise = taskpool.execute((path: string): undefined => unlinkSync(path), path);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -728,8 +738,8 @@ function unlink(path: string, callback: AsyncCallback<void>): void {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -741,9 +751,9 @@ function readText(filePath: string, options?: ReadTextOptions): Promise<string> 
     promise.then((ret: NullishType): void => {
       let r = ret as string;
       resolve(r);
-    }).catch((e: BusinessError): void => {
-      reject(e);
-    });   
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
+    });
   });
 }
 
@@ -756,8 +766,8 @@ function readText(filePath: string, callback: AsyncCallback<string>): void {
     e.code = 0;
     let r = ret as string;
     callback(e, r);
-  }).catch((e: BusinessError): void => {
-    callback(e, "");
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, "");
   });
 }
 
@@ -770,8 +780,8 @@ function readText(filePath: string, options: ReadTextOptions, callback: AsyncCal
     e.code = 0;
     let r = ret as string;
     callback(e, r);
-  }).catch((e: BusinessError): void => {
-    callback(e, "");
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, "");
   });
 }
 
@@ -787,8 +797,8 @@ function listFile(path: string, options?: ListFileOptions): Promise<string[]> {
     promise.then((ret: NullishType): void => {
       let r = ret as string[];
       resolve(r);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -802,8 +812,8 @@ function listFile(path: string, callback: AsyncCallback<string[]>): void {
     e.code = 0;
     let r = ret as string[];
     callback(e, r);
-  }).catch((e: BusinessError): void => {
-    callback(e, []);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, []);
   });
 }
 
@@ -816,8 +826,8 @@ function listFile(path: string, options: ListFileOptions, callback: AsyncCallbac
     e.code = 0;
     let r = ret as string[];
     callback(e, r);
-  }).catch((e: BusinessError): void => {
-    callback(e, []);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, []);
   });
 }
 
@@ -841,8 +851,8 @@ function stat(file: string | number): Promise<Stat> {
     promise.then((ret: NullishType): void => {
       let r = ret as Stat;
       resolve(r);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -856,8 +866,8 @@ function stat(file: string | number, callback: AsyncCallback<Stat, void>): void 
     e.code = 0;
     let r = ret as Stat;
     callback(e, r);
-  }).catch((e: BusinessError): void => {
-    callback(e, new StatInner(0));
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, new StatInner(0));
   });
 }
 
@@ -872,8 +882,8 @@ function fsync(fd: number): Promise<void> {
     }, fd);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -886,8 +896,8 @@ function fsync(fd: number, callback: AsyncCallback<void>): void {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -903,8 +913,8 @@ function symlink(target: string, srcPath: string): Promise<void> {
     }, target, srcPath);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -919,8 +929,8 @@ function rename(oldPath: string, newPath: string): Promise<void> {
     }, oldPath, newPath);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -933,8 +943,8 @@ function rename(oldPath: string, newPath: string, callback: AsyncCallback<void>)
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -954,8 +964,8 @@ function createRandomAccessFile(file: string | File, mode?: number,
     promise.then((ret: NullishType): void => {
       let raffile = ret as RandomAccessFileInner;
       resolve(raffile);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -968,8 +978,8 @@ function fdopenStream(fd: number, mode: string): Promise<Stream> {
     promise.then((ret: NullishType): void => {
       let stream = ret as Stream;
       resolve(stream);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -984,7 +994,7 @@ function setxattr(path: string, key: string, value: string): Promise<void> {
       FileIoImpl.setxattrSync(path, key, value), path, key, value);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
+    }).catch((e: Error): void => {
       reject(e as BusinessError<void>);
     });
   });
@@ -999,9 +1009,9 @@ function createRandomAccessFile(file: string | File, callback: AsyncCallback<Ran
     e.code = 0;
     let raffile = ret as RandomAccessFile;
     callback(e, raffile);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: Error): void => {
     let f: RandomAccessFile = new RandomAccessFileInner(0);
-    callback(e, f);
+    callback(e as BusinessError, f);
   });
 }
 
@@ -1015,9 +1025,9 @@ function createRandomAccessFile(file: string | File, mode: number,
     e.code = 0;
     let raffile = ret as RandomAccessFile;
     callback(e, raffile);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: Error): void => {
     let f: RandomAccessFile = new RandomAccessFileInner(0);
-    callback(e, f);
+    callback(e as BusinessError, f);
   });
 }
 
@@ -1030,9 +1040,9 @@ function fdopenStream(fd: number, mode: string, callback: AsyncCallback<Stream>)
     e.code = 0;
     let stream = ret as Stream;
     callback(e, stream);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: Error): void => {
     let r: Stream = new StreamInner(0);
-    callback(e, r);
+    callback(e as BusinessError, r);
   });
 }
 
@@ -1048,8 +1058,8 @@ function createStream(path: string, mode: string): Promise<Stream> {
     promise.then((ret: NullishType): void => {
       let stream = ret as Stream;
       resolve(stream);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -1063,9 +1073,9 @@ function createStream(path: string, mode: string, callback: AsyncCallback<Stream
     e.code = 0;
     let stream = ret as Stream;
     callback(e, stream);
-  }).catch((e: BusinessError): void => {
+  }).catch((e: Error): void => {
     let r: Stream = new StreamInner(0);
-    callback(e, r);
+    callback(e as BusinessError, r);
   });
 }
 
@@ -1093,8 +1103,8 @@ function symlink(target: string, srcPath: string, callback: AsyncCallback<void>)
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -1120,8 +1130,8 @@ function lstat(path: string): Promise<Stat> {
         let r = ret as Stat;
         resolve(r);
       }
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -1141,8 +1151,8 @@ function lstat(path: string, callback: AsyncCallback<Stat, void>): void {
       let r = ret as Stat;
       callback(e, r);
     }
-  }).catch((e: BusinessError): void => {
-    callback(e, new StatInner(0));
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, new StatInner(0));
   });
 }
 function copyFile(src: string | number, dest: string | number, mode?: number): Promise<void> {
@@ -1151,8 +1161,8 @@ function copyFile(src: string | number, dest: string | number, mode?: number): P
       FileIoImpl.copyFileSync(src, dest, mode), src, dest, mode);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -1163,8 +1173,8 @@ function copy(srcUri: string, destUri: string, options?: CopyOptions): Promise<v
       FileIoImpl.copySync(srcUri, destUri, options), srcUri, destUri, options);
     promise.then((ret: NullishType): void => {
       resolve(undefined);
-    }).catch((e: BusinessError): void => {
-      reject(e);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
     });
   });
 }
@@ -1176,8 +1186,8 @@ function copyFile(src: string | number, dest: string | number, mode: number, cal
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -1188,8 +1198,8 @@ function copy(srcUri: string, destUri: string, options: CopyOptions, callback: A
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -1200,8 +1210,8 @@ function copyFile(src: string | number, dest: string | number, callback: AsyncCa
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -1212,8 +1222,8 @@ function copy(srcUri: string, destUri: string, callback: AsyncCallback<void>): v
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
-  }).catch((e: BusinessError): void => {
-    callback(e, undefined);
+  }).catch((e: Error): void => {
+    callback(e as BusinessError, undefined);
   });
 }
 
@@ -1321,7 +1331,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
   }
 
   native setFilePointer0(filePointer: number): void;
-  
+
   native close(): void;
 
   writeSync(buffer: ArrayBuffer | string, options?: WriteOptions): number {
@@ -1340,8 +1350,8 @@ export class RandomAccessFileInner implements RandomAccessFile {
       promise.then((ret: NullishType): void => {
         let result = ret as number
         resolve(result);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -1355,8 +1365,8 @@ export class RandomAccessFileInner implements RandomAccessFile {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
 
@@ -1369,8 +1379,8 @@ export class RandomAccessFileInner implements RandomAccessFile {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
 
@@ -1390,8 +1400,8 @@ export class RandomAccessFileInner implements RandomAccessFile {
       promise.then((ret: NullishType): void => {
         let result = ret as number;
         resolve(result);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -1405,8 +1415,8 @@ export class RandomAccessFileInner implements RandomAccessFile {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
 
@@ -1419,8 +1429,8 @@ export class RandomAccessFileInner implements RandomAccessFile {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
 
@@ -1464,8 +1474,8 @@ export class FileInner implements File {
       }, exclusive);
       promise.then((ret: NullishType): void => {
         resolve(undefined);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -1478,8 +1488,8 @@ export class FileInner implements File {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
-    }).catch((e: BusinessError): void => {
-      callback(e, undefined);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, undefined);
     });
   }
 
@@ -1491,8 +1501,8 @@ export class FileInner implements File {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
-    }).catch((e: BusinessError): void => {
-      callback(e, undefined);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, undefined);
     });
   }
 
@@ -1580,7 +1590,7 @@ export class StatInner implements Stat {
       this.nativeStat = stat;
     }
   }
-  
+
   native isBlockDevice(): boolean;
   native isCharacterDevice(): boolean;
   native isDirectory(): boolean;
@@ -1622,8 +1632,8 @@ export class StreamInner implements Stream {
       let promise = taskpool.execute((): undefined => this.closeSync());
       promise.then((ret: NullishType): void => {
         resolve(undefined);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -1634,8 +1644,8 @@ export class StreamInner implements Stream {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
-    }).catch((e: BusinessError): void => {
-      callback(e, undefined);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, undefined);
     });
   }
 
@@ -1646,8 +1656,8 @@ export class StreamInner implements Stream {
       let promise = taskpool.execute((): undefined => this.flushSync());
       promise.then((ret: NullishType): void => {
         resolve(undefined);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -1658,8 +1668,8 @@ export class StreamInner implements Stream {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
-    }).catch((e: BusinessError): void => {
-      callback(e, undefined);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, undefined);
     });
   }
 
@@ -1673,8 +1683,8 @@ export class StreamInner implements Stream {
       promise.then((ret: NullishType): void => {
         let result = ret as number
         resolve(result);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -1688,8 +1698,8 @@ export class StreamInner implements Stream {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
 
@@ -1702,8 +1712,8 @@ export class StreamInner implements Stream {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
 
@@ -1717,8 +1727,8 @@ export class StreamInner implements Stream {
       promise.then((ret: NullishType): void => {
         let result = ret as number
         resolve(result);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -1732,8 +1742,8 @@ export class StreamInner implements Stream {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
 
@@ -1746,18 +1756,18 @@ export class StreamInner implements Stream {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
-  
+
   native readSync(buffer: ArrayBuffer, options?: ReadOptions): number;
   native seek(offset: number, whence?: number): number;
 }
 
 export class ReadStream extends stream.Readable {
-  private pathInner: string;
-  private bytesReadInner: number;
+  path: string;
+  bytesRead: number;
   private offset: number;
   private start?: number;
   private end?: number;
@@ -1765,20 +1775,12 @@ export class ReadStream extends stream.Readable {
 
   constructor(path: string, options?: ReadStreamOptions) {
     super();
-    this.pathInner = path;
-    this.bytesReadInner = 0;
+    this.path = path;
+    this.bytesRead = 0;
     this.start = options?.start;
     this.end = options?.end;
-    this.stream = createStreamSync(this.pathInner, 'r');
+    this.stream = createStreamSync(this.path, 'r');
     this.offset = this.start ?? 0;
-  }
-
-  get path(): string {
-    return this.pathInner;
-  }
-
-  get bytesRead(): number {
-    return this.bytesReadInner;
   }
 
   seek(offset: number, whence?: WhenceType): number {
@@ -1822,7 +1824,7 @@ export class ReadStream extends stream.Readable {
     this.stream?.read(buffer, { offset: off, length: readSize })
       .then((readOut: number) => {
         if (readOut > 0) {
-          this.bytesReadInner += readOut;
+          this.bytesRead += readOut;
           this.push(new Uint8Array(buffer.slice(0, readOut)));
         }
         if (readOut !== readSize || readOut < size) {
@@ -1834,8 +1836,8 @@ export class ReadStream extends stream.Readable {
 }
 
 export class WriteStream extends stream.Writable {
-  private pathInner: string;
-  private bytesWrittenInner: number;
+  path: string;
+  bytesWritten: number;
   private offset: number;
   private mode: string;
   private start?: number;
@@ -1843,20 +1845,12 @@ export class WriteStream extends stream.Writable {
 
   constructor(path: string, options?: WriteStreamOptions) {
     super();
-    this.pathInner = path;
-    this.bytesWrittenInner = 0;
+    this.path = path;
+    this.bytesWritten = 0;
     this.start = options?.start;
     this.mode = this.convertOpenMode(options?.mode);
-    this.stream = createStreamSync(this.pathInner, this.mode);
+    this.stream = createStreamSync(this.path, this.mode);
     this.offset = this.start ?? 0;
-  }
-
-  get path(): string {
-    return this.pathInner;
-  }
-
-  get bytesWritten(): number {
-    return this.bytesWrittenInner;
   }
 
   seek(offset: number, whence?: WhenceType): number {
@@ -1878,6 +1872,10 @@ export class WriteStream extends stream.Writable {
     this.stream?.close();
   }
 
+  closeSync(): void {
+    this.stream?.closeSync();
+  }
+
   doInitialize(callback: () => void): void {
     callback();
   }
@@ -1886,7 +1884,7 @@ export class WriteStream extends stream.Writable {
     this.stream?.write(chunk, { offset: this.offset })
       .then((writeIn: number) => {
         this.offset += writeIn;
-        this.bytesWrittenInner += writeIn;
+        this.bytesWritten += writeIn;
         callback();
       })
       .finally(() => {
@@ -1913,6 +1911,53 @@ export class WriteStream extends stream.Writable {
     }
     return modeStr;
   }
+}
+
+export class AtomicFile {
+  static {
+    loadLibrary("ani_file_fs");
+  }
+
+  private nativePtr: long = 0;
+  private native getPath(): string;
+  private writeStream: WriteStream | null = null;
+
+  native constructor(path: string);
+
+  native getBaseFile(): File;
+
+  native openRead(): ReadStream;
+
+  native readFully(): ArrayBuffer;
+
+  native nativeStartWrite(): WriteStream;
+  startWrite(): WriteStream {
+    let ws = this.nativeStartWrite();
+    this.writeStream = ws;
+    return ws;
+  }
+
+  native nativeFinishWrite(): void;
+  finishWrite(): void {
+    if (!this.writeStream) {
+      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+    }
+    this.writeStream?.close();
+    this.nativeFinishWrite();
+    this.writeStream = null;
+  };
+
+  native nativeFailWrite(): void;
+  failWrite(): void {
+    if (!this.writeStream) {
+      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+    }
+    this.writeStream?.close();
+    this.nativeFailWrite();
+    this.writeStream = null;
+  };
+
+  native delete(): void;
 }
 
 export enum WhenceType {
@@ -2074,15 +2119,15 @@ export class FileIoImpl {
   static native createStreamSync(path: string, mode: string): fileIo.Stream;
 
   static native createWatcherSync(path: string, events: number, listener: WatchEventListener): fileIo.Watcher;
-  
+
   static native fdopenStreamSync(fd: number, mode: string): fileIo.Stream;
-  
+
   static native dup(fd: number): fileIo.File;
 
   static native listFileSync(path: string, options?: ListFileOptions): string[];
 
   static native lstatSync(path: string): fileIo.Stat;
-  
+
   static native lseekSync(fd: number, offset: number, whence?: fileIo.WhenceType): number;
 
   static native mkdirSync(path: string): void;
@@ -2098,7 +2143,7 @@ export class FileIoImpl {
   static native openSync(path: String, mode?: number): fileIo.File;
 
   static native readlinesSync(filePath: string, options?: Options): fileIo.ReaderIterator;
-  
+
   static native readSync(fd: number, buffer: ArrayBuffer, options?: ReadOptions): number;
 
   static native readTextSync(filePath: string, options?: ReadTextOptions): string;
