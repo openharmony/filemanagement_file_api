@@ -24,10 +24,15 @@ ohos_rust_shared_ffi("rust_file") {
   sources = [ "src/lib.rs" ]
   crate_name = "rust_file"
   rustflags = [ "-Zstack-protector=all" ]
-  external_deps = [
-    "hilog:hilog_rust",
-    "rust_libc:lib",
-  ]
+  deps = []
+  external_deps = [ "hilog:hilog_rust" ]
+
+  if (defined(global_parts_info) && !defined(global_parts_info.third_party_rust_libc)) {
+    deps += [ "//third_party/rust/crates/libc:lib" ]
+  } else {
+    external_deps += [ "rust_libc:lib" ]
+  }
+
   innerapi_tags = [ "platformsdk" ]
   public_configs = [ ":public_config" ]
 }
