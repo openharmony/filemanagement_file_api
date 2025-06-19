@@ -39,7 +39,6 @@
             "data_share",
             "dfs_service",
             "eventhandler",
-            "googletest",
             "hilog",
             "hisysevent",
             "hitrace",
