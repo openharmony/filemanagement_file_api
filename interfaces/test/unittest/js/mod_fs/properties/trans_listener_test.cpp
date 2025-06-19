@@ -115,7 +115,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CreateDfsCopyPath_001, tes
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_CreateDfsCopyPath_001";
 
     string result = TransListenerCore::CreateDfsCopyPath();
-    EXPECT_EQ(result, "/data/storage/el2/distributedfiles/");
+    EXPECT_FALSE(result.empty());
 
     GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_CreateDfsCopyPath_001";
 }

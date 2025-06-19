@@ -217,6 +217,23 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsFile_002, testing::ext::TestSize.Level1)
 }
 
 /**
+ * @tc.name: CopyCoreTest_IsMediaUri_001
+ * @tc.desc: Test function of CopyCore::IsMediaUri interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_IsMediaUri_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsMediaUri_001";
+
+    auto res = CopyCore::IsMediaUri(srcFile);
+    EXPECT_EQ(res, false);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsMediaUri_001";
+}
+
+/**
  * @tc.name: CopyCoreTest_GetFileSize_001
  * @tc.desc: Test function of CopyCore::GetFileSize interface for success.
  * @tc.size: MEDIUM
@@ -456,6 +473,37 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopySubDir_001, testing::ext::TestSize.Level
 }
 
 /**
+ * @tc.name: CopyCoreTest_CopySubDir_002
+ * @tc.desc: Test function of CopyCore::CopySubDir interface for success.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_CopySubDir_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopySubDir_002";
+
+    string subDir = srcDir + "/sub_dir";
+    mkdir(subDir.c_str(), 0755);
+    string subFile = subDir + "/sub_file.txt";
+    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, 0644);
+    if (fd >= 0) {
+        close(fd);
+    }
+
+    string destSubDir = destDir + "/sub_dir";
+    auto infos = make_shared<FsFileInfos>();
+    infos->notifyFd = 1;
+    auto res = CopyCore::CopySubDir(subDir, destSubDir, infos);
+    EXPECT_EQ(res, errno);
+
+    remove(subFile.c_str());
+    rmdir(subDir.c_str());
+    rmdir(destSubDir.c_str());
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CopySubDir_002";
+}
+
+/**
  * @tc.name: CopyCoreTest_RecurCopyDir_001
  * @tc.desc: Test function of CopyCore::RecurCopyDir interface for success.
  * @tc.size: MEDIUM
@@ -540,13 +588,36 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ExecLocal_001, testing::ext::TestSize.Level1
     infos->isFile = true;
     infos->srcPath = srcFile;
     infos->destPath = destFile;
-
     auto callback = make_shared<FsCallbackObject>(nullptr);
+
     auto res = CopyCore::ExecLocal(infos, callback);
     EXPECT_EQ(res, ERRNO_NOERR);
     EXPECT_TRUE(CopyCore::IsFile(destFile));
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ExecLocal_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_ExecLocal_002
+ * @tc.desc: Test function of CopyCore::ExecLocal interface for file copy FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_ExecLocal_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_ExecLocal_002";
+
+    auto infos = make_shared<FsFileInfos>();
+    infos->isFile = true;
+    infos->srcPath = srcFile;
+    infos->destPath = srcFile;
+    auto callback = make_shared<FsCallbackObject>(nullptr);
+
+    auto res = CopyCore::ExecLocal(infos, callback);
+    EXPECT_EQ(res, EINVAL);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ExecLocal_002";
 }
 
 /**
@@ -621,6 +692,356 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_DoCopy_001, testing::ext::TestSize.Level1)
     EXPECT_EQ(err.GetErrNo(), E_PARAMS);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_DoCopy_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_DoCopy_002
+ * @tc.desc: Test function of CopyCore::DoCopy interface for success.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_DoCopy_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_DoCopy_002";
+
+    string src = "file:///data/test/src/src.txt";
+    string dest = "file:///data/test/dest/dest.txt";
+    optional<CopyOptions> options;
+
+    auto res = CopyCore::DoCopy(src, dest, options);
+    EXPECT_TRUE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_DoCopy_002";
+}
+
+/**
+ * @tc.name: CopyCoreTest_GetDirSize_001
+ * @tc.desc: Test function of CopyCore::GetDirSize interface for file copy success.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_GetDirSize_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_GetDirSize_001";
+
+    auto infos = make_shared<FsFileInfos>();
+    infos->isFile = true;
+    infos->srcPath = srcFile;
+    infos->destPath = destFile;
+
+    auto res = CopyCore::GetDirSize(infos, srcDir);
+    EXPECT_EQ(res, 0);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_GetDirSize_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_GetUVEntry_001
+ * @tc.desc: Test function of CopyCore::GetUVEntry interface for file copy FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_GetUVEntry_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_GetUVEntry_001";
+
+    auto infos = make_shared<FsFileInfos>();
+    auto res = CopyCore::GetUVEntry(infos);
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_GetUVEntry_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_CheckFileValid_001
+ * @tc.desc: Test function of CopyCore::CheckFileValid interface for file copy FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_CheckFileValid_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CheckFileValid_001";
+
+    auto infos = make_shared<FsFileInfos>();
+    infos->isFile = true;
+    infos->srcPath = srcFile;
+    infos->destPath = destFile;
+
+    auto res = CopyCore::CheckFileValid(srcFile, infos);
+    EXPECT_EQ(res, false);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CheckFileValid_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_UpdateProgressSize_001
+ * @tc.desc: Test function of CopyCore::UpdateProgressSize interface for success.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_UpdateProgressSize_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_UpdateProgressSize_001";
+
+    auto receivedInfo = make_shared<ReceiveInfo>();
+    auto callback = make_shared<FsCallbackObject>(nullptr);
+
+    auto res = CopyCore::UpdateProgressSize(srcFile, receivedInfo, callback);
+    EXPECT_EQ(res, ERRNO_NOERR);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_UpdateProgressSize_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_GetRegisteredListener_001
+ * @tc.desc: Test function of CopyCore::GetRegisteredListener interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_GetRegisteredListener_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_GetRegisteredListener_001";
+
+    auto infos = make_shared<FsFileInfos>();
+    infos->isFile = true;
+    infos->srcPath = srcFile;
+    infos->destPath = destFile;
+
+    auto res = CopyCore::GetRegisteredListener(infos);
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_GetRegisteredListener_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_SubscribeLocalListener_001
+ * @tc.desc: Test function of CopyCore::SubscribeLocalListener interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_SubscribeLocalListener_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_SubscribeLocalListener_001";
+
+    auto infos = make_shared<FsFileInfos>();
+    infos->isFile = true;
+    infos->srcPath = srcFile;
+    infos->destPath = destFile;
+    auto callback = make_shared<FsCallbackObject>(nullptr);
+
+    auto res = CopyCore::SubscribeLocalListener(infos, callback);
+    EXPECT_EQ(res, errno);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_SubscribeLocalListener_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_GetRealPath_001
+ * @tc.desc: Test function of CopyCore::GetRealPath interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_GetRealPath_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_GetRealPath_001";
+
+    string path = "./data/test/src/src.txt";
+
+    auto res = CopyCore::GetRealPath(path);
+    EXPECT_EQ(res, "data/test/src/src.txt");
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_GetRealPath_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_GetRealPath_002
+ * @tc.desc: Test function of CopyCore::GetRealPath interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_GetRealPath_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_GetRealPath_002";
+
+    string path = "../data/test/src/src.txt";
+
+    auto res = CopyCore::GetRealPath(path);
+    EXPECT_EQ(res, "data/test/src/src.txt");
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_GetRealPath_002";
+}
+
+/**
+ * @tc.name: CopyCoreTest_ExecCopy_001
+ * @tc.desc: Test function of CopyCore::ExecCopy interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_ExecCopy_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_ExecCopy_001";
+
+    auto infos = make_shared<FsFileInfos>();
+    infos->isFile = false;
+    infos->srcPath = "/data/test/src";
+    infos->destPath = "/data/test/dest";
+
+    auto res = CopyCore::ExecCopy(infos);
+    EXPECT_EQ(res, ERRNO_NOERR);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ExecCopy_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_CopyFile_001
+ * @tc.desc: Test function of CopyCore::CopyFile interface for file copy FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_CopyFile_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopyFile_001";
+
+    string src = "datashare:///media/src_test.jpg";
+    string dest = "datashare:///media/dest_test.jpg";
+    auto infos = make_shared<FsFileInfos>();
+    infos->isFile = true;
+    infos->srcPath = src;
+    infos->destPath = dest;
+
+    auto res = CopyCore::CopyFile(src, dest, infos);
+    EXPECT_EQ(res, errno);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CopyFile_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_HandleProgress_001
+ * @tc.desc: Test function of CopyCore::HandleProgress interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_HandleProgress_001";
+
+    auto infos = make_shared<FsFileInfos>();
+    infos->isFile = false;
+    infos->srcPath = "/data/test/src";
+    infos->destPath = "/data/test/dest";
+
+    auto event = make_unique<inotify_event>();
+    const int testWd = 123;
+    event->wd = testWd;
+    event->mask = IN_MODIFY;
+    event->len = 0;
+    // 执行处理
+    auto [continueProcess, errCode, needSend] = CopyCore::HandleProgress(event.get(), infos, nullptr);
+    
+    // 验证结果
+    EXPECT_TRUE(continueProcess);
+    EXPECT_EQ(errCode, EINVAL);
+    EXPECT_FALSE(needSend);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_HandleProgress_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_HandleProgress_002
+ * @tc.desc: Test function of CopyCore::HandleProgress interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_HandleProgress_002";
+
+    auto infos = make_shared<FsFileInfos>();
+    infos->srcPath = srcDir;
+    infos->destPath = destDir;
+    infos->isFile = true;
+
+    auto callback = make_shared<FsCallbackObject>(nullptr);
+
+    // 添加接收信息（使用不同的wd）
+    const int testWd = 123;
+    const int differentWd = 456;
+    auto receiveInfo = make_shared<ReceiveInfo>();
+    receiveInfo->path = testDir;
+    callback->wds.push_back({differentWd, receiveInfo});
+
+    // 初始化事件结构
+    auto event = make_unique<inotify_event>();
+    event->wd = testWd;
+    event->mask = IN_MODIFY;
+    event->len = 0;
+    
+    // 执行处理
+    auto [continueProcess, errCode, needSend] = 
+        CopyCore::HandleProgress(event.get(), infos, callback);
+    
+    // 验证结果
+    EXPECT_TRUE(continueProcess);
+    EXPECT_EQ(errCode, EINVAL);
+    EXPECT_FALSE(needSend);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_HandleProgress_002";
+}
+
+/**
+ * @tc.name: CopyCoreTest_HandleProgress_003
+ * @tc.desc: Test function of CopyCore::HandleProgress interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_HandleProgress_003";
+    
+    // 创建测试用的文件信息对象
+    auto infos = make_shared<FsFileInfos>();
+    infos->srcPath = srcDir;
+    infos->destPath = destDir;
+    infos->isFile = true;
+    
+    // 创建测试用的回调对象
+    auto callback = make_shared<FsCallbackObject>(nullptr);
+    
+    // 添加匹配的接收信息
+    const int testWd = 123;
+    auto receiveInfo = make_shared<ReceiveInfo>();
+    receiveInfo->path = srcFile;
+    callback->wds.push_back({testWd, receiveInfo});
+    
+    // 初始化事件结构
+    auto event = make_unique<inotify_event>();
+    event->wd = testWd;
+    event->mask = IN_MODIFY;
+    event->len = 0;
+    
+    // 执行处理
+    auto [continueProcess, errCode, needSend] = CopyCore::HandleProgress(event.get(), infos, callback);
+    
+    // 验证结果
+    EXPECT_TRUE(continueProcess);
+    EXPECT_EQ(errCode, ERRNO_NOERR);
+    EXPECT_TRUE(needSend);
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_HandleProgress_003";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
