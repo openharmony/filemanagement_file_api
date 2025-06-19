@@ -24,6 +24,7 @@ namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
 using namespace testing::ext;
 using namespace std;
+const mode_t DIR_PERMISSIONS = 0755;
 
 class AccessCoreTest : public testing::Test {
 public:
@@ -73,15 +74,17 @@ bool CreateDirectoryRecursive(const std::string& path) {
 
     while ((pos = path.find('/', pos)) != std::string::npos) {
         dir = path.substr(0, pos++);
-        if (dir.empty()) continue;
-        if (mkdir(dir.c_str(), 0755) == -1) {
+        if (dir.empty()) {
+            continue;
+        }
+        if (mkdir(dir.c_str(), DIR_PERMISSIONS) == -1) {
             if (errno != EEXIST) {
                 return false;
             }
         }
     }
 
-    if (mkdir(path.c_str(), 0755) == -1 && errno != EEXIST) {
+    if (mkdir(path.c_str(), DIR_PERMISSIONS) == -1 && errno != EEXIST) {
         return false;
     }
     return true;
