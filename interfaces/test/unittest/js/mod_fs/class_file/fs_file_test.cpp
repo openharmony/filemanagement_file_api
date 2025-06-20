@@ -18,7 +18,6 @@
 
 #include <gtest/gtest.h>
 
-
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
 using namespace testing::ext;
@@ -257,7 +256,6 @@ HWTEST_F(FsFileTest, FsFileTest_GetParent_011, testing::ext::TestSize.Level1)
 
     GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_GetParent_011";
 }
-
 
 /**
  * @tc.name: FsFileTest_GetPath_012

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "open_core.h"
 #include "mock/uv_fs_mock.h"
+#include "open_core.h"
 
 #include <filesystem>
 #include <fstream>

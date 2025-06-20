@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "fs_file.h"
 #include "file_entity.h"
+#include "fs_file.h"
 #include "system_mock.h"
 #include "uv_fs_mock.h"
 
@@ -64,7 +64,7 @@ void FsFileMockTest::SetUp(void)
     const int fdValue = 3;
     const bool isClosed = false;
     fileEntity->fd_ = std::make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
-    fileEntity->path_ = "/data/test/test.txt";
+    fileEntity->path_ = "/data/test/file_test.txt";
     fileEntity->uri_ = "";
     fsFile = std::make_unique<FsFile>(std::move(fileEntity));
 }
