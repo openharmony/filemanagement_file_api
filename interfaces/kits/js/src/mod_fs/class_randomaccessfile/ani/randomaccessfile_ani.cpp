@@ -473,13 +473,13 @@ ani_object RandomAccessFileAni::GetWriteStream(ani_env *env, [[maybe_unused]] an
 
     int flags = fcntl(entity->fd.get()->GetFD(), F_GETFL);
     unsigned int uflags = static_cast<unsigned int>(flags);
-    if (((uflags & O_ACCMODE) != O_RDONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
+    if (((uflags & O_ACCMODE) != O_WRONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
         HILOGE("Failed to check Permission");
         ErrorHandler::Throw(env, EACCES);
         return nullptr;
     }
 
-    return CreateStream(env, READ_STREAM_CLASS, entity, flags);
+    return CreateStream(env, WRITE_STREAM_CLASS, entity, flags);
 }
 
 } // namespace ANI
