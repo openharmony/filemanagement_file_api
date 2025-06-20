@@ -555,6 +555,7 @@ ohos_shared_library("securitylabel") {
 
   external_deps = [
     "access_token:libtokenid_sdk",
+    "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
