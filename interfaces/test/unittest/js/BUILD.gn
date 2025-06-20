@@ -161,9 +161,9 @@ ohos_unittest("ani_file_securitylabel_test") {
   ]
 
   deps = [
+    "${file_api_path}/interfaces/kits/js:ani_file_securitylabel",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
-    "${file_api_path}/interfaces/kits/js:ani_file_securitylabel",
   ]
 
   external_deps = [
