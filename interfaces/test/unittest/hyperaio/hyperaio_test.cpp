@@ -39,6 +39,7 @@ namespace OHOS::HyperAio {
     HyperAio::ProcessIoResultCallBack callBack = [](std::unique_ptr<IoResponse> response) {
         GTEST_LOG_(INFO) << "HyperAioTest callBack";
     };
+
     /**
      * @tc.name: HyperAio_SupportIouring_0000
      * @tc.desc: Test function of SupportIouring() interface for SUCCESS.
@@ -58,6 +59,7 @@ namespace OHOS::HyperAio {
         }
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_SupportIouring_0000";
     }
+
     /**
      * @tc.name: HyperAio_CtxInit_0000
      * @tc.desc: Test function of CtxInit() interface for SUCCESS.
@@ -78,6 +80,7 @@ namespace OHOS::HyperAio {
         hyperAio_->DestroyCtx();
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0000";
     }
+
     /**
      * @tc.name: HyperAio_CtxInit_0001
      * @tc.desc: Test function of CtxInit() interface for SUCCESS.
@@ -94,6 +97,7 @@ namespace OHOS::HyperAio {
         EXPECT_EQ(result, -EINVAL);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0001";
     }
+
     /**
      * @tc.name: HyperAio_CtxInit_0002
      * @tc.desc: Test function of CtxInit() interface for SUCCESS.
@@ -111,6 +115,7 @@ namespace OHOS::HyperAio {
         hyperAio_->DestroyCtx();
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0002";
     }
+
     /**
      * @tc.name: HyperAio_CtxInit_0003
      * @tc.desc: Test function of CtxInit() interface for SUCCESS.
@@ -130,6 +135,26 @@ namespace OHOS::HyperAio {
         hyperAio_->DestroyCtx();
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0003";
     }
+
+    /**
+     * @tc.name: HyperAio_CtxInit_0004
+     * @tc.desc: Test function of CtxInit() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_CtxInit_0004, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CtxInit_0004";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        init_flag = false;
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, -1);
+        init_flag = true;
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CtxInit_0004";
+    }
+
     /**
      * @tc.name: HyperAio_StartOpenReqs_0000
      * @tc.desc: Test function of StartOpenReqs() interface for SUCCESS.
@@ -223,6 +248,10 @@ namespace OHOS::HyperAio {
         OpenReqs openReqs = {batchSize, openInfos.get()};
         result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, 0);
+        sqe_flag = false;
+        result = hyperAio_->StartOpenReqs(&openReqs);
+        EXPECT_EQ(result, -ENOMEM);
+        sqe_flag = true;
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0003";
@@ -256,6 +285,23 @@ namespace OHOS::HyperAio {
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0004";
+    }
+
+    /**
+     * @tc.name: HyperAio_StartOpenReqs_0005
+     * @tc.desc: Test function of StartOpenReqs() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0005, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartOpenReqs_0005";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->StartOpenReqs(nullptr);
+        EXPECT_EQ(result, -EINVAL);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0005";
     }
 
     /**
@@ -349,6 +395,10 @@ namespace OHOS::HyperAio {
         ReadReqs readReqs = {batchSize, readInfos.get()};
         result = hyperAio_->StartReadReqs(&readReqs);
         EXPECT_EQ(result, 0);
+        sqe_flag = false;
+        result = hyperAio_->StartReadReqs(&readReqs);
+        EXPECT_EQ(result, -ENOMEM);
+        sqe_flag = true;
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartReadReqs_0003";
@@ -383,6 +433,24 @@ namespace OHOS::HyperAio {
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartReadReqs_0004";
     }
+
+    /**
+     * @tc.name: HyperAio_StartReadReqs_0005
+     * @tc.desc: Test function of StartReadReqs() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0005, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartReadReqs_0005";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->StartReadReqs(nullptr);
+        EXPECT_EQ(result, -EINVAL);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartReadReqs_0005";
+    }
+
     /**
      * @tc.name: HyperAio_StartCancelReqs_0000
      * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
@@ -470,6 +538,10 @@ namespace OHOS::HyperAio {
         CancelReqs cancelReqs = {batchSize, cancelInfos.get()};
         result = hyperAio_->StartCancelReqs(&cancelReqs);
         EXPECT_EQ(result, 0);
+        sqe_flag = false;
+        result = hyperAio_->StartCancelReqs(&cancelReqs);
+        EXPECT_EQ(result, -ENOMEM);
+        sqe_flag = true;
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartCancelReqs_0003";
@@ -503,20 +575,58 @@ namespace OHOS::HyperAio {
     }
 
     /**
-     * @tc.name: HyperAio_DestoryCtx_0000
+     * @tc.name: HyperAio_StartCancelReqs_0005
      * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
      * @tc.require: AR000HG8M4
      */
-    HWTEST_F(HyperAioTest, HyperAio_DestoryCtx_0000, testing::ext::TestSize.Level1)
+    HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0005, testing::ext::TestSize.Level1)
     {
-        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_DestoryCtx_0000";
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartCancelReqs_0005";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->StartCancelReqs(nullptr);
+        EXPECT_EQ(result, -EINVAL);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartCancelReqs_0005";
+    }
+
+    /**
+     * @tc.name: HyperAio_HarvestRes_0000
+     * @tc.desc: Test function of HarvestRes() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_HarvestRes_0000, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_HarvestRes_0000";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        wait_flag = false;
+        hyperAio_->pImpl_ = nullptr;
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_HarvestRes_0000";
+    }
+
+    /**
+     * @tc.name: HyperAio_DestroyCtx_0000
+     * @tc.desc: Test function of DestoryCtx() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_DestroyCtx_0000, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_DestroyCtx_0000";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
-        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_DestoryCtx_0000";
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_DestroyCtx_0000";
     }
-#endif
+#endif       
 }

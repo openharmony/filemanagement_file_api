@@ -267,11 +267,10 @@ void HyperAio::HarvestRes()
             HILOGI("wait cqe failed, ret = %{public}d", ret);
             continue;
         }
+        cqeCount_++;
         if (cqe->res < 0) {
             HILOGI("cqe failed, cqe->res = %{public}d", cqe->res);
-            continue;
         }
-        cqeCount_++;
         auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
         HyperaioTrace trace("harvest: userdata " + std::to_string(cqe->user_data)
             + " res " + std::to_string(cqe->res) + "flags " + std::to_string(cqe->flags));
