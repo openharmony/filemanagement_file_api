@@ -295,7 +295,7 @@ int32_t HyperAio::DestroyCtx()
     if (harvestThread_.joinable()) {
         HILOGI("start harvest thread join");
         harvestThread_.join();
-        // No print this log means join failed
+        // This log is only printed after join() completes successfully
         HILOGI("join success");
     }
 
