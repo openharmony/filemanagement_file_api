@@ -18,7 +18,6 @@
 using namespace OHOS::FileManagement::ModuleFileIO;
 
 extern "C" {
-
 int fseek(FILE *stream, long len, int offset)
 {
     return ICMock::ins->fseek(stream, len, offset);
