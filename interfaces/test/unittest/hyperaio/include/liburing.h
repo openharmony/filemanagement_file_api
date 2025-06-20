@@ -24,6 +24,7 @@ namespace HyperAio {
 inline bool sqe_flag = true;
 inline bool init_flag = true;
 inline bool wait_flag = true;
+inline bool cqe_res_flag = true;
 struct io_uring_sqe {
     int32_t data;
 };
@@ -39,8 +40,8 @@ struct io_uring {
     std::vector<std::unique_ptr<io_uring_sqe>> sqe_list;
     io_uring() {}
     ~io_uring() {}
-    inline io_uring_cqe *io_uring_get_sqe() {
-        auto sqe = std::make_shared<io_uring_sqe>();
+    inline io_uring_sqe *io_uring_get_sqe() {
+        auto sqe = std::make_unique<io_uring_sqe>();
         io_uring_sqe *raw_sqe = sqe.get();
         sqe_list.push_back(std::move(sqe));
         return raw_sqe;
@@ -96,7 +97,7 @@ inline void io_uring_prep_cancel(struct io_uring_sqe *sqe,
 
 inline int io_uring_wait_cqe(struct io_uring *ring, struct io_uring_cqe **cqe_ptr)
 {
-    std::this_thread::sleep_for(std::chrono:::second(1));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     if (!wait_flag) {
         wait_flag = true;
         return -1;
@@ -104,8 +105,13 @@ inline int io_uring_wait_cqe(struct io_uring *ring, struct io_uring_cqe **cqe_pt
     *cqe_ptr = new io_uring_cqe;
     (*cqe_ptr)->data = 0;
     (*cqe_ptr)->user_data = 0;
-    (*cqe_ptr)->res = 0;
     (*cqe_ptr)->flags = 0;
+    if (!cqe_res_flag) {
+        (*cqe_ptr)->res = -1;
+        cqe_res_flag = true;
+    } else {
+        (*cqe_ptr)->res = 0;
+    }
     return 1;
 }
 

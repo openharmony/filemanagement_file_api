@@ -613,8 +613,29 @@ namespace OHOS::HyperAio {
     }
 
     /**
+     * @tc.name: HyperAio_HarvestRes_0001
+     * @tc.desc: Test function of HarvestRes() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     * @tc.require: AR000HG8M4
+     */
+    HWTEST_F(HyperAioTest, HyperAio_HarvestRes_0001, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_HarvestRes_0001";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        cqe_res_flag = false;
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_HarvestRes_0001";
+    }
+
+    /**
      * @tc.name: HyperAio_DestroyCtx_0000
-     * @tc.desc: Test function of DestoryCtx() interface for SUCCESS.
+     * @tc.desc: Test function of DestroyCtx() interface for SUCCESS.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -628,5 +649,5 @@ namespace OHOS::HyperAio {
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_DestroyCtx_0000";
     }
-#endif       
+#endif
 }
