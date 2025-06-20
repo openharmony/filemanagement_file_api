@@ -102,10 +102,10 @@ ani_boolean AccessAni::AccessSync3(
     auto flagType = OptToAccessFlagType(flagOpt);
 
     FsResult<bool> fsRet = FsResult<bool>::Error(UNKNOWN_ERR);
-    if (flagOpt == std::nullopt) {
-        fsRet = AccessCore::DoAccess(pathStr, modeType);
-    } else {
+    if (modeType != std::nullopt && flagType != std::nullopt) {
         fsRet = AccessCore::DoAccess(pathStr, modeType.value(), flagType.value());
+    } else {
+        fsRet = AccessCore::DoAccess(pathStr, modeType);
     }
 
     if (!fsRet.IsSuccess()) {
