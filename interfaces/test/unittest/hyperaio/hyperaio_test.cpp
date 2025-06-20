@@ -68,7 +68,7 @@ namespace OHOS::HyperAio {
      * @tc.level Level 1
      * @tc.require: AR000HG8M4
      */
-    HWTEST_F(HyperAioTest, HyperAio_CtxInit_0000, testing::ext::TestSize.Level1)
+    HWTEST_F(HyperAioTest, HyperAio_CtxInit_0000, testing::ext::TestSize.Level0)
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CtxInit_0000";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
@@ -208,7 +208,7 @@ namespace OHOS::HyperAio {
      * @tc.level Level 1
      * @tc.require: AR000HG8M4
      */
-    HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0002, testing::ext::TestSize.Level1)
+    HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0002, testing::ext::TestSize.Level0)
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartOpenReqs_0002";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
@@ -356,7 +356,7 @@ namespace OHOS::HyperAio {
      * @tc.level Level 1
      * @tc.require: AR000HG8M4
      */
-    HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0002, testing::ext::TestSize.Level1)
+    HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0002, testing::ext::TestSize.Level0)
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartReadReqs_0002";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
@@ -502,7 +502,7 @@ namespace OHOS::HyperAio {
      * @tc.level Level 1
      * @tc.require: AR000HG8M4
      */
-    HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0002, testing::ext::TestSize.Level1)
+    HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0002, testing::ext::TestSize.Level0)
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartCancelReqs_0002";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
