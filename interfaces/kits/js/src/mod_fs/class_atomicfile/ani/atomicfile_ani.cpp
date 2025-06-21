@@ -17,6 +17,7 @@
 
 #include <filesystem>
 
+#include "ani_signature.h"
 #include "error_handler.h"
 #include "file_wrapper.h"
 #include "filemgmt_libhilog.h"
@@ -30,6 +31,7 @@ namespace ANI {
 namespace fs = std::filesystem;
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 const std::string READ_STREAM_CLASS = "ReadStream";
 const std::string WRITE_STREAM_CLASS = "WriteStream";
@@ -52,7 +54,8 @@ void AtomicFileAni::Constructor(ani_env *env, ani_object obj, ani_string pathObj
     }
 
     if (ANI_OK !=
-        env->Object_SetFieldByName_Long(obj, "nativePtr", reinterpret_cast<ani_long>(ret.GetData().value()))) {
+        env->Object_SetFieldByName_Long(obj, "nativePtr",
+            static_cast<ani_long>(reinterpret_cast<uintptr_t>(ret.GetData().value())))) {
         HILOGE("Failed to wrap entity for obj AtomicFile");
         ErrorHandler::Throw(env, EIO);
         return;
@@ -120,20 +123,24 @@ ani_object AtomicFileAni::GetBaseFile(ani_env *env, [[maybe_unused]] ani_object 
 
 static ani_object CreateReadStream(ani_env *env, ani_string filePath)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/ReadStream;";
+    auto classDesc = FS::ReadStream::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::ReadStream::ctorDesc.c_str();
+    auto ctorSig = FS::ReadStream::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %s obj Failed", classDesc);
         return nullptr;
     }
 
@@ -142,20 +149,24 @@ static ani_object CreateReadStream(ani_env *env, ani_string filePath)
 
 static ani_object CreateWriteStream(ani_env *env, ani_string filePath)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/WriteStream;";
+    auto classDesc = FS::WriteStream::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::WriteStream::ctorDesc.c_str();
+    auto ctorSig = FS::WriteStream::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %s obj Failed", classDesc);
         return nullptr;
     }
 
@@ -163,9 +174,9 @@ static ani_object CreateWriteStream(ani_env *env, ani_string filePath)
 }
 
 static ani_object CreateStream(
-    ani_env *env, [[maybe_unused]] ani_object object, const std::string &streamName, const std::string &fineName)
+    ani_env *env, [[maybe_unused]] ani_object object, const std::string &streamName, const std::string &fileName)
 {
-    auto [succ, filePath] = TypeConverter::ToAniString(env, fineName);
+    auto [succ, filePath] = TypeConverter::ToAniString(env, fileName);
     if (!succ) {
         HILOGE("Failed to ani_string");
         ErrorHandler::Throw(env, UNKNOWN_ERR);

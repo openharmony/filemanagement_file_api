@@ -166,7 +166,9 @@ static ani_status BindTaskSignalClassMethods(ani_env *env)
 
 static ani_status BindAtomicFileMethods(ani_env *env)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/AtomicFile;";
+    auto classDesc = FS::AtomicFile::classDesc.c_str();
+    auto ctorDesc = FS::AtomicFile::ctorDesc.c_str();
+    auto ctorSig = FS::AtomicFile::ctorSig.c_str();
 
     std::array methods = {
         ani_native_function { "getPath", nullptr, reinterpret_cast<void *>(AtomicFileAni::GetPath) },
@@ -176,11 +178,11 @@ static ani_status BindAtomicFileMethods(ani_env *env)
         ani_native_function { "nativeFinishWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::FinishWrite) },
         ani_native_function { "nativeFailWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::FailWrite) },
         ani_native_function { "delete", nullptr, reinterpret_cast<void *>(AtomicFileAni::Delete) },
-        ani_native_function { "<ctor>", "Lstd/core/String;:V", reinterpret_cast<void *>(AtomicFileAni::Constructor) },
+        ani_native_function { ctorDesc, ctorSig, reinterpret_cast<void *>(AtomicFileAni::Constructor) },
         ani_native_function { "openRead", nullptr, reinterpret_cast<void *>(AtomicFileAni::OpenRead) },
     };
 
-    return BindClass(env, className, methods);
+    return BindClass(env, classDesc, methods);
 }
 const static string mkdirCtorSig0 = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 const static string mkdirCtorSig1 =
