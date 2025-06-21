@@ -93,6 +93,7 @@ struct Array : public BaseType {
 struct ArrayBuffer : public BaseType {
     static const Type classType;
     static const string classDesc;
+    static const string ctorSig;
 };
 
 struct BigInt : public BaseType {
@@ -181,6 +182,24 @@ struct LocationType : public BaseType {
     static const string classDesc;
 };
 
+struct ReadStream : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+};
+
+struct WriteStream : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+};
+
+struct AtomicFile : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+};
+
 } // namespace FS
 
 namespace Impl {
@@ -211,6 +230,16 @@ struct StatvfsImpl : public BaseType {
 };
 
 } // namespace Impl
+
+namespace HASH {
+
+struct HashStreamImpl : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+};
+
+} // namespace HASH
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature
 

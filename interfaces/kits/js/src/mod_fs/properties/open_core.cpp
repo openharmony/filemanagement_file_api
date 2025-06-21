@@ -75,7 +75,7 @@ static tuple<bool, uint32_t> ValidAndConvertFlags(const optional<int32_t> &mode)
         }
         flags = static_cast<uint32_t>(modeValue);
         uint32_t invalidMode = (O_WRONLY | O_RDWR);
-        if ((modeValue & invalidMode) == invalidMode) {
+        if ((flags & invalidMode) == invalidMode) {
             HILOGE("Invalid mode");
             return { false, flags };
         }
