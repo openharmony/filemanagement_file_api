@@ -36,6 +36,10 @@ void StatvFsCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     int32_t fd = open("/data/test/statvfs.txt", O_CREAT | O_RDWR, 0644);
+    if (fd <= 0) {
+        close(fd);
+        ASSERT_TRUE(false);
+    }
     close(fd);
 }
 
@@ -89,6 +93,8 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetFreeSize_002, testing::ext::TestS
 
     auto result = ModuleStatvfs::StatvfsCore::DoGetFreeSize("/test/path");
     EXPECT_EQ(result.IsSuccess(), false);
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetFreeSize_002";
 }
@@ -127,6 +133,8 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_004, testing::ext::Test
 
     auto result = ModuleStatvfs::StatvfsCore::DoGetTotalSize("/test/path");
     EXPECT_EQ(result.IsSuccess(), false);
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetTotalSize_004";
 }

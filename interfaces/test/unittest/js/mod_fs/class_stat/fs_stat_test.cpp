@@ -17,7 +17,6 @@
 
 #include <gtest/gtest.h>
 
-
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
 using namespace testing::ext;

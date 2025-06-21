@@ -182,3 +182,32 @@ ohos_unittest("ani_file_securitylabel_test") {
     "googletest:gtest_main",
   ]
 }
+
+ohos_unittest("ani_file_statvfs_test") {
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  sources = [
+    "mod_statvfs/statvfs_core_test.cpp",
+  ]
+
+  include_dirs = [
+    "mock/libuv",
+    "${file_api_path}/interfaces/kits/js/src/mod_statvfs",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/js:ani_file_statvfs",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "libuv:uv",
+  ]
+}
