@@ -97,7 +97,7 @@ inline void io_uring_prep_cancel(struct io_uring_sqe *sqe,
     return;
 }
 
-inline int io_uring_wait_cqe(struct io_uring *ring, struct io_uring_cqe **cqe_ptr) 
+inline int io_uring_wait_cqe(struct io_uring *ring, struct io_uring_cqe **cqe_ptr)
 {
     std::this_thread::sleep_for(std::chrono::seconds(1));
     if (!wait_flag)    return wait_flag = true, -1;
