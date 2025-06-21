@@ -66,6 +66,8 @@ HWTEST_F(LstatCoreTest, LstatCoreTest_DoLstat_001, testing::ext::TestSize.Level1
     
     auto res = LstatCore::DoLstat("/invalid/test/lstat.txt");
     EXPECT_EQ(res.IsSuccess(), false);
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
 
     GTEST_LOG_(INFO) << "LstatCoreTest-end LstatCoreTest_DoLstat_001";
 }

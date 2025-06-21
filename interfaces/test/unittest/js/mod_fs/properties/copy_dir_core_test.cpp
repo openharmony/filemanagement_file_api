@@ -47,8 +47,8 @@ void CopyDirCoreTest::SetUpTestCase(void)
 {
     srcPath = filesystem::temp_directory_path() / "src/";
     destPath = filesystem::temp_directory_path() / "dest/";
-    std::filesystem::create_directory(srcPath);
-    std::filesystem::create_directory(destPath);
+    filesystem::create_directory(srcPath);
+    filesystem::create_directory(destPath);
     GTEST_LOG_(INFO) << "SetUpTestCase";
 }
 
@@ -157,7 +157,7 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_004, testing::ext::TestSize.
     string dest = destPath.string() + "/invalid_file.txt";
     filesystem::path(dest).remove_filename();
     filesystem::create_directories(filesystem::path(dest).parent_path());
-    std::ofstream(dest).close(); // 创建文件而非目录
+    ofstream(dest).close(); // 创建文件而非目录
 
     auto result = CopyDirCore::DoCopyDir(src, dest, optional<int32_t>());
 
