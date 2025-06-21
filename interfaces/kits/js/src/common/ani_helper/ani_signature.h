@@ -93,6 +93,7 @@ struct Array : public BaseType {
 struct ArrayBuffer : public BaseType {
     static const Type classType;
     static const string classDesc;
+    static const string ctorSig;
 };
 
 struct BigInt : public BaseType {
@@ -179,6 +180,24 @@ struct WatchEventInner : public BaseType {
 struct LocationType : public BaseType {
     static const Type classType;
     static const string classDesc;
+};
+
+struct ReadStream : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+};
+
+struct WriteStream : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+};
+
+struct AtomicFile : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
 };
 
 } // namespace FS
