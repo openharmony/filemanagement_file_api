@@ -26,8 +26,8 @@ using namespace std;
 
 class CopyDirCoreTest : public testing::Test {
 public:
-    static filesystem::path srcPath;
-    static filesystem::path destPath;
+    static filesystem::path g_srcPath;
+    static filesystem::path g_destPath;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -40,23 +40,23 @@ public:
     }
 };
 
-filesystem::path CopyDirCoreTest::srcPath;
-filesystem::path CopyDirCoreTest::destPath;
+filesystem::path CopyDirCoreTest::g_srcPath;
+filesystem::path CopyDirCoreTest::g_destPath;
 
 void CopyDirCoreTest::SetUpTestCase(void)
 {
-    srcPath = filesystem::temp_directory_path() / "src/";
-    destPath = filesystem::temp_directory_path() / "dest/";
-    filesystem::create_directory(srcPath);
-    filesystem::create_directory(destPath);
+    g_srcPath = filesystem::temp_directory_path() / "src/";
+    g_destPath = filesystem::temp_directory_path() / "dest/";
+    filesystem::create_directory(g_srcPath);
+    filesystem::create_directory(g_destPath);
     GTEST_LOG_(INFO) << "SetUpTestCase";
 }
 
 void CopyDirCoreTest::TearDownTestCase(void)
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    filesystem::remove_all(srcPath);
-    filesystem::remove_all(destPath);
+    filesystem::remove_all(g_srcPath);
+    filesystem::remove_all(g_destPath);
 }
 
 void CopyDirCoreTest::SetUp(void)
@@ -75,14 +75,13 @@ void CopyDirCoreTest::TearDown(void)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyDirCoreTest-begin CopyDirCoreTest_DoCopyDir_001";
 
-    string src = srcPath.string() + "/test01";
-    string dest = destPath.string();
+    string src = g_srcPath.string() + "/test01";
+    string dest = g_destPath.string();
     filesystem::create_directories(src);
 
     auto result = CopyDirCore::DoCopyDir(src, dest, optional<int32_t>());
@@ -99,14 +98,13 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_001, testing::ext::TestSize.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyDirCoreTest-begin CopyDirCoreTest_DoCopyDir_002";
 
-    string src = srcPath.string() + "/test02";
-    string dest = destPath.string();
+    string src = g_srcPath.string() + "/test02";
+    string dest = g_destPath.string();
     filesystem::create_directories(src);
 
     int invalidMode = COPYMODE_MAX + 1;
@@ -124,14 +122,13 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_002, testing::ext::TestSize.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyDirCoreTest-begin CopyDirCoreTest_DoCopyDir_003";
 
-    string src = srcPath.string() + "/non_existent";
-    string dest = destPath.string();
+    string src = g_srcPath.string() + "/non_existent";
+    string dest = g_destPath.string();
 
     auto result = CopyDirCore::DoCopyDir(src, dest, optional<int32_t>());
 
@@ -147,14 +144,13 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_003, testing::ext::TestSize.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyDirCoreTest-begin CopyDirCoreTest_DoCopyDir_004";
 
-    string src = srcPath.string();
-    string dest = destPath.string() + "/invalid_file.txt";
+    string src = g_srcPath.string();
+    string dest = g_destPath.string() + "/invalid_file.txt";
     filesystem::path(dest).remove_filename();
     filesystem::create_directories(filesystem::path(dest).parent_path());
     ofstream(dest).close(); // 创建文件而非目录
@@ -173,14 +169,13 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_004, testing::ext::TestSize.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyDirCoreTest-begin CopyDirCoreTest_DoCopyDir_005";
 
-    string src = srcPath.string();
-    string dest = srcPath.string();
+    string src = g_srcPath.string();
+    string dest = g_srcPath.string();
 
     auto result = CopyDirCore::DoCopyDir(src, dest, optional<int32_t>());
 
@@ -196,14 +191,13 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_005, testing::ext::TestSize.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyDirCoreTest-begin CopyDirCoreTest_DoCopyDir_006";
 
-    string src = srcPath.string() + "/test06";
-    string dest = destPath.string();
+    string src = g_srcPath.string() + "/test06";
+    string dest = g_destPath.string();
     filesystem::create_directories(src);
     CreateTestFile(src + "/file1.txt", "content1");
     CreateTestFile(src + "/file2.txt", "content2");
@@ -222,14 +216,13 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_006, testing::ext::TestSize.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_007, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyDirCoreTest-begin CopyDirCoreTest_DoCopyDir_007";
 
-    string src = srcPath.string() + "/test07";
-    string dest = destPath.string();
+    string src = g_srcPath.string() + "/test07";
+    string dest = g_destPath.string();
     filesystem::create_directories(src + "/subdir1");
     filesystem::create_directories(src + "/subdir2");
     CreateTestFile(src + "/subdir1/file1.txt", "sub1_content1");
@@ -249,14 +242,13 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_007, testing::ext::TestSize.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_008, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyDirCoreTest-begin CopyDirCoreTest_DoCopyDir_008";
 
-    string src = srcPath.string() + "/test08";
-    string dest = destPath.string();
+    string src = g_srcPath.string() + "/test08";
+    string dest = g_destPath.string();
     filesystem::create_directories(src);
     CreateTestFile(src + "/file1.txt", "content1");
     
@@ -278,14 +270,13 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_008, testing::ext::TestSize.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_009, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyDirCoreTest-begin CopyDirCoreTest_DoCopyDir_009";
 
-    string src = srcPath.string() + "/test09";
-    string dest = destPath.string();
+    string src = g_srcPath.string() + "/test09";
+    string dest = g_destPath.string();
     filesystem::create_directories(src);
     CreateTestFile(src + "/file1.txt", "content1");
     

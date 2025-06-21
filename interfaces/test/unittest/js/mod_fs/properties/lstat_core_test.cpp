@@ -34,6 +34,9 @@ void LstatCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     int32_t fd = open("/data/test/lstat.txt", CREATE | O_RDWR, 0644);
+    if (fd <= 0) {
+        ASSERT_TRUE(false);
+    }
     close(fd);
 }
 
