@@ -23,13 +23,13 @@ HyperaioTrace::HyperaioTrace(const std::string& value, bool isShowLog) : value_(
     if (isShowLog) {
         HILOGI("%{public}s", value_.c_str());
     }
-    StartTrace(HITRACE_TAG_OHOS, "[HyperAio]" + value);
+    StartTrace(HITRACE_TAG_FILEMANAGEMENT, "[HyperAio]" + value);
 }
 
 void HyperaioTrace::End()
 {
     if (!isFinished_) {
-        FinishTrace(HITRACE_TAG_OHOS);
+        FinishTrace(HITRACE_TAG_FILEMANAGEMENT);
         isFinished_ = true;
     }
 }

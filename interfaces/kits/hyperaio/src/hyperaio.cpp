@@ -53,6 +53,11 @@ static bool HasAccessIouringPermission()
     return true;
 }
 
+static bool ValidateReqNum(uint32_t reqNum)
+{
+    return reqNum > 0 && reqNum <= URING_QUEUE_SIZE - 1;
+}
+
 uint32_t HyperAio::SupportIouring()
 {
     HyperaioTrace trace("SupportIouring");
@@ -121,6 +126,10 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
+    if (!ValidateReqNum(req->reqNum)) {
+        HILOGE("reqNum is out of range: %{public}u", req->reqNum);
+        return -EINVAL;
+    }
     HyperaioTrace trace("StartOpenReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
@@ -139,7 +148,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         HyperaioTrace trace("open flags:" + std::to_string(openInfo->flags) + "mode:" + std::to_string(openInfo->mode)
             + "userData:" + std::to_string(openInfo->userData));
         count++;
-        if (count >= BATCH_SIZE) {
+        if (count >= BATCH_SIZE || i == totalReqs - 1) {
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit open reqs failed, ret = %{public}d", ret);
@@ -148,14 +157,6 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
             openReqCount_ += count;
             count = 0;
         }
-    }
-    if (count > 0 && count < BATCH_SIZE) {
-        int32_t ret = io_uring_submit(&pImpl_->uring_);
-        if (ret < 0) {
-            HILOGE("submit open reqs failed, ret = %{public}d", ret);
-            return ret;
-        }
-        openReqCount_ += count;
     }
     return EOK;
 }
@@ -171,6 +172,10 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
         return -EPERM;
+    }
+    if (!ValidateReqNum(req->reqNum)) {
+        HILOGE("reqNum is out of range: %{public}u", req->reqNum);
+        return -EINVAL;
     }
     HyperaioTrace trace("StartReadReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
@@ -189,7 +194,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         HyperaioTrace trace("read len:" + std::to_string(readInfo->len) + "offset:" + std::to_string(readInfo->offset)
             + "userData:" + std::to_string(readInfo->userData));
         count++;
-        if (count >= BATCH_SIZE) {
+        if (count >= BATCH_SIZE || i == totalReqs - 1) {
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit read reqs failed, ret = %{public}d", ret);
@@ -199,15 +204,6 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
             count = 0;
         }
     }
-    if (count > 0 && count < BATCH_SIZE) {
-        int32_t ret = io_uring_submit(&pImpl_->uring_);
-        if (ret < 0) {
-            HILOGE("submit read reqs failed, ret = %{public}d", ret);
-            return ret;
-        }
-        readReqCount_ += count;
-    }
-
     return EOK;
 }
 
@@ -222,6 +218,10 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
         return -EPERM;
+    }
+    if (!ValidateReqNum(req->reqNum)) {
+        HILOGE("reqNum is out of range: %{public}u", req->reqNum);
+        return -EINVAL;
     }
     HyperaioTrace trace("StartCancelReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
@@ -240,7 +240,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         HyperaioTrace trace("cancel userData:" + std::to_string(cancelInfo->userData)
             + "targetUserData:" + std::to_string(cancelInfo->targetUserData));
         count++;
-        if (count >= BATCH_SIZE) {
+        if (count >= BATCH_SIZE || i == totalReqs - 1) {
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit cancel reqs failed, ret = %{public}d", ret);
@@ -249,14 +249,6 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
             cancelReqCount_ += count;
             count = 0;
         }
-    }
-    if (count > 0 && count < BATCH_SIZE) {
-        int32_t ret = io_uring_submit(&pImpl_->uring_);
-        if (ret < 0) {
-            HILOGE("submit cancel reqs failed, ret = %{public}d", ret);
-            return ret;
-        }
-        cancelReqCount_ += count;
     }
     return EOK;
 }
@@ -276,9 +268,10 @@ void HyperAio::HarvestRes()
             continue;
         }
         cqeCount_++;
+        if (cqe->res < 0) {
+            HILOGI("cqe failed, cqe->res = %{public}d", cqe->res);
+        }
         auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
-        HILOGI("get cqe, user_data = %{public}lld, res = %{public}d, flags = %{public}u",
-            cqe->user_data, cqe->res, cqe->flags);
         HyperaioTrace trace("harvest: userdata " + std::to_string(cqe->user_data)
             + " res " + std::to_string(cqe->res) + "flags " + std::to_string(cqe->flags));
         io_uring_cqe_seen(&pImpl_->uring_, cqe);
@@ -302,6 +295,7 @@ int32_t HyperAio::DestroyCtx()
     if (harvestThread_.joinable()) {
         HILOGI("start harvest thread join");
         harvestThread_.join();
+        // This log is only printed after join() completes successfully
         HILOGI("join success");
     }
 

@@ -16,9 +16,15 @@
 #ifndef UNITTEST_HYPERAIO_INCLUDE_LIBURING_H
 #define UNITTEST_HYPERAIO_INCLUDE_LIBURING_H
 
+#include <chrono>
+#include <thread>
 namespace OHOS {
 namespace HyperAio {
 #define O_RDWR      02
+inline bool sqe_flag = true;
+inline bool init_flag = true;
+inline bool wait_flag = true;
+inline bool cqe_res_flag = true;
 struct io_uring_sqe {
     int32_t data;
 };
@@ -31,12 +37,28 @@ struct io_uring_cqe {
 };
 
 struct io_uring {
-    int32_t data;
+    std::vector<std::unique_ptr<io_uring_sqe>> sqe_list;
+    io_uring() {}
+    ~io_uring() {}
+    inline io_uring_sqe *io_uring_get_sqe()
+    {
+        auto sqe = std::make_unique<io_uring_sqe>();
+        io_uring_sqe *raw_sqe = sqe.get();
+        sqe_list.push_back(std::move(sqe));
+        return raw_sqe;
+    }
+    void clear_sqes()
+    {
+        sqe_list.clear();
+    }
 };
 
 inline struct io_uring_sqe *io_uring_get_sqe(struct io_uring *ring)
 {
-    return new io_uring_sqe();
+    if (sqe_flag) {
+        return ring->io_uring_get_sqe();
+    }
+    return nullptr;
 }
 
 inline int io_uring_submit(struct io_uring *ring)
@@ -46,7 +68,10 @@ inline int io_uring_submit(struct io_uring *ring)
 
 inline int io_uring_queue_init(unsigned entries, struct io_uring *ring, unsigned flags)
 {
-    return 1;
+    if (init_flag) {
+        return 1;
+    }
+    return -1;
 }
 
 inline void io_uring_sqe_set_data(struct io_uring_sqe *sqe, void *data)
@@ -74,11 +99,14 @@ inline void io_uring_prep_cancel(struct io_uring_sqe *sqe,
 
 inline int io_uring_wait_cqe(struct io_uring *ring, struct io_uring_cqe **cqe_ptr)
 {
-    *cqe_ptr = new io_uring_cqe;
-    (*cqe_ptr)->data = 0;
-    (*cqe_ptr)->user_data = 0;
-    (*cqe_ptr)->res = 0;
-    (*cqe_ptr)->flags = 0;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    if (!wait_flag) {
+        wait_flag = true;
+        return -1;
+    }
+    *cqe_ptr = new io_uring_cqe();
+    (*cqe_ptr)->res = cqe_res_flag ? 0 : -1;
+    cqe_res_flag = true;
     return 1;
 }
 
