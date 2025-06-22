@@ -46,7 +46,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_SupportIouring_0000, testing::ext::TestSize.Level1)
     {
@@ -66,7 +65,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_CtxInit_0000, testing::ext::TestSize.Level0)
     {
@@ -87,7 +85,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_CtxInit_0001, testing::ext::TestSize.Level1)
     {
@@ -104,7 +101,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_CtxInit_0002, testing::ext::TestSize.Level1)
     {
@@ -122,7 +118,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_CtxInit_0003, testing::ext::TestSize.Level1)
     {
@@ -142,7 +137,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_CtxInit_0004, testing::ext::TestSize.Level1)
     {
@@ -161,7 +155,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0000, testing::ext::TestSize.Level1)
     {
@@ -181,7 +174,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0001, testing::ext::TestSize.Level1)
     {
@@ -206,7 +198,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0002, testing::ext::TestSize.Level0)
     {
@@ -229,7 +220,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0003, testing::ext::TestSize.Level1)
     {
@@ -263,7 +253,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0004, testing::ext::TestSize.Level1)
     {
@@ -293,7 +282,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0005, testing::ext::TestSize.Level1)
     {
@@ -310,7 +298,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0000, testing::ext::TestSize.Level1)
     {
@@ -329,7 +316,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0001, testing::ext::TestSize.Level1)
     {
@@ -354,7 +340,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0002, testing::ext::TestSize.Level0)
     {
@@ -376,7 +361,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0003, testing::ext::TestSize.Level1)
     {
@@ -410,7 +394,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0004, testing::ext::TestSize.Level1)
     {
@@ -440,7 +423,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0005, testing::ext::TestSize.Level1)
     {
@@ -457,7 +439,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0000, testing::ext::TestSize.Level1)
     {
@@ -476,7 +457,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0001, testing::ext::TestSize.Level1)
     {
@@ -500,7 +480,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0002, testing::ext::TestSize.Level0)
     {
@@ -522,7 +501,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0003, testing::ext::TestSize.Level1)
     {
@@ -553,7 +531,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0004, testing::ext::TestSize.Level1)
     {
@@ -580,7 +557,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0005, testing::ext::TestSize.Level1)
     {
@@ -597,7 +573,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_HarvestRes_0000, testing::ext::TestSize.Level1)
     {
@@ -618,7 +593,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_HarvestRes_0001, testing::ext::TestSize.Level1)
     {
@@ -639,7 +613,6 @@ namespace OHOS::HyperAio {
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
-     * @tc.require: AR000HG8M4
      */
     HWTEST_F(HyperAioTest, HyperAio_DestroyCtx_0000, testing::ext::TestSize.Level1)
     {
