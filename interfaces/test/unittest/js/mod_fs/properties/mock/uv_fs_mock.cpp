@@ -17,8 +17,8 @@
 
 using namespace OHOS::FileManagement::ModuleFileIO;
 
-int uv_fs_read(
-    uv_loop_t *loop, uv_fs_t *req, uv_file file, const uv_buf_t bufs[], unsigned int nbufs, int64_t off, uv_fs_cb cb)
+int uv_fs_read(uv_loop_t *loop, uv_fs_t *req, uv_file file, const uv_buf_t bufs[], unsigned int nbufs, int64_t off,
+    uv_fs_cb cb)
 {
     return Uvfs::ins->uv_fs_read(loop, req, file, bufs, nbufs, off, cb);
 }
@@ -68,10 +68,20 @@ int uv_fs_ftruncate(uv_loop_t *loop, uv_fs_t *req, uv_file fd, int64_t offset, u
     return Uvfs::ins->uv_fs_ftruncate(loop, req, fd, offset, cb);
 }
 
-int uv_fs_write(
-    uv_loop_t *loop, uv_fs_t *req, uv_file fd, const uv_buf_t bufs[], unsigned int nbufs, int64_t offset, uv_fs_cb cb)
+int uv_fs_write(uv_loop_t *loop, uv_fs_t *req, uv_file fd, const uv_buf_t bufs[], unsigned int nbufs, int64_t offset,
+    uv_fs_cb cb)
 {
     return Uvfs::ins->uv_fs_write(loop, req, fd, bufs, nbufs, offset, cb);
+}
+
+int uv_fs_realpath(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_realpath(loop, req, path, cb);
+}
+
+int uv_fs_close(uv_loop_t *loop, uv_fs_t *req, uv_file file, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_close(loop, req, file, cb);
 }
 
 int uv_fs_fdatasync(uv_loop_t *loop, uv_fs_t *req, uv_file file, uv_fs_cb cb)
@@ -99,4 +109,27 @@ int uv_fs_unlink(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb)
     return Uvfs::ins->uv_fs_unlink(loop, req, path, cb);
 }
 
-void uv_fs_req_cleanup(uv_fs_t *req) {}
+void uv_fs_req_cleanup(uv_fs_t *req)
+{
+    return;
+}
+
+int uv_fs_rename(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_rename(loop, req, path, newPath, cb);
+}
+
+int uv_fs_fsync(uv_loop_t *loop, uv_fs_t *req, uv_file file, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_fsync(loop, req, file, cb);
+}
+
+int uv_fs_sendfile(uv_loop_t *loop, uv_fs_t *req, uv_file outFd, uv_file inFd, int64_t off, size_t len, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_sendfile(loop, req, outFd, inFd, off, len, cb);
+}
+
+int uv_fs_lstat(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_lstat(loop, req, path, cb);
+}
