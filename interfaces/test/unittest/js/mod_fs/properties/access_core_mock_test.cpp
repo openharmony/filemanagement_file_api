@@ -67,7 +67,7 @@ void AccessCoreMockTest::TearDown(void)
  */
 HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin AccessCoreMockTest_DoAccess_001";
+    GTEST_LOG_(INFO) << "AccessCoreMockTest-begin AccessCoreMockTest_DoAccess_001";
 
     std::string path = "TEST";
     std::optional<AccessModeType> mode;
@@ -76,7 +76,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_001, testing::ext::Test
     auto res = AccessCore::DoAccess(path, mode);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "NClassTest-end AccessCoreMockTest_DoAccess_001";
+    GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_001";
 }
 
 /**
@@ -88,7 +88,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_001, testing::ext::Test
  */
 HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin AccessCoreMockTest_DoAccess_002";
+    GTEST_LOG_(INFO) << "AccessCoreMockTest-begin AccessCoreMockTest_DoAccess_002";
 
     std::string path = "TEST";
     std::optional<AccessModeType> mode;
@@ -98,7 +98,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_002, testing::ext::Test
     auto res = AccessCore::DoAccess(path, mode);
     EXPECT_EQ(res.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "NClassTest-end AccessCoreMockTest_DoAccess_002";
+    GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_002";
 }
 
 /**
@@ -110,7 +110,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_002, testing::ext::Test
  */
 HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin AccessCoreMockTest_DoAccess_003";
+    GTEST_LOG_(INFO) << "AccessCoreMockTest-begin AccessCoreMockTest_DoAccess_003";
 
     std::string path = "TEST";
     AccessModeType mode = AccessModeType::EXIST;
@@ -120,7 +120,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_003, testing::ext::Test
     auto res = AccessCore::DoAccess(path, mode, flag);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "NClassTest-end AccessCoreMockTest_DoAccess_003";
+    GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_003";
 }
 
 /**
@@ -132,7 +132,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_003, testing::ext::Test
  */
 HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin AccessCoreMockTest_DoAccess_004";
+    GTEST_LOG_(INFO) << "AccessCoreMockTest-begin AccessCoreMockTest_DoAccess_004";
 
     std::string path = "TEST";
     AccessModeType mode = AccessModeType::EXIST;
@@ -143,7 +143,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_004, testing::ext::Test
     auto res = AccessCore::DoAccess(path, mode, flag);
     EXPECT_EQ(res.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "NClassTest-end AccessCoreMockTest_DoAccess_004";
+    GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_004";
 }
 
 /**

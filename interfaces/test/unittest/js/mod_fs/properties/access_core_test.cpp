@@ -208,7 +208,7 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_006, testing::ext::TestSize.Lev
 {
     GTEST_LOG_(INFO) << "AccessCoreTest-begin AccessCoreTest_DoAccess_006";
 
-    std::string path = "test";
+    std::string path = "AccessCoreTest";
     AccessModeType mode = AccessModeType::EXIST;
     AccessFlag flag = LOCAL_FLAG;
 
