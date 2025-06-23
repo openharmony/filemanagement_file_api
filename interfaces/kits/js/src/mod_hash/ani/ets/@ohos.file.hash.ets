@@ -23,8 +23,8 @@ export default namespace hash {
       promise.then((ret: NullishType): void => {
         let res = ret as string;
         resolve(res);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -36,8 +36,8 @@ export default namespace hash {
       e.code = 0;
       let res = ret as string;
       callback(e, res);
-    }).catch((e: BusinessError): void => {
-      callback(e, "");
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, "");
     });
   }
 

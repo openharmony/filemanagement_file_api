@@ -26,12 +26,12 @@ namespace statfs {
       promise.then((ret: NullishType): void => {
         let result = ret as number
         resolve(result);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
-    
+
   export function getFreeSize(path: string, callback: AsyncCallback<number>): void {
     let promise = taskpool.execute(StatvfsImpl.getFreeSizeSync, path);
     promise.then((ret: NullishType): void => {
@@ -39,27 +39,27 @@ namespace statfs {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
-  
+
   export function getTotalSizeSync(path: string): number {
     return StatvfsImpl.getTotalSizeSync(path);
   }
-  
+
   export function getTotalSize(path: string): Promise<number> {
     return new Promise<number>((resolve: (result: number) => void, reject: (e: BusinessError<void>) => void): void => {
       let promise = taskpool.execute(StatvfsImpl.getTotalSizeSync, path);
       promise.then((ret: NullishType): void => {
         let result = ret as number
         resolve(result);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
-  
+
   export function getTotalSize(path: string, callback: AsyncCallback<number>): void {
     let promise = taskpool.execute(StatvfsImpl.getTotalSizeSync, path);
     promise.then((ret: NullishType): void => {
@@ -67,8 +67,8 @@ namespace statfs {
       e.code = 0;
       let result = ret as number;
       callback(e, result);
-    }).catch((e: BusinessError): void => {
-      callback(e, 0);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, 0);
     });
   }
 }
