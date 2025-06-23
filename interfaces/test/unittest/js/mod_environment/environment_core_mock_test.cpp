@@ -92,7 +92,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetStorageDataDir_001, testi
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetStorageDataDir_002
- * @tc.desc: Test function of DoGetStorageDataDir interface for FALSE.
+ * @tc.desc: Test function of DoGetStorageDataDir interface for success.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -112,7 +112,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetStorageDataDir_002, testi
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetUserDataDir_001
- * @tc.desc: Test function of DoGetUserDataDir interface for success.
+ * @tc.desc: Test function of DoGetUserDataDir interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -177,7 +177,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetUserDownloadDir_001, test
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetUserDownloadDir_002
- * @tc.desc: Test function of DoGetUserDownloadDir interface for success.
+ * @tc.desc: Test function of DoGetUserDownloadDir interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -197,7 +197,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetUserDownloadDir_002, test
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetUserDownloadDir_003
- * @tc.desc: Test function of DoGetUserDownloadDir interface for success.
+ * @tc.desc: Test function of DoGetUserDownloadDir interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -246,7 +246,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetUserDesktopDir_001, testi
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetUserDesktopDir_002
- * @tc.desc: Test function of DoGetUserDesktopDir interface for success.
+ * @tc.desc: Test function of DoGetUserDesktopDir interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -319,7 +319,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetUserDocumentDir_001, test
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetUserDocumentDir_002
- * @tc.desc: Test function of DoGetUserDocumentDir interface for success.
+ * @tc.desc: Test function of DoGetUserDocumentDir interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -343,7 +343,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetUserDocumentDir_002, test
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetUserDocumentDir_003
- * @tc.desc: Test function of DoGetUserDocumentDir interface for success.
+ * @tc.desc: Test function of DoGetUserDocumentDir interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -367,7 +367,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetUserDocumentDir_003, test
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetExternalStorageDir_001
- * @tc.desc: Test function of DoGetExternalStorageDir interface for success.
+ * @tc.desc: Test function of DoGetExternalStorageDir interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -392,7 +392,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetExternalStorageDir_001, t
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetExternalStorageDir_002
- * @tc.desc: Test function of DoGetExternalStorageDir interface for success.
+ * @tc.desc: Test function of DoGetExternalStorageDir interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -447,7 +447,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetExternalStorageDir_003, t
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetExternalStorageDir_004
- * @tc.desc: Test function of DoGetExternalStorageDir interface for success.
+ * @tc.desc: Test function of DoGetExternalStorageDir interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -492,7 +492,7 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetUserHomeDir_001, testing:
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetUserHomeDir_002
- * @tc.desc: Test function of DoGetUserHomeDir interface for FALSE.
+ * @tc.desc: Test function of DoGetUserHomeDir interface for success.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
