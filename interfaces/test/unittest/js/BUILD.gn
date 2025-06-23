@@ -32,18 +32,21 @@ ohos_unittest("ani_file_fs_test") {
   ]
 
   sources = [
-    "mod_fs/class_file/fs_file_test.cpp",
     "mod_fs/class_atomicfile/fs_atomicfile_test.cpp",
+    "mod_fs/class_file/fs_file_test.cpp",
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_test.cpp",
+    "mod_fs/class_stat/fs_stat_test.cpp",
     "mod_fs/class_stream/fs_stream_test.cpp",
     "mod_fs/properties/access_core_test.cpp",
     "mod_fs/properties/close_core_test.cpp",
+    "mod_fs/properties/copy_dir_core_test.cpp",
     "mod_fs/properties/create_randomaccessfile_core_test.cpp",
     "mod_fs/properties/create_stream_core_test.cpp",
     "mod_fs/properties/dup_core_test.cpp",
     "mod_fs/properties/fdopen_stream_core_test.cpp",
     "mod_fs/properties/listfile_core_test.cpp",
     "mod_fs/properties/read_core_test.cpp",
+    "mod_fs/properties/lstat_core_test.cpp",
     "mod_fs/properties/open_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
     "mod_fs/properties/rmdir_core_test.cpp",
@@ -96,9 +99,10 @@ ohos_unittest("ani_file_fs_mock_test") {
 
   sources = [
     "mod_fs/class_file/fs_file_mock_test.cpp",
+    "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
+    "mod_fs/class_stat/fs_stat_mock_test.cpp",
     "mod_fs/class_stream/fs_stream_mock_test.cpp",
     "mod_fs/class_stream/mock/c_mock.cpp",
-    "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
     "mod_fs/properties/access_core_mock_test.cpp",
     "mod_fs/properties/create_randomaccessfile_core_mock_test.cpp",
     "mod_fs/properties/dup_core_mock_test.cpp",
@@ -106,6 +110,7 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/symlink_core_mock_test.cpp",
     "mod_fs/properties/truncate_core_mock_test.cpp",
     "mod_fs/properties/utimes_core_mock_test.cpp",
+    "mod_fs/properties/lstat_core_mock_test.cpp",
     "mod_fs/properties/mock/system_mock.cpp",
     "mod_fs/properties/mock/uv_fs_mock.cpp",
     "mod_fs/properties/open_core_mock_test.cpp",
@@ -191,5 +196,34 @@ ohos_unittest("ani_file_securitylabel_test") {
     "libuv:uv",
     "googletest:gmock_main",
     "googletest:gtest_main",
+  ]
+}
+
+ohos_unittest("ani_file_statvfs_test") {
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  sources = [
+    "mod_statvfs/statvfs_core_test.cpp",
+  ]
+
+  include_dirs = [
+    "mock/libuv",
+    "${file_api_path}/interfaces/kits/js/src/mod_statvfs",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/js:ani_file_statvfs",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "libuv:uv",
   ]
 }

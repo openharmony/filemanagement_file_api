@@ -50,10 +50,10 @@ public:
     virtual int uv_fs_mkdtemp(uv_loop_t *loop, uv_fs_t *req, const char *tpl, uv_fs_cb cb) = 0;
     virtual int uv_fs_unlink(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb) = 0;
     virtual int uv_fs_rename(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, uv_fs_cb cb) = 0;
-    virtual int uv_fs_fsync(uv_loop_t* loop, uv_fs_t* req, uv_file file, uv_fs_cb cb) = 0;
-    virtual int uv_fs_sendfile(uv_loop_t* loop, uv_fs_t* req, uv_file outFd, uv_file inFd,
-        int64_t off, size_t len, uv_fs_cb cb) = 0;
     virtual int uv_fs_lstat(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb) = 0;
+    virtual int uv_fs_fsync(uv_loop_t *loop, uv_fs_t *req, uv_file file, uv_fs_cb cb) = 0;
+    virtual int uv_fs_sendfile(uv_loop_t *loop, uv_fs_t *req, uv_file outFd, uv_file inFd, int64_t off, size_t len,
+        uv_fs_cb cb) = 0;
 };
 
 class UvfsMock : public Uvfs {
@@ -81,10 +81,10 @@ public:
     MOCK_METHOD4(uv_fs_mkdtemp, int(uv_loop_t *loop, uv_fs_t *req, const char *tpl, uv_fs_cb cb));
     MOCK_METHOD4(uv_fs_unlink, int(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb));
     MOCK_METHOD5(uv_fs_rename, int(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, uv_fs_cb cb));
-    MOCK_METHOD4(uv_fs_fsync, int(uv_loop_t* loop, uv_fs_t* req, uv_file file, uv_fs_cb cb));
-    MOCK_METHOD7(uv_fs_sendfile, int(uv_loop_t* loop, uv_fs_t* req, uv_file outFd, uv_file inFd,
-        int64_t off, size_t len, uv_fs_cb cb));
     MOCK_METHOD4(uv_fs_lstat, int(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb));
+    MOCK_METHOD4(uv_fs_fsync, int(uv_loop_t *loop, uv_fs_t *req, uv_file file, uv_fs_cb cb));
+    MOCK_METHOD7(uv_fs_sendfile, int(uv_loop_t *loop, uv_fs_t *req, uv_file outFd, uv_file inFd, int64_t off,
+        size_t len, uv_fs_cb cb));
 };
 
 } // OHOS::FileManagement::ModuleFileIO
