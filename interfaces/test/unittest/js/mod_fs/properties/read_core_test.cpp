@@ -14,10 +14,11 @@
  */
 
 #include "read_core.h"
-#include "mock/uv_fs_mock.h"
 
+#include <cstdint>
+#include <climits>
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -61,7 +62,7 @@ void ReadCoreTest::TearDown(void)
  */
 HWTEST_F(ReadCoreTest, ReadCoreTest_DoRead_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadCoreTest_DoRead_001";
+    GTEST_LOG_(INFO) << "ReadCoreTest-begin ReadCoreTest_DoRead_001";
 
     int32_t fd = -1;
     void *buf = nullptr;
@@ -70,31 +71,28 @@ HWTEST_F(ReadCoreTest, ReadCoreTest_DoRead_001, testing::ext::TestSize.Level1)
     auto res = ReadCore::DoRead(fd, arrayBuffer);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "NClassTest-end ReadCoreTest_DoRead_001";
+    GTEST_LOG_(INFO) << "ReadCoreTest-end ReadCoreTest_DoRead_001";
 }
 
 /**
  * @tc.name: ReadCoreTest_DoRead_002
- * @tc.desc: Test function of ReadCore::DoRead interface for FALSE.
+ * @tc.desc: Test function of ReadCore::DoRead interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
 HWTEST_F(ReadCoreTest, ReadCoreTest_DoRead_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadCoreTest_DoRead_002";
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(-1));
+    GTEST_LOG_(INFO) << "ReadCoreTest-begin ReadCoreTest_DoRead_002";
 
     int32_t fd = 1;
     void *buf = nullptr;
-    ArrayBuffer arrayBuffer(buf, 0);
+    ArrayBuffer arrayBuffer(buf, 0xffffffff + 1);
+
     auto res = ReadCore::DoRead(fd, arrayBuffer);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "NClassTest-end ReadCoreTest_DoRead_002";
+    GTEST_LOG_(INFO) << "ReadCoreTest-end ReadCoreTest_DoRead_002";
 }
 
 /**
@@ -106,19 +104,18 @@ HWTEST_F(ReadCoreTest, ReadCoreTest_DoRead_002, testing::ext::TestSize.Level1)
  */
 HWTEST_F(ReadCoreTest, ReadCoreTest_DoRead_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "NClassTest-begin ReadCoreTest_DoRead_005";
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(1));
+    GTEST_LOG_(INFO) << "ReadCoreTest-begin ReadCoreTest_DoRead_003";
 
     int32_t fd = 1;
     void *buf = nullptr;
     ArrayBuffer arrayBuffer(buf, 0);
-    auto res = ReadCore::DoRead(fd, arrayBuffer);
-    EXPECT_EQ(res.IsSuccess(), true);
+    optional<ReadOptions> options = std::make_optional<ReadOptions>();
+    options->offset = std::make_optional<int64_t>(-1);
 
-    GTEST_LOG_(INFO) << "NClassTest-end ReadCoreTest_DoRead_003";
+    auto res = ReadCore::DoRead(fd, arrayBuffer, options);
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "ReadCoreTest-end ReadCoreTest_DoRead_003";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

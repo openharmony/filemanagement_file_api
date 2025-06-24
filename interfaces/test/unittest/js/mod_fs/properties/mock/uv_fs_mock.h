@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_UV_FS_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_UV_FS_MOCK_H
+#ifndef UV_FS_MOCK_H
+#define UV_FS_MOCK_H
 
 #include "uv.h"
 
@@ -36,7 +36,7 @@ public:
     virtual int uv_fs_scandir(uv_loop_t *loop, uv_fs_t *req, const char *path, int flags, uv_fs_cb cb) = 0;
     virtual int uv_fs_scandir_next(uv_fs_t *req, uv_dirent_t *ent) = 0;
     virtual int uv_fs_rmdir(uv_loop_t *loop, uv_fs_t *req, const char* path, uv_fs_cb cb) = 0;
-    virtual int uv_fs_symlink(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, int flags,
+    virtual int uv_fs_symlink(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *new_path, int flags,
         uv_fs_cb cb) = 0;
     virtual int uv_fs_open(uv_loop_t *loop, uv_fs_t *req, const char *path, int flags, int mode, uv_fs_cb cb) = 0;
     virtual int uv_fs_ftruncate(uv_loop_t *loop, uv_fs_t *req, uv_file fd, int64_t offset, uv_fs_cb cb) = 0;
@@ -67,7 +67,7 @@ public:
     MOCK_METHOD5(uv_fs_scandir, int(uv_loop_t *loop, uv_fs_t *req, const char *path, int flags, uv_fs_cb cb));
     MOCK_METHOD2(uv_fs_scandir_next, int(uv_fs_t *req, uv_dirent_t *ent));
     MOCK_METHOD4(uv_fs_rmdir, int(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb));
-    MOCK_METHOD6(uv_fs_symlink, int(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, int flags,
+    MOCK_METHOD6(uv_fs_symlink, int(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *new_path, int flags,
         uv_fs_cb cb));
     MOCK_METHOD6(uv_fs_open, int(uv_loop_t *loop, uv_fs_t *req, const char *path, int flags, int mode, uv_fs_cb cb));
     MOCK_METHOD5(uv_fs_ftruncate, int(uv_loop_t *loop, uv_fs_t *req, uv_file fd, int64_t offset, uv_fs_cb cb));
@@ -87,5 +87,5 @@ public:
         size_t len, uv_fs_cb cb));
 };
 
-} // namespace OHOS::FileManagement::ModuleFileIO
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_UV_FS_MOCK_H
+} // OHOS::FileManagement::ModuleFileIO
+#endif

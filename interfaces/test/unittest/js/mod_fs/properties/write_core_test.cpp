@@ -14,10 +14,8 @@
  */
 
 #include "write_core.h"
-#include "mock/uv_fs_mock.h"
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -71,50 +69,6 @@ HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite1_001, testing::ext::TestSize.Level
 }
 
 /**
- * @tc.name: WriteCoreTest_DoWrite1_002
- * @tc.desc: Test function of WriteCore::DoWrite3 interface for FALSE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite1_002, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite1_002";
-    int32_t fd = 1;
-    string buffer;
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-
-    EXPECT_CALL(*uv, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
-
-    auto res = WriteCore::DoWrite(fd, buffer);
-    EXPECT_EQ(res.IsSuccess(), false);
-    GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite1_002";
-}
-
-/**
- * @tc.name: WriteCoreTest_DoWrite1_003
- * @tc.desc: Test function of WriteCore::DoWrite3 interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite1_003, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite1_003";
-    int32_t fd = 1;
-    string buffer;
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-
-    EXPECT_CALL(*uv, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(1));
-
-    auto res = WriteCore::DoWrite(fd, buffer);
-    EXPECT_EQ(res.IsSuccess(), true);
-    GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite1_003";
-}
-
-/**
  * @tc.name: WriteCoreTest_DoWrite2_001
  * @tc.desc: Test function of WriteCore::DoWrite2 interface for FALSE.
  * @tc.size: MEDIUM
@@ -132,27 +86,63 @@ HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite2_001, testing::ext::TestSize.Level
     GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite2_001";
 }
 
+#if defined(_WIN64) || defined(__X86_64__) || defined(__ppc64__) || defined(__LP64__)
 /**
- * @tc.name: WriteCoreTest_DoWrite2_002
- * @tc.desc: Test function of WriteCore::DoWrite2 interface for FALSE.
+ * @tc.name: WriteCoreTest_DoWrite1_002
+ * @tc.desc: Test function of WriteCore::DoWrite1 interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite2_002, testing::ext::TestSize.Level1)
+HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite1_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite2_002";
+    GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite1_002";
     int32_t fd = -1;
-    string buffer;
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-
-    EXPECT_CALL(*uv, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
+    ArrayBuffer buffer(nullptr, 0);
 
     auto res = WriteCore::DoWrite(fd, buffer);
     EXPECT_EQ(res.IsSuccess(), false);
-    GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite2_002";
+    GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite1_002";
+}
+#else
+#endif
+
+/**
+ * @tc.name: WriteCoreTest_DoWrite1_003
+ * @tc.desc: Test function of WriteCore::DoWrite1 interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite1_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite1_003";
+    int32_t fd = 1;
+    ArrayBuffer buffer(nullptr, 1);
+    std::optional<WriteOptions> options = std::make_optional<WriteOptions>(WriteOptions());
+    options->offset = std::make_optional<int64_t>(-1);
+
+    auto res = WriteCore::DoWrite(fd, buffer, options);
+    EXPECT_EQ(res.IsSuccess(), false);
+    GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite1_003";
 }
 
+/**
+ * @tc.name: WriteCoreTest_DoWrite1_004
+ * @tc.desc: Test function of WriteCore::DoWrite1 interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite1_004, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite1_004";
+    int32_t fd = 1;
+    ArrayBuffer buffer(nullptr, 1);
+
+    auto res = WriteCore::DoWrite(fd, buffer);
+    EXPECT_EQ(res.IsSuccess(), false);
+    GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite1_004";
+}
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

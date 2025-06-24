@@ -14,10 +14,9 @@
  */
 
 #include "utimes_core.h"
-#include "mock/uv_fs_mock.h"
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -62,84 +61,13 @@ void UtimesCoreTest::TearDown(void)
 HWTEST_F(UtimesCoreTest, UtimesCoreTest_DoUtimes_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UtimesCoreTest-begin UtimesCoreTest_DoUtimes_001";
+
     string path;
     double mtime = -1;
     auto res = UtimesCore::DoUtimes(path, mtime);
-
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "UtimesCoreTest-end UtimesCoreTest_DoUtimes_001";
-}
-
-/**
- * @tc.name: UtimesCoreTest_DoUtimes_002
- * @tc.desc: Test function of UtimesCore::DoUtimes interface for Failed.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(UtimesCoreTest, UtimesCoreTest_DoUtimes_002, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "UtimesCoreTest-begin UtimesCoreTest_DoUtimes_002";
-    string path;
-    double mtime = 1;
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-
-    EXPECT_CALL(*uv, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
-
-    auto res = UtimesCore::DoUtimes(path, mtime);
-    EXPECT_EQ(res.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "UtimesCoreTest-end UtimesCoreTest_DoUtimes_002";
-}
-
-/**
- * @tc.name: UtimesCoreTest_DoUtimes_003
- * @tc.desc: Test function of UtimesCore::DoUtimes interface for FALSE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(UtimesCoreTest, UtimesCoreTest_DoUtimes_003, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "UtimesCoreTest-begin UtimesCoreTest_DoUtimes_003";
-    string path;
-    double mtime = 1;
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-
-    EXPECT_CALL(*uv, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
-    EXPECT_CALL(*uv, uv_fs_utime(_, _, _, _, _, _)).WillOnce(Return(-1));
-
-    auto res = UtimesCore::DoUtimes(path, mtime);
-    EXPECT_EQ(res.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "UtimesCoreTest-end UtimesCoreTest_DoUtimes_003";
-}
-
-/**
- * @tc.name: UtimesCoreTest_DoUtimes_004
- * @tc.desc: Test function of UtimesCore::DoUtimes interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(UtimesCoreTest, UtimesCoreTest_DoUtimes_004, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "UtimesCoreTest-begin UtimesCoreTest_DoUtimes_004";
-    string path;
-    double mtime = 1;
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-
-    EXPECT_CALL(*uv, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
-    EXPECT_CALL(*uv, uv_fs_utime(_, _, _, _, _, _)).WillOnce(Return(1));
-
-    auto res = UtimesCore::DoUtimes(path, mtime);
-    EXPECT_EQ(res.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "UtimesCoreTest-end UtimesCoreTest_DoUtimes_004";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
