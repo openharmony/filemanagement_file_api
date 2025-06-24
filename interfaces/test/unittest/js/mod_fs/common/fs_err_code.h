@@ -13,33 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_POLL_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_POLL_MOCK_H
-
-#include <gmock/gmock.h>
-#include <poll.h>
+#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_COMMON_FS_ERR_CODE_H
+#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_COMMON_FS_ERR_CODE_H
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-class IPollMock {
-public:
-    virtual ~IPollMock() = default;
-    virtual int poll(struct pollfd *, nfds_t, int) = 0;
-};
-
-class PollMock : public IPollMock {
-public:
-    MOCK_METHOD(int, poll, (struct pollfd *, nfds_t, int), (override));
-
-public:
-    static std::shared_ptr<PollMock> GetMock();
-    static void DestroyMock();
-
-private:
-    static thread_local std::shared_ptr<PollMock> pollMock;
+enum FsErrCode {
+    E_IO_CODE = 13900005,
+    E_INVAL_CODE = 13900020,
 };
 
 } // namespace Test
@@ -47,4 +31,4 @@ private:
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_POLL_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_COMMON_FS_ERR_CODE_H

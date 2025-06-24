@@ -34,14 +34,13 @@ class EventfdMock : public IEventfdMock {
 public:
     MOCK_METHOD(int, eventfd, (unsigned int, int), (override));
 
-    static EventfdMock &GetMock()
-    {
-        static EventfdMock mock;
-        return mock;
-    }
-};
+public:
+    static std::shared_ptr<EventfdMock> GetMock();
+    static void DestroyMock();
 
-EventfdMock &GetEventfdMock();
+private:
+    static thread_local std::shared_ptr<EventfdMock> eventfdMock;
+};
 
 } // namespace Test
 } // namespace ModuleFileIO

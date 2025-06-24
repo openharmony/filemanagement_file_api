@@ -20,9 +20,19 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-EventfdMock &GetEventfdMock()
+thread_local std::shared_ptr<EventfdMock> EventfdMock::eventfdMock = nullptr;
+
+std::shared_ptr<EventfdMock> EventfdMock::GetMock()
 {
-    return EventfdMock::GetMock();
+    if (eventfdMock == nullptr) {
+        eventfdMock = std::make_shared<EventfdMock>();
+    }
+    return eventfdMock;
+}
+
+void EventfdMock::DestroyMock()
+{
+    eventfdMock = nullptr;
 }
 
 } // namespace Test
@@ -35,7 +45,7 @@ using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
 int eventfd(unsigned int count, int flags)
 {
-    return GetEventfdMock().eventfd(count, flags);
+    return EventfdMock::GetMock()->eventfd(count, flags);
 }
 
 } // extern "C"

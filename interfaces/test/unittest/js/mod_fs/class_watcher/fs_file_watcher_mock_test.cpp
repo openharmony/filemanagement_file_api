@@ -48,6 +48,10 @@ void FsFileWatcherMockTest::SetUpTestCase(void)
 
 void FsFileWatcherMockTest::TearDownTestCase(void)
 {
+    EventfdMock::DestroyMock();
+    InotifyMock::DestroyMock();
+    PollMock::DestroyMock();
+    UnistdMock::DestroyMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -75,9 +79,9 @@ void FsFileWatcherMockTest::TearDown(void)
  * @tc.desc: Test function of FsFileWatcher::GetNotifyId interface.
  * @tc.size: SMALL
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyId_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyId_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_GetNotifyId_001";
     // Prepare test condition
@@ -95,23 +99,23 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyId_001, testing::
  * @tc.desc: Test function of FsFileWatcher::InitNotify interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_InitNotify_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_InitNotify_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_InitNotify_001";
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     // Set mock behaviors
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    testing::StrictMock<EventfdMock> &eventfdMock = static_cast<testing::StrictMock<EventfdMock> &>(GetEventfdMock());
-    EXPECT_CALL(inotifyMock, inotify_init()).Times(1).WillOnce(testing::Return(1));
-    EXPECT_CALL(eventfdMock, eventfd(testing::_, testing::_)).Times(1).WillOnce(testing::Return(2));
+    auto eventfdMock = EventfdMock::GetMock();
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_init()).Times(1).WillOnce(testing::Return(1));
+    EXPECT_CALL(*eventfdMock, eventfd(testing::_, testing::_)).Times(1).WillOnce(testing::Return(2));
     // Do testing
     bool result = watcher.InitNotify();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
-    testing::Mock::VerifyAndClearExpectations(&eventfdMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
+    testing::Mock::VerifyAndClearExpectations(eventfdMock.get());
     EXPECT_TRUE(result);
     EXPECT_EQ(watcher.notifyFd_, 1);
     EXPECT_EQ(watcher.eventFd_, 2);
@@ -131,12 +135,12 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_InitNotify_002, testing::e
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     // Set mock behaviors
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(inotifyMock, inotify_init()).Times(1).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_init()).Times(1).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
     // Do testing
     bool result = watcher.InitNotify();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_FALSE(result);
     EXPECT_EQ(watcher.notifyFd_, -1);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_InitNotify_002";
@@ -155,15 +159,15 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_InitNotify_003, testing::e
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     // Set mock behaviors
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    testing::StrictMock<EventfdMock> &eventfdMock = static_cast<testing::StrictMock<EventfdMock> &>(GetEventfdMock());
-    EXPECT_CALL(inotifyMock, inotify_init()).Times(1).WillOnce(testing::Return(1));
-    EXPECT_CALL(eventfdMock, eventfd(testing::_, testing::_)).Times(1).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
+    auto inotifyMock = InotifyMock::GetMock();
+    auto eventfdMock = EventfdMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_init()).Times(1).WillOnce(testing::Return(1));
+    EXPECT_CALL(*eventfdMock, eventfd(testing::_, testing::_)).Times(1).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
     // Do testing
     bool result = watcher.InitNotify();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
-    testing::Mock::VerifyAndClearExpectations(&eventfdMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
+    testing::Mock::VerifyAndClearExpectations(eventfdMock.get());
     EXPECT_FALSE(result);
     EXPECT_EQ(watcher.notifyFd_, 1);
     EXPECT_EQ(watcher.eventFd_, -1);
@@ -175,9 +179,9 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_InitNotify_003, testing::e
  * @tc.desc: Test function of FsFileWatcher::StartNotify interface for SUCCESS when path is not watched.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StartNotify_001";
     // Prepare test parameters
@@ -188,16 +192,17 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_001, testing::
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
     // Set mock behaviors
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
+    int32_t expectedWd = 100;
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
-        .WillOnce(testing::Return(100));
+        .WillOnce(testing::Return(expectedWd));
     // Do testing
     int32_t result = watcher.StartNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, ERRNO_NOERR);
-    EXPECT_EQ(info->wd, 100);
+    EXPECT_EQ(info->wd, expectedWd);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StartNotify_001";
 }
 
@@ -207,29 +212,30 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_001, testing::
  * events.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_002, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_002, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StartNotify_002";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StartNotify_002";
     info->events = IN_CREATE | IN_DELETE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_)).Times(0);
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_)).Times(0);
     // Do testing
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     int32_t result = watcher.StartNotify(info);
     // Verify results
     EXPECT_EQ(result, ERRNO_NOERR);
-    EXPECT_EQ(info->wd, 100);
+    EXPECT_EQ(info->wd, expectedWd);
 }
 
 /**
@@ -293,14 +299,14 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_005, testing::
     info->fileName = "/test/FsFileWatcherMockTest_StartNotify_005";
     info->events = IN_DELETE;
     // Set mock behaviors for inotify_add_watch failure
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(testing::SetErrnoAndReturn(EIO, -1));
     // Do testing
     int32_t result = watcher.StartNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, EIO);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StartNotify_005";
 }
@@ -310,31 +316,32 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_005, testing::
  * @tc.desc: Test function of FsFileWatcher::StopNotify interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_001";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StopNotify_001";
     info->events = IN_CREATE | IN_DELETE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(0));
-    EXPECT_CALL(inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
+    auto unistdMock = UnistdMock::GetMock();
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, ERRNO_NOERR);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StopNotify_001";
 }
@@ -371,11 +378,12 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_003, testing::e
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = -1; // Invalid notifyFd
-    // Build test parameters
+    // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StopNotify_003";
     info->events = IN_CREATE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
@@ -394,27 +402,28 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_004, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_004";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StopNotify_004";
     info->events = IN_DELETE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(0));
-    EXPECT_CALL(inotifyMock, inotify_rm_watch(testing::_, testing::_))
+    auto unistdMock = UnistdMock::GetMock();
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_))
         .Times(1)
         .WillOnce(testing::SetErrnoAndReturn(EIO, -1));
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, EIO);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StopNotify_004";
 }
@@ -430,10 +439,11 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_005, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_005";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StopNotify_005";
     info->events = IN_DELETE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
@@ -442,16 +452,16 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_005, testing::e
     watcher.closed_ = true;
     watcher.reading_ = true;
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(0);
-    EXPECT_CALL(inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
+    auto unistdMock = UnistdMock::GetMock();
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::Return(1));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(0);
+    EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, ERRNO_NOERR);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StopNotify_005";
 }
@@ -468,10 +478,11 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_006, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_006";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StopNotify_006";
     info->events = IN_DELETE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
@@ -480,19 +491,19 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_006, testing::e
     auto remainingInfo = std::make_shared<WatcherInfo>(nullptr);
     remainingInfo->fileName = "/test/FsFileWatcherMockTest_StopNotify_006";
     remainingInfo->events = IN_CREATE;
-    remainingInfo->wd = 100;
+    remainingInfo->wd = expectedWd;
     watcher.dataCache_.AddWatcherInfo(remainingInfo);
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(0);
-    EXPECT_CALL(inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
+    auto unistdMock = UnistdMock::GetMock();
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(0);
+    EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, ERRNO_NOERR);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StopNotify_006";
 }
@@ -509,10 +520,11 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_007, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_007";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StopNotify_007";
     info->events = IN_DELETE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
@@ -521,22 +533,22 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_007, testing::e
     auto remainingInfo = std::make_shared<WatcherInfo>(nullptr);
     remainingInfo->fileName = "/test/FsFileWatcherMockTest_StopNotify_007";
     remainingInfo->events = IN_CREATE;
-    remainingInfo->wd = 100;
+    remainingInfo->wd = expectedWd;
     watcher.dataCache_.AddWatcherInfo(remainingInfo);
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(0);
-    EXPECT_CALL(inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
+    auto unistdMock = UnistdMock::GetMock();
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(0);
+    EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
-        .WillOnce(testing::Return(100));
+        .WillOnce(testing::Return(expectedWd));
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, ERRNO_NOERR);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StopNotify_007";
 }
@@ -553,10 +565,11 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_008, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_008";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StopNotify_008";
     info->events = IN_DELETE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
@@ -565,22 +578,22 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_008, testing::e
     auto remainingInfo = std::make_shared<WatcherInfo>(nullptr);
     remainingInfo->fileName = "/test/FsFileWatcherMockTest_StopNotify_008";
     remainingInfo->events = IN_CREATE;
-    remainingInfo->wd = 100;
+    remainingInfo->wd = expectedWd;
     watcher.dataCache_.AddWatcherInfo(remainingInfo);
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(0);
-    EXPECT_CALL(inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
+    auto unistdMock = UnistdMock::GetMock();
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(0);
+    EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(testing::SetErrnoAndReturn(EIO, -1));
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, EIO);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StopNotify_008";
 }
@@ -597,10 +610,11 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_009, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_009";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StopNotify_009";
     info->events = IN_DELETE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
@@ -609,22 +623,23 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_009, testing::e
     auto remainingInfo = std::make_shared<WatcherInfo>(nullptr);
     remainingInfo->fileName = "/test/FsFileWatcherMockTest_StopNotify_009";
     remainingInfo->events = IN_CREATE;
-    remainingInfo->wd = 100;
+    remainingInfo->wd = expectedWd;
     watcher.dataCache_.AddWatcherInfo(remainingInfo);
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(0);
-    EXPECT_CALL(inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
+    int32_t unexpectedWd = 200;
+    auto unistdMock = UnistdMock::GetMock();
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(0);
+    EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
-        .WillOnce(testing::Return(200));
+        .WillOnce(testing::Return(unexpectedWd));
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, EIO);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StopNotify_009";
 }
@@ -640,26 +655,27 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_010, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_010";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
     info->fileName = "/test/FsFileWatcherMockTest_StopNotify_010";
     info->events = IN_DELETE;
-    info->wd = 100;
+    info->wd = expectedWd;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
     watcher.eventFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(unistdMock, access(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(EIO));
-    EXPECT_CALL(inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
+    auto unistdMock = UnistdMock::GetMock();
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(EIO));
+    EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, EIO);
     EXPECT_EQ(watcher.notifyFd_, -1);
     EXPECT_EQ(watcher.eventFd_, -1);
@@ -671,21 +687,21 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_010, testing::e
  * @tc.desc: Test function of FsFileWatcher::GetNotifyEvent interface when run_ is true.
  * @tc.size: SMALL
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_GetNotifyEvent_001";
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.run_ = true;
     // Set mock behaviors
-    testing::StrictMock<PollMock> &pollMock = static_cast<testing::StrictMock<PollMock> &>(GetPollMock());
-    EXPECT_CALL(pollMock, poll(testing::_, testing::_, testing::_)).Times(0);
+    auto pollMock = PollMock::GetMock();
+    EXPECT_CALL(*pollMock, poll(testing::_, testing::_, testing::_)).Times(0);
     // Do testing
     watcher.GetNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&pollMock);
+    testing::Mock::VerifyAndClearExpectations(pollMock.get());
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_GetNotifyEvent_001";
 }
 
@@ -706,8 +722,8 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_002, testin
     watcher.notifyFd_ = 1;
     watcher.eventFd_ = 2;
     // Set mock behaviors
-    testing::StrictMock<PollMock> &pollMock = static_cast<testing::StrictMock<PollMock> &>(GetPollMock());
-    EXPECT_CALL(pollMock, poll(testing::_, testing::_, testing::_))
+    auto pollMock = PollMock::GetMock();
+    EXPECT_CALL(*pollMock, poll(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce([](struct pollfd *fds, nfds_t n, int timeout) {
             fds[0].revents = POLLNVAL;
@@ -716,7 +732,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_002, testin
     // Do testing
     watcher.GetNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&pollMock);
+    testing::Mock::VerifyAndClearExpectations(pollMock.get());
     EXPECT_FALSE(watcher.run_);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_GetNotifyEvent_002";
 }
@@ -738,8 +754,8 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_003, testin
     watcher.notifyFd_ = 1;
     watcher.eventFd_ = 2;
     // Set mock behaviors
-    testing::StrictMock<PollMock> &pollMock = static_cast<testing::StrictMock<PollMock> &>(GetPollMock());
-    EXPECT_CALL(pollMock, poll(testing::_, testing::_, testing::_))
+    auto pollMock = PollMock::GetMock();
+    EXPECT_CALL(*pollMock, poll(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce([](struct pollfd *fds, nfds_t n, int timeout) {
             fds[0].revents = POLLIN;
@@ -748,7 +764,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_003, testin
     // Do testing
     watcher.GetNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&pollMock);
+    testing::Mock::VerifyAndClearExpectations(pollMock.get());
     EXPECT_FALSE(watcher.run_);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_GetNotifyEvent_003";
 }
@@ -771,8 +787,8 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_004, testin
     watcher.eventFd_ = 2;
     watcher.closed_ = true; // Avoid calling ReadNotifyEvent
     // Set mock behaviors
-    testing::StrictMock<PollMock> &pollMock = static_cast<testing::StrictMock<PollMock> &>(GetPollMock());
-    EXPECT_CALL(pollMock, poll(testing::_, testing::_, testing::_))
+    auto pollMock = PollMock::GetMock();
+    EXPECT_CALL(*pollMock, poll(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce([&watcher](struct pollfd *fds, nfds_t n, int timeout) {
             fds[1].revents = POLLIN;
@@ -782,7 +798,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_004, testin
     // Do testing
     watcher.GetNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&pollMock);
+    testing::Mock::VerifyAndClearExpectations(pollMock.get());
     EXPECT_FALSE(watcher.run_);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_GetNotifyEvent_004";
 }
@@ -803,8 +819,8 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_005, testin
     watcher.notifyFd_ = 1;
     watcher.eventFd_ = 2;
     // Set mock behaviors
-    testing::StrictMock<PollMock> &pollMock = static_cast<testing::StrictMock<PollMock> &>(GetPollMock());
-    EXPECT_CALL(pollMock, poll(testing::_, testing::_, testing::_))
+    auto pollMock = PollMock::GetMock();
+    EXPECT_CALL(*pollMock, poll(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce([&watcher](struct pollfd *fds, nfds_t n, int timeout) {
             watcher.run_ = false; // Ensure the loop will exit
@@ -813,7 +829,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_005, testin
     // Do testing
     watcher.GetNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&pollMock);
+    testing::Mock::VerifyAndClearExpectations(pollMock.get());
     EXPECT_FALSE(watcher.run_);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_GetNotifyEvent_005";
 }
@@ -834,8 +850,8 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_006, testin
     watcher.notifyFd_ = 1;
     watcher.eventFd_ = 2;
     // Set mock behaviors
-    testing::StrictMock<PollMock> &pollMock = static_cast<testing::StrictMock<PollMock> &>(GetPollMock());
-    EXPECT_CALL(pollMock, poll(testing::_, testing::_, testing::_))
+    auto pollMock = PollMock::GetMock();
+    EXPECT_CALL(*pollMock, poll(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce([&watcher](struct pollfd *fds, nfds_t n, int timeout) {
             errno = EINTR;
@@ -845,7 +861,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_006, testin
     // Do testing
     watcher.GetNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&pollMock);
+    testing::Mock::VerifyAndClearExpectations(pollMock.get());
     EXPECT_FALSE(watcher.run_);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_GetNotifyEvent_006";
 }
@@ -866,8 +882,8 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_007, testin
     watcher.notifyFd_ = 1;
     watcher.eventFd_ = 2;
     // Set mock behaviors
-    testing::StrictMock<PollMock> &pollMock = static_cast<testing::StrictMock<PollMock> &>(GetPollMock());
-    EXPECT_CALL(pollMock, poll(testing::_, testing::_, testing::_))
+    auto pollMock = PollMock::GetMock();
+    EXPECT_CALL(*pollMock, poll(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce([&watcher](struct pollfd *fds, nfds_t n, int timeout) {
             errno = EIO;
@@ -877,7 +893,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_007, testin
     // Do testing
     watcher.GetNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&pollMock);
+    testing::Mock::VerifyAndClearExpectations(pollMock.get());
     EXPECT_FALSE(watcher.run_);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_GetNotifyEvent_007";
 }
@@ -887,22 +903,22 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyEvent_007, testin
  * @tc.desc: Test ReadNotifyEventLocked when closed_ is false.
  * @tc.size: SMALL
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEventLocked_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEventLocked_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_ReadNotifyEventLocked_001";
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.closed_ = false;
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    EXPECT_CALL(unistdMock, read(testing::_, testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(0);
+    auto unistdMock = UnistdMock::GetMock();
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(0);
     // Do testing
     watcher.ReadNotifyEventLocked();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     EXPECT_FALSE(watcher.reading_);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_ReadNotifyEventLocked_001";
 }
@@ -921,19 +937,19 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEventLocked_002,
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.closed_ = false;
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    EXPECT_CALL(unistdMock, read(testing::_, testing::_, testing::_))
+    auto unistdMock = UnistdMock::GetMock();
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce([&watcher](int fd, void *buf, size_t count) {
             errno = EIO;
             watcher.closed_ = true; // Set close after read condition
             return 0;
         });
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(0));
     // Do testing
     watcher.ReadNotifyEventLocked();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     EXPECT_FALSE(watcher.closed_);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_ReadNotifyEventLocked_002";
 }
@@ -943,21 +959,21 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEventLocked_002,
  * @tc.desc: Test function of FsFileWatcher::ReadNotifyEvent interface for SUCCESS when read valid event data.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEvent_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEvent_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_ReadNotifyEvent_001";
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     int32_t len = static_cast<int32_t>(sizeof(struct inotify_event));
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    EXPECT_CALL(unistdMock, read(testing::_, testing::_, testing::_)).Times(1).WillOnce(testing::Return(len));
+    auto unistdMock = UnistdMock::GetMock();
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).Times(1).WillOnce(testing::Return(len));
     // Do testing
     watcher.ReadNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_ReadNotifyEvent_001";
 }
 
@@ -974,14 +990,14 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEvent_002, testi
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    EXPECT_CALL(unistdMock, read(testing::_, testing::_, testing::_))
+    auto unistdMock = UnistdMock::GetMock();
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(testing::SetErrnoAndReturn(EIO, -1));
     // Do testing
     watcher.ReadNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     EXPECT_EQ(errno, EIO);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_ReadNotifyEvent_002";
 }
@@ -999,14 +1015,14 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEvent_003, testi
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     // Set mock behaviors
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    EXPECT_CALL(unistdMock, read(testing::_, testing::_, testing::_))
+    auto unistdMock = UnistdMock::GetMock();
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(testing::SetErrnoAndReturn(0, 0));
     // Do testing
     watcher.ReadNotifyEvent();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     EXPECT_EQ(errno, 0);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_ReadNotifyEvent_003";
 }
@@ -1016,30 +1032,29 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEvent_003, testi
  * @tc.desc: Test function of FsFileWatcher::NotifyEvent interface for SUCCESS when valid event without filename.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_NotifyEvent_001";
     // Prepare test parameters
-    int32_t wd = 1;
+    int32_t expectedWd = 100;
     uint32_t mask = IN_CREATE;
-    struct inotify_event event = { .wd = wd, .mask = mask, .cookie = 0, .len = 0 };
+    struct inotify_event event = { .wd = expectedWd, .mask = mask, .cookie = 0, .len = 0 };
     // Prepare test condition
     auto callback = std::make_shared<MockWatcherCallback>();
     auto info = std::make_shared<WatcherInfo>(callback);
     info->fileName = "/test/FsFileWatcherMockTest_NotifyEvent_001";
     info->events = mask;
-    info->wd = wd;
+    info->wd = expectedWd;
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
-    auto cbMock = std::dynamic_pointer_cast<MockWatcherCallback>(callback);
-    EXPECT_CALL(*cbMock, InvokeCallback(testing::_, testing::_, testing::_)).Times(1);
+    EXPECT_CALL(*callback, InvokeCallback(testing::_, testing::_, testing::_)).Times(1);
     // Do testing
     watcher.NotifyEvent(&event);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(cbMock.get());
+    testing::Mock::VerifyAndClearExpectations(callback.get());
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_NotifyEvent_001";
 }
 
@@ -1054,14 +1069,14 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_002, testing::
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_NotifyEvent_002";
     // Prepare test parameters
+    int32_t expectedWd = 100;
     const char *name = "test.txt";
     size_t len = strlen(name);
-    int32_t wd = 1;
     uint32_t mask = IN_CREATE;
     size_t totalSize = sizeof(struct inotify_event) + len + 1;
     std::vector<char> buffer(totalSize);
     struct inotify_event *event = reinterpret_cast<struct inotify_event *>(buffer.data());
-    event->wd = wd;
+    event->wd = expectedWd;
     event->mask = mask;
     event->cookie = 0;
     event->len = len + 1;
@@ -1077,16 +1092,15 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_002, testing::
     auto info = std::make_shared<WatcherInfo>(callback);
     info->fileName = "/test/FsFileWatcherMockTest_NotifyEvent_002";
     info->events = mask;
-    info->wd = wd;
+    info->wd = expectedWd;
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
-    auto cbMock = std::dynamic_pointer_cast<MockWatcherCallback>(callback);
-    EXPECT_CALL(*cbMock, InvokeCallback(testing::_, testing::_, testing::_)).Times(1);
+    EXPECT_CALL(*callback, InvokeCallback(testing::_, testing::_, testing::_)).Times(1);
     // Do testing
     watcher.NotifyEvent(event);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(cbMock.get());
+    testing::Mock::VerifyAndClearExpectations(callback.get());
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_NotifyEvent_002";
 }
 
@@ -1121,22 +1135,23 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_004, testing::
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_NotifyEvent_004";
     // Prepare test parameters
-    struct inotify_event event = { .wd = 1, .mask = IN_CREATE, .cookie = 0, .len = 0 };
+    int32_t expectedWd = 100;
+    int32_t unexpectedWd = 200;
+    struct inotify_event event = { .wd = expectedWd, .mask = IN_CREATE, .cookie = 0, .len = 0 };
     // Prepare test condition
     auto callback = std::make_shared<MockWatcherCallback>();
     auto info = std::make_shared<WatcherInfo>(callback);
     info->fileName = "/test/FsFileWatcherMockTest_NotifyEvent_004";
     info->events = IN_MODIFY; // Not matched mask
-    info->wd = 2;             // Not matched wd
+    info->wd = unexpectedWd;  // Not matched wd
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
-    auto cbMock = std::dynamic_pointer_cast<MockWatcherCallback>(callback);
-    EXPECT_CALL(*cbMock, InvokeCallback(testing::_, testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*callback, InvokeCallback(testing::_, testing::_, testing::_)).Times(0);
     // Do testing
     watcher.NotifyEvent(&event);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(cbMock.get());
+    testing::Mock::VerifyAndClearExpectations(callback.get());
     EXPECT_FALSE(watcher.dataCache_.wdFileNameCache_.empty());
     EXPECT_FALSE(watcher.dataCache_.watcherInfoCache_.empty());
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_NotifyEvent_004";

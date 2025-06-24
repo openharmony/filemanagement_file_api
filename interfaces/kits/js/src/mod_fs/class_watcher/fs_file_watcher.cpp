@@ -125,7 +125,7 @@ int32_t FsFileWatcher::CloseNotifyFd()
     return closeRet;
 }
 
-int FsFileWatcher::CloseNotifyFdLocked()
+int32_t FsFileWatcher::CloseNotifyFdLocked()
 {
     {
         lock_guard<mutex> lock(readMutex_);
@@ -152,6 +152,7 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
 
     uint32_t remainingEvents = RemoveWatcherInfo(info);
     if (remainingEvents > 0) {
+        // There are still events remaining to be listened for.
         if (access(info->fileName.c_str(), F_OK) == 0) {
             return NotifyToWatchNewEvents(info->fileName, info->wd, remainingEvents);
         }
@@ -159,6 +160,7 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
         return ERRNO_NOERR;
     }
 
+    // No events remain to be listened for, and proceed to the file watch removal process.
     int32_t oldWd = -1;
     {
         lock_guard<mutex> lock(readMutex_);
@@ -169,15 +171,18 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
         }
     }
 
-    int32_t rmRet = 0;
     if (oldWd == -1) {
-        rmRet = errno;
-        HILOGE("Failed to stop notify errCode:%{public}d", rmRet);
+        int32_t rmErr = errno;
+        if (access(info->fileName.c_str(), F_OK) == 0) {
+            HILOGE("Failed to stop notify errCode:%{public}d", rmErr);
+            dataCache_.RemoveFileWatcher(info->fileName);
+            CloseNotifyFdLocked();
+            return rmErr;
+        }
     }
 
     dataCache_.RemoveFileWatcher(info->fileName);
-    int32_t closeRet = CloseNotifyFdLocked();
-    return rmRet != 0 ? rmRet : closeRet;
+    return CloseNotifyFdLocked();
 }
 
 void FsFileWatcher::ReadNotifyEvent()
@@ -243,7 +248,7 @@ void FsFileWatcher::GetNotifyEvent()
 
     run_ = true;
     nfds_t nfds = 2;
-    struct pollfd fds[2] = { { 0 } };
+    struct pollfd fds[2] = { { -1 } };
     fds[0].fd = eventFd_;
     fds[0].events = POLLIN;
     fds[1].fd = notifyFd_;
@@ -264,18 +269,11 @@ void FsFileWatcher::GetNotifyEvent()
             if (static_cast<unsigned short>(fds[1].revents) & POLLIN) {
                 ReadNotifyEventLocked();
             }
-            continue;
-        }
-        if (ret == 0) {
-            continue;
-        }
-        if (ret < 0 && errno == EINTR) {
-            continue;
-        }
-        if (ret < 0 && errno != EINTR) {
+        } else if (ret < 0 && errno != EINTR) {
             HILOGE("Failed to poll NotifyFd, errno=%{public}d", errno);
             break;
         }
+        // Ignore cases where poll returns 0 (timeout) or EINTR (interrupted system call)
     }
 }
 

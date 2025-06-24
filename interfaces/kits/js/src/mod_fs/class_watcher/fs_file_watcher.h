@@ -29,14 +29,14 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 
-constexpr int BUF_SIZE = 1024;
+constexpr int32_t BUF_SIZE = 1024;
 
 class FsFileWatcher : public Singleton<FsFileWatcher> {
 public:
     int32_t GetNotifyId();
     bool InitNotify();
-    int StartNotify(shared_ptr<WatcherInfo> info);
-    int StopNotify(shared_ptr<WatcherInfo> info);
+    int32_t StartNotify(shared_ptr<WatcherInfo> info);
+    int32_t StopNotify(shared_ptr<WatcherInfo> info);
     void GetNotifyEvent();
     void AsyncGetNotifyEvent();
     bool AddWatcherInfo(shared_ptr<WatcherInfo> info);
@@ -51,9 +51,9 @@ public:
 private:
     uint32_t RemoveWatcherInfo(shared_ptr<WatcherInfo> info);
     void NotifyEvent(const struct inotify_event *event);
-    int CloseNotifyFd();
-    int CloseNotifyFdLocked();
-    int NotifyToWatchNewEvents(const string &fileName, int wd, uint32_t watchEvents);
+    int32_t CloseNotifyFd();
+    int32_t CloseNotifyFdLocked();
+    int32_t NotifyToWatchNewEvents(const string &fileName, int32_t wd, uint32_t watchEvents);
     void ReadNotifyEvent();
     void ReadNotifyEventLocked();
     void DestroyTaskThead();

@@ -45,6 +45,8 @@ void WatcherCoreMockTest::SetUpTestCase(void)
 
 void WatcherCoreMockTest::TearDownTestCase(void)
 {
+    EventfdMock::DestroyMock();
+    InotifyMock::DestroyMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -72,9 +74,9 @@ void WatcherCoreMockTest::TearDown(void)
  * @tc.desc: Test function of WatcherCore::DoCreateWatcher interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_001, testing::ext::TestSize.Level1)
+HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-begin WatcherCoreMockTest_DoCreateWatcher_001";
     // Prepare test parameters
@@ -82,15 +84,15 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_001, testing::
     int32_t events = IN_CREATE;
     std::shared_ptr<MockWatcherCallback> callback = std::make_shared<MockWatcherCallback>();
     // Set mock behaviors
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    testing::StrictMock<EventfdMock> &eventfdMock = static_cast<testing::StrictMock<EventfdMock> &>(GetEventfdMock());
-    EXPECT_CALL(inotifyMock, inotify_init()).Times(1).WillOnce(testing::Return(1));
-    EXPECT_CALL(eventfdMock, eventfd(testing::_, testing::_)).Times(1).WillOnce(testing::Return(2));
+    auto inotifyMock = InotifyMock::GetMock();
+    auto eventfdMock = EventfdMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_init()).Times(1).WillOnce(testing::Return(1));
+    EXPECT_CALL(*eventfdMock, eventfd(testing::_, testing::_)).Times(1).WillOnce(testing::Return(2));
     // Do testing
     auto result = WatcherCore::DoCreateWatcher(path, events, callback);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
-    testing::Mock::VerifyAndClearExpectations(&eventfdMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
+    testing::Mock::VerifyAndClearExpectations(eventfdMock.get());
     EXPECT_TRUE(result.IsSuccess());
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-end WatcherCoreMockTest_DoCreateWatcher_001";
 }
@@ -110,12 +112,12 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_002, testing::
     int32_t events = IN_CREATE;
     std::shared_ptr<MockWatcherCallback> callback = std::make_shared<MockWatcherCallback>();
     // Set mock behaviors
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(inotifyMock, inotify_init()).Times(1).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_init()).Times(1).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
     // Do testing
     auto result = WatcherCore::DoCreateWatcher(path, events, callback);
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_FALSE(result.IsSuccess());
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-end WatcherCoreMockTest_DoCreateWatcher_002";
 }
@@ -153,10 +155,10 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_004, testing::
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-begin WatcherCoreMockTest_DoCreateWatcher_004";
     // Prepare test parameters
     std::string path = "/test/WatcherCoreMockTest_DoCreateWatcher_004";
-    int32_t events = 9999;
+    int32_t invalidEvents = ~IN_ALL_EVENTS;
     std::shared_ptr<MockWatcherCallback> callback = std::make_shared<MockWatcherCallback>();
     // Do testing
-    auto result = WatcherCore::DoCreateWatcher(path, events, callback);
+    auto result = WatcherCore::DoCreateWatcher(path, invalidEvents, callback);
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-end WatcherCoreMockTest_DoCreateWatcher_004";
@@ -198,12 +200,13 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_006, testing::
     int32_t events = IN_CREATE;
     std::shared_ptr<MockWatcherCallback> callback = std::make_shared<MockWatcherCallback>();
     // Prepare test condition
+    int32_t expectedWd = 100;
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1; // Valid notifyFd
     auto info = std::make_shared<WatcherInfo>(callback);
     info->fileName = "/test/WatcherCoreMockTest_DoCreateWatcher_006";
     info->events = IN_CREATE;
-    info->wd = 100;
+    info->wd = expectedWd;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
     auto cbMock = std::dynamic_pointer_cast<MockWatcherCallback>(callback);

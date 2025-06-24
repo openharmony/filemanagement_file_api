@@ -20,9 +20,19 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-PollMock &GetPollMock()
+thread_local std::shared_ptr<PollMock> PollMock::pollMock = nullptr;
+
+std::shared_ptr<PollMock> PollMock::GetMock()
 {
-    return PollMock::GetMock();
+    if (pollMock == nullptr) {
+        pollMock = std::make_shared<PollMock>();
+    }
+    return pollMock;
+}
+
+void PollMock::DestroyMock()
+{
+    pollMock = nullptr;
 }
 
 } // namespace Test
@@ -35,7 +45,7 @@ using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
 int poll(struct pollfd *fds, nfds_t n, int timeout)
 {
-    return GetPollMock().poll(fds, n, timeout);
+    return PollMock::GetMock()->poll(fds, n, timeout);
 }
 
 } // extern "C"

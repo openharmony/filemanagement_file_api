@@ -20,6 +20,7 @@
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "fs_err_code.h"
 #include "fs_file_watcher.h"
 #include "fs_watcher.h"
 #include "inotify_mock.h"
@@ -45,6 +46,8 @@ void FsWatcherMockTest::SetUpTestCase(void)
 
 void FsWatcherMockTest::TearDownTestCase(void)
 {
+    InotifyMock::DestroyMock();
+    UnistdMock::DestroyMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -72,9 +75,9 @@ void FsWatcherMockTest::TearDown(void)
  * @tc.desc: Test function of FsWatcher::Constructor interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsWatcherMockTest, FsWatcherTest_Constructor_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsWatcherMockTest, FsWatcherTest_Constructor_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsWatcherMockTest-begin FsWatcherTest_Constructor_001";
     // Do testing
@@ -97,12 +100,13 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Constructor_001, testing::ext::TestSiz
  * @tc.desc: Test function of FsWatcher::Start interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsWatcherMockTest-begin FsWatcherTest_Start_001";
     // Prepare test condition
+    int32_t expectedWd = 100;
     auto watchEntity = CreateUniquePtr<FsWatchEntity>();
     FsWatcher fsWatcher(std::move(watchEntity));
     std::shared_ptr<WatcherInfo> info = std::make_shared<WatcherInfo>(nullptr);
@@ -112,14 +116,14 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_001, testing::ext::TestSize.Leve
     watcher.notifyFd_ = 1;       // Valid notifyFd
     watcher.taskRunning_ = true; // Avoid starting thread
     // Set mock behaviors
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    EXPECT_CALL(inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
-        .WillOnce(testing::Return(100));
+        .WillOnce(testing::Return(expectedWd));
     // Do testing
     auto result = fsWatcher.Start();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_TRUE(result.IsSuccess());
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Start_001";
 }
@@ -141,7 +145,7 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_002, testing::ext::TestSize.Leve
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
     auto errCode = result.GetError().GetErrNo();
-    EXPECT_EQ(errCode, 13900020);
+    EXPECT_EQ(errCode, E_INVAL_CODE);
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Start_002";
 }
 
@@ -168,7 +172,7 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_003, testing::ext::TestSize.Leve
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
     auto errCode = result.GetError().GetErrNo();
-    EXPECT_EQ(errCode, 13900005);
+    EXPECT_EQ(errCode, E_IO_CODE);
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Start_003";
 }
 
@@ -177,9 +181,9 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_003, testing::ext::TestSize.Leve
  * @tc.desc: Test function of FsWatcher::Stop interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
- * @tc.level Level 1
+ * @tc.level Level 0
  */
-HWTEST_F(FsWatcherMockTest, FsWatcherTest_Stop_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsWatcherMockTest, FsWatcherTest_Stop_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsWatcherMockTest-begin FsWatcherTest_Stop_001";
     // Prepare test condition
@@ -189,19 +193,19 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Stop_001, testing::ext::TestSize.Level
     fsWatcher.GetWatchEntity()->data_ = info;
     // Prepare test condition for FsFileWatcher
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     // Set mock behaviors
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
-    testing::StrictMock<UnistdMock> &unistdMock = static_cast<testing::StrictMock<UnistdMock> &>(GetUnistdMock());
-    EXPECT_CALL(inotifyMock, inotify_rm_watch(testing::_, testing::_))
+    auto inotifyMock = InotifyMock::GetMock();
+    auto unistdMock = UnistdMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_))
         .Times(1)
         .WillOnce(testing::SetErrnoAndReturn(0, 0));
-    EXPECT_CALL(unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(2).WillRepeatedly(testing::Return(0));
     // Do testing
     auto result = fsWatcher.Stop();
     // Verify results
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
-    testing::Mock::VerifyAndClearExpectations(&unistdMock);
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     EXPECT_TRUE(result.IsSuccess());
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Stop_001";
 }
@@ -223,7 +227,7 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Stop_002, testing::ext::TestSize.Level
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
     auto errCode = result.GetError().GetErrNo();
-    EXPECT_EQ(errCode, 13900020);
+    EXPECT_EQ(errCode, E_INVAL_CODE);
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Stop_002";
 }
 
@@ -250,7 +254,7 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Stop_003, testing::ext::TestSize.Level
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
     auto errCode = result.GetError().GetErrNo();
-    EXPECT_EQ(errCode, 13900005);
+    EXPECT_EQ(errCode, E_IO_CODE);
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Stop_003";
 }
 

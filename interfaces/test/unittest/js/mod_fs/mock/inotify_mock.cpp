@@ -20,9 +20,19 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-InotifyMock &GetInotifyMock()
+thread_local std::shared_ptr<InotifyMock> InotifyMock::inotifyMock = nullptr;
+
+std::shared_ptr<InotifyMock> InotifyMock::GetMock()
 {
-    return InotifyMock::GetMock();
+    if (inotifyMock == nullptr) {
+        inotifyMock = std::make_shared<InotifyMock>();
+    }
+    return inotifyMock;
+}
+
+void InotifyMock::DestroyMock()
+{
+    inotifyMock = nullptr;
 }
 
 } // namespace Test
@@ -35,17 +45,17 @@ using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
 int inotify_init()
 {
-    return GetInotifyMock().inotify_init();
+    return InotifyMock::GetMock()->inotify_init();
 }
 
 int inotify_add_watch(int fd, const char *pathname, uint32_t mask)
 {
-    return GetInotifyMock().inotify_add_watch(fd, pathname, mask);
+    return InotifyMock::GetMock()->inotify_add_watch(fd, pathname, mask);
 }
 
 int inotify_rm_watch(int fd, int wd)
 {
-    return GetInotifyMock().inotify_rm_watch(fd, wd);
+    return InotifyMock::GetMock()->inotify_rm_watch(fd, wd);
 }
 
 } // extern "C"
