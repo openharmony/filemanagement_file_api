@@ -20,9 +20,19 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-UnistdMock &GetUnistdMock()
+thread_local std::shared_ptr<UnistdMock> UnistdMock::unistdMock = nullptr;
+
+std::shared_ptr<UnistdMock> UnistdMock::GetMock()
 {
-    return UnistdMock::GetMock();
+    if (unistdMock == nullptr) {
+        unistdMock = std::make_shared<UnistdMock>();
+    }
+    return unistdMock;
+}
+
+void UnistdMock::DestroyMock()
+{
+    unistdMock = nullptr;
 }
 
 } // namespace Test
@@ -35,17 +45,17 @@ using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
 int access(const char *filename, int amode)
 {
-    return GetUnistdMock().access(filename, amode);
+    return UnistdMock::GetMock()->access(filename, amode);
 }
 
 int close(int fd)
 {
-    return GetUnistdMock().close(fd);
+    return UnistdMock::GetMock()->close(fd);
 }
 
 ssize_t read(int fd, void *buf, size_t count)
 {
-    return GetUnistdMock().read(fd, buf, count);
+    return UnistdMock::GetMock()->read(fd, buf, count);
 }
 
 } // extern "C"

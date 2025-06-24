@@ -38,14 +38,13 @@ public:
     MOCK_METHOD(int, close, (int), (override));
     MOCK_METHOD(ssize_t, read, (int, void *, size_t), (override));
 
-    static UnistdMock &GetMock()
-    {
-        static UnistdMock mock;
-        return mock;
-    }
-};
+public:
+    static std::shared_ptr<UnistdMock> GetMock();
+    static void DestroyMock();
 
-UnistdMock &GetUnistdMock();
+private:
+    static thread_local std::shared_ptr<UnistdMock> unistdMock;
+};
 
 } // namespace Test
 } // namespace ModuleFileIO
