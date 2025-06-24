@@ -93,6 +93,7 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/read_lines_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
     "mod_fs/properties/trans_listener_test.cpp",
+    "mod_fs/properties/xattr_core_test.cpp",
   ]
 
   deps = [
@@ -163,7 +164,9 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/open_core_mock_test.cpp",
     "mod_fs/properties/read_lines_core_mock_test.cpp",
     "mod_fs/properties/trans_listener_mock_test.cpp",
+    "mod_fs/properties/unlink_core_mock_test.cpp",
     "mod_fs/properties/watcher_core_mock_test.cpp",
+    "mod_fs/properties/xattr_core_mock_test.cpp",
   ]
 
   deps = [
