@@ -42,7 +42,6 @@ public:
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(CreateStreamCoreTest, DoCreateStreamTest_0001, testing::ext::TestSize.Level1)
 {
@@ -64,7 +63,6 @@ HWTEST_F(CreateStreamCoreTest, DoCreateStreamTest_0001, testing::ext::TestSize.L
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(CreateStreamCoreTest, DoCreateStreamTest_0002, testing::ext::TestSize.Level1)
 {
