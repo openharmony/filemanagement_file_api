@@ -46,6 +46,9 @@ void TransListenerCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     int32_t fd = open(g_path.c_str(), O_CREAT | O_RDWR, 0644);
+    if (fd < 0) {
+        EXPECT_TRUE(false);
+    }
     close(fd);
 }
 
@@ -64,44 +67,6 @@ void TransListenerCoreTest::TearDown(void)
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
-
-// /**
-//  * @tc.name: TransListenerCoreTest_RmDir_001
-//  * @tc.desc: Test function of TransListenerCore::RmDir interface for FALSE.
-//  * @tc.size: MEDIUM
-//  * @tc.type: FUNC
-//  * @tc.level Level 1
-//  */
-// HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_RmDir_001, testing::ext::TestSize.Level1)
-// {
-//     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_RmDir_001";
-
-//     string path = "/data/test/TransListenerCoreTest_RmDir_001.txt";
-
-//     TransListenerCore::RmDir(path);
-
-//     GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_RmDir_001";
-// }
-
-// /**
-//  * @tc.name: TransListenerCoreTest_RmDir_002
-//  * @tc.desc: Test function of TransListenerCore::RmDir interface for SUCC.
-//  * @tc.size: MEDIUM
-//  * @tc.type: FUNC
-//  * @tc.level Level 1
-//  */
-// HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_RmDir_002, testing::ext::TestSize.Level1)
-// {
-//     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_RmDir_002";
-
-//     string path = "/data/test/TransListenerCoreTest_RmDir_002.txt";
-//     int32_t fd = open(path, O_CREAT | O_RDWR, 0644);
-//     close(fd);
-
-//     TransListenerCore::RmDir(path);
-
-//     GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_RmDir_002";
-// }
 
 /**
  * @tc.name: TransListenerCoreTest_CreateDfsCopyPath_001
@@ -155,6 +120,9 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_HandleCopyFailure_002, tes
 
     string path = "/data/test/TransListenerCoreTest_HandleCopyFailure_002.txt";
     int32_t fd = open(path.c_str(), O_CREAT | O_RDWR, 0644);
+    if (fd < 0) {
+        EXPECT_TRUE(false);
+    }
     close(fd);
 
     Storage::DistributedFile::HmdfsInfo info;
@@ -199,7 +167,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_WaitForCopyResult_001, tes
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_WaitForCopyResult_001";
 
-    shared_ptr<TransListenerCore> transListener(new TransListenerCore);
+    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
     transListener->copyEvent_.copyResult = FAILED;
     int result = TransListenerCore::WaitForCopyResult(transListener.get());
     EXPECT_EQ(result, 2);
@@ -521,7 +489,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_OnFileReceive_001, testing
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_OnFileReceive_001";
 
-    shared_ptr<TransListenerCore> transListener(new TransListenerCore);
+    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
     transListener->callback_ = nullptr;
     auto res = transListener->OnFileReceive(0, 0);
     EXPECT_EQ(res, ENOMEM);
@@ -540,7 +508,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_OnFileReceive_002, testing
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_OnFileReceive_002";
 
-    shared_ptr<TransListenerCore> transListener(new TransListenerCore);
+    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
     transListener->callback_ = make_shared<FsCallbackObject>(std::make_shared<IProgressListenerTest>());
     auto res = transListener->OnFileReceive(0, 0);
     EXPECT_EQ(res, ERRNO_NOERR);
@@ -559,7 +527,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_OnFinished_001, testing::e
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_OnFinished_001";
 
-    shared_ptr<TransListenerCore> transListener(new TransListenerCore);
+    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
     auto res = transListener->OnFinished("sessionName");
     EXPECT_EQ(res, ERRNO_NOERR);
 
@@ -577,7 +545,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_OnFailed_001, testing::ext
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_OnFailed_001";
 
-    shared_ptr<TransListenerCore> transListener(new TransListenerCore);
+    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
     auto res = transListener->OnFailed("sessionName", 0);
     EXPECT_EQ(res, ERRNO_NOERR);
 
@@ -596,12 +564,11 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CopyFileFromSoftBus_001, t
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_CopyFileFromSoftBus_001";
 
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
-    shared_ptr<TransListenerCore> transListener(new TransListenerCore);
+    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
     std::shared_ptr<FsFileInfos> infos(new FsFileInfos);
     transListener->copyEvent_.copyResult = FAILED;
 
     auto res = transListener->CopyFileFromSoftBus(srcUri, "destUri", infos, nullptr);
-
     EXPECT_EQ(res, EIO);
 
     GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_CopyFileFromSoftBus_001";
