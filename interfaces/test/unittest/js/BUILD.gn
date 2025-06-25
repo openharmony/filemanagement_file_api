@@ -90,6 +90,7 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/fdopen_stream_core_test.cpp",
     "mod_fs/properties/listfile_core_test.cpp",
     "mod_fs/properties/read_core_test.cpp",
+    "mod_fs/properties/read_lines_core_test.cpp",
     "mod_fs/properties/lstat_core_test.cpp",
     "mod_fs/properties/open_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
@@ -97,6 +98,7 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/truncate_core_test.cpp",
     "mod_fs/properties/utimes_core_test.cpp",
     "mod_fs/properties/write_core_test.cpp",
+    "mod_fs/properties/xattr_core_test.cpp",
   ]
 
   deps = [
@@ -150,7 +152,9 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/access_core_mock_test.cpp",
     "mod_fs/properties/create_randomaccessfile_core_mock_test.cpp",
     "mod_fs/properties/dup_core_mock_test.cpp",
+    "mod_fs/properties/fdatasync_core_mock_test.cpp",
     "mod_fs/properties/read_core_mock_test.cpp",
+    "mod_fs/properties/read_lines_core_mock_test.cpp",
     "mod_fs/properties/symlink_core_mock_test.cpp",
     "mod_fs/properties/truncate_core_mock_test.cpp",
     "mod_fs/properties/utimes_core_mock_test.cpp",
@@ -158,6 +162,8 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/mock/system_mock.cpp",
     "mod_fs/properties/mock/uv_fs_mock.cpp",
     "mod_fs/properties/open_core_mock_test.cpp",
+    "mod_fs/properties/unlink_core_mock_test.cpp",
+    "mod_fs/properties/xattr_core_mock_test.cpp",
   ]
 
   deps = [
