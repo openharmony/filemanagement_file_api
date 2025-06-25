@@ -1081,7 +1081,6 @@ ohos_shared_library("ani_file_statvfs") {
   ]
   use_exceptions = true
   cflags = [
-    "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-Oz",
