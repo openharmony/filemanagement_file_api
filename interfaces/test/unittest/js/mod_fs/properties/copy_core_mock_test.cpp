@@ -56,9 +56,10 @@ void CopyCoreMockTest::SetUpTestCase(void)
     mkdir(srcDir.c_str(), 0755);
     mkdir(destDir.c_str(), 0755);
     int32_t fd = open(srcFile.c_str(), O_CREAT | O_RDWR, 0644);
-    if (fd >= 0) {
-        close(fd);
+    if (fd < 0) {
+        EXPECT_TRUE(false);
     }
+    close(fd);
     uvMock = std::make_shared<UvfsMock>();
     Uvfs::ins = uvMock;
 }
@@ -66,7 +67,8 @@ void CopyCoreMockTest::SetUpTestCase(void)
 void CopyCoreMockTest::TearDownTestCase(void)
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    remove(srcFile.c_str());
+    int ret = remove(srcFile.c_str());
+    EXPECT_TRUE(ret == 0);
     rmdir(srcDir.c_str());
     rmdir(destDir.c_str());
     rmdir(testDir.c_str());
@@ -87,7 +89,7 @@ void CopyCoreMockTest::TearDown(void)
 
 /**
  * @tc.name: CopyCoreMockTest_CopyFile_001
- * @tc.desc: Test function of CopyCore::CopyFile interface for file copy FALSE.
+ * @tc.desc: Test function of CopyCore::CopyFile interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -148,9 +150,10 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_001, testing::ext::TestSi
     mkdir(subDir.c_str(), 0755);
     string subFile = subDir + "/sub_file.txt";
     int fd = open(subFile.c_str(), O_CREAT | O_RDWR, 0644);
-    if (fd >= 0) {
-        close(fd);
+    if (fd < 0) {
+        EXPECT_TRUE(false);
     }
+    close(fd);
 
     testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
     string destSubDir = destDir + "/sub_dir";
@@ -158,7 +161,7 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_001, testing::ext::TestSi
     infos->notifyFd = 1;
     EXPECT_CALL(inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
-        .WillOnce(testing::Return(100));
+        .WillOnce(testing::Return(0));
     auto res = CopyCore::CopySubDir(subDir, destSubDir, infos);
     testing::Mock::VerifyAndClearExpectations(&inotifyMock);
     EXPECT_EQ(res, UNKNOWN_ERR);

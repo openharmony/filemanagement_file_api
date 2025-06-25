@@ -48,17 +48,11 @@ public:
         return 0;
     }
 
-    // int32_t PrepareSession(const std::string &srcUri, const std::string &dstUri, const std::string &srcDeviceId,
-    //     const sptr<IRemoteObject> &listener, HmdfsInfo &info) override
-    // {
-    //     return 0;
-    // }
-    MOCK_METHOD(int32_t, PrepareSession, (const std::string &srcUri, const std::string &dstUri, 
-                                           const std::string &srcDeviceId,
-                                           const sptr<IRemoteObject> &listener, HmdfsInfo &info), (override));
+    MOCK_METHOD(int32_t, PrepareSession, (const std::string &srcUri, const std::string &dstUri,
+        const std::string &srcDeviceId, const sptr<IRemoteObject> &listener, HmdfsInfo &info), (override));
 
-    int32_t PushAsset(
-        int32_t userId, const sptr<AssetObj> &assetObj, const sptr<IAssetSendCallback> &sendCallback) override
+    int32_t PushAsset(int32_t userId, const sptr<AssetObj> &assetObj,
+        const sptr<IAssetSendCallback> &sendCallback) override
     {
         return 0;
     }
@@ -125,7 +119,7 @@ using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
-string g_path = "/data/test/TransListenerCoreTest.txt";
+string g_path = "/data/test/TransListenerCoreMockTest.txt";
 const string FILE_MANAGER_AUTHORITY = "docs";
 const string MEDIA_AUTHORITY = "media";
 
@@ -134,7 +128,7 @@ public:
     void InvokeListener(uint64_t progressSize, uint64_t totalSize) const override {}
 };
 
-class TransListenerCoreTest : public testing::Test {
+class TransListenerCoreMockTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -146,39 +140,42 @@ public:
     }
 };
 
-void TransListenerCoreTest::SetUpTestCase(void)
+void TransListenerCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     int32_t fd = open(g_path.c_str(), O_CREAT | O_RDWR, 0644);
+    if (fd < 0) {
+        EXPECT_TRUE(false);
+    }
     close(fd);
 }
 
-void TransListenerCoreTest::TearDownTestCase(void)
+void TransListenerCoreMockTest::TearDownTestCase(void)
 {
     rmdir(g_path.c_str());
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void TransListenerCoreTest::SetUp(void)
+void TransListenerCoreMockTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void TransListenerCoreTest::TearDown(void)
+void TransListenerCoreMockTest::TearDown(void)
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
- * @tc.name: TransListenerCoreTest_PrepareCopySession_001
+ * @tc.name: TransListenerCoreMockTest_PrepareCopySession_001
  * @tc.desc: Test function of TransListenerCore::PrepareCopySession interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_PrepareCopySession_001, testing::ext::TestSize.Level1)
+HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_PrepareCopySession_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_PrepareCopySession_001";
+    GTEST_LOG_(INFO) << "TransListenerCoreMockTest-begin TransListenerCoreMockTest_PrepareCopySession_001";
 
     Storage::DistributedFile::HmdfsInfo info;
     info.authority = FILE_MANAGER_AUTHORITY;
@@ -192,19 +189,19 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_PrepareCopySession_001, te
     auto result = TransListenerCore::PrepareCopySession(srcUri, "destUri", nullptr, info, disSandboxPath);
     EXPECT_EQ(result, ERRNO_NOERR);
 
-    GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_PrepareCopySession_001";
+    GTEST_LOG_(INFO) << "TransListenerCoreMockTest-end TransListenerCoreMockTest_PrepareCopySession_001";
 }
 
 /**
- * @tc.name: TransListenerCoreTest_CopyFileFromSoftBus_001
+ * @tc.name: TransListenerCoreMockTest_CopyFileFromSoftBus_001
  * @tc.desc: Test function of TransListenerCore::CopyFileFromSoftBus interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CopyFileFromSoftBus_001, testing::ext::TestSize.Level1)
+HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_CopyFileFromSoftBus_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_CopyFileFromSoftBus_001";
+    GTEST_LOG_(INFO) << "TransListenerCoreMockTest-begin TransListenerCoreMockTest_CopyFileFromSoftBus_001";
 
     Storage::DistributedFile::HmdfsInfo info;
     info.authority = FILE_MANAGER_AUTHORITY;
@@ -212,10 +209,6 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CopyFileFromSoftBus_001, t
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
     shared_ptr<TransListenerCore> transListener(new TransListenerCore);
     std::shared_ptr<FsFileInfos> infos(new FsFileInfos);
-    // transListener->copyEvent_.copyResult = FAILED;
-
-    // shared_ptr<TransListenerCore> transListenerArg(new TransListenerCore);
-    // transListenerArg->copyEvent_.errorCode = DFS_CANCEL_SUCCESS;
 
     EXPECT_CALL(GetMock(), PrepareSession(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERRNO_NOERR));
@@ -223,7 +216,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CopyFileFromSoftBus_001, t
     auto res = transListener->CopyFileFromSoftBus(srcUri, "destUri", infos, nullptr);
     EXPECT_EQ(res, EIO);
 
-    GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_CopyFileFromSoftBus_001";
+    GTEST_LOG_(INFO) << "TransListenerCoreMockTest-end TransListenerCoreMockTest_CopyFileFromSoftBus_001";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "fs_task_signal.h"
 
 #include <gtest/gtest.h>
@@ -102,7 +101,7 @@ HWTEST_F(FsTaskSignalTest, FsTaskSignalTest_Constructor_002, testing::ext::TestS
 
 /**
  * @tc.name: FsTaskSignalTest_Constructor_003
- * @tc.desc: Test function of FsTaskSignal::Constructor interface for SUCCESS.
+ * @tc.desc: Test function of FsTaskSignal::Constructor interface for True.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -124,7 +123,7 @@ HWTEST_F(FsTaskSignalTest, FsTaskSignalTest_Constructor_003, testing::ext::TestS
 
 /**
  * @tc.name: FsTaskSignalTest_Cancel_001
- * @tc.desc: Test function of FsTaskSignal::Cancel interface for false.
+ * @tc.desc: Test function of FsTaskSignal::Cancel interface for False.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -143,7 +142,7 @@ HWTEST_F(FsTaskSignalTest, FsTaskSignalTest_Cancel_001, testing::ext::TestSize.L
 
 /**
  * @tc.name: FsTaskSignalTest_Cancel_002
- * @tc.desc: Test function of FsTaskSignal::Cancel interface for false.
+ * @tc.desc: Test function of FsTaskSignal::Cancel interface for False.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -163,7 +162,7 @@ HWTEST_F(FsTaskSignalTest, FsTaskSignalTest_Cancel_002, testing::ext::TestSize.L
 
 /**
  * @tc.name: FsTaskSignalTest_OnCancel_001
- * @tc.desc: Test function of FsTaskSignal::OnCancel interface for false.
+ * @tc.desc: Test function of FsTaskSignal::OnCancel interface for False.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -182,7 +181,7 @@ HWTEST_F(FsTaskSignalTest, FsTaskSignalTest_OnCancel_001, testing::ext::TestSize
 
 /**
  * @tc.name: FsTaskSignalTest_OnCancel_002
- * @tc.desc: Test function of FsTaskSignal::OnCancel interface for false.
+ * @tc.desc: Test function of FsTaskSignal::OnCancel interface for False.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
