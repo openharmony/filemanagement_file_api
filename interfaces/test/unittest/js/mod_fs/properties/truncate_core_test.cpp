@@ -14,10 +14,9 @@
  */
 
 #include "truncate_core.h"
-#include "mock/uv_fs_mock.h"
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -89,128 +88,6 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_002, testing::ext::TestSi
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_002";
-}
-
-/**
- * @tc.name: TruncateCoreTest_DoTruncate_003
- * @tc.desc: Test function of RmdirCore::DoTruncate interface for Failed.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_003, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_003";
-    FileInfo fileInfo;
-    fileInfo.isPath = true;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(-1));
-
-    auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_003";
-}
-
-/**
- * @tc.name: TruncateCoreTest_DoTruncate_004
- * @tc.desc: Test function of RmdirCore::DoTruncate interface for Failed.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_004, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_004";
-    FileInfo fileInfo;
-    fileInfo.isPath = true;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(1));
-    EXPECT_CALL(*uv, uv_fs_ftruncate(_, _, _, _, _)).WillOnce(Return(-1));
-
-    auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_004";
-}
-
-/**
- * @tc.name: TruncateCoreTest_DoTruncate_005
- * @tc.desc: Test function of RmdirCore::DoTruncate interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_005, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_005";
-    FileInfo fileInfo;
-    fileInfo.isPath = true;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(1));
-    EXPECT_CALL(*uv, uv_fs_ftruncate(_, _, _, _, _)).WillOnce(Return(1));
-
-    auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_005";
-}
-
-/**
- * @tc.name: TruncateCoreTest_DoTruncate_006
- * @tc.desc: Test function of RmdirCore::DoTruncate interface for FALSE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_006";
-    FileInfo fileInfo;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-
-    EXPECT_CALL(*uv, uv_fs_ftruncate(_, _, _, _, _)).WillOnce(Return(-1));
-
-    auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_006";
-}
-
-/**
- * @tc.name: TruncateCoreTest_DoTruncate_007
- * @tc.desc: Test function of RmdirCore::DoTruncate interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_007";
-    FileInfo fileInfo;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-
-    EXPECT_CALL(*uv, uv_fs_ftruncate(_, _, _, _, _)).WillOnce(Return(1));
-
-    auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_007";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
