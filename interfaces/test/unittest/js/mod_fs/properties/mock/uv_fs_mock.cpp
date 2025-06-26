@@ -128,3 +128,8 @@ int uv_fs_sendfile(uv_loop_t *loop, uv_fs_t *req, uv_file outFd, uv_file inFd, i
 {
     return Uvfs::ins->uv_fs_sendfile(loop, req, outFd, inFd, off, len, cb);
 }
+
+int uv_fs_lstat(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb)
+{
+    return Uvfs::ins->uv_fs_lstat(loop, req, path, cb);
+}
