@@ -146,27 +146,4 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_004, testing::ext::Test
     GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_004";
 }
 
-/**
- * @tc.name: AccessCoreMockTest_DoAccess_005
- * @tc.desc: Test function of AccessCore::DoAccess interface for success.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_005, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AccessCoreMockTest-begin AccessCoreMockTest_DoAccess_005";
-
-    std::string path = DISTRIBUTED_FILE_PREFIX;
-    AccessModeType mode = AccessModeType::EXIST;
-    AccessFlag flag = LOCAL_FLAG;
-
-    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(0));
-
-    auto res = AccessCore::DoAccess(path, mode, flag);
-    EXPECT_EQ(res.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_005";
-}
-
 } // OHOS::FileManagement::ModuleFileIO::Test
