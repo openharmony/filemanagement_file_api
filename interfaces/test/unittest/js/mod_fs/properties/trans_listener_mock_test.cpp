@@ -20,6 +20,7 @@
 #include <gmock/gmock.h>
 
 #include "copy_core.h"
+#include "unistd_mock.h"
 
 using namespace OHOS;
 using namespace OHOS::Storage::DistributedFile;
@@ -153,6 +154,7 @@ void TransListenerCoreMockTest::SetUpTestCase(void)
 void TransListenerCoreMockTest::TearDownTestCase(void)
 {
     rmdir(g_path.c_str());
+    UnistdMock::DestroyMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -183,7 +185,9 @@ HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_PrepareCopySession
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
 
     string disSandboxPath = "disSandboxPath";
+    auto unistdMock = UnistdMock::GetMock();
 
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(GetMock(), PrepareSession(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERRNO_NOERR));
     auto result = TransListenerCore::PrepareCopySession(srcUri, "destUri", nullptr, info, disSandboxPath);
@@ -207,9 +211,11 @@ HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_CopyFileFromSoftBu
     info.authority = FILE_MANAGER_AUTHORITY;
     
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
-    shared_ptr<TransListenerCore> transListener(new TransListenerCore);
-    std::shared_ptr<FsFileInfos> infos(new FsFileInfos);
+    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
+    std::shared_ptr<FsFileInfos> infos = std::make_shared<FsFileInfos>();
+    auto unistdMock = UnistdMock::GetMock();
 
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(GetMock(), PrepareSession(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERRNO_NOERR));
 

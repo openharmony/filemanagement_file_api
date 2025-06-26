@@ -719,6 +719,7 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/class_watcher/ani/watch_event_wrapper.cpp",
     "src/mod_fs/class_watcher/fs_file_watcher.cpp",
     "src/mod_fs/class_watcher/fs_watcher.cpp",
+    "src/mod_fs/class_watcher/watcher_data_cache.cpp",
     "src/mod_fs/fs_utils.cpp",
     "src/mod_fs/properties/access_core.cpp",
     "src/mod_fs/properties/ani/access_ani.cpp",
