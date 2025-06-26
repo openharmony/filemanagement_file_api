@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,25 +60,9 @@ constexpr int BUF_SIZE = 1024;
 constexpr size_t MAX_SIZE = 1024 * 1024 * 4;
 constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(300);
 std::recursive_mutex CopyCore::mutex_;
-std::map<FileInfosCore, std::shared_ptr<CallbackObjectCore>> CopyCore::jsCbMap_;
+std::map<FsFileInfos, std::shared_ptr<FsCallbackObject>> CopyCore::callbackMap_;
 
-static string GetModeFromFlags(unsigned int flags)
-{
-    const string readMode = "r";
-    const string writeMode = "w";
-    const string appendMode = "a";
-    const string truncMode = "t";
-    string mode = readMode;
-    mode += (((flags & O_RDWR) == O_RDWR) ? writeMode : "");
-    mode = (((flags & O_WRONLY) == O_WRONLY) ? writeMode : mode);
-    if (mode != readMode) {
-        mode += ((flags & O_TRUNC) ? truncMode : "");
-        mode += ((flags & O_APPEND) ? appendMode : "");
-    }
-    return mode;
-}
-
-static int OpenSrcFile(const string &srcPth, std::shared_ptr<FileInfosCore> infos, int32_t &srcFd)
+static int OpenSrcFile(const string &srcPth, std::shared_ptr<FsFileInfos> infos, int32_t &srcFd)
 {
     Uri uri(infos->srcUri);
     if (uri.GetAuthority() == MEDIA) {
@@ -93,7 +77,7 @@ static int OpenSrcFile(const string &srcPth, std::shared_ptr<FileInfosCore> info
             HILOGE("Failed to connect to datashare");
             return E_PERMISSION;
         }
-        srcFd = dataShareHelper->OpenFile(uri, GetModeFromFlags(O_RDONLY));
+        srcFd = dataShareHelper->OpenFile(uri, FsUtils::GetModeFromFlags(O_RDONLY));
         if (srcFd < 0) {
             HILOGE("Open media uri by data share fail. ret = %{public}d", srcFd);
             return EPERM;
@@ -108,18 +92,17 @@ static int OpenSrcFile(const string &srcPth, std::shared_ptr<FileInfosCore> info
     return ERRNO_NOERR;
 }
 
-static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg,
-                        std::unique_ptr<DistributedFS::FDGuard> destFdg,
-                        std::shared_ptr<FileInfosCore> infos)
+static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg, std::unique_ptr<DistributedFS::FDGuard> destFdg,
+    std::shared_ptr<FsFileInfos> infos)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> sendFileReq = {
-        new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> sendFileReq = { new (nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (sendFileReq == nullptr) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
     int64_t offset = 0;
-    struct stat srcStat{};
+    struct stat srcStat {};
     if (fstat(srcFdg->GetFD(), &srcStat) < 0) {
         HILOGE("Failed to get stat of file by fd: %{public}d ,errno = %{public}d", srcFdg->GetFD(), errno);
         return errno;
@@ -127,15 +110,13 @@ static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg,
     int32_t ret = 0;
     int64_t size = static_cast<int64_t>(srcStat.st_size);
     while (size >= 0) {
-        ret = uv_fs_sendfile(nullptr, sendFileReq.get(), destFdg->GetFD(), srcFdg->GetFD(),
-            offset, MAX_SIZE, nullptr);
+        ret = uv_fs_sendfile(nullptr, sendFileReq.get(), destFdg->GetFD(), srcFdg->GetFD(), offset, MAX_SIZE, nullptr);
         if (ret < 0) {
             HILOGE("Failed to sendfile by errno : %{public}d", errno);
             return errno;
         }
         if (infos != nullptr && infos->taskSignal != nullptr) {
             if (infos->taskSignal->CheckCancelIfNeed(infos->srcPath)) {
-                HILOGE("===Copy Task Canceled Success");
                 return ECANCELED;
             }
         }
@@ -159,10 +140,7 @@ bool CopyCore::IsValidUri(const std::string &uri)
 
 bool CopyCore::ValidOperand(std::string uriStr)
 {
-    if (IsValidUri(uriStr)) {
-        return true;
-    }
-    return false;
+    return IsValidUri(uriStr);
 }
 
 bool CopyCore::IsRemoteUri(const std::string &uri)
@@ -228,7 +206,7 @@ int CopyCore::CheckOrCreatePath(const std::string &destPath)
     return ERRNO_NOERR;
 }
 
-int CopyCore::CopyFile(const string &src, const string &dest, std::shared_ptr<FileInfosCore> infos)
+int CopyCore::CopyFile(const string &src, const string &dest, std::shared_ptr<FsFileInfos> infos)
 {
     HILOGD("src = %{public}s, dest = %{public}s", GetAnonyString(src).c_str(), GetAnonyString(dest).c_str());
     int32_t srcFd = -1;
@@ -264,7 +242,7 @@ int CopyCore::MakeDir(const string &path)
     return ERRNO_NOERR;
 }
 
-int CopyCore::CopySubDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfosCore> infos)
+int CopyCore::CopySubDir(const string &srcPath, const string &destPath, std::shared_ptr<FsFileInfos> infos)
 {
     std::error_code errCode;
     if (!filesystem::exists(destPath, errCode) && errCode.value() == ERRNO_NOERR) {
@@ -286,14 +264,14 @@ int CopyCore::CopySubDir(const string &srcPath, const string &destPath, std::sha
         }
         {
             std::lock_guard<std::recursive_mutex> lock(CopyCore::mutex_);
-            auto iter = CopyCore::jsCbMap_.find(*infos);
+            auto iter = CopyCore::callbackMap_.find(*infos);
             auto receiveInfo = CreateSharedPtr<ReceiveInfo>();
             if (receiveInfo == nullptr) {
                 HILOGE("Failed to request heap memory.");
                 return ENOMEM;
             }
             receiveInfo->path = destPath;
-            if (iter == CopyCore::jsCbMap_.end() || iter->second == nullptr) {
+            if (iter == CopyCore::callbackMap_.end() || iter->second == nullptr) {
                 HILOGE("Failed to find infos, srcPath = %{public}s, destPath = %{public}s",
                     GetAnonyString(infos->srcPath).c_str(), GetAnonyString(infos->destPath).c_str());
                 return UNKNOWN_ERR;
@@ -329,11 +307,11 @@ static void Deleter(struct NameList *arg)
     arg = nullptr;
 }
 
-std::string CopyCore::GetRealPath(const std::string& path)
+std::string CopyCore::GetRealPath(const std::string &path)
 {
     fs::path tempPath(path);
-    fs::path realPath{};
-    for (const auto& component : tempPath) {
+    fs::path realPath {};
+    for (const auto &component : tempPath) {
         if (component == ".") {
             continue;
         } else if (component == "..") {
@@ -345,7 +323,7 @@ std::string CopyCore::GetRealPath(const std::string& path)
     return realPath.string();
 }
 
-uint64_t CopyCore::GetDirSize(std::shared_ptr<FileInfosCore> infos, std::string path)
+uint64_t CopyCore::GetDirSize(std::shared_ptr<FsFileInfos> infos, std::string path)
 {
     unique_ptr<struct NameList, decltype(Deleter) *> pNameList = { new (nothrow) struct NameList, Deleter };
     if (pNameList == nullptr) {
@@ -374,7 +352,7 @@ uint64_t CopyCore::GetDirSize(std::shared_ptr<FileInfosCore> infos, std::string 
     return size;
 }
 
-int CopyCore::RecurCopyDir(const string &srcPath, const string &destPath, std::shared_ptr<FileInfosCore> infos)
+int CopyCore::RecurCopyDir(const string &srcPath, const string &destPath, std::shared_ptr<FsFileInfos> infos)
 {
     unique_ptr<struct NameList, decltype(Deleter) *> pNameList = { new (nothrow) struct NameList, Deleter };
     if (pNameList == nullptr) {
@@ -404,7 +382,7 @@ int CopyCore::RecurCopyDir(const string &srcPath, const string &destPath, std::s
     return ERRNO_NOERR;
 }
 
-int CopyCore::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<FileInfosCore> infos)
+int CopyCore::CopyDirFunc(const string &src, const string &dest, std::shared_ptr<FsFileInfos> infos)
 {
     HILOGD("CopyDirFunc in, src = %{public}s, dest = %{public}s", GetAnonyString(src).c_str(),
         GetAnonyString(dest).c_str());
@@ -421,7 +399,7 @@ int CopyCore::CopyDirFunc(const string &src, const string &dest, std::shared_ptr
     return CopySubDir(src, destStr, infos);
 }
 
-int CopyCore::ExecLocal(std::shared_ptr<FileInfosCore> infos, std::shared_ptr<CallbackObjectCore> callback)
+int CopyCore::ExecLocal(std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCallbackObject> callback)
 {
     if (infos->isFile) {
         if (infos->srcPath == infos->destPath) {
@@ -446,8 +424,7 @@ int CopyCore::ExecLocal(std::shared_ptr<FileInfosCore> infos, std::shared_ptr<Ca
     return ExecCopy(infos);
 }
 
-int CopyCore::SubscribeLocalListener(std::shared_ptr<FileInfosCore> infos,
-                                     std::shared_ptr<CallbackObjectCore> callback)
+int CopyCore::SubscribeLocalListener(std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCallbackObject> callback)
 {
     infos->notifyFd = inotify_init();
     if (infos->notifyFd < 0) {
@@ -465,7 +442,7 @@ int CopyCore::SubscribeLocalListener(std::shared_ptr<FileInfosCore> infos,
     if (newWd < 0) {
         auto errCode = errno;
         HILOGE("Failed to add watch, errno = %{public}d, notifyFd: %{public}d, destPath: %{public}s", errno,
-               infos->notifyFd, infos->destPath.c_str());
+            infos->notifyFd, infos->destPath.c_str());
         CloseNotifyFdLocked(infos, callback);
         return errCode;
     }
@@ -489,66 +466,73 @@ int CopyCore::SubscribeLocalListener(std::shared_ptr<FileInfosCore> infos,
     return err;
 }
 
-std::shared_ptr<CallbackObjectCore> CopyCore::RegisterListener(const std::shared_ptr<FileInfosCore> &infos)
+std::shared_ptr<FsCallbackObject> CopyCore::RegisterListener(const std::shared_ptr<FsFileInfos> &infos)
 {
-    auto callback = CreateSharedPtr<CallbackObjectCore>(infos->listenerCb);
+    auto callback = CreateSharedPtr<FsCallbackObject>(infos->listener);
     if (callback == nullptr) {
         HILOGE("Failed to request heap memory.");
         return nullptr;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = jsCbMap_.find(*infos);
-    if (iter != jsCbMap_.end()) {
+    auto iter = callbackMap_.find(*infos);
+    if (iter != callbackMap_.end()) {
         HILOGE("CopyCore::RegisterListener, already registered.");
         return nullptr;
     }
-    jsCbMap_.insert({ *infos, callback });
+    callbackMap_.insert({ *infos, callback });
     return callback;
 }
 
-void CopyCore::UnregisterListener(std::shared_ptr<FileInfosCore> fileInfos)
+void CopyCore::UnregisterListener(std::shared_ptr<FsFileInfos> fileInfos)
 {
     if (fileInfos == nullptr) {
         HILOGE("fileInfos is nullptr");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = jsCbMap_.find(*fileInfos);
-    if (iter == jsCbMap_.end()) {
+    auto iter = callbackMap_.find(*fileInfos);
+    if (iter == callbackMap_.end()) {
         HILOGI("It is not be registered.");
         return;
     }
-    jsCbMap_.erase(*fileInfos);
+    callbackMap_.erase(*fileInfos);
 }
 
-void CopyCore::ReceiveComplete(std::shared_ptr<UvEntryCore> entry)
+void CopyCore::ReceiveComplete(std::shared_ptr<FsUvEntry> entry)
 {
     if (entry == nullptr) {
         HILOGE("entry pointer is nullptr.");
         return;
     }
+    if (entry->callback == nullptr) {
+        HILOGE("entry callback pointer is nullptr.");
+        return;
+    }
     auto processedSize = entry->progressSize;
     if (processedSize < entry->callback->maxProgressSize) {
-        HILOGE("enter ReceiveComplete2");
         return;
     }
     entry->callback->maxProgressSize = processedSize;
-
-    entry->callback->listenerCb(processedSize, entry->totalSize);
+    auto listener = entry->callback->listener;
+    if (listener == nullptr) {
+        HILOGE("listener pointer is nullptr.");
+        return;
+    }
+    listener->InvokeListener(processedSize, entry->totalSize);
 }
 
-UvEntryCore *CopyCore::GetUVEntry(std::shared_ptr<FileInfosCore> infos)
+FsUvEntry *CopyCore::GetUVEntry(std::shared_ptr<FsFileInfos> infos)
 {
-    UvEntryCore *entry = nullptr;
+    FsUvEntry *entry = nullptr;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
-        auto iter = jsCbMap_.find(*infos);
-        if (iter == jsCbMap_.end()) {
+        auto iter = callbackMap_.find(*infos);
+        if (iter == callbackMap_.end()) {
             HILOGE("Failed to find callback");
             return nullptr;
         }
         auto callback = iter->second;
-        entry = new (std::nothrow) UvEntryCore(iter->second, infos);
+        entry = new (std::nothrow) FsUvEntry(iter->second, infos);
         if (entry == nullptr) {
             HILOGE("entry ptr is nullptr.");
             return nullptr;
@@ -559,9 +543,9 @@ UvEntryCore *CopyCore::GetUVEntry(std::shared_ptr<FileInfosCore> infos)
     return entry;
 }
 
-void CopyCore::OnFileReceive(std::shared_ptr<FileInfosCore> infos)
+void CopyCore::OnFileReceive(std::shared_ptr<FsFileInfos> infos)
 {
-    std::shared_ptr<UvEntryCore> entry(GetUVEntry(infos));
+    std::shared_ptr<FsUvEntry> entry(GetUVEntry(infos));
     if (entry == nullptr) {
         HILOGE("failed to get uv entry");
         return;
@@ -569,25 +553,22 @@ void CopyCore::OnFileReceive(std::shared_ptr<FileInfosCore> infos)
     ReceiveComplete(entry);
 }
 
-std::shared_ptr<ReceiveInfo> CopyCore::GetReceivedInfo(int wd, std::shared_ptr<CallbackObjectCore> callback)
+std::shared_ptr<ReceiveInfo> CopyCore::GetReceivedInfo(int wd, std::shared_ptr<FsCallbackObject> callback)
 {
-    auto it = find_if(callback->wds.begin(), callback->wds.end(), [wd](const auto& item) {
-        return item.first == wd;
-    });
+    auto it = find_if(callback->wds.begin(), callback->wds.end(), [wd](const auto &item) { return item.first == wd; });
     if (it != callback->wds.end()) {
         return it->second;
     }
     return nullptr;
 }
 
-bool CopyCore::CheckFileValid(const std::string &filePath, std::shared_ptr<FileInfosCore> infos)
+bool CopyCore::CheckFileValid(const std::string &filePath, std::shared_ptr<FsFileInfos> infos)
 {
     return infos->filePaths.count(filePath) != 0;
 }
 
-int CopyCore::UpdateProgressSize(const std::string &filePath,
-                                 std::shared_ptr<ReceiveInfo> receivedInfo,
-                                 std::shared_ptr<CallbackObjectCore> callback)
+int CopyCore::UpdateProgressSize(
+    const std::string &filePath, std::shared_ptr<ReceiveInfo> receivedInfo, std::shared_ptr<FsCallbackObject> callback)
 {
     auto [err, fileSize] = GetFileSize(filePath);
     if (err != ERRNO_NOERR) {
@@ -608,18 +589,18 @@ int CopyCore::UpdateProgressSize(const std::string &filePath,
     return ERRNO_NOERR;
 }
 
-std::shared_ptr<CallbackObjectCore> CopyCore::GetRegisteredListener(std::shared_ptr<FileInfosCore> infos)
+std::shared_ptr<FsCallbackObject> CopyCore::GetRegisteredListener(std::shared_ptr<FsFileInfos> infos)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    auto iter = jsCbMap_.find(*infos);
-    if (iter == jsCbMap_.end()) {
+    auto iter = callbackMap_.find(*infos);
+    if (iter == callbackMap_.end()) {
         HILOGE("It is not registered.");
         return nullptr;
     }
     return iter->second;
 }
 
-void CopyCore::CloseNotifyFd(std::shared_ptr<FileInfosCore> infos, std::shared_ptr<CallbackObjectCore> callback)
+void CopyCore::CloseNotifyFd(std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCallbackObject> callback)
 {
     callback->closed = false;
     infos->eventFd = -1;
@@ -631,7 +612,7 @@ void CopyCore::CloseNotifyFd(std::shared_ptr<FileInfosCore> infos, std::shared_p
     }
 }
 
-void CopyCore::CloseNotifyFdLocked(std::shared_ptr<FileInfosCore> infos, std::shared_ptr<CallbackObjectCore> callback)
+void CopyCore::CloseNotifyFdLocked(std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCallbackObject> callback)
 {
     {
         lock_guard<mutex> lock(callback->readMutex);
@@ -645,7 +626,7 @@ void CopyCore::CloseNotifyFdLocked(std::shared_ptr<FileInfosCore> infos, std::sh
 }
 
 tuple<bool, int, bool> CopyCore::HandleProgress(
-    inotify_event *event, std::shared_ptr<FileInfosCore> infos, std::shared_ptr<CallbackObjectCore> callback)
+    inotify_event *event, std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCallbackObject> callback)
 {
     if (callback == nullptr) {
         return { true, EINVAL, false };
@@ -674,14 +655,15 @@ tuple<bool, int, bool> CopyCore::HandleProgress(
     return { true, callback->errorCode, true };
 }
 
-void CopyCore::ReadNotifyEvent(std::shared_ptr<FileInfosCore> infos)
+void CopyCore::ReadNotifyEvent(std::shared_ptr<FsFileInfos> infos)
 {
     char buf[BUF_SIZE] = { 0 };
     struct inotify_event *event = nullptr;
     int len = 0;
     int64_t index = 0;
     auto callback = GetRegisteredListener(infos);
-    while (infos->run && ((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {}
+    while (infos->run && ((len = read(infos->notifyFd, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {
+    }
     while (infos->run && index < len) {
         event = reinterpret_cast<inotify_event *>(buf + index);
         auto [needContinue, errCode, needSend] = HandleProgress(event, infos, callback);
@@ -706,7 +688,7 @@ void CopyCore::ReadNotifyEvent(std::shared_ptr<FileInfosCore> infos)
     }
 }
 
-void CopyCore::ReadNotifyEventLocked(std::shared_ptr<FileInfosCore> infos, std::shared_ptr<CallbackObjectCore> callback)
+void CopyCore::ReadNotifyEventLocked(std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCallbackObject> callback)
 {
     {
         std::lock_guard<std::mutex> lock(callback->readMutex);
@@ -728,7 +710,7 @@ void CopyCore::ReadNotifyEventLocked(std::shared_ptr<FileInfosCore> infos, std::
     }
 }
 
-void CopyCore::GetNotifyEvent(std::shared_ptr<FileInfosCore> infos)
+void CopyCore::GetNotifyEvent(std::shared_ptr<FsFileInfos> infos)
 {
     auto callback = GetRegisteredListener(infos);
     if (callback == nullptr) {
@@ -760,17 +742,16 @@ void CopyCore::GetNotifyEvent(std::shared_ptr<FileInfosCore> infos)
         }
         {
             std::unique_lock<std::mutex> lock(callback->cvLock);
-            callback->cv.wait_for(lock, std::chrono::microseconds(SLEEP_TIME), [callback]() -> bool {
-                return callback->notifyFd == -1;
-            });
+            callback->cv.wait_for(
+                lock, std::chrono::microseconds(SLEEP_TIME), [callback]() -> bool { return callback->notifyFd == -1; });
         }
     }
 }
 
-tuple<int, std::shared_ptr<FileInfosCore>> CopyCore::CreateFileInfos(
-    const std::string &srcUri, const std::string &destUri, std::optional<CopyOptions> options)
+tuple<int, std::shared_ptr<FsFileInfos>> CopyCore::CreateFileInfos(
+    const std::string &srcUri, const std::string &destUri, const std::optional<CopyOptions> &options)
 {
-    auto infos = CreateSharedPtr<FileInfosCore>();
+    auto infos = CreateSharedPtr<FsFileInfos>();
     if (infos == nullptr) {
         HILOGE("Failed to request heap memory.");
         return { ENOMEM, nullptr };
@@ -785,29 +766,29 @@ tuple<int, std::shared_ptr<FileInfosCore>> CopyCore::CreateFileInfos(
     infos->destPath = GetRealPath(infos->destPath);
     infos->isFile = IsMediaUri(infos->srcUri) || IsFile(infos->srcPath);
     infos->notifyTime = std::chrono::steady_clock::now() + NOTIFY_PROGRESS_DELAY;
-    if (options != std::nullopt) {
-        if (options.value().listenerCb) {
+    if (options.has_value()) {
+        auto listener = options.value().progressListener;
+        if (listener) {
             infos->hasListener = true;
-            infos->listenerCb = options.value().listenerCb;
+            infos->listener = listener;
         }
-        if (options.value().taskSignalEntityCore != nullptr) {
-            infos->taskSignal = options.value().taskSignalEntityCore->taskSignal_;
+        auto copySignal = options.value().copySignal;
+        if (copySignal) {
+            infos->taskSignal = copySignal->GetTaskSignal();
         }
     }
 
     return { ERRNO_NOERR, infos };
 }
 
-void CopyCore::StartNotify(std::shared_ptr<FileInfosCore> infos, std::shared_ptr<CallbackObjectCore> callback)
+void CopyCore::StartNotify(std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCallbackObject> callback)
 {
     if (infos->hasListener && callback != nullptr) {
-        callback->notifyHandler = std::thread([infos] {
-            GetNotifyEvent(infos);
-            });
+        callback->notifyHandler = std::thread([infos] { GetNotifyEvent(infos); });
     }
 }
 
-int CopyCore::ExecCopy(std::shared_ptr<FileInfosCore> infos)
+int CopyCore::ExecCopy(std::shared_ptr<FsFileInfos> infos)
 {
     if (infos->isFile && IsFile(infos->destPath)) {
         // copyFile
@@ -826,25 +807,18 @@ int CopyCore::ExecCopy(std::shared_ptr<FileInfosCore> infos)
     return EINVAL;
 }
 
-int CopyCore::ValidParam(const string& src, const string& dest,
-                         std::optional<CopyOptions> options,
-                         std::shared_ptr<FileInfosCore> &fileInfos)
+bool CopyCore::ValidParams(const string &src, const string &dest)
 {
     auto succSrc = ValidOperand(src);
     auto succDest = ValidOperand(dest);
     if (!succSrc || !succDest) {
         HILOGE("The first/second argument requires uri/uri");
-        return E_PARAMS;
+        return false;
     }
-    auto [errCode, infos] = CreateFileInfos(src, dest, options);
-    if (errCode != ERRNO_NOERR) {
-        return errCode;
-    }
-    fileInfos = infos;
-    return ERRNO_NOERR;
+    return true;
 }
 
-void CopyCore::WaitNotifyFinished(std::shared_ptr<CallbackObjectCore> callback)
+void CopyCore::WaitNotifyFinished(std::shared_ptr<FsCallbackObject> callback)
 {
     if (callback != nullptr) {
         if (callback->notifyHandler.joinable()) {
@@ -853,7 +827,7 @@ void CopyCore::WaitNotifyFinished(std::shared_ptr<CallbackObjectCore> callback)
     }
 }
 
-void CopyCore::CopyComplete(std::shared_ptr<FileInfosCore> infos, std::shared_ptr<CallbackObjectCore> callback)
+void CopyCore::CopyComplete(std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCallbackObject> callback)
 {
     if (callback != nullptr && infos->hasListener) {
         callback->progressSize = callback->totalSize;
@@ -861,12 +835,16 @@ void CopyCore::CopyComplete(std::shared_ptr<FileInfosCore> infos, std::shared_pt
     }
 }
 
-FsResult<void> CopyCore::DoCopy(const string& src, const string& dest, std::optional<CopyOptions> &options)
+FsResult<void> CopyCore::DoCopy(const string &src, const string &dest, std::optional<CopyOptions> &options)
 {
-    std::shared_ptr<FileInfosCore> infos = nullptr;
-    auto result = ValidParam(src, dest, options, infos);
-    if (result != ERRNO_NOERR) {
-        return FsResult<void>::Error(result);
+    auto isValid = ValidParams(src, dest);
+    if (!isValid) {
+        return FsResult<void>::Error(E_PARAMS);
+    }
+
+    auto [errCode, infos] = CreateFileInfos(src, dest, options);
+    if (errCode != ERRNO_NOERR) {
+        return FsResult<void>::Error(errCode);
     }
 
     auto callback = RegisterListener(infos);
@@ -878,23 +856,25 @@ FsResult<void> CopyCore::DoCopy(const string& src, const string& dest, std::opti
         if (infos->taskSignal != nullptr) {
             infos->taskSignal->MarkRemoteTask();
         }
-        auto ret = TransListenerCore::CopyFileFromSoftBus(infos->srcUri, infos->destUri,
-                                                          infos, std::move(callback));
+        auto ret = TransListenerCore::CopyFileFromSoftBus(infos->srcUri, infos->destUri, infos, std::move(callback));
+        UnregisterListener(infos);
         if (ret != ERRNO_NOERR) {
             return FsResult<void>::Error(ret);
         } else {
             return FsResult<void>::Success();
         }
     }
-    result = CopyCore::ExecLocal(infos, callback);
+    auto result = CopyCore::ExecLocal(infos, callback);
     CloseNotifyFdLocked(infos, callback);
     infos->run = false;
     WaitNotifyFinished(callback);
     if (result != ERRNO_NOERR) {
         infos->exceptionCode = result;
+        UnregisterListener(infos);
         return FsResult<void>::Error(infos->exceptionCode);
     }
     CopyComplete(infos, callback);
+    UnregisterListener(infos);
     if (infos->exceptionCode != ERRNO_NOERR) {
         return FsResult<void>::Error(infos->exceptionCode);
     } else {
