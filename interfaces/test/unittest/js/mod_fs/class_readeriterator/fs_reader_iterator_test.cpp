@@ -38,7 +38,7 @@ filesystem::path FsReaderIteratorTest::tempFilePath;
 void FsReaderIteratorTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    tempFilePath = std::filesystem::temp_directory_path() / "test_file.txt";
+    tempFilePath = std::filesystem::temp_directory_path() / "fs_reader_iterator_test_file.txt";
     ofstream tempfile(tempFilePath);
     tempfile << "Test content\n123\n456";
     tempfile.close();

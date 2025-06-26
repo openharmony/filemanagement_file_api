@@ -45,7 +45,6 @@ public:
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamCloseTest_0001, testing::ext::TestSize.Level1)
 {
@@ -66,7 +65,6 @@ HWTEST_F(FsStreamTest, FsStreamCloseTest_0001, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamCloseTest_0002, testing::ext::TestSize.Level1)
 {
@@ -92,7 +90,6 @@ HWTEST_F(FsStreamTest, FsStreamCloseTest_0002, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamFlushTest_0001, testing::ext::TestSize.Level1)
 {
@@ -118,7 +115,6 @@ HWTEST_F(FsStreamTest, FsStreamFlushTest_0001, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamFlushTest_0002, testing::ext::TestSize.Level1)
 {
@@ -142,7 +138,6 @@ HWTEST_F(FsStreamTest, FsStreamFlushTest_0002, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
 {
@@ -168,7 +163,6 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
 {
@@ -195,7 +189,6 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamSeekTest_0003, testing::ext::TestSize.Level1)
 {
@@ -222,7 +215,6 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0003, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamSeekTest_0004, testing::ext::TestSize.Level1)
 {
@@ -246,7 +238,6 @@ HWTEST_F(FsStreamTest, FsStreamSeekTest_0004, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1)
 {
@@ -271,7 +262,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1)
 {
@@ -297,7 +287,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0003, testing::ext::TestSize.Level1)
 {
@@ -325,7 +314,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0003, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0004, testing::ext::TestSize.Level1)
 {
@@ -354,7 +342,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0004, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0005, testing::ext::TestSize.Level1)
 {
@@ -382,7 +369,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0005, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0006, testing::ext::TestSize.Level1)
 {
@@ -412,7 +398,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0006, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0007, testing::ext::TestSize.Level1)
 {
@@ -440,7 +425,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0007, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0008, testing::ext::TestSize.Level1)
 {
@@ -469,7 +453,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0008, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0009, testing::ext::TestSize.Level1)
 {
@@ -497,7 +480,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0009, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0010, testing::ext::TestSize.Level1)
 {
@@ -526,7 +508,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0010, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0013, testing::ext::TestSize.Level1)
 {
@@ -551,7 +532,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0013, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0014, testing::ext::TestSize.Level1)
 {
@@ -577,7 +557,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0014, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0015, testing::ext::TestSize.Level1)
 {
@@ -609,7 +588,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0015, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamWriteTest_0016, testing::ext::TestSize.Level1)
 {
@@ -642,7 +620,6 @@ HWTEST_F(FsStreamTest, FsStreamWriteTest_0016, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
 {
@@ -669,7 +646,6 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0002, testing::ext::TestSize.Level1)
 {
@@ -700,7 +676,6 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0002, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0003, testing::ext::TestSize.Level1)
 {
@@ -730,7 +705,6 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0003, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0004, testing::ext::TestSize.Level1)
 {
@@ -760,7 +734,6 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0004, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0005, testing::ext::TestSize.Level1)
 {
@@ -787,7 +760,6 @@ HWTEST_F(FsStreamTest, FsStreamReadTest_0005, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(FsStreamTest, FsStreamReadTest_0006, testing::ext::TestSize.Level1)
 {

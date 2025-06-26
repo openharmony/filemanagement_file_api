@@ -90,7 +90,6 @@ public:
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0001, testing::ext::TestSize.Level1)
 {
@@ -118,7 +117,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0001, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0002, testing::ext::TestSize.Level1)
 {
@@ -145,7 +143,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0002, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0003, testing::ext::TestSize.Level1)
 {
@@ -168,7 +165,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0003, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0004, testing::ext::TestSize.Level1)
 {
@@ -196,7 +192,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0004, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0005, testing::ext::TestSize.Level1)
 {
@@ -224,7 +219,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0005, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0006, testing::ext::TestSize.Level1)
 {
@@ -252,7 +246,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0006, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0007, testing::ext::TestSize.Level1)
 {
@@ -279,7 +272,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0007, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0008, testing::ext::TestSize.Level1)
 {
@@ -306,7 +298,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0008, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0009, testing::ext::TestSize.Level1)
 {
@@ -331,7 +322,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0009, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0010, testing::ext::TestSize.Level1)
 {
@@ -356,7 +346,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0010, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0011, testing::ext::TestSize.Level1)
 {
@@ -380,7 +369,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0011, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0012, testing::ext::TestSize.Level1)
 {
@@ -400,7 +388,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0012, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0013, testing::ext::TestSize.Level1)
 {
@@ -423,7 +410,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0013, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0014, testing::ext::TestSize.Level1)
 {
@@ -443,7 +429,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0014, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0015, testing::ext::TestSize.Level1)
 {
@@ -477,7 +462,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0015, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0016, testing::ext::TestSize.Level1)
 {
@@ -504,7 +488,6 @@ HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0016, testing::ext::TestSize.Level
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ListFileCoreTest, DoListFileCoreTest_0017, testing::ext::TestSize.Level1)
 {
