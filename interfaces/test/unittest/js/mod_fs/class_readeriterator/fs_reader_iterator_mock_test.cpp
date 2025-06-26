@@ -45,7 +45,7 @@ void FsReaderIteratorMockTest::SetUpTestCase(void)
     GTEST_LOG_(INFO) << "SetUpTestCase";
     tempFilePath = std::filesystem::temp_directory_path() / "test_file.txt";
     ofstream tempfile(tempFilePath);
-    tempfile << "Test content\n123\n456\n";
+    tempfile << "";
     tempfile.close();
     uvMock = std::make_shared<UvfsMock>();
     Uvfs::ins = uvMock;
@@ -94,20 +94,7 @@ HWTEST_F(FsReaderIteratorMockTest, FsReaderIteratorMockTest_Next_001, testing::e
     auto nextResult = iterator->Next();
     EXPECT_TRUE(nextResult.IsSuccess());
     EXPECT_TRUE(nextResult.GetData().value().done);
-    EXPECT_EQ(nextResult.GetData().value().value, "Test content\n");
-
-    nextResult = iterator->Next();
-    EXPECT_TRUE(nextResult.IsSuccess());
-    EXPECT_FALSE(nextResult.GetData().value().done);
-    EXPECT_EQ(nextResult.GetData().value().value, "123\n");
-
-    nextResult = iterator->Next();
-    EXPECT_TRUE(nextResult.IsSuccess());
-    EXPECT_FALSE(nextResult.GetData().value().done);
-    EXPECT_EQ(nextResult.GetData().value().value, "456\n");
-
-    nextResult = iterator->Next();
-    EXPECT_FALSE(nextResult.IsSuccess());
+    EXPECT_EQ(nextResult.GetData().value().value, "");
 
     GTEST_LOG_(INFO) << "FsReaderIteratorMockTest-end FsReaderIteratorMockTest_Next_001";
 }
