@@ -43,7 +43,6 @@ public:
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(FdopenStreamCoreTest, DoFdopenStreamTest_0001, testing::ext::TestSize.Level1)
 {
@@ -73,7 +72,6 @@ HWTEST_F(FdopenStreamCoreTest, DoFdopenStreamTest_0001, testing::ext::TestSize.L
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(FdopenStreamCoreTest, DoFdopenStreamTest_0002, testing::ext::TestSize.Level1)
 {
@@ -93,7 +91,6 @@ HWTEST_F(FdopenStreamCoreTest, DoFdopenStreamTest_0002, testing::ext::TestSize.L
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(FdopenStreamCoreTest, DoFdopenStreamTest_0003, testing::ext::TestSize.Level1)
 {
