@@ -565,7 +565,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CopyFileFromSoftBus_001, t
 
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
     std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
-    std::shared_ptr<FsFileInfos> infos(new FsFileInfos);
+    std::shared_ptr<FsFileInfos> infos = std::make_shared<FsFileInfos>();
     transListener->copyEvent_.copyResult = FAILED;
 
     auto res = transListener->CopyFileFromSoftBus(srcUri, "destUri", infos, nullptr);

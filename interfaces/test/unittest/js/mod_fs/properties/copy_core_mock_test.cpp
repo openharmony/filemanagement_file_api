@@ -22,6 +22,7 @@
 #include "copy_core.h"
 #include "inotify_mock.h"
 #include "mock/uv_fs_mock.h"
+#include "unistd_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -30,6 +31,8 @@ using namespace std;
 
 class CopyCoreMockTest : public testing::Test {
 public:
+    static constexpr mode_t permission0755 = 0755;
+    static constexpr mode_t permission0644 = 0644;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -52,10 +55,10 @@ const string CopyCoreMockTest::destFile = destDir + "/dest.txt";
 void CopyCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    mkdir(testDir.c_str(), 0755);
-    mkdir(srcDir.c_str(), 0755);
-    mkdir(destDir.c_str(), 0755);
-    int32_t fd = open(srcFile.c_str(), O_CREAT | O_RDWR, 0644);
+    mkdir(testDir.c_str(), permission0755);
+    mkdir(srcDir.c_str(), permission0755);
+    mkdir(destDir.c_str(), permission0755);
+    int32_t fd = open(srcFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
         EXPECT_TRUE(false);
     }
@@ -74,6 +77,8 @@ void CopyCoreMockTest::TearDownTestCase(void)
     rmdir(testDir.c_str());
     Uvfs::ins = nullptr;
     uvMock = nullptr;
+    UnistdMock::DestroyMock();
+    InotifyMock::DestroyMock();
 }
 
 void CopyCoreMockTest::SetUp(void)
@@ -84,7 +89,6 @@ void CopyCoreMockTest::SetUp(void)
 void CopyCoreMockTest::TearDown(void)
 {
     GTEST_LOG_(INFO) << "TearDown";
-    remove(destFile.c_str());
 }
 
 /**
@@ -102,7 +106,9 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopyFile_001, testing::ext::TestSize
     infos->isFile = true;
     infos->srcPath = CopyCoreMockTest::srcFile;
     infos->destPath = CopyCoreMockTest::destFile;
+    auto unistdMock = UnistdMock::GetMock();
 
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).WillOnce(Return(-1));
 
     auto res = CopyCore::CopyFile(srcFile, destFile, infos);
@@ -125,12 +131,16 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_DoCopy_001, testing::ext::TestSize.L
     string srcUri = "file://" + srcFile;
     string destUri = "file://" + destFile;
     optional<CopyOptions> options;
+    auto unistdMock = UnistdMock::GetMock();
 
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).WillOnce(Return(0));
 
     auto res = CopyCore::DoCopy(srcUri, destUri, options);
     EXPECT_EQ(res.IsSuccess(), true);
     EXPECT_TRUE(filesystem::exists(destFile));
+    int ret = remove(destFile.c_str());
+    EXPECT_TRUE(ret == 0);
 
     GTEST_LOG_(INFO) << "CopyCoreMockTest-end CopyCoreMockTest_DoCopy_001";
 }
@@ -147,26 +157,27 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_001, testing::ext::TestSi
     GTEST_LOG_(INFO) << "CopyCoreMockTest-begin CopyCoreMockTest_CopySubDir_001";
 
     string subDir = srcDir + "/sub_dir";
-    mkdir(subDir.c_str(), 0755);
+    mkdir(subDir.c_str(), permission0755);
     string subFile = subDir + "/sub_file.txt";
-    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, 0644);
+    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
         EXPECT_TRUE(false);
     }
     close(fd);
 
-    testing::StrictMock<InotifyMock> &inotifyMock = static_cast<testing::StrictMock<InotifyMock> &>(GetInotifyMock());
+    auto inotifyMock = InotifyMock::GetMock();
     string destSubDir = destDir + "/sub_dir";
     auto infos = make_shared<FsFileInfos>();
     infos->notifyFd = 1;
-    EXPECT_CALL(inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
-        .Times(1)
-        .WillOnce(testing::Return(0));
+    auto unistdMock = UnistdMock::GetMock();
+
+    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
+    EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
     auto res = CopyCore::CopySubDir(subDir, destSubDir, infos);
-    testing::Mock::VerifyAndClearExpectations(&inotifyMock);
     EXPECT_EQ(res, UNKNOWN_ERR);
 
-    remove(subFile.c_str());
+    int ret = remove(subFile.c_str());
+    EXPECT_TRUE(ret == 0);
     rmdir(subDir.c_str());
     rmdir(destSubDir.c_str());
     GTEST_LOG_(INFO) << "CopyCoreMockTest-end CopyCoreMockTest_CopySubDir_001";

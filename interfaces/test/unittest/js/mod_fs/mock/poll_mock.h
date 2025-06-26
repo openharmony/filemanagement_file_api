@@ -13,29 +13,38 @@
  * limitations under the License.
  */
 
-#include "inotify_mock.h"
+#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_POLL_MOCK_H
+#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_POLL_MOCK_H
+
+#include <gmock/gmock.h>
+#include <poll.h>
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-InotifyMock &GetInotifyMock()
-{
-    return InotifyMock::GetMock();
-}
+class IPollMock {
+public:
+    virtual ~IPollMock() = default;
+    virtual int poll(struct pollfd *, nfds_t, int) = 0;
+};
+
+class PollMock : public IPollMock {
+public:
+    MOCK_METHOD(int, poll, (struct pollfd *, nfds_t, int), (override));
+
+public:
+    static std::shared_ptr<PollMock> GetMock();
+    static void DestroyMock();
+
+private:
+    static thread_local std::shared_ptr<PollMock> pollMock;
+};
 
 } // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-extern "C" {
-using namespace OHOS::FileManagement::ModuleFileIO::Test;
-
-int inotify_add_watch(int fd, const char *pathname, uint32_t mask)
-{
-    return GetInotifyMock().inotify_add_watch(fd, pathname, mask);
-}
-
-} // extern "C"
+#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_POLL_MOCK_H

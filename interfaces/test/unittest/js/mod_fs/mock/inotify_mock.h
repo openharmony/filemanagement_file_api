@@ -27,21 +27,24 @@ namespace Test {
 class IInotifyMock {
 public:
     virtual ~IInotifyMock() = default;
+    virtual int inotify_init() = 0;
     virtual int inotify_add_watch(int, const char *, uint32_t) = 0;
+    virtual int inotify_rm_watch(int, int) = 0;
 };
 
 class InotifyMock : public IInotifyMock {
 public:
+    MOCK_METHOD(int, inotify_init, (), (override));
     MOCK_METHOD(int, inotify_add_watch, (int, const char *, uint32_t), (override));
+    MOCK_METHOD(int, inotify_rm_watch, (int, int), (override));
 
-    static InotifyMock &GetMock()
-    {
-        static InotifyMock mock;
-        return mock;
-    }
+public:
+    static std::shared_ptr<InotifyMock> GetMock();
+    static void DestroyMock();
+
+private:
+    static thread_local std::shared_ptr<InotifyMock> inotifyMock;
 };
-
-InotifyMock &GetInotifyMock();
 
 } // namespace Test
 } // namespace ModuleFileIO

@@ -24,10 +24,10 @@ using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
-const int g_permissions = 0755;
-
 class CopyCoreTest : public testing::Test {
 public:
+    static constexpr mode_t permission0755 = 0755;  //rwxr-xr-x
+    static constexpr mode_t permission0644 = 0644;  //rw-r--r--
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -49,10 +49,10 @@ const string CopyCoreTest::destFile = destDir + "/dest.txt";
 void CopyCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    mkdir(testDir.c_str(), g_permissions);
-    mkdir(srcDir.c_str(), g_permissions);
-    mkdir(destDir.c_str(), g_permissions);
-    int32_t fd = open(srcFile.c_str(), O_CREAT | O_RDWR, 0644);
+    mkdir(testDir.c_str(), permission0755);
+    mkdir(srcDir.c_str(), permission0755);
+    mkdir(destDir.c_str(), permission0755);
+    int32_t fd = open(srcFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
         EXPECT_TRUE(false);
     }
@@ -453,9 +453,9 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopySubDir_001, testing::ext::TestSize.Level
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopySubDir_001";
 
     string subDir = srcDir + "/sub_dir";
-    mkdir(subDir.c_str(), g_permissions);
+    mkdir(subDir.c_str(), permission0755);
     string subFile = subDir + "/sub_file.txt";
-    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, 0644);
+    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
         EXPECT_TRUE(false);
     }
@@ -488,9 +488,9 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopySubDir_002, testing::ext::TestSize.Level
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopySubDir_002";
 
     string subDir = srcDir + "/sub_dir";
-    mkdir(subDir.c_str(), g_permissions);
+    mkdir(subDir.c_str(), permission0755);
     string subFile = subDir + "/sub_file.txt";
-    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, 0644);
+    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
         EXPECT_TRUE(false);
     }
@@ -520,9 +520,9 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_RecurCopyDir_001, testing::ext::TestSize.Lev
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_RecurCopyDir_001";
 
     string subDir = srcDir + "/sub_dir";
-    mkdir(subDir.c_str(), g_permissions);
+    mkdir(subDir.c_str(), permission0755);
     string subFile = subDir + "/sub_file.txt";
-    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, 0644);
+    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
         EXPECT_TRUE(false);
     }
@@ -555,9 +555,9 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopyDirFunc_001, testing::ext::TestSize.Leve
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopyDirFunc_001";
 
     string subDir = srcDir + "/sub_dir";
-    mkdir(subDir.c_str(), g_permissions);
+    mkdir(subDir.c_str(), permission0755);
     string subFile = subDir + "/sub_file.txt";
-    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, 0644);
+    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
         EXPECT_TRUE(false);
     }
