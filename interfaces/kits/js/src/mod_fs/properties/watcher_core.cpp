@@ -98,7 +98,7 @@ FsResult<FsWatcher *> WatcherCore::DoCreateWatcher(
 
     watchEntity->data_ = info;
 
-    bool ret = FsFileWatcher::GetInstance().AddWatcherInfo(info->fileName, info);
+    bool ret = FsFileWatcher::GetInstance().AddWatcherInfo(info);
     if (!ret) {
         HILOGE("Failed to add watcher info.");
         return FsResult<FsWatcher *>::Error(EINVAL);
