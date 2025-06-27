@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_FILE_API_TRANS_LISTENER_CORE_H
-#define FILEMANAGEMENT_FILE_API_TRANS_LISTENER_CORE_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_COPY_LISTENER_TRANS_LISTENER_CORE_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_COPY_LISTENER_TRANS_LISTENER_CORE_H
 
 #include <condition_variable>
 
@@ -40,35 +40,31 @@ public:
     int32_t OnFileReceive(uint64_t totalBytes, uint64_t processedBytes) override;
     int32_t OnFinished(const std::string &sessionName) override;
     int32_t OnFailed(const std::string &sessionName, int32_t errorCode) override;
-    static int CopyFileFromSoftBus(const std::string &srcUri,
-                                      const std::string &destUri,
-                                      std::shared_ptr<FileInfosCore> fileInfos,
-                                      std::shared_ptr<CallbackObjectCore> callback);
+    static int CopyFileFromSoftBus(const std::string &srcUri, const std::string &destUri,
+        std::shared_ptr<FsFileInfos> fileInfos, std::shared_ptr<FsCallbackObject> callback);
+
 private:
     static std::string GetNetworkIdFromUri(const std::string &uri);
-    static void CallbackComplete(std::shared_ptr<UvEntryCore> entry);
+    static void CallbackComplete(std::shared_ptr<FsUvEntry> entry);
     static void RmDir(const std::string &path);
     static std::string CreateDfsCopyPath();
     static std::string GetFileName(const std::string &path);
     static int32_t CopyToSandBox(const std::string &srcUri, const std::string &disSandboxPath,
         const std::string &sandboxPath, const std::string &currentId);
-    static int32_t PrepareCopySession(const std::string &srcUri,
-                                      const std::string &destUri,
-                                      TransListenerCore* transListener,
-                                      Storage::DistributedFile::HmdfsInfo &info,
-                                      std::string &disSandboxPath);
+    static int32_t PrepareCopySession(const std::string &srcUri, const std::string &destUri,
+        TransListenerCore *transListener, Storage::DistributedFile::HmdfsInfo &info, std::string &disSandboxPath);
     static int HandleCopyFailure(CopyEvent &copyEvent, const Storage::DistributedFile::HmdfsInfo &info,
         const std::string &disSandboxPath, const std::string &currentId);
-    static int WaitForCopyResult(TransListenerCore* transListener);
+    static int WaitForCopyResult(TransListenerCore *transListener);
     static std::atomic<uint32_t> getSequenceId_;
     std::mutex cvMutex_;
     std::condition_variable cv_;
     CopyEvent copyEvent_;
     std::mutex callbackMutex_;
-    std::shared_ptr<CallbackObjectCore> callback_;
+    std::shared_ptr<FsCallbackObject> callback_;
 };
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // FILEMANAGEMENT_FILE_API_TRANS_LISTENER_CORE_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_COPY_LISTENER_TRANS_LISTENER_CORE_H
