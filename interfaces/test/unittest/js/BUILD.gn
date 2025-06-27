@@ -14,6 +14,48 @@
 import("//build/test.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
+ohos_unittest("ani_file_environment_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
+  module_out_path = "file_api/file_api"
+  include_dirs = [
+    "${src_path}/mod_environment",
+    "${src_path}/mod_environment/ani",
+    "${file_api_path}/interfaces/test/unittest/js/mod_environment/mock",
+  ]
+
+  sources = [
+    "mod_environment/environment_core_mock_test.cpp",
+    "mod_environment/mock/accesstoken_kit_mock.cpp",
+    "mod_environment/mock/ipc_skeleton_mock.cpp",
+    "mod_environment/mock/parameter_mock.cpp",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/js:ani_file_environment",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "libuv:uv",
+    "openssl:libcrypto_shared",
+    "os_account:os_account_innerkits",
+    "runtime_core:ani",
+    "runtime_core:libarkruntime",
+  ]
+
+  defines = [ "private=public" ]
+}
+
 ohos_unittest("ani_file_fs_test") {
   branch_protector_ret = "pac_ret"
   testonly = true
