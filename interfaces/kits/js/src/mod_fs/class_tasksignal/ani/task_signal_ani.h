@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_FILE_API_TASK_SIGNAL_ANI_H
-#define FILEMANAGEMENT_FILE_API_TASK_SIGNAL_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_TASKSIGNAL_ANI_TASK_SIGNAL_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_TASKSIGNAL_ANI_TASK_SIGNAL_ANI_H
 
 #include <ani.h>
 
@@ -22,13 +22,15 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
+
 class TaskSignalAni final {
 public:
     static void Cancel(ani_env *env, [[maybe_unused]] ani_object object);
     static void OnCancel(ani_env *env, [[maybe_unused]] ani_object object);
 };
+
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif // FILEMANAGEMENT_FILE_API_TASK_SIGNAL_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_TASKSIGNAL_ANI_TASK_SIGNAL_ANI_H

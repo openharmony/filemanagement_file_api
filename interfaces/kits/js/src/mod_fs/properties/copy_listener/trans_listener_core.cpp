@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,10 @@
 #include <filesystem>
 #include <random>
 
+#include "dfs_event_dfx.h"
 #include "ipc_skeleton.h"
 #include "sandbox_helper.h"
 #include "uri.h"
-#include "dfs_event_dfx.h"
 #include "utils_log.h"
 
 namespace OHOS {
@@ -70,22 +70,20 @@ int TransListenerCore::HandleCopyFailure(CopyEvent &copyEvent, const Storage::Di
     auto it = softbusErr2ErrCodeTable.find(copyEvent.errorCode);
     if (it == softbusErr2ErrCodeTable.end()) {
         RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
-            RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
-            RadarReporter::SEND_FILE_ERROR, RadarReporter::CONCURRENT_ID, currentId,
-            RadarReporter::PACKAGE_NAME, to_string(copyEvent.errorCode));
+            RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE, RadarReporter::SEND_FILE_ERROR,
+            RadarReporter::CONCURRENT_ID, currentId, RadarReporter::PACKAGE_NAME, to_string(copyEvent.errorCode));
         return EIO;
     }
     if (copyEvent.errorCode != DFS_CANCEL_SUCCESS) {
         HILOGE("HandleCopyFailure failed, copyEvent.errorCode = %{public}d.", copyEvent.errorCode);
         RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
-            RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
-            RadarReporter::SEND_FILE_ERROR, RadarReporter::CONCURRENT_ID, currentId,
-            RadarReporter::PACKAGE_NAME, to_string(copyEvent.errorCode));
+            RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE, RadarReporter::SEND_FILE_ERROR,
+            RadarReporter::CONCURRENT_ID, currentId, RadarReporter::PACKAGE_NAME, to_string(copyEvent.errorCode));
     }
     return it->second;
 }
 
-int TransListenerCore::WaitForCopyResult(TransListenerCore* transListener)
+int TransListenerCore::WaitForCopyResult(TransListenerCore *transListener)
 {
     if (transListener == nullptr) {
         HILOGE("transListener is nullptr");
@@ -93,14 +91,13 @@ int TransListenerCore::WaitForCopyResult(TransListenerCore* transListener)
     }
     std::unique_lock<std::mutex> lock(transListener->cvMutex_);
     transListener->cv_.wait(lock, [&transListener]() {
-            return transListener->copyEvent_.copyResult == SUCCESS ||
-                transListener->copyEvent_.copyResult == FAILED;
+        return transListener->copyEvent_.copyResult == SUCCESS || transListener->copyEvent_.copyResult == FAILED;
     });
     return transListener->copyEvent_.copyResult;
 }
 
 int TransListenerCore::CopyFileFromSoftBus(const std::string &srcUri, const std::string &destUri,
-    std::shared_ptr<FileInfosCore> fileInfos, std::shared_ptr<CallbackObjectCore> callback)
+    std::shared_ptr<FsFileInfos> fileInfos, std::shared_ptr<FsCallbackObject> callback)
 {
     HILOGI("CopyFileFromSoftBus begin.");
     std::string currentId = "CopyFile_" + std::to_string(getpid()) + "_" + std::to_string(getSequenceId_);
@@ -115,7 +112,7 @@ int TransListenerCore::CopyFileFromSoftBus(const std::string &srcUri, const std:
     }
     transListener->callback_ = std::move(callback);
 
-    Storage::DistributedFile::HmdfsInfo info{};
+    Storage::DistributedFile::HmdfsInfo info {};
     Uri uri(destUri);
     info.authority = uri.GetAuthority();
     info.sandboxPath = SandboxHelper::Decode(uri.GetPath());
@@ -151,14 +148,11 @@ int TransListenerCore::CopyFileFromSoftBus(const std::string &srcUri, const std:
     return ERRNO_NOERR;
 }
 
-int32_t TransListenerCore::PrepareCopySession(const std::string &srcUri,
-                                              const std::string &destUri,
-                                              TransListenerCore* transListener,
-                                              Storage::DistributedFile::HmdfsInfo &info,
-                                              std::string &disSandboxPath)
+int32_t TransListenerCore::PrepareCopySession(const std::string &srcUri, const std::string &destUri,
+    TransListenerCore *transListener, Storage::DistributedFile::HmdfsInfo &info, std::string &disSandboxPath)
 {
     std::string tmpDir;
-    if (info.authority != FILE_MANAGER_AUTHORITY && info.authority  != MEDIA_AUTHORITY) {
+    if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
         tmpDir = CreateDfsCopyPath();
         disSandboxPath = DISTRIBUTED_PATH + tmpDir;
         std::error_code errCode;
@@ -181,8 +175,8 @@ int32_t TransListenerCore::PrepareCopySession(const std::string &srcUri,
     info.copyPath = tmpDir;
     auto networkId = GetNetworkIdFromUri(srcUri);
     HILOGI("dfs PrepareSession begin.");
-    auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(srcUri, destUri,
-        networkId, transListener, info);
+    auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(
+        srcUri, destUri, networkId, transListener, info);
     if (ret != ERRNO_NOERR) {
         HILOGE("PrepareSession failed, ret = %{public}d.", ret);
         if (info.authority != FILE_MANAGER_AUTHORITY && info.authority != MEDIA_AUTHORITY) {
@@ -218,8 +212,8 @@ int32_t TransListenerCore::CopyToSandBox(const std::string &srcUri, const std::s
             RmDir(disSandboxPath);
             return EIO;
         }
-        std::filesystem::copy(disSandboxPath + fileName, sandboxPath, std::filesystem::copy_options::update_existing,
-            errCode);
+        std::filesystem::copy(
+            disSandboxPath + fileName, sandboxPath, std::filesystem::copy_options::update_existing, errCode);
         if (errCode.value() != 0) {
             HILOGE("Copy file failed: errCode: %{public}d", errCode.value());
             RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
@@ -250,14 +244,24 @@ std::string TransListenerCore::GetNetworkIdFromUri(const std::string &uri)
     return uri.substr(uri.find(NETWORK_PARA) + NETWORK_PARA.size(), uri.size());
 }
 
-void TransListenerCore::CallbackComplete(std::shared_ptr<UvEntryCore> entry)
+void TransListenerCore::CallbackComplete(std::shared_ptr<FsUvEntry> entry)
 {
     if (entry == nullptr) {
         HILOGE("entry pointer is nullptr.");
         return;
     }
 
-    entry->callback->listenerCb(entry->progressSize, entry->totalSize);
+    if (entry->callback == nullptr) {
+        HILOGE("entry callback pointer is nullptr.");
+        return;
+    }
+
+    auto listener = entry->callback->listener;
+    if (listener == nullptr) {
+        HILOGE("listener pointer is nullptr.");
+        return;
+    }
+    listener->InvokeListener(entry->progressSize, entry->totalSize);
 }
 
 int32_t TransListenerCore::OnFileReceive(uint64_t totalBytes, uint64_t processedBytes)
@@ -268,7 +272,7 @@ int32_t TransListenerCore::OnFileReceive(uint64_t totalBytes, uint64_t processed
         return ENOMEM;
     }
 
-    std::shared_ptr<UvEntryCore> entry = std::make_shared<UvEntryCore>(callback_);
+    std::shared_ptr<FsUvEntry> entry = std::make_shared<FsUvEntry>(callback_);
     if (entry == nullptr) {
         HILOGE("entry ptr is nullptr");
         return ENOMEM;

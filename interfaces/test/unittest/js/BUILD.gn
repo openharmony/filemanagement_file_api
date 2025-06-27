@@ -73,17 +73,21 @@ ohos_unittest("ani_file_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
   ]
 
   sources = [
     "mod_fs/class_atomicfile/fs_atomicfile_test.cpp",
     "mod_fs/class_file/fs_file_test.cpp",
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_test.cpp",
+    "mod_fs/class_readeriterator/fs_reader_iterator_test.cpp",
     "mod_fs/class_stat/fs_stat_test.cpp",
     "mod_fs/class_stream/fs_stream_test.cpp",
+    "mod_fs/class_tasksignal/fs_task_signal_test.cpp",
     "mod_fs/properties/access_core_test.cpp",
     "mod_fs/properties/close_core_test.cpp",
     "mod_fs/properties/copy_file_core_test.cpp",
+    "mod_fs/properties/copy_core_test.cpp",
     "mod_fs/properties/copy_dir_core_test.cpp",
     "mod_fs/properties/create_randomaccessfile_core_test.cpp",
     "mod_fs/properties/create_stream_core_test.cpp",
@@ -94,11 +98,13 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/lstat_core_test.cpp",
     "mod_fs/properties/move_core_test.cpp",
     "mod_fs/properties/stat_core_test.cpp",
+    "mod_fs/properties/movedir_core_test.cpp",
     "mod_fs/properties/open_core_test.cpp",
     "mod_fs/properties/read_core_test.cpp",
     "mod_fs/properties/read_lines_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
     "mod_fs/properties/rmdir_core_test.cpp",
+    "mod_fs/properties/trans_listener_test.cpp",
     "mod_fs/properties/truncate_core_test.cpp",
     "mod_fs/properties/utimes_core_test.cpp",
     "mod_fs/properties/write_core_test.cpp",
@@ -118,6 +124,8 @@ ohos_unittest("ani_file_fs_test") {
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
     "c_utils:utils",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "dfs_service:libdistributedfileutils",
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -140,8 +148,10 @@ ohos_unittest("ani_file_fs_mock_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/class_stream/mock",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/mock",
@@ -151,6 +161,7 @@ ohos_unittest("ani_file_fs_mock_test") {
   sources = [
     "mod_fs/class_file/fs_file_mock_test.cpp",
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
+    "mod_fs/class_readeriterator/fs_reader_iterator_mock_test.cpp",
     "mod_fs/class_stat/fs_stat_mock_test.cpp",
     "mod_fs/class_stream/fs_stream_mock_test.cpp",
     "mod_fs/class_stream/mock/c_mock.cpp",
@@ -162,11 +173,14 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/mock/unistd_mock.cpp",
     "mod_fs/properties/access_core_mock_test.cpp",
     "mod_fs/properties/copy_file_core_mock_test.cpp",
+    "mod_fs/properties/copy_core_mock_test.cpp",
     "mod_fs/properties/create_randomaccessfile_core_mock_test.cpp",
     "mod_fs/properties/dup_core_mock_test.cpp",
     "mod_fs/properties/fdatasync_core_mock_test.cpp",
     "mod_fs/properties/fsync_core_mock_test.cpp",
     "mod_fs/properties/lstat_core_mock_test.cpp",
+    "mod_fs/properties/mkdir_core_mock_test.cpp",
+    "mod_fs/properties/mkdtemp_core_mock_test.cpp",
     "mod_fs/properties/mock/system_mock.cpp",
     "mod_fs/properties/mock/uv_fs_mock.cpp",
     "mod_fs/properties/move_core_mock_test.cpp",
@@ -176,6 +190,7 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/read_core_mock_test.cpp",
     "mod_fs/properties/read_lines_core_mock_test.cpp",
     "mod_fs/properties/symlink_core_mock_test.cpp",
+    "mod_fs/properties/trans_listener_mock_test.cpp",
     "mod_fs/properties/truncate_core_mock_test.cpp",
     "mod_fs/properties/unlink_core_mock_test.cpp",
     "mod_fs/properties/utimes_core_mock_test.cpp",
@@ -196,6 +211,8 @@ ohos_unittest("ani_file_fs_mock_test") {
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
     "c_utils:utils",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "dfs_service:libdistributedfileutils",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -203,7 +220,10 @@ ohos_unittest("ani_file_fs_mock_test") {
     "libuv:uv",
   ]
 
-  defines = [ "private=public" ]
+  defines = [
+    "ENABLE_DISTRIBUTED_FILE_MOCK",
+    "private=public",
+  ]
 }
 
 ohos_unittest("ani_file_hash_test") {
