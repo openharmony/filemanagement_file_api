@@ -44,7 +44,6 @@ public:
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(CloseCoreTest, DoCloseTestFd_0001, testing::ext::TestSize.Level1)
 {
@@ -65,7 +64,6 @@ HWTEST_F(CloseCoreTest, DoCloseTestFd_0001, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(CloseCoreTest, DoCloseTestFd_0002, testing::ext::TestSize.Level1)
 {
@@ -98,7 +96,6 @@ HWTEST_F(CloseCoreTest, DoCloseTestFd_0002, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(CloseCoreTest, DoCloseTestFd_0003, testing::ext::TestSize.Level1)
 {
@@ -125,7 +122,6 @@ HWTEST_F(CloseCoreTest, DoCloseTestFd_0003, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(CloseCoreTest, DoCloseTestFile_0001, testing::ext::TestSize.Level1)
 {
@@ -147,7 +143,6 @@ HWTEST_F(CloseCoreTest, DoCloseTestFile_0001, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(CloseCoreTest, DoCloseTestFile_0002, testing::ext::TestSize.Level1)
 {

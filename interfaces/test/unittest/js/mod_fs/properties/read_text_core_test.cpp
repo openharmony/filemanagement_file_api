@@ -47,7 +47,6 @@ public:
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ReadTextCoreTest, DoReadTextTest_0001, testing::ext::TestSize.Level1)
 {
@@ -68,7 +67,6 @@ HWTEST_F(ReadTextCoreTest, DoReadTextTest_0001, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ReadTextCoreTest, DoReadTextTest_0002, testing::ext::TestSize.Level1)
 {
@@ -90,7 +88,6 @@ HWTEST_F(ReadTextCoreTest, DoReadTextTest_0002, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ReadTextCoreTest, DoReadTextTest_0003, testing::ext::TestSize.Level1)
 {
@@ -112,7 +109,6 @@ HWTEST_F(ReadTextCoreTest, DoReadTextTest_0003, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ReadTextCoreTest, DoReadTextTest_0004, testing::ext::TestSize.Level1)
 {
@@ -134,7 +130,6 @@ HWTEST_F(ReadTextCoreTest, DoReadTextTest_0004, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ReadTextCoreTest, DoReadTextTest_0005, testing::ext::TestSize.Level1)
 {
@@ -156,7 +151,6 @@ HWTEST_F(ReadTextCoreTest, DoReadTextTest_0005, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ReadTextCoreTest, DoReadTextTest_0006, testing::ext::TestSize.Level1)
 {
@@ -176,7 +170,6 @@ HWTEST_F(ReadTextCoreTest, DoReadTextTest_0006, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ReadTextCoreTest, DoReadTextTest_0007, testing::ext::TestSize.Level1)
 {
@@ -198,7 +191,6 @@ HWTEST_F(ReadTextCoreTest, DoReadTextTest_0007, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ReadTextCoreTest, DoReadTextTest_0008, testing::ext::TestSize.Level1)
 {
@@ -221,7 +213,6 @@ HWTEST_F(ReadTextCoreTest, DoReadTextTest_0008, testing::ext::TestSize.Level1)
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
-* @tc.require: AR000IGDNF
 */
 HWTEST_F(ReadTextCoreTest, DoReadTextTest_0009, testing::ext::TestSize.Level1)
 {
