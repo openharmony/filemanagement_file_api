@@ -177,7 +177,6 @@ static bool ValidAccessArgs(const std::string &path, const std::optional<AccessM
         return false;
     }
     finalMode = hasMode ? mode : 0;
-    flag = DEFAULT_FLAG;
     return true;
 }
 
