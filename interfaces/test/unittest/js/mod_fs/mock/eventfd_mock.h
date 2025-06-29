@@ -36,10 +36,13 @@ public:
 
 public:
     static std::shared_ptr<EventfdMock> GetMock();
-    static void DestroyMock();
+    static void EnableMock();
+    static void DisableMock();
+    static bool IsMockable();
 
 private:
     static thread_local std::shared_ptr<EventfdMock> eventfdMock;
+    static thread_local bool mockable;
 };
 
 } // namespace Test

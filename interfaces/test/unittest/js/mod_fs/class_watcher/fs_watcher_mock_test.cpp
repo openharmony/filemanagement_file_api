@@ -42,12 +42,14 @@ public:
 void FsWatcherMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    InotifyMock::EnableMock();
+    UnistdMock::EnableMock();
 }
 
 void FsWatcherMockTest::TearDownTestCase(void)
 {
-    InotifyMock::DestroyMock();
-    UnistdMock::DestroyMock();
+    InotifyMock::DisableMock();
+    UnistdMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 

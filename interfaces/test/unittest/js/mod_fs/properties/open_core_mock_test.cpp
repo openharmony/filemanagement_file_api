@@ -43,6 +43,7 @@ void OpenCoreMockTest::SetUpTestCase(void)
     GTEST_LOG_(INFO) << "SetUpTestCase";
     uvMock = std::make_shared<UvfsMock>();
     Uvfs::ins = uvMock;
+    UnistdMock::EnableMock();
 }
 
 void OpenCoreMockTest::TearDownTestCase(void)
@@ -50,7 +51,7 @@ void OpenCoreMockTest::TearDownTestCase(void)
     GTEST_LOG_(INFO) << "TearDownTestCase";
     Uvfs::ins = nullptr;
     uvMock = nullptr;
-    UnistdMock::DestroyMock();
+    UnistdMock::DisableMock();
 }
 
 void OpenCoreMockTest::SetUp(void)
