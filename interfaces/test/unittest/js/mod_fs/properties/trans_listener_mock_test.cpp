@@ -149,12 +149,13 @@ void TransListenerCoreMockTest::SetUpTestCase(void)
         EXPECT_TRUE(false);
     }
     close(fd);
+    UnistdMock::EnableMock();
 }
 
 void TransListenerCoreMockTest::TearDownTestCase(void)
 {
     rmdir(g_path.c_str());
-    UnistdMock::DestroyMock();
+    UnistdMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 

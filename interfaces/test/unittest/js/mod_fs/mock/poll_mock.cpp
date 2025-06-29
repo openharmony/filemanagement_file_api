@@ -15,12 +15,15 @@
 
 #include "poll_mock.h"
 
+#include <dlfcn.h>
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
 thread_local std::shared_ptr<PollMock> PollMock::pollMock = nullptr;
+thread_local bool PollMock::mockable = false;
 
 std::shared_ptr<PollMock> PollMock::GetMock()
 {
@@ -30,9 +33,20 @@ std::shared_ptr<PollMock> PollMock::GetMock()
     return pollMock;
 }
 
-void PollMock::DestroyMock()
+void PollMock::EnableMock()
+{
+    mockable = true;
+}
+
+void PollMock::DisableMock()
 {
     pollMock = nullptr;
+    mockable = false;
+}
+
+bool PollMock::IsMockable()
+{
+    return mockable;
 }
 
 } // namespace Test
@@ -40,12 +54,25 @@ void PollMock::DestroyMock()
 } // namespace FileManagement
 } // namespace OHOS
 
+#ifdef __cplusplus
 extern "C" {
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
+static int (*real_poll)(struct pollfd *fds, nfds_t n, int timeout) = nullptr;
+
 int poll(struct pollfd *fds, nfds_t n, int timeout)
 {
-    return PollMock::GetMock()->poll(fds, n, timeout);
+    if (PollMock::IsMockable()) {
+        return PollMock::GetMock()->poll(fds, n, timeout);
+    }
+
+    real_poll = (int (*)(struct pollfd *, nfds_t, int))dlsym(RTLD_NEXT, "poll");
+    if (!real_poll) {
+        GTEST_LOG_(ERROR) << "Failed to resolve real poll" << dlerror();
+        return -1;
+    }
+    return real_poll(fds, n, timeout);
 }
 
 } // extern "C"
+#endif

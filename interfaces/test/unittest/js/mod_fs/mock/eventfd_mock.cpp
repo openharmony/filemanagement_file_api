@@ -15,12 +15,15 @@
 
 #include "eventfd_mock.h"
 
+#include <dlfcn.h>
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
 thread_local std::shared_ptr<EventfdMock> EventfdMock::eventfdMock = nullptr;
+thread_local bool EventfdMock::mockable = false;
 
 std::shared_ptr<EventfdMock> EventfdMock::GetMock()
 {
@@ -30,9 +33,20 @@ std::shared_ptr<EventfdMock> EventfdMock::GetMock()
     return eventfdMock;
 }
 
-void EventfdMock::DestroyMock()
+void EventfdMock::EnableMock()
+{
+    mockable = true;
+}
+
+void EventfdMock::DisableMock()
 {
     eventfdMock = nullptr;
+    mockable = false;
+}
+
+bool EventfdMock::IsMockable()
+{
+    return mockable;
 }
 
 } // namespace Test
@@ -40,12 +54,25 @@ void EventfdMock::DestroyMock()
 } // namespace FileManagement
 } // namespace OHOS
 
+#ifdef __cplusplus
 extern "C" {
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
+static int (*real_eventfd)(unsigned int count, int flags) = nullptr;
+
 int eventfd(unsigned int count, int flags)
 {
-    return EventfdMock::GetMock()->eventfd(count, flags);
+    if (EventfdMock::IsMockable()) {
+        return EventfdMock::GetMock()->eventfd(count, flags);
+    }
+
+    real_eventfd = (int (*)(unsigned int, int))dlsym(RTLD_NEXT, "eventfd");
+    if (!real_eventfd) {
+        GTEST_LOG_(ERROR) << "Failed to resolve real eventfd" << dlerror();
+        return -1;
+    }
+    return real_eventfd(count, flags);
 }
 
 } // extern "C"
+#endif
