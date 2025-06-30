@@ -25,95 +25,104 @@
 using namespace OHOS;
 using namespace OHOS::Storage::DistributedFile;
 
-class MockDistributedFileDaemonManager : public DistributedFileDaemonManager {
+class MockDistributedFileDaemonManager final : public DistributedFileDaemonManager {
 public:
-    MOCK_METHOD(int32_t, CancelCopyTask, (const std::string &sessionName), (override));
+    MOCK_METHOD(int32_t, PrepareSession,
+        (const std::string &srcUri, const std::string &dstUri, const std::string &srcDeviceId,
+            const sptr<IRemoteObject> &listener, HmdfsInfo &info),
+        (override));
 
     int32_t OpenP2PConnection(const DistributedHardware::DmDeviceInfo &deviceInfo) override
     {
         return 0;
     }
-
     int32_t CloseP2PConnection(const DistributedHardware::DmDeviceInfo &deviceInfo) override
     {
         return 0;
     }
-
     int32_t OpenP2PConnectionEx(const std::string &networkId, sptr<IFileDfsListener> remoteReverseObj) override
     {
         return 0;
     }
-
     int32_t CloseP2PConnectionEx(const std::string &networkId) override
     {
         return 0;
     }
-
-    MOCK_METHOD(int32_t, PrepareSession, (const std::string &srcUri, const std::string &dstUri,
-        const std::string &srcDeviceId, const sptr<IRemoteObject> &listener, HmdfsInfo &info), (override));
-
-    int32_t PushAsset(int32_t userId, const sptr<AssetObj> &assetObj,
-        const sptr<IAssetSendCallback> &sendCallback) override
+    int32_t CancelCopyTask(const std::string &sessionName) override
     {
         return 0;
     }
-
+    int32_t PushAsset(
+        int32_t userId, const sptr<AssetObj> &assetObj, const sptr<IAssetSendCallback> &sendCallback) override
+    {
+        return 0;
+    }
     int32_t RegisterAssetCallback(const sptr<IAssetRecvCallback> &recvCallback) override
     {
         return 0;
     }
-
     int32_t UnRegisterAssetCallback(const sptr<IAssetRecvCallback> &recvCallback) override
     {
         return 0;
     }
-
     int32_t GetSize(const std::string &uri, bool isSrcUri, uint64_t &size) override
     {
         return 0;
     }
-
     int32_t IsDirectory(const std::string &uri, bool isSrcUri, bool &isDirectory) override
     {
         return 0;
     }
-
     int32_t Copy(const std::string &srcUri, const std::string &destUri, ProcessCallback processCallback) override
     {
         return 0;
     }
-
     int32_t Cancel(const std::string &srcUri, const std::string &destUri) override
     {
         return 0;
     }
-
     int32_t Cancel() override
     {
         return 0;
     }
 
-    static MockDistributedFileDaemonManager &GetInstance()
-    {
-        static MockDistributedFileDaemonManager instance;
-        return instance;
-    }
+    MockDistributedFileDaemonManager() = default;
+    ~MockDistributedFileDaemonManager() = default;
+
+public:
+    static std::shared_ptr<MockDistributedFileDaemonManager> GetMock();
+    static void DisableMock();
+
+private:
+    static thread_local std::shared_ptr<MockDistributedFileDaemonManager> managerMock;
 };
 
-static MockDistributedFileDaemonManager &g_mockDistributedFileDaemonManager =
-    MockDistributedFileDaemonManager::GetInstance();
+thread_local std::shared_ptr<MockDistributedFileDaemonManager> MockDistributedFileDaemonManager::managerMock = nullptr;
 
-#ifdef ENABLE_DISTRIBUTED_FILE_MOCK
-DistributedFileDaemonManager &DistributedFileDaemonManager::GetInstance()
+std::shared_ptr<MockDistributedFileDaemonManager> MockDistributedFileDaemonManager::GetMock()
 {
-    return MockDistributedFileDaemonManager::GetInstance();
+    if (managerMock == nullptr) {
+        managerMock = std::make_shared<MockDistributedFileDaemonManager>();
+    }
+    return managerMock;
 }
-#endif
+
+void MockDistributedFileDaemonManager::DisableMock()
+{
+    managerMock = nullptr;
+}
 
 class MockTaskSignalListener : public OHOS::DistributedFS::ModuleTaskSignal::TaskSignalListener {
 public:
     MOCK_METHOD(void, OnCancel, (), (override));
 };
+
+#ifdef ENABLE_DISTRIBUTED_FILE_MOCK
+DistributedFileDaemonManager &DistributedFileDaemonManager::GetInstance()
+{
+    return *MockDistributedFileDaemonManager::GetMock();
+}
+#endif
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -135,10 +144,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    MockDistributedFileDaemonManager &GetMock()
-    {
-        return g_mockDistributedFileDaemonManager;
-    }
 };
 
 void TransListenerCoreMockTest::SetUpTestCase(void)
@@ -155,6 +160,7 @@ void TransListenerCoreMockTest::SetUpTestCase(void)
 void TransListenerCoreMockTest::TearDownTestCase(void)
 {
     rmdir(g_path.c_str());
+    MockDistributedFileDaemonManager::DisableMock();
     UnistdMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
@@ -187,9 +193,10 @@ HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_PrepareCopySession
 
     string disSandboxPath = "disSandboxPath";
     auto unistdMock = UnistdMock::GetMock();
+    auto managerMock = MockDistributedFileDaemonManager::GetMock();
 
     EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
-    EXPECT_CALL(GetMock(), PrepareSession(testing::_, testing::_, testing::_, testing::_, testing::_))
+    EXPECT_CALL(*managerMock, PrepareSession(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERRNO_NOERR));
     auto result = TransListenerCore::PrepareCopySession(srcUri, "destUri", nullptr, info, disSandboxPath);
     EXPECT_EQ(result, ERRNO_NOERR);
@@ -210,14 +217,15 @@ HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_CopyFileFromSoftBu
 
     Storage::DistributedFile::HmdfsInfo info;
     info.authority = FILE_MANAGER_AUTHORITY;
-    
+
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
     std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
     std::shared_ptr<FsFileInfos> infos = std::make_shared<FsFileInfos>();
     auto unistdMock = UnistdMock::GetMock();
+    auto managerMock = MockDistributedFileDaemonManager::GetMock();
 
     EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
-    EXPECT_CALL(GetMock(), PrepareSession(testing::_, testing::_, testing::_, testing::_, testing::_))
+    EXPECT_CALL(*managerMock, PrepareSession(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERRNO_NOERR));
 
     auto res = transListener->CopyFileFromSoftBus(srcUri, "destUri", infos, nullptr);
