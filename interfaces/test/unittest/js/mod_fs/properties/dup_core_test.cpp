@@ -14,10 +14,10 @@
  */
 
 #include "dup_core.h"
-#include "mock/uv_fs_mock.h"
 
+#include <unistd.h>
+#include <fcntl.h>
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -80,16 +80,15 @@ HWTEST_F(DupCoreTest, DupCoreTest_DoDup_001, testing::ext::TestSize.Level1)
 HWTEST_F(DupCoreTest, DupCoreTest_DoDup_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NClassTest-begin DupCoreTest_DoDup_002";
-    int32_t fd = 1;
-    std::shared_ptr<UvfsMock> uv = std::make_shared<UvfsMock>();
-    Uvfs::ins = uv;
-    EXPECT_CALL(*uv, uv_fs_readlink(_, _, _, _)).WillOnce(Return(-1));
+    int32_t fd = open("temp_file.txt", O_CREAT | O_RDWR, 0666);
+    ASSERT_NE(fd, -1);
+    close(fd);
 
     auto res = DupCore::DoDup(fd);
+
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "NClassTest-end DupCoreTest_DoDup_002";
 }
-
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
