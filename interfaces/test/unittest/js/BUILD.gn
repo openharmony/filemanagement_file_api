@@ -67,6 +67,8 @@ ohos_unittest("ani_file_fs_mock_test") {
   defines = [
     "private=public",
   ]
+
+  use_exceptions = true
 }
 
 ohos_unittest("ani_file_fs_test") {
@@ -127,6 +129,8 @@ ohos_unittest("ani_file_fs_test") {
   defines = [
     "private=public",
   ]
+
+  use_exceptions = true
 }
 
 ohos_unittest("ani_file_hash_test") {
@@ -156,6 +160,8 @@ ohos_unittest("ani_file_hash_test") {
     "googletest:gmock_main",
     "googletest:gtest_main",
   ]
+
+  use_exceptions = true
 }
 
 ohos_unittest("ani_file_securitylabel_test") {
@@ -183,4 +189,6 @@ ohos_unittest("ani_file_securitylabel_test") {
     "googletest:gmock_main",
     "googletest:gtest_main",
   ]
+
+  use_exceptions = true
 }
