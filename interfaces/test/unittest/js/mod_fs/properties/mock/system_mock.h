@@ -29,7 +29,7 @@ public:
 public:
     virtual ~System() = default;
     virtual int setxattr(const char *path, const char *name, const void *value, size_t size, int flags) = 0;
-    virtual int getxattr(const char *path, const char *name, void *value, size_t size) = 0;
+    virtual ssize_t getxattr(const char *path, const char *name, void *value, size_t size) = 0;
     virtual int fgetxattr(int filedes, const char *name, void *value, size_t size) = 0;
     virtual int flock(int fd, int operation) = 0;
 };
@@ -37,7 +37,7 @@ public:
 class SystemMock : public System {
 public:
     MOCK_METHOD5(setxattr, int(const char *path, const char *name, const void *value, size_t size, int flags));
-    MOCK_METHOD4(getxattr, int(const char *path, const char *name, void *value, size_t size));
+    MOCK_METHOD4(getxattr, ssize_t(const char *path, const char *name, void *value, size_t size));
     MOCK_METHOD4(fgetxattr, int(int filedes, const char *name, void *value, size_t size));
     MOCK_METHOD2(flock, int(int fd, int operation));
 };
