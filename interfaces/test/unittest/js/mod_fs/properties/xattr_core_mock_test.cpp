@@ -84,7 +84,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_001, testing::ext::Test
     string key = "test_key";
     string value = "test_value";
 
-    EXPECT_CALL(*sys, setxattr(_, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*sys, setxattr(_, _, _, _, _)).WillOnce(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoSetXattr(path, key, value);
     EXPECT_FALSE(ret.IsSuccess());
 
@@ -127,7 +127,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_001, testing::ext::Test
     string path = tempFilePath.string();
     string key = "test_key";
 
-    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillRepeatedly(Return(-1));
+    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillRepeatedly(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoGetXattr(path, key);
     EXPECT_TRUE(ret.IsSuccess());
 
@@ -148,7 +148,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_002, testing::ext::Test
     string path = tempFilePath.string();
     string key = "test_key";
 
-    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(Return(-1));
+    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoGetXattr(path, key);
     EXPECT_FALSE(ret.IsSuccess());
 
