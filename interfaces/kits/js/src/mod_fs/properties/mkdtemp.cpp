@@ -69,7 +69,7 @@ static NError MkdTempExec(shared_ptr<string> arg, const string &path)
     }
     int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
-        HILOGE("Failed to create a temporary directory with path");
+        HILOGE("Failed to create a temporary directory with path ret %{public}d", ret);
         return NError(ret);
     } else {
         *arg = mkdtemp_req->path;

@@ -112,7 +112,7 @@ static NError AsyncExec(ReaderIteratorArg &readerIterator, const string &pathStr
     }
     int ret = GetFileSize(pathStr, readerIterator.offset);
     if (ret < 0) {
-        HILOGE("Failed to get size of the file");
+        HILOGE("Failed to get size of the file ret %{public}d", ret);
         return NError(ret);
     }
 

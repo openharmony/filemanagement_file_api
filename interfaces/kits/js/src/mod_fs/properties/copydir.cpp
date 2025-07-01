@@ -282,6 +282,7 @@ napi_value CopyDir::Sync(napi_env env, napi_callback_info info)
         NError(ret).ThrowErrAddData(env, EEXIST, PushErrFilesInData(env, errfiles));
         return nullptr;
     } else if (ret) {
+        HILOGE("Failed to copy dir, ret %{public}d", ret);
         NError(ret).ThrowErr(env);
         return nullptr;
     }

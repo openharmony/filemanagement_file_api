@@ -263,7 +263,7 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
     bool isAccess = false;
     int ret = AccessCore(args.path, args.mode, args.flag);
     if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
-        HILOGE("Failed to access file by path");
+        HILOGE("Failed to access file by path, ret:%{public}d", ret);
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -296,6 +296,9 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
     }
     auto cbExec = [path = args.path, result, mode = args.mode, flag = args.flag]() -> NError {
         int ret = AccessCore(path, mode, flag);
+        if (ret < 0) {
+            HILOGE("Accesscore finish ret %{public}d", ret);
+        }
         if (ret == 0) {
             result->isAccess = true;
         }
@@ -343,7 +346,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
         }
         int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
-            HILOGD("Failed to unlink with path");
+            HILOGD("Failed to unlink with path ret %{public}d", ret);
             return NError(ret);
         }
         return NError(ERRNO_NOERR);
@@ -390,7 +393,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     }
     int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.get(), nullptr);
     if (ret < 0) {
-        HILOGD("Failed to unlink with path");
+        HILOGD("Failed to unlink with path ret %{public}d", ret);
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -419,7 +422,7 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
             return NError(EEXIST);
         }
         if (ret != -ENOENT) {
-            HILOGE("Failed to check for illegal path or request for heap memory");
+            HILOGE("Failed to check for illegal path or request for heap memory, ret: %{public}d", ret);
             return NError(ret);
         }
         if (::Mkdirs(path.c_str(), static_cast<MakeDirectionMode>(recursion)) < 0) {
@@ -428,7 +431,7 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
         }
         ret = AccessCore(path, 0);
         if (ret) {
-            HILOGE("Failed to verify the result of Mkdirs function");
+            HILOGE("Failed to verify the result of Mkdirs function, ret: %{public}d", ret);
             return NError(ret);
         }
         return NError(ERRNO_NOERR);
