@@ -148,7 +148,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_002, testing::ext::Test
     string path = tempFilePath.string();
     string key = "test_key";
 
-    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(Return(-1));
+    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoGetXattr(path, key);
     EXPECT_FALSE(ret.IsSuccess());
 
