@@ -36,8 +36,7 @@ tuple<bool, size_t> FsUtils::GetActualLen(size_t bufLen, size_t bufOff, const op
     if (length.has_value()) {
         int64_t opLength = length.value();
         if (opLength < 0 || static_cast<size_t>(opLength) > retLen) {
-            HILOGE("Invalid option.length: option.length (%{public}lld), bufLen (%{public}zu), bufOff (%{public}zu)",
-                opLength, bufLen, bufOff);
+            HILOGE("Invalid option.length: option.length=%{public}" PRId64 ", retLen=%{public}zu", opLength, retLen);
             return { false, 0 };
         }
         retLen = static_cast<size_t>(opLength);
