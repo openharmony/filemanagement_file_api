@@ -316,7 +316,10 @@ ohos_unittest("ani_file_hash_test") {
 
   resource_config_file = "../resource/ohos_test.xml"
 
-  sources = [ "mod_hash/hash_core_test.cpp" ]
+  sources = [
+    "mod_hash/hash_core_test.cpp",
+    "mod_hash/hash_stream_test.cpp",
+    ]
   sources += ani_file_hash_core
 
   include_dirs = [
@@ -325,6 +328,7 @@ ohos_unittest("ani_file_hash_test") {
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_fs",
     "${file_api_path}/interfaces/kits/js/src/mod_hash",
+    "${file_api_path}/interfaces/kits/js/src/mod_hash/class_hashstream",
   ]
 
   deps = [
@@ -340,6 +344,8 @@ ohos_unittest("ani_file_hash_test") {
     "libuv:uv",
     "openssl:libcrypto_shared",
   ]
+
+  defines = [ "private=public" ]
 }
 
 ani_file_securitylabel_core = [
