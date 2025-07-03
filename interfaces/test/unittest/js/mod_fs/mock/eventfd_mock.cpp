@@ -58,20 +58,25 @@ bool EventfdMock::IsMockable()
 extern "C" {
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
-static int (*real_eventfd)(unsigned int count, int flags) = nullptr;
-
 int eventfd(unsigned int count, int flags)
 {
     if (EventfdMock::IsMockable()) {
         return EventfdMock::GetMock()->eventfd(count, flags);
     }
 
-    real_eventfd = (int (*)(unsigned int, int))dlsym(RTLD_NEXT, "eventfd");
-    if (!real_eventfd) {
-        GTEST_LOG_(ERROR) << "Failed to resolve real eventfd" << dlerror();
+    static int (*realEventfd)(unsigned int, int) = []() {
+        auto func = (int (*)(unsigned int, int))dlsym(RTLD_NEXT, "eventfd");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real eventfd: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realEventfd) {
         return -1;
     }
-    return real_eventfd(count, flags);
+
+    return realEventfd(count, flags);
 }
 
 } // extern "C"

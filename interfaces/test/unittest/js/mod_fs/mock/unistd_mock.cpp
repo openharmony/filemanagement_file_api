@@ -58,22 +58,25 @@ bool UnistdMock::IsMockable()
 extern "C" {
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
-static int (*real_access)(const char *filename, int amode) = nullptr;
-static int (*real_close)(int fd) = nullptr;
-static ssize_t (*real_read)(int fd, void *buf, size_t count) = nullptr;
-
 int access(const char *filename, int amode)
 {
     if (UnistdMock::IsMockable()) {
         return UnistdMock::GetMock()->access(filename, amode);
     }
 
-    real_access = (int (*)(const char *, int))dlsym(RTLD_NEXT, "access");
-    if (!real_access) {
-        GTEST_LOG_(ERROR) << "Failed to resolve real access" << dlerror();
+    static int (*realAccess)(const char *filename, int amode) = []() {
+        auto func = (int (*)(const char *, int))dlsym(RTLD_NEXT, "access");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real access: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realAccess) {
         return -1;
     }
-    return real_access(filename, amode);
+
+    return realAccess(filename, amode);
 }
 
 int close(int fd)
@@ -82,12 +85,19 @@ int close(int fd)
         return UnistdMock::GetMock()->close(fd);
     }
 
-    real_close = (int (*)(int))dlsym(RTLD_NEXT, "close");
-    if (!real_close) {
-        GTEST_LOG_(ERROR) << "Failed to resolve real close" << dlerror();
+    static int (*realClose)(int fd) = []() {
+        auto func = (int (*)(int))dlsym(RTLD_NEXT, "close");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real close: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realClose) {
         return -1;
     }
-    return real_close(fd);
+
+    return realClose(fd);
 }
 
 ssize_t read(int fd, void *buf, size_t count)
@@ -96,12 +106,19 @@ ssize_t read(int fd, void *buf, size_t count)
         return UnistdMock::GetMock()->read(fd, buf, count);
     }
 
-    real_read = (ssize_t(*)(int, void *, size_t))dlsym(RTLD_NEXT, "read");
-    if (!real_read) {
-        GTEST_LOG_(ERROR) << "Failed to resolve real read" << dlerror();
+    static ssize_t (*realRead)(int fd, void *buf, size_t count) = []() {
+        auto func = (ssize_t(*)(int, void *, size_t))dlsym(RTLD_NEXT, "read");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real read: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realRead) {
         return 0;
     }
-    return real_read(fd, buf, count);
+
+    return realRead(fd, buf, count);
 }
 
 } // extern "C"

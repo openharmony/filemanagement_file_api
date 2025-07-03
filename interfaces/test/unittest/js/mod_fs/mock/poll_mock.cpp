@@ -58,20 +58,25 @@ bool PollMock::IsMockable()
 extern "C" {
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
-static int (*real_poll)(struct pollfd *fds, nfds_t n, int timeout) = nullptr;
-
 int poll(struct pollfd *fds, nfds_t n, int timeout)
 {
     if (PollMock::IsMockable()) {
         return PollMock::GetMock()->poll(fds, n, timeout);
     }
 
-    real_poll = (int (*)(struct pollfd *, nfds_t, int))dlsym(RTLD_NEXT, "poll");
-    if (!real_poll) {
-        GTEST_LOG_(ERROR) << "Failed to resolve real poll" << dlerror();
+    static int (*realPoll)(struct pollfd * fds, nfds_t n, int timeout) = []() {
+        auto func = (int (*)(struct pollfd *, nfds_t, int))dlsym(RTLD_NEXT, "poll");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real poll: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realPoll) {
         return -1;
     }
-    return real_poll(fds, n, timeout);
+
+    return realPoll(fds, n, timeout);
 }
 
 } // extern "C"

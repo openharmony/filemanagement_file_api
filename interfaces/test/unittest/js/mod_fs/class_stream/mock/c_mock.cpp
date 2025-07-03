@@ -52,21 +52,25 @@ bool CMock::IsMockable()
 extern "C" {
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
-static int (*real_fseek)(FILE *, long, int) = nullptr;
-static long (*real_ftell)(FILE *) = nullptr;
-
 int fseek(FILE *stream, long len, int offset)
 {
     if (CMock::IsMockable()) {
         return CMock::GetMock()->fseek(stream, len, offset);
     }
 
-    real_fseek = (int (*)(FILE *, long, int))dlsym(RTLD_NEXT, "fseek");
-    if (!real_fseek) {
-        GTEST_LOG_(ERROR) << "Failed to resolve real fseek" << dlerror();
+    static int (*realFseek)(FILE *, long, int) = []() {
+        auto func = (int (*)(FILE *, long, int))dlsym(RTLD_NEXT, "fseek");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real fseek: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realFseek) {
         return -1;
     }
-    return real_fseek(stream, len, offset);
+
+    return realFseek(stream, len, offset);
 }
 
 long ftell(FILE *stream)
@@ -75,12 +79,19 @@ long ftell(FILE *stream)
         return CMock::GetMock()->ftell(stream);
     }
 
-    real_ftell = (long (*)(FILE *))dlsym(RTLD_NEXT, "ftell");
-    if (!real_ftell) {
-        GTEST_LOG_(ERROR) << "Failed to resolve real ftell" << dlerror();
+    static long (*realFtell)(FILE *) = []() {
+        auto func = (long (*)(FILE *))dlsym(RTLD_NEXT, "ftell");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real ftell: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realFtell) {
         return -1;
     }
-    return real_ftell(stream);
+
+    return realFtell(stream);
 }
 } // extern "C"
 #endif
