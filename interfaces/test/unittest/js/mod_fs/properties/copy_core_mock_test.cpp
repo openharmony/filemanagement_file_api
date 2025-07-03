@@ -33,8 +33,6 @@ using namespace std;
 
 class CopyCoreMockTest : public testing::Test {
 public:
-    static constexpr mode_t permission0755 = 0755;
-    static constexpr mode_t permission0644 = 0644;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -46,6 +44,10 @@ public:
     static const string destDir;
     static const string srcFile;
     static const string destFile;
+
+private:
+    static constexpr mode_t permission0755 = 0755;
+    static constexpr mode_t permission0644 = 0644;
 };
 
 const string CopyCoreMockTest::testDir = "/data/test";
@@ -245,6 +247,7 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_003, testing::ext::TestSi
     string subFile = subDir + "/sub_file.txt";
     int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
+        GTEST_LOG_(INFO) << "Open test file failed! ret: " << fd << ", errno: " << errno;
         EXPECT_TRUE(false);
     }
     close(fd);
@@ -309,8 +312,8 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_ReceiveComplete_002, testing::ext::T
     auto callback = std::make_shared<FsCallbackObject>(mockListener);
     callback->maxProgressSize = 100;
     auto entry = std::make_shared<FsUvEntry>(callback);
-    entry->progressSize = 50;
-    entry->totalSize = 200;
+    entry->progressSize = 50; // Mock valid progressSize
+    entry->totalSize = 200;   // Mock valid totalSize, and progressSize < totalSize
 
     EXPECT_CALL(*mockListener, InvokeListener(testing::_, testing::_)).Times(0);
     CopyCore::ReceiveComplete(entry);
@@ -446,7 +449,7 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_ReadNotifyEventLocked_002, testing::
         .Times(1)
         .WillOnce([callback](int fd, void *buf, size_t count) {
             errno = EIO;
-            callback->closed = true; // Set close after read condition
+            callback->closed = true;
             return 0;
         });
     EXPECT_CALL(*unistdMock, close(testing::_)).WillRepeatedly(testing::Return(0));

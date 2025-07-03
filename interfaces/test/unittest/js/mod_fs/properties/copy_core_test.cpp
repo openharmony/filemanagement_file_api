@@ -26,8 +26,6 @@ using namespace std;
 
 class CopyCoreTest : public testing::Test {
 public:
-    static constexpr mode_t permission0755 = 0755; // rwxr-xr-x
-    static constexpr mode_t permission0644 = 0644; // rw-r--r--
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -38,6 +36,10 @@ public:
     static const string destDir;
     static const string srcFile;
     static const string destFile;
+
+private:
+    static constexpr mode_t permission0755 = 0755; // rwxr-xr-x
+    static constexpr mode_t permission0644 = 0644; // rw-r--r--
 };
 
 const string CopyCoreTest::testDir = "/data/test";
@@ -79,6 +81,9 @@ void CopyCoreTest::TearDown(void)
     CopyCore::callbackMap_.clear();
     GTEST_LOG_(INFO) << "TearDown";
 }
+
+inline const int32_t EXPECTED_WD = 100;
+inline const int32_t UNEXPECTED_WD = 200;
 
 /**
  * @tc.name: CopyCoreTest_IsValidUri_001
@@ -1014,8 +1019,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_001, testing::ext::TestSize.L
     infos->destPath = "/data/test/dest";
 
     auto event = make_unique<inotify_event>();
-    const int testWd = 123; // 模拟wd数值为123
-    event->wd = testWd;
+    event->wd = EXPECTED_WD;
     event->mask = IN_MODIFY;
     event->len = 0;
     auto [continueProcess, errCode, needSend] = CopyCore::HandleProgress(event.get(), infos, nullptr);
@@ -1045,14 +1049,12 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_002, testing::ext::TestSize.L
 
     auto callback = make_shared<FsCallbackObject>(nullptr);
 
-    const int testWd = 123;      // 模拟wd数值为123
-    const int differentWd = 456; // 模拟wd数值为456
     auto receiveInfo = make_shared<ReceiveInfo>();
     receiveInfo->path = testDir;
-    callback->wds.push_back({ differentWd, receiveInfo });
+    callback->wds.push_back({ UNEXPECTED_WD, receiveInfo });
 
     auto event = make_unique<inotify_event>();
-    event->wd = testWd;
+    event->wd = EXPECTED_WD;
     event->mask = IN_MODIFY;
     event->len = 0;
 
@@ -1083,13 +1085,12 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_003, testing::ext::TestSize.L
 
     auto callback = make_shared<FsCallbackObject>(nullptr);
 
-    const int testWd = 123;
     auto receiveInfo = make_shared<ReceiveInfo>();
     receiveInfo->path = srcFile;
-    callback->wds.push_back({ testWd, receiveInfo });
+    callback->wds.push_back({ EXPECTED_WD, receiveInfo });
 
     auto event = make_unique<inotify_event>();
-    event->wd = testWd;
+    event->wd = EXPECTED_WD;
     event->mask = IN_MODIFY;
     event->len = 0;
 
