@@ -65,6 +65,8 @@ void CopyCoreMockTest::SetUpTestCase(void)
     close(fd);
     uvMock = std::make_shared<UvfsMock>();
     Uvfs::ins = uvMock;
+    UnistdMock::EnableMock();
+    InotifyMock::EnableMock();
 }
 
 void CopyCoreMockTest::TearDownTestCase(void)
@@ -77,8 +79,8 @@ void CopyCoreMockTest::TearDownTestCase(void)
     rmdir(testDir.c_str());
     Uvfs::ins = nullptr;
     uvMock = nullptr;
-    UnistdMock::DestroyMock();
-    InotifyMock::DestroyMock();
+    UnistdMock::DisableMock();
+    InotifyMock::DisableMock();
 }
 
 void CopyCoreMockTest::SetUp(void)

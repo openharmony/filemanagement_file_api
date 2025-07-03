@@ -40,10 +40,13 @@ public:
 
 public:
     static std::shared_ptr<InotifyMock> GetMock();
-    static void DestroyMock();
+    static void EnableMock();
+    static void DisableMock();
+    static bool IsMockable();
 
 private:
     static thread_local std::shared_ptr<InotifyMock> inotifyMock;
+    static thread_local bool mockable;
 };
 
 } // namespace Test

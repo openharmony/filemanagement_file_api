@@ -44,18 +44,16 @@ ohos_unittest("ani_file_environment_test") {
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "libuv:uv",
-    "ipc:ipc_core",
     "init:libbegetutil",
+    "ipc:ipc_core",
+    "libuv:uv",
     "openssl:libcrypto_shared",
     "os_account:os_account_innerkits",
     "runtime_core:ani",
     "runtime_core:libarkruntime",
   ]
 
-  defines = [
-    "private=public",
-  ]
+  defines = [ "private=public" ]
 }
 
 ohos_unittest("ani_file_fs_test") {
@@ -86,9 +84,9 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/class_tasksignal/fs_task_signal_test.cpp",
     "mod_fs/properties/access_core_test.cpp",
     "mod_fs/properties/close_core_test.cpp",
-    "mod_fs/properties/copy_file_core_test.cpp",
     "mod_fs/properties/copy_core_test.cpp",
     "mod_fs/properties/copy_dir_core_test.cpp",
+    "mod_fs/properties/copy_file_core_test.cpp",
     "mod_fs/properties/create_randomaccessfile_core_test.cpp",
     "mod_fs/properties/create_stream_core_test.cpp",
     "mod_fs/properties/dup_core_test.cpp",
@@ -97,13 +95,13 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/lseek_core_test.cpp",
     "mod_fs/properties/lstat_core_test.cpp",
     "mod_fs/properties/move_core_test.cpp",
-    "mod_fs/properties/stat_core_test.cpp",
     "mod_fs/properties/movedir_core_test.cpp",
     "mod_fs/properties/open_core_test.cpp",
     "mod_fs/properties/read_core_test.cpp",
     "mod_fs/properties/read_lines_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
     "mod_fs/properties/rmdir_core_test.cpp",
+    "mod_fs/properties/stat_core_test.cpp",
     "mod_fs/properties/trans_listener_test.cpp",
     "mod_fs/properties/truncate_core_test.cpp",
     "mod_fs/properties/utimes_core_test.cpp",
@@ -172,8 +170,8 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/mock/poll_mock.cpp",
     "mod_fs/mock/unistd_mock.cpp",
     "mod_fs/properties/access_core_mock_test.cpp",
-    "mod_fs/properties/copy_file_core_mock_test.cpp",
     "mod_fs/properties/copy_core_mock_test.cpp",
+    "mod_fs/properties/copy_file_core_mock_test.cpp",
     "mod_fs/properties/create_randomaccessfile_core_mock_test.cpp",
     "mod_fs/properties/dup_core_mock_test.cpp",
     "mod_fs/properties/fdatasync_core_mock_test.cpp",
@@ -184,11 +182,11 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/mock/system_mock.cpp",
     "mod_fs/properties/mock/uv_fs_mock.cpp",
     "mod_fs/properties/move_core_mock_test.cpp",
-    "mod_fs/properties/rename_core_mock_test.cpp",
-    "mod_fs/properties/stat_core_mock_test.cpp",
     "mod_fs/properties/open_core_mock_test.cpp",
     "mod_fs/properties/read_core_mock_test.cpp",
     "mod_fs/properties/read_lines_core_mock_test.cpp",
+    "mod_fs/properties/rename_core_mock_test.cpp",
+    "mod_fs/properties/stat_core_mock_test.cpp",
     "mod_fs/properties/symlink_core_mock_test.cpp",
     "mod_fs/properties/trans_listener_mock_test.cpp",
     "mod_fs/properties/truncate_core_mock_test.cpp",
@@ -219,6 +217,8 @@ ohos_unittest("ani_file_fs_mock_test") {
     "ipc:ipc_core",
     "libuv:uv",
   ]
+
+  libs = [ "dl" ]
 
   defines = [
     "ENABLE_DISTRIBUTED_FILE_MOCK",

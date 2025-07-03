@@ -15,12 +15,15 @@
 
 #include "unistd_mock.h"
 
+#include <dlfcn.h>
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
 thread_local std::shared_ptr<UnistdMock> UnistdMock::unistdMock = nullptr;
+thread_local bool UnistdMock::mockable = false;
 
 std::shared_ptr<UnistdMock> UnistdMock::GetMock()
 {
@@ -30,9 +33,20 @@ std::shared_ptr<UnistdMock> UnistdMock::GetMock()
     return unistdMock;
 }
 
-void UnistdMock::DestroyMock()
+void UnistdMock::EnableMock()
+{
+    mockable = true;
+}
+
+void UnistdMock::DisableMock()
 {
     unistdMock = nullptr;
+    mockable = false;
+}
+
+bool UnistdMock::IsMockable()
+{
+    return mockable;
 }
 
 } // namespace Test
@@ -40,22 +54,72 @@ void UnistdMock::DestroyMock()
 } // namespace FileManagement
 } // namespace OHOS
 
+#ifdef __cplusplus
 extern "C" {
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
 int access(const char *filename, int amode)
 {
-    return UnistdMock::GetMock()->access(filename, amode);
+    if (UnistdMock::IsMockable()) {
+        return UnistdMock::GetMock()->access(filename, amode);
+    }
+
+    static int (*realAccess)(const char *filename, int amode) = []() {
+        auto func = (int (*)(const char *, int))dlsym(RTLD_NEXT, "access");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real access: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realAccess) {
+        return -1;
+    }
+
+    return realAccess(filename, amode);
 }
 
 int close(int fd)
 {
-    return UnistdMock::GetMock()->close(fd);
+    if (UnistdMock::IsMockable()) {
+        return UnistdMock::GetMock()->close(fd);
+    }
+
+    static int (*realClose)(int fd) = []() {
+        auto func = (int (*)(int))dlsym(RTLD_NEXT, "close");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real close: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realClose) {
+        return -1;
+    }
+
+    return realClose(fd);
 }
 
 ssize_t read(int fd, void *buf, size_t count)
 {
-    return UnistdMock::GetMock()->read(fd, buf, count);
+    if (UnistdMock::IsMockable()) {
+        return UnistdMock::GetMock()->read(fd, buf, count);
+    }
+
+    static ssize_t (*realRead)(int fd, void *buf, size_t count) = []() {
+        auto func = (ssize_t(*)(int, void *, size_t))dlsym(RTLD_NEXT, "read");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real read: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realRead) {
+        return 0;
+    }
+
+    return realRead(fd, buf, count);
 }
 
 } // extern "C"
+#endif
