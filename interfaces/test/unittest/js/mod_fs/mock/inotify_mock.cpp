@@ -15,12 +15,15 @@
 
 #include "inotify_mock.h"
 
+#include <dlfcn.h>
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
 thread_local std::shared_ptr<InotifyMock> InotifyMock::inotifyMock = nullptr;
+thread_local bool InotifyMock::mockable = false;
 
 std::shared_ptr<InotifyMock> InotifyMock::GetMock()
 {
@@ -30,9 +33,20 @@ std::shared_ptr<InotifyMock> InotifyMock::GetMock()
     return inotifyMock;
 }
 
-void InotifyMock::DestroyMock()
+void InotifyMock::EnableMock()
+{
+    mockable = true;
+}
+
+void InotifyMock::DisableMock()
 {
     inotifyMock = nullptr;
+    mockable = false;
+}
+
+bool InotifyMock::IsMockable()
+{
+    return mockable;
 }
 
 } // namespace Test
@@ -40,22 +54,72 @@ void InotifyMock::DestroyMock()
 } // namespace FileManagement
 } // namespace OHOS
 
+#ifdef __cplusplus
 extern "C" {
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
 int inotify_init()
 {
-    return InotifyMock::GetMock()->inotify_init();
+    if (InotifyMock::IsMockable()) {
+        return InotifyMock::GetMock()->inotify_init();
+    }
+
+    static int (*realInotifyInit)() = []() {
+        auto func = (int (*)())dlsym(RTLD_NEXT, "inotify_init");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real inotify_init: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realInotifyInit) {
+        return -1;
+    }
+
+    return realInotifyInit();
 }
 
 int inotify_add_watch(int fd, const char *pathname, uint32_t mask)
 {
-    return InotifyMock::GetMock()->inotify_add_watch(fd, pathname, mask);
+    if (InotifyMock::IsMockable()) {
+        return InotifyMock::GetMock()->inotify_add_watch(fd, pathname, mask);
+    }
+
+    static int (*realInotifyAddWatch)(int, const char *, uint32_t) = []() {
+        auto func = (int (*)(int, const char *, uint32_t))dlsym(RTLD_NEXT, "inotify_add_watch");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real inotify_add_watch: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realInotifyAddWatch) {
+        return -1;
+    }
+
+    return realInotifyAddWatch(fd, pathname, mask);
 }
 
 int inotify_rm_watch(int fd, int wd)
 {
-    return InotifyMock::GetMock()->inotify_rm_watch(fd, wd);
+    if (InotifyMock::IsMockable()) {
+        return InotifyMock::GetMock()->inotify_rm_watch(fd, wd);
+    }
+
+    static int (*realInotifyRmWatch)(int, int) = []() {
+        auto func = (int (*)(int, int))dlsym(RTLD_NEXT, "inotify_rm_watch");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real inotify_rm_watch: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realInotifyRmWatch) {
+        return -1;
+    }
+
+    return realInotifyRmWatch(fd, wd);
 }
 
 } // extern "C"
+#endif

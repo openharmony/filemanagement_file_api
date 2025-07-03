@@ -44,14 +44,18 @@ public:
 void FsFileWatcherMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    EventfdMock::EnableMock();
+    InotifyMock::EnableMock();
+    PollMock::EnableMock();
+    UnistdMock::EnableMock();
 }
 
 void FsFileWatcherMockTest::TearDownTestCase(void)
 {
-    EventfdMock::DestroyMock();
-    InotifyMock::DestroyMock();
-    PollMock::DestroyMock();
-    UnistdMock::DestroyMock();
+    EventfdMock::DisableMock();
+    InotifyMock::DisableMock();
+    PollMock::DisableMock();
+    UnistdMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -73,6 +77,9 @@ void FsFileWatcherMockTest::TearDown(void)
     watcher.dataCache_.ClearCache();
     GTEST_LOG_(INFO) << "TearDown";
 }
+
+inline const int32_t EXPECTED_WD = 100;
+inline const int32_t UNEXPECTED_WD = 200;
 
 /**
  * @tc.name: FsFileWatcherMockTest_GetNotifyId_001
@@ -186,23 +193,22 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_001, testing::
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StartNotify_001";
     // Prepare test parameters
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StartNotify_001";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StartNotify_001";
     info->events = IN_CREATE | IN_DELETE;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     // Set mock behaviors
-    int32_t expectedWd = 100;
     auto inotifyMock = InotifyMock::GetMock();
     EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
-        .WillOnce(testing::Return(expectedWd));
+        .WillOnce(testing::Return(EXPECTED_WD));
     // Do testing
     int32_t result = watcher.StartNotify(info);
     // Verify results
     testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_EQ(result, ERRNO_NOERR);
-    EXPECT_EQ(info->wd, expectedWd);
+    EXPECT_EQ(info->wd, EXPECTED_WD);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StartNotify_001";
 }
 
@@ -218,14 +224,13 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_002, testing::
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StartNotify_002";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StartNotify_002";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StartNotify_002";
     info->events = IN_CREATE | IN_DELETE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
     auto inotifyMock = InotifyMock::GetMock();
@@ -235,7 +240,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_002, testing::
     int32_t result = watcher.StartNotify(info);
     // Verify results
     EXPECT_EQ(result, ERRNO_NOERR);
-    EXPECT_EQ(info->wd, expectedWd);
+    EXPECT_EQ(info->wd, EXPECTED_WD);
 }
 
 /**
@@ -269,10 +274,10 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_004, testing::
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StartNotify_004";
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = -1; // Invalid notifyFd
+    watcher.notifyFd_ = -1;
     // Build test parameters
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StartNotify_004";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StartNotify_004";
     info->events = IN_CREATE;
     // Do testing
     int32_t result = watcher.StartNotify(info);
@@ -293,10 +298,10 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_005, testing::
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StartNotify_005";
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     // Build test parameters
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StartNotify_005";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StartNotify_005";
     info->events = IN_DELETE;
     // Set mock behaviors for inotify_add_watch failure
     auto inotifyMock = InotifyMock::GetMock();
@@ -312,6 +317,42 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_005, testing::
 }
 
 /**
+ * @tc.name: FsFileWatcherMockTest_StartNotify_006
+ * @tc.desc: Test function of FsFileWatcher::StartNotify interface for SUCCESS when path is already watched.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ */
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StartNotify_006, testing::ext::TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StartNotify_006";
+    // Prepare test parameters
+    auto info = std::make_shared<WatcherInfo>(nullptr);
+    info->fileName = "fakePath/FsFileWatcherMockTest_StartNotify_006";
+    info->events = IN_CREATE;
+    // Prepare test condition
+    FsFileWatcher &watcher = FsFileWatcher::GetInstance();
+    watcher.notifyFd_ = 1;
+    auto cachedInfo = std::make_shared<WatcherInfo>(nullptr);
+    cachedInfo->fileName = "fakePath/FsFileWatcherMockTest_StartNotify_006";
+    cachedInfo->events = IN_DELETE;
+    cachedInfo->wd = EXPECTED_WD;
+    watcher.dataCache_.AddWatcherInfo(cachedInfo);
+    // Set mock behaviors
+    auto inotifyMock = InotifyMock::GetMock();
+    EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
+        .Times(1)
+        .WillOnce(testing::Return(EXPECTED_WD));
+    // Do testing
+    int32_t result = watcher.StartNotify(info);
+    // Verify results
+    testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
+    EXPECT_EQ(result, ERRNO_NOERR);
+    EXPECT_EQ(info->wd, EXPECTED_WD);
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_StartNotify_006";
+}
+
+/**
  * @tc.name: FsFileWatcherMockTest_StopNotify_001
  * @tc.desc: Test function of FsFileWatcher::StopNotify interface for SUCCESS.
  * @tc.size: MEDIUM
@@ -322,14 +363,13 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_001, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_001";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StopNotify_001";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_001";
     info->events = IN_CREATE | IN_DELETE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
     auto unistdMock = UnistdMock::GetMock();
@@ -377,13 +417,12 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_003, testing::e
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_003";
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = -1; // Invalid notifyFd
+    watcher.notifyFd_ = -1;
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StopNotify_003";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_003";
     info->events = IN_CREATE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
@@ -402,14 +441,13 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_004, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_004";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StopNotify_004";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_004";
     info->events = IN_DELETE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
     auto unistdMock = UnistdMock::GetMock();
@@ -439,14 +477,13 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_005, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_005";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StopNotify_005";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_005";
     info->events = IN_DELETE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set rm watch fail condition
     watcher.closed_ = true;
@@ -478,20 +515,19 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_006, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_006";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StopNotify_006";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_006";
     info->events = IN_DELETE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set having remainingEvents condition
     auto remainingInfo = std::make_shared<WatcherInfo>(nullptr);
-    remainingInfo->fileName = "/test/FsFileWatcherMockTest_StopNotify_006";
+    remainingInfo->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_006";
     remainingInfo->events = IN_CREATE;
-    remainingInfo->wd = expectedWd;
+    remainingInfo->wd = EXPECTED_WD;
     watcher.dataCache_.AddWatcherInfo(remainingInfo);
     // Set mock behaviors
     auto unistdMock = UnistdMock::GetMock();
@@ -520,20 +556,19 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_007, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_007";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StopNotify_007";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_007";
     info->events = IN_DELETE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set having remainingEvents condition
     auto remainingInfo = std::make_shared<WatcherInfo>(nullptr);
-    remainingInfo->fileName = "/test/FsFileWatcherMockTest_StopNotify_007";
+    remainingInfo->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_007";
     remainingInfo->events = IN_CREATE;
-    remainingInfo->wd = expectedWd;
+    remainingInfo->wd = EXPECTED_WD;
     watcher.dataCache_.AddWatcherInfo(remainingInfo);
     // Set mock behaviors
     auto unistdMock = UnistdMock::GetMock();
@@ -543,7 +578,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_007, testing::e
     EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
-        .WillOnce(testing::Return(expectedWd));
+        .WillOnce(testing::Return(EXPECTED_WD));
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
@@ -565,20 +600,19 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_008, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_008";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StopNotify_008";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_008";
     info->events = IN_DELETE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set having remainingEvents condition
     auto remainingInfo = std::make_shared<WatcherInfo>(nullptr);
-    remainingInfo->fileName = "/test/FsFileWatcherMockTest_StopNotify_008";
+    remainingInfo->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_008";
     remainingInfo->events = IN_CREATE;
-    remainingInfo->wd = expectedWd;
+    remainingInfo->wd = EXPECTED_WD;
     watcher.dataCache_.AddWatcherInfo(remainingInfo);
     // Set mock behaviors
     auto unistdMock = UnistdMock::GetMock();
@@ -610,23 +644,21 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_009, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_009";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StopNotify_009";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_009";
     info->events = IN_DELETE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set having remainingEvents condition
     auto remainingInfo = std::make_shared<WatcherInfo>(nullptr);
-    remainingInfo->fileName = "/test/FsFileWatcherMockTest_StopNotify_009";
+    remainingInfo->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_009";
     remainingInfo->events = IN_CREATE;
-    remainingInfo->wd = expectedWd;
+    remainingInfo->wd = EXPECTED_WD;
     watcher.dataCache_.AddWatcherInfo(remainingInfo);
     // Set mock behaviors
-    int32_t unexpectedWd = 200;
     auto unistdMock = UnistdMock::GetMock();
     auto inotifyMock = InotifyMock::GetMock();
     EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).Times(1).WillOnce(testing::Return(0));
@@ -634,7 +666,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_009, testing::e
     EXPECT_CALL(*inotifyMock, inotify_rm_watch(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*inotifyMock, inotify_add_watch(testing::_, testing::_, testing::_))
         .Times(1)
-        .WillOnce(testing::Return(unexpectedWd));
+        .WillOnce(testing::Return(UNEXPECTED_WD));
     // Do testing
     int32_t result = watcher.StopNotify(info);
     // Verify results
@@ -655,14 +687,13 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_StopNotify_010, testing::e
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_StopNotify_010";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     auto info = std::make_shared<WatcherInfo>(nullptr);
-    info->fileName = "/test/FsFileWatcherMockTest_StopNotify_010";
+    info->fileName = "fakePath/FsFileWatcherMockTest_StopNotify_010";
     info->events = IN_DELETE;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
-    watcher.notifyFd_ = 1; // Valid notifyFd
+    watcher.notifyFd_ = 1;
     watcher.eventFd_ = 1;
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
@@ -1038,15 +1069,14 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_001, testing::
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_NotifyEvent_001";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     uint32_t mask = IN_CREATE;
-    struct inotify_event event = { .wd = expectedWd, .mask = mask, .cookie = 0, .len = 0 };
+    struct inotify_event event = { .wd = EXPECTED_WD, .mask = mask, .cookie = 0, .len = 0 };
     // Prepare test condition
     auto callback = std::make_shared<MockWatcherCallback>();
     auto info = std::make_shared<WatcherInfo>(callback);
-    info->fileName = "/test/FsFileWatcherMockTest_NotifyEvent_001";
+    info->fileName = "fakePath/FsFileWatcherMockTest_NotifyEvent_001";
     info->events = mask;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
@@ -1069,14 +1099,13 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_002, testing::
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_NotifyEvent_002";
     // Prepare test parameters
-    int32_t expectedWd = 100;
     const char *name = "test.txt";
     size_t len = strlen(name);
     uint32_t mask = IN_CREATE;
     size_t totalSize = sizeof(struct inotify_event) + len + 1;
     std::vector<char> buffer(totalSize);
     struct inotify_event *event = reinterpret_cast<struct inotify_event *>(buffer.data());
-    event->wd = expectedWd;
+    event->wd = EXPECTED_WD;
     event->mask = mask;
     event->cookie = 0;
     event->len = len + 1;
@@ -1090,9 +1119,9 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_002, testing::
     // Prepare test condition
     auto callback = std::make_shared<MockWatcherCallback>();
     auto info = std::make_shared<WatcherInfo>(callback);
-    info->fileName = "/test/FsFileWatcherMockTest_NotifyEvent_002";
+    info->fileName = "fakePath/FsFileWatcherMockTest_NotifyEvent_002";
     info->events = mask;
-    info->wd = expectedWd;
+    info->wd = EXPECTED_WD;
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
@@ -1135,15 +1164,13 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_004, testing::
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_NotifyEvent_004";
     // Prepare test parameters
-    int32_t expectedWd = 100;
-    int32_t unexpectedWd = 200;
-    struct inotify_event event = { .wd = expectedWd, .mask = IN_CREATE, .cookie = 0, .len = 0 };
+    struct inotify_event event = { .wd = EXPECTED_WD, .mask = IN_CREATE, .cookie = 0, .len = 0 };
     // Prepare test condition
     auto callback = std::make_shared<MockWatcherCallback>();
     auto info = std::make_shared<WatcherInfo>(callback);
-    info->fileName = "/test/FsFileWatcherMockTest_NotifyEvent_004";
+    info->fileName = "fakePath/FsFileWatcherMockTest_NotifyEvent_004";
     info->events = IN_MODIFY; // Not matched mask
-    info->wd = unexpectedWd;  // Not matched wd
+    info->wd = UNEXPECTED_WD; // Not matched wd
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.dataCache_.AddWatcherInfo(info);
     // Set mock behaviors
@@ -1155,6 +1182,140 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_004, testing::
     EXPECT_FALSE(watcher.dataCache_.wdFileNameCache_.empty());
     EXPECT_FALSE(watcher.dataCache_.watcherInfoCache_.empty());
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_NotifyEvent_004";
+}
+
+/**
+ * @tc.name: FsFileWatcherMockTest_AddWatcherInfo_001
+ * @tc.desc: Test function of FsFileWatcher::AddWatcherInfo interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_AddWatcherInfo_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_AddWatcherInfo_001";
+    // Prepare test parameters
+    auto info = std::make_shared<WatcherInfo>(nullptr);
+    info->fileName = "fakePath/FsFileWatcherMockTest_AddWatcherInfo_001";
+    info->events = IN_CREATE;
+    // Prepare test condition
+    FsFileWatcher &watcher = FsFileWatcher::GetInstance();
+    auto cachedInfo0 = std::make_shared<WatcherInfo>(nullptr);
+    cachedInfo0->fileName = "fakePath/FsFileWatcherMockTest_AddWatcherInfo_001_cachedInfo0";
+    watcher.dataCache_.AddWatcherInfo(cachedInfo0);
+
+    auto cachedInfo1 = std::make_shared<WatcherInfo>(nullptr);
+    cachedInfo1->fileName = "fakePath/FsFileWatcherMockTest_AddWatcherInfo_001";
+    cachedInfo1->events = IN_DELETE;
+    watcher.dataCache_.AddWatcherInfo(cachedInfo1);
+
+    auto callback = std::make_shared<MockWatcherCallback>();
+    auto cachedInfo2 = std::make_shared<WatcherInfo>(callback);
+    cachedInfo2->fileName = "fakePath/FsFileWatcherMockTest_AddWatcherInfo_001";
+    cachedInfo2->events = IN_CREATE;
+    watcher.dataCache_.AddWatcherInfo(cachedInfo2);
+
+    // Set mock behaviors
+    EXPECT_CALL(*callback, IsStrictEquals(testing::_)).Times(1).WillOnce(testing::Return(false));
+    // Do testing
+    bool result = watcher.AddWatcherInfo(info);
+    // Verify results
+    testing::Mock::VerifyAndClearExpectations(callback.get());
+    EXPECT_TRUE(result);
+    cachedInfo2->callback = nullptr;
+    watcher.dataCache_.ClearCache();
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_AddWatcherInfo_001";
+}
+
+/**
+ * @tc.name: FsFileWatcherMockTest_AddWatcherInfo_002
+ * @tc.desc: Test function of FsFileWatcher::AddWatcherInfo interface for FAILURE when param is nullptr.
+ * @tc.size: SMALL
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_AddWatcherInfo_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_AddWatcherInfo_002";
+    // Prepare test condition
+    FsFileWatcher &watcher = FsFileWatcher::GetInstance();
+    // Do testing
+    bool result = watcher.AddWatcherInfo(nullptr);
+    // Verify results
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_AddWatcherInfo_002";
+}
+
+/**
+ * @tc.name: FsFileWatcherMockTest_AddWatcherInfo_003
+ * @tc.desc: Test function of FsFileWatcher::AddWatcherInfo interface for FAILURE when having same info.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_AddWatcherInfo_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_AddWatcherInfo_003";
+    // Prepare test parameters
+    auto info = std::make_shared<WatcherInfo>(nullptr);
+    info->fileName = "fakePath/FsFileWatcherMockTest_AddWatcherInfo_003";
+    info->events = IN_CREATE;
+    // Prepare test condition
+    FsFileWatcher &watcher = FsFileWatcher::GetInstance();
+    auto callback = std::make_shared<MockWatcherCallback>();
+    auto cachedInfo = std::make_shared<WatcherInfo>(callback);
+    cachedInfo->fileName = "fakePath/FsFileWatcherMockTest_AddWatcherInfo_003";
+    cachedInfo->events = IN_CREATE;
+    watcher.dataCache_.AddWatcherInfo(cachedInfo);
+    // Set mock behaviors
+    EXPECT_CALL(*callback, IsStrictEquals(testing::_)).Times(1).WillOnce(testing::Return(true));
+    // Do testing
+    bool result = watcher.AddWatcherInfo(info);
+    // Verify results
+    testing::Mock::VerifyAndClearExpectations(callback.get());
+    EXPECT_FALSE(result);
+    cachedInfo->callback = nullptr;
+    watcher.dataCache_.ClearCache();
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_AddWatcherInfo_003";
+}
+
+/**
+ * @tc.name: FsFileWatcherMockTest_RemoveWatcherInfo_001
+ * @tc.desc: Test function of FsFileWatcher::RemoveWatcherInfo interface for FAILURE when param is nullptr.
+ * @tc.size: SMALL
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_RemoveWatcherInfo_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_RemoveWatcherInfo_001";
+    // Prepare test condition
+    FsFileWatcher &watcher = FsFileWatcher::GetInstance();
+    // Do testing
+    auto result = watcher.RemoveWatcherInfo(nullptr);
+    // Verify results
+    EXPECT_EQ(result, EINVAL);
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_RemoveWatcherInfo_001";
+}
+
+/**
+ * @tc.name: FsFileWatcherMockTest_DestroyTaskThead_001
+ * @tc.desc: Test function of FsFileWatcher::DestroyTaskThead interface when taskRunning is true.
+ * @tc.size: SMALL
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_DestroyTaskThead_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_DestroyTaskThead_001";
+    // Prepare test condition
+    FsFileWatcher &watcher = FsFileWatcher::GetInstance();
+    watcher.taskRunning_ = true;
+    // Do testing
+    watcher.DestroyTaskThead();
+    // Verify results
+    EXPECT_FALSE(watcher.taskRunning_);
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_DestroyTaskThead_001";
 }
 
 } // namespace Test

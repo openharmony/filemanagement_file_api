@@ -21,6 +21,7 @@
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
+namespace Test {
 using namespace std;
 
 static const string g_streamFilePath = "/data/test/FsStreamCoreTest.txt";
@@ -29,21 +30,17 @@ class FsStreamMockTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
-        mock_ = std::make_shared<CMock>();
-        ICMock::ins = mock_;
+        CMock::EnableMock();
         int32_t fd = open(g_streamFilePath.c_str(), CREATE | O_RDWR, 0644);
         close(fd);
     };
     static void TearDownTestCase()
     {
-        ICMock::ins = nullptr;
-        mock_ = nullptr;
+        CMock::DisableMock();
         rmdir(g_streamFilePath.c_str());
     };
     void SetUp() {};
     void TearDown() {};
-
-    static inline std::shared_ptr<CMock> mock_ = nullptr;
 };
 
 /**
@@ -60,6 +57,7 @@ HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
+    auto mock_ = CMock::GetMock();
     EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
 
     auto retSk = result->Seek(1);
@@ -85,6 +83,7 @@ HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
+    auto mock_ = CMock::GetMock();
     EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*mock_, ftell(testing::_)).WillOnce(testing::Return(-1));
 
@@ -111,6 +110,7 @@ HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
+    auto mock_ = CMock::GetMock();
     EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
 
     WriteOptions opt;
@@ -138,6 +138,7 @@ HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
+    auto mock_ = CMock::GetMock();
     EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
 
     WriteOptions opt;
@@ -169,6 +170,7 @@ HWTEST_F(FsStreamMockTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
     void *buffer = std::malloc(4096);
     ArrayBuffer arrayBuffer(buffer, 4096);
 
+    auto mock_ = CMock::GetMock();
     EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
 
     ReadOptions opt;
@@ -183,6 +185,7 @@ HWTEST_F(FsStreamMockTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamReadTest_0001";
 }
 
+} // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
