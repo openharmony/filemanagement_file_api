@@ -26,8 +26,6 @@ using namespace std;
 
 class CopyCoreTest : public testing::Test {
 public:
-    static constexpr mode_t permission0755 = 0755;  //rwxr-xr-x
-    static constexpr mode_t permission0644 = 0644;  //rw-r--r--
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -38,6 +36,10 @@ public:
     static const string destDir;
     static const string srcFile;
     static const string destFile;
+
+private:
+    static constexpr mode_t permission0755 = 0755; // rwxr-xr-x
+    static constexpr mode_t permission0644 = 0644; // rw-r--r--
 };
 
 const string CopyCoreTest::testDir = "/data/test";
@@ -76,8 +78,12 @@ void CopyCoreTest::SetUp(void)
 
 void CopyCoreTest::TearDown(void)
 {
+    CopyCore::callbackMap_.clear();
     GTEST_LOG_(INFO) << "TearDown";
 }
+
+inline const int32_t EXPECTED_WD = 100;
+inline const int32_t UNEXPECTED_WD = 200;
 
 /**
  * @tc.name: CopyCoreTest_IsValidUri_001
@@ -437,6 +443,12 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CreateFileInfos_001, testing::ext::TestSize.
 
     auto [errCode, infos] = CopyCore::CreateFileInfos(srcFile, destFile, options);
     EXPECT_EQ(errCode, ERRNO_NOERR);
+    EXPECT_NE(infos, nullptr);
+    if (infos) {
+        EXPECT_FALSE(infos->hasListener);
+        EXPECT_EQ(infos->listener, nullptr);
+        EXPECT_EQ(infos->taskSignal, nullptr);
+    }
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CreateFileInfos_001";
 }
@@ -562,7 +574,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopyDirFunc_001, testing::ext::TestSize.Leve
         EXPECT_TRUE(false);
     }
     close(fd);
-    
+
     string destSubDir = destDir + "/src/sub_dir";
     string destSubFile = destSubDir + "/sub_file.txt";
     string destSrcDir = destDir + "/src";
@@ -655,6 +667,34 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_RegisterListener_001, testing::ext::TestSize
 }
 
 /**
+ * @tc.name: CopyCoreTest_RegisterListener_002
+ * @tc.desc: Test function of CopyCore::RegisterListener interface for the case when the info already exists in
+ * callbackMap_.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_RegisterListener_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_RegisterListener_002";
+
+    auto infos = make_shared<FsFileInfos>();
+    auto firstCallback = CopyCore::RegisterListener(infos);
+    EXPECT_NE(firstCallback, nullptr);
+    auto secondCallback = CopyCore::RegisterListener(infos);
+    EXPECT_EQ(secondCallback, nullptr);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(CopyCore::mutex_);
+        auto iter = CopyCore::callbackMap_.find(*infos);
+        EXPECT_NE(iter, CopyCore::callbackMap_.end());
+    }
+
+    CopyCore::UnregisterListener(infos);
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_RegisterListener_002";
+}
+
+/**
  * @tc.name: CopyCoreTest_UnregisterListener_001
  * @tc.desc: Test function of CopyCore::UnregisterListener interface for TRUE.
  * @tc.size: MEDIUM
@@ -678,6 +718,31 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_UnregisterListener_001, testing::ext::TestSi
     }
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_UnregisterListener_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_UnregisterListener_002
+ * @tc.desc: Test function of CopyCore::UnregisterListener interface for the case when the info is not registered in
+ * callbackMap_.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_UnregisterListener_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_UnregisterListener_002";
+
+    auto infos = make_shared<FsFileInfos>();
+
+    CopyCore::UnregisterListener(infos);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(CopyCore::mutex_);
+        auto iter = CopyCore::callbackMap_.find(*infos);
+        EXPECT_EQ(iter, CopyCore::callbackMap_.end());
+    }
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_UnregisterListener_002";
 }
 
 /**
@@ -954,8 +1019,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_001, testing::ext::TestSize.L
     infos->destPath = "/data/test/dest";
 
     auto event = make_unique<inotify_event>();
-    const int testWd = 123;             //模拟wd数值为123
-    event->wd = testWd;
+    event->wd = EXPECTED_WD;
     event->mask = IN_MODIFY;
     event->len = 0;
     auto [continueProcess, errCode, needSend] = CopyCore::HandleProgress(event.get(), infos, nullptr);
@@ -985,14 +1049,12 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_002, testing::ext::TestSize.L
 
     auto callback = make_shared<FsCallbackObject>(nullptr);
 
-    const int testWd = 123;             //模拟wd数值为123
-    const int differentWd = 456;        //模拟wd数值为456
     auto receiveInfo = make_shared<ReceiveInfo>();
     receiveInfo->path = testDir;
-    callback->wds.push_back({differentWd, receiveInfo});
+    callback->wds.push_back({ UNEXPECTED_WD, receiveInfo });
 
     auto event = make_unique<inotify_event>();
-    event->wd = testWd;
+    event->wd = EXPECTED_WD;
     event->mask = IN_MODIFY;
     event->len = 0;
 
@@ -1023,13 +1085,12 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_003, testing::ext::TestSize.L
 
     auto callback = make_shared<FsCallbackObject>(nullptr);
 
-    const int testWd = 123;
     auto receiveInfo = make_shared<ReceiveInfo>();
     receiveInfo->path = srcFile;
-    callback->wds.push_back({testWd, receiveInfo});
+    callback->wds.push_back({ EXPECTED_WD, receiveInfo });
 
     auto event = make_unique<inotify_event>();
-    event->wd = testWd;
+    event->wd = EXPECTED_WD;
     event->mask = IN_MODIFY;
     event->len = 0;
 
@@ -1040,6 +1101,45 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_003, testing::ext::TestSize.L
     EXPECT_TRUE(needSend);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_HandleProgress_003";
+}
+
+/**
+ * @tc.name: CopyCoreTest_OnFileReceive_001
+ * @tc.desc: Test function of CopyCore::OnFileReceive interface fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_OnFileReceive_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_OnFileReceive_001";
+
+    auto infos = make_shared<FsFileInfos>();
+    CopyCore::OnFileReceive(infos);
+    EXPECT_TRUE(CopyCore::callbackMap_.empty());
+
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_OnFileReceive_001";
+}
+
+/**
+ * @tc.name: CopyCoreTest_OnFileReceive_002
+ * @tc.desc: Test function of CopyCore::OnFileReceive interface when listener is nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CopyCoreTest, CopyCoreTest_OnFileReceive_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_OnFileReceive_002";
+
+    auto infos = make_shared<FsFileInfos>();
+    auto callback = CopyCore::RegisterListener(infos);
+    CopyCore::OnFileReceive(infos);
+    EXPECT_NE(callback, nullptr);
+    if (callback) {
+        EXPECT_EQ(callback->listener, nullptr);
+    }
+    GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_OnFileReceive_002";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
