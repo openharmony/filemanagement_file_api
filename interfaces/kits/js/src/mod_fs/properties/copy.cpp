@@ -371,7 +371,9 @@ int32_t Copy::ExecCopy(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallb
         processListener = [infos, callback](uint64_t processSize, uint64_t totalSize) -> void {
             callback->progressSize = processSize;
             callback->totalSize = totalSize;
-            OnFileReceive(infos);
+            if (processSize != totalSize) {
+                OnFileReceive(infos);
+            }
         };
     }
     if (infos->taskSignal != nullptr) {
