@@ -28,7 +28,7 @@ static ani_status BindStaticMethods(ani_env *env)
     std::array methods = {
         ani_native_function { "hashSync", nullptr, reinterpret_cast<void *>(HashAni::HashSync) },
     };
-    return BindClass(env, classDesc, methods);
+    return BindClassStaticMethods(env, classDesc, methods);
 }
 
 static ani_status BindHashStreamMethods(ani_env *env)
