@@ -25,7 +25,7 @@ namespace ANI {
 
 class ListFileAni final {
 public:
-    static ani_array_ref ListFileSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object obj);
+    static ani_array ListFileSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object obj);
 };
 
 } // namespace ANI

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import { BusinessError, AsyncCallback } from '@ohos.base';
+import stream from '@ohos.util.stream';
 
 const UNKNOWN_ERR: int = 13900042
 const UNKNOWN_MSG: string = "Unknown error"
@@ -1082,6 +1083,14 @@ function createStreamSync(path: string, mode: string): Stream {
   return FileIoImpl.createStreamSync(path, mode);
 }
 
+function createReadStream(path: string, options?: ReadStreamOptions): ReadStream {
+  return new ReadStream(path, options)
+}
+
+function createWriteStream(path: string, options?: WriteStreamOptions): WriteStream {
+  return new WriteStream(path, options);
+}
+
 function createWatcher(path: string, events: number, listener: WatchEventListener): Watcher {
   return FileIoImpl.createWatcherSync(path, events, listener);
 }
@@ -1311,6 +1320,8 @@ export interface RandomAccessFile {
   read(buffer: ArrayBuffer, callback: AsyncCallback<number>): void;
   read(buffer: ArrayBuffer, options: ReadOptions, callback: AsyncCallback<number>): void;
   readSync(buffer: ArrayBuffer, options?: ReadOptions): number;
+  getReadStream(): ReadStream;
+  getWriteStream(): WriteStream;
 }
 
 export class RandomAccessFileInner implements RandomAccessFile {
@@ -1434,6 +1445,8 @@ export class RandomAccessFileInner implements RandomAccessFile {
     });
   }
 
+  native getReadStream(): ReadStream;
+  native getWriteStream(): WriteStream;
 }
 
 export interface File {
@@ -1763,6 +1776,154 @@ export class StreamInner implements Stream {
   native seek(offset: number, whence?: number): number;
 }
 
+export class ReadStream extends stream.Readable {
+  path: string;
+  bytesRead: number;
+  private offset: number;
+  private start?: number;
+  private end?: number;
+  private stream?: Stream;
+
+  constructor(path: string, options?: ReadStreamOptions) {
+    super();
+    this.path = path;
+    this.bytesRead = 0;
+    this.start = options?.start;
+    this.end = options?.end;
+    this.stream = createStreamSync(this.path, 'r');
+    this.offset = this.start ?? 0;
+  }
+
+  seek(offset: number, whence?: WhenceType): number {
+    if (whence === undefined) {
+      let off = this.stream?.seek(offset);
+      if (off !== undefined) {
+        this.offset = off
+      }
+    } else {
+      let off = this.stream?.seek(offset, whence);
+      if (off !== undefined) {
+        this.offset = off
+      }
+    }
+    return this.offset;
+  }
+
+  close(): void {
+    this.stream?.close();
+  }
+
+  doInitialize(callback: () => void): void {
+    callback();
+  }
+
+  doRead(size: number): void {
+    let readSize = size;
+    let end = this.end
+    if (end !== undefined) {
+      if (this.offset > end) {
+        this.push(null);
+        return;
+      }
+      if (this.offset + readSize > end) {
+        readSize = end - this.offset;
+      }
+    }
+    let buffer = new ArrayBuffer(readSize);
+    const off = this.offset;
+    this.offset += readSize;
+    this.stream?.read(buffer, { offset: off, length: readSize })
+      .then((readOut: number) => {
+        if (readOut > 0) {
+          this.bytesRead += readOut;
+          this.push(new Uint8Array(buffer.slice(0, readOut)));
+        }
+        if (readOut !== readSize || readOut < size) {
+          this.offset = this.offset - readSize + readOut;
+          this.push(null);
+        }
+      });
+  }
+}
+
+export class WriteStream extends stream.Writable {
+  path: string;
+  bytesWritten: number;
+  private offset: number;
+  private mode: string;
+  private start?: number;
+  private stream?: Stream;
+
+  constructor(path: string, options?: WriteStreamOptions) {
+    super();
+    this.path = path;
+    this.bytesWritten = 0;
+    this.start = options?.start;
+    this.mode = this.convertOpenMode(options?.mode);
+    this.stream = createStreamSync(this.path, this.mode);
+    this.offset = this.start ?? 0;
+  }
+
+  seek(offset: number, whence?: WhenceType): number {
+    if (whence === undefined) {
+      let off = this.stream?.seek(offset);
+      if (off !== undefined) {
+        this.offset = off
+      }
+    } else {
+      let off = this.stream?.seek(offset, whence);
+      if (off !== undefined) {
+        this.offset = off
+      }
+    }
+    return this.offset;
+  }
+
+  close(): void {
+    this.stream?.close();
+  }
+
+  closeSync(): void {
+    this.stream?.closeSync();
+  }
+
+  doInitialize(callback: () => void): void {
+    callback();
+  }
+
+  doWrite(chunk: string | ArrayBuffer, encoding: string, callback: () => void): void {
+    this.stream?.write(chunk, { offset: this.offset })
+      .then((writeIn: number) => {
+        this.offset += writeIn;
+        this.bytesWritten += writeIn;
+        callback();
+      })
+      .finally(() => {
+        this.stream?.flush();
+      });
+  }
+
+  convertOpenMode(mode?: number): string {
+    let modeStr = 'w';
+    if (mode === undefined) {
+      return modeStr;
+    }
+    if ((mode as number) & fileIo.OpenMode.WRITE_ONLY) {
+      modeStr = 'w';
+    }
+    if ((mode as number) & fileIo.OpenMode.READ_WRITE) {
+      modeStr = 'w+';
+    }
+    if (((mode as number) & fileIo.OpenMode.WRITE_ONLY) && ((mode as number) & fileIo.OpenMode.APPEND)) {
+      modeStr = 'a';
+    }
+    if (((mode as number) & fileIo.OpenMode.READ_WRITE) && ((mode as number) & fileIo.OpenMode.APPEND)) {
+      modeStr = 'a+';
+    }
+    return modeStr;
+  }
+}
+
 export class AtomicFile {
   static {
     loadLibraryWithPermissionCheck("ani_file_fs", "@ohos.file.fs");
@@ -1770,12 +1931,42 @@ export class AtomicFile {
 
   private nativePtr: long = 0;
   private native getPath(): string;
+  private writeStream: WriteStream | null = null;
 
   native constructor(path: string);
 
   native getBaseFile(): File;
 
+  native openRead(): ReadStream;
+
   native readFully(): ArrayBuffer;
+
+  native nativeStartWrite(): WriteStream;
+  startWrite(): WriteStream {
+    let ws = this.nativeStartWrite();
+    this.writeStream = ws;
+    return ws;
+  }
+
+  native nativeFinishWrite(): void;
+  finishWrite(): void {
+    if (!this.writeStream) {
+      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+    }
+    this.writeStream?.close();
+    this.nativeFinishWrite();
+    this.writeStream = null;
+  };
+
+  native nativeFailWrite(): void;
+  failWrite(): void {
+    if (!this.writeStream) {
+      throw createBusinessError(UNKNOWN_ERR, UNKNOWN_MSG);
+    }
+    this.writeStream?.close();
+    this.nativeFailWrite();
+    this.writeStream = null;
+  };
 
   native delete(): void;
 }

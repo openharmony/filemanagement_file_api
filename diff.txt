@@ -1,0 +1,49 @@
+34b82116 !1744 修复WatchEventListener悬空指针问题 Merge pull request !1744 from Provii/wel_bugfix_0728
+019858c0 修复WatchEventListener悬空指针问题
+587067c2 !1723 修复watcher接口已知bug Merge pull request !1723 from Provii/watcher_bugfix_0728
+c3b32c80 修复watcher接口已知bug
+e67c2f26 !1691 randomaccessfile类stream类签名修改 Merge pull request !1691 from tianp/stream_0728
+c2519b7e !1697 ani层内存泄漏问题修复 Merge pull request !1697 from liyuke/0728
+13e261fe 日志打印修改
+6a1fd83c dup_ani内存泄漏问题修复
+9b7f84a3 randomaccessfile类stream类签名修改
+c0d61a0a !1689 read_iterator_ani.cpp Wrap修改 Merge pull request !1689 from liyuke/0728
+dcd305b5 read_iterator_ani.cpp Wrap修改
+f95c3053 !1683 接口性能优化 Merge pull request !1683 from Provii/perf_opt_0728
+0bec4cb8 !1682 copy 有概率异常 Merge pull request !1682 from 胖子的梦/0728
+bf88ed1d copy 有概率异常
+2c445aa0 接口性能优化
+1d1f2c97 !1674 copy修改 Merge pull request !1674 from 胖子的梦/copy_bug_0728
+537cce3a copy修改
+9aa3c1f3 !1673 handle listFile API failures in 0728 branch Merge pull request !1673 from 顾冬洋/listfile0728
+f68fb462 更改Array_new的入参nullptr为undefined
+695ef4ff !1652 Modify build.gn for file_api construction  in 0728 branch Merge pull request !1652 from 顾冬洋/TR3_0728
+0d35e669 handle listFile API failures
+f77f7f77 !1653 dup接口 释放dstFd Merge pull request !1653 from yangbiao59/86-1
+790a5e6a Enforce alphabetical ordering in build.gn
+ca59e81e dup接口 释放dstFd
+4a43b3e3 Modify build.gn for file_api construction
+a064f373 !1475 解析fd使用 int Merge pull request !1475 from 胖子的梦/0702
+c2f8ec0b number 转int 代码优化
+cbbc3bf5 !1473 doWrite fix Merge pull request !1473 from wuchengjun/ohos_0702
+6e424da7 !1474 copy修正 Merge pull request !1474 from liyuke/0702_copy
+ee2385c8 copy修正
+62b337a0 doWrite fix
+30352b65 !1469 解析fd修改 Merge pull request !1469 from liyuke/type_0702
+8599ff42 stream修改
+671c3399 correct the erro: fd->fp
+c36577c3 解析fd修改
+bf87e21e !1 listfile&amp;stat_fix
+a3c6c551   number转int
+d7a816ed 修改信息
+e1005f57 number to int
+398b3fe6 number
+631ff221 fdatasync等number转int
+cfff74c0 !1460 replace number to int Merge pull request !1460 from zzz701/OpenHarmony_feature_20250702
+2ce053ff num to int Signed-off-by: 周鑫 <zhouxin176@huawei.com>
+a44132e5 replace number to int Signed-off-by: zzz701 <lihaima1@huawei.com>
+00e835f6 !1438 编译修改 Merge pull request !1438 from 胖子的梦/pr_1436
+fa673ece 编译修改
+0dfea2fd !1402 Fix invlid code after primitive type refactor Merge pull request !1402 from tengtengh/0328_to_0702
+7529dd40 Fix invlid code after primitive type refactor
+ab06d9bd 代码回合0702

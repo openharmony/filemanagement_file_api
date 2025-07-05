@@ -206,7 +206,7 @@ tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
     return { true, make_optional<FsListFileOptions>(result) };
 }
 
-ani_array_ref ListFileAni::ListFileSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object obj)
+ani_array ListFileAni::ListFileSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object obj)
 {
     auto [succPath, srcPath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {

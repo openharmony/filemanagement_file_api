@@ -72,6 +72,9 @@ static ani_status BindRafFileMethods(ani_env *env)
         ani_native_function { "close", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::Close) },
         ani_native_function { "writeSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::WriteSync) },
         ani_native_function { "readSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::ReadSync) },
+        ani_native_function { "getReadStream", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::GetReadStream) },
+        ani_native_function {
+            "getWriteStream", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::GetWriteStream) },
     };
 
     return BindClass(env, classDesc, methods);
@@ -171,8 +174,12 @@ static ani_status BindAtomicFileMethods(ani_env *env)
         ani_native_function { "getPath", nullptr, reinterpret_cast<void *>(AtomicFileAni::GetPath) },
         ani_native_function { "getBaseFile", nullptr, reinterpret_cast<void *>(AtomicFileAni::GetBaseFile) },
         ani_native_function { "readFully", nullptr, reinterpret_cast<void *>(AtomicFileAni::ReadFully) },
+        ani_native_function { "nativeStartWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::StartWrite) },
+        ani_native_function { "nativeFinishWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::FinishWrite) },
+        ani_native_function { "nativeFailWrite", nullptr, reinterpret_cast<void *>(AtomicFileAni::FailWrite) },
         ani_native_function { "delete", nullptr, reinterpret_cast<void *>(AtomicFileAni::Delete) },
         ani_native_function { ctorDesc, ctorSig, reinterpret_cast<void *>(AtomicFileAni::Constructor) },
+        ani_native_function { "openRead", nullptr, reinterpret_cast<void *>(AtomicFileAni::OpenRead) },
     };
 
     return BindClass(env, classDesc, methods);

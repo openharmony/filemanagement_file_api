@@ -209,7 +209,6 @@ int CopyCore::CheckOrCreatePath(const std::string &destPath)
 int CopyCore::CopyFile(const string &src, const string &dest, std::shared_ptr<FsFileInfos> infos)
 {
     HILOGD("src = %{public}s, dest = %{public}s", GetAnonyString(src).c_str(), GetAnonyString(dest).c_str());
-
     int32_t srcFd = -1;
     int32_t ret = OpenSrcFile(src, infos, srcFd);
     if (srcFd < 0) {

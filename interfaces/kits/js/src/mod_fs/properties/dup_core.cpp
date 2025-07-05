@@ -48,7 +48,6 @@ FsResult<FsFile *> DupCore::DoDup(const int32_t &fd)
         HILOGE("Failed to dup fd, errno: %{public}d", errno);
         return FsResult<FsFile *>::Error(errno);
     }
-
     unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> readLinkReq = {
         new (std::nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (!readLinkReq) {

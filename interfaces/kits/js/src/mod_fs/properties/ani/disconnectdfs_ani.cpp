@@ -13,27 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ANI_READER_ITERATOR_ANI_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ANI_READER_ITERATOR_ANI_H
-
-#include <ani.h>
-
-#include "fs_reader_iterator.h"
+#include "disconnectdfs_ani.h"
+#include "disconnectdfs_core.h"
+#include "filemgmt_libhilog.h"
+#include "error_handler.h"
+#include "type_converter.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-class ReaderIteratorAni final {
-public:
-    static ani_object Wrap(ani_env *env, const FsReaderIterator *it);
-    static FsReaderIterator *Unwrap(ani_env *env, ani_object object);
-    static ani_object Next(ani_env *env, [[maybe_unused]] ani_object object);
-};
+using namespace std;
+void DisConnectDfsAni::DisConnectDfsSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string networkId)
+{
+    auto [succNetworkId, networkIdStr] = TypeConverter::ToUTF8String(env, networkId);
+    if (!succNetworkId) {
+        HILOGE("Invalid NetworkId");
+        ErrorHandler::Throw(env, E_PARAMS);
+        return;
+    }
+    auto ret = DisConnectDfsCore::DisConnectDfsExec(networkIdStr);
+    if (!ret.IsSuccess()) {
+        HILOGE("DisConnectDfsExec failed");
+        ErrorHandler::Throw(env, E_PARAMS);
+        return;
+    }
+}
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ANI_READER_ITERATOR_ANI_H

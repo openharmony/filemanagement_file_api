@@ -145,11 +145,10 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::EnumToInt32(ani_env *env
 static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrFd)
 {
     ani_boolean isFd = false;
-
-    auto classDesc = BoxedTypes::Double::classDesc.c_str();
-    ani_class cls;
-    env->FindClass(classDesc, &cls);
-    env->Object_InstanceOf(pathOrFd, cls, &isFd);
+    auto intClassDesc = BoxedTypes::Int::classDesc.c_str();
+    ani_class intClass;
+    env->FindClass(intClassDesc, &intClass);
+    env->Object_InstanceOf(pathOrFd, intClass, &isFd);
     if (isFd) {
         ani_int fd;
         if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, BasicTypesConverter::toInt.c_str(), nullptr, &fd)) {
@@ -229,7 +228,7 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
     ani_status ret;
     ani_class cls;
     if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Not found %{private}s, err: %{private}d", classDesc, ret);
+        HILOGE("Not found %{private}s, err: %{public}d", classDesc, ret);
         return { false, nullptr };
     }
 
@@ -237,7 +236,7 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
     auto ctorSig = BuiltInTypes::ArrayBuffer::ctorSig.c_str();
     ani_method ctor;
     if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
-        HILOGE("Not found ctor, err: %{private}d", ret);
+        HILOGE("Not found ctor, err: %{public}d", ret);
         return { false, nullptr };
     }
 
@@ -267,20 +266,15 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
     return { true, static_cast<ani_arraybuffer>(obj) };
 }
 
-std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(
+std::tuple<bool, ani_array> TypeConverter::ToAniStringList(
     ani_env *env, const std::string strList[], const uint32_t length)
 {
     if (env == nullptr) {
         return { false, nullptr };
     }
 
-    auto classDesc = BuiltInTypes::String::classDesc.c_str();
-    ani_array_ref result = nullptr;
-    ani_class cls = nullptr;
-    if (env->FindClass(classDesc, &cls) != ANI_OK) {
-        return { false, result };
-    }
-    if (env->Array_New_Ref(cls, length, nullptr, &result) != ANI_OK) {
+    ani_array result = nullptr;
+    if (env->Array_New(length, nullptr, &result) != ANI_OK) {
         return { false, result };
     }
     for (uint32_t i = 0; i < length; i++) {
@@ -289,7 +283,7 @@ std::tuple<bool, ani_array_ref> TypeConverter::ToAniStringList(
             return { false, nullptr };
         }
 
-        if (env->Array_Set_Ref(result, i, item) != ANI_OK) {
+        if (env->Array_Set(result, i, item) != ANI_OK) {
             return { false, nullptr };
         }
     }

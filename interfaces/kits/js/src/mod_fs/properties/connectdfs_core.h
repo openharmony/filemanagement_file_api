@@ -13,27 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ANI_READER_ITERATOR_ANI_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ANI_READER_ITERATOR_ANI_H
-
-#include <ani.h>
-
-#include "fs_reader_iterator.h"
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CONNECTDFS_CORE_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CONNECTDFS_CORE_H
+#include <chrono>
+#include <set>
+#include <sys/inotify.h>
+#include <thread>
+#include "bundle_mgr_client_impl.h"
+#include "dfs_listener/file_dfs_listener_stub.h"
+#include "distributed_file_daemon_manager.h"
+#include "filemgmt_libfs.h"
+#include "fs_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-namespace ANI {
-
-class ReaderIteratorAni final {
+class ConnectDfsCore final {
 public:
-    static ani_object Wrap(ani_env *env, const FsReaderIterator *it);
-    static FsReaderIterator *Unwrap(ani_env *env, ani_object object);
-    static ani_object Next(ani_env *env, [[maybe_unused]] ani_object object);
+    static FsResult<void> ConnectDfsExec(const std::string &networkId, sptr<FileDfsListenerStub> listener);
 };
-} // namespace ANI
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ANI_READER_ITERATOR_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CONNECTDFS_CORE_H
+

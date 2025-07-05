@@ -25,7 +25,6 @@ class SymlinkCore final {
 public:
     static FsResult<void> DoSymlink(const string &target, const string &srcPath);
 };
-
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

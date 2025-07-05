@@ -52,6 +52,22 @@ public:
     {
         return 0;
     }
+    int32_t CancelCopyTask(const std::string &srcUri, const std::string &dstUri)
+    {
+        return 0;
+    }
+    int32_t GetDfsSwitchStatus(const std::string &networkId, int32_t &switchStatus)
+    {
+        return 0;
+    }
+    int32_t UpdateDfsSwitchStatus(int32_t switchStatus)
+    {
+        return 0;
+    }
+    int32_t GetConnectedDeviceList(std::vector<DfsDeviceInfo> &deviceList)
+    {
+        return 0;
+    }
     int32_t PushAsset(
         int32_t userId, const sptr<AssetObj> &assetObj, const sptr<IAssetSendCallback> &sendCallback) override
     {
