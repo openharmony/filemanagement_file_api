@@ -803,7 +803,7 @@ ohos_shared_library("ani_file_fs") {
   external_deps = [
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
-    "bounds_checking_function:libsec_static",
+    "bounds_checking_function:libsec_shared",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -880,7 +880,7 @@ ohos_shared_library("ani_file_hash") {
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
   external_deps = [
-    "bounds_checking_function:libsec_static",
+    "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "libuv:uv",
     "openssl:libcrypto_shared",
@@ -943,7 +943,7 @@ ohos_shared_library("ani_file_securitylabel") {
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
   external_deps = [
-    "bounds_checking_function:libsec_static",
+    "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "libuv:uv",
     "runtime_core:ani",
@@ -1007,7 +1007,7 @@ ohos_shared_library("ani_file_environment") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
-    "bounds_checking_function:libsec_static",
+    "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
@@ -1073,7 +1073,7 @@ ohos_shared_library("ani_file_statvfs") {
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
   external_deps = [
-    "bounds_checking_function:libsec_static",
+    "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "libuv:uv",
     "runtime_core:ani",
