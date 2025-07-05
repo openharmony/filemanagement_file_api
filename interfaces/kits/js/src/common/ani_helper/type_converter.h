@@ -39,7 +39,7 @@ public:
     static std::tuple<bool, std::optional<int32_t>> EnumToInt32(ani_env *env, const ani_enum_item &enumOp);
     static std::tuple<bool, FileInfo> ToFileInfo(ani_env *env, const ani_object &pathOrFd);
     static std::tuple<bool, ArrayBuffer> ToArrayBuffer(ani_env *env, ani_arraybuffer &buffer);
-    static std::tuple<bool, ani_array_ref> ToAniStringList(
+    static std::tuple<bool, ani_array> ToAniStringList(
         ani_env *env, const std::string strList[], const uint32_t length);
 };
 

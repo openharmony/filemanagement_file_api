@@ -14,6 +14,48 @@
 import("//build/test.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
+ohos_unittest("ani_file_environment_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
+  module_out_path = "file_api/file_api"
+  include_dirs = [
+    "${src_path}/mod_environment",
+    "${src_path}/mod_environment/ani",
+    "${file_api_path}/interfaces/test/unittest/js/mod_environment/mock",
+  ]
+
+  sources = [
+    "mod_environment/environment_core_mock_test.cpp",
+    "mod_environment/mock/accesstoken_kit_mock.cpp",
+    "mod_environment/mock/ipc_skeleton_mock.cpp",
+    "mod_environment/mock/parameter_mock.cpp",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/js:ani_file_environment",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "libuv:uv",
+    "openssl:libcrypto_shared",
+    "os_account:os_account_innerkits",
+    "runtime_core:ani",
+    "runtime_core:libarkruntime",
+  ]
+
+  defines = [ "private=public" ]
+}
+
 ohos_unittest("ani_file_fs_mock_test") {
   branch_protector_ret = "pac_ret"
   testonly = true
@@ -21,42 +63,78 @@ ohos_unittest("ani_file_fs_mock_test") {
   module_out_path = "file_api/file_api"
 
   include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/class_stream/mock",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/common",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/mock",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/properties/mock",
   ]
 
   sources = [
     "mod_fs/class_file/fs_file_mock_test.cpp",
+    "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
+    "mod_fs/class_readeriterator/fs_reader_iterator_mock_test.cpp",
     "mod_fs/class_stat/fs_stat_mock_test.cpp",
+    "mod_fs/class_stream/fs_stream_mock_test.cpp",
+    "mod_fs/class_stream/mock/c_mock.cpp",
+    "mod_fs/class_watcher/fs_file_watcher_mock_test.cpp",
+    "mod_fs/class_watcher/fs_watcher_mock_test.cpp",
+    "mod_fs/mock/eventfd_mock.cpp",
+    "mod_fs/mock/inotify_mock.cpp",
+    "mod_fs/mock/poll_mock.cpp",
+    "mod_fs/mock/unistd_mock.cpp",
     "mod_fs/properties/access_core_mock_test.cpp",
+    "mod_fs/properties/copy_core_mock_test.cpp",
     "mod_fs/properties/copy_file_core_mock_test.cpp",
+    "mod_fs/properties/create_randomaccessfile_core_mock_test.cpp",
+    "mod_fs/properties/dup_core_mock_test.cpp",
+    "mod_fs/properties/fdatasync_core_mock_test.cpp",
+    "mod_fs/properties/fsync_core_mock_test.cpp",
+    "mod_fs/properties/lstat_core_mock_test.cpp",
     "mod_fs/properties/mkdir_core_mock_test.cpp",
-    "mod_fs/properties/move_core_mock_test.cpp",
+    "mod_fs/properties/mkdtemp_core_mock_test.cpp",
     "mod_fs/properties/mock/system_mock.cpp",
     "mod_fs/properties/mock/uv_fs_mock.cpp",
+    "mod_fs/properties/move_core_mock_test.cpp",
     "mod_fs/properties/open_core_mock_test.cpp",
     "mod_fs/properties/read_core_mock_test.cpp",
+    "mod_fs/properties/read_lines_core_mock_test.cpp",
+    "mod_fs/properties/rename_core_mock_test.cpp",
     "mod_fs/properties/stat_core_mock_test.cpp",
+    "mod_fs/properties/symlink_core_mock_test.cpp",
+    "mod_fs/properties/trans_listener_mock_test.cpp",
     "mod_fs/properties/truncate_core_mock_test.cpp",
     "mod_fs/properties/unlink_core_mock_test.cpp",
+    "mod_fs/properties/utimes_core_mock_test.cpp",
+    "mod_fs/properties/watcher_core_mock_test.cpp",
     "mod_fs/properties/write_core_mock_test.cpp",
+    "mod_fs/properties/xattr_core_mock_test.cpp",
   ]
 
   deps = [
+    "${file_api_path}/interfaces/kits/js:ani_file_fs",
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "${file_api_path}/interfaces/kits/native:task_signal_native",
     "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
-    "${file_api_path}/interfaces/kits/js:ani_file_fs",
   ]
 
   external_deps = [
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
     "c_utils:utils",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "dfs_service:libdistributedfileutils",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -64,7 +142,10 @@ ohos_unittest("ani_file_fs_mock_test") {
     "libuv:uv",
   ]
 
+  libs = [ "dl" ]
+
   defines = [
+    "ENABLE_DISTRIBUTED_FILE_MOCK",
     "private=public",
   ]
 }
@@ -86,47 +167,66 @@ ohos_unittest("ani_file_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
   ]
 
   sources = [
+    "mod_fs/class_atomicfile/fs_atomicfile_test.cpp",
     "mod_fs/class_file/fs_file_test.cpp",
+    "mod_fs/class_randomaccessfile/fs_randomaccessfile_test.cpp",
+    "mod_fs/class_readeriterator/fs_reader_iterator_test.cpp",
     "mod_fs/class_stat/fs_stat_test.cpp",
+    "mod_fs/class_stream/fs_stream_test.cpp",
+    "mod_fs/class_tasksignal/fs_task_signal_test.cpp",
     "mod_fs/properties/access_core_test.cpp",
     "mod_fs/properties/close_core_test.cpp",
+    "mod_fs/properties/copy_core_test.cpp",
+    "mod_fs/properties/copy_dir_core_test.cpp",
     "mod_fs/properties/copy_file_core_test.cpp",
+    "mod_fs/properties/create_randomaccessfile_core_test.cpp",
+    "mod_fs/properties/create_stream_core_test.cpp",
+    "mod_fs/properties/dup_core_test.cpp",
+    "mod_fs/properties/fdopen_stream_core_test.cpp",
     "mod_fs/properties/listfile_core_test.cpp",
+    "mod_fs/properties/lseek_core_test.cpp",
+    "mod_fs/properties/lstat_core_test.cpp",
     "mod_fs/properties/move_core_test.cpp",
+    "mod_fs/properties/movedir_core_test.cpp",
     "mod_fs/properties/open_core_test.cpp",
     "mod_fs/properties/read_core_test.cpp",
+    "mod_fs/properties/read_lines_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
     "mod_fs/properties/rmdir_core_test.cpp",
     "mod_fs/properties/stat_core_test.cpp",
+    "mod_fs/properties/trans_listener_test.cpp",
     "mod_fs/properties/truncate_core_test.cpp",
+    "mod_fs/properties/utimes_core_test.cpp",
     "mod_fs/properties/write_core_test.cpp",
+    "mod_fs/properties/xattr_core_test.cpp",
   ]
 
   deps = [
+    "${file_api_path}/interfaces/kits/js:ani_file_fs",
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "${file_api_path}/interfaces/kits/native:task_signal_native",
     "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
-    "${file_api_path}/interfaces/kits/js:ani_file_fs",
   ]
 
   external_deps = [
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
     "c_utils:utils",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "dfs_service:libdistributedfileutils",
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
     "libuv:uv",
   ]
 
-  defines = [
-    "private=public",
-  ]
+  defines = [ "private=public" ]
 }
 
 ohos_unittest("ani_file_hash_test") {
@@ -134,9 +234,7 @@ ohos_unittest("ani_file_hash_test") {
 
   resource_config_file = "../resource/ohos_test.xml"
 
-  sources = [ 
-    "mod_hash/hash_core_test.cpp",
-  ]
+  sources = [ "mod_hash/hash_core_test.cpp" ]
 
   include_dirs = [
     "mock/libuv",
@@ -144,17 +242,17 @@ ohos_unittest("ani_file_hash_test") {
   ]
 
   deps = [
-    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
-    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${file_api_path}/interfaces/kits/js:ani_file_hash",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "hilog:libhilog",
-    "libuv:uv",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "hilog:libhilog",
+    "libuv:uv",
   ]
 }
 
@@ -163,24 +261,51 @@ ohos_unittest("ani_file_securitylabel_test") {
 
   resource_config_file = "../resource/ohos_test.xml"
 
-  sources = [ 
-    "mod_securitylabel/securitylabel_core_test.cpp",
-  ]
+  sources = [ "mod_securitylabel/securitylabel_core_test.cpp" ]
 
   include_dirs = [
+    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/mod_securitylabel",
   ]
 
   deps = [
-    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
-    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${file_api_path}/interfaces/kits/js:ani_file_securitylabel",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "hilog:libhilog",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "hilog:libhilog",
+    "libuv:uv",
+  ]
+}
+
+ohos_unittest("ani_file_statvfs_test") {
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  sources = [ "mod_statvfs/statvfs_core_test.cpp" ]
+
+  include_dirs = [
+    "mock/libuv",
+    "${file_api_path}/interfaces/kits/js/src/mod_statvfs",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/js:ani_file_statvfs",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "libuv:uv",
   ]
 }

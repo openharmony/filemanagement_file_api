@@ -24,7 +24,6 @@ namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
 using namespace testing::ext;
 using namespace std;
-
 const mode_t DIR_PERMISSIONS = 0755;
 
 class AccessCoreTest : public testing::Test {
@@ -74,8 +73,7 @@ bool CreateDirectoryRecursive(const std::string& path)
         pos++;
     }
 
-    while ((pos = path.find('/', pos)) != std::string::npos)
-    {
+    while ((pos = path.find('/', pos)) != std::string::npos) {
         dir = path.substr(0, pos++);
         if (dir.empty()) {
             continue;
@@ -87,8 +85,7 @@ bool CreateDirectoryRecursive(const std::string& path)
         }
     }
 
-    if (mkdir(path.c_str(), DIR_PERMISSIONS) == -1 && errno != EEXIST)
-    {
+    if (mkdir(path.c_str(), DIR_PERMISSIONS) == -1 && errno != EEXIST) {
         return false;
     }
     return true;
@@ -212,7 +209,7 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_006, testing::ext::TestSize.Lev
 {
     GTEST_LOG_(INFO) << "AccessCoreTest-begin AccessCoreTest_DoAccess_006";
 
-    std::string path = "test";
+    std::string path = "AccessCoreTest";
     AccessModeType mode = AccessModeType::EXIST;
     AccessFlag flag = LOCAL_FLAG;
 

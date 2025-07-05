@@ -34,4 +34,4 @@ struct RandomAccessFileEntity {
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H
