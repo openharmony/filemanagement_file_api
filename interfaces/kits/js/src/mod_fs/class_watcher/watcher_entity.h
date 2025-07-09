@@ -15,6 +15,7 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_WATCHER_WATCHER_ENTITY_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_WATCHER_WATCHER_ENTITY_H
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -71,7 +72,7 @@ private:
 private:
     static std::mutex watchMutex_;
     std::mutex readMutex_;
-    bool run_ = false;
+    std::atomic<bool> run_ = false;
     bool reading_ = false;
     bool closed_ = false;
     int32_t notifyFd_ = -1;

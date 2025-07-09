@@ -117,7 +117,7 @@ int FileWatcher::NotifyToWatchNewEvents(const string &fileName, const int &wd, c
 int FileWatcher::CloseNotifyFd()
 {
     int closeRet = ERRNO_NOERR;
-    if (watcherInfoSet_.size() == 0) {
+    if (watcherInfoSet_.size() == 0 && run_) {
         run_ = false;
         closeRet = close(notifyFd_);
         if (closeRet != 0) {
