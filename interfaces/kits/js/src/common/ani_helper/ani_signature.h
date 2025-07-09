@@ -200,6 +200,18 @@ struct AtomicFile : public BaseType {
     static const string ctorSig;
 };
 
+struct ReadStreamOptionsInner : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+};
+
+struct WriteStreamOptionsInner : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+};
+
 } // namespace FS
 
 namespace Impl {

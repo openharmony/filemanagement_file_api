@@ -283,31 +283,34 @@ static ani_string GetFilePath(ani_env *env, const int fd)
 
 static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t end)
 {
-    static const char *className = "L@ohos/file/fs/ReadStreamOptionsInner;";
+    auto classDesc = FS::ReadStreamOptionsInner::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::ReadStreamOptionsInner::ctorDesc.c_str();
+    auto ctorSig = FS::ReadStreamOptionsInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %s obj Failed", classDesc);
         return nullptr;
     }
 
     ani_field startField = nullptr;
     ani_field endField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
-        HILOGE("Cannot find start in class %s", className);
+        HILOGE("Cannot find start in class %s", classDesc);
         return nullptr;
     }
     if (ANI_OK != env->Class_FindField(cls, "end", &endField)) {
-        HILOGE("Cannot find end in class %s", className);
+        HILOGE("Cannot find end in class %s", classDesc);
         return nullptr;
     }
 
@@ -326,31 +329,35 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
 
 static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flags)
 {
-    static const char *className = "L@ohos/file/fs/WriteStreamOptionsInner;";
+    auto classDesc = FS::WriteStreamOptionsInner::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::WriteStreamOptionsInner::ctorDesc.c_str();
+    auto ctorSig = FS::WriteStreamOptionsInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %s obj Failed", classDesc);
         return nullptr;
     }
 
     ani_field modeField = nullptr;
     ani_field startField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "mode", &modeField)) {
-        HILOGE("Cannot find mode in class %s", className);
+        HILOGE("Cannot find mode in class %s", classDesc);
         return nullptr;
     }
     if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
-        HILOGE("Cannot find start in class %s", className);
+        HILOGE("Cannot find start in class %s", classDesc);
         return nullptr;
     }
 
@@ -364,20 +371,24 @@ static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flag
 
 static ani_object CreateReadStream(ani_env *env, ani_string filePath, ani_object options)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/ReadStream;";
+    auto classDesc = FS::ReadStream::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::ReadStream::ctorDesc.c_str();
+    auto ctorSig = FS::ReadStream::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/ReadStreamOptions;:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %s obj Failed", classDesc);
         return nullptr;
     }
 
@@ -386,21 +397,24 @@ static ani_object CreateReadStream(ani_env *env, ani_string filePath, ani_object
 
 static ani_object CreateWriteStream(ani_env *env, ani_string filePath, ani_object options)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/WriteStream;";
+    auto classDesc = FS::WriteStream::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::WriteStream::ctorDesc.c_str();
+    auto ctorSig = FS::WriteStream::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK !=
-        env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/WriteStreamOptions;:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %s obj Failed", classDesc);
         return nullptr;
     }
 
