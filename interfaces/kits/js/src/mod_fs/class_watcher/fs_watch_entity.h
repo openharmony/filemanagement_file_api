@@ -36,14 +36,14 @@ struct WatcherInfo {
 
     explicit WatcherInfo(std::shared_ptr<IWatcherCallback> callback) : callback(std::move(callback)) {}
 
-    void TriggerCallback(const std::string &fileName, uint32_t event, uint32_t cookie) const
+    void TriggerCallback(const std::string &eventFileName, uint32_t event, uint32_t cookie) const
     {
-        callback->InvokeCallback(fileName, event, cookie);
+        callback->InvokeCallback(eventFileName, event, cookie);
     }
 };
 
 struct FsWatchEntity {
-    std::shared_ptr<WatcherInfo> data_;
+    std::shared_ptr<WatcherInfo> watherInfo;
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO

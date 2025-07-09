@@ -96,7 +96,7 @@ FsResult<FsWatcher *> WatcherCore::DoCreateWatcher(
         return FsResult<FsWatcher *>::Error(EIO);
     }
 
-    watchEntity->data_ = info;
+    watchEntity->watherInfo = info;
 
     bool ret = FsFileWatcher::GetInstance().AddWatcherInfo(info);
     if (!ret) {
