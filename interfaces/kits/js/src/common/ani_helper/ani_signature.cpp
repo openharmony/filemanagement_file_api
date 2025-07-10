@@ -129,11 +129,11 @@ const Type FS::AtomicFile::classType = Builder::BuildClass("@ohos.file.fs.fileIo
 const string FS::AtomicFile::classDesc = FS::AtomicFile::classType.Descriptor();
 const string FS::AtomicFile::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 // FS::ReadStreamOptionsInner
-const Type FS::ReadStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.WriteStreamOptionsInner");
+const Type FS::ReadStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.ReadStreamOptionsInner");
 const string FS::ReadStreamOptionsInner::classDesc = FS::ReadStreamOptionsInner::classType.Descriptor();
 const string FS::ReadStreamOptionsInner::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 // FS::WriteStreamOptionsInner
-const Type FS::WriteStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ReadStream");
+const Type FS::WriteStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.WriteStreamOptionsInner");
 const string FS::WriteStreamOptionsInner::classDesc = FS::WriteStreamOptionsInner::classType.Descriptor();
 const string FS::WriteStreamOptionsInner::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 // FS::LocationType
