@@ -29,7 +29,6 @@ static constexpr int EXIST_INDEX = 0;
 static constexpr int WRITE_INDEX = 2;
 static constexpr int READ_INDEX = 4;
 static constexpr int READ_WRITE_INDEX = 6;
-
 static constexpr int LOCAL_INDEX = 0;
 
 AccessModeType ToAccessModeType(int32_t mode_index)
