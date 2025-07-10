@@ -54,6 +54,7 @@ ani_string HashAni::HashSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
 
     const auto &res = ret.GetData().value();
     auto [succ, result] = TypeConverter::ToAniString(env, res);
+
     if (!succ) {
         HILOGE("Convert hash value to ani string failed");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
