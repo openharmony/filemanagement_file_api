@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "file_wrapper.h"
-
 #include "ani_signature.h"
 #include "error_handler.h"
+#include "file_wrapper.h"
 #include "filemgmt_libhilog.h"
 #include "fs_file.h"
 #include "type_converter.h"
