@@ -49,6 +49,7 @@ static tuple<bool, optional<ReadOptions>> ToReadOptions(ani_env *env, ani_object
         return { false, nullopt };
     }
     options.length = length;
+
     return { true, make_optional<ReadOptions>(move(options)) };
 }
 
