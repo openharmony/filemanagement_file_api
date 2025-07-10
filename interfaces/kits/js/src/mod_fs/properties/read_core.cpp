@@ -16,10 +16,9 @@
 #include "read_core.h"
 
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <tuple>
 #include <unistd.h>
-
-#include <sys/stat.h>
 
 #include "file_utils.h"
 #include "filemgmt_libfs.h"
