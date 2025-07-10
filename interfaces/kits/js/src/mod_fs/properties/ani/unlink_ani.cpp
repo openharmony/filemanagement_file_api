@@ -33,6 +33,7 @@ void UnlinkAni::UnlinkSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_s
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
+
     auto ret = UnlinkCore::DoUnlink(pathStr);
     if (!ret.IsSuccess()) {
         HILOGE("Unlink failed");
