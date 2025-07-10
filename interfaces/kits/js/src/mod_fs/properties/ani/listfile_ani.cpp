@@ -114,10 +114,10 @@ tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object 
     }
     auto getterDesc = BuiltInTypes::Array::getterDesc.c_str();
     auto getterSig = BuiltInTypes::Array::objectGetterSig.c_str();
-    for (int i = 0; i < int(length); i++) {
+    for (int idx = 0; idx < int(length); idx++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)i)) {
+            static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)idx)) {
             return { false, nullopt };
         }
         auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));
