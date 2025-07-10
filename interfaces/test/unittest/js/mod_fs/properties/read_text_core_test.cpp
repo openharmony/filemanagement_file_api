@@ -24,14 +24,14 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-const string content = "hello world";
+const string g_content = "hello world";
 
 class ReadTextCoreTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
         int32_t fd = open(FILE_PATH, CREATE | O_RDWR, 0644);
-        write(fd, content.c_str(), content.length());
+        write(fd, g_content.c_str(), g_content.length());
         close(fd);
     };
     static void TearDownTestCase()
