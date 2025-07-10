@@ -41,6 +41,7 @@ tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
     env->FindClass(doubleClassDesc, &doubleClass);
     ani_boolean isDouble;
     env->Object_InstanceOf(obj, doubleClass, &isDouble);
+
     if (isDouble) {
         ani_int fd;
         if (ANI_OK != env->Object_CallMethodByName_Int(obj, "intValue", nullptr, &fd)) {
