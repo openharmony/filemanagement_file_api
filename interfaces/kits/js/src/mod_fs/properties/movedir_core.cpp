@@ -226,10 +226,6 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode, de
     if (found == std::string::npos) {
         return EINVAL;
     }
-    if (access(src.c_str(), W_OK) != 0) {
-        HILOGE("Failed to move src directory due to doesn't exist or hasn't write permission");
-        return errno;
-    }
     string dirName = string(src).substr(found);
     string destStr = dest + dirName;
     auto [destStrExist, destStrEmpty] = JudgeExistAndEmpty(destStr);
