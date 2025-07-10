@@ -139,6 +139,7 @@ ani_double WriteAni::WriteSync(
         }
         return static_cast<double>(ret.GetData().value());
     }
+
     HILOGE("Unsupported buffer type!");
     ErrorHandler::Throw(env, EINVAL);
     return -1;
