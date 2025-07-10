@@ -13,13 +13,12 @@
 * limitations under the License.
 */
 
-#include "fs_file.h"
-
 #include <sys/file.h>
 
 #include "file_uri.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "fs_file.h"
 #include "fs_utils.h"
 
 namespace OHOS {
