@@ -185,7 +185,7 @@ static tuple<bool, int32_t> ValidMode(const optional<int32_t> &mode)
 }
 
 FsResult<void> CopyFileCore::DoCopyFile(FileInfo &src, FileInfo &dest,
-                                        const optional<int32_t> &mode)
+    const optional<int32_t> &mode)
 {
     auto [succMode, modeValue] = ValidMode(mode);
     if (!succMode) {
