@@ -74,6 +74,7 @@ static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
             return ret;
         }
     }
+
     return ERRNO_NOERR;
 }
 
