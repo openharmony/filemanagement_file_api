@@ -125,6 +125,7 @@ static int CopyAndDeleteFile(const string &src, const string &dest)
         uv_fs_req_cleanup(&unlinkReq);
         return ret;
     }
+
     uv_fs_req_cleanup(&unlinkReq);
     return ERRNO_NOERR;
 }
