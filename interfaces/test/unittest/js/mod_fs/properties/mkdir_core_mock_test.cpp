@@ -71,7 +71,6 @@ void MkdirCoreMockTest::TearDown(void)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0001, testing::ext::TestSize.Level1)
 {
@@ -92,7 +91,6 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0001, testing::ext::TestSi
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0002, testing::ext::TestSize.Level1)
 {
@@ -113,7 +111,6 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0002, testing::ext::TestSi
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0003, testing::ext::TestSize.Level1)
 {
@@ -134,7 +131,6 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0003, testing::ext::TestSi
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0004, testing::ext::TestSize.Level1)
 {
@@ -160,7 +156,6 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0004, testing::ext::TestSi
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0005, testing::ext::TestSize.Level1)
 {
