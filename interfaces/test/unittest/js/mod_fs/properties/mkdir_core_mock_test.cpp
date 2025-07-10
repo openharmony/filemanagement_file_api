@@ -41,7 +41,7 @@ filesystem::path MkdirCoreMockTest::tempFilePath;
 void MkdirCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    tempFilePath = filesystem::temp_directory_path() / "test";
+    tempFilePath = filesystem::temp_directory_path() / "mkdir_core_mock_test";
     std::filesystem::create_directory(tempFilePath);
     uvMock = std::make_shared<UvfsMock>();
     Uvfs::ins = uvMock;
