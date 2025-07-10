@@ -34,6 +34,7 @@ FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);
     }
+
     int ret = uv_fs_unlink(nullptr, unlinkReq.get(), src.c_str(), nullptr);
     if (ret < 0) {
         HILOGD("Failed to unlink with path");
