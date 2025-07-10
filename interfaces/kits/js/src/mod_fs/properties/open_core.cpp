@@ -111,6 +111,7 @@ static int OpenFileByDatashare(const string &path, uint32_t flags)
         HILOGE("Failed to connect to datashare");
         return -E_PERMISSION;
     }
+
     Uri uri(path);
     int fd = dataShareHelper->OpenFile(uri, FsUtils::GetModeFromFlags(flags));
     return fd;
