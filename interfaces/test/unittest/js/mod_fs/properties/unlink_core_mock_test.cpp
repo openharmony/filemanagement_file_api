@@ -42,7 +42,7 @@ void UnlinkCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     tempFilePath = filesystem::temp_directory_path() / "unlink_test_file.txt";
-    ofstream(tempFilePath) << "Test content\n123\n456";
+    ofstream(tempFilePath) << "unlink_test_file";
     uvMock = std::make_shared<UvfsMock>();
     Uvfs::ins = uvMock;
 }
