@@ -51,6 +51,7 @@ napi_value Dup::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!readlink_req) {
         HILOGE("Failed to request heap memory.");
+        close(dstFd);
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
