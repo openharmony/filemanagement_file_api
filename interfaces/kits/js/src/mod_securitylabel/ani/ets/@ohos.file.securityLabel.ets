@@ -23,8 +23,8 @@ namespace securityLabel {
       let promise = taskpool.execute((path: string, type: DataLevel): void => SecurityLabelImpl.setSecurityLabelSync(path, type), path, type);
       promise.then((ret: NullishType): void => {
         resolve(undefined);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -35,8 +35,8 @@ namespace securityLabel {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
-    }).catch((e: BusinessError): void => {
-      callback(e, undefined);
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, undefined);
     });
   }
 
@@ -50,8 +50,8 @@ namespace securityLabel {
       promise.then((ret: NullishType): void => {
         let r = ret as string;
         resolve(r);
-      }).catch((e: BusinessError): void => {
-        reject(e);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
       });
     });
   }
@@ -63,8 +63,8 @@ namespace securityLabel {
       e.code = 0;
       let r = ret as string;
       callback(e, r);
-    }).catch((e: BusinessError): void => {
-      callback(e, "");
+    }).catch((e: Error): void => {
+      callback(e as BusinessError, "");
     });
   }
 
