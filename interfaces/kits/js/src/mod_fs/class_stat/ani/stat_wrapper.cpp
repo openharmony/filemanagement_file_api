@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "stat_wrapper.h"
+
 #include <iostream>
 #include <string_view>
 #include <string>
@@ -20,7 +22,6 @@
 #include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
-#include "stat_wrapper.h"
 #include "type_converter.h"
 
 namespace OHOS {

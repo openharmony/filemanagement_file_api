@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "stat_ani.h"
+
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
-#include "stat_ani.h"
 #include "stat_core.h"
 #include "stat_wrapper.h"
 #include "type_converter.h"
