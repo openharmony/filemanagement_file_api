@@ -59,6 +59,7 @@ napi_value Dup::Sync(napi_env env, napi_callback_info info)
     int ret = uv_fs_readlink(nullptr, readlink_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to readlink fd, ret: %{public}d", ret);
+        close(dstFd);
         NError(ret).ThrowErr(env);
         return nullptr;
     }
