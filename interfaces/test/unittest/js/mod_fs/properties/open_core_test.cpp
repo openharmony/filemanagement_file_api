@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
 #include "open_core.h"
+
+#include <gtest/gtest.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -51,12 +51,12 @@ void OpenCoreTest::TearDown(void)
 }
 
 /**
-* @tc.name: OpenCoreTest_DoOpen_001
-* @tc.desc: Test function of OpenCore::DoOpen interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: OpenCoreTest_DoOpen_001
+ * @tc.desc: Test function of OpenCore::DoOpen interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_001";
@@ -71,12 +71,12 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_001, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: OpenCoreTest_DoOpen_002
-* @tc.desc: Test function of OpenCore::DoOpen interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: OpenCoreTest_DoOpen_002
+ * @tc.desc: Test function of OpenCore::DoOpen interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_002";
@@ -91,12 +91,12 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_002, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: OpenCoreTest_DoOpen_003
-* @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: OpenCoreTest_DoOpen_003
+ * @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_003";
@@ -111,12 +111,12 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_003, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: OpenCoreTest_DoOpen_004
-* @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: OpenCoreTest_DoOpen_004
+ * @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_004";
@@ -131,12 +131,12 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_004, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: OpenCoreTest_DoOpen_005
-* @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: OpenCoreTest_DoOpen_005
+ * @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_005";
@@ -151,12 +151,12 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_005, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: OpenCoreTest_DoOpen_006
-* @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: OpenCoreTest_DoOpen_006
+ * @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_006";
@@ -171,12 +171,12 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_006, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: OpenCoreTest_DoOpen_007
-* @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: OpenCoreTest_DoOpen_007
+ * @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_007, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_007";

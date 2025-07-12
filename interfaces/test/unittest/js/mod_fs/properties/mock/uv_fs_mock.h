@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef UV_FS_READ_MOCK_H
-#define UV_FS_READ_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_UV_FS_MOCK_H
+#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_UV_FS_MOCK_H
 
 #include "uv.h"
 
@@ -88,4 +88,4 @@ public:
 };
 
 } // OHOS::FileManagement::ModuleFileIO
-#endif
+#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_UV_FS_MOCK_H

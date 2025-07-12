@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FILEMGMT_LIBN_TEST_H
-#define FILEMGMT_LIBN_TEST_H
+#include "accesstoken_kit_mock.h"
 
-#include <gtest/gtest.h>
+namespace OHOS::Security::AccessToken {
 
-namespace OHOS {
-namespace Media {
-class FilemangementLibnTest : public testing::Test {
-public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
-    void SetUp();
-    void TearDown();
-};
+bool TokenIdKit::IsSystemAppByFullTokenID(uint64_t tokenId)
+{
+    return OHOS::FileManagement::Backup::BAccessTokenKit::token->IsSystemAppByFullTokenID(tokenId);
 }
+
+int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string &permissionName)
+{
+    return OHOS::FileManagement::Backup::BAccessTokenKit::token->VerifyAccessToken(tokenID, permissionName);
 }
-#endif
+} // namespace OHOS::Security::AccessToken

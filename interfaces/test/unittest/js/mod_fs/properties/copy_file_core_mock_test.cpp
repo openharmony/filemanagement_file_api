@@ -23,7 +23,7 @@ using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
-class CopyFileCoreTest : public testing::Test {
+class CopyFileCoreMockTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -32,40 +32,40 @@ public:
     static inline shared_ptr<UvfsMock>  uvfs = nullptr;
 };
 
-void CopyFileCoreTest::SetUpTestCase(void)
+void CopyFileCoreMockTest::SetUpTestCase(void)
 {
     uvfs = std::make_shared<UvfsMock>();
     Uvfs::ins = uvfs;
     GTEST_LOG_(INFO) << "SetUpTestCase";
 }
 
-void CopyFileCoreTest::TearDownTestCase(void)
+void CopyFileCoreMockTest::TearDownTestCase(void)
 {
     Uvfs::ins = nullptr;
     uvfs = nullptr;
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void CopyFileCoreTest::SetUp(void)
+void CopyFileCoreMockTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void CopyFileCoreTest::TearDown(void)
+void CopyFileCoreMockTest::TearDown(void)
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_001
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_001
  * @tc.desc: Test function of CopyFileCore::ValidMode interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_001, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_001";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_001";
 
     FileInfo src;
     FileInfo dest;
@@ -74,19 +74,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_001, testing::ext::TestSi
     auto res = CopyFileCore::DoCopyFile(src, dest, mode);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_001";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_001";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_003
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_003
  * @tc.desc: Test function of CopyFileCore::OpenFile.OpenCore interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_003, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_003";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_003";
 
     FileInfo src;
     FileInfo dest;
@@ -98,44 +98,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_003, testing::ext::TestSi
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_003";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_003";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_004
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_005
  * @tc.desc: Test function of CopyFileCore::OpenFile.OpenCore interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_004, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_005, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_004";
-
-    FileInfo src;
-    FileInfo dest;
-    src.isPath = true;
-    dest.isPath = false;
-    src.fdg = make_unique<DistributedFS::FDGuard>(1);
-
-    EXPECT_CALL(*uvfs, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
-
-    auto res = CopyFileCore::DoCopyFile(src, dest);
-    EXPECT_EQ(res.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_004";
-}
-
-/**
- * @tc.name: CopyFileCoreTest_DoCopyFile_005
- * @tc.desc: Test function of CopyFileCore::OpenFile.OpenCore interface for FALSE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_005, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_005";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_005";
 
     FileInfo src;
     FileInfo dest;
@@ -151,19 +126,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_005, testing::ext::TestSi
     EXPECT_EQ(res.IsSuccess(), false);
     close(fd);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_005";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_005";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_006
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_006
  * @tc.desc: Test function of CopyFileCore::OpenFile.OpenCore interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_006, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_006, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_006";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_006";
 
     FileInfo src;
     FileInfo dest;
@@ -179,19 +154,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_006, testing::ext::TestSi
     EXPECT_EQ(res.IsSuccess(), true);
     close(fd);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_006";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_006";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_007
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_007
  * @tc.desc: Test function of CopyFileCore::OpenFile.TruncateCore interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_007, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_007, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_007";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_007";
 
     FileInfo src;
     FileInfo dest;
@@ -208,19 +183,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_007, testing::ext::TestSi
     EXPECT_EQ(res.IsSuccess(), false);
     close(fd);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_007";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_007";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_008
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_008
  * @tc.desc: Test function of CopyFileCore::OpenFile.TruncateCore interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_008, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_008, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_008";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_008";
 
     FileInfo src;
     FileInfo dest;
@@ -237,19 +212,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_008, testing::ext::TestSi
     EXPECT_EQ(res.IsSuccess(), false);
     close(fd);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_008";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_008";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_009
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_009
  * @tc.desc: Test function of CopyFileCore::OpenFile.TruncateCore interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_009, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_009, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_009";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_009";
 
     FileInfo src;
     FileInfo dest;
@@ -270,19 +245,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_009, testing::ext::TestSi
     close(srcfd);
     close(destfd);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_009";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_009";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_0010
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_0010
  * @tc.desc: Test function of CopyFileCore::OpenFile.SendFileCore interface for false.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_0010, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0010, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_0010";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_0010";
 
     FileInfo src;
     FileInfo dest;
@@ -303,19 +278,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_0010, testing::ext::TestS
     EXPECT_EQ(res.IsSuccess(), false);
     close(srcfd);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_0010";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0010";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_0011
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_0011
  * @tc.desc: Test function of CopyFileCore::OpenFile.SendFileCore interface for false.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_0011, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0011, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_0011";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_0011";
 
     FileInfo src;
     FileInfo dest;
@@ -336,19 +311,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_0011, testing::ext::TestS
     EXPECT_EQ(res.IsSuccess(), false);
     close(srcfd);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_0011";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0011";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_0012
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_0012
  * @tc.desc: Test function of CopyFileCore::OpenFile.SendFileCore interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_0012, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0012, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_0012";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_0012";
 
     FileInfo src;
     FileInfo dest;
@@ -369,19 +344,19 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_0012, testing::ext::TestS
     EXPECT_EQ(res.IsSuccess(), true);
     close(srcfd);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_0012";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0012";
 }
 
 /**
- * @tc.name: CopyFileCoreTest_DoCopyFile_0013
+ * @tc.name: CopyFileCoreMockTest_DoCopyFile_0013
  * @tc.desc: Test function of CopyFileCore::OpenFile.SendFileCore interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_0013, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0013, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_0013";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_0013";
 
     FileInfo src;
     FileInfo dest;
@@ -402,7 +377,7 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_0013, testing::ext::TestS
     EXPECT_EQ(res.IsSuccess(), false);
     close(srcfd);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_0013";
+    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0013";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

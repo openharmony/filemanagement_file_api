@@ -19,7 +19,7 @@
 #include <unistd.h>
 
 #include "fd_guard.h"
-#include "n_val.h"
+#include "filemgmt_libhilog.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -34,4 +34,4 @@ struct RandomAccessFileEntity {
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_RANDOMACCESSFILE_ENTITY_H

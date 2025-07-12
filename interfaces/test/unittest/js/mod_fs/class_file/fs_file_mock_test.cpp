@@ -75,12 +75,12 @@ void FsFileMockTest::TearDown(void)
 }
 
 /**
-* @tc.name: FsFileMockTest_GetPath_001
-* @tc.desc: Test function of GetPath() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_GetPath_001
+ * @tc.desc: Test function of GetPath() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetPath_001";
@@ -100,12 +100,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_001, testing::ext::TestSize.Leve
 }
 
 /**
-* @tc.name: FsFileMockTest_GetPath_002
-* @tc.desc: Test function of GetPath() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_GetPath_002
+ * @tc.desc: Test function of GetPath() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetPath_002";
@@ -119,12 +119,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_002, testing::ext::TestSize.Leve
 }
 
 /**
-* @tc.name: FsFileMockTest_GetName_003
-* @tc.desc: Test function of GetName() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_GetName_003
+ * @tc.desc: Test function of GetName() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_003";
@@ -138,12 +138,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_003, testing::ext::TestSize.Leve
 }
 
 /**
-* @tc.name: FsFileMockTest_GetName_004
-* @tc.desc: Test function of GetName() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_GetName_004
+ * @tc.desc: Test function of GetName() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_004";
@@ -157,12 +157,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_004, testing::ext::TestSize.Leve
 }
 
 /**
-* @tc.name: FsFileMockTest_GetParent_005
-* @tc.desc: Test function of GetParent() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_GetParent_005
+ * @tc.desc: Test function of GetParent() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_005";
@@ -176,12 +176,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_005, testing::ext::TestSize.Le
 }
 
 /**
-* @tc.name: FsFileMockTest_GetName_006
-* @tc.desc: Test function of GetName() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_GetName_006
+ * @tc.desc: Test function of GetName() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_006";
@@ -201,12 +201,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_006, testing::ext::TestSize.Leve
 }
 
 /**
-* @tc.name: FsFileMockTest_GetParent_007
-* @tc.desc: Test function of GetParent() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_GetParent_007
+ * @tc.desc: Test function of GetParent() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_007, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_007";
@@ -226,12 +226,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_007, testing::ext::TestSize.Le
 }
 
 /**
-* @tc.name: FsFileMockTest_GetName_008
-* @tc.desc: Test function of GetName() interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_GetName_008
+ * @tc.desc: Test function of GetName() interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_008, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_008";
@@ -251,12 +251,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_008, testing::ext::TestSize.Leve
 }
 
 /**
-* @tc.name: FsFileMockTest_GetParent_009
-* @tc.desc: Test function of GetParent() interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_GetParent_009
+ * @tc.desc: Test function of GetParent() interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_009, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_009";
@@ -276,12 +276,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_009, testing::ext::TestSize.Le
 }
 
 /**
-* @tc.name: FsFileMockTest_Lock_010
-* @tc.desc: Test function of Lock() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_Lock_010
+ * @tc.desc: Test function of Lock() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_010, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_010";
@@ -294,12 +294,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_010, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileMockTest_Lock_011
-* @tc.desc: Test function of Lock() interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_Lock_011
+ * @tc.desc: Test function of Lock() interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_011, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_011";
@@ -312,12 +312,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_011, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileMockTest_TryLock_012
-* @tc.desc: Test function of TryLock() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_TryLock_012
+ * @tc.desc: Test function of TryLock() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_012, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_012";
@@ -330,12 +330,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_012, testing::ext::TestSize.Leve
 }
 
 /**
-* @tc.name: FsFileMockTest_TryLock_013
-* @tc.desc: Test function of TryLock() interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_TryLock_013
+ * @tc.desc: Test function of TryLock() interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_013, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_013";
@@ -348,12 +348,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_013, testing::ext::TestSize.Leve
 }
 
 /**
-* @tc.name: FsFileMockTest_UnLock_014
-* @tc.desc: Test function of UnLock() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_UnLock_014
+ * @tc.desc: Test function of UnLock() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_014, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_014";
@@ -366,12 +366,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_014, testing::ext::TestSize.Level
 }
 
 /**
-* @tc.name: FsFileMockTest_UnLock_015
-* @tc.desc: Test function of UnLock() interface for FALSE.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileMockTest_UnLock_015
+ * @tc.desc: Test function of UnLock() interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_015, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_015";

@@ -65,7 +65,7 @@ tuple<bool, int> ParseIntParam(ani_env *env, ani_object obj, string tag)
     }
     ani_int resultRefRes;
     if (ANI_OK != env->Object_CallMethodByName_Int(
-        static_cast<ani_object>(resultRef), "intValue", nullptr, &resultRefRes)) {
+        static_cast<ani_object>(resultRef), "toInt", nullptr, &resultRefRes)) {
         result = -1;
         return { false, result };
     }
@@ -87,7 +87,7 @@ tuple<bool, optional<double>> ParseDoubleParam(ani_env *env, ani_object obj, str
 
     ani_double resultRefRes;
     if (ANI_OK != env->Object_CallMethodByName_Double(
-        static_cast<ani_object>(resultRef), "doubleValue", nullptr, &resultRefRes)) {
+        static_cast<ani_object>(resultRef), "toDouble", nullptr, &resultRefRes)) {
         return { false, nullopt };
     }
     double result = static_cast<double>(resultRefRes);
@@ -206,7 +206,7 @@ tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
     return { true, make_optional<FsListFileOptions>(result) };
 }
 
-ani_array_ref ListFileAni::ListFileSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object obj)
+ani_array ListFileAni::ListFileSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_object obj)
 {
     auto [succPath, srcPath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {

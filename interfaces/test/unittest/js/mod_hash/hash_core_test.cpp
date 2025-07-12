@@ -45,7 +45,6 @@ public:
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(HashCoreTest, DoHashTest_0001, testing::ext::TestSize.Level1)
 {
@@ -66,7 +65,6 @@ HWTEST_F(HashCoreTest, DoHashTest_0001, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(HashCoreTest, DoHashTest_0002, testing::ext::TestSize.Level1)
 {
@@ -83,7 +81,6 @@ HWTEST_F(HashCoreTest, DoHashTest_0002, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(HashCoreTest, DoHashTest_0003, testing::ext::TestSize.Level1)
 {
@@ -100,7 +97,6 @@ HWTEST_F(HashCoreTest, DoHashTest_0003, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(HashCoreTest, DoHashTest_0004, testing::ext::TestSize.Level1)
 {
@@ -117,7 +113,6 @@ HWTEST_F(HashCoreTest, DoHashTest_0004, testing::ext::TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- * @tc.require: AR000IGDNF
  */
 HWTEST_F(HashCoreTest, DoHashTest_0005, testing::ext::TestSize.Level1)
 {
