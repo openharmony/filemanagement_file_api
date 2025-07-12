@@ -150,6 +150,15 @@ int FileWatcher::CloseNotifyFdLocked()
 
 int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
 {
+    while (true) {
+        lock_guard<mutex> lock(readMutex_);
+        if (reading_) {
+            HILOGI("Watcher is reading, retry ReadMutex");
+        } else {
+            break;
+        }
+    };
+
     unique_lock<mutex> lock(watchMutex_);
     if (notifyFd_ < 0) {
         HILOGE("Failed to stop notify notifyFd_:%{public}d", notifyFd_);
@@ -168,6 +177,7 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
         lock_guard<mutex> lock(readMutex_);
         if (!(closed_ && reading_)) {
             oldWd = inotify_rm_watch(notifyFd_, arg->wd);
+            HILOGE("rm watch failed, err: %{public}d", errno);
         } else {
             HILOGE("rm watch fail");
         }
