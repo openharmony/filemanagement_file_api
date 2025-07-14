@@ -86,6 +86,26 @@ std::tuple<bool, std::optional<int64_t>> TypeConverter::ToOptionalInt64(ani_env 
     return { false, {} };
 }
 
+tuple<bool, optional<double>> TypeConverter::ToOptionalDouble(ani_env *env, const ani_object &value)
+{
+    if (env == nullptr) {
+        return { false, {} };
+    }
+
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(value, &isUndefined);
+    if (isUndefined) {
+        return { true, nullopt };
+    }
+
+    ani_double doubleValue;
+    if (ANI_OK == env->Object_CallMethodByName_Double(value, "toDouble", nullptr, &doubleValue)) {
+        return { true, make_optional<double>(doubleValue) };
+    }
+
+    return { false, {} };
+}
+
 std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::string str)
 {
     if (env == nullptr) {
