@@ -27,7 +27,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-void FDataSyncAni::FDataSyncSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd)
+void FDataSyncAni::FDataSyncSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd)
 {
     auto ret = FDataSyncCore::DoFDataSync(static_cast<int32_t>(fd));
     if (!ret.IsSuccess()) {
