@@ -152,9 +152,7 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
 {
     while (true) {
         lock_guard<mutex> lock(readMutex_);
-        if (reading_) {
-            HILOGI("Watcher is reading, retry ReadMutex");
-        } else {
+        if (!reading_) {
             break;
         }
     };
