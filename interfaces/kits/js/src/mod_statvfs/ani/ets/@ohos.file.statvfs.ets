@@ -16,15 +16,15 @@
 import { BusinessError, AsyncCallback } from '@ohos.base';
 
 namespace statfs {
-  export function getFreeSizeSync(path: string): number {
+  export function getFreeSizeSync(path: string): long {
     return StatvfsImpl.getFreeSizeSync(path);
   }
 
-  export function getFreeSize(path: string): Promise<number> {
-    return new Promise<number>((resolve: (result: number) => void, reject: (e: BusinessError<void>) => void): void => {
+  export function getFreeSize(path: string): Promise<long> {
+    return new Promise<long>((resolve: (result: long) => void, reject: (e: BusinessError<void>) => void): void => {
       let promise = taskpool.execute(StatvfsImpl.getFreeSizeSync, path);
       promise.then((ret: NullishType): void => {
-        let result = ret as number
+        let result = ret as long
         resolve(result);
       }).catch((e: Error): void => {
         reject(e as BusinessError);
@@ -32,27 +32,27 @@ namespace statfs {
     });
   }
 
-  export function getFreeSize(path: string, callback: AsyncCallback<number>): void {
+  export function getFreeSize(path: string, callback: AsyncCallback<long>): void {
     let promise = taskpool.execute(StatvfsImpl.getFreeSizeSync, path);
     promise.then((ret: NullishType): void => {
       let e = new BusinessError<void>();
       e.code = 0;
-      let result = ret as number;
+      let result = ret as long;
       callback(e, result);
     }).catch((e: Error): void => {
       callback(e as BusinessError, 0);
     });
   }
 
-  export function getTotalSizeSync(path: string): number {
+  export function getTotalSizeSync(path: string): long {
     return StatvfsImpl.getTotalSizeSync(path);
   }
 
-  export function getTotalSize(path: string): Promise<number> {
-    return new Promise<number>((resolve: (result: number) => void, reject: (e: BusinessError<void>) => void): void => {
+  export function getTotalSize(path: string): Promise<long> {
+    return new Promise<long>((resolve: (result: long) => void, reject: (e: BusinessError<void>) => void): void => {
       let promise = taskpool.execute(StatvfsImpl.getTotalSizeSync, path);
       promise.then((ret: NullishType): void => {
-        let result = ret as number
+        let result = ret as long
         resolve(result);
       }).catch((e: Error): void => {
         reject(e as BusinessError);
@@ -60,12 +60,12 @@ namespace statfs {
     });
   }
 
-  export function getTotalSize(path: string, callback: AsyncCallback<number>): void {
+  export function getTotalSize(path: string, callback: AsyncCallback<long>): void {
     let promise = taskpool.execute(StatvfsImpl.getTotalSizeSync, path);
     promise.then((ret: NullishType): void => {
       let e = new BusinessError<void>();
       e.code = 0;
-      let result = ret as number;
+      let result = ret as long;
       callback(e, result);
     }).catch((e: Error): void => {
       callback(e as BusinessError, 0);
@@ -81,6 +81,6 @@ class StatvfsImpl {
     loadLibraryWithPermissionCheck("ani_file_statvfs", "@ohos.file.statvfs");
   }
 
-  static native getFreeSizeSync(path: string): number;
-  static native getTotalSizeSync(path: string): number;
+  static native getFreeSizeSync(path: string): long;
+  static native getTotalSizeSync(path: string): long;
 }

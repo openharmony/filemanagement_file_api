@@ -40,6 +40,11 @@ const string BoxedTypes::Boolean::unboxedSig = Builder::BuildSignatureDescriptor
 // BoxedTypes::Int
 const Type BoxedTypes::Int::classType = Builder::BuildClass("std.core.Int");
 const string BoxedTypes::Int::classDesc = BoxedTypes::Int::classType.Descriptor();
+const string BoxedTypes::Int::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
+// BoxedTypes::Long
+const Type BoxedTypes::Long::classType = Builder::BuildClass("std.core.Long");
+const string BoxedTypes::Long::classDesc = BoxedTypes::Long::classType.Descriptor();
+const string BoxedTypes::Long::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
 // BoxedTypes::Double
 const Type BoxedTypes::Double::classType = Builder::BuildClass("std.core.Double");
 const string BoxedTypes::Double::classDesc = BoxedTypes::Double::classType.Descriptor();
@@ -69,7 +74,7 @@ const string BuiltInTypes::ArrayBuffer::ctorSig = Builder::BuildSignatureDescrip
 // BuiltInTypes::BigInt
 const Type BuiltInTypes::BigInt::classType = Builder::BuildClass("escompat.BigInt");
 const string BuiltInTypes::BigInt::classDesc = BuiltInTypes::BigInt::classType.Descriptor();
-const string BuiltInTypes::BigInt::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::doubleType });
+const string BuiltInTypes::BigInt::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
 // BuiltInTypes::BusinessError
 const Type BuiltInTypes::BusinessError::classType = Builder::BuildClass("@ohos.base.BusinessError");
 const string BuiltInTypes::BusinessError::classDesc = BuiltInTypes::BusinessError::classType.Descriptor();
@@ -86,7 +91,7 @@ const string FS::FileInner::ctorSig = Builder::BuildSignatureDescriptor({ BasicT
 const Type FS::ProgressInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ProgressInner");
 const string FS::ProgressInner::classDesc = FS::ProgressInner::classType.Descriptor();
 const string FS::ProgressInner::ctorSig =
-    Builder::BuildSignatureDescriptor({ BasicTypes::doubleType, BasicTypes::doubleType });
+    Builder::BuildSignatureDescriptor({ BasicTypes::longType, BasicTypes::longType });
 // FS::RandomAccessFileInner
 const Type FS::RandomAccessFileInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.RandomAccessFileInner");
 const string FS::RandomAccessFileInner::classDesc = FS::RandomAccessFileInner::classType.Descriptor();
@@ -123,15 +128,17 @@ const string FS::WatcherInner::nativePtr = "nativePtr";
 const Type FS::WatchEventInner::classType = Builder::BuildClass("@ohos.file.fs.WatchEventInner");
 const string FS::WatchEventInner::classDesc = FS::WatchEventInner::classType.Descriptor();
 const string FS::WatchEventInner::ctorSig =
-    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::doubleType, BasicTypes::doubleType });
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::intType, BasicTypes::intType });
 // FS::ReadStream
 const Type FS::ReadStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ReadStream");
 const string FS::ReadStream::classDesc = FS::ReadStream::classType.Descriptor();
-const string FS::ReadStream::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+const string FS::ReadStream::ctorSig =
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::ReadStreamOptionsInner::classType });
 // FS::WriteStream
 const Type FS::WriteStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.WriteStream");
 const string FS::WriteStream::classDesc = FS::WriteStream::classType.Descriptor();
-const string FS::WriteStream::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+const string FS::WriteStream::ctorSig =
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::WriteStreamOptionsInner::classType });
 // FS::AtomicFile
 const Type FS::AtomicFile::classType = Builder::BuildClass("@ohos.file.fs.fileIo.AtomicFile");
 const string FS::AtomicFile::classDesc = FS::AtomicFile::classType.Descriptor();

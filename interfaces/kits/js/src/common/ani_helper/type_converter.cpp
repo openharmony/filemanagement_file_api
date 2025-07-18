@@ -86,6 +86,26 @@ std::tuple<bool, std::optional<int64_t>> TypeConverter::ToOptionalInt64(ani_env 
     return { false, {} };
 }
 
+tuple<bool, optional<double>> TypeConverter::ToOptionalDouble(ani_env *env, const ani_object &value)
+{
+    if (env == nullptr) {
+        return { false, {} };
+    }
+
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(value, &isUndefined);
+    if (isUndefined) {
+        return { true, nullopt };
+    }
+
+    ani_double doubleValue;
+    if (ANI_OK == env->Object_CallMethodByName_Double(value, "toDouble", nullptr, &doubleValue)) {
+        return { true, make_optional<double>(doubleValue) };
+    }
+
+    return { false, {} };
+}
+
 std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::string str)
 {
     if (env == nullptr) {
@@ -145,10 +165,11 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::EnumToInt32(ani_env *env
 static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrFd)
 {
     ani_boolean isFd = false;
-    auto intClassDesc = BoxedTypes::Int::classDesc.c_str();
-    ani_class intClass;
-    env->FindClass(intClassDesc, &intClass);
-    env->Object_InstanceOf(pathOrFd, intClass, &isFd);
+
+    auto classDesc = BoxedTypes::Int::classDesc.c_str();
+    ani_class cls;
+    env->FindClass(classDesc, &cls);
+    env->Object_InstanceOf(pathOrFd, cls, &isFd);
     if (isFd) {
         ani_int fd;
         if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, BasicTypesConverter::toInt.c_str(), nullptr, &fd)) {
@@ -274,7 +295,9 @@ std::tuple<bool, ani_array> TypeConverter::ToAniStringList(
     }
 
     ani_array result = nullptr;
-    if (env->Array_New(length, nullptr, &result) != ANI_OK) {
+    ani_ref undefined;
+    env->GetUndefined(&undefined);
+    if (env->Array_New(length, undefined, &result) != ANI_OK) {
         return { false, result };
     }
     for (uint32_t i = 0; i < length; i++) {

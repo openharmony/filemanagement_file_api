@@ -62,6 +62,13 @@ struct Boolean : public BaseType {
 struct Int : public BaseType {
     static const Type classType;
     static const string classDesc;
+    static const string ctorSig;
+};
+
+struct Long : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
 };
 
 struct Double : public BaseType {

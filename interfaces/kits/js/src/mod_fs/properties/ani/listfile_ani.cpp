@@ -51,6 +51,28 @@ tuple<bool, bool> ParseBooleanParam(ani_env *env, ani_object obj, string tag)
     return { true, static_cast<bool>(boolRef_res) };
 }
 
+tuple<bool, long> ParseLongParam(ani_env *env, ani_object obj, string tag)
+{
+    long result = 0;
+    ani_boolean isUndefined;
+    ani_ref result_ref;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &result_ref)) {
+        return { false, result };
+    }
+    env->Reference_IsUndefined(result_ref, &isUndefined);
+    if (isUndefined) {
+        return { true, result };
+    }
+    ani_long result_ref_res;
+    if (ANI_OK != env->Object_CallMethodByName_Long(
+        static_cast<ani_object>(result_ref), "toLong", nullptr, &result_ref_res)) {
+        result = -1;
+        return { false, result };
+    }
+    result = static_cast<int64_t>(result_ref_res);
+    return { true, result };
+}
+
 tuple<bool, int> ParseIntParam(ani_env *env, ani_object obj, string tag)
 {
     int result = 0;
@@ -107,8 +129,8 @@ tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object 
         return { true, nullopt };
     }
 
-    ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(
+    ani_int length;
+    if (ANI_OK != env->Object_GetPropertyByName_Int(
         static_cast<ani_object>(resultRef), "length", &length) || length == 0) {
         return { false, nullopt };
     }
@@ -133,7 +155,7 @@ tuple<bool, optional<FsFileFilter>> ParseFilter(ani_env *env, ani_object obj)
 {
     FsFileFilter filter;
 
-    auto [succfileSizeOver, fileSizeOver] = ParseIntParam(env, obj, "fileSizeOver");
+    auto [succfileSizeOver, fileSizeOver] = ParseLongParam(env, obj, "fileSizeOver");
     if (!succfileSizeOver) {
         HILOGE("Illegal option.fileSizeOver parameter");
         return { false, move(filter) };
@@ -180,12 +202,12 @@ tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
     }
     result.recursion = recursion;
 
-    auto [succlistNum, listNumRes] = ParseIntParam(env, obj, "listNum");
+    auto [succlistNum, listNumRes] = ParseLongParam(env, obj, "listNum");
     if (!succlistNum) {
         HILOGE("Invalid listNum");
         return { false, nullopt };
     }
-    result.listNum = (int)listNumRes;
+    result.listNum = listNumRes;
 
     ani_ref filterRef;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "filter", &filterRef)) {

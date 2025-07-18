@@ -168,7 +168,9 @@ enum ErrCodeSuffixOfDistributedFile {
     E_NETWORK_ERR,
     E_BATTERY_WARNING,
     E_EXCEED_MAX_LIMIT,
-    E_DATABASE_FAILED
+    E_INNER_ERROR,
+    E_OTHER_TASK_RUNNING,
+    E_VERSION_FILE_NO_EXIST,
 };
 
 enum CommonErrCode {
@@ -282,7 +284,8 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { EBADFD, { FILEIO_SYS_CAP_TAG + E_BADFD, "File descriptor in bad state" } },
     { ERESTART, { FILEIO_SYS_CAP_TAG + E_RESTART, "Interrupted system call should be restarted" } },
     { EDQUOT, { FILEIO_SYS_CAP_TAG + E_DQUOT, "Quota exceeded" } },
-    { UNKROWN_ERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
+    { UNKROWN_ERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error. Possible causes: 1.Insufficient memory."
+        "2.Memory operation error. 3.Null pointer. 4.Failed to obtain expected resources." } },
     { ENOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { ENETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
     { ECONNECTIONFAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
@@ -335,7 +338,8 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { FILEIO_SYS_CAP_TAG + E_RESTART, { FILEIO_SYS_CAP_TAG + E_RESTART,
         "Interrupted system call should be restarted" } },
     { FILEIO_SYS_CAP_TAG + E_DQUOT, { FILEIO_SYS_CAP_TAG + E_DQUOT, "Quota exceeded" } },
-    { FILEIO_SYS_CAP_TAG + E_UKERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error" } },
+    { FILEIO_SYS_CAP_TAG + E_UKERR, { FILEIO_SYS_CAP_TAG + E_UKERR, "Unknown error. Possible causes:"
+        "1.Insufficient memory. 2.Memory operation error. 3.Null pointer. 4.Failed to obtain expected resources." } },
     { FILEIO_SYS_CAP_TAG + E_NOLCK, { FILEIO_SYS_CAP_TAG + E_NOLCK, "No record locks available" } },
     { FILEIO_SYS_CAP_TAG + E_NETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
     { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
@@ -368,7 +372,8 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         "Member not exist" } },
     { USER_FILE_MANAGER_SYS_CAP_TAG + E_INPUT, { USER_FILE_MANAGER_SYS_CAP_TAG + E_INPUT,
         "Wrong input parameter" } },
-    { STORAGE_SERVICE_SYS_CAP_TAG + E_IPCSS, { STORAGE_SERVICE_SYS_CAP_TAG + E_IPCSS, "IPC error" } },
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_IPCSS, { STORAGE_SERVICE_SYS_CAP_TAG + E_IPCSS,
+        "IPC error. Possible causes: 1.IPC failed or timed out. 2.Failed to load the service" } },
     { STORAGE_SERVICE_SYS_CAP_TAG + E_NOTSUPPORTEDFS, { STORAGE_SERVICE_SYS_CAP_TAG + E_NOTSUPPORTEDFS,
         "Not supported filesystem" } },
     { STORAGE_SERVICE_SYS_CAP_TAG + E_MOUNT, { STORAGE_SERVICE_SYS_CAP_TAG + E_MOUNT, "Failed to mount" } },

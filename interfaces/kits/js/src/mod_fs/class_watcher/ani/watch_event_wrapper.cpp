@@ -49,12 +49,9 @@ ani_object WatchEventWrapper::Wrap(ani_env *env, const WatchEvent &evt)
         return nullptr;
     }
 
-    auto event = static_cast<double>(evt.event);
-    auto cookie = static_cast<double>(evt.cookie);
-
     ani_object obj;
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, fileName, event, cookie)) {
-        HILOGE("Create %{public}s obj failed!", classDesc);
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, fileName, evt.event, evt.cookie)) {
+        HILOGE("Create %s obj failed!", classDesc);
         return nullptr;
     }
     return obj;

@@ -25,7 +25,7 @@ namespace ANI {
 
 class FsyncAni final {
 public:
-    static void FsyncSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd);
+    static void FsyncSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd);
 };
 } // namespace ANI
 } // namespace ModuleFileIO

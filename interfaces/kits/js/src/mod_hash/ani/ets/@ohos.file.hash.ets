@@ -62,7 +62,7 @@ export default namespace hash {
       this.hs.update(data);
     }
 
-    doTransform(chunk: string, encoding: string, callback: () => void): void {
+    doTransform(chunk: string, encoding: string, callback: Function): void {
       let charCodes: number[] = [];
       for (let i = 0; i < chunk.length; i++) {
         charCodes = [...charCodes, chunk.charCodeAt(i)];
@@ -70,15 +70,15 @@ export default namespace hash {
       const buf = new Uint8Array(charCodes).buffer;
       this.hs.update((buf as ArrayBuffer));
       this.push(chunk);
-      callback();
+      callback.unsafeCall();
     }
 
-    doWrite(chunk: string | Uint8Array, encoding: string, callback: () => void): void {
-      callback();
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+      callback.unsafeCall();
     }
 
-    doFlush(callback: () => void): void {
-      callback();
+    doFlush(callback: Function): void {
+      callback.unsafeCall();
     }
   }
 }

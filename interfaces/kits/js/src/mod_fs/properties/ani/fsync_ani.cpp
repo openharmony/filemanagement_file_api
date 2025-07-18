@@ -25,7 +25,7 @@ namespace ModuleFileIO {
 namespace ANI {
 using namespace OHOS::FileManagement::ModuleFileIO;
 
-void FsyncAni::FsyncSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd)
+void FsyncAni::FsyncSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd)
 {
     auto ret = FsyncCore::DoFsync(static_cast<int32_t>(fd));
     if (!ret.IsSuccess()) {

@@ -36,60 +36,54 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 class AniHelper {
 public:
     template <typename T>
-    static ani_status SetFieldValue(
-        ani_env *env, const ani_class &cls, ani_object &obj, const char *fieldName, const T &value)
+    static ani_status SetFieldValue(ani_env *env, ani_object &obj, const string_view &key, const T &value)
     {
-        ani_field field;
-        auto status = env->Class_FindField(cls, fieldName, &field);
-        if (status != ANI_OK) {
-            return status;
-        }
-
+        ani_status status = ANI_ERROR;
         if constexpr (is_same_v<T, int> || is_same_v<T, int32_t> || is_same_v<T, ani_int>) {
-            status = env->Object_SetField_Int(obj, field, value);
-        } else if constexpr (is_same_v<T, int64_t> || is_same_v<T, ani_long>) {
-            status = env->Object_SetField_Long(obj, field, value);
+            status = env->Object_SetFieldByName_Int(obj, key.data(), static_cast<ani_int>(value));
+        } else if constexpr (is_same_v<T, long> || is_same_v<T, int64_t> || is_same_v<T, ani_long>) {
+            status = env->Object_SetFieldByName_Long(obj, key.data(), static_cast<ani_long>(value));
         } else if constexpr (is_same_v<T, double> || is_same_v<T, ani_double>) {
-            status = env->Object_SetField_Double(obj, field, value);
+            status = env->Object_SetFieldByName_Double(obj, key.data(), static_cast<ani_double>(value));
         } else if constexpr (is_same_v<T, bool> || is_same_v<T, ani_boolean>) {
-            status = env->Object_SetField_Boolean(obj, field, value);
+            status = env->Object_SetFieldByName_Boolean(obj, key.data(), static_cast<ani_boolean>(value));
         } else if constexpr (is_same_v<T, string> || is_same_v<T, const char *>) {
             auto [succ, aniStr] = TypeConverter::ToAniString(env, value);
             if (!succ) {
                 return ANI_ERROR;
             }
-            status = env->Object_SetField_Ref(obj, field, move(aniStr));
-        } else if constexpr (is_base_of_v<ani_ref, T>) {
-            status = env->Object_SetField_Ref(obj, field, value);
+            status = env->Object_SetFieldByName_Ref(obj, key.data(), move(aniStr));
+        } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<__ani_ref, std::remove_pointer_t<T>>) {
+            status = env->Object_SetFieldByName_Ref(obj, key.data(), value);
         } else {
+            HILOGE("Invalid ani value type!");
             return ANI_INVALID_TYPE;
         }
         return status;
     }
 
     template <typename T>
-    static ani_status SetPropertyValue(
-        ani_env *env, const ani_class &cls, ani_object &obj, const string &property, const T &value)
+    static ani_status SetPropertyValue(ani_env *env, ani_object &obj, const string_view &key, const T &value)
     {
-        ani_method method;
-        string setter = "<set>" + property;
-        auto status = env->Class_FindMethod(cls, setter.c_str(), nullptr, &method);
-        if (status != ANI_OK) {
-            return status;
-        }
-
-        if constexpr (is_same_v<T, string> || is_same_v<T, const char *>) {
+        ani_status status = ANI_ERROR;
+        if constexpr (is_same_v<T, int> || is_same_v<T, int32_t> || is_same_v<T, ani_int>) {
+            status = env->Object_SetPropertyByName_Int(obj, key.data(), static_cast<ani_int>(value));
+        } else if constexpr (is_same_v<T, long> || is_same_v<T, int64_t> || is_same_v<T, ani_long>) {
+            status = env->Object_SetPropertyByName_Long(obj, key.data(), static_cast<ani_long>(value));
+        } else if constexpr (is_same_v<T, double> || is_same_v<T, ani_double>) {
+            status = env->Object_SetPropertyByName_Double(obj, key.data(), static_cast<ani_double>(value));
+        } else if constexpr (is_same_v<T, bool> || is_same_v<T, ani_boolean>) {
+            status = env->Object_SetPropertyByName_Boolean(obj, key.data(), static_cast<ani_boolean>(value));
+        } else if constexpr (is_same_v<T, string> || is_same_v<T, const char *>) {
             auto [succ, aniStr] = TypeConverter::ToAniString(env, value);
             if (!succ) {
                 return ANI_ERROR;
             }
-            status = env->Object_CallMethod_Void(obj, method, move(aniStr));
-        } else if constexpr (is_base_of_v<ani_ref, T> || is_same_v<T, int> || is_same_v<T, int32_t> ||
-                             is_same_v<T, ani_int> || is_same_v<T, int64_t> || is_same_v<T, ani_long> ||
-                             is_same_v<T, double> || is_same_v<T, ani_double> || is_same_v<T, bool> ||
-                             is_same_v<T, ani_boolean>) {
-            status = env->Object_CallMethod_Void(obj, method, value);
+            status = env->Object_SetPropertyByName_Ref(obj, key.data(), move(aniStr));
+        } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<__ani_ref, std::remove_pointer_t<T>>) {
+            status = env->Object_SetPropertyByName_Ref(obj, key.data(), value);
         } else {
+            HILOGE("Invalid ani value type!");
             return ANI_INVALID_TYPE;
         }
         return status;

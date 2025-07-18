@@ -51,12 +51,12 @@ ani_object ReaderIteratorResultAni::Wrap(ani_env *env, const ReaderIteratorResul
         return nullptr;
     }
 
-    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "done", static_cast<bool>(result.done))) {
+    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "done", result.done)) {
         HILOGE("Set 'done' field value failed!");
         return nullptr;
     }
 
-    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "value", result.value)) {
+    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "value", result.value)) {
         HILOGE("Set 'value' field value failed!");
         return nullptr;
     }

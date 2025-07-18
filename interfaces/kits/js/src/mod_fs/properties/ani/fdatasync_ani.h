@@ -25,7 +25,7 @@ namespace ANI {
 
 class FDataSyncAni final {
 public:
-    static void FDataSyncSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd);
+    static void FDataSyncSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd);
 };
 
 } // namespace ANI
