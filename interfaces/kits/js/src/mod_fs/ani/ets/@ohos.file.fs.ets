@@ -156,7 +156,7 @@ function getxattr(path: string, key: string): Promise<string> {
   });
 }
 
-function dup(fd: number): File {
+function dup(fd: int): File {
   return FileIoImpl.dup(fd);
 }
 
@@ -551,17 +551,17 @@ function write(fd: number, buffer: string | ArrayBuffer, callback: AsyncCallback
   });
 }
 
-function readSync(fd: number, buffer: ArrayBuffer, options?: ReadOptions): number {
+function readSync(fd: int, buffer: ArrayBuffer, options?: ReadOptions): long {
   return FileIoImpl.readSync(fd, buffer, options)
 }
 
-function read(fd: number, buffer: ArrayBuffer, options?: ReadOptions): Promise<number> {
-  return new Promise<number>((resolve: (result: number) => void, reject: (e: BusinessError<void>) => void) => {
-    let promise = taskpool.execute((fd: number, buffer: ArrayBuffer, options?: ReadOptions): number => {
+function read(fd: int, buffer: ArrayBuffer, options?: ReadOptions): Promise<long> {
+  return new Promise<long>((resolve: (result: long) => void, reject: (e: BusinessError<void>) => void) => {
+    let promise = taskpool.execute((fd: int, buffer: ArrayBuffer, options?: ReadOptions): long => {
       return FileIoImpl.readSync(fd, buffer, options)
     }, fd, buffer, options);
     promise.then((ret: NullishType) => {
-      let result = ret as number;
+      let result = ret as long;
       resolve(result);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -569,28 +569,28 @@ function read(fd: number, buffer: ArrayBuffer, options?: ReadOptions): Promise<n
   });
 }
 
-function read(fd: number, buffer: ArrayBuffer, callback: AsyncCallback<number, void>): void {
-  let promise = taskpool.execute((fd: number, buffer: ArrayBuffer): number => {
+function read(fd: int, buffer: ArrayBuffer, callback: AsyncCallback<long, void>): void {
+  let promise = taskpool.execute((fd: int, buffer: ArrayBuffer): long => {
     return FileIoImpl.readSync(fd, buffer);
   }, fd, buffer);
   promise.then((ret: NullishType): void => {
     let e = new BusinessError<void>();
     e.code = 0;
-    let result = ret as number;
+    let result = ret as long;
     callback(e, result);
   }).catch((e: Error): void => {
     callback(e as BusinessError, 0);
   });
 }
 
-function read(fd: number, buffer: ArrayBuffer, options: ReadOptions, callback: AsyncCallback<number, void>): void {
-  let promise = taskpool.execute((fd: number, buffer: ArrayBuffer, options: ReadOptions): number => {
+function read(fd: int, buffer: ArrayBuffer, options: ReadOptions, callback: AsyncCallback<long, void>): void {
+  let promise = taskpool.execute((fd: int, buffer: ArrayBuffer, options: ReadOptions): long => {
     return FileIoImpl.readSync(fd, buffer, options);
   }, fd, buffer, options);
   promise.then((ret: NullishType): void => {
     let e = new BusinessError<void>();
     e.code = 0;
-    let result = ret as number;
+    let result = ret as long;
     callback(e, result);
   }).catch((e: Error): void => {
     callback(e as BusinessError, 0);
@@ -839,13 +839,13 @@ function copyFileSync(src: string | int, dest: string | int, mode?: int): void {
   return FileIoImpl.copyFileSync(src, dest, mode)
 }
 
-function statSync(file: string | number): Stat {
+function statSync(file: string | int): Stat {
   return FileIoImpl.statSync(file)
 }
 
-function stat(file: string | number): Promise<Stat> {
+function stat(file: string | int): Promise<Stat> {
   return new Promise<Stat>((resolve: (result: Stat) => void, reject: (e: BusinessError<void>) => void) => {
-    let promise = taskpool.execute((file: string | number): Stat => {
+    let promise = taskpool.execute((file: string | int): Stat => {
       return FileIoImpl.statSync(file);
     }, file);
     promise.then((ret: NullishType): void => {
@@ -857,8 +857,8 @@ function stat(file: string | number): Promise<Stat> {
   });
 }
 
-function stat(file: string | number, callback: AsyncCallback<Stat, void>): void {
-  let p = taskpool.execute((file: string | number): Stat => {
+function stat(file: string | int, callback: AsyncCallback<Stat, void>): void {
+  let p = taskpool.execute((file: string | int): Stat => {
     return FileIoImpl.statSync(file);
   }, file);
   p.then((ret: NullishType): void => {
@@ -1108,7 +1108,7 @@ function symlink(target: string, srcPath: string, callback: AsyncCallback<void>)
   });
 }
 
-function utimes(path: string, mtime: number): void {
+function utimes(path: string, mtime: double): void {
   return FileIoImpl.utimes(path, mtime);
 }
 
@@ -1227,7 +1227,7 @@ function copy(srcUri: string, destUri: string, callback: AsyncCallback<void>): v
   });
 }
 
-function lseek(fd: number, offset: number, whence?: WhenceType): number {
+function lseek(fd: int, offset: long, whence?: WhenceType): long {
   return FileIoImpl.lseekSync(fd, offset, whence);
 }
 
@@ -1241,8 +1241,8 @@ export interface Filter {
 }
 
 export interface Progress {
-  processedSize: number;
-  totalSize: number;
+  processedSize: long;
+  totalSize: long;
 }
 
 export interface DfsListeners {
@@ -1559,13 +1559,13 @@ export class ReaderIteratorInner implements ReaderIterator {
 
 export interface Stat {
   ino: bigint;
-  mode: number;
-  uid: number;
-  gid: number;
-  size: number;
-  atime: number;
-  mtime: number;
-  ctime: number;
+  mode: int;
+  uid: int;
+  gid: int;
+  size: long;
+  atime: long;
+  mtime: long;
+  ctime: long;
   atimeNs: bigint;
   mtimeNs: bigint;
   ctimeNs: bigint;
@@ -2133,13 +2133,13 @@ export class FileIoImpl {
 
   static native fdopenStreamSync(fd: int, mode: string): fileIo.Stream;
 
-  static native dup(fd: number): fileIo.File;
+  static native dup(fd: int): fileIo.File;
 
   static native listFileSync(path: string, options?: ListFileOptions): string[];
 
   static native lstatSync(path: string): fileIo.Stat;
 
-  static native lseekSync(fd: number, offset: number, whence?: fileIo.WhenceType): number;
+  static native lseekSync(fd: int, offset: long, whence?: fileIo.WhenceType): long;
 
   static native mkdirSync(path: string): void;
 
@@ -2155,7 +2155,7 @@ export class FileIoImpl {
 
   static native readlinesSync(filePath: string, options?: Options): fileIo.ReaderIterator;
 
-  static native readSync(fd: number, buffer: ArrayBuffer, options?: ReadOptions): number;
+  static native readSync(fd: int, buffer: ArrayBuffer, options?: ReadOptions): long;
 
   static native readTextSync(filePath: string, options?: ReadTextOptions): string;
 
@@ -2163,7 +2163,7 @@ export class FileIoImpl {
 
   static native setxattrSync(path: string, key: string, value: string): void;
 
-  static native statSync(file: string | number): fileIo.Stat;
+  static native statSync(file: string | int): fileIo.Stat;
 
   static native truncateSync(file: string | int, len?: long): void;
 
@@ -2180,5 +2180,5 @@ export class FileIoImpl {
 
   static native symlinkSync(target: string, srcPath: string): void;
 
-  static native utimes(path: string, mtime: number): void;
+  static native utimes(path: string, mtime: double): void;
 }
