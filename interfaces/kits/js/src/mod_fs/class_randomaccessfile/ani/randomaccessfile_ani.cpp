@@ -134,7 +134,7 @@ static tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_obj
     return { true, move(result) };
 }
 
-void RandomAccessFileAni::SetFilePointer(ani_env *env, [[maybe_unused]] ani_object object, ani_double fp)
+void RandomAccessFileAni::SetFilePointer(ani_env *env, [[maybe_unused]] ani_object object, ani_long fp)
 {
     auto rafFile = Unwrap(env, object);
     if (rafFile == nullptr) {
@@ -168,7 +168,7 @@ void RandomAccessFileAni::Close(ani_env *env, [[maybe_unused]] ani_object object
     }
 }
 
-ani_double RandomAccessFileAni::WriteSync(
+ani_long RandomAccessFileAni::WriteSync(
     ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options)
 {
     auto rafFile = Unwrap(env, object);
@@ -199,7 +199,7 @@ ani_double RandomAccessFileAni::WriteSync(
             ErrorHandler::Throw(env, ret.GetError());
             return -1;
         }
-        return static_cast<double>(ret.GetData().value());
+        return static_cast<long>(ret.GetData().value());
     }
 
     auto [isArrayBuffer, arrayBuffer] = ParseArrayBuffer(env, buf);
@@ -216,14 +216,14 @@ ani_double RandomAccessFileAni::WriteSync(
             ErrorHandler::Throw(env, ret.GetError());
             return -1;
         }
-        return static_cast<double>(ret.GetData().value());
+        return static_cast<long>(ret.GetData().value());
     }
     HILOGE("Unsupported buffer type!");
     ErrorHandler::Throw(env, EINVAL);
     return -1;
 }
 
-ani_double RandomAccessFileAni::ReadSync(
+ani_long RandomAccessFileAni::ReadSync(
     ani_env *env, [[maybe_unused]] ani_object object, ani_arraybuffer buf, ani_object options)
 {
     auto rafFile = Unwrap(env, object);
@@ -254,7 +254,7 @@ ani_double RandomAccessFileAni::ReadSync(
         ErrorHandler::Throw(env, err);
         return -1;
     }
-    return static_cast<double>(ret.GetData().value());
+    return static_cast<long>(ret.GetData().value());
 }
 
 static ani_string GetFilePath(ani_env *env, const int fd)
