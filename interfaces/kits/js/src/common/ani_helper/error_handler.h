@@ -120,7 +120,7 @@ private:
             return { status, nullptr };
         }
 
-        status = env->Object_SetPropertyByName_Double(obj, "code", static_cast<double>(code));
+        status = env->Object_SetPropertyByName_Int(obj, "code", code);
         if (status != ANI_OK) {
             HILOGE("Set property 'code' value failed");
             return { status, nullptr };

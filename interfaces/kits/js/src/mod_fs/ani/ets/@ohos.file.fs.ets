@@ -14,10 +14,10 @@
  */
 import { BusinessError, AsyncCallback } from '@ohos.base';
 
-const UNKNOWN_ERR: number = 13900042
+const UNKNOWN_ERR: int = 13900042
 const UNKNOWN_MSG: string = "Unknown error"
 
-function createBusinessError(code: number, msg: string): BusinessError {
+function createBusinessError(code: int, msg: string): BusinessError {
   let err = new BusinessError();
   err.code = code;
   err.message = msg;
