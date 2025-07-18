@@ -26,6 +26,7 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+using namespace OHOS::DistributedFS;
 
 static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJsArg)
 {
@@ -63,13 +64,14 @@ static NError TruncateCore(napi_env env, FileInfo &fileInfo, int64_t truncateLen
             HILOGE("Failed to open by libuv ret %{public}d", ret);
             return NError(ret);
         }
+        FDGuard fd(ret);
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
             new uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!ftruncate_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
-        ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), ret, truncateLen, nullptr);
+        ret = uv_fs_ftruncate(nullptr, ftruncate_req.get(), fd.GetFD(), truncateLen, nullptr);
         if (ret < 0) {
             HILOGE("Failed to truncate file by path ret %{public}d", ret);
             return NError(ret);
