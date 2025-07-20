@@ -1091,7 +1091,7 @@ function createWriteStream(path: string, options?: WriteStreamOptions): WriteStr
   return new WriteStream(path, options);
 }
 
-function createWatcher(path: string, events: number, listener: WatchEventListener): Watcher {
+function createWatcher(path: string, events: int, listener: WatchEventListener): Watcher {
   return FileIoImpl.createWatcherSync(path, events, listener);
 }
 
@@ -1250,10 +1250,10 @@ export interface DfsListeners {
 }
 
 export class ProgressInner implements Progress {
-  processedSize: number;
-  totalSize: number;
+  processedSize: long;
+  totalSize: long;
 
-  constructor(pSize: number, tSize: number) {
+  constructor(pSize: long, tSize: long) {
     this.processedSize = pSize;
     this.totalSize = tSize;
   }
@@ -1560,8 +1560,8 @@ export class ReaderIteratorInner implements ReaderIterator {
 export interface Stat {
   ino: bigint;
   mode: int;
-  uid: int;
-  gid: int;
+  uid: long;
+  gid: long;
   size: long;
   atime: long;
   mtime: long;
@@ -1582,13 +1582,13 @@ export interface Stat {
 
 export class StatInner implements Stat {
   ino: bigint = 0n;
-  mode: number;
-  uid: number;
-  gid: number;
-  size: number;
-  atime: number;
-  mtime: number;
-  ctime: number;
+  mode: int;
+  uid: long;
+  gid: long;
+  size: long;
+  atime: long;
+  mtime: long;
+  ctime: long;
   atimeNs: bigint = 0n;
   mtimeNs: bigint = 0n;
   ctimeNs: bigint = 0n;
@@ -2015,16 +2015,16 @@ class ConflictFilesInner implements ConflictFiles {
 
 export interface WatchEvent {
   fileName: string;
-  event: number;
-  cookie: number;
+  event: int;
+  cookie: int;
 }
 
 class WatchEventInner implements WatchEvent {
   fileName: string = '';
-  event: number;
-  cookie: number;
+  event: int;
+  cookie: int;
 
-  constructor(fileName: string, event: number, cookie: number) {
+  constructor(fileName: string, event: int, cookie: int) {
     this.fileName = fileName;
     this.event = event;
     this.cookie = cookie;
@@ -2039,8 +2039,8 @@ export interface Options {
 }
 
 export interface ReadOptions {
-  offset?: number;
-  length?: number;
+  offset?: long;
+  length?: long;
 }
 
 export interface ReadTextOptions extends ReadOptions {
@@ -2064,13 +2064,13 @@ export interface ListFileOptions {
 }
 
 export interface WriteStreamOptions {
-  mode?: number;
-  start?: number;
+  mode?: int;
+  start?: long;
 }
 
 export interface ReadStreamOptions {
-  start?: number;
-  end?: number;
+  start?: long;
+  end?: long;
 }
 
 export class ReadStreamOptionsInner implements ReadStreamOptions {
@@ -2088,15 +2088,6 @@ export class WriteStreamOptionsInner implements WriteStreamOptions {
 export interface ReaderIteratorResult {
   done: boolean;
   value: string;
-}
-
-export interface Filter {
-  suffix?: Array<string>;
-  displayName?: Array<string>;
-  mimeType?: Array<string>;
-  fileSizeOver?: number;
-  lastModifiedAfter?: number;
-  excludeMedia?: boolean;
 }
 
 type TaskSignal = fileIo.TaskSignal;
@@ -2129,7 +2120,7 @@ export class FileIoImpl {
 
   static native createStreamSync(path: string, mode: string): fileIo.Stream;
 
-  static native createWatcherSync(path: string, events: number, listener: WatchEventListener): fileIo.Watcher;
+  static native createWatcherSync(path: string, events: int, listener: WatchEventListener): fileIo.Watcher;
 
   static native fdopenStreamSync(fd: int, mode: string): fileIo.Stream;
 

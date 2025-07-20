@@ -32,8 +32,24 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
+concept AniNumType = std::is_same_v<T, ani_int> || std::is_same_v<T, ani_long> || std::is_same_v<T, ani_double>
+
+template<AniNumType T>
+static ani_status SetNumberProperty(
+    ani_env *env, const ani_class &cls, ani_object &object, const char *name, T &value)
+{
+    ani_method setter;
+    ani_status ret;
+    if ((ret = env->Class_FindMethod(cls, name, nullptr, &setter)) != ANI_OK) {
+        HILOGE("Class_FindMethod Fail %{private}s, err: %{private}d", name, ret);
+        return ret;
+    }
+
+    return env->Object_CallMethod_Void(object, setter, value);
+}
+
 static ani_status SetNumProperty(
-    ani_env *env, const ani_class &cls, ani_object &object, const char *name, ani_double &value)
+    ani_env *env, const ani_class &cls, ani_object &object, const char *name, ani_long &value)
 {
     ani_method setter;
     ani_status ret;
@@ -136,15 +152,26 @@ const static string LOCATION_SETTER = Builder::BuildSetterName("location");
 static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &statObject, FsStat *fsStat)
 {
     ani_status ret;
+    vector<pair<string_view, ani_int>> intProperties = {
+        { MODE_SETTER, fsStat->GetMode() },
+    };
+    for (auto iter : intProperties) {
+        auto key = iter.first.data();
+        auto value = iter.second;
+        ret = SetNumberProperty(env, cls, statObject, key, value);
+        if (ret != ANI_OK) {
+            HILOGE("Object_CallMethod_Void Fail %{private}s, err: %{private}d", key, ret);
+            return ret;
+        }
+    }
 
-    vector<pair<string_view, ani_double>> numProperties = {
-        { MODE_SETTER, ani_double(static_cast<double>(fsStat->GetMode())) },
-        { UID_SETTER, ani_double(static_cast<double>(fsStat->GetUid())) },
-        { GID_SETTER, ani_double(static_cast<double>(fsStat->GetGid())) },
-        { SIZE_SETTER, ani_double(static_cast<double>(fsStat->GetSize())) },
-        { ATIME_SETTER, ani_double(static_cast<double>(fsStat->GetAtime())) },
-        { MTIME_SETTER, ani_double(static_cast<double>(fsStat->GetMtime())) },
-        { CTIME_SETTER, ani_double(static_cast<double>(fsStat->GetCtime())) },
+    vector<pair<string_view, ani_long>> numProperties = {
+        { UID_SETTER, fsStat->GetUid() },
+        { GID_SETTER, fsStat->GetGid() },
+        { SIZE_SETTER, fsStat->GetSize() },
+        { ATIME_SETTER, fsStat->GetAtime() },
+        { MTIME_SETTER, fsStat->GetMtime() },
+        { CTIME_SETTER, fsStat->GetCtime() },
     };
     for (auto iter : numProperties) {
         auto key = iter.first.data();

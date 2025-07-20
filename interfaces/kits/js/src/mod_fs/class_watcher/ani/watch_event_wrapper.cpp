@@ -49,8 +49,8 @@ ani_object WatchEventWrapper::Wrap(ani_env *env, const WatchEvent &evt)
         return nullptr;
     }
 
-    auto event = static_cast<double>(evt.event);
-    auto cookie = static_cast<double>(evt.cookie);
+    auto event = evt.event;
+    auto cookie = evt.cookie;
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, fileName, event, cookie)) {
