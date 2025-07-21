@@ -150,13 +150,6 @@ int FileWatcher::CloseNotifyFdLocked()
 
 int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
 {
-    while (true) {
-        lock_guard<mutex> lock(readMutex_);
-        if (!reading_) {
-            break;
-        }
-    };
-
     unique_lock<mutex> lock(watchMutex_);
     if (notifyFd_ < 0) {
         HILOGE("Failed to stop notify notifyFd_:%{public}d", notifyFd_);
@@ -231,6 +224,7 @@ void FileWatcher::ReadNotifyEventLocked(WatcherCallback callback)
     }
     ReadNotifyEvent(callback);
     {
+        lock_guard<mutex> watcherLock(watchMutex_);
         lock_guard<mutex> lock(readMutex_);
         reading_ = false;
         if (closed_) {
