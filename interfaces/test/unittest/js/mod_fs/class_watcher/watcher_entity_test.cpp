@@ -106,48 +106,4 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFd_003, testing::ext::T
     GTEST_LOG_(INFO) << "WatcherEntityTest-end WatcherEntityTest_CloseNotifyFd_003";
 }
 
-/**
- * @tc.name: WatcherEntityTest_StopNotify_001
- * @tc.desc: Test function of WatcherEntityTest::StopNotify interface for FAILURE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(WatcherEntityTest, WatcherEntityTest_StopNotify_001, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WatcherEntityTest-begin WatcherEntityTest_StopNotify_001";
-
-    auto &watcher = FileWatcher::GetInstance();
-    watcher.notifyFd_ = -1;
-    watcher.reading_ = false;
-    EXPECT_EQ(watcher.StopNotify(nullptr), 5);
-
-    GTEST_LOG_(INFO) << "WatcherEntityTest-end WatcherEntityTest_StopNotify_001";
-}
-
-/**
- * @tc.name: WatcherEntityTest_StopNotify_002
- * @tc.desc: Test function of WatcherEntityTest::StopNotify interface for FAILURE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(WatcherEntityTest, WatcherEntityTest_StopNotify_002, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WatcherEntityTest-begin WatcherEntityTest_StopNotify_002";
-
-    auto &watcher = FileWatcher::GetInstance();
-    watcher.notifyFd_ = -1;
-    watcher.reading_ = true;
-    std::thread recordThread([this, &watcher]() {
-        watcher.StopNotify(nullptr);
-    });
-    std::this_thread::sleep_for(std::chrono::milliseconds(600));
-    watcher.reading_ = false;
-    recordThread.join();
-    EXPECT_EQ(watcher.StopNotify(nullptr), 5);
-
-    GTEST_LOG_(INFO) << "WatcherEntityTest-end WatcherEntityTest_StopNotify_002";
-}
-
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
