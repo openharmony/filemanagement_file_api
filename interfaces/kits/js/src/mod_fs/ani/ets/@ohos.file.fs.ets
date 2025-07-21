@@ -15,10 +15,10 @@
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import stream from '@ohos.util.stream';
 
-const UNKNOWN_ERR: number = 13900042
+const UNKNOWN_ERR: int = 13900042
 const UNKNOWN_MSG: string = "Unknown error"
 
-function createBusinessError(code: number, msg: string): BusinessError {
+function createBusinessError(code: int, msg: string): BusinessError {
   let err = new BusinessError();
   err.code = code;
   err.message = msg;
