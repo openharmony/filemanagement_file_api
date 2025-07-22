@@ -145,10 +145,11 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::EnumToInt32(ani_env *env
 static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrFd)
 {
     ani_boolean isFd = false;
-    auto intClassDesc = BoxedTypes::Int::classDesc.c_str();
-    ani_class intClass;
-    env->FindClass(intClassDesc, &intClass);
-    env->Object_InstanceOf(pathOrFd, intClass, &isFd);
+
+    auto classDesc = BoxedTypes::Double::classDesc.c_str();
+    ani_class cls;
+    env->FindClass(classDesc, &cls);
+    env->Object_InstanceOf(pathOrFd, cls, &isFd);
     if (isFd) {
         ani_int fd;
         if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "toInt", nullptr, &fd)) {
