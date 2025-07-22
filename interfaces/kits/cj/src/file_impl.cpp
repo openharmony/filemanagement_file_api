@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,22 +253,26 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Dup(int32_t fd)
         new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!readlink_req) {
         LOGE("Failed to request heap memory.");
+        close(dstFd);
         return {ENOMEM, nullptr};
     }
     string path = "/proc/self/fd/" + to_string(dstFd);
     int ret = uv_fs_readlink(nullptr, readlink_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
         LOGE("Failed to readlink fd, ret: %{public}d", ret);
+        close(dstFd);
         return {ret, nullptr};
     }
     auto fdPrt = CreateUniquePtr<DistributedFS::FDGuard>(dstFd, false);
     if (fdPrt == nullptr) {
         LOGE("Failed to request heap memory.");
+        close(dstFd);
         return {ENOMEM, nullptr};
     }
     auto pathStr = string(static_cast<const char *>(readlink_req->ptr));
     auto fileEntity = FFIData::Create<FileEntity>(std::move(fdPrt), pathStr, "");
     if (!fileEntity) {
+        close(dstFd);
         return {ENOMEM, nullptr};
     }
     return {SUCCESS_CODE, fileEntity};
