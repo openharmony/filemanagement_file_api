@@ -115,7 +115,7 @@ const string FS::WatcherInner::ctorSig = Builder::BuildSignatureDescriptor({ Bas
 const Type FS::WatchEventInner::classType = Builder::BuildClass("@ohos.file.fs.WatchEventInner");
 const string FS::WatchEventInner::classDesc = FS::WatchEventInner::classType.Descriptor();
 const string FS::WatchEventInner::ctorSig =
-    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::doubleType, BasicTypes::doubleType });
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::intType, BasicTypes::intType });
 // FS::ReadStream
 const Type FS::ReadStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ReadStream");
 const string FS::ReadStream::classDesc = FS::ReadStream::classType.Descriptor();

@@ -1231,15 +1231,6 @@ function lseek(fd: int, offset: long, whence?: WhenceType): long {
   return FileIoImpl.lseekSync(fd, offset, whence);
 }
 
-export interface Filter {
-  suffix?: Array<string>;
-  displayName?: Array<string>;
-  mimeType?: Array<string>;
-  fileSizeOver?: long;
-  lastModifiedAfter?: double;
-  excludeMedia?: boolean;
-}
-
 export interface Progress {
   processedSize: long;
   totalSize: long;
@@ -2088,6 +2079,15 @@ export class WriteStreamOptionsInner implements WriteStreamOptions {
 export interface ReaderIteratorResult {
   done: boolean;
   value: string;
+}
+
+export interface Filter {
+  suffix?: Array<string>;
+  displayName?: Array<string>;
+  mimeType?: Array<string>;
+  fileSizeOver?: long;
+  lastModifiedAfter?: double;
+  excludeMedia?: boolean;
 }
 
 type TaskSignal = fileIo.TaskSignal;

@@ -32,11 +32,8 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-concept AniNumType = std::is_same_v<T, ani_int> || std::is_same_v<T, ani_long> || std::is_same_v<T, ani_double>
-
-template<AniNumType T>
-static ani_status SetNumberProperty(
-    ani_env *env, const ani_class &cls, ani_object &object, const char *name, T &value)
+static ani_status SetIntProperty(
+    ani_env *env, const ani_class &cls, ani_object &object, const char *name, ani_int &value)
 {
     ani_method setter;
     ani_status ret;
@@ -152,13 +149,14 @@ const static string LOCATION_SETTER = Builder::BuildSetterName("location");
 static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &statObject, FsStat *fsStat)
 {
     ani_status ret;
+
     vector<pair<string_view, ani_int>> intProperties = {
         { MODE_SETTER, fsStat->GetMode() },
     };
     for (auto iter : intProperties) {
         auto key = iter.first.data();
         auto value = iter.second;
-        ret = SetNumberProperty(env, cls, statObject, key, value);
+        ret = SetIntProperty(env, cls, statObject, key, value);
         if (ret != ANI_OK) {
             HILOGE("Object_CallMethod_Void Fail %{private}s, err: %{private}d", key, ret);
             return ret;
