@@ -19,8 +19,8 @@ ohos_unittest("class_atomicfile_test") {
 
   sources = [
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile/atomicfile_n_exporter.cpp",
-    "${file_api_path}/interfaces/test/unitest/class_atomicfile/mock/atomicfile_mock.cpp",
-    "${file_api_path}/interfaces/test/unitest/class_atomicfile/atomicfile_mock_test.cpp",
+    "${file_api_path}/interfaces/test/unittest/class_atomicfile/mock/atomicfile_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/class_atomicfile/atomicfile_mock_test.cpp",
   ]
 
   include_dirs = [
