@@ -22,18 +22,18 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-string g_filePath = "/data/test/CloseCoreTest.txt";
+#define FILE_PATH "/data/test/CloseCoreTest.txt"
 
 class CloseCoreTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
-        int32_t fd = open(g_filePath.c_str(), CREATE | O_RDWR, 0644);
+        int32_t fd = open(FILE_PATH, CREATE | O_RDWR, 0644);
         close(fd);
     };
     static void TearDownTestCase()
     {
-        rmdir(g_filePath.c_str());
+        rmdir(FILE_PATH);
     };
     void SetUp() {};
     void TearDown() {};
@@ -71,7 +71,7 @@ HWTEST_F(CloseCoreTest, DoCloseTestFd_0001, testing::ext::TestSize.Level1)
 HWTEST_F(CloseCoreTest, DoCloseTestFile_0001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CloseCoreTest-begin DoCloseTestFile_0001";
-    auto fileRes = OpenCore::DoOpen(g_filePath);
+    auto fileRes = OpenCore::DoOpen(FILE_PATH);
     if (!fileRes.IsSuccess()) {
         ASSERT_TRUE(false);
     }
@@ -93,7 +93,7 @@ HWTEST_F(CloseCoreTest, DoCloseTestFile_0001, testing::ext::TestSize.Level1)
 HWTEST_F(CloseCoreTest, DoCloseTestFile_0002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CloseCoreTest-begin DoCloseTestFile_0002";
-    auto fileRes = OpenCore::DoOpen(g_filePath);
+    auto fileRes = OpenCore::DoOpen(FILE_PATH);
     if (!fileRes.IsSuccess()) {
         ASSERT_TRUE(false);
     }
