@@ -1804,11 +1804,11 @@ export class ReadStream extends stream.Readable {
     this.stream?.close();
   }
 
-  doInitialize(callback: () => void): void {
-    callback();
+  doInitialize(callback: Function): void {
+    callback.unsafeCall();
   }
 
-  doRead(size: long): void {
+  doRead(size: int): void {
     let readSize = size;
     let end = this.end
     if (end !== undefined) {
@@ -1817,7 +1817,7 @@ export class ReadStream extends stream.Readable {
         return;
       }
       if (this.offset + readSize > end) {
-        readSize = end - this.offset;
+        readSize = (end - this.offset).toInt();
       }
     }
     let buffer = new ArrayBuffer(readSize);
@@ -1878,16 +1878,22 @@ export class WriteStream extends stream.Writable {
     this.stream?.closeSync();
   }
 
-  doInitialize(callback: () => void): void {
-    callback();
+  doInitialize(callback: Function): void {
+    callback.unsafeCall();
   }
 
-  doWrite(chunk: string | ArrayBuffer, encoding: string, callback: () => void): void {
+  doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+    let buf: string | ArrayBuffer;
+    if (chunk instanceof Uint8Array) {
+      buf = chunk.buffer;
+    } else {
+      buf = chunk;
+    }
     this.stream?.write(chunk, { offset: this.offset })
       .then((writeIn: long) => {
         this.offset += writeIn;
         this.bytesWritten += writeIn;
-        callback();
+        callback.unsafeCall();
       })
       .finally(() => {
         this.stream?.flush();
