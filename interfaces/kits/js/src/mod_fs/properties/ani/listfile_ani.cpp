@@ -51,9 +51,9 @@ tuple<bool, bool> ParseBooleanParam(ani_env *env, ani_object obj, string tag)
     return { true, static_cast<bool>(boolRef_res) };
 }
 
-tuple<bool, int> ParseLongParam(ani_env *env, ani_object obj, string tag)
+tuple<bool, long> ParseLongParam(ani_env *env, ani_object obj, string tag)
 {
-    int result = 0;
+    long result = 0;
     ani_boolean isUndefined;
     ani_ref result_ref;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &result_ref)) {
@@ -202,12 +202,12 @@ tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
     }
     result.recursion = recursion;
 
-    auto [succlistNum, listNumRes] = ParseIntParam(env, obj, "listNum");
+    auto [succlistNum, listNumRes] = ParseLongParam(env, obj, "listNum");
     if (!succlistNum) {
         HILOGE("Invalid listNum");
         return { false, nullopt };
     }
-    result.listNum = (int)listNumRes;
+    result.listNum = listNumRes;
 
     ani_ref filterRef;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "filter", &filterRef)) {

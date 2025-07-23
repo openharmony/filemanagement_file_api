@@ -1550,7 +1550,7 @@ export class ReaderIteratorInner implements ReaderIterator {
 
 export interface Stat {
   ino: bigint;
-  mode: int;
+  mode: long;
   uid: long;
   gid: long;
   size: long;
@@ -1573,7 +1573,7 @@ export interface Stat {
 
 export class StatInner implements Stat {
   ino: bigint = 0n;
-  mode: int;
+  mode: long;
   uid: long;
   gid: long;
   size: long;
@@ -2050,7 +2050,7 @@ export interface RandomAccessFileOptions {
 
 export interface ListFileOptions {
   recursion?: boolean;
-  listNum?: int;
+  listNum?: long;
   filter?: Filter;
 }
 

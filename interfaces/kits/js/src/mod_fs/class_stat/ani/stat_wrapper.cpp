@@ -32,19 +32,6 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-static ani_status SetIntProperty(
-    ani_env *env, const ani_class &cls, ani_object &object, const char *name, ani_int &value)
-{
-    ani_method setter;
-    ani_status ret;
-    if ((ret = env->Class_FindMethod(cls, name, nullptr, &setter)) != ANI_OK) {
-        HILOGE("Class_FindMethod Fail %{private}s, err: %{private}d", name, ret);
-        return ret;
-    }
-
-    return env->Object_CallMethod_Void(object, setter, value);
-}
-
 static ani_status SetNumProperty(
     ani_env *env, const ani_class &cls, ani_object &object, const char *name, ani_long &value)
 {
@@ -150,20 +137,8 @@ static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &
 {
     ani_status ret;
 
-    vector<pair<string_view, ani_int>> intProperties = {
-        { MODE_SETTER, fsStat->GetMode() },
-    };
-    for (auto iter : intProperties) {
-        auto key = iter.first.data();
-        auto value = iter.second;
-        ret = SetIntProperty(env, cls, statObject, key, value);
-        if (ret != ANI_OK) {
-            HILOGE("Object_CallMethod_Void Fail %{private}s, err: %{private}d", key, ret);
-            return ret;
-        }
-    }
-
     vector<pair<string_view, ani_long>> numProperties = {
+        { MODE_SETTER, fsStat->GetMode() },
         { UID_SETTER, fsStat->GetUid() },
         { GID_SETTER, fsStat->GetGid() },
         { SIZE_SETTER, fsStat->GetSize() },
