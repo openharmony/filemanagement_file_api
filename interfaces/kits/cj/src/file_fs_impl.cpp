@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -390,6 +390,7 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(dupFd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        close(dupFd);
         return { GetErrorCode(ENOMEM), nullptr};
     }
     fileInfo = FileInfo { false, nullptr, move(fdg) };
@@ -399,6 +400,7 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
     ptr->filePointer = 0;
     auto randomAccessFileImpl = FFIData::Create<RandomAccessFileImpl>(std::move(ptr));
     if (!randomAccessFileImpl) {
+        close(dupFd);
         return {GetErrorCode(ENOMEM), nullptr};
     }
     return {SUCCESS_CODE, randomAccessFileImpl};
