@@ -1889,7 +1889,7 @@ export class WriteStream extends stream.Writable {
     } else {
       buf = chunk;
     }
-    this.stream?.write(chunk, { offset: this.offset })
+    this.stream?.write(buf, { offset: this.offset })
       .then((writeIn: long) => {
         this.offset += writeIn;
         this.bytesWritten += writeIn;
