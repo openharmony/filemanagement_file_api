@@ -26,12 +26,6 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-void ProgressListenerAni::InvokeListener(uint64_t progressSize, uint64_t totalSize) const
-{
-    auto task = [this, progressSize, totalSize]() { SendCopyProgress(progressSize, totalSize); };
-    AniHelper::SendEventToMainThread(task);
-}
-
 static ani_object WrapCopyProgress(ani_env *env, uint64_t progressSize, uint64_t totalSize)
 {
     auto classDesc = FS::ProgressInner::classDesc.c_str();
@@ -59,7 +53,7 @@ static ani_object WrapCopyProgress(ani_env *env, uint64_t progressSize, uint64_t
     return obj;
 }
 
-void ProgressListenerAni::SendCopyProgress(uint64_t progressSize, uint64_t totalSize) const
+static void SendCopyProgress(ani_vm *vm, ani_ref listener, uint64_t progressSize, uint64_t totalSize)
 {
     if (vm == nullptr) {
         HILOGE("Cannot send copy progress because the vm is null.");
@@ -90,4 +84,13 @@ void ProgressListenerAni::SendCopyProgress(uint64_t progressSize, uint64_t total
     }
 }
 
+void ProgressListenerAni::InvokeListener(uint64_t progressSize, uint64_t totalSize) const
+{
+    auto localVm = vm;
+    auto localListener = listener;
+    auto task = [localVm, localListener, progressSize, totalSize]() {
+        SendCopyProgress(localVm, localListener, progressSize, totalSize);
+    };
+    AniHelper::SendEventToMainThread(task);
+}
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI
