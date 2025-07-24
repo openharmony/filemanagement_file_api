@@ -28,9 +28,6 @@ public:
     void InvokeListener(uint64_t progressSize, uint64_t totalSize) const override;
 
 private:
-    void SendCopyProgress(uint64_t progressSize, uint64_t totalSize) const;
-
-private:
     ani_vm *vm;
     ani_ref listener;
 };
