@@ -26,7 +26,7 @@ namespace ANI {
 class WatcherAni final {
 public:
     static ani_object CreateWatcherSync(
-        ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_double events, ani_ref listener);
+        ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_int events, ani_ref listener);
 };
 } // namespace ANI
 } // namespace ModuleFileIO

@@ -51,7 +51,7 @@ static bool SetFileProperties(ani_env *env, ani_class cls, ani_object obj, const
     }
 
     const auto &fd = fdRet.GetData().value();
-    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "fd", static_cast<double>(fd))) {
+    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "fd", fd)) {
         HILOGE("Set fd field value failed!");
         return false;
     }

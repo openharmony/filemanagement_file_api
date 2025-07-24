@@ -31,7 +31,7 @@ namespace ANI {
 using namespace OHOS::FileManagement::ModuleFileIO;
 
 ani_object WatcherAni::CreateWatcherSync(
-    ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_double events, ani_ref listener)
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_int events, ani_ref listener)
 {
     auto [succPath, filePath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
@@ -56,7 +56,7 @@ ani_object WatcherAni::CreateWatcherSync(
     }
 
     FsResult<FsWatcher *> ret =
-        WatcherCore::DoCreateWatcher(filePath, static_cast<int32_t>(events), move(eventListener));
+        WatcherCore::DoCreateWatcher(filePath, events, move(eventListener));
     if (!ret.IsSuccess()) {
         HILOGE("Create watcher failed");
         const auto &err = ret.GetError();

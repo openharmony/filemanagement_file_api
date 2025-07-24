@@ -25,10 +25,10 @@ namespace ANI {
 
 class RandomAccessFileAni final {
 public:
-    static void SetFilePointer(ani_env *env, [[maybe_unused]] ani_object object, ani_double fp);
+    static void SetFilePointer(ani_env *env, [[maybe_unused]] ani_object object, ani_long fp);
     static void Close(ani_env *env, [[maybe_unused]] ani_object object);
-    static ani_double WriteSync(ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options);
-    static ani_double ReadSync(
+    static ani_long WriteSync(ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options);
+    static ani_long ReadSync(
         ani_env *env, [[maybe_unused]] ani_object object, ani_arraybuffer buf, ani_object options);
     static ani_object GetReadStream(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_object GetWriteStream(ani_env *env, [[maybe_unused]] ani_object object);

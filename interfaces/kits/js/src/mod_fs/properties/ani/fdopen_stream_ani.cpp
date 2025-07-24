@@ -30,7 +30,7 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 
 ani_object FdopenStreamAni::FdopenStreamSync(
-    ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd, ani_string mode)
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_string mode)
 {
     auto [succMode, openMode] = TypeConverter::ToUTF8String(env, mode);
     if (!succMode) {

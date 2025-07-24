@@ -24,7 +24,7 @@ namespace ModuleFileIO {
 namespace ANI {
 class FdopenStreamAni final {
 public:
-    static ani_object FdopenStreamSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd, ani_string mode);
+    static ani_object FdopenStreamSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_string mode);
 };
 } // namespace ANI
 } // namespace ModuleFileIO

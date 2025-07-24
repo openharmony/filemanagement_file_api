@@ -29,7 +29,7 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleStatvfs;
 
-ani_double StatvfsAni::GetFreeSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
+ani_long StatvfsAni::GetFreeSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
     auto [succPath, srcPath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
@@ -46,10 +46,10 @@ ani_double StatvfsAni::GetFreeSizeSync(ani_env *env, [[maybe_unused]] ani_class 
         return 0;
     }
 
-    return static_cast<double>(ret.GetData().value());
+    return static_cast<long>(ret.GetData().value());
 }
 
-ani_double StatvfsAni::GetTotalSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
+ani_long StatvfsAni::GetTotalSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
     auto [succPath, srcPath] = TypeConverter::ToUTF8String(env, path);
     if (!succPath) {
@@ -66,7 +66,7 @@ ani_double StatvfsAni::GetTotalSizeSync(ani_env *env, [[maybe_unused]] ani_class
         return 0;
     }
 
-    return static_cast<double>(ret.GetData().value());
+    return static_cast<long>(ret.GetData().value());
 }
 
 } // namespace ANI

@@ -170,7 +170,7 @@ void StreamAni::Flush(ani_env *env, [[maybe_unused]] ani_object object)
     }
 }
 
-ani_double StreamAni::Write(ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options)
+ani_long StreamAni::Write(ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options)
 {
     auto fsStream = Unwrap(env, object);
     if (fsStream == nullptr) {
@@ -217,7 +217,7 @@ ani_double StreamAni::Write(ani_env *env, [[maybe_unused]] ani_object object, an
             ErrorHandler::Throw(env, err);
             return -1;
         }
-        return static_cast<double>(ret.GetData().value());
+        return ret.GetData().value();
     }
 
     HILOGE("Unsupported buffer type!");
@@ -225,7 +225,7 @@ ani_double StreamAni::Write(ani_env *env, [[maybe_unused]] ani_object object, an
     return -1;
 }
 
-ani_double StreamAni::Read(ani_env *env, [[maybe_unused]] ani_object object, ani_arraybuffer buffer, ani_object options)
+ani_long StreamAni::Read(ani_env *env, [[maybe_unused]] ani_object object, ani_arraybuffer buffer, ani_object options)
 {
     auto fsStream = Unwrap(env, object);
     if (fsStream == nullptr) {
@@ -255,10 +255,10 @@ ani_double StreamAni::Read(ani_env *env, [[maybe_unused]] ani_object object, ani
         ErrorHandler::Throw(env, err);
         return -1;
     }
-    return static_cast<double>(ret.GetData().value());
+    return ret.GetData().value();
 }
 
-ani_double StreamAni::Seek(ani_env *env, [[maybe_unused]] ani_object object, ani_double offset, ani_object whence)
+ani_long StreamAni::Seek(ani_env *env, [[maybe_unused]] ani_object object, ani_long offset, ani_object whence)
 {
     auto fsStream = Unwrap(env, object);
     if (fsStream == nullptr) {
@@ -281,7 +281,7 @@ ani_double StreamAni::Seek(ani_env *env, [[maybe_unused]] ani_object object, ani
         ErrorHandler::Throw(env, err);
         return -1;
     }
-    return static_cast<double>(ret.GetData().value());
+    return ret.GetData().value();
 }
 
 } // namespace ANI

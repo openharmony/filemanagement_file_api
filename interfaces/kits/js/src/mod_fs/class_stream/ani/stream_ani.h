@@ -27,10 +27,10 @@ class StreamAni final {
 public:
     static void Close(ani_env *env, [[maybe_unused]] ani_object object);
     static void Flush(ani_env *env, [[maybe_unused]] ani_object object);
-    static ani_double Write(ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options);
-    static ani_double Read(
+    static ani_long Write(ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options);
+    static ani_long Read(
         ani_env *env, [[maybe_unused]] ani_object object, ani_arraybuffer buffer, ani_object options);
-    static ani_double Seek(ani_env *env, [[maybe_unused]] ani_object object, ani_double offset, ani_object whence);
+    static ani_long Seek(ani_env *env, [[maybe_unused]] ani_object object, ani_long offset, ani_object whence);
 };
 } // namespace ANI
 } // namespace ModuleFileIO

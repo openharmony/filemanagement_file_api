@@ -66,7 +66,7 @@ static ani_object Wrap(ani_env *env, const FsRandomAccessFile *rafFile)
     }
 
     const auto &fd = fdRet.GetData().value();
-    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "fd", static_cast<double>(fd))) {
+    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "fd", fd)) {
         HILOGE("Set fd field value failed!");
         return nullptr;
     }
@@ -78,7 +78,7 @@ static ani_object Wrap(ani_env *env, const FsRandomAccessFile *rafFile)
     }
 
     const auto &fp = fpRet.GetData().value();
-    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "filePointer", static_cast<double>(fp))) {
+    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "filePointer", fp)) {
         HILOGE("Set fp field value failed!");
         return nullptr;
     }

@@ -33,7 +33,7 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static ani_status SetNumProperty(
-    ani_env *env, const ani_class &cls, ani_object &object, const char *name, ani_double &value)
+    ani_env *env, const ani_class &cls, ani_object &object, const char *name, ani_long &value)
 {
     ani_method setter;
     ani_status ret;
@@ -137,14 +137,14 @@ static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &
 {
     ani_status ret;
 
-    vector<pair<string_view, ani_double>> numProperties = {
-        { MODE_SETTER, ani_double(static_cast<double>(fsStat->GetMode())) },
-        { UID_SETTER, ani_double(static_cast<double>(fsStat->GetUid())) },
-        { GID_SETTER, ani_double(static_cast<double>(fsStat->GetGid())) },
-        { SIZE_SETTER, ani_double(static_cast<double>(fsStat->GetSize())) },
-        { ATIME_SETTER, ani_double(static_cast<double>(fsStat->GetAtime())) },
-        { MTIME_SETTER, ani_double(static_cast<double>(fsStat->GetMtime())) },
-        { CTIME_SETTER, ani_double(static_cast<double>(fsStat->GetCtime())) },
+    vector<pair<string_view, ani_long>> numProperties = {
+        { MODE_SETTER, fsStat->GetMode() },
+        { UID_SETTER, fsStat->GetUid() },
+        { GID_SETTER, fsStat->GetGid() },
+        { SIZE_SETTER, fsStat->GetSize() },
+        { ATIME_SETTER, fsStat->GetAtime() },
+        { MTIME_SETTER, fsStat->GetMtime() },
+        { CTIME_SETTER, fsStat->GetCtime() },
     };
     for (auto iter : numProperties) {
         auto key = iter.first.data();

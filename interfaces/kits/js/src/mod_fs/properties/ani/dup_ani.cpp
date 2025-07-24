@@ -28,9 +28,9 @@ namespace ModuleFileIO {
 namespace ANI {
 using namespace OHOS::FileManagement::ModuleFileIO;
 
-ani_object DupAni::Dup(ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd)
+ani_object DupAni::Dup(ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd)
 {
-    FsResult<FsFile *> ret = DupCore::DoDup(static_cast<int32_t>(fd));
+    FsResult<FsFile *> ret = DupCore::DoDup(fd);
     if (!ret.IsSuccess()) {
         HILOGE("Dup file failed");
         const auto &err = ret.GetError();
