@@ -166,7 +166,7 @@ static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrF
 {
     ani_boolean isFd = false;
 
-    auto classDesc = BoxedTypes::Double::classDesc.c_str();
+    auto classDesc = BoxedTypes::Int::classDesc.c_str();
     ani_class cls;
     env->FindClass(classDesc, &cls);
     env->Object_InstanceOf(pathOrFd, cls, &isFd);
