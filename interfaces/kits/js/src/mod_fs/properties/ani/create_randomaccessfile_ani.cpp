@@ -186,13 +186,13 @@ ani_object CreateRandomAccessFileAni::CreateRandomAccessFileSync(
     if (isPath) {
         return CreateRandomAccessFileByString(env, file, mode, op);
     } else {
-        ani_double fdOp;
-        if (ANI_OK != env->Object_GetPropertyByName_Double(file, "fd", &fdOp)) {
+        ani_int fd;
+        if (ANI_OK != env->Object_GetPropertyByName_Int(file, "fd", &fd)) {
             HILOGE("Get fd in class file failed");
             ErrorHandler::Throw(env, EINVAL);
             return nullptr;
         }
-        int32_t fd = static_cast<int32_t>(fdOp);
+
         FsResult<FsRandomAccessFile *> ret = CreateRandomAccessFileCore::DoCreateRandomAccessFile(fd, op);
         if (!ret.IsSuccess()) {
             HILOGE("CreateRandomAccessFile failed");

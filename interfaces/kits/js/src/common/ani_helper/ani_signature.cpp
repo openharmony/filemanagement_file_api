@@ -81,7 +81,7 @@ const string FS::FileInner::ctorSig = Builder::BuildSignatureDescriptor({ BasicT
 const Type FS::ProgressInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ProgressInner");
 const string FS::ProgressInner::classDesc = FS::ProgressInner::classType.Descriptor();
 const string FS::ProgressInner::ctorSig =
-    Builder::BuildSignatureDescriptor({ BasicTypes::doubleType, BasicTypes::doubleType });
+    Builder::BuildSignatureDescriptor({ BasicTypes::longType, BasicTypes::longType });
 // FS::RandomAccessFileInner
 const Type FS::RandomAccessFileInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.RandomAccessFileInner");
 const string FS::RandomAccessFileInner::classDesc = FS::RandomAccessFileInner::classType.Descriptor();
