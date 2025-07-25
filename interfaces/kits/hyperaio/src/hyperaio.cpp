@@ -55,7 +55,7 @@ static bool HasAccessIouringPermission()
 
 static bool ValidateReqNum(uint32_t reqNum)
 {
-    return reqNum > 0 && reqNum <= URING_QUEUE_SIZE - 1;
+    return reqNum > 0 && reqNum <= URING_QUEUE_SIZE;
 }
 
 uint32_t HyperAio::SupportIouring()

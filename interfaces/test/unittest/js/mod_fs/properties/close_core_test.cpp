@@ -17,13 +17,12 @@
 #include "close_core.h"
 #include "open_core.h"
 
+#define FILE_PATH "/data/test/CloseCoreTest.txt"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
-
-#define FILE_PATH "/data/test/CloseCoreTest.txt"
-
 class CloseCoreTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
