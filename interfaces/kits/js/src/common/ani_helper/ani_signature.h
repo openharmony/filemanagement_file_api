@@ -123,6 +123,20 @@ struct ConflictFilesInner : public BaseType {
     static const string ctorSig;
 };
 
+struct ReadStreamOptionsInner : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorDesc;
+    static const string ctorSig;
+};
+
+struct WriteStreamOptionsInner : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorDesc;
+    static const string ctorSig;
+};
+
 struct FileInner : public BaseType {
     static const Type classType;
     static const string classDesc;

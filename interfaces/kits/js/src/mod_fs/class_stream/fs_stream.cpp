@@ -25,6 +25,7 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
+const string UTF_8 = "utf-8";
 
 std::shared_ptr<FILE> FsStream::GetFilePtr()
 {
@@ -71,7 +72,7 @@ static tuple<bool, size_t, int64_t> ValidWriteArg(const size_t bufLen, const opt
     }
 
     if (encodingOp.has_value()) {
-        if (encodingOp.value() != "utf-8") {
+        if (encodingOp.value() != UTF_8) {
             HILOGE("option.encoding shall be utf-8");
             return { false, 0, offset };
         }

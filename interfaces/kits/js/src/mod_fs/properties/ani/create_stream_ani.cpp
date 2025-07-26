@@ -59,6 +59,7 @@ ani_object CreateStreamAni::CreateStreamSync(
     if (result == nullptr) {
         delete stream;
         stream = nullptr;
+        HILOGE("Wrap failed");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }

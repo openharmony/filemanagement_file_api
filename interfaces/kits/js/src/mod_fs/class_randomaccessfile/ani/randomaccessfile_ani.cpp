@@ -33,13 +33,15 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 const int BUF_SIZE = 1024;
 const string READ_STREAM_CLASS = "ReadStream";
 const string WRITE_STREAM_CLASS = "WriteStream";
+const string OFFSET = "offset";
+const string LENGTH = "length";
 
 static FsRandomAccessFile *Unwrap(ani_env *env, ani_object object)
 {
     ani_long nativePtr;
     auto ret = env->Object_GetFieldByName_Long(object, "nativePtr", &nativePtr);
     if (ret != ANI_OK) {
-        HILOGE("Unwrap FsRandomAccessFile err: %{private}d", ret);
+        HILOGE("Unwrap FsRandomAccessFile err: %{public}d", ret);
         return nullptr;
     }
     uintptr_t ptrValue = static_cast<uintptr_t>(nativePtr);
@@ -56,14 +58,14 @@ static tuple<bool, optional<ReadOptions>> ToReadOptions(ani_env *env, ani_object
         return { true, nullopt };
     }
 
-    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, "offset");
+    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, OFFSET);
     if (!succOffset) {
         HILOGE("Illegal option.offset parameter");
         return { false, nullopt };
     }
     options.offset = offset;
 
-    auto [succLength, length] = AniHelper::ParseInt64Option(env, obj, "length");
+    auto [succLength, length] = AniHelper::ParseInt64Option(env, obj, LENGTH);
     if (!succLength) {
         HILOGE("Illegal option.length parameter");
         return { false, nullopt };
@@ -81,14 +83,14 @@ static tuple<bool, optional<WriteOptions>> ToWriteOptions(ani_env *env, ani_obje
         return { true, nullopt };
     }
 
-    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, "offset");
+    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, OFFSET);
     if (!succOffset) {
         HILOGE("Illegal option.offset parameter");
         return { false, nullopt };
     }
     options.offset = offset;
 
-    auto [succLength, length] = AniHelper::ParseInt64Option(env, obj, "length");
+    auto [succLength, length] = AniHelper::ParseInt64Option(env, obj, LENGTH);
     if (!succLength) {
         HILOGE("Illegal option.length parameter");
         return { false, nullopt };
@@ -283,31 +285,32 @@ static ani_string GetFilePath(ani_env *env, const int fd)
 
 static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t end)
 {
-    static const char *className = "L@ohos/file/fs/ReadStreamOptionsInner;";
+    static const char *className = FS::ReadStreamOptionsInner::classType;
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+        HILOGE("Cannot find class %{public}s", className);
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, FS::ReadStreamOptionsInner::ctorDesc,
+        FS::ReadStreamOptionsInner::ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %{public}s", className);
         return nullptr;
     }
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %{public}s obj Failed", className);
         return nullptr;
     }
 
     ani_field startField = nullptr;
     ani_field endField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
-        HILOGE("Cannot find start in class %s", className);
+        HILOGE("Cannot find start in class %{public}s", className);
         return nullptr;
     }
     if (ANI_OK != env->Class_FindField(cls, "end", &endField)) {
-        HILOGE("Cannot find end in class %s", className);
+        HILOGE("Cannot find end in class %{public}s", className);
         return nullptr;
     }
 
@@ -326,31 +329,32 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
 
 static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flags)
 {
-    static const char *className = "L@ohos/file/fs/WriteStreamOptionsInner;";
+    static const char *className = FS::WriteStreamOptionsInner::classType;
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+        HILOGE("Cannot find class %{public}s", className);
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, FS::WriteStreamOptionsInner::ctorDesc,
+        FS::WriteStreamOptionsInner::ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %{public}s", className);
         return nullptr;
     }
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %{public}s obj Failed", className);
         return nullptr;
     }
 
     ani_field modeField = nullptr;
     ani_field startField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "mode", &modeField)) {
-        HILOGE("Cannot find mode in class %s", className);
+        HILOGE("Cannot find mode in class %{public}s", className);
         return nullptr;
     }
     if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
-        HILOGE("Cannot find start in class %s", className);
+        HILOGE("Cannot find start in class %{public}s", className);
         return nullptr;
     }
 
@@ -367,17 +371,17 @@ static ani_object CreateReadStream(ani_env *env, ani_string filePath, ani_object
     static const char *className = "L@ohos/file/fs/fileIo/ReadStream;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+        HILOGE("Cannot find class %{public}s", className);
         return nullptr;
     }
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/ReadStreamOptions;:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+        HILOGE("Cannot find constructor method for class %{public}s", className);
         return nullptr;
     }
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %{public}s obj Failed", className);
         return nullptr;
     }
 
@@ -389,18 +393,18 @@ static ani_object CreateWriteStream(ani_env *env, ani_string filePath, ani_objec
     static const char *className = "L@ohos/file/fs/fileIo/WriteStream;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+        HILOGE("Cannot find class %{public}s", className);
         return nullptr;
     }
     ani_method ctor;
     if (ANI_OK !=
         env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/WriteStreamOptions;:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+        HILOGE("Cannot find constructor method for class %{public}s", className);
         return nullptr;
     }
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %{public}s obj Failed", className);
         return nullptr;
     }
 

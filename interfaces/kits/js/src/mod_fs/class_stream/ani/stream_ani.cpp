@@ -100,6 +100,7 @@ static std::tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_ob
     ani_boolean isString;
     env->Object_InstanceOf(buf, cls, &isString);
     if (!isString) {
+        HILOGE("Object_InstanceOf is failed");
         return { false, {} };
     }
     auto result = static_cast<ani_string>(buf);
