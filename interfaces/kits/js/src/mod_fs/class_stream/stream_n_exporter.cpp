@@ -27,6 +27,7 @@
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "rust_file.h"
 #include "stream_entity.h"
 
 namespace OHOS {
