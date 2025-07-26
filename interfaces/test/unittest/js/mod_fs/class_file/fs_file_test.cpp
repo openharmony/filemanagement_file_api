@@ -29,8 +29,8 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    std::unique_ptr<FileEntity> fileEntity;
-    std::unique_ptr<FsFile> fsFile;
+    unique_ptr<FileEntity> fileEntity;
+    unique_ptr<FsFile> fsFile;
 };
 
 void FsFileTest::SetUpTestCase(void)
@@ -47,13 +47,13 @@ void FsFileTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
     
-    fileEntity = std::make_unique<FileEntity>();
+    fileEntity = make_unique<FileEntity>();
     const int fdValue = 3;
     const bool isClosed = false;
-    fileEntity->fd_ = std::make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
+    fileEntity->fd_ = make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
     fileEntity->path_ = "/data/test/file_test.txt";
     fileEntity->uri_ = "";
-    fsFile = std::make_unique<FsFile>(std::move(fileEntity));
+    fsFile = make_unique<FsFile>(move(fileEntity));
 }
 
 void FsFileTest::TearDown(void)
@@ -62,12 +62,12 @@ void FsFileTest::TearDown(void)
 }
 
 /**
-* @tc.name: FsFileTest_Constructor_001
-* @tc.desc: Test function of FsFile::Constructor() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_Constructor_001
+ * @tc.desc: Test function of FsFile::Constructor() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_Constructor_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_Constructor_001";
@@ -79,12 +79,12 @@ HWTEST_F(FsFileTest, FsFileTest_Constructor_001, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_GetFD_002
-* @tc.desc: Test function of GetFD() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_GetFD_002
+ * @tc.desc: Test function of GetFD() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_GetFD_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetFD_002";
@@ -96,17 +96,17 @@ HWTEST_F(FsFileTest, FsFileTest_GetFD_002, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_GetFD_003
-* @tc.desc: Test function of GetFD() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_GetFD_003
+ * @tc.desc: Test function of GetFD() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_GetFD_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetFD_003";
 
-    fsFile = std::make_unique<FsFile>(nullptr);
+    fsFile = make_unique<FsFile>(nullptr);
     auto result = fsFile->GetFD();
     EXPECT_EQ(result.IsSuccess(), false);
 
@@ -114,17 +114,17 @@ HWTEST_F(FsFileTest, FsFileTest_GetFD_003, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_GetPath_004
-* @tc.desc: Test function of GetPath() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_GetPath_004
+ * @tc.desc: Test function of GetPath() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_GetPath_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetPath_004";
 
-    fsFile = std::make_unique<FsFile>(nullptr);
+    fsFile = make_unique<FsFile>(nullptr);
     auto result = fsFile->GetPath();
     EXPECT_EQ(result.IsSuccess(), false);
 
@@ -132,17 +132,17 @@ HWTEST_F(FsFileTest, FsFileTest_GetPath_004, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_GetName_005
-* @tc.desc: Test function of GetName() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_GetName_005
+ * @tc.desc: Test function of GetName() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_GetName_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetName_005";
 
-    fsFile = std::make_unique<FsFile>(nullptr);
+    fsFile = make_unique<FsFile>(nullptr);
     auto result = fsFile->GetName();
     EXPECT_EQ(result.IsSuccess(), false);
 
@@ -150,17 +150,17 @@ HWTEST_F(FsFileTest, FsFileTest_GetName_005, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_GetParent_006
-* @tc.desc: Test function of GetParent() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_GetParent_006
+ * @tc.desc: Test function of GetParent() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_GetParent_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetParent_006";
 
-    fsFile = std::make_unique<FsFile>(nullptr);
+    fsFile = make_unique<FsFile>(nullptr);
     auto result = fsFile->GetParent();
     EXPECT_EQ(result.IsSuccess(), false);
 
@@ -168,17 +168,17 @@ HWTEST_F(FsFileTest, FsFileTest_GetParent_006, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_Lock_007
-* @tc.desc: Test function of Lock() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_Lock_007
+ * @tc.desc: Test function of Lock() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_Lock_007, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_Lock_007";
 
-    fsFile = std::make_unique<FsFile>(nullptr);
+    fsFile = make_unique<FsFile>(nullptr);
     auto result = fsFile->Lock(true);
     EXPECT_EQ(result.IsSuccess(), false);
 
@@ -186,17 +186,17 @@ HWTEST_F(FsFileTest, FsFileTest_Lock_007, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_TryLock_008
-* @tc.desc: Test function of TryLock() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_TryLock_008
+ * @tc.desc: Test function of TryLock() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_TryLock_008, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_TryLock_008";
 
-    fsFile = std::make_unique<FsFile>(nullptr);
+    fsFile = make_unique<FsFile>(nullptr);
     auto result = fsFile->TryLock(true);
     EXPECT_EQ(result.IsSuccess(), false);
 
@@ -204,17 +204,17 @@ HWTEST_F(FsFileTest, FsFileTest_TryLock_008, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_UnLock_009
-* @tc.desc: Test function of UnLock() interface for ERROR.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_UnLock_009
+ * @tc.desc: Test function of UnLock() interface for ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_UnLock_009, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_UnLock_009";
 
-    fsFile = std::make_unique<FsFile>(nullptr);
+    fsFile = make_unique<FsFile>(nullptr);
     auto result = fsFile->UnLock();
     EXPECT_EQ(result.IsSuccess(), false);
 
@@ -222,12 +222,12 @@ HWTEST_F(FsFileTest, FsFileTest_UnLock_009, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_GetName_010
-* @tc.desc: Test function of GetName() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_GetName_010
+ * @tc.desc: Test function of GetName() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_GetName_010, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetName_010";
@@ -240,12 +240,12 @@ HWTEST_F(FsFileTest, FsFileTest_GetName_010, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_GetParent_011
-* @tc.desc: Test function of GetParent() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_GetParent_011
+ * @tc.desc: Test function of GetParent() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_GetParent_011, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetParent_011";
@@ -258,12 +258,12 @@ HWTEST_F(FsFileTest, FsFileTest_GetParent_011, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: FsFileTest_GetPath_012
-* @tc.desc: Test function of GetPath() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: FsFileTest_GetPath_012
+ * @tc.desc: Test function of GetPath() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FsFileTest, FsFileTest_GetPath_012, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetPath_012";

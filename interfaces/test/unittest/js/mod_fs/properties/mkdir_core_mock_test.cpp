@@ -15,11 +15,11 @@
 
 #include <filesystem>
 #include <fstream>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "mkdir_core.h"
-#include "mock/uv_fs_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -107,7 +107,7 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0002, testing::ext::TestSi
 
 /**
  * @tc.name: MkdirCoreMockTest_DoMkdir_0003
- * @tc.desc: Test function of DoMkdir() interface for FAILED.
+ * @tc.desc: Test function of DoMkdir() interface is FAILED for uv_fs_mkdir return 1.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -127,7 +127,7 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0003, testing::ext::TestSi
 
 /**
  * @tc.name: MkdirCoreMockTest_DoMkdir_0004
- * @tc.desc: Test function of DoMkdir() interface for FAILED.
+ * @tc.desc: Test function of DoMkdir() interface is FAILED for file exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -152,7 +152,7 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0004, testing::ext::TestSi
 
 /**
  * @tc.name: MkdirCoreMockTest_DoMkdir_0005
- * @tc.desc: Test function of DoMkdir() interface for FAILED.
+ * @tc.desc: Test function of DoMkdir() interface is FAILED for no such file or directory.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
