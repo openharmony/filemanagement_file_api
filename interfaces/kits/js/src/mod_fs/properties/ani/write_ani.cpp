@@ -40,13 +40,6 @@ static tuple<bool, optional<WriteOptions>> ToWriteOptions(ani_env *env, ani_obje
         return { true, nullopt };
     }
 
-    auto [succEncoding, encoding] = AniHelper::ParseEncoding(env, obj);
-    if (!succEncoding) {
-        HILOGE("Illegal option.encoding parameter");
-        return { false, nullopt };
-    }
-    options.encoding = encoding;
-
     auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, "offset");
     if (!succOffset) {
         HILOGE("Illegal option.offset parameter");
@@ -61,6 +54,12 @@ static tuple<bool, optional<WriteOptions>> ToWriteOptions(ani_env *env, ani_obje
     }
     options.length = length;
 
+    auto [succEncoding, encoding] = AniHelper::ParseEncoding(env, obj);
+    if (!succEncoding) {
+        HILOGE("Illegal option.encoding parameter");
+        return { false, nullopt };
+    }
+    options.encoding = encoding;
     return { true, make_optional<WriteOptions>(move(options)) };
 }
 
