@@ -51,6 +51,7 @@ namespace Environment {
         });
         });
   }
+
   export function getUserDataDir(callback: AsyncCallback<string>): void {
     let promise = taskpool.execute(EnvironmentImpl.getUserDataDirSync);
       promise.then((ret: NullishType): void => {

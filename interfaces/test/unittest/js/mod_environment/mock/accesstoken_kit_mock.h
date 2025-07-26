@@ -27,11 +27,9 @@ public:
     virtual bool IsSystemAppByFullTokenID(uint64_t) = 0;
     virtual int VerifyAccessToken(Security::AccessToken::AccessTokenID, const std::string &) = 0;
 
-public:
     BAccessTokenKit() = default;
     virtual ~BAccessTokenKit() = default;
 
-public:
     static inline std::shared_ptr<BAccessTokenKit> token = nullptr;
 };
 

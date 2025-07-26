@@ -72,7 +72,7 @@ void EnvironmentCoreTest::TearDown(void)
 
 /**
  * @tc.name: EnvironmentCoreTest_DoGetStorageDataDir_001
- * @tc.desc: Test function of DoGetStorageDataDir interface for FALSE.
+ * @tc.desc: Test function of DoGetStorageDataDir interface for FALSE tokenID error.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -164,7 +164,8 @@ HWTEST_F(EnvironmentCoreTest, EnvironmentCoreTest_DoGetUserDownloadDir_001, test
     EXPECT_CALL(*paramMoc, GetParameter(_, _, _, _))
         .WillRepeatedly(Invoke([&](const char *, const char *, char *value, uint32_t) {
             strcpy_s(value, 5, "true");
-            return 1;
+            uint32_t successValue = 1;
+            return successValue;
         }));
     EXPECT_CALL(*skeleton, GetOsAccountShortName(_)).WillRepeatedly(Return(ERR_OK));
 

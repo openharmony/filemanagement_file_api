@@ -65,7 +65,7 @@ static std::string GetUserName()
     std::string userName;
     ErrCode errCode = OHOS::AccountSA::OsAccountManager::GetOsAccountShortName(userName);
     if (errCode != ERR_OK || userName.empty()) {
-        HILOGE("Get userName Failed");
+        HILOGE("Get userName failed");
     }
     userName = DEFAULT_USERNAME;
     return userName;
@@ -93,11 +93,13 @@ static int CheckInvalidAccess(const std::string &permission)
         HILOGE("Capability not supported");
         return E_DEVICENOTSUPPORT;
     }
+
     if (permission == FILE_ACCESS_MANAGER_PERMISSION) {
         if (!IsSystemApp()) {
             return E_PERMISSION_SYS;
         }
     }
+
     if (!CheckCallingPermission(permission)) {
         HILOGE("No Permission");
         return E_PERMISSION;
