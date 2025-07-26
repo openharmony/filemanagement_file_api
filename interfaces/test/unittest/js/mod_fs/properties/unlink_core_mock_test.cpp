@@ -15,11 +15,12 @@
 
 #include <filesystem>
 #include <fstream>
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
-#include "mock/uv_fs_mock.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include "unlink_core.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
