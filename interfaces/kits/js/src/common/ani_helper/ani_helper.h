@@ -33,10 +33,7 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-inline shared_ptr<OHOS::AppExecFwk::EventHandler>& GetMainHandler() {
-    thread_local shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler;
-    return mainHandler;
-}
+static thread_local shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler;
 
 class AniHelper {
 public:
@@ -116,7 +113,7 @@ public:
         static const string longValueSig = Builder::BuildSignatureDescriptor({}, BasicTypes::longType);
         ani_long value;
         status = env->Object_CallMethodByName_Long(
-            static_cast<ani_object>(property), "longValue", longValueSig.c_str(), &value);
+            static_cast<ani_object>(property), "toLong", longValueSig.c_str(), &value);
         if (status != ANI_OK) {
             return { false, nullopt };
         }
@@ -186,7 +183,6 @@ public:
             return false;
         }
 
-        auto& mainHandler = GetMainHandler();
         if (mainHandler == nullptr) {
             shared_ptr<OHOS::AppExecFwk::EventRunner> runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
             if (!runner) {

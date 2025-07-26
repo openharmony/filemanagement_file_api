@@ -185,15 +185,14 @@ static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &
 
 ani_object StatWrapper::Wrap(ani_env *env, FsStat *fsStat)
 {
-    auto classDesc = FS::StatInner::classDesc.c_str();
-    ani_object statObject = {};
-    ani_class cls;
-    ani_status ret;
-
     if (fsStat == nullptr) {
         HILOGE("FsStat pointer is null!");
         return nullptr;
     }
+    auto classDesc = FS::StatInner::classDesc.c_str();
+    ani_object statObject = {};
+    ani_class cls;
+    ani_status ret;
 
     if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
         HILOGE("Not found %{private}s, err: %{private}d", classDesc, ret);

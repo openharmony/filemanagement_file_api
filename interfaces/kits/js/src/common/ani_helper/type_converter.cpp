@@ -59,7 +59,7 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::ToOptionalInt32(ani_env 
     }
 
     ani_int intValue;
-    if (ANI_OK == env->Object_CallMethodByName_Int(value, "intValue", nullptr, &intValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Int(value, "toInt", nullptr, &intValue)) {
         return { true, std::make_optional(intValue) };
     }
 
@@ -79,7 +79,7 @@ std::tuple<bool, std::optional<int64_t>> TypeConverter::ToOptionalInt64(ani_env 
     }
 
     ani_long longValue;
-    if (ANI_OK == env->Object_CallMethodByName_Long(value, "longValue", nullptr, &longValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Long(value, "toLong", nullptr, &longValue)) {
         return { true, std::make_optional(longValue) };
     }
 
@@ -114,7 +114,7 @@ std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::strin
 
 std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, const char *str)
 {
-    if (env == nullptr || str == nullptr) {
+    if (env == nullptr) {
         return { false, {} };
     }
 
@@ -152,7 +152,7 @@ static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrF
     env->Object_InstanceOf(pathOrFd, cls, &isFd);
     if (isFd) {
         ani_int fd;
-        if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "intValue", nullptr, &fd)) {
+        if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "toInt", nullptr, &fd)) {
             HILOGE("Parse file path failed");
             return { false, 0 };
         }
@@ -225,23 +225,25 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
         return { false, nullptr };
     }
 
-    static const char *className = "Lescompat/ArrayBuffer;";
+    auto classDesc = BuiltInTypes::ArrayBuffer::classDesc.c_str();
     ani_status ret;
     ani_class cls;
-    if ((ret = env->FindClass(className, &cls)) != ANI_OK) {
-        HILOGE("Not found %{private}s, err: %{public}d", className, ret);
+    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
+        HILOGE("Not found %{private}s, err: %{private}d", classDesc, ret);
         return { false, nullptr };
     }
 
+    auto ctorDesc = BuiltInTypes::ArrayBuffer::ctorDesc.c_str();
+    auto ctorSig = BuiltInTypes::ArrayBuffer::ctorSig.c_str();
     ani_method ctor;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
-        HILOGE("Not found ctor, err: %{public}d", ret);
+    if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
+        HILOGE("Not found ctor, err: %{private}d", ret);
         return { false, nullptr };
     }
 
     ani_object obj;
     if ((ret = env->Object_New(cls, ctor, &obj, length)) != ANI_OK) {
-        HILOGE("New Uint8Array err: %{public}d", ret);
+        HILOGE("New Uint8Array err: %{private}d", ret);
         return { false, nullptr };
     }
 
