@@ -112,7 +112,8 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_GetBaseFile_002, testing::ext::TestS
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_GetBaseFile_002";
 
     size_t largeLength = static_cast<size_t>(PATH_MAX) + 1;
-    string largeString(largeLength, 'a');
+    char text = 'a';
+    string largeString(largeLength, text);
 
     auto ret = FsAtomicFile::Constructor(largeString);
     ASSERT_TRUE(ret.IsSuccess());
@@ -135,7 +136,7 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_GetBaseFile_003, testing::ext::TestS
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_GetBaseFile_003";
 
-    string path = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    string path = "FsAtomicfileTest_GetBaseFile_003_aaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
     auto ret = FsAtomicFile::Constructor(path);
     ASSERT_TRUE(ret.IsSuccess());
@@ -158,7 +159,7 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_GetBaseFile_004, testing::ext::TestS
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_GetBaseFile_004";
 
-    string path = "/data/test/aaaaaaaaaa.txt";
+    string path = "/data/test/FsAtomicfileTest_GetBaseFile_004_aaaaaaaaaa.txt";
 
     auto ret = FsAtomicFile::Constructor(path);
     ASSERT_TRUE(ret.IsSuccess());
@@ -202,7 +203,7 @@ HWTEST_F(FsAtomicfileTest, FsAtomicfileTest_StartWrite_002, testing::ext::TestSi
 {
     GTEST_LOG_(INFO) << "FsAtomicfileTest-begin FsAtomicfileTest_StartWrite_002";
 
-    string path = "/data/local/tmp/test/test/test/test.txt";
+    string path = "/data/local/tmp/test/test/test/FsAtomicfileTest_StartWrite_002_test.txt";
 
     auto ret = FsAtomicFile::Constructor(path);
     ASSERT_TRUE(ret.IsSuccess());

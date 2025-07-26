@@ -51,6 +51,7 @@ FsResult<void> FsTaskSignal::Cancel()
         HILOGE("Failed to get taskSignal");
         return FsResult<void>::Error(EINVAL);
     }
+
     auto ret = taskSignal_->Cancel();
     if (ret != ERRNO_NOERR) {
         HILOGE("Failed to cancel the task.");

@@ -43,6 +43,7 @@ void TaskSignalListenerAni::SendCancelEvent(const string &filepath) const
         HILOGE("Cannot send cancel event because the signalObj is null.");
         return;
     }
+
     ani_env *env = AniHelper::GetThreadEnv(vm);
     if (env == nullptr) {
         HILOGE("Cannot send cancel event because the env is null.");
@@ -53,6 +54,7 @@ void TaskSignalListenerAni::SendCancelEvent(const string &filepath) const
         HILOGE("Cannot convert filepath to ani string!");
         return;
     }
+
     auto ret = env->Object_CallMethodByName_Void(signalObj, "onCancelCallback", nullptr, aniPath);
     if (ret != ANI_OK) {
         HILOGE("Call onCancelCallback failed, err: %{public}d", ret);

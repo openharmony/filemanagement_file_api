@@ -32,7 +32,7 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 FsTaskSignal *TaskSignalWrapper::Unwrap(ani_env *env, ani_object object)
 {
     ani_long nativePtr;
-    auto status = env->Object_GetFieldByName_Long(object, "nativeTaskSignal", &nativePtr);
+    auto status = env->Object_GetFieldByName_Long(object, FS::TaskSignal::nativeTaskSignal, &nativePtr);
     if (status != ANI_OK) {
         HILOGE("Unwrap taskSignal obj failed! status: %{public}d", status);
         return nullptr;
@@ -56,7 +56,7 @@ bool TaskSignalWrapper::Wrap(ani_env *env, ani_object object, const FsTaskSignal
 
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(signal));
 
-    auto status = env->Object_SetFieldByName_Long(object, "nativeTaskSignal", ptr);
+    auto status = env->Object_SetFieldByName_Long(object, FS::TaskSignal::nativeTaskSignal, ptr);
     if (status != ANI_OK) {
         HILOGE("Wrap taskSignal obj failed! status: %{public}d", status);
         return false;
