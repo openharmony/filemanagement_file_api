@@ -110,6 +110,7 @@ static std::tuple<std::unique_ptr<BufferData>, int32_t> ReadFileToBuffer(FILE *f
         HILOGE("Failed to allocate memory");
         return { nullptr, ENOMEM };
     }
+
     bufferData->length = fread(bufferData->buffer, sizeof(uint8_t), fileSize, fp);
     if ((bufferData->length != static_cast<size_t>(fileSize) && !feof(fp)) || ferror(fp)) {
         HILOGE("Failed to read file, actual length is:%zu, fileSize:%ld", bufferData->length, fileSize);
@@ -169,7 +170,7 @@ FsResult<string> FsAtomicFile::StartWrite()
 FsResult<void> FsAtomicFile::FinishWrite()
 {
     if (std::rename(entity->newFileName.c_str(), entity->baseFileName.c_str()) != 0) {
-        HILOGE("rename failed");
+        HILOGE("Rename failed");
         return FsResult<void>::Error(errno);
     }
     std::string tmpNewFileName = entity->baseFileName;

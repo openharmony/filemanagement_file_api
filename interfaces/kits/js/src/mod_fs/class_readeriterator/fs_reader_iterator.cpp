@@ -56,7 +56,7 @@ FsResult<ReaderIteratorResult> FsReaderIterator::Next()
     bool done = entity->offset == 0;
     result.done = done;
     if (str != nullptr) {
-        std::string value(str->str, str->len);
+        string value(str->str, str->len);
         result.value = value;
         entity->offset -= static_cast<int64_t>(str->len);
     } else {

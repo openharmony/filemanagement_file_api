@@ -30,7 +30,7 @@ using namespace std;
 
 class FsReaderIteratorMockTest : public testing::Test {
 public:
-    static std::filesystem::path tempFilePath;
+    static filesystem::path tempFilePath;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -43,11 +43,11 @@ filesystem::path FsReaderIteratorMockTest::tempFilePath;
 void FsReaderIteratorMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    tempFilePath = std::filesystem::temp_directory_path() / "test_file.txt";
+    tempFilePath = filesystem::temp_directory_path() / "FsReaderIteratorMockTest_test_file.txt";
     ofstream tempfile(tempFilePath);
     tempfile << "";
     tempfile.close();
-    uvMock = std::make_shared<UvfsMock>();
+    uvMock = make_shared<UvfsMock>();
     Uvfs::ins = uvMock;
 }
 
@@ -80,8 +80,8 @@ HWTEST_F(FsReaderIteratorMockTest, FsReaderIteratorMockTest_Next_001, testing::e
 {
     GTEST_LOG_(INFO) << "FsReaderIteratorMockTest-begin FsReaderIteratorMockTest_Next_001";
     
-    std::string path = tempFilePath.string();
-    std::optional<Options> option = std::nullopt;
+    string path = tempFilePath.string();
+    optional<Options> option = nullopt;
 
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
 

@@ -28,14 +28,14 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
-namespace fs = std::filesystem;
+namespace fs = filesystem;
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-const std::string READ_STREAM_CLASS = "ReadStream";
-const std::string WRITE_STREAM_CLASS = "WriteStream";
-const std::string TEMP_FILE_SUFFIX = "_XXXXXX";
+const string READ_STREAM_CLASS = "ReadStream";
+const string WRITE_STREAM_CLASS = "WriteStream";
+const string TEMP_FILE_SUFFIX = "_XXXXXX";
 
 void AtomicFileAni::Constructor(ani_env *env, ani_object obj, ani_string pathObj)
 {
@@ -174,7 +174,7 @@ static ani_object CreateWriteStream(ani_env *env, ani_string filePath)
 }
 
 static ani_object CreateStream(
-    ani_env *env, [[maybe_unused]] ani_object object, const std::string &streamName, const std::string &fileName)
+    ani_env *env, [[maybe_unused]] ani_object object, const string &streamName, const string &fileName)
 {
     auto [succ, filePath] = TypeConverter::ToAniString(env, fileName);
     if (!succ) {

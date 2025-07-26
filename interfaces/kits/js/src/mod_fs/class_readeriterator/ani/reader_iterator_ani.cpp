@@ -89,6 +89,7 @@ ani_object ReaderIteratorAni::Next(ani_env *env, [[maybe_unused]] ani_object obj
         ErrorHandler::Throw(env, err);
         return nullptr;
     }
+
     auto nextRet = ret.GetData().value();
     auto result = ReaderIteratorResultAni::Wrap(env, &nextRet);
     if (result == nullptr) {
