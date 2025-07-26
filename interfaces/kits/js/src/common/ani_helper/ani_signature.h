@@ -38,6 +38,11 @@ struct BasicTypes {
     static const Type doubleType;
 };
 
+struct BasicTypesConverter {
+    static const string toLong;
+    static const string toInt;
+};
+
 struct BaseType {
     static const string ctorDesc;
     static const string ctorSig0;

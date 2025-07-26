@@ -70,7 +70,7 @@ HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_001, testing::ext::TestSiz
     
     EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
 
-    auto res = LstatCore::DoLstat("/data/test/lstat.txt");
+    auto res = LstatCore::DoLstat("/data/test/LstatCoreMockTestLstat.txt");
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_001";

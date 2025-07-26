@@ -113,7 +113,7 @@ public:
         static const string longValueSig = Builder::BuildSignatureDescriptor({}, BasicTypes::longType);
         ani_long value;
         status = env->Object_CallMethodByName_Long(
-            static_cast<ani_object>(property), "toLong", longValueSig.c_str(), &value);
+            static_cast<ani_object>(property), BasicTypesConverter::toLong.c_str(), longValueSig.c_str(), &value);
         if (status != ANI_OK) {
             return { false, nullopt };
         }
@@ -157,7 +157,7 @@ public:
         if (status != ANI_OK) {
             status = vm->GetEnv(ANI_VERSION_1, &env);
             if (status != ANI_OK) {
-                HILOGE("vm GetEnv, err: %{private}d", status);
+                HILOGE("vm GetEnv, err: %{public}d", status);
                 return nullptr;
             }
         }
@@ -169,7 +169,7 @@ public:
         if (vm && GetThreadEnvStorage()) {
             auto status = vm->DetachCurrentThread();
             if (status != ANI_OK) {
-                HILOGE("Detach thread env from vm failed! status: %{private}d", status);
+                HILOGE("Detach thread env from vm failed! status: %{public}d", status);
                 return;
             }
             GetThreadEnvStorage() = nullptr;

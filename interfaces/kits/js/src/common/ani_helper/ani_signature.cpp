@@ -27,6 +27,10 @@ const Type BasicTypes::intType = Builder::BuildInt();
 const Type BasicTypes::longType = Builder::BuildLong();
 const Type BasicTypes::floatType = Builder::BuildFloat();
 const Type BasicTypes::doubleType = Builder::BuildDouble();
+// BasicTypesConverter::toLong
+const string BasicTypesConverter::toLong = "toLong";
+const string BasicTypesConverter::toInt = "toInt";
+
 // BoxedTypes::Boolean
 const Type BoxedTypes::Boolean::classType = Builder::BuildClass("std.core.Boolean");
 const string BoxedTypes::Boolean::classDesc = BoxedTypes::Double::classType.Descriptor();

@@ -60,6 +60,7 @@ FsResult<FsStat *> LstatCore::DoLstat(const string &path)
     auto stat = StatInstantiator::InstantiateStat(lstat_req->statbuf);
 #endif
     if (stat == nullptr) {
+        HILOGE("Failed to InstantiateStat.");
         return FsResult<FsStat *>::Error(ENOMEM);
     }
     return FsResult<FsStat *>::Success(stat);
