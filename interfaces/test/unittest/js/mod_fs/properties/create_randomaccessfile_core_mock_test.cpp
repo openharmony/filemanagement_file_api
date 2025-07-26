@@ -69,7 +69,7 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_001";
 
-    string path = "/test/path.txt";
+    string path = "/test/CreateRandomAccessFileCoreMockTest_path.txt";
     int32_t mode = 0;
     optional<RandomAccessFileOptions> options = nullopt;
 
@@ -92,7 +92,7 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_002";
 
-    string path = "/test/path.txt";
+    string path = "/test/CreateRandomAccessFileCoreMockTest_path.txt";
     int32_t mode = 0;
     RandomAccessFileOptions opts;
     opts.start = 0;

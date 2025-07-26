@@ -111,10 +111,11 @@ static tuple<bool, uint32_t, int64_t, int64_t> ValidAndConvertFlags(const option
         }
         flags = FsUtils::ConvertFlags(static_cast<uint32_t>(modeValue));
     }
+
     if (options.has_value()) {
         auto [succOpt, start, end] = ValidRafOptions(options);
         if (!succOpt) {
-            HILOGE("invalid RandomAccessFile options");
+            HILOGE("Invalid RandomAccessFile options");
             return {false, flags, start, end};
         }
     }

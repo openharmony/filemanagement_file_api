@@ -38,7 +38,7 @@ public:
     static FsResult<FsRandomAccessFile *> DoCreateRandomAccessFile(
         const int32_t &fd, const optional<RandomAccessFileOptions> &options = nullopt);
 };
-const string PROCEDURE_CREATERAT_NAME = "FileIOCreateRandomAccessFile";
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

@@ -30,8 +30,8 @@ public:
     void SetUp();
     void TearDown();
 protected:
-    std::unique_ptr<RandomAccessFileEntity> rafEntity;
-    std::unique_ptr<FsRandomAccessFile> raf;
+    unique_ptr<RandomAccessFileEntity> rafEntity;
+    unique_ptr<FsRandomAccessFile> raf;
 };
 
 void FsRandomAccessFileTest::SetUpTestCase(void)
@@ -47,12 +47,12 @@ void FsRandomAccessFileTest::TearDownTestCase(void)
 void FsRandomAccessFileTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
-    rafEntity = std::make_unique<RandomAccessFileEntity>();
+    rafEntity = make_unique<RandomAccessFileEntity>();
     const int fdValue = 3;
     const bool isClosed = false;
-    rafEntity->fd = std::make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
+    rafEntity->fd = make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
     rafEntity->filePointer = 0;
-    raf = std::make_unique<FsRandomAccessFile>(std::move(rafEntity));
+    raf = make_unique<FsRandomAccessFile>(move(rafEntity));
 }
 
 void FsRandomAccessFileTest::TearDown(void)
@@ -60,7 +60,6 @@ void FsRandomAccessFileTest::TearDown(void)
     GTEST_LOG_(INFO) << "TearDown";
 }
 
-// 测试Constructor
 /**
  * @tc.name: FsRandomAccessFileTest_Constructor_001
  * @tc.desc: Test function of Constructor() interface for SUCCESS.
@@ -70,15 +69,14 @@ void FsRandomAccessFileTest::TearDown(void)
  */
 HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_Constructor_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_Constructor_001";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_Constructor_001";
 
     auto result = FsRandomAccessFile::Constructor();
     EXPECT_EQ(result.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_Constructor_001";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_Constructor_001";
 }
 
-// 测试GetFD
 /**
  * @tc.name: FsRandomAccessFileTest_GetFD_002
  * @tc.desc: Test function of GetFD() interface for SUCCESS.
@@ -88,12 +86,12 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_Constructor_001, testing
  */
 HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFD_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_GetFD_002";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_GetFD_002";
 
     auto result = raf->GetFD();
     EXPECT_EQ(result.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_GetFD_002";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_GetFD_002";
 }
 
 /**
@@ -108,7 +106,7 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFD_003, testing::ext:
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_GetFD_003";
 
-    raf = std::make_unique<FsRandomAccessFile>(nullptr);
+    raf = make_unique<FsRandomAccessFile>(nullptr);
     auto result = raf->GetFD();
     EXPECT_EQ(result.IsSuccess(), false);
 
@@ -147,14 +145,13 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFPointer_005, testing
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_GetFPointer_005";
 
-    raf = std::make_unique<FsRandomAccessFile>(nullptr);
+    raf = make_unique<FsRandomAccessFile>(nullptr);
     auto result = raf->GetFPointer();
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_GetFPointer_005";
 }
 
-// SetFilePointerSync
 /**
  * @tc.name: FsRandomAccessFileTest_SetFilePointerSync_006
  * @tc.desc: Test function of SetFilePointerSync() interface for SUCCESS.
@@ -186,7 +183,7 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_SetFilePointerSync_007, 
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_SetFilePointerSync_007";
 
-    raf = std::make_unique<FsRandomAccessFile>(nullptr);
+    raf = make_unique<FsRandomAccessFile>(nullptr);
     auto result = raf->SetFilePointerSync(50);
     EXPECT_EQ(result.IsSuccess(), false);
 
@@ -206,10 +203,10 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_ReadSync_008, testing::e
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_ReadSync_008";
 
-    raf = std::make_unique<FsRandomAccessFile>(nullptr);
+    raf = make_unique<FsRandomAccessFile>(nullptr);
     ArrayBuffer buffer(malloc(100), 100);
 
-    auto result = raf->ReadSync(buffer, std::nullopt);
+    auto result = raf->ReadSync(buffer, nullopt);
     EXPECT_EQ(result.IsSuccess(), false);
     free(buffer.buf);
 
@@ -275,9 +272,9 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_011, testing::
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_011";
 
-    raf = std::make_unique<FsRandomAccessFile>(nullptr);
-    std::string data = "test data";
-    auto result = raf->WriteSync(data, std::nullopt);
+    raf = make_unique<FsRandomAccessFile>(nullptr);
+    string data = "test data";
+    auto result = raf->WriteSync(data, nullopt);
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_WriteSync_011";
@@ -295,9 +292,9 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_012, testing::
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_012";
 
-    raf = std::make_unique<FsRandomAccessFile>(nullptr);
+    raf = make_unique<FsRandomAccessFile>(nullptr);
     ArrayBuffer buffer(malloc(100), 100);
-    auto result = raf->WriteSync(buffer, std::nullopt);
+    auto result = raf->WriteSync(buffer, nullopt);
     EXPECT_EQ(result.IsSuccess(), false);
     free(buffer.buf);
 
@@ -316,7 +313,7 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_013, testing::
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_013";
 
-    std::string data = "test data";
+    string data = "test data";
     WriteOptions options;
     options.offset = -5;
 
@@ -361,7 +358,7 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_015, testing::
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_015";
 
-    std::string data = "test data";
+    string data = "test data";
     WriteOptions options;
     options.length = -5;
 
@@ -407,7 +404,7 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_CloseSync_017, testing::
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_CloseSync_017";
 
-    raf = std::make_unique<FsRandomAccessFile>(nullptr);
+    raf = make_unique<FsRandomAccessFile>(nullptr);
     auto result = raf->CloseSync();
     EXPECT_EQ(result.IsSuccess(), false);
 

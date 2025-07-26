@@ -34,13 +34,13 @@ public:
     void TearDown();
     static inline shared_ptr<UvfsMock> uvMock = nullptr;
 protected:
-    std::unique_ptr<RandomAccessFileEntity> rafEntity;
-    std::unique_ptr<FsRandomAccessFile> raf;
+    unique_ptr<RandomAccessFileEntity> rafEntity;
+    unique_ptr<FsRandomAccessFile> raf;
 };
 
 void FsRandomAccessFileMockTest::SetUpTestCase(void)
 {
-    uvMock = std::make_shared<UvfsMock>();
+    uvMock = make_shared<UvfsMock>();
     Uvfs::ins = uvMock;
     GTEST_LOG_(INFO) << "SetUpTestCase";
 }
@@ -55,12 +55,12 @@ void FsRandomAccessFileMockTest::TearDownTestCase(void)
 void FsRandomAccessFileMockTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
-    rafEntity = std::make_unique<RandomAccessFileEntity>();
+    rafEntity = make_unique<RandomAccessFileEntity>();
     const int fdValue = 3;
     const bool isClosed = false;
-    rafEntity->fd = std::make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
+    rafEntity->fd = make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
     rafEntity->filePointer = 0;
-    raf = std::make_unique<FsRandomAccessFile>(std::move(rafEntity));
+    raf = make_unique<FsRandomAccessFile>(move(rafEntity));
 }
 
 void FsRandomAccessFileMockTest::TearDown(void)
@@ -70,19 +70,19 @@ void FsRandomAccessFileMockTest::TearDown(void)
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_ReadSync_001
- * @tc.desc: Test function of ReadSync() interface for is failed for options is std::nullopt.
+ * @tc.desc: Test function of ReadSync() interface for is failed for options is nullopt.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  
 */
-HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_ReadSync_001";
 
     ArrayBuffer buffer(malloc(100), 100);
     EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(-1));
-    auto result = raf->ReadSync(buffer, std::nullopt);
+    auto result = raf->ReadSync(buffer, nullopt);
     EXPECT_EQ(result.IsSuccess(), false);
     free(buffer.buf);
 
@@ -97,7 +97,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, te
  * @tc.level Level 1
  
 */
-HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_ReadSync_002";
 
@@ -117,19 +117,19 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, te
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_WriteSync_003
- * @tc.desc: Test function of WriteSync() interface for is failed for options is std::nullopt.
+ * @tc.desc: Test function of WriteSync() interface for is failed for options is nullopt.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  
 */
-HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_003";
 
-    std::string data = "test data";
+    string data = "test data";
     EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
-    auto result = raf->WriteSync(data, std::nullopt);
+    auto result = raf->WriteSync(data, nullopt);
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_WriteSync_003";
@@ -143,11 +143,11 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, t
  * @tc.level Level 1
  
 */
-HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_004";
 
-    std::string data = "test data";
+    string data = "test data";
     WriteOptions options;
     options.length = 4;
     options.offset = 0;
@@ -167,7 +167,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, t
  * @tc.level Level 1
  
 */
-HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_005";
 
@@ -192,7 +192,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, t
  * @tc.level Level 1
  
 */
-HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_006";
 
@@ -217,7 +217,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, t
  * @tc.level Level 1
  
 */
-HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_007";
 
@@ -236,7 +236,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, t
  * @tc.level Level 1
  
 */
-HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_008";
 
