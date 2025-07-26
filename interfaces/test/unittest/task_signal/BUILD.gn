@@ -33,8 +33,15 @@ ohos_unittest("task_signal_test") {
 
   external_deps = [
     "c_utils:utils",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_napi",
+  ]
+
+  defines = [
+    "ENABLE_DISTRIBUTED_FILE_MOCK",
+    "private=public",
   ]
 }
