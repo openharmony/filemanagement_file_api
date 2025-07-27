@@ -37,8 +37,8 @@
 #include "filemgmt_libhilog.h"
 #include "fs_utils.h"
 #include "if_system_ability_manager.h"
-#include "iservice_registry.h"
 #include "ipc_skeleton.h"
+#include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "trans_listener_core.h"
 #include "utils_log.h"
@@ -154,7 +154,7 @@ bool CopyCore::IsDirectory(const std::string &path)
     struct stat buf {};
     int ret = stat(path.c_str(), &buf);
     if (ret == -1) {
-        HILOGE("stat failed, errno is %{public}d", errno);
+        HILOGE("Stat failed, errno is %{public}d", errno);
         return false;
     }
     return (buf.st_mode & S_IFMT) == S_IFDIR;
@@ -165,7 +165,7 @@ bool CopyCore::IsFile(const std::string &path)
     struct stat buf {};
     int ret = stat(path.c_str(), &buf);
     if (ret == -1) {
-        HILOGI("stat failed, errno is %{public}d, ", errno);
+        HILOGI("Stat failed, errno is %{public}d, ", errno);
         return false;
     }
     return (buf.st_mode & S_IFMT) == S_IFREG;
@@ -193,7 +193,7 @@ int CopyCore::CheckOrCreatePath(const std::string &destPath)
 {
     std::error_code errCode;
     if (!filesystem::exists(destPath, errCode) && errCode.value() == ERRNO_NOERR) {
-        HILOGI("destPath not exist");
+        HILOGI("DestPath not exist");
         auto file = open(destPath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (file < 0) {
             HILOGE("Error opening file descriptor. errno = %{public}d", errno);
@@ -209,17 +209,20 @@ int CopyCore::CheckOrCreatePath(const std::string &destPath)
 int CopyCore::CopyFile(const string &src, const string &dest, std::shared_ptr<FsFileInfos> infos)
 {
     HILOGD("src = %{public}s, dest = %{public}s", GetAnonyString(src).c_str(), GetAnonyString(dest).c_str());
+
     int32_t srcFd = -1;
     int32_t ret = OpenSrcFile(src, infos, srcFd);
     if (srcFd < 0) {
         return ret;
     }
+
     auto destFd = open(dest.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
     if (destFd < 0) {
         HILOGE("Error opening dest file descriptor. errno = %{public}d", errno);
         close(srcFd);
         return errno;
     }
+
     auto srcFdg = CreateUniquePtr<DistributedFS::FDGuard>(srcFd, true);
     auto destFdg = CreateUniquePtr<DistributedFS::FDGuard>(destFd, true);
     if (srcFdg == nullptr || destFdg == nullptr) {
@@ -408,7 +411,7 @@ int CopyCore::ExecLocal(std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCa
         }
         int ret = CheckOrCreatePath(infos->destPath);
         if (ret != ERRNO_NOERR) {
-            HILOGE("check or create fail, error code is %{public}d", ret);
+            HILOGE("Check or create fail, error code is %{public}d", ret);
             return ret;
         }
     }
@@ -575,6 +578,7 @@ int CopyCore::UpdateProgressSize(
         HILOGE("GetFileSize failed, err: %{public}d.", err);
         return err;
     }
+
     auto size = fileSize;
     auto iter = receivedInfo->fileList.find(filePath);
     if (iter == receivedInfo->fileList.end()) {
