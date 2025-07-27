@@ -183,6 +183,7 @@ struct TaskSignal : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string nativeTaskSignal;
 };
 
 struct WatcherInner : public BaseType {
