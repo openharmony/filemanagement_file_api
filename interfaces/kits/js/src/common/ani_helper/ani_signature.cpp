@@ -30,6 +30,7 @@ const Type BasicTypes::doubleType = Builder::BuildDouble();
 // BasicTypesConverter::toLong
 const string BasicTypesConverter::toLong = "toLong";
 const string BasicTypesConverter::toInt = "toInt";
+const string BasicTypesConverter::toDouble = "toDouble";
 
 // BoxedTypes::Boolean
 const Type BoxedTypes::Boolean::classType = Builder::BuildClass("std.core.Boolean");
