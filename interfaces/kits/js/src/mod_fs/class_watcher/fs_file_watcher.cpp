@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <poll.h>
 #include <unistd.h>
-
 #include <sys/eventfd.h>
 
 #include "filemgmt_libhilog.h"
@@ -167,7 +166,7 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
         if (!(closed_ && reading_)) {
             oldWd = inotify_rm_watch(notifyFd_, info->wd);
         } else {
-            HILOGE("rm watch fail");
+            HILOGE("Rm watch fail");
         }
     }
 
@@ -212,7 +211,7 @@ void FsFileWatcher::ReadNotifyEventLocked()
     {
         lock_guard<mutex> lock(readMutex_);
         if (closed_) {
-            HILOGE("read after close");
+            HILOGE("Read after close");
             return;
         }
         reading_ = true;
@@ -224,7 +223,7 @@ void FsFileWatcher::ReadNotifyEventLocked()
         lock_guard<mutex> lock(readMutex_);
         reading_ = false;
         if (closed_) {
-            HILOGE("close after read");
+            HILOGE("Close after read");
             CloseNotifyFd();
             return;
         }

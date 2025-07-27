@@ -20,9 +20,9 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "fs_watcher_wrapper.h"
+#include "type_converter.h"
 #include "watch_event_listener.h"
 #include "watcher_core.h"
-#include "type_converter.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -66,6 +66,7 @@ ani_object WatcherAni::CreateWatcherSync(
     const FsWatcher *watcher = ret.GetData().value();
     auto result = FsWatcherWrapper::Wrap(env, move(watcher));
     if (result == nullptr) {
+        HILOGE("Failed to Wrap");
         delete watcher;
         watcher = nullptr;
         ErrorHandler::Throw(env, UNKNOWN_ERR);

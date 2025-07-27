@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+
 #include "i_watcher_callback.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -36,9 +37,9 @@ struct WatcherInfo {
 
     explicit WatcherInfo(std::shared_ptr<IWatcherCallback> callback) : callback(std::move(callback)) {}
 
-    void TriggerCallback(const std::string &fileName, uint32_t event, uint32_t cookie) const
+    void TriggerCallback(const std::string &eventFileName, uint32_t event, uint32_t cookie) const
     {
-        callback->InvokeCallback(fileName, event, cookie);
+        callback->InvokeCallback(eventFileName, event, cookie);
     }
 };
 

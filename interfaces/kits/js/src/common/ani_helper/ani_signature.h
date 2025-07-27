@@ -190,6 +190,7 @@ struct WatcherInner : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string nativePtr;
 };
 
 struct WatchEventInner : public BaseType {

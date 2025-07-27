@@ -16,6 +16,7 @@
 #include "watch_event_listener.h"
 
 #include <memory>
+
 #include "ani_helper.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -28,6 +29,7 @@ using namespace std;
 bool WatchEventListener::IsStrictEquals(const shared_ptr<IWatcherCallback> &other) const
 {
     if (other->GetClassName() != className_) {
+        HILOGE("Cannot GetClassName");
         return false;
     }
 
@@ -46,7 +48,7 @@ bool WatchEventListener::IsStrictEquals(const shared_ptr<IWatcherCallback> &othe
     ani_boolean isSame = false;
     ani_status status = env->Reference_StrictEquals(callback, otherListener->callback, &isSame);
     if (status != ANI_OK) {
-        HILOGE("Compare ref for strict equality failed. status = %{public}d", static_cast<int32_t>(status));
+        HILOGE("Compare ref for strict equality failed. status = %{public}d", status);
         return false;
     }
     return isSame;

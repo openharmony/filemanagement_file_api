@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "watcher_data_cache.h"
+
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -58,6 +59,7 @@ bool WatcherDataCache::RemoveFileWatcher(const std::string &fileName)
 
     auto iter = wdFileNameCache_.find(fileName);
     if (iter == wdFileNameCache_.end()) {
+        HILOGE("Failed to find fileName");
         return false;
     }
     wdFileNameCache_.erase(iter);

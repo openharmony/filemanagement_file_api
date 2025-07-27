@@ -29,9 +29,9 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 FsWatcher *FsWatcherWrapper::Unwrap(ani_env *env, ani_object object)
 {
     ani_long nativePtr;
-    auto ret = env->Object_GetFieldByName_Long(object, "nativePtr", &nativePtr);
+    auto ret = env->Object_GetFieldByName_Long(object, FS::WatcherInner::nativePtr, &nativePtr);
     if (ret != ANI_OK) {
-        HILOGE("Unwrap fsWatcher err: %{private}d", ret);
+        HILOGE("Unwrap fsWatcher err: %{public}d", ret);
         return nullptr;
     }
     uintptr_t ptrValue = static_cast<uintptr_t>(nativePtr);
@@ -55,13 +55,13 @@ ani_object FsWatcherWrapper::Wrap(ani_env *env, const FsWatcher *watcher)
     auto ctorSig = FS::WatcherInner::ctorSig.c_str();
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", classDesc);
+        HILOGE("Cannot find constructor method for class %{public}s", classDesc);
         return nullptr;
     }
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(watcher));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", classDesc);
+        HILOGE("New %{public}s obj Failed!", classDesc);
         return nullptr;
     }
     return obj;

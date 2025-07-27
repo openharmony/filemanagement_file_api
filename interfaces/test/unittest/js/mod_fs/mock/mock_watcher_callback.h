@@ -18,6 +18,7 @@
 
 #include <string>
 #include <gmock/gmock.h>
+
 #include "i_watcher_callback.h"
 
 namespace OHOS {

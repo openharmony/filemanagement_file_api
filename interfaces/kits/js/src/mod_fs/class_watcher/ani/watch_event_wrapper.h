@@ -18,6 +18,7 @@
 
 #include <ani.h>
 #include <string>
+
 #include "fs_watch_entity.h"
 
 namespace OHOS {

@@ -32,6 +32,7 @@ static FsResult<FsWatcher *> InstantiateWatcher()
         HILOGE("Failed to get notifyId or initnotify fail");
         return FsResult<FsWatcher *>::Error(errno);
     }
+
     FsResult<FsWatcher *> result = FsWatcher::Constructor();
     if (!result.IsSuccess()) {
         HILOGE("Failed to instantiate watcher");

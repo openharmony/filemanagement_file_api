@@ -83,7 +83,7 @@ inline const int32_t UNEXPECTED_WD = 200;
 
 /**
  * @tc.name: FsFileWatcherMockTest_GetNotifyId_001
- * @tc.desc: Test function of FsFileWatcher::GetNotifyId interface.
+ * @tc.desc: Test function of FsFileWatcher::GetNotifyId interface for FAILED.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 0
@@ -111,13 +111,14 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_GetNotifyId_001, testing::
 HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_InitNotify_001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_InitNotify_001";
+    int32_t eventFd = 2;
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     // Set mock behaviors
     auto eventfdMock = EventfdMock::GetMock();
     auto inotifyMock = InotifyMock::GetMock();
     EXPECT_CALL(*inotifyMock, inotify_init()).Times(1).WillOnce(testing::Return(1));
-    EXPECT_CALL(*eventfdMock, eventfd(testing::_, testing::_)).Times(1).WillOnce(testing::Return(2));
+    EXPECT_CALL(*eventfdMock, eventfd(testing::_, testing::_)).Times(1).WillOnce(testing::Return(eventFd));
     // Do testing
     bool result = watcher.InitNotify();
     // Verify results
@@ -125,7 +126,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_InitNotify_001, testing::e
     testing::Mock::VerifyAndClearExpectations(eventfdMock.get());
     EXPECT_TRUE(result);
     EXPECT_EQ(watcher.notifyFd_, 1);
-    EXPECT_EQ(watcher.eventFd_, 2);
+    EXPECT_EQ(watcher.eventFd_, eventFd);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_InitNotify_001";
 }
 
