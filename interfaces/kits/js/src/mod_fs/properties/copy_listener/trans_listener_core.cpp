@@ -285,7 +285,6 @@ int32_t TransListenerCore::OnFileReceive(uint64_t totalBytes, uint64_t processed
 
 int32_t TransListenerCore::OnFinished(const std::string &sessionName)
 {
-    HILOGI("OnFinished");
     {
         std::lock_guard<std::mutex> lock(callbackMutex_);
         callback_ = nullptr;

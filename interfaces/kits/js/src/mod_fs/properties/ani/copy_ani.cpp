@@ -51,7 +51,7 @@ static bool ParseListenerFromOptionArg(ani_env *env, const ani_object &options, 
 
     ani_ref cbRef;
     if (ANI_OK != env->GlobalReference_Create(prog, &cbRef)) {
-        HILOGE("Illegal options.progressListener type");
+        HILOGE("Failed to create reference");
         return false;
     }
 
