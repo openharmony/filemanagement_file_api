@@ -41,7 +41,7 @@ ani_object FdopenStreamAni::FdopenStreamSync(
 
     FsResult<FsStream *> ret = FdopenStreamCore::DoFdopenStream(static_cast<int32_t>(fd), openMode);
     if (!ret.IsSuccess()) {
-        HILOGE("fdopen stream failed");
+        HILOGE("Fdopen stream failed");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
         return nullptr;
@@ -53,6 +53,7 @@ ani_object FdopenStreamAni::FdopenStreamSync(
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
+
     return result;
 }
 

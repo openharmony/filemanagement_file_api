@@ -41,6 +41,7 @@ struct BasicTypes {
 struct BasicTypesConverter {
     static const string toLong;
     static const string toInt;
+    static const string toDouble;
 };
 
 struct BaseType {

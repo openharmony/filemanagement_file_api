@@ -24,6 +24,6 @@ class FsyncCore final {
 public:
     static FsResult<void> DoFsync(const int32_t &fd);
 };
-const std::string PROCEDURE_FSYNC_NAME = "FileIOFsync";
+
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FSYNC_CORE_H

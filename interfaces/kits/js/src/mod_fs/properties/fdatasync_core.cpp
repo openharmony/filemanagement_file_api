@@ -17,9 +17,8 @@
 
 #include <cstring>
 #include <fcntl.h>
-#include <tuple>
-#include <unistd.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "filemgmt_libhilog.h"
 

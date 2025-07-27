@@ -44,8 +44,8 @@ ani_double LseekAni::LseekSync(
         ErrorHandler::Throw(env, EINVAL);
         return -1;
     }
+    
     auto pos = ParseSeekPos(whenceOp);
-
     auto ret = LseekCore::DoLseek(static_cast<int32_t>(fd), static_cast<int64_t>(offset), pos);
     if (!ret.IsSuccess()) {
         HILOGE("DoLseek failed!");

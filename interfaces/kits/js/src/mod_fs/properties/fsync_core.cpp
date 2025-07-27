@@ -32,6 +32,7 @@ FsResult<void> FsyncCore::DoFsync(const int32_t &fd)
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);
     }
+
     int ret = uv_fs_fsync(nullptr, fsyncReq.get(), fd, nullptr);
     if (ret < 0) {
         HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
