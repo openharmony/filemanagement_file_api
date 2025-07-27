@@ -154,5 +154,15 @@ const string Impl::StatvfsImpl::classDesc = Impl::StatvfsImpl::classType.Descrip
 const Type HASH::HashStreamImpl::classType = Builder::BuildClass("@ohos.file.hash.HashStreamImpl");
 const string HASH::HashStreamImpl::classDesc = HASH::HashStreamImpl::classType.Descriptor();
 const string HASH::HashStreamImpl::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+// FS::ReadStreamOptionsInner
+const Type FS::ReadStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.ReadStreamOptionsInner");
+const string FS::ReadStreamOptionsInner::classDesc = FS::ReadStreamOptionsInner::classType.Descriptor();
+const string FS::ReadStreamOptionsInner::ctorSig = Builder::BuildSignatureDescriptor({});
+const string FS::ReadStreamOptionsInner::ctorDesc = Builder::BuildConstructorName();
+// FS::WriteStreamOptionsInner
+const Type FS::WriteStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.WriteStreamOptionsInner");
+const string FS::WriteStreamOptionsInner::classDesc = FS::ReadStreamOptionsInner::classType.Descriptor();
+const string FS::WriteStreamOptionsInner::ctorSig = Builder::BuildSignatureDescriptor({});
+const string FS::WriteStreamOptionsInner::ctorDesc = Builder::BuildConstructorName();
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature
