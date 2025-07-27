@@ -35,7 +35,7 @@ public:
 void DupCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = std::make_shared<UvfsMock>();
+    uvMock = make_shared<UvfsMock>();
     Uvfs::ins = uvMock;
 }
 

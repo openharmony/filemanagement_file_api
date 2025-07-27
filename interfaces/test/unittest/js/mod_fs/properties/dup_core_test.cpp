@@ -15,8 +15,8 @@
 
 #include "dup_core.h"
 
-#include <unistd.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <gtest/gtest.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
