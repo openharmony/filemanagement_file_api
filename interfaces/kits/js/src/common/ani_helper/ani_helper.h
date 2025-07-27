@@ -33,10 +33,7 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-inline shared_ptr<OHOS::AppExecFwk::EventHandler>& GetMainHandler() {
-    thread_local shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler;
-    return mainHandler;
-}
+static thread_local shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler;
 
 class AniHelper {
 public:
@@ -116,7 +113,7 @@ public:
         static const string longValueSig = Builder::BuildSignatureDescriptor({}, BasicTypes::longType);
         ani_long value;
         status = env->Object_CallMethodByName_Long(
-            static_cast<ani_object>(property), "longValue", longValueSig.c_str(), &value);
+            static_cast<ani_object>(property), BasicTypesConverter::toLong.c_str(), longValueSig.c_str(), &value);
         if (status != ANI_OK) {
             return { false, nullopt };
         }
@@ -160,7 +157,7 @@ public:
         if (status != ANI_OK) {
             status = vm->GetEnv(ANI_VERSION_1, &env);
             if (status != ANI_OK) {
-                HILOGE("vm GetEnv, err: %{private}d", status);
+                HILOGE("vm GetEnv, err: %{public}d", status);
                 return nullptr;
             }
         }
@@ -172,7 +169,7 @@ public:
         if (vm && GetThreadEnvStorage()) {
             auto status = vm->DetachCurrentThread();
             if (status != ANI_OK) {
-                HILOGE("Detach thread env from vm failed! status: %{private}d", status);
+                HILOGE("Detach thread env from vm failed! status: %{public}d", status);
                 return;
             }
             GetThreadEnvStorage() = nullptr;
@@ -186,7 +183,6 @@ public:
             return false;
         }
 
-        auto& mainHandler = GetMainHandler();
         if (mainHandler == nullptr) {
             shared_ptr<OHOS::AppExecFwk::EventRunner> runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
             if (!runner) {

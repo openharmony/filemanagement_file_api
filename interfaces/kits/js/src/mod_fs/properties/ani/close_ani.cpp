@@ -44,7 +44,7 @@ tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
 
     if (isDouble) {
         ani_int fd;
-        if (ANI_OK != env->Object_CallMethodByName_Int(obj, "intValue", nullptr, &fd)) {
+        if (ANI_OK != env->Object_CallMethodByName_Int(obj, BasicTypesConverter::toInt.c_str(), nullptr, &fd)) {
             HILOGE("Get fd value failed");
             return { false, result, nullptr };
         }
