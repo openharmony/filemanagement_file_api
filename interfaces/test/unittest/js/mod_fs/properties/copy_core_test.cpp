@@ -32,19 +32,23 @@ public:
     void TearDown();
 
     static const string testDir;
+    static const string copyCoreDir;
     static const string srcDir;
     static const string destDir;
     static const string srcFile;
     static const string destFile;
 
 private:
-    static constexpr mode_t permission0755 = 0755; // rwxr-xr-x
-    static constexpr mode_t permission0644 = 0644; // rw-r--r--
+    // rwxr-xr-x
+    static constexpr mode_t permission0755 = 0755;
+    // rw-r--r--
+    static constexpr mode_t permission0644 = 0644;
 };
 
 const string CopyCoreTest::testDir = "/data/test";
-const string CopyCoreTest::srcDir = testDir + "/src";
-const string CopyCoreTest::destDir = testDir + "/dest";
+const string CopyCoreTest::copyCoreDir = testDir + "/CopyCoreTest";
+const string CopyCoreTest::srcDir = copyCoreDir + "/src";
+const string CopyCoreTest::destDir = copyCoreDir + "/dest";
 const string CopyCoreTest::srcFile = srcDir + "/src.txt";
 const string CopyCoreTest::destFile = destDir + "/dest.txt";
 
@@ -52,6 +56,7 @@ void CopyCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     mkdir(testDir.c_str(), permission0755);
+    mkdir(copyCoreDir.c_str(), permission0755);
     mkdir(srcDir.c_str(), permission0755);
     mkdir(destDir.c_str(), permission0755);
     int32_t fd = open(srcFile.c_str(), O_CREAT | O_RDWR, permission0644);
@@ -114,7 +119,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsValidUri_002, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsValidUri_002";
 
-    string invalidUri = "invalid://data/test/file.txt";
+    string invalidUri = "invalid://data/test/CopyCoreTest_IsValidUri_002/file.txt";
     auto res = CopyCore::IsValidUri(invalidUri);
     EXPECT_EQ(res, false);
 
@@ -464,7 +469,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopySubDir_001, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopySubDir_001";
 
-    string subDir = srcDir + "/sub_dir";
+    string subDir = srcDir + "/CopyCoreTest_CopySubDir_001_sub_dir";
     mkdir(subDir.c_str(), permission0755);
     string subFile = subDir + "/sub_file.txt";
     int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);

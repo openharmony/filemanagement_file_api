@@ -17,14 +17,13 @@
 #include <filesystem>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <gtest/gtest.h>
 
 #include "copy_core.h"
 #include "inotify_mock.h"
 #include "mock_progress_listener.h"
-#include "mock/uv_fs_mock.h"
 #include "poll_mock.h"
 #include "unistd_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -46,11 +45,13 @@ public:
     static const string destFile;
 
 private:
+    // rwxr-xr-x
     static constexpr mode_t permission0755 = 0755;
+    // rw-r--r--
     static constexpr mode_t permission0644 = 0644;
 };
 
-const string CopyCoreMockTest::testDir = "/data/test";
+const string CopyCoreMockTest::testDir = "/data/test/CopyCoreMockTest";
 const string CopyCoreMockTest::srcDir = testDir + "/src";
 const string CopyCoreMockTest::destDir = testDir + "/dest";
 const string CopyCoreMockTest::srcFile = srcDir + "/src.txt";
@@ -288,7 +289,9 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_ReceiveComplete_001, testing::ext::T
     auto callback = std::make_shared<FsCallbackObject>(mockListener);
     callback->maxProgressSize = 50;
     auto entry = std::make_shared<FsUvEntry>(callback);
+    // 当前已经拷贝的字节数
     entry->progressSize = 100;
+    // 需要拷贝的字节数
     entry->totalSize = 200;
 
     EXPECT_CALL(*mockListener, InvokeListener(entry->progressSize, entry->totalSize)).Times(1);
@@ -485,7 +488,8 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_GetNotifyId_001, testing::ext::TestS
         .Times(1)
         .WillOnce([infos](struct pollfd *fds, nfds_t n, int timeout) {
             fds[1].revents = POLLIN;
-            infos->run = false; // Ensure the loop will exit
+            // Ensure the loop will exit
+            infos->run = false;
             return 1;
         });
     // Do testing

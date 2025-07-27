@@ -36,8 +36,8 @@ using namespace OHOS::AppExecFwk;
 using namespace DistributedFS::ModuleTaskSignal;
 
 struct CopyOptions {
-    std::shared_ptr<IProgressListener> progressListener;
-    std::shared_ptr<FsTaskSignal> copySignal;
+    shared_ptr<IProgressListener> progressListener;
+    shared_ptr<FsTaskSignal> copySignal;
 };
 
 struct ReceiveInfo {
@@ -118,9 +118,8 @@ struct FsUvEntry {
     uint64_t progressSize = 0;
     uint64_t totalSize = 0;
     FsUvEntry(const std::shared_ptr<FsCallbackObject> &cb, std::shared_ptr<FsFileInfos> fileInfos)
-        : callback(cb), fileInfos(fileInfos)
-    {
-    }
+        : callback(cb), fileInfos(fileInfos) {}
+
     explicit FsUvEntry(const std::shared_ptr<FsCallbackObject> &cb) : callback(cb) {}
 };
 
@@ -181,7 +180,6 @@ private:
     static std::string ConvertUriToPath(const std::string &uri);
     static std::string GetRealPath(const std::string &path);
 
-private:
     static std::recursive_mutex mutex_;
     static std::map<FsFileInfos, std::shared_ptr<FsCallbackObject>> callbackMap_;
 };
