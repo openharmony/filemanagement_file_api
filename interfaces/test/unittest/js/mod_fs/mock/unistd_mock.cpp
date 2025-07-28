@@ -30,6 +30,7 @@ std::shared_ptr<UnistdMock> UnistdMock::GetMock()
     if (unistdMock == nullptr) {
         unistdMock = std::make_shared<UnistdMock>();
     }
+
     return unistdMock;
 }
 

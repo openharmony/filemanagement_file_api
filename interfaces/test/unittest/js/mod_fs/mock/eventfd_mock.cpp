@@ -30,6 +30,7 @@ std::shared_ptr<EventfdMock> EventfdMock::GetMock()
     if (eventfdMock == nullptr) {
         eventfdMock = std::make_shared<EventfdMock>();
     }
+
     return eventfdMock;
 }
 

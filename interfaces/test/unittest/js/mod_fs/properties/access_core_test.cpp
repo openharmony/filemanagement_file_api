@@ -19,7 +19,6 @@
 #include <gtest/gtest.h>
 #include <sys/xattr.h>
 
-
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
 using namespace testing::ext;
@@ -59,7 +58,6 @@ void AccessCoreTest::TearDown(void)
     GTEST_LOG_(INFO) << "TearDown";
 }
 
-// 递归创建多级目录的辅助函数
 bool CreateDirectoryRecursive(const std::string& path) {
     if (path.empty()) {
         return false;

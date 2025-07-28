@@ -104,7 +104,7 @@ HWTEST_F(FsStatMockTest, FsStatMockTest_GetLocation_002, testing::ext::TestSize.
     statEntity = make_unique<StatEntity>();
     statEntity->fileInfo_ = make_unique<FileInfo>();
     statEntity->fileInfo_->isPath = false;
-    const int fdValue = 3;  //模拟fd为3
+    const int fdValue = 3;
     const bool isClosed = false;
     statEntity->fileInfo_->fdg = make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
     fsStat = make_unique<FsStat>(move(statEntity));
