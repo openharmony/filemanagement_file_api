@@ -16,6 +16,7 @@
 #include "movedir_ani.h"
 
 #include <optional>
+
 #include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
@@ -34,7 +35,7 @@ static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ErrFiles &fil
     ani_class cls;
     ani_status ret;
     if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Cannot find class %{private}s, err: %{private}d", classDesc, ret);
+        HILOGE("Cannot find class %{public}s, err: %{public}d", classDesc, ret);
         return { false, nullptr };
     }
 
@@ -42,7 +43,7 @@ static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ErrFiles &fil
     auto ctorSig = FS::ConflictFilesInner::ctorSig.c_str();
     ani_method ctor;
     if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
-        HILOGE("Cannot find class %{private}s constructor method, err: %{private}d", classDesc, ret);
+        HILOGE("Cannot find class %{public}s constructor method, err: %{public}d", classDesc, ret);
         return { false, nullptr };
     }
 
@@ -60,7 +61,7 @@ static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ErrFiles &fil
 
     ani_object obj;
     if ((ret = env->Object_New(cls, ctor, &obj, src, dest)) != ANI_OK) {
-        HILOGE("Create ConflictFiles object failed!, err: %{private}d", ret);
+        HILOGE("Create ConflictFiles object failed!, err: %{public}d", ret);
         return { false, nullptr };
     }
 
@@ -78,7 +79,7 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
     ani_status ret;
 
     if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Cannot find class %{private}s, err: %{private}d", classDesc, ret);
+        HILOGE("Cannot find class %{public}s, err: %{public}d", classDesc, ret);
         return { false, nullopt };
     }
 
@@ -86,14 +87,14 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
     auto ctorSig = BuiltInTypes::Array::ctorSig.c_str();
     ani_method ctor;
     if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
-        HILOGE("Cannot find class %{private}s constructor method, err: %{private}d", classDesc, ret);
+        HILOGE("Cannot find class %{public}s constructor method, err: %{public}d", classDesc, ret);
         return { false, nullopt };
     }
 
     ani_object arr;
     auto files = errFiles.value();
     if ((ret = env->Object_New(cls, ctor, &arr, files.size())) != ANI_OK) {
-        HILOGE("Create Array failed!, err: %{private}d", ret);
+        HILOGE("Create Array failed!, err: %{public}d", ret);
         return { false, nullopt };
     }
 
@@ -107,7 +108,7 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
         }
 
         if ((ret = env->Object_CallMethodByName_Void(arr, setterDesc, setterSig, index, fileObj)) != ANI_OK) {
-            HILOGE("Add element to Array failed, err: %{private}d", ret);
+            HILOGE("Add element to Array failed, err: %{public}d", ret);
             return { false, nullopt };
         }
         index++;

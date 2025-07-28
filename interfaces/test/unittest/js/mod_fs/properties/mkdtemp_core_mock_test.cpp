@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 
 #include "mkdtemp_core.h"
-#include "mock/uv_fs_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;

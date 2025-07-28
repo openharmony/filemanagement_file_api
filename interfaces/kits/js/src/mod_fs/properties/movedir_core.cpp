@@ -15,13 +15,13 @@
 
 #include "movedir_core.h"
 
+#include <deque>
 #include <dirent.h>
 #include <filesystem>
 #include <memory>
 #include <string_view>
 #include <tuple>
 #include <unistd.h>
-#include <deque>
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -59,7 +59,7 @@ static int RmDirectory(const string &path)
             return errCode.value();
         }
     } else if (errCode.value() != ERRNO_NOERR) {
-        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        HILOGE("Fs exists fail, errcode is %{public}d", errCode.value());
         return errCode.value();
     }
     return ERRNO_NOERR;
@@ -110,7 +110,7 @@ static int RenameFile(const string &src, const string &dest, const int mode, deq
         }
     }
     if (errCode.value() != ERRNO_NOERR) {
-        HILOGE("fs exists or is_directory fail, errcode is %{public}d", errCode.value());
+        HILOGE("Fs exists or is_directory fail, errcode is %{public}d", errCode.value());
     }
     filesystem::path srcPath(src);
     filesystem::rename(srcPath, dstPath, errCode);
@@ -136,7 +136,7 @@ static int RenameDir(const string &src, const string &dest, const int mode, dequ
     if (filesystem::exists(destPath, errCode)) {
         return RecurMoveDir(src, dest, mode, errfiles);
     } else if (errCode.value() != ERRNO_NOERR) {
-        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        HILOGE("Fs exists fail, errcode is %{public}d", errCode.value());
         return errCode.value();
     }
     filesystem::path srcPath(src);
