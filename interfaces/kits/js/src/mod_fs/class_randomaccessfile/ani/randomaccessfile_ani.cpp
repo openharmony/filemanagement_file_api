@@ -285,15 +285,15 @@ static ani_string GetFilePath(ani_env *env, const int fd)
 
 static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t end)
 {
-    static const char *className = FS::ReadStreamOptionsInner::classType;
+    static const char *className = FS::ReadStreamOptionsInner::classDesc.c_str();
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         HILOGE("Cannot find class %{public}s", className);
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, FS::ReadStreamOptionsInner::ctorDesc,
-        FS::ReadStreamOptionsInner::ctorSig, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, FS::ReadStreamOptionsInner::ctorDesc.c_str(),
+        FS::ReadStreamOptionsInner::ctorSig.c_str(), &ctor)) {
         HILOGE("Cannot find constructor method for class %{public}s", className);
         return nullptr;
     }
@@ -329,15 +329,15 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
 
 static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flags)
 {
-    static const char *className = FS::WriteStreamOptionsInner::classType;
+    static const char *className = FS::WriteStreamOptionsInner::classDesc.c_str();
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         HILOGE("Cannot find class %{public}s", className);
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, FS::WriteStreamOptionsInner::ctorDesc,
-        FS::WriteStreamOptionsInner::ctorSig, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, FS::WriteStreamOptionsInner::ctorDesc.c_str(),
+        FS::WriteStreamOptionsInner::ctorSig.c_str(), &ctor)) {
         HILOGE("Cannot find constructor method for class %{public}s", className);
         return nullptr;
     }

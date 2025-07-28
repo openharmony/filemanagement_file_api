@@ -167,7 +167,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_WaitForCopyResult_001, tes
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_WaitForCopyResult_001";
 
-    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
+    shared_ptr<TransListenerCore> transListener = make_shared<TransListenerCore>();
     transListener->copyEvent_.copyResult = FAILED;
     int result = TransListenerCore::WaitForCopyResult(transListener.get());
     EXPECT_EQ(result, 2);
@@ -301,6 +301,9 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_PrepareCopySession_005, te
     info.authority = "abc";
     info.sandboxPath = "/data/test/PrepareCopySession_004.txt";
     int32_t fd = open(info.sandboxPath.c_str(), O_CREAT | O_RDWR, 0644);
+    if (fd < 0) {
+        EXPECT_TRUE(false);
+    }
     close(fd);
 
     string disSandboxPath = "disSandboxPath";
@@ -436,7 +439,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CallbackComplete_002, test
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_CallbackComplete_002";
 
-    auto entry = make_shared<FsUvEntry>(make_shared<FsCallbackObject>(std::make_shared<IProgressListenerTest>()));
+    auto entry = make_shared<FsUvEntry>(make_shared<FsCallbackObject>(make_shared<IProgressListenerTest>()));
     entry->callback = nullptr;
     TransListenerCore::CallbackComplete(entry);
 
@@ -454,7 +457,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CallbackComplete_003, test
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_CallbackComplete_003";
 
-    auto entry = make_shared<FsUvEntry>(make_shared<FsCallbackObject>(std::make_shared<IProgressListenerTest>()));
+    auto entry = make_shared<FsUvEntry>(make_shared<FsCallbackObject>(make_shared<IProgressListenerTest>()));
     entry->callback->listener = nullptr;
     TransListenerCore::CallbackComplete(entry);
 
@@ -472,7 +475,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CallbackComplete_004, test
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_CallbackComplete_004";
 
-    auto entry = make_shared<FsUvEntry>(make_shared<FsCallbackObject>(std::make_shared<IProgressListenerTest>()));
+    auto entry = make_shared<FsUvEntry>(make_shared<FsCallbackObject>(make_shared<IProgressListenerTest>()));
     TransListenerCore::CallbackComplete(entry);
 
     GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_CallbackComplete_004";
@@ -489,7 +492,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_OnFileReceive_001, testing
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_OnFileReceive_001";
 
-    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
+    shared_ptr<TransListenerCore> transListener = make_shared<TransListenerCore>();
     transListener->callback_ = nullptr;
     auto res = transListener->OnFileReceive(0, 0);
     EXPECT_EQ(res, ENOMEM);
@@ -508,8 +511,8 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_OnFileReceive_002, testing
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_OnFileReceive_002";
 
-    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
-    transListener->callback_ = make_shared<FsCallbackObject>(std::make_shared<IProgressListenerTest>());
+    shared_ptr<TransListenerCore> transListener = make_shared<TransListenerCore>();
+    transListener->callback_ = make_shared<FsCallbackObject>(make_shared<IProgressListenerTest>());
     auto res = transListener->OnFileReceive(0, 0);
     EXPECT_EQ(res, ERRNO_NOERR);
 
@@ -527,7 +530,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_OnFinished_001, testing::e
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_OnFinished_001";
 
-    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
+    shared_ptr<TransListenerCore> transListener = make_shared<TransListenerCore>();
     auto res = transListener->OnFinished("sessionName");
     EXPECT_EQ(res, ERRNO_NOERR);
 
@@ -545,7 +548,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_OnFailed_001, testing::ext
 {
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_OnFailed_001";
 
-    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
+    shared_ptr<TransListenerCore> transListener = make_shared<TransListenerCore>();
     auto res = transListener->OnFailed("sessionName", 0);
     EXPECT_EQ(res, ERRNO_NOERR);
 
@@ -564,8 +567,8 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_CopyFileFromSoftBus_001, t
     GTEST_LOG_(INFO) << "TransListenerCoreTest-begin TransListenerCoreTest_CopyFileFromSoftBus_001";
 
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
-    std::shared_ptr<TransListenerCore> transListener = std::make_shared<TransListenerCore>();
-    std::shared_ptr<FsFileInfos> infos = std::make_shared<FsFileInfos>();
+    shared_ptr<TransListenerCore> transListener = make_shared<TransListenerCore>();
+    shared_ptr<FsFileInfos> infos = make_shared<FsFileInfos>();
     transListener->copyEvent_.copyResult = FAILED;
 
     auto res = transListener->CopyFileFromSoftBus(srcUri, "destUri", infos, nullptr);
