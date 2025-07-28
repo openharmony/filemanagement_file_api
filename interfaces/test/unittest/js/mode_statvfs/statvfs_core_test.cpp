@@ -35,7 +35,7 @@ public:
 void StatvFsCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    int32_t fd = open("/data/test/statvfs.txt", O_CREAT | O_RDWR, 0644);
+    int32_t fd = open("/data/test/statvfs_test.txt", O_CREAT | O_RDWR, 0644);
     if (fd <= 0) {
         close(fd);
         ASSERT_TRUE(false);
@@ -46,7 +46,7 @@ void StatvFsCoreTest::SetUpTestCase(void)
 void StatvFsCoreTest::TearDownTestCase(void)
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    rmdir("/data/test/statvfs.txt");
+    rmdir("/data/test/statvfs_test.txt");
 }
 
 void StatvFsCoreTest::SetUp(void)
@@ -74,7 +74,7 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetFreeSize_001, testing::ext::TestS
     diskInfo.f_bsize = 2;
     diskInfo.f_bfree = 1;
 
-    auto result = ModuleStatvfs::StatvfsCore::DoGetFreeSize("/data/test/statvfs.txt");
+    auto result = ModuleStatvfs::StatvfsCore::DoGetFreeSize("/data/test/statvfs_test.txt");
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetFreeSize_001";
@@ -114,7 +114,7 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_003, testing::ext::Test
     diskInfo.f_bsize = 2;
     diskInfo.f_blocks = 1;
 
-    auto result = ModuleStatvfs::StatvfsCore::DoGetTotalSize("/data/test/statvfs.txt");
+    auto result = ModuleStatvfs::StatvfsCore::DoGetTotalSize("/data/test/statvfs_test.txt");
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetTotalSize_003";
