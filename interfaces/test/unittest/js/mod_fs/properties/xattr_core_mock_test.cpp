@@ -76,7 +76,7 @@ void XattrCoreMockTest::TearDown(void)
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_001, testing::ext::TestSize.Level1)
+HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoSetXattr_001";
 
@@ -98,7 +98,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_001, testing::ext::Test
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_002, testing::ext::TestSize.Level1)
+HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoSetXattr_002";
 
@@ -120,7 +120,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_002, testing::ext::Test
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_001, testing::ext::TestSize.Level1)
+HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoGetXattr_001";
 
@@ -141,7 +141,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_001, testing::ext::Test
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_002, testing::ext::TestSize.Level1)
+HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoGetXattr_002";
 
@@ -162,7 +162,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_002, testing::ext::Test
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_003, testing::ext::TestSize.Level1)
+HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoGetXattr_003";
 

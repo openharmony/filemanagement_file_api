@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FILEMANAGEMENT_FILE_API_FILE_DFS_LISTENER_STUB_H
-#define FILEMANAGEMENT_FILE_API_FILE_DFS_LISTENER_STUB_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_DFS_LISTENER_FILE_DFS_LISTENER_STUB_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_DFS_LISTENER_FILE_DFS_LISTENER_STUB_H
 
 #include <map>
 #include "i_file_dfs_listener.h"
@@ -43,4 +43,4 @@ private:
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // FILEMANAGEMENT_FILE_API_FILE_DFS_LISTENER_STUB_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_DFS_LISTENER_FILE_DFS_LISTENER_STUB_H

@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "file_dfs_listener_stub.h"
+
 #include "file_dfs_listener_interface_code.h"
+#include "file_dfs_listener_stub.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -53,12 +54,12 @@ int32_t FileDfsListenerStub::HandleOnStatus(MessageParcel &data, MessageParcel &
 {
     std::string networkId;
     if (!data.ReadString(networkId)) {
-        HILOGE("read networkId failed");
+        HILOGE("Read networkId failed");
         return E_INVAL_ARG;
     }
     int32_t status;
     if (!data.ReadInt32(status)) {
-        HILOGE("read status failed");
+        HILOGE("Read status failed");
         return E_INVAL_ARG;
     }
     if (networkId.empty() || status < 0) {

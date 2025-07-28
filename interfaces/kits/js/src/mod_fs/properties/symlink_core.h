@@ -25,7 +25,7 @@ class SymlinkCore final {
 public:
     static FsResult<void> DoSymlink(const string &target, const string &srcPath);
 };
-const std::string PROCEDURE_RMDIRENT_NAME = "FileIOSymLink";
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
