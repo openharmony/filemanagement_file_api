@@ -22,7 +22,7 @@ using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
-class CopyFileCoreMockTest : public testing::Test {
+class CopyFileCoreTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -30,36 +30,36 @@ public:
     void TearDown();
 };
 
-void CopyFileCoreMockTest::SetUpTestCase(void)
+void CopyFileCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
 }
 
-void CopyFileCoreMockTest::TearDownTestCase(void)
+void CopyFileCoreTest::TearDownTestCase(void)
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void CopyFileCoreMockTest::SetUp(void)
+void CopyFileCoreTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void CopyFileCoreMockTest::TearDown(void)
+void CopyFileCoreTest::TearDown(void)
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
- * @tc.name: CopyFileCoreMockTest_DoCopyFile_001
+ * @tc.name: CopyFileCoreTest_DoCopyFile_001
  * @tc.desc: Test function of CopyFileCore::ValidMode interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_001, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_001";
+    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_001";
 
     FileInfo src;
     FileInfo dest;
@@ -68,19 +68,19 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_001, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest, mode);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_001";
+    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_001";
 }
 
 /**
- * @tc.name: CopyFileCoreMockTest_DoCopyFile_002
+ * @tc.name: CopyFileCoreTest_DoCopyFile_002
  * @tc.desc: Test function of CopyFileCore::ValidMode interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_002, testing::ext::TestSize.Level1)
+HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-begin CopyFileCoreMockTest_DoCopyFile_002";
+    GTEST_LOG_(INFO) << "CopyFileCoreTest-begin CopyFileCoreTest_DoCopyFile_002";
 
     FileInfo src;
     FileInfo dest;
@@ -92,7 +92,7 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_002, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_002";
+    GTEST_LOG_(INFO) << "CopyFileCoreTest-end CopyFileCoreTest_DoCopyFile_002";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
