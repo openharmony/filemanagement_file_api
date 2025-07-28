@@ -16,8 +16,8 @@
 #include "trans_listener_core.h"
 
 #include <fcntl.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "copy_core.h"
 #include "unistd_mock.h"
@@ -89,7 +89,6 @@ public:
     MockDistributedFileDaemonManager() = default;
     ~MockDistributedFileDaemonManager() = default;
 
-public:
     static std::shared_ptr<MockDistributedFileDaemonManager> GetMock();
     static void DisableMock();
 
@@ -182,7 +181,7 @@ void TransListenerCoreMockTest::TearDown(void)
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_PrepareCopySession_001, testing::ext::TestSize.Level1)
+HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_PrepareCopySession_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "TransListenerCoreMockTest-begin TransListenerCoreMockTest_PrepareCopySession_001";
 
@@ -211,7 +210,7 @@ HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_PrepareCopySession
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_CopyFileFromSoftBus_001, testing::ext::TestSize.Level1)
+HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_CopyFileFromSoftBus_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "TransListenerCoreMockTest-begin TransListenerCoreMockTest_CopyFileFromSoftBus_001";
 

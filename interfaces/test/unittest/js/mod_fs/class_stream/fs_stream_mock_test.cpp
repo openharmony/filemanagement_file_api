@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "c_mock.h"
 #include "create_stream_core.h"
 #include "fs_utils.h"
@@ -32,6 +33,9 @@ public:
     {
         CMock::EnableMock();
         int32_t fd = open(g_streamFilePath.c_str(), CREATE | O_RDWR, 0644);
+        if (fd <= 0) {
+            ASSERT_TRUE(false);
+        }
         close(fd);
     };
     static void TearDownTestCase()

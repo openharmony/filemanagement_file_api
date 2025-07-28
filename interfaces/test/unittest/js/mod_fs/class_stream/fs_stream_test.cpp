@@ -29,6 +29,9 @@ public:
     static void SetUpTestCase(void)
     {
         int32_t fd = open(streamFilePath.c_str(), CREATE | O_RDWR, 0644);
+        if (fd <= 0) {
+            ASSERT_TRUE(false);
+        }
         close(fd);
     };
     static void TearDownTestCase()
