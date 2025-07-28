@@ -777,6 +777,8 @@ ohos_shared_library("ani_file_hash") {
   include_dirs = [
     "src/mod_hash",
     "src/mod_hash/ani",
+    "src/mod_hash/class_hashstream",
+    "src/mod_hash/class_hashstream/ani",
   ]
   sources = [
     "src/common/ani_helper/ani_signature.cpp",

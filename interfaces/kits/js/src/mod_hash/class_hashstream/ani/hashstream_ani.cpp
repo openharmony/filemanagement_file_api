@@ -36,6 +36,7 @@ HsHashStream *Unwrap(ani_env *env, ani_object object)
         HILOGE("Unwrap hashstream err: %{public}d", ret);
         return nullptr;
     }
+
     uintptr_t ptrValue = static_cast<uintptr_t>(nativePtr);
     HsHashStream *hashStream = reinterpret_cast<HsHashStream *>(ptrValue);
     return hashStream;
@@ -104,6 +105,7 @@ void HashStreamAni::Constructor(ani_env *env, ani_object obj, ani_string alg)
 
     auto ret = HsHashStream::Constructor(algorithm);
     if (!ret.IsSuccess()) {
+        HILOGE("Constructor failed");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
         return;

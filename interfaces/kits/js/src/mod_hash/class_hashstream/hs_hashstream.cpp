@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "hs_hashstream.h"
 
 #include <iomanip>
@@ -46,6 +47,7 @@ tuple<bool, HsHashStreamEntity *> HsHashStream::GetHsEntity()
     if (!entity) {
         return { false, nullptr };
     }
+
     return { true, entity.get() };
 }
 
