@@ -116,6 +116,7 @@ const string FS::TaskSignal::nativeTaskSignal = "nativeTaskSignal";
 const Type FS::WatcherInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.WatcherInner");
 const string FS::WatcherInner::classDesc = FS::WatcherInner::classType.Descriptor();
 const string FS::WatcherInner::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
+const string FS::WatcherInner::nativePtr = "nativePtr";
 // FS::WatchEventInner
 const Type FS::WatchEventInner::classType = Builder::BuildClass("@ohos.file.fs.WatchEventInner");
 const string FS::WatchEventInner::classDesc = FS::WatchEventInner::classType.Descriptor();
