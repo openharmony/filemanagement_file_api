@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-
 #include "uv_fs_mock.h"
-
 
 using namespace OHOS::FileManagement::ModuleFileIO;
 
@@ -55,9 +53,9 @@ int uv_fs_rmdir(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb)
     return Uvfs::ins->uv_fs_rmdir(loop, req, path, cb);
 }
 
-int uv_fs_symlink(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *new_path, int flags, uv_fs_cb cb)
+int uv_fs_symlink(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, int flags, uv_fs_cb cb)
 {
-    return Uvfs::ins->uv_fs_symlink(loop, req, path, new_path, flags, cb);
+    return Uvfs::ins->uv_fs_symlink(loop, req, path, newPath, flags, cb);
 }
 
 int uv_fs_open(uv_loop_t *loop, uv_fs_t *req, const char *path, int flags, int mode, uv_fs_cb cb)

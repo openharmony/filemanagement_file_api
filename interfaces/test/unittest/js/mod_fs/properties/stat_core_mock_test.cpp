@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "securec.h"
 #include "stat_core.h"
 #include "uv_fs_mock.h"
 
+#include <cstring>
 #include <gtest/gtest.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -59,7 +59,7 @@ void StatCoreMockTest::TearDown(void)
 
 /**
  * @tc.name: StatCoreMockTest_DoStat_001
- * @tc.desc: Test function of FsyncCore::DoStat interface for FALSE.
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -82,7 +82,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_001, testing::ext::TestSize.L
 
 /**
  * @tc.name: StatCoreMockTest_DoStat_002
- * @tc.desc: Test function of FsyncCore::DoStat interface for FALSE.
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -105,7 +105,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_002, testing::ext::TestSize.L
 
 /**
  * @tc.name: StatCoreMockTest_DoStat_003
- * @tc.desc: Test function of FsyncCore::DoStat interface for FALSE.
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -127,30 +127,27 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_003, testing::ext::TestSize.L
 }
 
 /**
- * @tc.name: StatCoreMockTest_DoStat_005
- * @tc.desc: Test function of FsyncCore::DoStat interface for FALSE.
+ * @tc.name: StatCoreMockTest_DoStat_004
+ * @tc.desc: Test function of StatCore::DoStat interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_005, testing::ext::TestSize.Level1)
+HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_005";
+    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_004";
 
     FileInfo fileinfo;
-    string buffer = "Hello, World!";
-    int pathLength = buffer.size() + 1;
-    fileinfo.path = std::make_unique<char[]>(pathLength);
-    memcpy_s(fileinfo.path.get(), pathLength, buffer.c_str(), buffer.size());
-    fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(-1);
-    fileinfo.isPath = true;
+    fileinfo.path = std::make_unique<char[]>(1);
+    fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
+    fileinfo.isPath = false;
 
     EXPECT_CALL(*uvfs, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
 
     auto res = StatCore::DoStat(fileinfo);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_EQ(res.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_005";
+    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_004";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

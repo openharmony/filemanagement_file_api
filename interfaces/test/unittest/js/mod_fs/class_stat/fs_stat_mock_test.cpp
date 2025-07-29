@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "fs_stat.h"
-#include "../properties/mock/system_mock.h"
-#include "fs_stat_entity.h"
-#include "securec.h"
-
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include "fs_stat_entity.h"
+#include "fs_stat.h"
+#include "securec.h"
+#include "system_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -38,7 +38,7 @@ public:
 void FsStatMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    sys = std::make_shared<SystemMock>();
+    sys = make_shared<SystemMock>();
     System::ins = sys;
 }
 
@@ -70,17 +70,17 @@ HWTEST_F(FsStatMockTest, FsStatMockTest_GetLocation_001, testing::ext::TestSize.
 {
     GTEST_LOG_(INFO) << "FsStatMockTes-begin FsStatMockTest_GetLocation_001";
 
-    std::unique_ptr<StatEntity> statEntity;
-    std::unique_ptr<FsStat> fsStat;
-    statEntity = std::make_unique<StatEntity>();
-    statEntity->fileInfo_ = std::make_unique<FileInfo>();
+    unique_ptr<StatEntity> statEntity;
+    unique_ptr<FsStat> fsStat;
+    statEntity = make_unique<StatEntity>();
+    statEntity->fileInfo_ = make_unique<FileInfo>();
     statEntity->fileInfo_->isPath = true;
     int length = 100;
-    string testPath = "/test/path";
-    statEntity->fileInfo_->path = std::make_unique<char[]>(length);
+    string testPath = "/test/stat_path";
+    statEntity->fileInfo_->path = make_unique<char[]>(length);
     strncpy_s(statEntity->fileInfo_->path.get(), length, testPath.c_str(), testPath.size());
     statEntity->fileInfo_->path.get()[99] = '\0';
-    fsStat = std::make_unique<FsStat>(std::move(statEntity));
+    fsStat = make_unique<FsStat>(move(statEntity));
 
     EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1));
     EXPECT_EQ(fsStat->GetLocation(), 1);
@@ -99,15 +99,15 @@ HWTEST_F(FsStatMockTest, FsStatMockTest_GetLocation_002, testing::ext::TestSize.
 {
     GTEST_LOG_(INFO) << "FsStatMockTes-begin FsStatMockTest_GetLocation_002";
 
-    std::unique_ptr<StatEntity> statEntity;
-    std::unique_ptr<FsStat> fsStat;
-    statEntity = std::make_unique<StatEntity>();
-    statEntity->fileInfo_ = std::make_unique<FileInfo>();
+    unique_ptr<StatEntity> statEntity;
+    unique_ptr<FsStat> fsStat;
+    statEntity = make_unique<StatEntity>();
+    statEntity->fileInfo_ = make_unique<FileInfo>();
     statEntity->fileInfo_->isPath = false;
     const int fdValue = 3;
     const bool isClosed = false;
-    statEntity->fileInfo_->fdg = std::make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
-    fsStat = std::make_unique<FsStat>(std::move(statEntity));
+    statEntity->fileInfo_->fdg = make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
+    fsStat = make_unique<FsStat>(move(statEntity));
 
     EXPECT_CALL(*sys, fgetxattr(_, _, _, _)).WillOnce(Return(1));
     EXPECT_EQ(fsStat->GetLocation(), 1);

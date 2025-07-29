@@ -24,12 +24,14 @@ ohos_unittest("ani_file_fs_mock_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/mock",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/properties/mock",
   ]
 
   sources = [
     "mod_fs/class_file/fs_file_mock_test.cpp",
     "mod_fs/class_stat/fs_stat_mock_test.cpp",
+    "mod_fs/mock/unistd_mock.cpp",
     "mod_fs/properties/access_core_mock_test.cpp",
     "mod_fs/properties/copy_file_core_mock_test.cpp",
     "mod_fs/properties/mkdir_core_mock_test.cpp",

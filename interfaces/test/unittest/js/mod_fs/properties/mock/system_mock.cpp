@@ -23,7 +23,7 @@ int setxattr(const char *path, const char *name, const void *value, size_t size,
     return System::ins->setxattr(path, name, value, size, flags);
 }
 
-int getxattr(const char *path, const char *name, void *value, size_t size)
+ssize_t getxattr(const char *path, const char *name, void *value, size_t size)
 {
     return System::ins->getxattr(path, name, value, size);
 }

@@ -52,7 +52,7 @@ void StatCoreTest::TearDown(void)
 
 /**
  * @tc.name: StatCoreTest_DoStat_001
- * @tc.desc: Test function of FsyncCore::DoStat interface for FALSE.
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -71,7 +71,7 @@ HWTEST_F(StatCoreTest, StatCoreTest_DoStat_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: StatCoreTest_DoStat_002
- * @tc.desc: Test function of FsyncCore::DoStat interface for FALSE.
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
