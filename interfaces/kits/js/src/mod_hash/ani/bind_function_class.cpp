@@ -17,6 +17,7 @@
 #include "ani_signature.h"
 #include "bind_function.h"
 #include "hash_ani.h"
+#include "hashstream_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
