@@ -126,7 +126,6 @@ ohos_shared_library("fileio") {
     "hilog:libhilog",
     "libuv:uv",
     "napi:ace_napi",
-    "node:node_header_notice",
     "openssl:libcrypto_shared",
   ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
@@ -375,7 +374,6 @@ ohos_shared_library("file") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "napi:ace_napi",
-    "node:node_header_notice",
   ]
 
   if (file_api_read_optimize) {
@@ -608,7 +606,6 @@ ohos_shared_library("document") {
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",
-    "node:node_header_notice",
   ]
 }
 
