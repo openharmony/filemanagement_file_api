@@ -21,13 +21,11 @@
 #include "atomicfile_ani.h"
 #include "bind_function.h"
 #include "close_ani.h"
-#include "connectdfs_ani.h"
 #include "copy_ani.h"
 #include "copy_dir_ani.h"
 #include "copy_file_ani.h"
 #include "create_randomaccessfile_ani.h"
 #include "create_stream_ani.h"
-#include "disconnectdfs_ani.h"
 #include "dup_ani.h"
 #include "fdatasync_ani.h"
 #include "fdopen_stream_ani.h"
@@ -186,7 +184,6 @@ static ani_status BindStaticMethods(ani_env *env)
 
     std::array methods = {
         ani_native_function { "closeSync", nullptr, reinterpret_cast<void *>(CloseAni::CloseSync) },
-        ani_native_function { "connectDfs", nullptr, reinterpret_cast<void *>(ConnectDfsAni::ConnectDfsSync) },
         ani_native_function { "copyDirSync", nullptr, reinterpret_cast<void *>(CopyDirAni::CopyDirSync) },
         ani_native_function { "copyFileSync", nullptr, reinterpret_cast<void *>(CopyFileAni::CopyFileSync) },
         ani_native_function { "copySync", nullptr, reinterpret_cast<void *>(CopyAni::CopySync) },
@@ -195,7 +192,6 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function {
             "createStreamSync", nullptr, reinterpret_cast<void *>(CreateStreamAni::CreateStreamSync) },
         ani_native_function { "createWatcherSync", nullptr, reinterpret_cast<void *>(WatcherAni::CreateWatcherSync) },
-        ani_native_function { "disConnectDfs", nullptr, reinterpret_cast<void *>(DisConnectDfsAni::DisConnectDfsSync) },
         ani_native_function { "doAccessSync", nullptr, reinterpret_cast<void *>(AccessAni::AccessSync3) },
         ani_native_function { "dup", nullptr, reinterpret_cast<void *>(DupAni::Dup) },
         ani_native_function { "fdatasyncSync", nullptr, reinterpret_cast<void *>(FDataSyncAni::FDataSyncSync) },

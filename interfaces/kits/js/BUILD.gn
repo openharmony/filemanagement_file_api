@@ -725,13 +725,11 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties/access_core.cpp",
     "src/mod_fs/properties/ani/access_ani.cpp",
     "src/mod_fs/properties/ani/close_ani.cpp",
-    "src/mod_fs/properties/ani/connectdfs_ani.cpp",
     "src/mod_fs/properties/ani/copy_ani.cpp",
     "src/mod_fs/properties/ani/copy_dir_ani.cpp",
     "src/mod_fs/properties/ani/copy_file_ani.cpp",
     "src/mod_fs/properties/ani/create_randomaccessfile_ani.cpp",
     "src/mod_fs/properties/ani/create_stream_ani.cpp",
-    "src/mod_fs/properties/ani/disconnectdfs_ani.cpp",
     "src/mod_fs/properties/ani/dup_ani.cpp",
     "src/mod_fs/properties/ani/fdatasync_ani.cpp",
     "src/mod_fs/properties/ani/fdopen_stream_ani.cpp",
@@ -756,7 +754,6 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties/ani/write_ani.cpp",
     "src/mod_fs/properties/ani/xattr_ani.cpp",
     "src/mod_fs/properties/close_core.cpp",
-    "src/mod_fs/properties/connectdfs_core.cpp",
     "src/mod_fs/properties/copy_core.cpp",
     "src/mod_fs/properties/copy_dir_core.cpp",
     "src/mod_fs/properties/copy_file_core.cpp",
@@ -765,7 +762,6 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties/create_randomaccessfile_core.cpp",
     "src/mod_fs/properties/create_stream_core.cpp",
     "src/mod_fs/properties/dfs_listener/file_dfs_listener_stub.cpp",
-    "src/mod_fs/properties/disconnectdfs_core.cpp",
     "src/mod_fs/properties/dup_core.cpp",
     "src/mod_fs/properties/fdatasync_core.cpp",
     "src/mod_fs/properties/fdopen_stream_core.cpp",
@@ -881,8 +877,10 @@ ohos_shared_library("ani_file_hash") {
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
   external_deps = [
+    "eventhandler:libeventhandler",
     "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "libuv:uv",
     "openssl:libcrypto_shared",
     "runtime_core:ani",
@@ -945,7 +943,9 @@ ohos_shared_library("ani_file_securitylabel") {
   ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "libuv:uv",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
@@ -1011,6 +1011,7 @@ ohos_shared_library("ani_file_environment") {
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
     "bounds_checking_function:libsec_shared",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
@@ -1077,7 +1078,9 @@ ohos_shared_library("ani_file_statvfs") {
   ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "libuv:uv",
     "runtime_core:ani",
     "runtime_core:ani_helpers",

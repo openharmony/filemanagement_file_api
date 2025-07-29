@@ -85,6 +85,22 @@ public:
     {
         return 0;
     }
+    int32_t CancelCopyTask(const std::string &srcUri, const std::string &dstUri) override
+    {
+        return 0;
+    }
+    int32_t GetDfsSwitchStatus(const std::string &networkId, int32_t &switchStatus) override
+    {
+        return 0;
+    }
+    int32_t UpdateDfsSwitchStatus(int32_t switchStatus) override
+    {
+        return 0;
+    }
+    int32_t GetConnectedDeviceList(std::vector<DfsDeviceInfo> &deviceList) override
+    {
+        return 0;
+    }
 
     MockDistributedFileDaemonManager() = default;
     ~MockDistributedFileDaemonManager() = default;
