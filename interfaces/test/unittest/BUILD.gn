@@ -16,7 +16,6 @@ import("//foundation/filemanagement/file_api/file_api.gni")
 group("file_api_unittest") {
   testonly = true
   deps = [
-    "class_atomicfile:class_atomicfile_test",
     "class_file:class_file_test",
     "filemgmt_libn_test:filemgmt_libn_test",
     "js:ani_file_environment_test",
