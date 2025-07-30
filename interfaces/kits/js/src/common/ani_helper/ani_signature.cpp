@@ -164,7 +164,7 @@ const string FS::ReadStreamOptionsInner::ctorSig = Builder::BuildSignatureDescri
 const string FS::ReadStreamOptionsInner::ctorDesc = Builder::BuildConstructorName();
 // FS::WriteStreamOptionsInner
 const Type FS::WriteStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.WriteStreamOptionsInner");
-const string FS::WriteStreamOptionsInner::classDesc = FS::ReadStreamOptionsInner::classType.Descriptor();
+const string FS::WriteStreamOptionsInner::classDesc = FS::WriteStreamOptionsInner::classType.Descriptor();
 const string FS::WriteStreamOptionsInner::ctorSig = Builder::BuildSignatureDescriptor({});
 const string FS::WriteStreamOptionsInner::ctorDesc = Builder::BuildConstructorName();
 

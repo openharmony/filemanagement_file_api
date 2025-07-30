@@ -29,7 +29,7 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 FsWatcher *FsWatcherWrapper::Unwrap(ani_env *env, ani_object object)
 {
     ani_long nativePtr;
-    auto ret = env->Object_GetFieldByName_Long(object, FS::WatcherInner::nativePtr, &nativePtr);
+    auto ret = env->Object_GetFieldByName_Long(object, "nativePtr", &nativePtr);
     if (ret != ANI_OK) {
         HILOGE("Unwrap fsWatcher err: %{public}d", ret);
         return nullptr;
