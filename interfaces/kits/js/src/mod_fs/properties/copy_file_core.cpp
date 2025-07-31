@@ -67,6 +67,7 @@ static int32_t SendFileCore(FileInfo &srcFdg, FileInfo &destFdg, struct stat &st
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
+    
     int64_t offset = 0;
     size_t size = static_cast<size_t>(statbf.st_size);
     int ret = 0;
