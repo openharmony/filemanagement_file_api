@@ -42,6 +42,7 @@ FsResult<void> ConnectDfsCore::ConnectDfsExec(const std::string &networkId, sptr
         HILOGE("Fail to openp2pconnection");
         return FsResult<void>::Error(result);
     }
+    
     return FsResult<void>::Success();
 }
 
