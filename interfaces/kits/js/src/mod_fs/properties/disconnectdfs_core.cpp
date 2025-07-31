@@ -42,6 +42,7 @@ FsResult<void> DisConnectDfsCore::DisConnectDfsExec(const std::string &networkId
         HILOGE("Fail to Closep2pconnection");
         return FsResult<void>::Error(result);
     }
+    
     return FsResult<void>::Success();
 }
 
