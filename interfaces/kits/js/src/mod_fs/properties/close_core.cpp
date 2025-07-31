@@ -32,6 +32,7 @@ static int32_t CloseFd(int fd)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
+    
     int ret = uv_fs_close(nullptr, closeReq.get(), fd, nullptr);
     if (ret < 0) {
         HILOGE("Failed to close file with ret: %{public}d", ret);
