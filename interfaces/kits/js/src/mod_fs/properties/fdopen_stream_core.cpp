@@ -40,7 +40,6 @@ FsResult<FsStream *> FdopenStreamCore::DoFdopenStream(const int &fd, const strin
         HILOGE("Failed to fopen file by fd");
         return FsResult<FsStream *>::Error(errno);
     }
-
     return StreamInstantiator::InstantiateStream(move(file));
 }
 
