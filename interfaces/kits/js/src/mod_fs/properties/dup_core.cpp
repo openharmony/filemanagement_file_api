@@ -43,6 +43,7 @@ FsResult<FsFile *> DupCore::DoDup(const int32_t &fd)
     if (!ValidFd(fd)) {
         return FsResult<FsFile *>::Error(EINVAL);
     }
+    
     int dstFd = dup(fd);
     if (dstFd < 0) {
         HILOGE("Failed to dup fd, errno: %{public}d", errno);
