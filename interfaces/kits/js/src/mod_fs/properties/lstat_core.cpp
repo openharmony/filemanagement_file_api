@@ -35,6 +35,7 @@ FsResult<FsStat *> LstatCore::DoLstat(const string &path)
         HILOGE("Failed to request heap memory.");
         return FsResult<FsStat *>::Error(ENOMEM);
     }
+    
     int ret = uv_fs_lstat(nullptr, lstat_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to get stat of file, ret: %{public}d", ret);
