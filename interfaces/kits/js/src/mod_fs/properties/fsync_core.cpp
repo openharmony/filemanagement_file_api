@@ -37,6 +37,7 @@ FsResult<void> FsyncCore::DoFsync(const int32_t &fd)
         HILOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
         return FsResult<void>::Error(ret);
     }
+    
     return FsResult<void>::Success();
 }
 } // namespace OHOS::FileManagement::ModuleFileIO
