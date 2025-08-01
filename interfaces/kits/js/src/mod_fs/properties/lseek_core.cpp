@@ -44,7 +44,6 @@ FsResult<int64_t> LseekCore::DoLseek(const int32_t &fd, const int64_t &offset,
         HILOGE("Failed to lseek, error:%{public}d", errno);
         return FsResult<int64_t>::Error(errno);
     }
-
     return FsResult<int64_t>::Success(ret);
 }
 
