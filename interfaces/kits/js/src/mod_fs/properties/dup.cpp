@@ -44,6 +44,7 @@ napi_value Dup::Sync(napi_env env, napi_callback_info info)
     int dstFd = dup(srcFd);
     if (dstFd < 0) {
         HILOGE("Failed to dup fd, errno: %{public}d", errno);
+        close(dstFd);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -51,6 +52,7 @@ napi_value Dup::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!readlink_req) {
         HILOGE("Failed to request heap memory.");
+        close(dstFd);
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
