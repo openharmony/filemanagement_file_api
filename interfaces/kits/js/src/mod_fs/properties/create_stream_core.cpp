@@ -35,7 +35,6 @@ FsResult<FsStream *> CreateStreamCore::DoCreateStream(const std::string &path, c
         HILOGE("Failed to fopen file by path");
         return FsResult<FsStream *>::Error(errno);
     }
-
     return StreamInstantiator::InstantiateStream(move(file));
 }
 
