@@ -38,7 +38,6 @@ FsResult<void> FDataSyncCore::DoFDataSync(const int32_t &fd)
         HILOGE("Failed to transfer data associated with file descriptor: %{public}d, ret:%{public}d", fd, ret);
         return FsResult<void>::Error(ret);
     }
-
     return FsResult<void>::Success();
 }
 
