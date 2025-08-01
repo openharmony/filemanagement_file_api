@@ -44,6 +44,7 @@ static int UvAccess(const string &path, int mode)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
+    
     return uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
 }
 
