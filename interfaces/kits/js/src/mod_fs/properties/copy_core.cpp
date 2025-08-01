@@ -72,6 +72,7 @@ static int OpenSrcFile(const string &srcPth, std::shared_ptr<FsFileInfos> infos,
             HILOGE("Failed to get remote object");
             return ENOMEM;
         }
+        
         dataShareHelper = DataShare::DataShareHelper::Creator(remote->AsObject(), MEDIALIBRARY_DATA_URI);
         if (!dataShareHelper) {
             HILOGE("Failed to connect to datashare");
