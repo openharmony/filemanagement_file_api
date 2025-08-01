@@ -123,8 +123,11 @@ static int HandleLocalCheck(const string &path, int mode)
         }
         return ENOENT;
     }
-    // check if the distributed file of /data/storage/el2/distributedfiles is on the local,
-    // convert into physical path(/mnt/hmdfs/<currentUserId>/account/device_view/local/data/<PackageName>) and check
+
+    /*
+     *  check if the distributed file of /data/storage/el2/distributedfiles is on the local,
+     *  convert into physical path(/mnt/hmdfs/<currentUserId>/account/device_view/local/data/<PackageName>) and check
+    */
     if (path.find(DISTRIBUTED_FILE_PREFIX) == 0) {
         int userId = GetCurrentUserId();
         string bundleName = GetSelfBundleName();
