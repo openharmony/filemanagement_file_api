@@ -44,6 +44,7 @@ static bool AllowToCopy(const string &src, const string &dest)
         HILOGE("Failed to copy file, the same path");
         return false;
     }
+    
     if (EndWithSlash(src) ? dest.find(src) == 0 : dest.find(src + "/") == 0) {
         HILOGE("Failed to copy file, dest is under src");
         return false;
