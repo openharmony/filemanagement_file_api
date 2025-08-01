@@ -123,6 +123,7 @@ static bool FilterSuffix(const vector<string> &suffixs, const struct dirent &fil
     if (filename.d_type == DT_DIR) {
         return true;
     }
+    
     size_t found = string(filename.d_name).rfind('.');
     if (found == std::string::npos) {
         return false;
