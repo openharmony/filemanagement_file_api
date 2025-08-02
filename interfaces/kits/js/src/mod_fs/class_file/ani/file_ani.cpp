@@ -84,12 +84,14 @@ void FileAni::TryLock(ani_env *env, [[maybe_unused]] ani_object object, ani_obje
     if (!isUndefined) {
         exc = true;
     }
+
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {
         HILOGE("Cannot unwrap fsfile!");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
+
     auto ret = fsFile->TryLock(exc);
     if (!ret.IsSuccess()) {
         HILOGE("TryLock file failed!");
@@ -107,6 +109,7 @@ void FileAni::UnLock(ani_env *env, [[maybe_unused]] ani_object object)
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
+
     auto ret = fsFile->UnLock();
     if (!ret.IsSuccess()) {
         HILOGE("UnLock file failed!");
