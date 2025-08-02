@@ -114,7 +114,7 @@ ani_long WriteAni::WriteSync(
         }
         auto ret = WriteCore::DoWrite(static_cast<int32_t>(fd), buffer, op);
         if (!ret.IsSuccess()) {
-            HILOGE("write buffer failed!");
+            HILOGE("Write buffer failed!");
             const auto &err = ret.GetError();
             ErrorHandler::Throw(env, err);
             return -1;
@@ -132,7 +132,7 @@ ani_long WriteAni::WriteSync(
         }
         auto ret = WriteCore::DoWrite(static_cast<int32_t>(fd), buffer, op);
         if (!ret.IsSuccess()) {
-            HILOGE("write buffer failed!");
+            HILOGE("Write buffer failed!");
             const auto &err = ret.GetError();
             ErrorHandler::Throw(env, err);
             return -1;
