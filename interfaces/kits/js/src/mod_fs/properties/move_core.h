@@ -35,4 +35,4 @@ constexpr int MODE_THROW_ERR = 1;
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-#endif
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_MOVE_CORE_H

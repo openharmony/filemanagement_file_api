@@ -62,10 +62,12 @@ static tuple<bool, string, string, int> ValidMoveArg(const string &src, const st
         HILOGE("Invalid src");
         return { false, "", "", 0 };
     }
+
     if (CheckDir(dest)) {
         HILOGE("Invalid dest");
         return { false, "", "", 0 };
     }
+
     int modeType = 0;
     if (mode.has_value()) {
         modeType = mode.value();
@@ -79,12 +81,12 @@ static tuple<bool, string, string, int> ValidMoveArg(const string &src, const st
 
 static int CopyAndDeleteFile(const string &src, const string &dest)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> statReq = {
-        new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> statReq = { new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (!statReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
+
     int ret = uv_fs_stat(nullptr, statReq.get(), src.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to stat srcPath");
