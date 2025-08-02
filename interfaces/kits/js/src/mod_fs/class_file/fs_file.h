@@ -69,7 +69,6 @@ private:
     explicit FsFile(unique_ptr<FileEntity> entity) : fileEntity(move(entity)) {}
 };
 
-const string PROCEDURE_LOCK_NAME = "FileIOFileLock";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
