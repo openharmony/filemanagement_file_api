@@ -45,12 +45,14 @@ ani_object FsWatcherWrapper::Wrap(ani_env *env, const FsWatcher *watcher)
         HILOGE("FsWatcher pointer is null!");
         return nullptr;
     }
+
     auto classDesc = FS::WatcherInner::classDesc.c_str();
     ani_class cls;
     if (ANI_OK != env->FindClass(classDesc, &cls)) {
         HILOGE("Cannot find class %s", classDesc);
         return nullptr;
     }
+
     auto ctorDesc = FS::WatcherInner::ctorDesc.c_str();
     auto ctorSig = FS::WatcherInner::ctorSig.c_str();
     ani_method ctor;
@@ -58,7 +60,8 @@ ani_object FsWatcherWrapper::Wrap(ani_env *env, const FsWatcher *watcher)
         HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
-    ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(watcher));
+
+    ani_long ptr = static_cast<ani_long>(reinterpret_cast<uintptr_t>(watcher));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
         HILOGE("New %s obj Failed!", classDesc);
