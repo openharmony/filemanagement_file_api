@@ -30,8 +30,7 @@ using namespace std;
 
 static int DoReadRAF(void* buf, size_t len, int fd, int64_t offset)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> readReq = {
-        new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> readReq = { new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (readReq == nullptr) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
