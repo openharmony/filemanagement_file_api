@@ -17,8 +17,8 @@
 
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
-#include "fs_watcher.h"
 #include "fs_watcher_wrapper.h"
+#include "fs_watcher.h"
 #include "type_converter.h"
 
 namespace OHOS {

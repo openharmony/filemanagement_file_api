@@ -131,7 +131,7 @@ int32_t FsFileWatcher::CloseNotifyFdLocked()
         lock_guard<mutex> lock(readMutex_);
         closed_ = true;
         if (reading_) {
-            HILOGE("close while reading");
+            HILOGE("Close while reading");
             return ERRNO_NOERR;
         }
     }
@@ -152,7 +152,6 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
 
     uint32_t remainingEvents = RemoveWatcherInfo(info);
     if (remainingEvents > 0) {
-        // There are still events remaining to be listened for.
         if (access(info->fileName.c_str(), F_OK) == 0) {
             return NotifyToWatchNewEvents(info->fileName, info->wd, remainingEvents);
         }
@@ -160,14 +159,13 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
         return ERRNO_NOERR;
     }
 
-    // No events remain to be listened for, and proceed to the file watch removal process.
     int32_t oldWd = -1;
     {
         lock_guard<mutex> lock(readMutex_);
         if (!(closed_ && reading_)) {
             oldWd = inotify_rm_watch(notifyFd_, info->wd);
         } else {
-            HILOGE("rm watch fail");
+            HILOGE("Rm watch fail");
         }
     }
 
@@ -212,7 +210,7 @@ void FsFileWatcher::ReadNotifyEventLocked()
     {
         lock_guard<mutex> lock(readMutex_);
         if (closed_) {
-            HILOGE("read after close");
+            HILOGE("Read after close");
             return;
         }
         reading_ = true;
@@ -224,7 +222,7 @@ void FsFileWatcher::ReadNotifyEventLocked()
         lock_guard<mutex> lock(readMutex_);
         reading_ = false;
         if (closed_) {
-            HILOGE("close after read");
+            HILOGE("Close after read");
             CloseNotifyFd();
             return;
         }
@@ -273,7 +271,6 @@ void FsFileWatcher::GetNotifyEvent()
             HILOGE("Failed to poll NotifyFd, errno=%{public}d", errno);
             break;
         }
-        // Ignore cases where poll returns 0 (timeout) or EINTR (interrupted system call)
     }
 }
 
