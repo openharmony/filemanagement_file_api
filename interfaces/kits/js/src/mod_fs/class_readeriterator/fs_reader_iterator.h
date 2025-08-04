@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_FS_READERITERATOR_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_FS_READERITERATOR_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_FS_READER_ITERATOR_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_FS_READER_ITERATOR_H
 
 #include "filemgmt_libfs.h"
 #include "readeriterator_entity.h"
@@ -42,4 +42,4 @@ private:
     explicit FsReaderIterator(unique_ptr<ReaderIteratorEntity> entity) : entity(move(entity)) {};
 };
 } // namespace OHOS::FileManagement::ModuleFileIO
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_FS_READERITERATOR_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_FS_READER_ITERATOR_H
