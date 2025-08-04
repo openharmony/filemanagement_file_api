@@ -28,7 +28,6 @@ public:
     static FsResult<void> DoRename(const string &src, const string &dest);
 };
 
-const string PROCEDURE_RENAME_NAME = "FileIORename";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
