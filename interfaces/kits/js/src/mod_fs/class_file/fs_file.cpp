@@ -60,10 +60,12 @@ FsResult<string> FsFile::GetPath() const
         HILOGE("Failed to get file entity");
         return FsResult<string>::Error(EINVAL);
     }
+
     if (fileEntity->uri_.length() != 0) {
         AppFileService::ModuleFileUri::FileUri fileUri(fileEntity->uri_);
         return FsResult<string>::Success(fileUri.GetPath());
     }
+
     auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
     if (realPathRes != ERRNO_NOERR) {
         HILOGE("Failed to get real path");
@@ -78,15 +80,18 @@ FsResult<string> FsFile::GetName() const
         HILOGE("Failed to get file entity");
         return FsResult<string>::Error(EINVAL);
     }
+
     if (fileEntity->uri_.length() != 0) {
         AppFileService::ModuleFileUri::FileUri fileUri(fileEntity->uri_);
         return FsResult<string>::Success(fileUri.GetName());
     }
+
     auto [realPathRes, realPath] = RealPathCore(fileEntity->path_);
     if (realPathRes != ERRNO_NOERR) {
         HILOGE("Failed to get real path");
         return FsResult<string>::Error(realPathRes);
     }
+
     string path(static_cast<const char *>(realPath->ptr));
     auto pos = path.find_last_of('/');
     if (pos == string::npos) {
