@@ -79,17 +79,20 @@ void WatchEventListener::SendWatchEvent(const WatchEvent &watchEvent) const
         HILOGE("Cannot send WatchEvent because the callback is null.");
         return;
     }
-    ani_size scopeSize = ANI_SCOPE_SIZE;
+
     ani_env *env = AniHelper::GetThreadEnv(vm);
     if (env == nullptr) {
         HILOGE("Cannot send WatchEvent because the env is null.");
         return;
     }
+
+    ani_size scopeSize = ANI_SCOPE_SIZE;
     ani_status status = env->CreateLocalScope(scopeSize);
     if (status != ANI_OK) {
         HILOGE("Failed to creat local scope, status: %{public}d", static_cast<int32_t>(status));
         return;
     }
+
     auto evtObj = WatchEventWrapper::Wrap(env, watchEvent);
     if (evtObj == nullptr) {
         HILOGE("Create WatchEvent obj failed!");
@@ -102,7 +105,6 @@ void WatchEventListener::SendWatchEvent(const WatchEvent &watchEvent) const
     status = env->FunctionalObject_Call(cbObj, argc, args.data(), &result);
     if (status != ANI_OK) {
         HILOGE("Failed to call FunctionalObject_Call, status: %{public}d", static_cast<int32_t>(status));
-        // continue execution and not exit.
     }
     status = env->DestroyLocalScope();
     if (status != ANI_OK) {
