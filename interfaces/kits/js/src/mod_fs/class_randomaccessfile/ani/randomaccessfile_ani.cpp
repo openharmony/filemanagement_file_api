@@ -39,9 +39,10 @@ static FsRandomAccessFile *Unwrap(ani_env *env, ani_object object)
     ani_long nativePtr;
     auto ret = env->Object_GetFieldByName_Long(object, "nativePtr", &nativePtr);
     if (ret != ANI_OK) {
-        HILOGE("Unwrap FsRandomAccessFile err: %{private}d", ret);
+        HILOGE("Unwrap FsRandomAccessFile err: %{public}d", ret);
         return nullptr;
     }
+
     uintptr_t ptrValue = static_cast<uintptr_t>(nativePtr);
     FsRandomAccessFile *rafFile = reinterpret_cast<FsRandomAccessFile *>(ptrValue);
     return rafFile;
