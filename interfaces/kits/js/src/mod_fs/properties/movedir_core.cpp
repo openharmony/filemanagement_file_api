@@ -223,7 +223,7 @@ static int RecurMoveDir(const string &srcPath, const string &destPath, const int
 static int MoveDirFunc(const string &src, const string &dest, const int mode, deque<struct ErrFiles> &errfiles)
 {
     size_t found = string(src).rfind('/');
-    if (found == std::string::npos) {
+    if (found == string::npos) {
         return EINVAL;
     }
     string dirName = string(src).substr(found);
