@@ -43,5 +43,4 @@ private:
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI
-
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_TASKSIGNAL_ANI_TASK_SIGNAL_LISTENER_ANI_H
