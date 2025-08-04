@@ -133,15 +133,17 @@ FsResult<int64_t> FsRandomAccessFile::ReadSync(ArrayBuffer &buffer, const option
         HILOGE("Failed to get entity of RandomAccessFile");
         return FsResult<int64_t>::Error(EIO);
     }
+
     auto [succ, buf, len, offset] = ValidReadArg(buffer, options);
     if (!succ) {
         HILOGE("Invalid buffer/options");
         return FsResult<int64_t>::Error(EINVAL);
     }
     offset = CalculateOffset(offset, rafEntity->filePointer);
+
     int actLen = DoReadRAF(buf, len, rafEntity->fd.get()->GetFD(), offset);
     if (actLen < 0) {
-        HILOGE("Failed to read file for %{private}d", actLen);
+        HILOGE("Failed to read file for %{public}d", actLen);
         return FsResult<int64_t>::Error(actLen);
     }
     rafEntity->filePointer = offset + actLen;
@@ -279,6 +281,7 @@ FsResult<FsRandomAccessFile *> FsRandomAccessFile::Constructor()
         HILOGE("INNER BUG. Failed to wrap entity for obj RandomAccessFile");
         return FsResult<FsRandomAccessFile *>::Error(EIO);
     }
+
     return FsResult<FsRandomAccessFile *>::Success(move(randomAccessFilePtr));
 }
 

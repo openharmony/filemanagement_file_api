@@ -68,10 +68,8 @@ public:
     FsResult<int64_t> WriteSync(const ArrayBuffer &buffer, const optional<WriteOptions> &options = nullopt) const;
     FsResult<int64_t> ReadSync(ArrayBuffer &buffer, const optional<ReadOptions> &options = nullopt) const;
     FsResult<void> CloseSync() const;
-
     FsResult<int32_t> GetFD() const;
     FsResult<int64_t> GetFPointer() const;
-
     static FsResult<FsRandomAccessFile *> Constructor();
 
 private:
