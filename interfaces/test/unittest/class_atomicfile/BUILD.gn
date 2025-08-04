@@ -18,6 +18,7 @@ ohos_unittest("class_atomicfile_test") {
   module_out_path = "file_api/file_api"
 
   sources = [
+    "${file_api_path}/interfaces/kits/js/src/common/file_helper/fd_guard.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile/atomicfile_n_exporter.cpp",
     "${file_api_path}/interfaces/test/unittest/class_atomicfile/mock/atomicfile_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/class_atomicfile/atomicfile_mock_test.cpp",
