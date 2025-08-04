@@ -178,7 +178,7 @@ tuple<bool, void *, size_t, int64_t> ValidWriteArg(
     if (offsetOp.has_value()) {
         offset = offsetOp.value();
         if (offset < 0) {
-            HILOGE("option.offset shall be positive number");
+            HILOGE("Option.offset shall be positive number");
             return { false, nullptr, 0, offset };
         }
     }
