@@ -31,7 +31,7 @@ FsResult<int64_t> StatvfsCore::DoGetFreeSize(const string &path)
         return FsResult<int64_t>::Error(errno);
     }
     unsigned long long freeSize = static_cast<unsigned long long>(diskInfo.f_bsize) *
-                                static_cast<unsigned long long>(diskInfo.f_bfree);
+                                  static_cast<unsigned long long>(diskInfo.f_bfree);
     return FsResult<int64_t>::Success(static_cast<int64_t>(freeSize));
 }
 
@@ -43,7 +43,7 @@ FsResult<int64_t> StatvfsCore::DoGetTotalSize(const string &path)
         return FsResult<int64_t>::Error(errno);
     }
     unsigned long long totalSize = static_cast<unsigned long long>(diskInfo.f_bsize) *
-                                static_cast<unsigned long long>(diskInfo.f_blocks);
+                                   static_cast<unsigned long long>(diskInfo.f_blocks);
     return FsResult<int64_t>::Success(static_cast<int64_t>(totalSize));
 }
 
