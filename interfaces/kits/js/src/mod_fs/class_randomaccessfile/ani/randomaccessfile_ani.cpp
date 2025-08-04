@@ -370,11 +370,13 @@ static ani_object CreateReadStream(ani_env *env, ani_string filePath, ani_object
         HILOGE("Cannot find class %s", className);
         return nullptr;
     }
+
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/ReadStreamOptions;:V", &ctor)) {
         HILOGE("Cannot find constructor method for class %s", className);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
         HILOGE("New %s obj Failed", className);
