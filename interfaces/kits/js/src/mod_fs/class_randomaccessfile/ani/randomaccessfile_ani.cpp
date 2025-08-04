@@ -429,6 +429,7 @@ static ani_object CreateStream(ani_env *env, const string &streamName, RandomAcc
         ani_object obj = CreateReadStreamOptions(env, rafEntity->start, rafEntity->end);
         return CreateReadStream(env, filePath, obj);
     }
+
     if (streamName == WRITE_STREAM_CLASS) {
         ani_object obj = CreateWriteStreamOptions(env, rafEntity->start, flags);
         return CreateWriteStream(env, filePath, obj);
