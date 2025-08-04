@@ -46,6 +46,7 @@ ani_object OpenAni::OpenSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
         ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
+
     FsResult<FsFile *> ret = OpenCore::DoOpen(filePath, modeOp);
     if (!ret.IsSuccess()) {
         HILOGE("Open failed");
@@ -53,6 +54,7 @@ ani_object OpenAni::OpenSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani
         ErrorHandler::Throw(env, err);
         return nullptr;
     }
+
     const FsFile *file = ret.GetData().value();
     auto result = FileWrapper::Wrap(env, move(file));
     if (result == nullptr) {
