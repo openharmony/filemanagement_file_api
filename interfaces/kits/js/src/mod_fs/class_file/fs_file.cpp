@@ -120,6 +120,7 @@ FsResult<string> FsFile::GetParent() const
         }
         path = static_cast<const char *>(realPath->ptr);
     }
+
     auto pos = path.find_last_of('/');
     if (pos == string::npos) {
         HILOGE("Failed to split filename from path");

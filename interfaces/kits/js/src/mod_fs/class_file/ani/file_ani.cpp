@@ -36,6 +36,7 @@ ani_string FileAni::GetParent(ani_env *env, [[maybe_unused]] ani_object object)
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return {};
     }
+
     auto ret = fsFile->GetParent();
     if (!ret.IsSuccess()) {
         HILOGE("Cannot get file parent!");
@@ -43,6 +44,7 @@ ani_string FileAni::GetParent(ani_env *env, [[maybe_unused]] ani_object object)
         ErrorHandler::Throw(env, err);
         return {};
     }
+
     auto value = ret.GetData().value();
     auto [succ, parent] = TypeConverter::ToAniString(env, value);
     if (!succ) {
