@@ -78,7 +78,6 @@ static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
 }
 
 FsResult<void> TruncateCore::DoTruncate(FileInfo &fileInfo, const std::optional<int64_t> &len)
-
 {
     auto succ = ValidFileInfo(fileInfo);
     if (!succ) {
