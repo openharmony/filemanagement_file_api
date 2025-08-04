@@ -25,6 +25,6 @@ class LstatCore final {
 public:
     static FsResult<FsStat *> DoLstat(const string &path);
 };
-const std::string PROCEDURE_LSTAT_NAME = "FileIOLstat";
+
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LSTAT_CORE_H
