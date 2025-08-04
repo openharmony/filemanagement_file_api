@@ -80,7 +80,7 @@ static int32_t SendFileCore(FileInfo &srcFdg, FileInfo &destFdg, struct stat &st
         if (static_cast<size_t>(ret) > size) {
             HILOGE("More bytes returned than the size of the file. The file size is "
                    "%{public}zu"
-                   "The bytes returned is %{public}d",
+                   " The bytes returned is %{public}d",
                    size, ret);
             return EIO;
         }
