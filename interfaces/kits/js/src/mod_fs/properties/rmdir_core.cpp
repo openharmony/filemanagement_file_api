@@ -55,7 +55,7 @@ static int32_t RmDirent(const string &fpath)
 #else
 static int32_t RmDirent(const string &fpath)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> scandirReq = {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> scandirReq = {
         new (std::nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (!scandirReq) {
         HILOGE("Failed to request heap memory.");
@@ -89,7 +89,7 @@ static int32_t RmDirent(const string &fpath)
             }
         }
     }
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> rmdirReq = {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> rmdirReq = {
         new (std::nothrow) uv_fs_t, FsUtils::FsReqCleanup};
     if (!rmdirReq) {
         HILOGE("Failed to request heap memory.");
