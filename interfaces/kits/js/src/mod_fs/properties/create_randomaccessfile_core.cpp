@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "create_randomaccessfile_core.h"
 
 #include <securec.h>
@@ -37,6 +38,7 @@ static tuple<bool, FileInfo, int> ParseStringToFileInfo(const string &path)
         close(sfd);
         return { false, FileInfo { false, nullptr, nullptr }, ENOMEM};
     }
+
     size_t length = path.length() + 1;
     auto chars = std::make_unique<char[]>(length);
     auto ret = strncpy_s(chars.get(), length, path.c_str(), length - 1);
@@ -53,11 +55,13 @@ static tuple<bool, FileInfo, int> ParseFdToFileInfo(const int32_t &fd)
         HILOGE("Invalid fd");
         return { false, FileInfo { false, nullptr, nullptr }, EINVAL};
     }
+
     auto dupFd = dup(fd);
     if (dupFd < 0) {
         HILOGE("Failed to get valid fd, fail reason: %{public}s, fd: %{public}d", strerror(errno), fd);
         return { false, FileInfo { false, nullptr, nullptr }, EINVAL};
     }
+
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(dupFd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
@@ -114,7 +118,7 @@ static tuple<bool, uint32_t, int64_t, int64_t> ValidAndConvertFlags(const option
     if (options.has_value()) {
         auto [succOpt, start, end] = ValidRafOptions(options);
         if (!succOpt) {
-            HILOGE("invalid RandomAccessFile options");
+            HILOGE("Invalid RandomAccessFile options");
             return {false, flags, start, end};
         }
     }
