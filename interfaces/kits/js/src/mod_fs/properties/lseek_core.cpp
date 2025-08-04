@@ -22,8 +22,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-FsResult<int64_t> LseekCore::DoLseek(const int32_t &fd, const int64_t &offset,
-                                     const optional<SeekPos> &pos)
+FsResult<int64_t> LseekCore::DoLseek(const int32_t &fd, const int64_t &offset, const optional<SeekPos> &pos)
 {
     if (fd < 0) {
         HILOGE("Invalid fd from JS first argument");
