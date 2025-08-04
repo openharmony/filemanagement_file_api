@@ -38,6 +38,7 @@ void TaskSignalAni::Cancel(ani_env *env, [[maybe_unused]] ani_object object)
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
+
     auto ret = copySignal->Cancel();
     if (!ret.IsSuccess()) {
         HILOGE("Cannot Cancel!");
@@ -55,6 +56,7 @@ void TaskSignalAni::OnCancel(ani_env *env, [[maybe_unused]] ani_object object)
         ErrorHandler::Throw(env, EINVAL);
         return;
     }
+
     auto ret = copySignal->OnCancel();
     if (!ret.IsSuccess()) {
         HILOGE("Cannot Cancel!");
