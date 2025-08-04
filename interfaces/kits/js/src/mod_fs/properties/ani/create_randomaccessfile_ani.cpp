@@ -142,12 +142,14 @@ static ani_object CreateRandomAccessFileByString(
         HILOGE("Parse file path failed");
         return nullptr;
     }
+
     auto [succMode, modeOp] = TypeConverter::ToOptionalInt32(env, mode);
     if (!succMode) {
         HILOGE("Invalid mode");
         ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
+
     FsResult<FsRandomAccessFile *> ret = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, modeOp, op);
     if (!ret.IsSuccess()) {
         HILOGE("CreateRandomAccessFile failed");
@@ -155,6 +157,7 @@ static ani_object CreateRandomAccessFileByString(
         ErrorHandler::Throw(env, err);
         return nullptr;
     }
+
     const FsRandomAccessFile *refFile = ret.GetData().value();
     auto result = Wrap(env, move(refFile));
     if (result == nullptr) {
@@ -200,6 +203,7 @@ ani_object CreateRandomAccessFileAni::CreateRandomAccessFileSync(
             ErrorHandler::Throw(env, err);
             return nullptr;
         }
+
         const FsRandomAccessFile *refFile = ret.GetData().value();
         auto result = Wrap(env, move(refFile));
         if (result == nullptr) {
