@@ -39,7 +39,7 @@ using namespace std;
 
 static int UvAccess(const string &path, int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> accessReq = { new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> accessReq = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!accessReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -49,7 +49,7 @@ static int UvAccess(const string &path, int mode)
 
 static int MkdirCore(const string &path)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> mkdirReq = { new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> mkdirReq = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!mkdirReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -57,7 +57,7 @@ static int MkdirCore(const string &path)
     return uv_fs_mkdir(nullptr, mkdirReq.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
 }
 
-static int32_t MkdirExec(const string &path, bool recursion, bool hasOption)
+static int32_t MkdirExec(const std::string &path, bool recursion, bool hasOption)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (hasOption) {
