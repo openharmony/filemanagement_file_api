@@ -332,11 +332,13 @@ static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flag
         HILOGE("Cannot find class %s", className);
         return nullptr;
     }
+
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
         HILOGE("Cannot find constructor method for class %s", className);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         HILOGE("New %s obj Failed", className);
@@ -344,11 +346,12 @@ static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flag
     }
 
     ani_field modeField = nullptr;
-    ani_field startField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "mode", &modeField)) {
         HILOGE("Cannot find mode in class %s", className);
         return nullptr;
     }
+
+    ani_field startField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
         HILOGE("Cannot find start in class %s", className);
         return nullptr;
