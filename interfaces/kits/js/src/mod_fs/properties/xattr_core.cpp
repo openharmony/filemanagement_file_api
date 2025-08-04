@@ -30,15 +30,15 @@ constexpr size_t MAX_XATTR_SIZE = 4096;
 
 static bool IsIllegalXattr(const char *key, const char *value)
 {
-    bool isIllegalKey = strnlen(key, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE;
-    if (isIllegalKey) {
+    if (strnlen(key, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE) {
         HILOGE("key is too long");
+        return true;
     }
-    bool isIllegalValue = strnlen(value, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE;
-    if (isIllegalValue) {
+    if (strnlen(value, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE) {
         HILOGE("value is too long");
+        return true;
     }
-    return isIllegalKey || isIllegalValue;
+    return false;
 }
 
 static int32_t GetXattrCore(const char *path, const char *key, std::shared_ptr<string> result)
