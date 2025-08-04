@@ -130,6 +130,7 @@ static tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_obj
     if (!isArrayBuffer) {
         return { false, {} };
     }
+
     auto result = static_cast<ani_arraybuffer>(buf);
     return { true, move(result) };
 }
