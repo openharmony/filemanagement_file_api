@@ -63,12 +63,14 @@ void FileAni::LockSync(ani_env *env, [[maybe_unused]] ani_object object, ani_obj
     if (!isUndefined) {
         exc = true;
     }
+
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {
         HILOGE("Cannot unwrap fsfile!");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
+
     auto ret = fsFile->Lock(exc);
     if (!ret.IsSuccess()) {
         HILOGE("Lock file failed!");
