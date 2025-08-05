@@ -14,6 +14,11 @@
 import("//build/test.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
+ani_file_environment_core = [
+  "${src_path}/common/file_helper/fd_guard.cpp",
+  "${src_path}/mod_environment/environment_core.cpp",
+  "${src_path}/mod_fs/fs_utils.cpp",
+]
 ohos_unittest("ani_file_environment_test") {
   branch_protector_ret = "pac_ret"
   testonly = true
@@ -31,9 +36,9 @@ ohos_unittest("ani_file_environment_test") {
     "mod_environment/mock/ipc_skeleton_mock.cpp",
     "mod_environment/mock/parameter_mock.cpp",
   ]
+  sources += ani_file_environment_core
 
   deps = [
-    "${file_api_path}/interfaces/kits/js:ani_file_environment",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
@@ -56,6 +61,59 @@ ohos_unittest("ani_file_environment_test") {
   defines = [ "private=public" ]
 }
 
+ani_file_fs_core = [
+  "${src_path}/common/file_helper/fd_guard.cpp",
+  "${src_path}/mod_fs/class_atomicfile/fs_atomicfile.cpp",
+  "${src_path}/mod_fs/class_file/file_instantiator.cpp",
+  "${src_path}/mod_fs/class_file/fs_file.cpp",
+  "${src_path}/mod_fs/class_randomaccessfile/fs_randomaccessfile.cpp",
+  "${src_path}/mod_fs/class_readeriterator/fs_reader_iterator.cpp",
+  "${src_path}/mod_fs/class_stat/fs_stat.cpp",
+  "${src_path}/mod_fs/class_stat/stat_instantiator.cpp",
+  "${src_path}/mod_fs/class_stream/fs_stream.cpp",
+  "${src_path}/mod_fs/class_stream/stream_instantiator.cpp",
+  "${src_path}/mod_fs/class_tasksignal/fs_task_signal.cpp",
+  "${src_path}/mod_fs/class_watcher/fs_file_watcher.cpp",
+  "${src_path}/mod_fs/class_watcher/fs_watcher.cpp",
+  "${src_path}/mod_fs/class_watcher/watcher_data_cache.cpp",
+  "${src_path}/mod_fs/fs_utils.cpp",
+  "${src_path}/mod_fs/properties/access_core.cpp",
+  "${src_path}/mod_fs/properties/close_core.cpp",
+  "${src_path}/mod_fs/properties/connectdfs_core.cpp",
+  "${src_path}/mod_fs/properties/copy_core.cpp",
+  "${src_path}/mod_fs/properties/copy_dir_core.cpp",
+  "${src_path}/mod_fs/properties/copy_file_core.cpp",
+  "${src_path}/mod_fs/properties/copy_listener/trans_listener_core.cpp",
+  "${src_path}/mod_fs/properties/create_randomaccessfile_core.cpp",
+  "${src_path}/mod_fs/properties/create_stream_core.cpp",
+  "${src_path}/mod_fs/properties/dfs_listener/file_dfs_listener_stub.cpp",
+  "${src_path}/mod_fs/properties/disconnectdfs_core.cpp",
+  "${src_path}/mod_fs/properties/dup_core.cpp",
+  "${src_path}/mod_fs/properties/fdatasync_core.cpp",
+  "${src_path}/mod_fs/properties/fdopen_stream_core.cpp",
+  "${src_path}/mod_fs/properties/fsync_core.cpp",
+  "${src_path}/mod_fs/properties/listfile_core.cpp",
+  "${src_path}/mod_fs/properties/lseek_core.cpp",
+  "${src_path}/mod_fs/properties/lstat_core.cpp",
+  "${src_path}/mod_fs/properties/mkdir_core.cpp",
+  "${src_path}/mod_fs/properties/mkdtemp_core.cpp",
+  "${src_path}/mod_fs/properties/move_core.cpp",
+  "${src_path}/mod_fs/properties/movedir_core.cpp",
+  "${src_path}/mod_fs/properties/open_core.cpp",
+  "${src_path}/mod_fs/properties/read_core.cpp",
+  "${src_path}/mod_fs/properties/read_lines_core.cpp",
+  "${src_path}/mod_fs/properties/read_text_core.cpp",
+  "${src_path}/mod_fs/properties/rename_core.cpp",
+  "${src_path}/mod_fs/properties/rmdir_core.cpp",
+  "${src_path}/mod_fs/properties/stat_core.cpp",
+  "${src_path}/mod_fs/properties/symlink_core.cpp",
+  "${src_path}/mod_fs/properties/truncate_core.cpp",
+  "${src_path}/mod_fs/properties/unlink_core.cpp",
+  "${src_path}/mod_fs/properties/utimes_core.cpp",
+  "${src_path}/mod_fs/properties/watcher_core.cpp",
+  "${src_path}/mod_fs/properties/write_core.cpp",
+  "${src_path}/mod_fs/properties/xattr_core.cpp",
+]
 ohos_unittest("ani_file_fs_mock_test") {
   branch_protector_ret = "pac_ret"
   testonly = true
@@ -119,9 +177,9 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/write_core_mock_test.cpp",
     "mod_fs/properties/xattr_core_mock_test.cpp",
   ]
+  sources += ani_file_fs_core
 
   deps = [
-    "${file_api_path}/interfaces/kits/js:ani_file_fs",
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "${file_api_path}/interfaces/kits/native:task_signal_native",
     "${file_api_path}/interfaces/kits/rust:rust_file",
@@ -204,9 +262,9 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/write_core_test.cpp",
     "mod_fs/properties/xattr_core_test.cpp",
   ]
+  sources += ani_file_fs_core
 
   deps = [
-    "${file_api_path}/interfaces/kits/js:ani_file_fs",
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "${file_api_path}/interfaces/kits/native:task_signal_native",
     "${file_api_path}/interfaces/kits/rust:rust_file",
@@ -228,6 +286,13 @@ ohos_unittest("ani_file_fs_test") {
 
   defines = [ "private=public" ]
 }
+ani_file_hash_core = [
+  "${src_path}/common/file_helper/fd_guard.cpp",
+  "${src_path}/common/file_helper/hash_file.cpp",
+  "${src_path}/mod_fs/fs_utils.cpp",
+  "${src_path}/mod_hash/class_hashstream/hs_hashstream.cpp",
+  "${src_path}/mod_hash/hash_core.cpp",
+]
 
 ohos_unittest("ani_file_hash_test") {
   module_out_path = "file_api/file_api"
@@ -235,6 +300,7 @@ ohos_unittest("ani_file_hash_test") {
   resource_config_file = "../resource/ohos_test.xml"
 
   sources = [ "mod_hash/hash_core_test.cpp" ]
+  sources += ani_file_hash_core
 
   include_dirs = [
     "mock/libuv",
@@ -242,7 +308,6 @@ ohos_unittest("ani_file_hash_test") {
   ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/js:ani_file_hash",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
@@ -256,20 +321,24 @@ ohos_unittest("ani_file_hash_test") {
   ]
 }
 
+ani_file_securitylabel_core = [
+  "${src_path}/common/file_helper/fd_guard.cpp",
+  "${src_path}/mod_fs/fs_utils.cpp",
+  "${src_path}/mod_securitylabel/securitylabel_core.cpp",
+]
 ohos_unittest("ani_file_securitylabel_test") {
   module_out_path = "file_api/file_api"
 
   resource_config_file = "../resource/ohos_test.xml"
 
   sources = [ "mod_securitylabel/securitylabel_core_test.cpp" ]
-
+  sources += ani_file_securitylabel_core
   include_dirs = [
     "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/mod_securitylabel",
   ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/js:ani_file_securitylabel",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
@@ -283,20 +352,24 @@ ohos_unittest("ani_file_securitylabel_test") {
   ]
 }
 
+ani_file_statvfs_core = [
+  "${src_path}/common/file_helper/fd_guard.cpp",
+  "${src_path}/mod_fs/fs_utils.cpp",
+  "${src_path}/mod_statvfs/statvfs_core.cpp",
+]
 ohos_unittest("ani_file_statvfs_test") {
   module_out_path = "file_api/file_api"
 
   resource_config_file = "../resource/ohos_test.xml"
 
   sources = [ "mod_statvfs/statvfs_core_test.cpp" ]
-
+  sources += ani_file_statvfs_core
   include_dirs = [
     "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/mod_statvfs",
   ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/js:ani_file_statvfs",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
