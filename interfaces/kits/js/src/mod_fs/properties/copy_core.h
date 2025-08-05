@@ -19,8 +19,8 @@
 #include <chrono>
 #include <condition_variable>
 #include <set>
-#include <thread>
 #include <sys/inotify.h>
+#include <thread>
 
 #include "bundle_mgr_client_impl.h"
 #include "filemgmt_libfs.h"

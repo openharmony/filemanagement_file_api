@@ -36,6 +36,7 @@ ani_string FileAni::GetParent(ani_env *env, [[maybe_unused]] ani_object object)
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return {};
     }
+
     auto ret = fsFile->GetParent();
     if (!ret.IsSuccess()) {
         HILOGE("Cannot get file parent!");
@@ -43,6 +44,7 @@ ani_string FileAni::GetParent(ani_env *env, [[maybe_unused]] ani_object object)
         ErrorHandler::Throw(env, err);
         return {};
     }
+
     auto value = ret.GetData().value();
     auto [succ, parent] = TypeConverter::ToAniString(env, value);
     if (!succ) {
@@ -61,12 +63,14 @@ void FileAni::LockSync(ani_env *env, [[maybe_unused]] ani_object object, ani_obj
     if (!isUndefined) {
         exc = true;
     }
+
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {
         HILOGE("Cannot unwrap fsfile!");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
+
     auto ret = fsFile->Lock(exc);
     if (!ret.IsSuccess()) {
         HILOGE("Lock file failed!");
@@ -84,12 +88,14 @@ void FileAni::TryLock(ani_env *env, [[maybe_unused]] ani_object object, ani_obje
     if (!isUndefined) {
         exc = true;
     }
+
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {
         HILOGE("Cannot unwrap fsfile!");
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
+
     auto ret = fsFile->TryLock(exc);
     if (!ret.IsSuccess()) {
         HILOGE("TryLock file failed!");
@@ -107,6 +113,7 @@ void FileAni::UnLock(ani_env *env, [[maybe_unused]] ani_object object)
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
+
     auto ret = fsFile->UnLock();
     if (!ret.IsSuccess()) {
         HILOGE("UnLock file failed!");

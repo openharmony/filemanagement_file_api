@@ -16,8 +16,8 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_FS_RANDOMACCESSFILE_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_FS_RANDOMACCESSFILE_H
 
-#include "randomaccessfile_entity.h"
 #include "filemgmt_libfs.h"
+#include "randomaccessfile_entity.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -68,10 +68,8 @@ public:
     FsResult<int64_t> WriteSync(const ArrayBuffer &buffer, const optional<WriteOptions> &options = nullopt) const;
     FsResult<int64_t> ReadSync(ArrayBuffer &buffer, const optional<ReadOptions> &options = nullopt) const;
     FsResult<void> CloseSync() const;
-
     FsResult<int32_t> GetFD() const;
     FsResult<int64_t> GetFPointer() const;
-
     static FsResult<FsRandomAccessFile *> Constructor();
 
 private:

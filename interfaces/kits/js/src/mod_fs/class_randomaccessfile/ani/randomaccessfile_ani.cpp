@@ -39,9 +39,10 @@ static FsRandomAccessFile *Unwrap(ani_env *env, ani_object object)
     ani_long nativePtr;
     auto ret = env->Object_GetFieldByName_Long(object, "nativePtr", &nativePtr);
     if (ret != ANI_OK) {
-        HILOGE("Unwrap FsRandomAccessFile err: %{private}d", ret);
+        HILOGE("Unwrap FsRandomAccessFile err: %{public}d", ret);
         return nullptr;
     }
+
     uintptr_t ptrValue = static_cast<uintptr_t>(nativePtr);
     FsRandomAccessFile *rafFile = reinterpret_cast<FsRandomAccessFile *>(ptrValue);
     return rafFile;
@@ -130,6 +131,7 @@ static tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_obj
     if (!isArrayBuffer) {
         return { false, {} };
     }
+
     auto result = static_cast<ani_arraybuffer>(buf);
     return { true, move(result) };
 }
@@ -142,6 +144,7 @@ void RandomAccessFileAni::SetFilePointer(ani_env *env, [[maybe_unused]] ani_obje
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
+
     auto ret = rafFile->SetFilePointerSync(static_cast<int64_t>(fp));
     if (!ret.IsSuccess()) {
         HILOGE("SetFilePointerSync failed!");
@@ -161,7 +164,7 @@ void RandomAccessFileAni::Close(ani_env *env, [[maybe_unused]] ani_object object
     }
     auto ret = rafFile->CloseSync();
     if (!ret.IsSuccess()) {
-        HILOGE("close rafFile failed!");
+        HILOGE("Close rafFile failed!");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
         return;
@@ -289,11 +292,13 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
         HILOGE("Cannot find class %s", className);
         return nullptr;
     }
+
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
         HILOGE("Cannot find constructor method for class %s", className);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         HILOGE("New %s obj Failed", className);
@@ -301,11 +306,12 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
     }
 
     ani_field startField = nullptr;
-    ani_field endField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
         HILOGE("Cannot find start in class %s", className);
         return nullptr;
     }
+
+    ani_field endField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "end", &endField)) {
         HILOGE("Cannot find end in class %s", className);
         return nullptr;
@@ -332,11 +338,13 @@ static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flag
         HILOGE("Cannot find class %s", className);
         return nullptr;
     }
+
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
         HILOGE("Cannot find constructor method for class %s", className);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         HILOGE("New %s obj Failed", className);
@@ -344,11 +352,12 @@ static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flag
     }
 
     ani_field modeField = nullptr;
-    ani_field startField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "mode", &modeField)) {
         HILOGE("Cannot find mode in class %s", className);
         return nullptr;
     }
+
+    ani_field startField = nullptr;
     if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
         HILOGE("Cannot find start in class %s", className);
         return nullptr;
@@ -370,11 +379,13 @@ static ani_object CreateReadStream(ani_env *env, ani_string filePath, ani_object
         HILOGE("Cannot find class %s", className);
         return nullptr;
     }
+
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/ReadStreamOptions;:V", &ctor)) {
         HILOGE("Cannot find constructor method for class %s", className);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
         HILOGE("New %s obj Failed", className);
@@ -420,6 +431,7 @@ static ani_object CreateStream(ani_env *env, const string &streamName, RandomAcc
         ani_object obj = CreateReadStreamOptions(env, rafEntity->start, rafEntity->end);
         return CreateReadStream(env, filePath, obj);
     }
+
     if (streamName == WRITE_STREAM_CLASS) {
         ani_object obj = CreateWriteStreamOptions(env, rafEntity->start, flags);
         return CreateWriteStream(env, filePath, obj);

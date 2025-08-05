@@ -43,7 +43,7 @@ static int32_t IsAllPath(FileInfo &srcFile, FileInfo &destFile)
         return errCode.value();
     }
 #else
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> copyfileReq = {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> copyfileReq = {
         new (nothrow) uv_fs_t, FsUtils::FsReqCleanup};
     if (!copyfileReq) {
         HILOGE("Failed to request heap memory.");
@@ -61,7 +61,7 @@ static int32_t IsAllPath(FileInfo &srcFile, FileInfo &destFile)
 
 static int32_t SendFileCore(FileInfo &srcFdg, FileInfo &destFdg, struct stat &statbf)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> sendfileReq = {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> sendfileReq = {
         new (nothrow) uv_fs_t, FsUtils::FsReqCleanup};
     if (!sendfileReq) {
         HILOGE("Failed to request heap memory.");
@@ -73,7 +73,7 @@ static int32_t SendFileCore(FileInfo &srcFdg, FileInfo &destFdg, struct stat &st
     int ret = 0;
     while (size > 0) {
         ret = uv_fs_sendfile(nullptr, sendfileReq.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
-                             offset, std::min(MAX_SIZE, size), nullptr);
+                             offset, min(MAX_SIZE, size), nullptr);
         if (ret < 0) {
             HILOGE("Failed to sendfile by ret : %{public}d", ret);
             return ret;
@@ -81,7 +81,7 @@ static int32_t SendFileCore(FileInfo &srcFdg, FileInfo &destFdg, struct stat &st
         if (static_cast<size_t>(ret) > size) {
             HILOGE("More bytes returned than the size of the file. The file size is "
                    "%{public}zu"
-                   "The bytes returned is %{public}d",
+                   " The bytes returned is %{public}d",
                    size, ret);
             return EIO;
         }
@@ -101,7 +101,7 @@ static int32_t SendFileCore(FileInfo &srcFdg, FileInfo &destFdg, struct stat &st
 
 static int32_t TruncateCore(const FileInfo &fileInfo)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = {
         new (nothrow) uv_fs_t, FsUtils::FsReqCleanup};
     if (!ftruncateReq) {
         HILOGE("Failed to request heap memory.");
@@ -117,7 +117,7 @@ static int32_t TruncateCore(const FileInfo &fileInfo)
 
 static int32_t OpenCore(FileInfo &fileInfo, const int flags, const int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = {
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = {
         new (nothrow) uv_fs_t, FsUtils::FsReqCleanup};
     if (!openReq) {
         HILOGE("Failed to request heap memory.");

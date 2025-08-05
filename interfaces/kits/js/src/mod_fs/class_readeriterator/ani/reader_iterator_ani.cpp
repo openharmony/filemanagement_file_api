@@ -69,7 +69,7 @@ FsReaderIterator *ReaderIteratorAni::Unwrap(ani_env *env, ani_object object)
         HILOGE("Unwrap fsReaderIterator err: %{private}d", ret);
         return nullptr;
     }
-    uintptr_t ptrValue = static_cast<uintptr_t>(nativePtr);
+    std::uintptr_t ptrValue = static_cast<std::uintptr_t>(nativePtr);
     FsReaderIterator *readeriterator = reinterpret_cast<FsReaderIterator *>(ptrValue);
     return readeriterator;
 }

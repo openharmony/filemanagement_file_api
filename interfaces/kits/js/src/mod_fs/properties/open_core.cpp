@@ -12,6 +12,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 #include "open_core.h"
 
 #include <cstdio>
@@ -50,16 +51,16 @@ using namespace OHOS::DistributedFS::ModuleRemoteUri;
 using namespace OHOS::AppExecFwk;
 #endif
 
-const std::string PROCEDURE_OPEN_NAME = "FileIOOpen";
-const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
-const std::string FILE_DATA_URI = "file://";
-const std::string PATH_SHARE = "/data/storage/el2/share";
-const std::string MODE_RW = "/rw/";
-const std::string MODE_R = "/r/";
-const std::string MEDIA = "media";
-const std::string DOCS = "docs";
-const std::string DATASHARE = "datashare";
-const std::string SCHEME_BROKER = "content";
+const string PROCEDURE_OPEN_NAME = "FileIOOpen";
+const string MEDIALIBRARY_DATA_URI = "datashare:///media";
+const string FILE_DATA_URI = "file://";
+const string PATH_SHARE = "/data/storage/el2/share";
+const string MODE_RW = "/rw/";
+const string MODE_R = "/r/";
+const string MEDIA = "media";
+const string DOCS = "docs";
+const string DATASHARE = "datashare";
+const string SCHEME_BROKER = "content";
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 constexpr uint32_t MAX_WANT_FLAG = 4;
 #endif
@@ -99,8 +100,8 @@ static int OpenFileByPath(const string &path, uint32_t mode)
 
 static int OpenFileByDatashare(const string &path, uint32_t flags)
 {
-    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
-    sptr<FileIoToken> remote = new (std::nothrow) IRemoteStub<FileIoToken>();
+    shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
+    sptr<FileIoToken> remote = new (nothrow) IRemoteStub<FileIoToken>();
     if (!remote) {
         HILOGE("Failed to get remote object");
         return -ENOMEM;

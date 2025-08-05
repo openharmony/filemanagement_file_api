@@ -30,8 +30,7 @@ using namespace std;
 
 static int DoReadRAF(void* buf, size_t len, int fd, int64_t offset)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> readReq = {
-        new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> readReq = { new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (readReq == nullptr) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -43,8 +42,7 @@ static int DoReadRAF(void* buf, size_t len, int fd, int64_t offset)
 
 static int DoWriteRAF(void* buf, size_t len, int fd, int64_t offset)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> writeReq = {
-        new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> writeReq = { new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (writeReq == nullptr) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -133,15 +131,17 @@ FsResult<int64_t> FsRandomAccessFile::ReadSync(ArrayBuffer &buffer, const option
         HILOGE("Failed to get entity of RandomAccessFile");
         return FsResult<int64_t>::Error(EIO);
     }
+
     auto [succ, buf, len, offset] = ValidReadArg(buffer, options);
     if (!succ) {
         HILOGE("Invalid buffer/options");
         return FsResult<int64_t>::Error(EINVAL);
     }
     offset = CalculateOffset(offset, rafEntity->filePointer);
+
     int actLen = DoReadRAF(buf, len, rafEntity->fd.get()->GetFD(), offset);
     if (actLen < 0) {
-        HILOGE("Failed to read file for %{private}d", actLen);
+        HILOGE("Failed to read file for %{public}d", actLen);
         return FsResult<int64_t>::Error(actLen);
     }
     rafEntity->filePointer = offset + actLen;
@@ -177,7 +177,7 @@ tuple<bool, void *, size_t, int64_t> ValidWriteArg(
     if (offsetOp.has_value()) {
         offset = offsetOp.value();
         if (offset < 0) {
-            HILOGE("option.offset shall be positive number");
+            HILOGE("Option.offset shall be positive number");
             return { false, nullptr, 0, offset };
         }
     }
@@ -279,6 +279,7 @@ FsResult<FsRandomAccessFile *> FsRandomAccessFile::Constructor()
         HILOGE("INNER BUG. Failed to wrap entity for obj RandomAccessFile");
         return FsResult<FsRandomAccessFile *>::Error(EIO);
     }
+
     return FsResult<FsRandomAccessFile *>::Success(move(randomAccessFilePtr));
 }
 

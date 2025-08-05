@@ -132,7 +132,7 @@ static int CopyFile(const string &src, const string &dest, const int mode)
         }
     }
     if (errCode.value() != ERRNO_NOERR) {
-        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        HILOGE("Fs exists fail, errcode is %{public}d", errCode.value());
         return errCode.value();
     }
     filesystem::path srcPath(src);
@@ -154,7 +154,7 @@ static int CopySubDir(
             return res;
         }
     } else if (errCode.value() != ERRNO_NOERR) {
-        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        HILOGE("Fs exists fail, errcode is %{public}d", errCode.value());
         return errCode.value();
     }
     return RecurCopyDir(srcPath, destPath, mode, errfiles);
@@ -178,7 +178,7 @@ static int RecurCopyDir(
     }
     int num = scandir(srcPath.c_str(), &(pNameList->namelist), FilterFunc, alphasort);
     if (num < 0) {
-        HILOGE("scandir fail errno is %{public}d", errno);
+        HILOGE("Scandir fail errno is %{public}d", errno);
         return errno;
     }
     pNameList->direntNum = num;
@@ -226,7 +226,7 @@ static int CopyDirFunc(const string &src, const string &dest, const int mode, ve
             return res;
         }
     } else if (errCode.value() != ERRNO_NOERR) {
-        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        HILOGE("Fs exists fail, errcode is %{public}d", errCode.value());
         return errCode.value();
     }
     int res = RecurCopyDir(src, destStr, mode, errfiles);

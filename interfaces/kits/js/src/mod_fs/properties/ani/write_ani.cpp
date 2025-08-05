@@ -16,6 +16,7 @@
 #include "write_ani.h"
 
 #include <optional>
+
 #include "ani_helper.h"
 #include "ani_signature.h"
 #include "error_handler.h"
@@ -64,7 +65,7 @@ static tuple<bool, optional<WriteOptions>> ToWriteOptions(ani_env *env, ani_obje
     return { true, make_optional<WriteOptions>(move(options)) };
 }
 
-static std::tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object &buf)
+static tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object &buf)
 {
     auto classDesc = BuiltInTypes::String::classDesc.c_str();
     ani_class cls;
@@ -76,7 +77,7 @@ static std::tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_ob
         return { false, {} };
     }
     auto result = static_cast<ani_string>(buf);
-    return { true, std::move(result) };
+    return { true, move(result) };
 }
 
 static std::tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_object &buf)
@@ -114,7 +115,7 @@ ani_long WriteAni::WriteSync(
         }
         auto ret = WriteCore::DoWrite(static_cast<int32_t>(fd), buffer, op);
         if (!ret.IsSuccess()) {
-            HILOGE("write buffer failed!");
+            HILOGE("Write buffer failed!");
             const auto &err = ret.GetError();
             ErrorHandler::Throw(env, err);
             return -1;
@@ -132,7 +133,7 @@ ani_long WriteAni::WriteSync(
         }
         auto ret = WriteCore::DoWrite(static_cast<int32_t>(fd), buffer, op);
         if (!ret.IsSuccess()) {
-            HILOGE("write buffer failed!");
+            HILOGE("Write buffer failed!");
             const auto &err = ret.GetError();
             ErrorHandler::Throw(env, err);
             return -1;

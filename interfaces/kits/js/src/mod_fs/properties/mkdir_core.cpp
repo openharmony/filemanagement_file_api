@@ -58,7 +58,7 @@ static int MkdirCore(const string &path)
     return uv_fs_mkdir(nullptr, mkdirReq.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
 }
 
-static int32_t MkdirExec(const string &path, bool recursion, bool hasOption)
+static int32_t MkdirExec(const std::string &path, bool recursion, bool hasOption)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (hasOption) {

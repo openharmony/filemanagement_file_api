@@ -37,8 +37,8 @@
 #include "filemgmt_libhilog.h"
 #include "fs_utils.h"
 #include "if_system_ability_manager.h"
-#include "iservice_registry.h"
 #include "ipc_skeleton.h"
+#include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "trans_listener_core.h"
 #include "utils_log.h"
@@ -93,8 +93,9 @@ static int OpenSrcFile(const string &srcPth, std::shared_ptr<FsFileInfos> infos,
     return ERRNO_NOERR;
 }
 
-static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg, std::unique_ptr<DistributedFS::FDGuard> destFdg,
-    std::shared_ptr<FsFileInfos> infos)
+static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg,
+                        std::unique_ptr<DistributedFS::FDGuard> destFdg,
+                        std::shared_ptr<FsFileInfos> infos)
 {
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> sendFileReq = { new (nothrow) uv_fs_t,
         FsUtils::FsReqCleanup };
@@ -194,7 +195,7 @@ int CopyCore::CheckOrCreatePath(const std::string &destPath)
 {
     std::error_code errCode;
     if (!filesystem::exists(destPath, errCode) && errCode.value() == ERRNO_NOERR) {
-        HILOGI("destPath not exist");
+        HILOGI("DestPath not exist");
         auto file = open(destPath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (file < 0) {
             HILOGE("Error opening file descriptor. errno = %{public}d", errno);
@@ -253,14 +254,14 @@ int CopyCore::CopySubDir(const string &srcPath, const string &destPath, std::sha
             return res;
         }
     } else if (errCode.value() != ERRNO_NOERR) {
-        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
+        HILOGE("Fs exists fail, errcode is %{public}d", errCode.value());
         return errCode.value();
     }
     uint32_t watchEvents = IN_MODIFY;
     if (infos->notifyFd >= 0) {
         int newWd = inotify_add_watch(infos->notifyFd, destPath.c_str(), watchEvents);
         if (newWd < 0) {
-            HILOGE("inotify_add_watch, newWd is unvaild, newWd = %{public}d", newWd);
+            HILOGE("Inotify_add_watch, newWd is unvaild, newWd = %{public}d", newWd);
             return errno;
         }
         {
@@ -409,7 +410,7 @@ int CopyCore::ExecLocal(std::shared_ptr<FsFileInfos> infos, std::shared_ptr<FsCa
         }
         int ret = CheckOrCreatePath(infos->destPath);
         if (ret != ERRNO_NOERR) {
-            HILOGE("check or create fail, error code is %{public}d", ret);
+            HILOGE("Check or create fail, error code is %{public}d", ret);
             return ret;
         }
     }
@@ -487,7 +488,7 @@ std::shared_ptr<FsCallbackObject> CopyCore::RegisterListener(const std::shared_p
 void CopyCore::UnregisterListener(std::shared_ptr<FsFileInfos> fileInfos)
 {
     if (fileInfos == nullptr) {
-        HILOGE("fileInfos is nullptr");
+        HILOGE("FileInfos is nullptr");
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -502,11 +503,11 @@ void CopyCore::UnregisterListener(std::shared_ptr<FsFileInfos> fileInfos)
 void CopyCore::ReceiveComplete(std::shared_ptr<FsUvEntry> entry)
 {
     if (entry == nullptr) {
-        HILOGE("entry pointer is nullptr.");
+        HILOGE("Entry pointer is nullptr.");
         return;
     }
     if (entry->callback == nullptr) {
-        HILOGE("entry callback pointer is nullptr.");
+        HILOGE("Entry callback pointer is nullptr.");
         return;
     }
     auto processedSize = entry->progressSize;
@@ -516,7 +517,7 @@ void CopyCore::ReceiveComplete(std::shared_ptr<FsUvEntry> entry)
     entry->callback->maxProgressSize = processedSize;
     auto listener = entry->callback->listener;
     if (listener == nullptr) {
-        HILOGE("listener pointer is nullptr.");
+        HILOGE("Listener pointer is nullptr.");
         return;
     }
     listener->InvokeListener(processedSize, entry->totalSize);
