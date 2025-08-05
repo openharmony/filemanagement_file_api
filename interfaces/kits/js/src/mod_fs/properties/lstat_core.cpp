@@ -29,7 +29,7 @@ using namespace std;
 
 FsResult<FsStat *> LstatCore::DoLstat(const string &path)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> lstat_req = { new (std::nothrow) uv_fs_t,
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> lstat_req = { new (std::nothrow) uv_fs_t,
         FsUtils::FsReqCleanup };
     if (!lstat_req) {
         HILOGE("Failed to request heap memory.");
