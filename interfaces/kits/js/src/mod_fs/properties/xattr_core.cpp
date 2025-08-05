@@ -31,11 +31,11 @@ constexpr size_t MAX_XATTR_SIZE = 4096;
 static bool IsIllegalXattr(const char *key, const char *value)
 {
     if (strnlen(key, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE) {
-        HILOGE("key is too long");
+        HILOGE("Key is too long");
         return true;
     }
     if (strnlen(value, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE) {
-        HILOGE("value is too long");
+        HILOGE("Value is too long");
         return true;
     }
     return false;
