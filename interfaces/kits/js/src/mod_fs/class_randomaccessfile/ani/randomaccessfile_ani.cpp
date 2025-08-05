@@ -144,6 +144,7 @@ void RandomAccessFileAni::SetFilePointer(ani_env *env, [[maybe_unused]] ani_obje
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return;
     }
+
     auto ret = rafFile->SetFilePointerSync(static_cast<int64_t>(fp));
     if (!ret.IsSuccess()) {
         HILOGE("SetFilePointerSync failed!");
@@ -163,7 +164,7 @@ void RandomAccessFileAni::Close(ani_env *env, [[maybe_unused]] ani_object object
     }
     auto ret = rafFile->CloseSync();
     if (!ret.IsSuccess()) {
-        HILOGE("close rafFile failed!");
+        HILOGE("Close rafFile failed!");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
         return;
