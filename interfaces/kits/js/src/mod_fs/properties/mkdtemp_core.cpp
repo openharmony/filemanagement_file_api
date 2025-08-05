@@ -30,6 +30,7 @@ FsResult<string> MkdtempCore::DoMkdtemp(const string &path)
         HILOGE("Failed to request heap memory.");
         return FsResult<string>::Error(ENOMEM);
     }
+
     int ret = uv_fs_mkdtemp(nullptr, mkdtempReq.get(), const_cast<char *>(path.c_str()), nullptr);
     if (ret < 0) {
         HILOGE("Failed to create a temporary directory with path");
