@@ -31,6 +31,11 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
+struct NameListArg {
+    struct dirent** namelist;
+    int num;
+};
+
 static int RecurMoveDir(const string &srcPath, const string &destPath, const int mode,
     deque<struct ErrFiles> &errfiles);
 
@@ -155,11 +160,6 @@ static int RenameDir(const string &src, const string &dest, const int mode, dequ
     }
     return ERRNO_NOERR;
 }
-
-struct NameListArg {
-    struct dirent** namelist;
-    int num;
-};
 
 static void Deleter(struct NameListArg *arg)
 {
