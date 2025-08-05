@@ -22,14 +22,15 @@
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleEnvironment {
+using namespace std;
 using namespace ModuleFileIO;
-FsResult<std::string> DoGetStorageDataDir();
-FsResult<std::string> DoGetUserDataDir();
-FsResult<std::string> DoGetUserDownloadDir();
-FsResult<std::string> DoGetUserDesktopDir();
-FsResult<std::string> DoGetUserDocumentDir();
-FsResult<std::string> DoGetExternalStorageDir();
-FsResult<std::string> DoGetUserHomeDir();
+FsResult<string> DoGetStorageDataDir();
+FsResult<string> DoGetUserDataDir();
+FsResult<string> DoGetUserDownloadDir();
+FsResult<string> DoGetUserDesktopDir();
+FsResult<string> DoGetUserDocumentDir();
+FsResult<string> DoGetExternalStorageDir();
+FsResult<string> DoGetUserHomeDir();
 } // namespace ModuleEnvironment
 } // namespace FileManagement
 } // namespace OHOS
