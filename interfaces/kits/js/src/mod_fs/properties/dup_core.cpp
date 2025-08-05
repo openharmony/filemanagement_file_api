@@ -53,12 +53,14 @@ FsResult<FsFile *> DupCore::DoDup(const int32_t &fd)
         new (std::nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (!readLinkReq) {
         HILOGE("Failed to request heap memory.");
+        close(dstFd);
         return FsResult<FsFile *>::Error(ENOMEM);
     }
     string path = "/proc/self/fd/" + to_string(dstFd);
     int ret = uv_fs_readlink(nullptr, readLinkReq.get(), path.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to readlink fd, ret: %{public}d", ret);
+        close(dstFd);
         return FsResult<FsFile *>::Error(ret);
     }
     return FileInstantiator::InstantiateFile(dstFd, string(static_cast<const char *>(readLinkReq->ptr)), false);
