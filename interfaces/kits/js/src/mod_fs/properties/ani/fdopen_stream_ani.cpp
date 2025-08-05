@@ -16,8 +16,8 @@
 #include "fdopen_stream_ani.h"
 
 #include "error_handler.h"
-#include "filemgmt_libhilog.h"
 #include "fdopen_stream_core.h"
+#include "filemgmt_libhilog.h"
 #include "stream_wrapper.h"
 #include "type_converter.h"
 
@@ -41,7 +41,7 @@ ani_object FdopenStreamAni::FdopenStreamSync(
 
     FsResult<FsStream *> ret = FdopenStreamCore::DoFdopenStream(static_cast<int32_t>(fd), openMode);
     if (!ret.IsSuccess()) {
-        HILOGE("fdopen stream failed");
+        HILOGE("Fdopen stream failed");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
         return nullptr;
