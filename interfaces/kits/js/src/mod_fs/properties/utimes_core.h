@@ -25,7 +25,7 @@ class UtimesCore final {
 public:
     static FsResult<void> DoUtimes(const string &path, const double mtime);
 };
-const std::string PROCEDURE_RMDIRENT_NAME = "FileIOUtimes";
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
