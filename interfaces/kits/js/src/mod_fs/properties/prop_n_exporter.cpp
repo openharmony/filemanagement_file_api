@@ -134,6 +134,7 @@ static sptr<BundleMgrProxy> GetBundleMgrProxy()
         HILOGE("fail to get system ability mgr");
         return nullptr;
     }
+
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (!remoteObject) {
         HILOGE("fail to get bundle manager proxy");
