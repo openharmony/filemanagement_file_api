@@ -125,7 +125,7 @@ static bool FilterSuffix(const vector<string> &suffixs, const struct dirent &fil
     }
     
     size_t found = string(filename.d_name).rfind('.');
-    if (found == std::string::npos) {
+    if (found == string::npos) {
         return false;
     }
     string suffixStr = string(filename.d_name).substr(found);
