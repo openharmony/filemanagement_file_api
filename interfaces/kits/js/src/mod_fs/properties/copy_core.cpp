@@ -93,8 +93,9 @@ static int OpenSrcFile(const string &srcPth, std::shared_ptr<FsFileInfos> infos,
     return ERRNO_NOERR;
 }
 
-static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg, std::unique_ptr<DistributedFS::FDGuard> destFdg,
-    std::shared_ptr<FsFileInfos> infos)
+static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg,
+                        std::unique_ptr<DistributedFS::FDGuard> destFdg,
+                        std::shared_ptr<FsFileInfos> infos)
 {
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> sendFileReq = { new (nothrow) uv_fs_t,
         FsUtils::FsReqCleanup };
