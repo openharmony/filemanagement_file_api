@@ -81,13 +81,13 @@ static sptr<BundleMgrProxy> GetBundleMgrProxy()
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
-        HILOGE("fail to get system ability mgr");
+        HILOGE("Fail to get system ability mgr");
         return nullptr;
     }
     
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (!remoteObject) {
-        HILOGE("fail to get bundle manager proxy");
+        HILOGE("Fail to get bundle manager proxy");
         return nullptr;
     }
 
@@ -98,13 +98,13 @@ static string GetSelfBundleName()
 {
     sptr<BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
     if (!bundleMgrProxy) {
-        HILOGE("bundleMgrProxy is nullptr");
+        HILOGE("BundleMgrProxy is nullptr");
         return "";
     }
     BundleInfo bundleInfo;
     auto ret = bundleMgrProxy->GetBundleInfoForSelf(0, bundleInfo);
     if (ret != 0) {
-        HILOGE("bundleName get fail");
+        HILOGE("BundleName get fail");
         return "";
     }
     return bundleInfo.name;
@@ -116,7 +116,7 @@ static int HandleLocalCheck(const string &path, int mode)
     if (path.find(CLOUDDISK_FILE_PREFIX) == 0) {
         char val[2] = {'\0'};
         if (getxattr(path.c_str(), CLOUD_FILE_LOCATION.c_str(), val, sizeof(val)) < 0) {
-            HILOGI("get cloud file location fail, err: %{public}d", errno);
+            HILOGI("Get cloud file location fail, err: %{public}d", errno);
             return errno;
         }
         if (val[0] == POSITION_LOCAL || val[0] == POSITION_BOTH) {
