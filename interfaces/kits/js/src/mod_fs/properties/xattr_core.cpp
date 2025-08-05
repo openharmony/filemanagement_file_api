@@ -32,11 +32,12 @@ static bool IsIllegalXattr(const char *key, const char *value)
 {
     bool isIllegalKey = strnlen(key, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE;
     if (isIllegalKey) {
-        HILOGE("key is too long");
+        HILOGE("Key is too long");
     }
+
     bool isIllegalValue = strnlen(value, MAX_XATTR_SIZE + 1) > MAX_XATTR_SIZE;
     if (isIllegalValue) {
-        HILOGE("value is too long");
+        HILOGE("Value is too long");
     }
     return isIllegalKey || isIllegalValue;
 }
