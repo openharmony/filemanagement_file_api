@@ -58,6 +58,11 @@ std::recursive_mutex Copy::mutex_;
 std::map<FileInfos, std::shared_ptr<JsCallbackObject>> Copy::jsCbMap_;
 uint32_t g_apiCompatibleVersion = 0;
 
+struct NameList {
+    struct dirent **namelist = { nullptr };
+    int direntNum = 0;
+};
+
 tuple<bool, NVal> Copy::GetCopySignalFromOptionArg(napi_env env, const NFuncArg &funcArg)
 {
     if (funcArg.GetArgc() < NARG_CNT::THREE) {
@@ -130,11 +135,6 @@ int Copy::MakeDir(const string &path)
     }
     return ERRNO_NOERR;
 }
-
-struct NameList {
-    struct dirent **namelist = { nullptr };
-    int direntNum = 0;
-};
 
 std::shared_ptr<JsCallbackObject> Copy::RegisterListener(napi_env env, const std::shared_ptr<FileInfos> &infos)
 {
