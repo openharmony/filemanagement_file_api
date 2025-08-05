@@ -65,7 +65,7 @@ FsResult<void> XattrCore::DoSetXattr(const string &path, const string &key, cons
         return FsResult<void>::Error(EINVAL);
     }
     if (setxattr(path.c_str(), key.c_str(), value.c_str(), strnlen(value.c_str(), MAX_XATTR_SIZE), 0) < 0) {
-        HILOGE("setxattr fail, errno is %{public}d", errno);
+        HILOGE("Setxattr fail, errno is %{public}d", errno);
         return FsResult<void>::Error(errno);
     }
     return FsResult<void>::Success();
