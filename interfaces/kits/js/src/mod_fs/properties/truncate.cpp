@@ -97,6 +97,7 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+
     auto [succ, fileInfo] = ParseJsFile(env, funcArg[NARG_POS::FIRST]);
     if (!succ) {
         NError(EINVAL).ThrowErr(env);
