@@ -20,8 +20,8 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "fs_utils.h"
-#include "stream_instantiator.h"
 #include "stream_entity.h"
+#include "stream_instantiator.h"
 
 namespace OHOS {
 namespace FileManagement {
