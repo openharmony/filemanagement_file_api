@@ -148,7 +148,8 @@ static int OpenFileByPath(const string &path, unsigned int mode)
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 
-static int OpenFileByDatashareHasUserId(const string &path, unsigned int flags, const string &userId)
+static int OpenFileByDatashareHasUserId(const string &path, unsigned int flags,
+    const string &userId)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
     sptr<FileIoToken> remote = new (std::nothrow) IRemoteStub<FileIoToken>();
