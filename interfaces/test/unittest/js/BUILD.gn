@@ -25,12 +25,12 @@ ohos_unittest("ani_file_environment_test") {
 
   module_out_path = "file_api/file_api"
   include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_fs",
-    "${file_api_path}/interfaces/kits/js/src/common",
+    "${file_api_path}/interfaces/test/unittest/js/mod_environment/mock",
     "${src_path}/mod_environment",
     "${src_path}/mod_environment/ani",
-    "${file_api_path}/interfaces/test/unittest/js/mod_environment/mock",
   ]
 
   sources = [
@@ -124,10 +124,9 @@ ohos_unittest("ani_file_fs_mock_test") {
   module_out_path = "file_api/file_api"
 
   include_dirs = [
-    "./include",
+    "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_fs",
-    "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
@@ -198,16 +197,16 @@ ohos_unittest("ani_file_fs_mock_test") {
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
     "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "dfs_service:distributed_file_daemon_kit_inner",
     "dfs_service:libdistributedfileutils",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "libuv:uv",
-    "data_share:datashare_common",
-    "data_share:datashare_consumer",
-    "hisysevent:libhisysevent",
   ]
 
   libs = [ "dl" ]
@@ -227,10 +226,9 @@ ohos_unittest("ani_file_fs_test") {
   resource_config_file = "../resource/ohos_test.xml"
 
   include_dirs = [
-    "./include",
+    "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_fs",
-    "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
@@ -291,15 +289,15 @@ ohos_unittest("ani_file_fs_test") {
     "ability_runtime:ability_manager",
     "app_file_service:fileuri_native",
     "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "dfs_service:distributed_file_daemon_kit_inner",
     "dfs_service:libdistributedfileutils",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "libuv:uv",
-    "data_share:datashare_common",
-    "data_share:datashare_consumer",
-    "hisysevent:libhisysevent",
   ]
 
   defines = [ "private=public" ]
@@ -322,11 +320,10 @@ ohos_unittest("ani_file_hash_test") {
   sources += ani_file_hash_core
 
   include_dirs = [
+    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/common",
-    "./include",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_fs",
-    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/mod_hash",
   ]
 
@@ -359,9 +356,9 @@ ohos_unittest("ani_file_securitylabel_test") {
   sources += ani_file_securitylabel_core
 
   include_dirs = [
+    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
-    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/mod_securitylabel",
   ]
 
@@ -393,9 +390,9 @@ ohos_unittest("ani_file_statvfs_test") {
   sources += ani_file_statvfs_core
 
   include_dirs = [
+    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
-    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/mod_statvfs",
   ]
 
