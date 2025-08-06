@@ -35,13 +35,7 @@ void ConnectDfsAni::ConnectDfsSync(ani_env *env, [[maybe_unused]] ani_class claz
         ErrorHandler::Throw(env, E_PARAMS);
         return;
     }
-
     sptr<ANIDfsListener> anidfslistener_(new(std::nothrow) ANIDfsListener());
-    if (!anidfslistener_) {
-        HILOGE("Failed to new ANIDfsListener");
-        ErrorHandler::Throw(env, E_NOMEM);
-        return;
-    }
     anidfslistener_->SetConnectDfsEnv(env);
     ani_ref promiseDeferred = nullptr;
 
