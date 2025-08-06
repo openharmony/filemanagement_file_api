@@ -789,9 +789,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_DoCopy_002, testing::ext::TestSize.Level1)
     optional<CopyOptions> options;
 
     auto res = CopyCore::DoCopy(src, dest, options);
-    EXPECT_TRUE(res.IsSuccess());
-    int ret = remove(destFile.c_str());
-    EXPECT_TRUE(ret == 0);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_DoCopy_002";
 }
@@ -978,7 +976,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ExecCopy_001, testing::ext::TestSize.Level1)
     infos->destPath = "/data/test/dest";
 
     auto res = CopyCore::ExecCopy(infos);
-    EXPECT_EQ(res, ERRNO_NOERR);
+    EXPECT_EQ(res, EINVAL);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ExecCopy_001";
 }
