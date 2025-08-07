@@ -129,8 +129,8 @@ tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object 
         return { true, nullopt };
     }
 
-    ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(
+    ani_int length;
+    if (ANI_OK != env->Object_GetPropertyByName_Int(
         static_cast<ani_object>(resultRef), "length", &length) || length == 0) {
         return { false, nullopt };
     }
