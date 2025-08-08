@@ -14,6 +14,7 @@
  */
 
 #include "atomicfile_mock.h"
+
 #include <fcntl.h>
 #include <gtest/gtest.h>
 
@@ -26,13 +27,14 @@ using namespace std::filesystem;
 using namespace OHOS::FileManagement::ModuleFileIO;
 
 static const string g_atomicfilePath = "/data/test/AtomicfileMockTest.txt";
+static const mode_t g_atomicfilePermission = 0644;
 
 class AtomicfileMockTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
         AtomicfileMock::EnableMock();
-        int32_t fd = open(g_atomicfilePath.c_str(), O_CREAT | O_RDWR, 0644);
+        int32_t fd = open(g_atomicfilePath.c_str(), O_CREAT | O_RDWR, g_atomicfilePermission);
         close(fd);
     };
     static void TearDownTestCase()
@@ -46,7 +48,7 @@ public:
 
 /**
  * @tc.name: AtomicfileFailWrite_0001
- * @tc.desc: Test function of FailWrite() interface for fail.
+ * @tc.desc: Test function of Atomicfile::FailWrite() interface for fail.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -80,7 +82,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileFailWrite_0001, testing::ext::TestSize.Le
 
 /**
  * @tc.name: AtomicfileFailWrite_0002
- * @tc.desc: Test function of FailWrite() interface for fail.
+ * @tc.desc: Test function of Atomicfile::FailWrite() interface for fail.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -115,7 +117,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileFailWrite_0002, testing::ext::TestSize.Le
 
 /**
  * @tc.name: AtomicfileFailWrite_0003
- * @tc.desc: Test function of FailWrite() interface for fail.
+ * @tc.desc: Test function of Atomicfile::FailWrite() interface for fail.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -150,7 +152,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileFailWrite_0003, testing::ext::TestSize.Le
 
 /**
  * @tc.name: AtomicfileFinishWrite_0001
- * @tc.desc: Test function of FailWrite() interface for fail.
+ * @tc.desc: Test function of Atomicfile::FinishWrite() interface for fail.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -184,7 +186,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileFinishWrite_0001, testing::ext::TestSize.
 
 /**
  * @tc.name: AtomicfileFinishWrite_0002
- * @tc.desc: Test function of FailWrite() interface for fail.
+ * @tc.desc: Test function of Atomicfile::FinishWrite() interface for fail.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -219,7 +221,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileFinishWrite_0002, testing::ext::TestSize.
 
 /**
  * @tc.name: AtomicfileFinishWrite_0003
- * @tc.desc: Test function of FailWrite() interface for fail.
+ * @tc.desc: Test function of Atomicfile::FinishWrite() interface for fail.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
