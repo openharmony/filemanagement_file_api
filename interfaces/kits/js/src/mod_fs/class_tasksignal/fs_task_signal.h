@@ -27,14 +27,12 @@ using namespace DistributedFS::ModuleTaskSignal;
 
 class FsTaskSignal {
 public:
-    static FsResult<shared_ptr<FsTaskSignal>> Constructor(
+    static FsResult<unique_ptr<FsTaskSignal>> Constructor(
         shared_ptr<TaskSignal> taskSignal, shared_ptr<TaskSignalListener> signalListener);
     FsResult<void> Cancel();
     FsResult<void> OnCancel();
     shared_ptr<TaskSignal> GetTaskSignal() const;
-
-public:
-    FsTaskSignal() = default;
+    FsTaskSignal();
     ~FsTaskSignal() = default;
     FsTaskSignal(const FsTaskSignal &other) = delete;
     FsTaskSignal &operator=(const FsTaskSignal &other) = delete;

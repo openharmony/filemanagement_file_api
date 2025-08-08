@@ -27,7 +27,7 @@ namespace ANI {
 class TaskSignalWrapper final {
 public:
     static FsTaskSignal *Unwrap(ani_env *env, ani_object object);
-    static bool Wrap(ani_env *env, ani_object object, const FsTaskSignal *signal);
+    static bool Wrap(ani_env *env, ani_object object, unique_ptr<FsTaskSignal> signal);
 };
 
 } // namespace ANI
