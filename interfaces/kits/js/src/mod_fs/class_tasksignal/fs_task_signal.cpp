@@ -24,25 +24,25 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 
-FsResult<shared_ptr<FsTaskSignal>> FsTaskSignal::Constructor(
+FsResult<unique_ptr<FsTaskSignal>> FsTaskSignal::Constructor(
     shared_ptr<TaskSignal> taskSignal, shared_ptr<TaskSignalListener> signalListener)
 {
     if (!taskSignal) {
         HILOGE("Invalid taskSignal");
-        return FsResult<shared_ptr<FsTaskSignal>>::Error(EINVAL);
+        return FsResult<unique_ptr<FsTaskSignal>>::Error(EINVAL);
     }
     if (!signalListener) {
         HILOGE("Invalid signalListener");
-        return FsResult<shared_ptr<FsTaskSignal>>::Error(EINVAL);
+        return FsResult<unique_ptr<FsTaskSignal>>::Error(EINVAL);
     }
-    auto copySignal = CreateSharedPtr<FsTaskSignal>();
+    auto copySignal = CreateUniquePtr<FsTaskSignal>();
     if (copySignal == nullptr) {
         HILOGE("Failed to request heap memory.");
-        return FsResult<shared_ptr<FsTaskSignal>>::Error(ENOMEM);
+        return FsResult<unique_ptr<FsTaskSignal>>::Error(ENOMEM);
     }
     copySignal->taskSignal_ = move(taskSignal);
     copySignal->signalListener_ = move(signalListener);
-    return FsResult<shared_ptr<FsTaskSignal>>::Success(copySignal);
+    return FsResult<unique_ptr<FsTaskSignal>>::Success(move(copySignal));
 }
 
 FsResult<void> FsTaskSignal::Cancel()
@@ -73,6 +73,11 @@ FsResult<void> FsTaskSignal::OnCancel()
 shared_ptr<TaskSignal> FsTaskSignal::GetTaskSignal() const
 {
     return taskSignal_;
+}
+
+FsTaskSignal::FsTaskSignal()
+{
+    taskSignal_ = CreateSharedPtr<TaskSignal>();
 }
 
 } // namespace ModuleFileIO

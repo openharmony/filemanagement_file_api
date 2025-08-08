@@ -1254,7 +1254,7 @@ export type ProgressListener = (progress: Progress) => void;
 
 export class TaskSignal {
   private nativeTaskSignal: long = 0;
-
+  native constructor();
   private native onCancelNative(): void;
 
   private onCancelResolve: (path: string) => void = (path: string): void => {};

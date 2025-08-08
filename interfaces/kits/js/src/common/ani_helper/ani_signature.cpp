@@ -111,7 +111,8 @@ const string FS::StreamInner::ctorSig = Builder::BuildSignatureDescriptor({ Basi
 // FS::TaskSignal
 const Type FS::TaskSignal::classType = Builder::BuildClass("@ohos.file.fs.fileIo.TaskSignal");
 const string FS::TaskSignal::classDesc = FS::TaskSignal::classType.Descriptor();
-const string FS::TaskSignal::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
+const string FS::TaskSignal::ctorDesc = Builder::BuildConstructorName();
+const string FS::TaskSignal::ctorSig = Builder::BuildSignatureDescriptor({});
 const string FS::TaskSignal::nativeTaskSignal = "nativeTaskSignal";
 // FS::WatcherInner
 const Type FS::WatcherInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.WatcherInner");

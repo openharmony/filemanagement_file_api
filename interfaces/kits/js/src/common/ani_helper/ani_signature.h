@@ -183,6 +183,7 @@ struct StreamInner : public BaseType {
 struct TaskSignal : public BaseType {
     static const Type classType;
     static const string classDesc;
+    static const string ctorDesc;
     static const string ctorSig;
     static const string nativeTaskSignal;
 };

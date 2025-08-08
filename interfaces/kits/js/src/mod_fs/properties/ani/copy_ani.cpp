@@ -81,33 +81,11 @@ static bool ParseCopySignalFromOptionArg(ani_env *env, const ani_object &options
         return true;
     }
 
-    auto taskSignal = CreateSharedPtr<TaskSignal>();
-    if (taskSignal == nullptr) {
-        HILOGE("Failed to request heap memory.");
-        return false;
+    FsTaskSignal *copySignal = TaskSignalWrapper::Unwrap(env, static_cast<ani_object>(prog));
+    if (copySignal != nullptr) {
+        opts.copySignal = copySignal;
     }
 
-    auto signalObj = static_cast<ani_object>(prog);
-    ani_vm *vm = nullptr;
-    env->GetVM(&vm);
-    auto listener = CreateSharedPtr<TaskSignalListenerAni>(vm, signalObj, taskSignal);
-    if (listener == nullptr) {
-        HILOGE("Failed to request heap memory.");
-        return false;
-    }
-
-    auto result = FsTaskSignal::Constructor(taskSignal, listener);
-    if (!result.IsSuccess()) {
-        return false;
-    }
-
-    auto copySignal = result.GetData().value();
-    auto succ = TaskSignalWrapper::Wrap(env, signalObj, copySignal.get());
-    if (!succ) {
-        return false;
-    }
-
-    opts.copySignal = move(copySignal);
     return true;
 }
 

@@ -25,6 +25,7 @@ namespace ANI {
 
 class TaskSignalAni final {
 public:
+    static void Constructor(ani_env *env, ani_object obj);
     static void Cancel(ani_env *env, [[maybe_unused]] ani_object object);
     static void OnCancel(ani_env *env, [[maybe_unused]] ani_object object);
 };

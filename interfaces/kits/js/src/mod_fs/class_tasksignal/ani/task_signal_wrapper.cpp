@@ -37,12 +37,12 @@ FsTaskSignal *TaskSignalWrapper::Unwrap(ani_env *env, ani_object object)
         HILOGE("Unwrap taskSignal obj failed! status: %{public}d", status);
         return nullptr;
     }
-    uintptr_t ptrValue = static_cast<uintptr_t>(nativePtr);
-    FsTaskSignal *copySignal = reinterpret_cast<FsTaskSignal *>(ptrValue);
+
+    FsTaskSignal *copySignal = reinterpret_cast<FsTaskSignal *>(nativePtr);
     return copySignal;
 }
 
-bool TaskSignalWrapper::Wrap(ani_env *env, ani_object object, const FsTaskSignal *signal)
+bool TaskSignalWrapper::Wrap(ani_env *env, ani_object object, unique_ptr<FsTaskSignal> signal)
 {
     if (object == nullptr) {
         HILOGE("TaskSignal obj is null!");
@@ -54,14 +54,14 @@ bool TaskSignalWrapper::Wrap(ani_env *env, ani_object object, const FsTaskSignal
         return false;
     }
 
-    ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(signal));
+    ani_long ptr = reinterpret_cast<ani_long>(signal.get());
 
     auto status = env->Object_SetFieldByName_Long(object, "nativeTaskSignal", ptr);
     if (status != ANI_OK) {
         HILOGE("Wrap taskSignal obj failed! status: %{public}d", status);
         return false;
     }
-
+    signal.release();
     return true;
 }
 

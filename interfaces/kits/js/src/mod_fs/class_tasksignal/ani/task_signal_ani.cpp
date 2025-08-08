@@ -20,6 +20,7 @@
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "fs_task_signal.h"
+#include "task_signal_listener_ani.h"
 #include "task_signal_wrapper.h"
 #include "type_converter.h"
 
@@ -29,6 +30,30 @@ namespace ModuleFileIO {
 namespace ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+
+void TaskSignalAni::Constructor(ani_env *env, ani_object signalObj)
+{
+    auto taskSignal = CreateSharedPtr<TaskSignal>();
+    if (taskSignal == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return;
+    }
+
+    ani_vm *vm = nullptr;
+    env->GetVM(&vm);
+    auto listener = CreateUniquePtr<TaskSignalListenerAni>(vm, signalObj, taskSignal);
+    if (listener == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return ;
+    }
+
+    FsResult<unique_ptr<FsTaskSignal>> result = FsTaskSignal::Constructor(move(taskSignal), move(listener));
+    if (!result.IsSuccess()) {
+        HILOGE("Failed to FsTaskSignal::Constructor");
+        return ;
+    }
+    TaskSignalWrapper::Wrap(env, signalObj, move(result.GetData().value()));
+}
 
 void TaskSignalAni::Cancel(ani_env *env, [[maybe_unused]] ani_object object)
 {
