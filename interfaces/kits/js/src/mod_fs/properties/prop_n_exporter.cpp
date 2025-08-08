@@ -296,11 +296,10 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
     }
     auto cbExec = [path = args.path, result, mode = args.mode, flag = args.flag]() -> NError {
         int ret = AccessCore(path, mode, flag);
-        if (ret < 0) {
-            HILOGE("Accesscore finish ret %{public}d", ret);
-        }
         if (ret == 0) {
             result->isAccess = true;
+        } else {
+            HILOGE("Accesscore finish ret %{public}d", ret);
         }
         return (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) ? NError(ret) : NError(ERRNO_NOERR);
     };

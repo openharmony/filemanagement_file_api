@@ -16,13 +16,14 @@
 #ifndef INTERFACES_TEST_UNITTEST_CLASS_ATOMICFILE_MOCK_ATOMICFILE_MOCK_H
 #define INTERFACES_TEST_UNITTEST_CLASS_ATOMICFILE_MOCK_ATOMICFILE_MOCK_H
 
-#include <cstdio>
-#include <filesystem>
-#include <gmock/gmock.h>
 #include "n_napi.h"
 #include "atomicfile_entity.h"
 #include "atomicfile_n_exporter.h"
 #include "filemgmt_libn.h"
+
+#include <cstdio>
+#include <filesystem>
+#include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace std::filesystem;

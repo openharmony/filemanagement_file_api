@@ -400,6 +400,7 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
         NError(UNKROWN_ERR).ThrowErr(env, "Failed to rename file");
         return nullptr;
     }
+
     std::string tmpNewFileName = rafEntity->baseFileName;
     rafEntity->newFileName = tmpNewFileName.append(TEMP_FILE_SUFFIX);
     status = napi_delete_reference(env, rafEntity->writeStreamObj);

@@ -17,9 +17,8 @@
 
 #include <dlfcn.h>
 
-using namespace OHOS::FileManagement::ModuleFileIO;
-
 namespace OHOS::FileManagement::ModuleFileIO::Test {
+using namespace OHOS::FileManagement::ModuleFileIO;
 
 thread_local std::shared_ptr<AtomicfileMock> AtomicfileMock::atomicfileMock = nullptr;
 thread_local bool AtomicfileMock::mockable = false;
