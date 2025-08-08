@@ -761,7 +761,6 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties/copy_listener/trans_listener_core.cpp",
     "src/mod_fs/properties/create_randomaccessfile_core.cpp",
     "src/mod_fs/properties/create_stream_core.cpp",
-    "src/mod_fs/properties/dfs_listener/file_dfs_listener_stub.cpp",
     "src/mod_fs/properties/dup_core.cpp",
     "src/mod_fs/properties/fdatasync_core.cpp",
     "src/mod_fs/properties/fdopen_stream_core.cpp",
