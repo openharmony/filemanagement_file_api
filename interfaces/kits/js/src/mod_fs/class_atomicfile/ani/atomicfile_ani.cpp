@@ -114,6 +114,8 @@ ani_object AtomicFileAni::GetBaseFile(ani_env *env, [[maybe_unused]] ani_object 
     auto result = FileWrapper::Wrap(env, move(fsFile));
     if (result == nullptr) {
         HILOGE("Failed to wrap");
+        delete fsFile;
+        fsFile = nullptr;
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
