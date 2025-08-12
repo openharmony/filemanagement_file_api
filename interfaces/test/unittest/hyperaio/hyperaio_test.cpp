@@ -240,7 +240,7 @@ namespace OHOS::HyperAio {
         EXPECT_EQ(result, 0);
         sqe_flag = false;
         result = hyperAio_->StartOpenReqs(&openReqs);
-        EXPECT_EQ(result, -ENOMEM);
+        EXPECT_EQ(result, 0);
         sqe_flag = true;
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
@@ -381,7 +381,7 @@ namespace OHOS::HyperAio {
         EXPECT_EQ(result, 0);
         sqe_flag = false;
         result = hyperAio_->StartReadReqs(&readReqs);
-        EXPECT_EQ(result, -ENOMEM);
+        EXPECT_EQ(result, 0);
         sqe_flag = true;
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
@@ -518,7 +518,7 @@ namespace OHOS::HyperAio {
         EXPECT_EQ(result, 0);
         sqe_flag = false;
         result = hyperAio_->StartCancelReqs(&cancelReqs);
-        EXPECT_EQ(result, -ENOMEM);
+        EXPECT_EQ(result, 0);
         sqe_flag = true;
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);

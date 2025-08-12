@@ -156,7 +156,6 @@ int32_t HyperAio::CheckParameter(uint32_t reqNum)
 
 int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 {
-
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
