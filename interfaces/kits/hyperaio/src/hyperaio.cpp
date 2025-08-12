@@ -133,7 +133,7 @@ void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec, st
             HILOGE("submit read reqs failed, ret = %{public}d", ret);
             HandleError(infoVec);
         }
-        readReqCount_+= count;
+        readReqCount_ += count;
     }
     HandleError(errorVec);
 }
