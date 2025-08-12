@@ -114,30 +114,70 @@ int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
     return EOK;
 }
 
-int32_t HyperAio::StartOpenReqs(OpenReqs *req)
+void HyperAio::HandleError(std::vector<uint64_t> &errorVec)
+{
+    HILOGI("into HandleError");
+    for (auto &userdata : errorVec) {
+        HILOGI("HandleError: userData = %{public}lu", userdata);
+        auto response = std::make_unique<IoResponse>(userdata, -EBUSY, 0);
+        ioResultCallBack_(std::move(response));
+    }
+    errorVec.clear();
+}
+
+void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec, std::vector<uint64_t> &errorVec)
+{
+    if (count > 0) {
+        int32_t ret = io_uring_submit(&pImpl_->uring_);
+        if (ret < 0) {
+            HILOGE("submit read reqs failed, ret = %{public}d", ret);
+            HandleError(infoVec);
+        }
+        readReqCount_+= count;
+    }
+    HandleError(errorVec);
+}
+
+int32_t HyperAio::CheckParameter(uint32_t reqNum)
 {
     if (pImpl_ == nullptr) {
-        return -EINVAL;
-    }
-    if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
-    if (!ValidateReqNum(req->reqNum)) {
-        HILOGE("reqNum is out of range: %{public}u", req->reqNum);
+    if (!ValidateReqNum(reqNum)) {
+        HILOGE("reqNum is out of range: %{public}u", reqNum);
         return -EINVAL;
     }
+    return EOK;
+}
+
+int32_t HyperAio::StartOpenReqs(OpenReqs *req)
+{
+
+    if (req == nullptr || req->reqs == nullptr) {
+        return -EINVAL;
+    }
+    int32_t ret = CheckParameter(req->reqNum);
+    if (ret < 0) {
+        return ret;
+    }
+
     HyperaioTrace trace("StartOpenReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
+    std::vector<uint64_t> errorVec;
+    std::vector<uint64_t> openInfoVec;
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
-            HILOGE("get sqe failed");
-            return -ENOMEM;
+            for (uint32_t j = i; j < totalReqs; ++j) {
+                errorVec.push_back(req->reqs[j].userData);
+            }
+            HandleSqeError(count, openInfoVec, errorVec);
+            break;
         }
         struct OpenInfo *openInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(openInfo->userData));
@@ -148,11 +188,12 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         HyperaioTrace trace("open flags:" + std::to_string(openInfo->flags) + "mode:" + std::to_string(openInfo->mode)
             + "userData:" + std::to_string(openInfo->userData));
         count++;
+        openInfoVec.push_back(openInfo->userData);
         if (count >= BATCH_SIZE || i == totalReqs - 1) {
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit open reqs failed, ret = %{public}d", ret);
-                return ret;
+                HandleError(openInfoVec);
             }
             openReqCount_ += count;
             count = 0;
@@ -163,28 +204,26 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 
 int32_t HyperAio::StartReadReqs(ReadReqs *req)
 {
-    if (pImpl_ == nullptr) {
-        return -EINVAL;
-    }
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
-    if (!initialized_.load()) {
-        HILOGE("HyperAio is not initialized");
-        return -EPERM;
-    }
-    if (!ValidateReqNum(req->reqNum)) {
-        HILOGE("reqNum is out of range: %{public}u", req->reqNum);
-        return -EINVAL;
+    int32_t ret = CheckParameter(req->reqNum);
+    if (ret < 0) {
+        return ret;
     }
     HyperaioTrace trace("StartReadReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
+    std::vector<uint64_t> errorVec;
+    std::vector<uint64_t> readInfoVec;
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
-            HILOGE("get sqe failed");
-            return -ENOMEM;
+            for (uint32_t j = i; j < totalReqs; ++j) {
+                errorVec.push_back(req->reqs[j].userData);
+            }
+            HandleSqeError(count, readInfoVec, errorVec);
+            break;
         }
         struct ReadInfo *readInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(readInfo->userData));
@@ -194,11 +233,12 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         HyperaioTrace trace("read len:" + std::to_string(readInfo->len) + "offset:" + std::to_string(readInfo->offset)
             + "userData:" + std::to_string(readInfo->userData));
         count++;
+        readInfoVec.push_back(readInfo->userData);
         if (count >= BATCH_SIZE || i == totalReqs - 1) {
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit read reqs failed, ret = %{public}d", ret);
-                return ret;
+                HandleError(readInfoVec);
             }
             readReqCount_ += count;
             count = 0;
@@ -209,28 +249,26 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
 
 int32_t HyperAio::StartCancelReqs(CancelReqs *req)
 {
-    if (pImpl_ == nullptr) {
-        return -EINVAL;
-    }
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
-    if (!initialized_.load()) {
-        HILOGE("HyperAio is not initialized");
-        return -EPERM;
-    }
-    if (!ValidateReqNum(req->reqNum)) {
-        HILOGE("reqNum is out of range: %{public}u", req->reqNum);
-        return -EINVAL;
+    int32_t ret = CheckParameter(req->reqNum);
+    if (ret < 0) {
+        return ret;
     }
     HyperaioTrace trace("StartCancelReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
+    std::vector<uint64_t> errorVec;
+    std::vector<uint64_t> cancelInfoVec;
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
-            HILOGE("get sqe failed");
-            return -ENOMEM;
+            for (uint32_t j = i; j < totalReqs; ++j) {
+                errorVec.push_back(req->reqs[j].userData);
+            }
+            HandleSqeError(count, cancelInfoVec, errorVec);
+            break;
         }
         struct CancelInfo *cancelInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(cancelInfo->userData));
@@ -240,11 +278,12 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         HyperaioTrace trace("cancel userData:" + std::to_string(cancelInfo->userData)
             + "targetUserData:" + std::to_string(cancelInfo->targetUserData));
         count++;
+        cancelInfoVec.push_back(cancelInfo->userData);
         if (count >= BATCH_SIZE || i == totalReqs - 1) {
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit cancel reqs failed, ret = %{public}d", ret);
-                return ret;
+                HandleError(cancelInfoVec);
             }
             cancelReqCount_ += count;
             count = 0;

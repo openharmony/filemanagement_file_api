@@ -97,6 +97,9 @@ private:
     std::atomic<bool> stopThread_ = true;
     std::atomic<bool> initialized_ = false;
     void HarvestRes();
+    void HandleError(std::vector<uint64_t> &errorVec);
+    void HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec, std::vector<uint64_t> &errorVec);
+    int32_t CheckParameter(uint32_t reqNum);
 };
 }
 }
