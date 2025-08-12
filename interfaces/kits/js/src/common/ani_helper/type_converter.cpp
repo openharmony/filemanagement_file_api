@@ -295,7 +295,9 @@ std::tuple<bool, ani_array> TypeConverter::ToAniStringList(
     }
 
     ani_array result = nullptr;
-    if (env->Array_New(length, nullptr, &result) != ANI_OK) {
+    ani_ref undefined;
+    env->GetUndefined(&undefined);
+    if (env->Array_New(length, undefined, &result) != ANI_OK) {
         return { false, result };
     }
     for (uint32_t i = 0; i < length; i++) {
