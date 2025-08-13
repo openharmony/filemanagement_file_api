@@ -243,7 +243,6 @@ namespace OHOS::HyperAio {
         EXPECT_EQ(result, 0);
         sqe_flag = true;
         submit_flag = false;
-        sqe_probability = 100;
         result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, 0);
         submit_flag = true;
@@ -274,7 +273,6 @@ namespace OHOS::HyperAio {
             openInfos[i].userData = userData + i;
         }
         OpenReqs openReqs = {Threshold, openInfos.get()};
-        sqe_probability = 100;
         result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, -EINVAL);
         result = hyperAio_->DestroyCtx();
@@ -383,7 +381,6 @@ namespace OHOS::HyperAio {
             readInfos[i].userData = userData + i;
         }
         ReadReqs readReqs = {batchSize, readInfos.get()};
-        sqe_probability = 100;
         result = hyperAio_->StartReadReqs(&readReqs);
         EXPECT_EQ(result, 0);
         sqe_flag = false;

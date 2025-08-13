@@ -17,8 +17,6 @@
 #define UNITTEST_HYPERAIO_INCLUDE_LIBURING_H
 
 #include <chrono>
-#include <ctime>
-#include <cstdlib>
 #include <thread>
 namespace OHOS {
 namespace HyperAio {
@@ -28,7 +26,6 @@ inline bool init_flag = true;
 inline bool wait_flag = true;
 inline bool cqe_res_flag = true;
 inline bool submit_flag = true;
-inline int sqe_probability = 100;
 struct io_uring_sqe {
     int32_t data;
 };
@@ -59,9 +56,8 @@ struct io_uring {
 
 inline struct io_uring_sqe *io_uring_get_sqe(struct io_uring *ring)
 {
-    srand(static_cast<unsigned int>(time(NULL)));
-    if (sqe_flag && rand() % 100 < sqe_probability) {
-        sqe_probability = (sqe_probability > 0) ? sqe_probability - 1 : 0;
+    if (sqe_flag) {
+        sqe_flag = !sqe_flag;
         return ring->io_uring_get_sqe();
     }
     return nullptr;
@@ -77,6 +73,7 @@ inline int io_uring_submit(struct io_uring *ring)
 
 inline int io_uring_queue_init(unsigned entries, struct io_uring *ring, unsigned flags)
 {
+    sqe_flag = true;
     if (init_flag) {
         return 1;
     }
