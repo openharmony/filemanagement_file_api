@@ -116,6 +116,9 @@ int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
 
 void HyperAio::HandleError(std::vector<uint64_t> &errorVec)
 {
+    if (errorVec.empty()) {
+        return;
+    }
     HILOGI("into HandleError");
     for (auto &userdata : errorVec) {
         HILOGI("HandleError: userData = %{public}lu", userdata);
@@ -159,6 +162,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
+
     int32_t ret = CheckParameter(req->reqNum);
     if (ret < 0) {
         return ret;
@@ -206,6 +210,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
+
     int32_t ret = CheckParameter(req->reqNum);
     if (ret < 0) {
         return ret;
@@ -251,6 +256,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
     if (req == nullptr || req->reqs == nullptr) {
         return -EINVAL;
     }
+    
     int32_t ret = CheckParameter(req->reqNum);
     if (ret < 0) {
         return ret;
