@@ -242,6 +242,11 @@ namespace OHOS::HyperAio {
         result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, 0);
         sqe_flag = true;
+        submit_flag = false;
+        sqe_probability = 100;
+        result = hyperAio_->StartOpenReqs(&openReqs);
+        EXPECT_EQ(result, 0);
+        submit_flag = true;
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0003";
@@ -269,6 +274,7 @@ namespace OHOS::HyperAio {
             openInfos[i].userData = userData + i;
         }
         OpenReqs openReqs = {Threshold, openInfos.get()};
+        sqe_probability = 100;
         result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, -EINVAL);
         result = hyperAio_->DestroyCtx();
@@ -377,12 +383,17 @@ namespace OHOS::HyperAio {
             readInfos[i].userData = userData + i;
         }
         ReadReqs readReqs = {batchSize, readInfos.get()};
+        sqe_probability = 100;
         result = hyperAio_->StartReadReqs(&readReqs);
         EXPECT_EQ(result, 0);
         sqe_flag = false;
         result = hyperAio_->StartReadReqs(&readReqs);
         EXPECT_EQ(result, 0);
         sqe_flag = true;
+        submit_flag = false;
+        result = hyperAio_->StartReadReqs(&readReqs);
+        EXPECT_EQ(result, 0);
+        submit_flag = true;
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartReadReqs_0003";
@@ -520,6 +531,10 @@ namespace OHOS::HyperAio {
         result = hyperAio_->StartCancelReqs(&cancelReqs);
         EXPECT_EQ(result, 0);
         sqe_flag = true;
+        submit_flag = false;
+        result = hyperAio_->StartCancelReqs(&cancelReqs);
+        EXPECT_EQ(result, 0);
+        submit_flag = true;
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartCancelReqs_0003";
