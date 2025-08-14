@@ -227,6 +227,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
+            HILOGE("get sqe failed");
             for (uint32_t j = i; j < totalReqs; ++j) {
                 errorVec.push_back(req->reqs[j].userData);
             }
@@ -274,6 +275,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
+            HILOGE("get sqe failed");
             for (uint32_t j = i; j < totalReqs; ++j) {
                 errorVec.push_back(req->reqs[j].userData);
             }
