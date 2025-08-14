@@ -128,7 +128,7 @@ void HyperAio::CallbackError(std::vector<uint64_t> &errorVec, int32_t errorcode)
     errorVec.clear();
 }
 
-void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec, std::vector<uint64_t> &errorVec)
+void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec)
 {
     if (count > 0) {
         int32_t ret = io_uring_submit(&pImpl_->uring_);
@@ -138,7 +138,6 @@ void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec, st
         }
         readReqCount_ += count;
     }
-    CallbackError(errorVec, -ENOMEN);
 }
 
 int32_t HyperAio::CheckParameter(uint32_t reqNum)
@@ -182,7 +181,8 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
             for (uint32_t j = i; j < totalReqs; ++j) {
                 errorVec.push_back(req->reqs[j].userData);
             }
-            HandleSqeError(count, openInfoVec, errorVec);
+            HandleSqeError(count, openInfoVec);
+            CallbackError(errorVec, -EBUSY);
             break;
         }
         struct OpenInfo *openInfo = &req->reqs[i];
@@ -231,7 +231,8 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
             for (uint32_t j = i; j < totalReqs; ++j) {
                 errorVec.push_back(req->reqs[j].userData);
             }
-            HandleSqeError(count, readInfoVec, errorVec);
+            HandleSqeError(count, readInfoVec);
+            CallbackError(errorVec, -EBUSY);
             break;
         }
         struct ReadInfo *readInfo = &req->reqs[i];
@@ -279,7 +280,8 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
             for (uint32_t j = i; j < totalReqs; ++j) {
                 errorVec.push_back(req->reqs[j].userData);
             }
-            HandleSqeError(count, cancelInfoVec, errorVec);
+            HandleSqeError(count, cancelInfoVec);
+            CallbackError(errorVec, -EBUSY);
             break;
         }
         struct CancelInfo *cancelInfo = &req->reqs[i];
