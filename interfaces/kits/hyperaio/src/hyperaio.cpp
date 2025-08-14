@@ -134,7 +134,7 @@ void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec)
         int32_t ret = io_uring_submit(&pImpl_->uring_);
         if (ret < 0) {
             HILOGE("submit read reqs failed, ret = %{public}d", ret);
-            CallbackError(infoVec, -EBUSY);
+            CallbackError(infoVec, ret);
         }
         readReqCount_ += count;
     }
