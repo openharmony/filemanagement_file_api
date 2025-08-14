@@ -114,14 +114,14 @@ int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
     return EOK;
 }
 
-void HyperAio::CallbackError(std::vector<uint64_t> &errorVec, int32_t errorcode)
+void HyperAio::HandleRequestError(std::vector<uint64_t> &errorVec, int32_t errorcode)
 {
     if (errorVec.empty()) {
         HILOGE("errorVec is empty");
         return;
     }
     for (auto &userdata : errorVec) {
-        HILOGE("CallbackError: userData = %{public}lu", userdata);
+        HILOGE("HandleRequestError: userData = %{public}lu", userdata);
         auto response = std::make_unique<IoResponse>(userdata, errorcode, 0);
         ioResultCallBack_(std::move(response));
     }
@@ -134,7 +134,7 @@ void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec)
         int32_t ret = io_uring_submit(&pImpl_->uring_);
         if (ret < 0) {
             HILOGE("submit read reqs failed, ret = %{public}d", ret);
-            CallbackError(infoVec, ret);
+            HandleRequestError(infoVec, ret);
         }
         readReqCount_ += count;
     }
@@ -182,7 +182,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
                 errorVec.push_back(req->reqs[j].userData);
             }
             HandleSqeError(count, openInfoVec);
-            CallbackError(errorVec, -EBUSY);
+            HandleRequestError(errorVec, -EBUSY);
             break;
         }
         struct OpenInfo *openInfo = &req->reqs[i];
@@ -199,7 +199,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit open reqs failed, ret = %{public}d", ret);
-                CallbackError(openInfoVec, -EBUSY);
+                HandleRequestError(openInfoVec, -EBUSY);
             }
             openReqCount_ += count;
             count = 0;
@@ -232,7 +232,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
                 errorVec.push_back(req->reqs[j].userData);
             }
             HandleSqeError(count, readInfoVec);
-            CallbackError(errorVec, -EBUSY);
+            HandleRequestError(errorVec, -EBUSY);
             break;
         }
         struct ReadInfo *readInfo = &req->reqs[i];
@@ -248,7 +248,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit read reqs failed, ret = %{public}d", ret);
-                CallbackError(readInfoVec, -EBUSY);
+                HandleRequestError(readInfoVec, -EBUSY);
             }
             readReqCount_ += count;
             count = 0;
@@ -281,7 +281,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
                 errorVec.push_back(req->reqs[j].userData);
             }
             HandleSqeError(count, cancelInfoVec);
-            CallbackError(errorVec, -EBUSY);
+            HandleRequestError(errorVec, -EBUSY);
             break;
         }
         struct CancelInfo *cancelInfo = &req->reqs[i];
@@ -297,7 +297,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
                 HILOGE("submit cancel reqs failed, ret = %{public}d", ret);
-                CallbackError(cancelInfoVec, -EBUSY);
+                HandleRequestError(cancelInfoVec, -EBUSY);
             }
             cancelReqCount_ += count;
             count = 0;
