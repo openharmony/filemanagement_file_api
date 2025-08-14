@@ -59,7 +59,7 @@ public:
                 return ANI_ERROR;
             }
             status = env->Object_SetFieldByName_Ref(obj, key.data(), move(aniStr));
-        } else if constexpr (is_base_of_v<ani_ref, T>) {
+        } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<__ani_ref, std::remove_pointer_t<T>>) {
             status = env->Object_SetFieldByName_Ref(obj, key.data(), value);
         } else {
             HILOGE("Invalid ani value type!");
@@ -86,7 +86,7 @@ public:
                 return ANI_ERROR;
             }
             status = env->Object_SetPropertyByName_Ref(obj, key.data(), move(aniStr));
-        } else if constexpr (is_base_of_v<ani_ref, T>) {
+        } else if constexpr (std::is_pointer_v<T> && std::is_base_of_v<__ani_ref, std::remove_pointer_t<T>>) {
             status = env->Object_SetPropertyByName_Ref(obj, key.data(), value);
         } else {
             HILOGE("Invalid ani value type!");

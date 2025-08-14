@@ -40,7 +40,7 @@ static ani_status SetBigIntProperty(ani_env *env, ani_object &statObject, const 
     ani_status ret;
 
     if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Not found %{private}s, err: %{private}d", classDesc, ret);
+        HILOGE("Not found %{public}s, err: %{public}d", classDesc, ret);
         return ret;
     }
 
@@ -48,18 +48,18 @@ static ani_status SetBigIntProperty(ani_env *env, ani_object &statObject, const 
     auto ctorSig = BuiltInTypes::BigInt::ctorSig.c_str();
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Not found ctor, err: %{private}d", ret);
+        HILOGE("Not found ctor, err: %{public}d", ret);
         return ret;
     }
 
     if ((ret = env->Object_New(cls, ctor, &object, value)) != ANI_OK) {
-        HILOGE("New BigIntProperty Fail, err: %{private}d", ret);
+        HILOGE("New BigIntProperty Fail, err: %{public}d", ret);
         return ret;
     }
 
     ret = AniHelper::SetPropertyValue(env, statObject, name, object);
     if (ret != ANI_OK) {
-        HILOGE("SetPropertyValue Fail %{private}s, err: %{private}d", name, ret);
+        HILOGE("SetPropertyValue Fail %{public}s, err: %{public}d", name, ret);
         return ret;
     }
 
@@ -72,7 +72,7 @@ static ani_enum_item GetLocationEnumIndex(ani_env *env, const Location &value)
     auto classDesc = FS::LocationType::classDesc.c_str();
     ani_status ret = env->FindEnum(classDesc, &enumType);
     if (ret != ANI_OK) {
-        HILOGE("FindEnum %{private}s failed, err: %{private}d", classDesc, ret);
+        HILOGE("FindEnum %{public}s failed, err: %{public}d", classDesc, ret);
         return nullptr;
     }
 
@@ -87,7 +87,7 @@ static ani_enum_item GetLocationEnumIndex(ani_env *env, const Location &value)
     ani_enum_item enumItem;
     ret = env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
     if (ret != ANI_OK) {
-        HILOGE("Enum_GetEnumItemByIndex failed, index: %{private}zu, err: %{private}d", index, ret);
+        HILOGE("Enum_GetEnumItemByIndex failed, index: %{public}zu, err: %{public}d", index, ret);
         return nullptr;
     }
     return enumItem;
@@ -102,7 +102,7 @@ static ani_status SetEnumLocation(ani_env *env, ani_object &object, const char *
 
     ani_status ret = AniHelper::SetPropertyValue(env, object, name, location);
     if (ret != ANI_OK) {
-        HILOGE("SetPropertyValue Fail %{private}s, err: %{private}d", name, ret);
+        HILOGE("SetPropertyValue Fail %{public}s, err: %{public}d", name, ret);
         return ret;
     }
 
@@ -127,7 +127,7 @@ static ani_status SetProperties(ani_env *env, ani_object &statObject, FsStat *fs
         auto value = iter.second;
         ret = AniHelper::SetPropertyValue(env, statObject, key, value);
         if (ret != ANI_OK) {
-            HILOGE("SetPropertyValue Fail %{private}s, err: %{private}d", key, ret);
+            HILOGE("SetPropertyValue Fail %{public}s, err: %{public}d", key, ret);
             return ret;
         }
     }
@@ -143,14 +143,14 @@ static ani_status SetProperties(ani_env *env, ani_object &statObject, FsStat *fs
         auto value = iter.second;
         ret = SetBigIntProperty(env, statObject, key, value);
         if (ret != ANI_OK) {
-            HILOGE("SetBigIntProperty Fail %{private}s, err: %{private}d", key, ret);
+            HILOGE("SetBigIntProperty Fail %{public}s, err: %{public}d", key, ret);
             return ret;
         }
     }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if ((ret = SetEnumLocation(env, statObject, "location", static_cast<Location>(fsStat->GetLocation()))) != ANI_OK) {
-        HILOGE("SetEnumLocation Fail, err: %{private}d", ret);
+        HILOGE("SetEnumLocation Fail, err: %{public}d", ret);
         return ret;
     }
 #endif
@@ -170,7 +170,7 @@ ani_object StatWrapper::Wrap(ani_env *env, FsStat *fsStat)
     ani_status ret;
 
     if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Not found %{private}s, err: %{private}d", classDesc, ret);
+        HILOGE("Not found %{public}s, err: %{public}d", classDesc, ret);
         return nullptr;
     }
 
@@ -178,17 +178,17 @@ ani_object StatWrapper::Wrap(ani_env *env, FsStat *fsStat)
     auto ctorSig = FS::StatInner::ctorSig.c_str();
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Not found ctor, err: %{private}d", ret);
+        HILOGE("Not found ctor, err: %{public}d", ret);
         return nullptr;
     }
 
     if ((ret = env->Object_New(cls, ctor, &statObject, reinterpret_cast<ani_long>(fsStat))) != ANI_OK) {
-        HILOGE("New StatInner Fail, err: %{private}d", ret);
+        HILOGE("New StatInner Fail, err: %{public}d", ret);
         return nullptr;
     }
 
     if ((ret = SetProperties(env, statObject, fsStat)) != ANI_OK) {
-        HILOGE("SetProperties Fail, err: %{private}d", ret);
+        HILOGE("SetProperties Fail, err: %{public}d", ret);
         return nullptr;
     }
 
@@ -200,7 +200,7 @@ FsStat *StatWrapper::Unwrap(ani_env *env, ani_object object)
     ani_long fsStat;
     auto ret = env->Object_GetFieldByName_Long(object, "nativeStat", &fsStat);
     if (ret != ANI_OK) {
-        HILOGE("Unwrap fsStat err: %{private}d", ret);
+        HILOGE("Unwrap fsStat err: %{public}d", ret);
         return nullptr;
     }
     return reinterpret_cast<FsStat *>(fsStat);

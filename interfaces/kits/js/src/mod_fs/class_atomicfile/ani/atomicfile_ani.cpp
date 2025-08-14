@@ -54,7 +54,6 @@ void AtomicFileAni::Constructor(ani_env *env, ani_object obj, ani_string pathObj
     }
 
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<uintptr_t>(ret.GetData().value()));
-
     if (ANI_OK != AniHelper::SetFieldValue(env, obj, "nativePtr", ptr)) {
         HILOGE("Failed to wrap entity for obj AtomicFile");
         ErrorHandler::Throw(env, EIO);
