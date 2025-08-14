@@ -106,28 +106,22 @@ private:
             return { ANI_ERROR, nullptr };
         }
 
-        auto [succ, message] = TypeConverter::ToAniString(env, errMsg);
-        if (!succ) {
-            HILOGE("Convert errMsg to ani string failed");
-            return { ANI_ERROR, nullptr };
-        }
-
         ani_status status = ANI_ERROR;
 
-        status = env->Object_SetPropertyByName_Ref(obj, "message", message);
+        status = AniHelper::SetPropertyValue(env, obj, "message", errMsg);
         if (status != ANI_OK) {
             HILOGE("Set property 'message' value failed");
             return { status, nullptr };
         }
 
-        status = env->Object_SetPropertyByName_Int(obj, "code", code);
+        status = AniHelper::SetPropertyValue(env, obj, "code", code);
         if (status != ANI_OK) {
             HILOGE("Set property 'code' value failed");
             return { status, nullptr };
         }
 
         if (errData.has_value()) {
-            status = env->Object_SetPropertyByName_Ref(obj, "data", errData.value());
+            status = AniHelper::SetPropertyValue(env, obj, "data", errData.value());
             if (status != ANI_OK) {
                 HILOGE("Set property 'data' value failed");
                 return { status, nullptr };

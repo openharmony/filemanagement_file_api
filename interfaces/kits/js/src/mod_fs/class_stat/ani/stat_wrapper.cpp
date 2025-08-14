@@ -32,21 +32,7 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-static ani_status SetNumProperty(
-    ani_env *env, const ani_class &cls, ani_object &object, const char *name, ani_long &value)
-{
-    ani_method setter;
-    ani_status ret;
-    if ((ret = env->Class_FindMethod(cls, name, nullptr, &setter)) != ANI_OK) {
-        HILOGE("Class_FindMethod Fail %{private}s, err: %{private}d", name, ret);
-        return ret;
-    }
-
-    return env->Object_CallMethod_Void(object, setter, value);
-}
-
-static ani_status SetBigIntProperty(
-    ani_env *env, const ani_class &statCls, ani_object &statObject, const char *name, ani_double &value)
+static ani_status SetBigIntProperty(ani_env *env, ani_object &statObject, const char *name, int64_t value)
 {
     ani_object object = {};
     auto classDesc = BuiltInTypes::BigInt::classDesc.c_str();
@@ -71,13 +57,13 @@ static ani_status SetBigIntProperty(
         return ret;
     }
 
-    ani_method setter;
-    if ((ret = env->Class_FindMethod(statCls, name, nullptr, &setter)) != ANI_OK) {
-        HILOGE("Class_FindMethod Fail %{private}s, err: %{private}d", name, ret);
+    ret = AniHelper::SetPropertyValue(env, statObject, name, object);
+    if (ret != ANI_OK) {
+        HILOGE("SetPropertyValue Fail %{private}s, err: %{private}d", name, ret);
         return ret;
     }
 
-    return env->Object_CallMethod_Void(statObject, setter, object);
+    return ANI_OK;
 }
 
 static ani_enum_item GetLocationEnumIndex(ani_env *env, const Location &value)
@@ -107,75 +93,64 @@ static ani_enum_item GetLocationEnumIndex(ani_env *env, const Location &value)
     return enumItem;
 }
 
-static ani_status SetEnumLocation(
-    ani_env *env, const ani_class &cls, ani_object &object, const char *name, const Location &value)
+static ani_status SetEnumLocation(ani_env *env, ani_object &object, const char *name, const Location &value)
 {
-    ani_method setter;
-    ani_status ret;
-    if ((ret = env->Class_FindMethod(cls, name, nullptr, &setter)) != ANI_OK) {
-        HILOGE("Class_FindMethod Fail %{private}s, err: %{private}d", name, ret);
+    ani_enum_item location = GetLocationEnumIndex(env, value);
+    if (location == nullptr) {
+        return ANI_ERROR;
+    }
+
+    ani_status ret = AniHelper::SetPropertyValue(env, object, name, location);
+    if (ret != ANI_OK) {
+        HILOGE("SetPropertyValue Fail %{private}s, err: %{private}d", name, ret);
         return ret;
     }
 
-    return env->Object_CallMethod_Void(object, setter, GetLocationEnumIndex(env, value));
+    return ANI_OK;
 }
 
-const static string MODE_SETTER = Builder::BuildSetterName("mode");
-const static string UID_SETTER = Builder::BuildSetterName("uid");
-const static string GID_SETTER = Builder::BuildSetterName("gid");
-const static string SIZE_SETTER = Builder::BuildSetterName("size");
-const static string ATIME_SETTER = Builder::BuildSetterName("atime");
-const static string MTIME_SETTER = Builder::BuildSetterName("mtime");
-const static string CTIME_SETTER = Builder::BuildSetterName("ctime");
-const static string INO_SETTER = Builder::BuildSetterName("ino");
-const static string ATIME_NS_SETTER = Builder::BuildSetterName("atimeNs");
-const static string MTIME_NS_SETTER = Builder::BuildSetterName("mtimeNs");
-const static string CTIME_NS_SETTER = Builder::BuildSetterName("ctimeNs");
-const static string LOCATION_SETTER = Builder::BuildSetterName("location");
-
-static ani_status SetProperties(ani_env *env, const ani_class &cls, ani_object &statObject, FsStat *fsStat)
+static ani_status SetProperties(ani_env *env, ani_object &statObject, FsStat *fsStat)
 {
     ani_status ret;
 
-    vector<pair<string_view, ani_long>> numProperties = {
-        { MODE_SETTER, fsStat->GetMode() },
-        { UID_SETTER, fsStat->GetUid() },
-        { GID_SETTER, fsStat->GetGid() },
-        { SIZE_SETTER, fsStat->GetSize() },
-        { ATIME_SETTER, fsStat->GetAtime() },
-        { MTIME_SETTER, fsStat->GetMtime() },
-        { CTIME_SETTER, fsStat->GetCtime() },
+    vector<pair<string_view, int64_t>> numProperties = {
+        { "mode", fsStat->GetMode() },
+        { "uid", fsStat->GetUid() },
+        { "gid", fsStat->GetGid() },
+        { "size", fsStat->GetSize() },
+        { "atime", fsStat->GetAtime() },
+        { "mtime", fsStat->GetMtime() },
+        { "ctime", fsStat->GetCtime() },
     };
     for (auto iter : numProperties) {
         auto key = iter.first.data();
         auto value = iter.second;
-        ret = SetNumProperty(env, cls, statObject, key, value);
+        ret = AniHelper::SetPropertyValue(env, statObject, key, value);
         if (ret != ANI_OK) {
-            HILOGE("Object_CallMethod_Void Fail %{private}s, err: %{private}d", key, ret);
+            HILOGE("SetPropertyValue Fail %{private}s, err: %{private}d", key, ret);
             return ret;
         }
     }
 
-    vector<pair<string_view, ani_double>> bigIntProperties = {
-        { INO_SETTER, ani_double(static_cast<double>(fsStat->GetIno())) },
-        { ATIME_NS_SETTER, ani_double(static_cast<double>(fsStat->GetAtimeNs())) },
-        { MTIME_NS_SETTER, ani_double(static_cast<double>(fsStat->GetMtimeNs())) },
-        { CTIME_NS_SETTER, ani_double(static_cast<double>(fsStat->GetCtimeNs())) },
+    vector<pair<string_view, int64_t>> bigIntProperties = {
+        { "ino", fsStat->GetIno() },
+        { "atimeNs", fsStat->GetAtimeNs() },
+        { "mtimeNs", fsStat->GetMtimeNs() },
+        { "ctimeNs", fsStat->GetCtimeNs() },
     };
     for (auto iter : bigIntProperties) {
         auto key = iter.first.data();
         auto value = iter.second;
-        ret = SetBigIntProperty(env, cls, statObject, key, value);
+        ret = SetBigIntProperty(env, statObject, key, value);
         if (ret != ANI_OK) {
-            HILOGE("Object_CallMethod_Void Fail %{private}s, err: %{private}d", key, ret);
+            HILOGE("SetBigIntProperty Fail %{private}s, err: %{private}d", key, ret);
             return ret;
         }
     }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    auto key = LOCATION_SETTER.c_str();
-    if ((ret = SetEnumLocation(env, cls, statObject, key, static_cast<Location>(fsStat->GetLocation()))) != ANI_OK) {
-        HILOGE("Object_CallMethod_Void Fail %{private}s, err: %{private}d", key, ret);
+    if ((ret = SetEnumLocation(env, statObject, "location", static_cast<Location>(fsStat->GetLocation()))) != ANI_OK) {
+        HILOGE("SetEnumLocation Fail, err: %{private}d", ret);
         return ret;
     }
 #endif
@@ -212,7 +187,7 @@ ani_object StatWrapper::Wrap(ani_env *env, FsStat *fsStat)
         return nullptr;
     }
 
-    if ((ret = SetProperties(env, cls, statObject, fsStat)) != ANI_OK) {
+    if ((ret = SetProperties(env, statObject, fsStat)) != ANI_OK) {
         HILOGE("SetProperties Fail, err: %{private}d", ret);
         return nullptr;
     }
