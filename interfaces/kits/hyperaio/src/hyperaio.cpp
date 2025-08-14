@@ -144,6 +144,7 @@ void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec, st
 int32_t HyperAio::CheckParameter(uint32_t reqNum)
 {
     if (pImpl_ == nullptr) {
+        HILOGE("pImpl is not initialized");
         return -EINVAL;
     }
     if (!initialized_.load()) {
@@ -160,6 +161,7 @@ int32_t HyperAio::CheckParameter(uint32_t reqNum)
 int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 {
     if (req == nullptr || req->reqs == nullptr) {
+        HILOGE("the request is empty");
         return -EINVAL;
     }
 
@@ -208,6 +210,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 int32_t HyperAio::StartReadReqs(ReadReqs *req)
 {
     if (req == nullptr || req->reqs == nullptr) {
+        HILOGE("the request is empty");
         return -EINVAL;
     }
 
@@ -254,9 +257,10 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
 int32_t HyperAio::StartCancelReqs(CancelReqs *req)
 {
     if (req == nullptr || req->reqs == nullptr) {
+        HILOGE("the request is empty");
         return -EINVAL;
     }
-    
+
     int32_t ret = CheckParameter(req->reqNum);
     if (ret < 0) {
         return ret;
