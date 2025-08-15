@@ -178,8 +178,8 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
             HILOGE("get sqe failed");
-            for (uint32_t j = i; j < totalReqs; ++j) {
-                errorVec.push_back(req->reqs[j].userData);
+            for (; i < totalReqs; ++i) {
+                errorVec.push_back(req->reqs[i].userData);
             }
             HandleSqeError(count, openInfoVec);
             HandleRequestError(errorVec, -EBUSY);
@@ -228,8 +228,8 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
             HILOGE("get sqe failed");
-            for (uint32_t j = i; j < totalReqs; ++j) {
-                errorVec.push_back(req->reqs[j].userData);
+            for (; i < totalReqs; ++i) {
+                errorVec.push_back(req->reqs[i].userData);
             }
             HandleSqeError(count, readInfoVec);
             HandleRequestError(errorVec, -EBUSY);
@@ -277,8 +277,8 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
             HILOGE("get sqe failed");
-            for (uint32_t j = i; j < totalReqs; ++j) {
-                errorVec.push_back(req->reqs[j].userData);
+            for (; i < totalReqs; ++i) {
+                errorVec.push_back(req->reqs[i].userData);
             }
             HandleSqeError(count, cancelInfoVec);
             HandleRequestError(errorVec, -EBUSY);
