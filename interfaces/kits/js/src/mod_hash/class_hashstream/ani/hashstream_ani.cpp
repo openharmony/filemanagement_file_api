@@ -109,8 +109,8 @@ void HashStreamAni::Constructor(ani_env *env, ani_object obj, ani_string alg)
         return;
     }
 
-    if (ANI_OK !=
-        env->Object_SetFieldByName_Long(obj, "nativePtr", reinterpret_cast<ani_long>(ret.GetData().value()))) {
+    ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(ret.GetData().value()));
+    if (ANI_OK != AniHelper::SetFieldValue(env, obj, "nativePtr", ptr)) {
         HILOGE("Failed to wrap entity for obj HashStream");
         ErrorHandler::Throw(env, EIO);
         return;
