@@ -43,9 +43,6 @@ bool TaskSignalListenerAni::CreateGlobalReference()
 
 void TaskSignalListenerAni::OnCancel()
 {
-    if (!CreateGlobalReference()) {
-        return;
-    }
     auto filepath = taskSignal->filePath_;
     auto task = [this, filepath]() { SendCancelEvent(filepath); };
     AniHelper::SendEventToMainThread(task);
