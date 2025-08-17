@@ -76,6 +76,8 @@ ani_object ReadLinesAni::ReadLinesSync(
     const FsReaderIterator *readerIterator = ret.GetData().value();
     auto result = ReaderIteratorAni::Wrap(env, move(readerIterator));
     if (result == nullptr) {
+        delete readerIterator;
+        readerIterator = nullptr;
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
     }
