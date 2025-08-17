@@ -26,8 +26,26 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
+bool TaskSignalListenerAni::CreateGlobalReference()
+{
+    if (signalRef) {
+        return true;
+    }
+    ani_env *env = AniHelper::GetThreadEnv(vm);
+    int ret = 0;
+    if ((ret = env->GlobalReference_Create(static_cast<ani_ref>(signalObj), &signalRef)) != ANI_OK) {
+        HILOGE("TaskSignalListenerAni GlobalReference_Create failed: %{public}d", ret);
+        signalRef = nullptr;
+        return false;
+    }
+    return true;
+}
+
 void TaskSignalListenerAni::OnCancel()
 {
+    if (!CreateGlobalReference()) {
+        return;
+    }
     auto filepath = taskSignal->filePath_;
     auto task = [this, filepath]() { SendCancelEvent(filepath); };
     AniHelper::SendEventToMainThread(task);
@@ -39,8 +57,8 @@ void TaskSignalListenerAni::SendCancelEvent(const string &filepath) const
         HILOGE("Cannot send cancel event because the vm is null.");
         return;
     }
-    if (signalObj == nullptr) {
-        HILOGE("Cannot send cancel event because the signalObj is null.");
+    if (signalRef == nullptr) {
+        HILOGE("Cannot send cancel event because the signalRef is null.");
         return;
     }
 
@@ -55,10 +73,23 @@ void TaskSignalListenerAni::SendCancelEvent(const string &filepath) const
         return;
     }
 
-    auto ret = env->Object_CallMethodByName_Void(signalObj, "onCancelCallback", nullptr, aniPath);
+    auto ret = env->Object_CallMethodByName_Void(static_cast<ani_object>(signalRef), "onCancelCallback", nullptr,
+        aniPath);
     if (ret != ANI_OK) {
         HILOGE("Call onCancelCallback failed, err: %{public}d", ret);
         return;
+    }
+}
+
+TaskSignalListenerAni::~TaskSignalListenerAni()
+{
+    if (signalRef == nullptr) {
+        return;
+    }
+    ani_env *env = AniHelper::GetThreadEnv(vm);
+    int ret = 0;
+    if ((ret = env->GlobalReference_Delete(signalRef)) != ANI_OK) {
+        HILOGE("TaskSignalListenerAni GlobalReference_Delete: %{public}d", ret);
     }
 }
 

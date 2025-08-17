@@ -149,10 +149,13 @@ static ani_status BindStreamMethods(ani_env *env)
 static ani_status BindTaskSignalClassMethods(ani_env *env)
 {
     auto classDesc = FS::TaskSignal::classDesc.c_str();
+    auto ctorDesc = FS::TaskSignal::ctorDesc.c_str();
+    auto ctorSig = FS::TaskSignal::ctorSig.c_str();
 
     std::array methods = {
         ani_native_function { "cancel", nullptr, reinterpret_cast<void *>(TaskSignalAni::Cancel) },
         ani_native_function { "onCancelNative", nullptr, reinterpret_cast<void *>(TaskSignalAni::OnCancel) },
+        ani_native_function { ctorDesc, ctorSig, reinterpret_cast<void *>(TaskSignalAni::Constructor) },
     };
 
     return BindClass(env, classDesc, methods);
