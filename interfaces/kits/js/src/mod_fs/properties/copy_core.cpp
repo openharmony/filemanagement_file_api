@@ -774,7 +774,7 @@ tuple<int, std::shared_ptr<FsFileInfos>> CopyCore::CreateFileInfos(
         }
         auto copySignal = options.value().copySignal;
         if (copySignal) {
-            infos->taskSignal = copySignal->GetTaskSignal();
+            infos->taskSignal = copySignal->GetTaskSignal().get();
         }
     }
 
