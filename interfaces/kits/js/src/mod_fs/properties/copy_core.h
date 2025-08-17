@@ -36,8 +36,8 @@ using namespace OHOS::AppExecFwk;
 using namespace DistributedFS::ModuleTaskSignal;
 
 struct CopyOptions {
-    std::shared_ptr<IProgressListener> progressListener;
-    std::shared_ptr<FsTaskSignal> copySignal;
+    shared_ptr<IProgressListener> progressListener;
+    FsTaskSignal* copySignal = nullptr;
 };
 
 struct ReceiveInfo {
@@ -95,8 +95,8 @@ struct FsFileInfos {
     int32_t eventFd = -1;
     bool run = true;
     bool hasListener = false;
-    std::shared_ptr<IProgressListener> listener = nullptr;
-    std::shared_ptr<TaskSignal> taskSignal = nullptr;
+    shared_ptr<IProgressListener> listener = nullptr;
+    TaskSignal* taskSignal = nullptr;
     std::set<std::string> filePaths;
     int exceptionCode = ERRNO_NOERR; // notify copy thread or listener thread has exceptions.
     bool operator==(const FsFileInfos &infos) const

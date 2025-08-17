@@ -531,7 +531,7 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CreateFileInfos_001, testing::ext::T
     copySignal->taskSignal_ = std::make_shared<TaskSignal>();
     auto options = std::make_optional<CopyOptions>();
     options->progressListener = std::make_shared<MockProgressListener>();
-    options->copySignal = std::move(copySignal);
+    options->copySignal = copySignal.get();
 
     auto [errCode, infos] = CopyCore::CreateFileInfos(srcFile, destFile, options);
     EXPECT_EQ(errCode, ERRNO_NOERR);
