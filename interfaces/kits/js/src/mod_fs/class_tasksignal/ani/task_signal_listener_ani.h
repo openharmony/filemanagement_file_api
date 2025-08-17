@@ -26,7 +26,10 @@ using namespace DistributedFS::ModuleTaskSignal;
 class TaskSignalListenerAni : public TaskSignalListener {
 public:
     TaskSignalListenerAni(ani_vm *vm, const ani_object &signalObject, std::shared_ptr<TaskSignal> taskSignal)
-        : vm(vm), signalObj(signalObject), taskSignal(taskSignal) {}
+        : vm(vm), signalObj(signalObject), taskSignal(taskSignal)
+    {
+        CreateGlobalReference();
+    }
     void OnCancel() override;
 
 public:
