@@ -277,7 +277,7 @@ FsResult<FsStream *> FsStream::Constructor()
         HILOGE("Failed to request heap memory.");
         return FsResult<FsStream *>::Error(ENOMEM);
     }
-    FsStream *fsStreamPtr = new FsStream(move(rafEntity));
+    FsStream *fsStreamPtr = new (nothrow) FsStream(move(rafEntity));
 
     if (fsStreamPtr == nullptr) {
         HILOGE("Failed to create FsStream object on heap.");

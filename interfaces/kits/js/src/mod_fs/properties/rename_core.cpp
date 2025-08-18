@@ -29,7 +29,8 @@ using namespace std;
 
 FsResult<void> RenameCore::DoRename(const string &src, const string &dest)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> renameReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> renameReq = { new (std::nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!renameReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);

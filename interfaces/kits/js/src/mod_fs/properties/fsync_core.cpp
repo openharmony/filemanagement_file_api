@@ -27,7 +27,8 @@ using namespace std;
 
 FsResult<void> FsyncCore::DoFsync(const int32_t &fd)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> fsyncReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> fsyncReq = { new (std::nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!fsyncReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);

@@ -30,7 +30,7 @@ FsResult<FsReaderIterator *> FsReaderIterator::Constructor()
         return FsResult<FsReaderIterator *>::Error(ENOMEM);
     }
 
-    FsReaderIterator *it = new FsReaderIterator(move(entity));
+    FsReaderIterator *it = new (nothrow) FsReaderIterator(move(entity));
 
     if (it == nullptr) {
         HILOGE("Failed to create FsReaderIterator object on heap.");

@@ -32,7 +32,7 @@ FsResult<FsWatcher *> FsWatcher::Constructor()
         return FsResult<FsWatcher *>::Error(ENOMEM);
     }
 
-    FsWatcher *watcherPtr = new FsWatcher(move(watchEntity));
+    FsWatcher *watcherPtr = new (nothrow) FsWatcher(move(watchEntity));
 
     if (watcherPtr == nullptr) {
         HILOGE("Failed to create FsWatcher object on heap.");

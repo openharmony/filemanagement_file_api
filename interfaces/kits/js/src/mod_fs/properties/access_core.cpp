@@ -55,7 +55,8 @@ const int BASE_USER_RANGE = 200000;
 
 static int UvAccess(const string &path, int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> accessReq = {new uv_fs_t, FsUtils::FsReqCleanup};
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> accessReq = { new (nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!accessReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
