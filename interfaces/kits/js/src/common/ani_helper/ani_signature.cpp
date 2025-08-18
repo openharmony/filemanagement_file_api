@@ -35,6 +35,11 @@ const string BoxedTypes::Boolean::unboxedSig = Builder::BuildSignatureDescriptor
 // BoxedTypes::Int
 const Type BoxedTypes::Int::classType = Builder::BuildClass("std.core.Int");
 const string BoxedTypes::Int::classDesc = BoxedTypes::Int::classType.Descriptor();
+const string BoxedTypes::Int::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
+// BoxedTypes::Long
+const Type BoxedTypes::Long::classType = Builder::BuildClass("std.core.Long");
+const string BoxedTypes::Long::classDesc = BoxedTypes::Long::classType.Descriptor();
+const string BoxedTypes::Long::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
 // BoxedTypes::Double
 const Type BoxedTypes::Double::classType = Builder::BuildClass("std.core.Double");
 const string BoxedTypes::Double::classDesc = BoxedTypes::Double::classType.Descriptor();
@@ -121,15 +126,23 @@ const string FS::WatchEventInner::ctorSig =
 // FS::ReadStream
 const Type FS::ReadStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ReadStream");
 const string FS::ReadStream::classDesc = FS::ReadStream::classType.Descriptor();
-const string FS::ReadStream::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+const string FS::ReadStream::ctorSig =
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::ReadStreamOptionsInner::classType });
 // FS::WriteStream
 const Type FS::WriteStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.WriteStream");
 const string FS::WriteStream::classDesc = FS::WriteStream::classType.Descriptor();
-const string FS::WriteStream::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+const string FS::WriteStream::ctorSig =
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::WriteStreamOptionsInner::classType });
 // FS::AtomicFile
 const Type FS::AtomicFile::classType = Builder::BuildClass("@ohos.file.fs.fileIo.AtomicFile");
 const string FS::AtomicFile::classDesc = FS::AtomicFile::classType.Descriptor();
 const string FS::AtomicFile::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+// FS::ReadStreamOptionsInner
+const Type FS::ReadStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.ReadStreamOptionsInner");
+const string FS::ReadStreamOptionsInner::classDesc = FS::ReadStreamOptionsInner::classType.Descriptor();
+// FS::WriteStreamOptionsInner
+const Type FS::WriteStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.WriteStreamOptionsInner");
+const string FS::WriteStreamOptionsInner::classDesc = FS::WriteStreamOptionsInner::classType.Descriptor();
 // FS::LocationType
 const Type FS::LocationType::classType = Builder::BuildClass("@ohos.file.fs.fileIo.LocationType");
 const string FS::LocationType::classDesc = FS::LocationType::classType.Descriptor();
