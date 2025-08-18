@@ -28,13 +28,8 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-ani_object ReaderIteratorResultAni::Wrap(ani_env *env, const ReaderIteratorResult *result)
+ani_object ReaderIteratorResultAni::Wrap(ani_env *env, const ReaderIteratorResult &result)
 {
-    if (result == nullptr) {
-        HILOGE("ReaderIteratorResult pointer is null!");
-        return nullptr;
-    }
-
     auto classDesc = FS::ReaderIteratorResultInner::classDesc.c_str();
     ani_class cls;
     if (ANI_OK != env->FindClass(classDesc, &cls)) {
@@ -50,21 +45,18 @@ ani_object ReaderIteratorResultAni::Wrap(ani_env *env, const ReaderIteratorResul
         return nullptr;
     }
 
-    ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(result));
     ani_object obj;
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         HILOGE("New %s obj Failed!", classDesc);
         return nullptr;
     }
 
-    const auto &done = result->done;
-    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "done", done)) {
+    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "done", result.done)) {
         HILOGE("Set 'done' field value failed!");
         return nullptr;
     }
 
-    const auto &value = result->value;
-    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "value", value)) {
+    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "value", result.value)) {
         HILOGE("Set 'value' field value failed!");
         return nullptr;
     }
