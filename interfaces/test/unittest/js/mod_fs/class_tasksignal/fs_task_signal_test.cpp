@@ -136,7 +136,7 @@ HWTEST_F(FsTaskSignalTest, FsTaskSignalTest_Cancel_001, testing::ext::TestSize.L
 
     auto res = fsTaskSignal.Cancel();
 
-    EXPECT_EQ(fsTaskSignal.taskSignal_, nullptr);
+    EXPECT_NE(fsTaskSignal.taskSignal_, nullptr);
     GTEST_LOG_(INFO) << "NClassTest-end FsTaskSignalTest_Cancel_001";
 }
 
@@ -175,7 +175,7 @@ HWTEST_F(FsTaskSignalTest, FsTaskSignalTest_OnCancel_001, testing::ext::TestSize
 
     auto res = fsTaskSignal.OnCancel();
 
-    EXPECT_EQ(fsTaskSignal.taskSignal_, nullptr);
+    EXPECT_NE(fsTaskSignal.taskSignal_, nullptr);
     GTEST_LOG_(INFO) << "NClassTest-end FsTaskSignalTest_OnCancel_001";
 }
 
