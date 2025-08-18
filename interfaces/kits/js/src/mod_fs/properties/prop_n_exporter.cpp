@@ -104,7 +104,7 @@ struct AccessArgs {
 
 static int UvAccess(const string &path, int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup) *> access_req = {new uv_fs_t,
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup) *> access_req = {new (std::nothrow) uv_fs_t,
         CommonFunc::fs_req_cleanup};
     if (!access_req) {
         HILOGE("Failed to request heap memory.");
@@ -338,7 +338,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
 
     auto cbExec = [path = string(tmp.get())]() -> NError {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> unlink_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
+            new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!unlink_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
@@ -384,7 +384,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     }
 
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> unlink_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!unlink_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
@@ -403,7 +403,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
 static int MkdirCore(const string &path)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!mkdir_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -562,7 +562,7 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
 
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
@@ -582,7 +582,7 @@ static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, in
 {
     uv_buf_t buffer = uv_buf_init(buf, len);
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
@@ -660,7 +660,7 @@ static NError WriteExec(shared_ptr<AsyncIOWrtieArg> arg, char *buf, size_t len, 
 {
     uv_buf_t buffer = uv_buf_init(buf, static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> write_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!write_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
@@ -762,7 +762,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
 
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> write_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!write_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);

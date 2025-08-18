@@ -37,7 +37,11 @@ static tuple<bool, int64_t, bool, int64_t, unique_ptr<char[]>> GetReadTextArg(na
     int64_t len = 0;
     bool succ = false;
     bool hasLen = false;
-    unique_ptr<char[]> encoding { new char[]{ "utf-8" } };
+    unique_ptr<char[]> encoding { new (std::nothrow) char[]{ "utf-8" } };
+    if(!encoding){
+        HILOGE("Failed to request heap memory.");
+        return { false, offset, hasLen, len, nullptr };
+    }
 
     if (op.HasProp("offset") && !op.GetProp("offset").TypeIs(napi_undefined)) {
         tie(succ, offset) = op.GetProp("offset").ToInt64();
@@ -74,7 +78,7 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
     OHOS::DistributedFS::FDGuard sfd;
     struct stat statbf;
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
@@ -105,7 +109,7 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
     string buffer(len, '\0');
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(len));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
         HILOGE("Failed to request heap memory.");
         return NError(ENOMEM);
@@ -122,7 +126,7 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
 static int OpenFile(const std::string& path)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup
     };
     if (open_req == nullptr) {
         HILOGE("Failed to request heap memory.");
@@ -137,7 +141,7 @@ static int ReadFromFile(int fd, int64_t offset, string& buffer)
 {
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(buffer.size()));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (read_req == nullptr) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;

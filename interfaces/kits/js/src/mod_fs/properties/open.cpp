@@ -136,7 +136,7 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri, 
 static int OpenFileByPath(const string &path, unsigned int mode)
 {
     unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;

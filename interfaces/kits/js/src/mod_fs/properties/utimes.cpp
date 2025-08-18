@@ -65,7 +65,7 @@ napi_value Utimes::Sync(napi_env env, napi_callback_info info)
     }
 
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> utimes_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!utimes_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);

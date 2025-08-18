@@ -43,7 +43,7 @@ napi_value Fsync::Sync(napi_env env, napi_callback_info info)
     }
 
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fsync_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!fsync_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
@@ -76,7 +76,7 @@ napi_value Fsync::Async(napi_env env, napi_callback_info info)
 
     auto cbExec = [fd = fd]() -> NError {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fsync_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
+            new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!fsync_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
