@@ -38,7 +38,7 @@ static tuple<bool, int64_t, bool, int64_t, unique_ptr<char[]>> GetReadTextArg(na
     bool succ = false;
     bool hasLen = false;
     unique_ptr<char[]> encoding { new (std::nothrow) char[]{ "utf-8" } };
-    if(!encoding){
+    if (!encoding) {
         HILOGE("Failed to request heap memory.");
         return { false, offset, hasLen, len, nullptr };
     }
