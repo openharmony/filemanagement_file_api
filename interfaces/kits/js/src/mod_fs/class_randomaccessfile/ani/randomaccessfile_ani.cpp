@@ -300,25 +300,20 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
         return nullptr;
     }
 
-    ani_field startField = nullptr;
-    ani_field endField = nullptr;
-    if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
-        HILOGE("Cannot find start in class %s", className);
-        return nullptr;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "end", &endField)) {
-        HILOGE("Cannot find end in class %s", className);
-        return nullptr;
+    if (start >= 0) {
+        auto ret = AniHelper::SetFieldValue(env, obj, "start", start);
+        if (ret != ANI_OK) {
+            HILOGE("Set 'start' field value failed! ret: %{public}d", ret);
+            return nullptr;
+        }
     }
 
-    if (start >= 0) {
-        env->Object_SetField_Int(obj, startField, start);
-    }
     if (end >= 0) {
-        env->Object_SetField_Int(obj, endField, end);
-    }
-    if (obj == nullptr) {
-        HILOGE("CreateReadStreamOptions is nullptr");
+        auto ret = AniHelper::SetFieldValue(env, obj, "end", end);
+        if (ret != ANI_OK) {
+            HILOGE("Set 'end' field value failed! ret: %{public}d", ret);
+            return nullptr;
+        }
     }
 
     return move(obj);
@@ -343,20 +338,18 @@ static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flag
         return nullptr;
     }
 
-    ani_field modeField = nullptr;
-    ani_field startField = nullptr;
-    if (ANI_OK != env->Class_FindField(cls, "mode", &modeField)) {
-        HILOGE("Cannot find mode in class %s", className);
-        return nullptr;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "start", &startField)) {
-        HILOGE("Cannot find start in class %s", className);
+    auto ret = AniHelper::SetFieldValue(env, obj, "mode", flags);
+    if (ret != ANI_OK) {
+        HILOGE("Set 'mode' field value failed! ret: %{public}d", ret);
         return nullptr;
     }
 
-    env->Object_SetField_Int(obj, modeField, flags);
     if (start >= 0) {
-        env->Object_SetField_Int(obj, startField, start);
+        ret = AniHelper::SetFieldValue(env, obj, "start", start);
+        if (ret != ANI_OK) {
+            HILOGE("Set 'start' field value failed! ret: %{public}d", ret);
+            return nullptr;
+        }
     }
 
     return move(obj);

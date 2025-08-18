@@ -64,7 +64,7 @@ const string BuiltInTypes::ArrayBuffer::ctorSig = Builder::BuildSignatureDescrip
 // BuiltInTypes::BigInt
 const Type BuiltInTypes::BigInt::classType = Builder::BuildClass("escompat.BigInt");
 const string BuiltInTypes::BigInt::classDesc = BuiltInTypes::BigInt::classType.Descriptor();
-const string BuiltInTypes::BigInt::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::doubleType });
+const string BuiltInTypes::BigInt::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
 // BuiltInTypes::BusinessError
 const Type BuiltInTypes::BusinessError::classType = Builder::BuildClass("@ohos.base.BusinessError");
 const string BuiltInTypes::BusinessError::classDesc = BuiltInTypes::BusinessError::classType.Descriptor();
