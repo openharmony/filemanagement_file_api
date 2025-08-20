@@ -109,7 +109,10 @@ static tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object 
 {
     ani_class cls;
     auto classDesc = BuiltInTypes::String::classDesc.c_str();
-    env->FindClass(classDesc, &cls);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %{public}s", classDesc);
+        return { false, {} };
+    }
 
     ani_boolean isString;
     env->Object_InstanceOf(buf, cls, &isString);
@@ -124,7 +127,10 @@ static tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_obj
 {
     ani_class cls;
     auto classDesc = BuiltInTypes::ArrayBuffer::classDesc.c_str();
-    env->FindClass(classDesc, &cls);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %{public}s", classDesc);
+        return { false, {} };
+    }
 
     ani_boolean isArrayBuffer;
     env->Object_InstanceOf(buf, cls, &isArrayBuffer);
@@ -284,29 +290,89 @@ static ani_string GetFilePath(ani_env *env, const int fd)
     return move(filePath);
 }
 
-static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t end)
+static ani_object CreateBoxedInt(ani_env *env, int32_t value)
 {
-    static const char *className = "L@ohos/file/fs/ReadStreamOptionsInner;";
+    auto classDesc = BoxedTypes::Int::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %{public}s", classDesc);
         return nullptr;
     }
 
+    auto ctorDesc = BoxedTypes::Int::ctorDesc.c_str();
+    auto ctorSig = BoxedTypes::Int::ctorSig0.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %{public}s", classDesc);
+        return nullptr;
+    }
+
+    ani_object obj;
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, value)) {
+        HILOGE("New %{public}s obj Failed", classDesc);
+        return nullptr;
+    }
+
+    return obj;
+}
+
+static ani_object CreateBoxedLong(ani_env *env, int64_t value)
+{
+    auto classDesc = BoxedTypes::Long::classDesc.c_str();
+    ani_class cls;
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %{public}s", classDesc);
+        return nullptr;
+    }
+
+    auto ctorDesc = BoxedTypes::Long::ctorDesc.c_str();
+    auto ctorSig = BoxedTypes::Long::ctorSig0.c_str();
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %{public}s", classDesc);
+        return nullptr;
+    }
+
+    ani_object obj;
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, value)) {
+        HILOGE("New %{public}s obj Failed", classDesc);
+        return nullptr;
+    }
+
+    return obj;
+}
+
+static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t end)
+{
+    auto classDesc = FS::ReadStreamOptionsInner::classDesc.c_str();
+    ani_class cls;
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %{public}s", classDesc);
+        return nullptr;
+    }
+
+    auto ctorDesc = FS::ReadStreamOptionsInner::ctorDesc.c_str();
+    auto ctorSig = FS::ReadStreamOptionsInner::ctorSig0.c_str();
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %{public}s", classDesc);
         return nullptr;
     }
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %{public}s obj Failed", classDesc);
         return nullptr;
     }
 
     if (start >= 0) {
-        auto ret = AniHelper::SetFieldValue(env, obj, "start", start);
+        auto startValue = CreateBoxedLong(env, start);
+        if (startValue == nullptr) {
+            HILOGE("Create 'start' field value failed!");
+            return nullptr;
+        }
+
+        auto ret = AniHelper::SetPropertyValue(env, obj, "start", startValue);
         if (ret != ANI_OK) {
             HILOGE("Set 'start' field value failed! ret: %{public}d", ret);
             return nullptr;
@@ -314,7 +380,13 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
     }
 
     if (end >= 0) {
-        auto ret = AniHelper::SetFieldValue(env, obj, "end", end);
+        auto endValue = CreateBoxedLong(env, end);
+        if (endValue == nullptr) {
+            HILOGE("Create 'end' field value failed!");
+            return nullptr;
+        }
+
+        auto ret = AniHelper::SetPropertyValue(env, obj, "end", endValue);
         if (ret != ANI_OK) {
             HILOGE("Set 'end' field value failed! ret: %{public}d", ret);
             return nullptr;
@@ -326,33 +398,47 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
 
 static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flags)
 {
-    static const char *className = "L@ohos/file/fs/WriteStreamOptionsInner;";
+    auto classDesc = FS::WriteStreamOptionsInner::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %{public}s", classDesc);
         return nullptr;
     }
 
+    auto ctorDesc = FS::WriteStreamOptionsInner::ctorDesc.c_str();
+    auto ctorSig = FS::WriteStreamOptionsInner::ctorSig0.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %{public}s", classDesc);
         return nullptr;
     }
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %{public}s obj Failed", classDesc);
         return nullptr;
     }
 
-    auto ret = AniHelper::SetFieldValue(env, obj, "mode", flags);
+    auto flagsValue = CreateBoxedInt(env, flags);
+    if (flagsValue == nullptr) {
+        HILOGE("Create 'mode' field value failed!");
+        return nullptr;
+    }
+    
+    auto ret = AniHelper::SetPropertyValue(env, obj, "mode", flagsValue);
     if (ret != ANI_OK) {
         HILOGE("Set 'mode' field value failed! ret: %{public}d", ret);
         return nullptr;
     }
 
     if (start >= 0) {
-        ret = AniHelper::SetFieldValue(env, obj, "start", start);
+        auto startValue = CreateBoxedLong(env, start);
+        if (startValue == nullptr) {
+            HILOGE("Create 'start' field value failed!");
+            return nullptr;
+        }
+
+        ret = AniHelper::SetPropertyValue(env, obj, "start", startValue);
         if (ret != ANI_OK) {
             HILOGE("Set 'start' field value failed! ret: %{public}d", ret);
             return nullptr;
@@ -364,22 +450,24 @@ static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flag
 
 static ani_object CreateReadStream(ani_env *env, ani_string filePath, ani_object options)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/ReadStream;";
+    auto classDesc = FS::ReadStream::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %{public}s", classDesc);
         return nullptr;
     }
 
+    auto ctorDesc = FS::ReadStream::ctorDesc.c_str();
+    auto ctorSig = FS::ReadStream::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/ReadStreamOptions;:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %{public}s", classDesc);
         return nullptr;
     }
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %{public}s obj Failed", classDesc);
         return nullptr;
     }
 
@@ -388,21 +476,24 @@ static ani_object CreateReadStream(ani_env *env, ani_string filePath, ani_object
 
 static ani_object CreateWriteStream(ani_env *env, ani_string filePath, ani_object options)
 {
-    static const char *className = "L@ohos/file/fs/fileIo/WriteStream;";
+    auto classDesc = FS::WriteStream::classDesc.c_str();
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class %s", className);
+    if (ANI_OK != env->FindClass(classDesc, &cls)) {
+        HILOGE("Cannot find class %{public}s", classDesc);
         return nullptr;
     }
+
+    auto ctorDesc = FS::WriteStream::ctorDesc.c_str();
+    auto ctorSig = FS::WriteStream::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK !=
-        env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;L@ohos/file/fs/WriteStreamOptions;:V", &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", className);
+    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+        HILOGE("Cannot find constructor method for class %{public}s", classDesc);
         return nullptr;
     }
+
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, options)) {
-        HILOGE("New %s obj Failed", className);
+        HILOGE("New %{public}s obj Failed", classDesc);
         return nullptr;
     }
 
@@ -420,12 +511,36 @@ static ani_object CreateStream(ani_env *env, const string &streamName, RandomAcc
 
     if (streamName == READ_STREAM_CLASS) {
         ani_object obj = CreateReadStreamOptions(env, rafEntity->start, rafEntity->end);
-        return CreateReadStream(env, filePath, obj);
+        if (obj == nullptr) {
+            HILOGE("Create readstreamoptions failed.");
+            ErrorHandler::Throw(env, EINVAL);
+            return nullptr;
+        }
+
+        ani_object readStream = CreateReadStream(env, filePath, obj);
+        if (readStream == nullptr) {
+            HILOGE("Create readstream failed.");
+            ErrorHandler::Throw(env, UNKNOWN_ERR);
+            return nullptr;
+        }
+        return readStream;
     }
 
     if (streamName == WRITE_STREAM_CLASS) {
         ani_object obj = CreateWriteStreamOptions(env, rafEntity->start, flags);
-        return CreateWriteStream(env, filePath, obj);
+        if (obj == nullptr) {
+            HILOGE("Create writestreamoptions failed.");
+            ErrorHandler::Throw(env, EINVAL);
+            return nullptr;
+        }
+
+        ani_object writeStream = CreateWriteStream(env, filePath, obj);
+        if (writeStream == nullptr) {
+            HILOGE("Create writestream failed.");
+            ErrorHandler::Throw(env, UNKNOWN_ERR);
+            return nullptr;
+        }
+        return writeStream;
     }
 
     return nullptr;
