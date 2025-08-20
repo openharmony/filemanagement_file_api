@@ -27,7 +27,7 @@ namespace ANI {
 
 class ReaderIteratorResultAni final {
 public:
-    static ani_object Wrap(ani_env *env, const ReaderIteratorResult *result);
+    static ani_object Wrap(ani_env *env, const ReaderIteratorResult &result);
 };
 } // namespace ANI
 } // namespace ModuleFileIO

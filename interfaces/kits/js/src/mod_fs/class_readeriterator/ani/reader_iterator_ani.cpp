@@ -91,7 +91,7 @@ ani_object ReaderIteratorAni::Next(ani_env *env, [[maybe_unused]] ani_object obj
     }
 
     auto nextRet = ret.GetData().value();
-    auto result = ReaderIteratorResultAni::Wrap(env, &nextRet);
+    auto result = ReaderIteratorResultAni::Wrap(env, nextRet);
     if (result == nullptr) {
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return nullptr;
