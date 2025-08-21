@@ -14,6 +14,7 @@
  */
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import stream from '@ohos.util.stream';
+import hilog from '@ohos.hilog'
 
 const UNKNOWN_ERR: int = 13900042
 const UNKNOWN_MSG: string = "Unknown error"
@@ -24,6 +25,23 @@ function createBusinessError(code: int, msg: string): BusinessError {
   err.message = msg;
   return err;
 }
+
+class Cleaner {
+    private ptr: long = 0
+    private name: string = "";
+    constructor(ptr: long, name: string) {
+        this.ptr = ptr
+        this.name = name
+    }
+    native clean(): void
+}
+
+function CleanerCallback(cleaner: Cleaner): void {
+    cleaner.clean()
+}
+
+let destroyRegister = new FinalizationRegistry<Cleaner>(CleanerCallback)
+let unregisterToken = new object()
 
 namespace fileIo {
   export namespace OpenMode {
@@ -1253,6 +1271,9 @@ export class ProgressInner implements Progress {
 export type ProgressListener = (progress: Progress) => void;
 
 export class TaskSignal {
+  static {
+    loadLibrary("ani_file_fs");
+  }
   private nativeTaskSignal: long = 0;
   native constructor();
   private native onCancelNative(): void;
@@ -1320,11 +1341,21 @@ export class RandomAccessFileInner implements RandomAccessFile {
   filePointer: long = -1;
 
   private nativePtr: long = 0;
+  private cleaner: Cleaner | null = null;
 
   constructor(ptr: long) {
     if (this.nativePtr === 0) {
       this.nativePtr = ptr;
     }
+  this.registerCleaner(this.nativePtr)
+  }
+
+  registerCleaner(ptr: long): void {
+      this.cleaner = new Cleaner(ptr, "RandomAccessFile");
+      destroyRegister.register(this, this.cleaner!, this);
+  }
+  unregisterCleaner(): void {
+      destroyRegister.unregister(this);
   }
 
   setFilePointer(filePointer: long): void {
@@ -1459,11 +1490,20 @@ export class FileInner implements File {
   name: String = "";
 
   private nativePtr: long = 0;
+  private cleaner: Cleaner | null = null;
 
   constructor(ptr: long) {
     if (this.nativePtr === 0) {
       this.nativePtr = ptr;
     }
+    this.registerCleaner(this.nativePtr)
+  }
+  registerCleaner(ptr: long): void {
+      this.cleaner = new Cleaner(ptr, "File");
+      destroyRegister.register(this, this.cleaner!, this);
+  }
+  unregisterCleaner(): void {
+      destroyRegister.unregister(this);
   }
 
   native getParent(): String;
@@ -1520,16 +1560,13 @@ export enum LocationType {
 
 
 export class ReaderIteratorResultInner implements ReaderIteratorResult {
-  private nativePtr: long = 0;
-
-  constructor(ptr: long) {
-    if (this.nativePtr === 0) {
-      this.nativePtr = ptr;
-    }
-  }
-
   done: boolean = false;
   value: string = "";
+  
+  constructor(done: boolean, value: string) {
+    this.done = done;
+    this.value = value;
+  }
 }
 
 export interface ReaderIterator {
@@ -1538,11 +1575,20 @@ export interface ReaderIterator {
 
 export class ReaderIteratorInner implements ReaderIterator {
   private nativePtr: long = 0;
+  private cleaner: Cleaner | null = null;
 
   constructor(ptr: long) {
     if (this.nativePtr === 0) {
       this.nativePtr = ptr;
     }
+  this.registerCleaner(this.nativePtr)
+  }
+  registerCleaner(ptr: long): void {
+      this.cleaner = new Cleaner(ptr, "ReaderIterator");
+      destroyRegister.register(this, this.cleaner!, this);
+  }
+  unregisterCleaner(): void {
+      destroyRegister.unregister(this);
   }
 
   native next(): ReaderIteratorResult;
@@ -1586,11 +1632,20 @@ export class StatInner implements Stat {
   location: LocationType = LocationType.LOCAL;
 
   private nativeStat: long = 0;
+  private cleaner: Cleaner | null = null;
 
   constructor(stat: long) {
     if (this.nativeStat === 0) {
       this.nativeStat = stat;
     }
+  this.registerCleaner(this.nativeStat)
+  }
+  registerCleaner(ptr: long): void {
+      this.cleaner = new Cleaner(ptr, "Stat");
+      destroyRegister.register(this, this.cleaner!, this);
+  }
+  unregisterCleaner(): void {
+      destroyRegister.unregister(this);
   }
 
   native isBlockDevice(): boolean;
@@ -1622,11 +1677,20 @@ export interface Stream {
 
 export class StreamInner implements Stream {
   private nativePtr: long = 0;
+  private cleaner: Cleaner | null = null;
 
   constructor(ptr: long) {
     if (this.nativePtr === 0) {
       this.nativePtr = ptr;
     }
+  this.registerCleaner(this.nativePtr)
+  }
+  registerCleaner(ptr: long): void {
+      this.cleaner = new Cleaner(ptr, "Stream");
+      destroyRegister.register(this, this.cleaner!, this);
+  }
+  unregisterCleaner(): void {
+      destroyRegister.unregister(this);
   }
 
   close(): Promise<void> {
@@ -1927,8 +1991,24 @@ export class AtomicFile {
   }
 
   private nativePtr: long = 0;
+  private cleaner: Cleaner | null = null;
   private native getPath(): string;
   private writeStream: WriteStream | null = null;
+
+  registerCleaner(ptr: long): void {
+      this.cleaner = new Cleaner(ptr, "AtomicFile");
+      destroyRegister.register(this, this.cleaner!, this);
+  }
+  unregisterCleaner(): void {
+      destroyRegister.unregister(this);
+  }
+  bindNativePtr(ptr: long): void {
+      if (this.nativePtr === 0) {
+          this.nativePtr = ptr;
+      }
+      this.registerCleaner(this.nativePtr)
+
+  }
 
   native constructor(path: string);
 

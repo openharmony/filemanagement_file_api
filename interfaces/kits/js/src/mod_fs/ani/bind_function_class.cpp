@@ -61,6 +61,7 @@
 #include "watcher_ani.h"
 #include "write_ani.h"
 #include "xattr_ani.h"
+#include "cleaner_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
@@ -239,6 +240,17 @@ static ani_status BindStaticMethods(ani_env *env)
     return BindClass(env, classDesc, methods);
 }
 
+static ani_status BindCleanerMethods(ani_env *env)
+{
+    auto classDesc = CLEANER::CleanerImpl::classDesc.c_str();
+
+    std::array methods = {
+        ani_native_function { "clean", nullptr, reinterpret_cast<void *>(CleanerAni::Clean) },
+    };
+
+    return BindClass(env, classDesc, methods);
+}
+
 static ani_status DoBindMethods(ani_env *env)
 {
     ani_status status;
@@ -284,6 +296,11 @@ static ani_status DoBindMethods(ani_env *env)
 
     if ((status = BindAtomicFileMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native methods for AtomicFile Class!");
+        return status;
+    };
+
+    if ((status = BindCleanerMethods(env)) != ANI_OK) {
+        HILOGE("Cannot bind native methods for Cleaner Class!");
         return status;
     };
 
