@@ -89,7 +89,10 @@ static tuple<bool, bool> JudgeFile(ani_env *env, ani_object obj)
 {
     auto stringTypeDesc = BuiltInTypes::String::classDesc.c_str();
     ani_class stringClass;
-    env->FindClass(stringTypeDesc, &stringClass);
+    if (ANI_OK != env->FindClass(stringTypeDesc, &stringClass)) {
+        HILOGE("Cannot find class %{public}s", stringTypeDesc);
+        return { false, false };
+    }
     ani_boolean isString = false;
     env->Object_InstanceOf(obj, stringClass, &isString);
     if (isString) {
@@ -98,7 +101,10 @@ static tuple<bool, bool> JudgeFile(ani_env *env, ani_object obj)
 
     auto fileClassDesc = FS::FileInner::classDesc.c_str();
     ani_class fileClass;
-    env->FindClass(fileClassDesc, &fileClass);
+    if (ANI_OK != env->FindClass(fileClassDesc, &fileClass)) {
+        HILOGE("Cannot find class %{public}s", fileClassDesc);
+        return { false, false };
+    }
     ani_boolean isFile = false;
     env->Object_InstanceOf(obj, fileClass, &isFile);
     if (isFile) {
@@ -140,14 +146,17 @@ static ani_object CreateRandomAccessFileByString(
     auto [succPath, path] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(file));
     if (!succPath) {
         HILOGE("Parse file path failed");
+        ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
+
     auto [succMode, modeOp] = TypeConverter::ToOptionalInt32(env, mode);
     if (!succMode) {
         HILOGE("Invalid mode");
         ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
+
     FsResult<FsRandomAccessFile *> ret = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, modeOp, op);
     if (!ret.IsSuccess()) {
         HILOGE("CreateRandomAccessFile failed");
@@ -155,6 +164,7 @@ static ani_object CreateRandomAccessFileByString(
         ErrorHandler::Throw(env, err);
         return nullptr;
     }
+
     const FsRandomAccessFile *refFile = ret.GetData().value();
     auto result = Wrap(env, move(refFile));
     if (result == nullptr) {
@@ -200,6 +210,7 @@ ani_object CreateRandomAccessFileAni::CreateRandomAccessFileSync(
             ErrorHandler::Throw(env, err);
             return nullptr;
         }
+
         const FsRandomAccessFile *refFile = ret.GetData().value();
         auto result = Wrap(env, move(refFile));
         if (result == nullptr) {
