@@ -19,14 +19,10 @@
 #include <cstdint>
 #include "filemgmt_libfs.h"
 #include "fs_utils.h"
+#include "read_options.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
-
-struct ReadOptions final {
-    optional<int64_t> offset = nullopt;
-    optional<int64_t> length = nullopt;
-};
 
 class ReadCore final {
 public:

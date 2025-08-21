@@ -37,6 +37,10 @@ public:
 
     FsResult<ReaderIteratorResult> Next();
 
+    ~FsReaderIterator() {
+        HILOGE("~FsReaderIterator success");
+    }
+
 private:
     unique_ptr<ReaderIteratorEntity> entity;
     explicit FsReaderIterator(unique_ptr<ReaderIteratorEntity> entity) : entity(move(entity)) {};

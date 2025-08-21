@@ -18,22 +18,13 @@
 
 #include "filemgmt_libfs.h"
 #include "randomaccessfile_entity.h"
+#include "write_options.h"
+#include "read_options.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
-
-struct WriteOptions {
-    optional<size_t> length = nullopt;
-    optional<int64_t> offset = nullopt;
-    optional<string> encoding = nullopt;
-};
-
-struct ReadOptions {
-    optional<int64_t> offset = nullopt;
-    optional<int64_t> length = nullopt;
-};
 
 class FsRandomAccessFile {
 public:
@@ -61,7 +52,9 @@ public:
         return *this;
     }
 
-    ~FsRandomAccessFile() = default;
+    ~FsRandomAccessFile() {
+        HILOGE("~FsRandomAccessFile success.");
+    }
 
     FsResult<void> SetFilePointerSync(const int64_t &fp) const;
     FsResult<int64_t> WriteSync(const string &buffer, const optional<WriteOptions> &options = nullopt) const;

@@ -18,6 +18,7 @@
 
 #include "filemgmt_libfs.h"
 #include "fs_watch_entity.h"
+#include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 
@@ -38,7 +39,9 @@ public:
     FsWatcher(FsWatcher &&) noexcept = default;
     FsWatcher &operator=(FsWatcher &&) noexcept = default;
 
-    ~FsWatcher() = default;
+    ~FsWatcher() {
+        HILOGE("~FsWatcher success.");
+    }
 
 private:
     unique_ptr<FsWatchEntity> watchEntity;

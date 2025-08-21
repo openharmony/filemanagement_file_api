@@ -193,6 +193,7 @@ struct TaskSignal : public BaseType {
     static const string ctorDesc;
     static const string ctorSig;
     static const string nativeTaskSignal;
+    static const string bindNativePtrSig;
 };
 
 struct WatcherInner : public BaseType {
@@ -229,6 +230,7 @@ struct AtomicFile : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string bindNativePtrSig;
 };
 
 } // namespace FS
@@ -271,6 +273,15 @@ struct HashStreamImpl : public BaseType {
 };
 
 } // namespace HASH
+
+namespace CLEANER {
+
+struct CleanerImpl : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+};
+
+} // namespace CLEANER
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature
 
