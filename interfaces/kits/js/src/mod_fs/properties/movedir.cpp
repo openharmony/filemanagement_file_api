@@ -210,7 +210,7 @@ static int RecurMoveDir(const string &srcPath, const string &destPath, const int
         return ERRNO_NOERR;
     }
 
-    unique_ptr<struct NameListArg, decltype(Deleter)*> ptr = {new struct NameListArg, Deleter};
+    unique_ptr<struct NameListArg, decltype(Deleter)*> ptr = { new (std::nothrow) struct NameListArg, Deleter };
     if (!ptr) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;

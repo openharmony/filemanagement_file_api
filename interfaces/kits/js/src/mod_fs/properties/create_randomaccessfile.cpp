@@ -185,7 +185,7 @@ napi_value CreateRandomAccessFile::Sync(napi_env env, napi_callback_info info)
             return nullptr;
         }
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
+            new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
             NError(ENOMEM).ThrowErr(env);
@@ -218,7 +218,11 @@ NError AsyncExec(shared_ptr<AsyncCreateRandomAccessFileArg> arg,
 {
     if (fileInfo->isPath) {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
+            new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+        if (!open_req) {
+            HILOGE("Failed to request heap memory.");
+            return NError(ENOMEM);
+        }
         int ret = uv_fs_open(nullptr, open_req.get(), fileInfo->path.get(), flags, S_IRUSR |
             S_IWUSR | S_IRGRP | S_IWGRP, NULL);
         if (ret < 0) {

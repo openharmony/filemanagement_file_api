@@ -53,7 +53,7 @@ static NError TruncateCore(napi_env env, FileInfo &fileInfo, int64_t truncateLen
 {
     if (fileInfo.isPath) {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
+            new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
@@ -66,7 +66,7 @@ static NError TruncateCore(napi_env env, FileInfo &fileInfo, int64_t truncateLen
         }
         FDGuard fd(ret);
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
+            new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!ftruncate_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
@@ -78,7 +78,7 @@ static NError TruncateCore(napi_env env, FileInfo &fileInfo, int64_t truncateLen
         }
     } else {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
+            new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!ftruncate_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);

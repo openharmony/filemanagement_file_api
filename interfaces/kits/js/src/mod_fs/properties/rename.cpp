@@ -52,7 +52,7 @@ napi_value Rename::Sync(napi_env env, napi_callback_info info)
     }
 
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> rename_req = {
-        new uv_fs_t, CommonFunc::fs_req_cleanup };
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!rename_req) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
@@ -93,7 +93,7 @@ napi_value Rename::Async(napi_env env, napi_callback_info info)
 
     auto cbExec = [opath = string(src.get()), npath = string(dest.get())]() -> NError {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> rename_req = {
-            new uv_fs_t, CommonFunc::fs_req_cleanup };
+            new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!rename_req) {
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
