@@ -207,6 +207,7 @@ napi_value ReadLines::Sync(napi_env env, napi_callback_info info)
     int ret = GetFileSize(path.get(), offset);
     if (ret != 0) {
         HILOGE("Failed to get size of the file");
+        NError(errno).ThrowErr(env);
         return nullptr;
     }
 
