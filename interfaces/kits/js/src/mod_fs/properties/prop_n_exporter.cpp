@@ -104,8 +104,8 @@ struct AccessArgs {
 
 static int UvAccess(const string &path, int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup) *> access_req = {new (std::nothrow) uv_fs_t,
-        CommonFunc::fs_req_cleanup};
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup) *> access_req = {
+        new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup};
     if (!access_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
