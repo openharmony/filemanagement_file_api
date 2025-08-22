@@ -167,7 +167,8 @@ void TransListenerCoreMockTest::SetUpTestCase(void)
     GTEST_LOG_(INFO) << "SetUpTestCase";
     int32_t fd = open(g_path.c_str(), O_CREAT | O_RDWR, 0644);
     if (fd < 0) {
-        EXPECT_TRUE(false);
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(fd);
     UnistdMock::EnableMock();

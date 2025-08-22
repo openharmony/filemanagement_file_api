@@ -43,7 +43,7 @@ struct WatcherInfo {
 };
 
 struct FsWatchEntity {
-    std::shared_ptr<WatcherInfo> watherInfo;
+    std::shared_ptr<WatcherInfo> watcherInfo;
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO

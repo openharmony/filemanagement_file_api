@@ -36,8 +36,8 @@ void StatvFsCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     int32_t fd = open("/data/test/statvfs.txt", O_CREAT | O_RDWR, 0644);
-    if (fd <= 0) {
-        close(fd);
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
         ASSERT_TRUE(false);
     }
     close(fd);
@@ -139,4 +139,4 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_004, testing::ext::Test
     GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetTotalSize_004";
 }
 
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test
