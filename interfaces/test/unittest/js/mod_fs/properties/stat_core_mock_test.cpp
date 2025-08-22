@@ -30,7 +30,7 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock>  uvfs = nullptr;
+    static inline shared_ptr<UvfsMock> uvfs = nullptr;
 };
 
 void StatCoreMockTest::SetUpTestCase(void)
@@ -139,7 +139,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_004, testing::ext::TestSize.L
 
     FileInfo fileinfo;
     fileinfo.path = std::make_unique<char[]>(1);
-    fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
+    fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(1, false);
     fileinfo.isPath = false;
 
     EXPECT_CALL(*uvfs, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));

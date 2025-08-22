@@ -122,5 +122,26 @@ ssize_t read(int fd, void *buf, size_t count)
     return realRead(fd, buf, count);
 }
 
+ssize_t write(int fd, const void *buf, size_t count)
+{
+    if (UnistdMock::IsMockable()) {
+        return UnistdMock::GetMock()->write(fd, buf, count);
+    }
+
+    static ssize_t (*realWrite)(int fd, const void *buf, size_t count) = []() {
+        auto func = (ssize_t(*)(int, const void *, size_t))dlsym(RTLD_NEXT, "write");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real write: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realWrite) {
+        return 0;
+    }
+
+    return realWrite(fd, buf, count);
+}
+
 } // extern "C"
 #endif
