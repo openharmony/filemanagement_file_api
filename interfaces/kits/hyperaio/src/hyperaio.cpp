@@ -63,7 +63,7 @@ static std::string GetAnonyString(const std::string &value)
     if (strLen < INT32_MIN_ID_LENGTH) {
         return tmpStr;
     }
-    
+
     res.append(value, 0, INT32_PLAINTEXT_LENGTH);
     res += tmpStr;
     res.append(value, strLen - INT32_PLAINTEXT_LENGTH, INT32_PLAINTEXT_LENGTH);
@@ -210,7 +210,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         HILOGD("open flags = %{public}d, mode = %{public}u, userData = %{private}lu",
             openInfo->flags, openInfo->mode, openInfo->userData);
         HyperaioTrace trace("open flags:" + std::to_string(openInfo->flags) + "mode:" + std::to_string(openInfo->mode)
-            + "userData:" + getAnonyString(std::to_string(openInfo->userData)));
+            + "userData:" + GetAnonyString(std::to_string(openInfo->userData)));
         count++;
         openInfoVec.push_back(openInfo->userData);
         if (count >= BATCH_SIZE || i == totalReqs - 1) {
@@ -259,7 +259,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         HILOGD("read len = %{public}u, offset = %{public}lu, userData = %{private}lu",
             readInfo->len, readInfo->offset, readInfo->userData);
         HyperaioTrace trace("read len:" + std::to_string(readInfo->len) + "offset:" + std::to_string(readInfo->offset)
-            + "userData:" + getAnonyString(std::to_string(readInfo->userData)));
+            + "userData:" + GetAnonyString(std::to_string(readInfo->userData)));
         count++;
         readInfoVec.push_back(readInfo->userData);
         if (count >= BATCH_SIZE || i == totalReqs - 1) {
@@ -307,8 +307,8 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         io_uring_prep_cancel(sqe, reinterpret_cast<void *>(cancelInfo->targetUserData), 0);
         HILOGD("cancel userData = %{private}lu,  targetUserData = %{private}lu",
             cancelInfo->userData, cancelInfo->targetUserData);
-        HyperaioTrace trace("cancel userData:" + getAnonyString(std::to_string(cancelInfo->userData))
-            + "targetUserData:" + getAnonyString(std::to_string(cancelInfo->targetUserData)));
+        HyperaioTrace trace("cancel userData:" + GetAnonyString(std::to_string(cancelInfo->userData))
+            + "targetUserData:" + GetAnonyString(std::to_string(cancelInfo->targetUserData)));
         count++;
         cancelInfoVec.push_back(cancelInfo->userData);
         if (count >= BATCH_SIZE || i == totalReqs - 1) {
@@ -343,7 +343,7 @@ void HyperAio::HarvestRes()
             HILOGI("cqe failed, cqe->res = %{public}d", cqe->res);
         }
         auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
-        HyperaioTrace trace("harvest: userdata " + getAnonyString(std::to_string(cqe->user_data))
+        HyperaioTrace trace("harvest: userdata " + GetAnonyString(std::to_string(cqe->user_data))
             + " res " + std::to_string(cqe->res) + "flags " + std::to_string(cqe->flags));
         io_uring_cqe_seen(&pImpl_->uring_, cqe);
         if (ioResultCallBack_) {
