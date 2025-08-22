@@ -274,7 +274,7 @@ bool FileWatcher::AddWatcherInfo(const string &fileName, shared_ptr<WatcherInfoA
             bool isSame = false;
             napi_strict_equals(iter->env, iter->nRef.Deref(iter->env).val_, arg->nRef.Deref(arg->env).val_, &isSame);
             if (isSame) {
-                HILOGE("Faile to add watcher, fileName:%{public}s the callback is same", fileName.c_str());
+                HILOGE("Faile to add watcher, fileName:%{private}s the callback is same", fileName.c_str());
                 return false;
             }
         }
