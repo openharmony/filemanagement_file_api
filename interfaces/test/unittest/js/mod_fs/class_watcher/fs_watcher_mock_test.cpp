@@ -112,7 +112,7 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_001, testing::ext::TestSize.Leve
     auto watchEntity = CreateUniquePtr<FsWatchEntity>();
     FsWatcher fsWatcher(std::move(watchEntity));
     std::shared_ptr<WatcherInfo> info = std::make_shared<WatcherInfo>(nullptr);
-    fsWatcher.GetWatchEntity()->watherInfo = info;
+    fsWatcher.GetWatchEntity()->watcherInfo = info;
     // Prepare test condition for FsFileWatcher
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1;       // Valid notifyFd
@@ -165,7 +165,7 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_003, testing::ext::TestSize.Leve
     auto watchEntity = CreateUniquePtr<FsWatchEntity>();
     FsWatcher fsWatcher(std::move(watchEntity));
     std::shared_ptr<WatcherInfo> info = std::make_shared<WatcherInfo>(nullptr);
-    fsWatcher.GetWatchEntity()->watherInfo = info;
+    fsWatcher.GetWatchEntity()->watcherInfo = info;
     // Prepare test condition for FsFileWatcher
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = -1; // Invalid notifyFd
@@ -192,7 +192,7 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Stop_001, testing::ext::TestSize.Level
     auto watchEntity = CreateUniquePtr<FsWatchEntity>();
     FsWatcher fsWatcher(std::move(watchEntity));
     std::shared_ptr<WatcherInfo> info = std::make_shared<WatcherInfo>(nullptr);
-    fsWatcher.GetWatchEntity()->watherInfo = info;
+    fsWatcher.GetWatchEntity()->watcherInfo = info;
     // Prepare test condition for FsFileWatcher
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = 1;
@@ -247,7 +247,7 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Stop_003, testing::ext::TestSize.Level
     auto watchEntity = CreateUniquePtr<FsWatchEntity>();
     FsWatcher fsWatcher(std::move(watchEntity));
     std::shared_ptr<WatcherInfo> info = std::make_shared<WatcherInfo>(nullptr);
-    fsWatcher.GetWatchEntity()->watherInfo = info;
+    fsWatcher.GetWatchEntity()->watcherInfo = info;
     // Prepare test condition for FsFileWatcher
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.notifyFd_ = -1; // Invalid notifyFd

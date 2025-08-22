@@ -101,7 +101,7 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_001, testing::
 
 /**
  * @tc.name: WatcherCoreMockTest_DoCreateWatcher_002
- * @tc.desc: Test function of WatcherCore::DoCreateWatcher interface for FAILURE when InitNotify fails.
+ * @tc.desc: Test function of WatcherCore::DoCreateWatcher interface for FAILURE when TryInitNotify fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

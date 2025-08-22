@@ -33,11 +33,9 @@ constexpr int32_t BUF_SIZE = 1024;
 
 class FsFileWatcher : public Singleton<FsFileWatcher> {
 public:
-    int32_t GetNotifyId();
-    bool InitNotify();
+    bool TryInitNotify();
     int32_t StartNotify(shared_ptr<WatcherInfo> info);
     int32_t StopNotify(shared_ptr<WatcherInfo> info);
-    void GetNotifyEvent();
     void AsyncGetNotifyEvent();
     bool AddWatcherInfo(shared_ptr<WatcherInfo> info);
     bool CheckEventValid(uint32_t event);
@@ -49,6 +47,8 @@ public:
     FsFileWatcher &operator=(const FsFileWatcher &) = delete;
 
 private:
+    bool InitNotify();
+    void GetNotifyEvent();
     uint32_t RemoveWatcherInfo(shared_ptr<WatcherInfo> info);
     void NotifyEvent(const struct inotify_event *event);
     int32_t CloseNotifyFd();
@@ -56,18 +56,19 @@ private:
     int32_t NotifyToWatchNewEvents(const string &fileName, int32_t wd, uint32_t watchEvents);
     void ReadNotifyEvent();
     void ReadNotifyEventLocked();
-    void DestroyTaskThead();
+    void DestroyTaskThread();
+    void WakeupThread();
 
 private:
     static constexpr int32_t pollTimeoutMs = 500;
 
-    mutex taskMutex_;
     mutex readMutex_;
+    mutex notifyMutex_;
 
-    atomic<bool> taskRunning_ = false;
-    thread taskThead_;
+    atomic<bool> taskRunning_ { false };
+    thread taskThread_;
 
-    bool run_ = false;
+    atomic<bool> run_ { false };
     bool reading_ = false;
     bool closed_ = false;
     int32_t notifyFd_ = -1;

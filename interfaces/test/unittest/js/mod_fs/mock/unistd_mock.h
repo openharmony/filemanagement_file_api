@@ -30,6 +30,7 @@ public:
     virtual int access(const char *, int) = 0;
     virtual int close(int) = 0;
     virtual ssize_t read(int, void *, size_t) = 0;
+    virtual ssize_t write(int, const void *, size_t) = 0;
 };
 
 class UnistdMock : public IUnistdMock {
@@ -37,6 +38,7 @@ public:
     MOCK_METHOD(int, access, (const char *, int), (override));
     MOCK_METHOD(int, close, (int), (override));
     MOCK_METHOD(ssize_t, read, (int, void *, size_t), (override));
+    MOCK_METHOD(ssize_t, write, (int, const void *, size_t), (override));
 
 public:
     static std::shared_ptr<UnistdMock> GetMock();

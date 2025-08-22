@@ -28,9 +28,10 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 
-int32_t FsFileWatcher::GetNotifyId()
+bool FsFileWatcher::TryInitNotify()
 {
-    return notifyFd_;
+    lock_guard<mutex> lock(notifyMutex_);
+    return notifyFd_ >= 0 || InitNotify();
 }
 
 bool FsFileWatcher::InitNotify()
@@ -60,7 +61,7 @@ int32_t FsFileWatcher::StartNotify(shared_ptr<WatcherInfo> info)
         return EIO;
     }
 
-    auto [isWatched, wd] = dataCache_.FindWatchedWd(info->fileName, info->events);
+    auto [isWatched, wd, events] = dataCache_.FindWatchedEvents(info->fileName, info->events);
     if (isWatched && wd > 0) {
         info->wd = wd;
         return ERRNO_NOERR;
@@ -68,7 +69,7 @@ int32_t FsFileWatcher::StartNotify(shared_ptr<WatcherInfo> info)
 
     uint32_t watchEvents = 0;
     if (wd != -1) {
-        watchEvents = dataCache_.GetFileEvents(info->fileName) | info->events;
+        watchEvents = events | info->events;
     } else {
         watchEvents = info->events;
     }
@@ -107,6 +108,7 @@ int32_t FsFileWatcher::CloseNotifyFd()
 
     if (!dataCache_.HasWatcherInfo()) {
         run_ = false;
+        WakeupThread();
         closeRet = close(notifyFd_);
         if (closeRet != 0) {
             HILOGE("Failed to stop notify close fd errCode:%{public}d", errno);
@@ -118,7 +120,6 @@ int32_t FsFileWatcher::CloseNotifyFd()
             HILOGE("Failed to close eventfd errCode:%{public}d", errno);
         }
         eventFd_ = -1;
-        DestroyTaskThead();
     }
 
     closed_ = false;
@@ -127,13 +128,12 @@ int32_t FsFileWatcher::CloseNotifyFd()
 
 int32_t FsFileWatcher::CloseNotifyFdLocked()
 {
-    {
-        lock_guard<mutex> lock(readMutex_);
-        closed_ = true;
-        if (reading_) {
-            HILOGE("Close while reading");
-            return ERRNO_NOERR;
-        }
+    scoped_lock lock(readMutex_, notifyMutex_);
+    closed_ = true;
+    if (reading_) {
+        HILOGE("Close while reading");
+        closed_ = false;
+        return ERRNO_NOERR;
     }
     return CloseNotifyFd();
 }
@@ -152,6 +152,7 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
 
     uint32_t remainingEvents = RemoveWatcherInfo(info);
     if (remainingEvents > 0) {
+        // There are still events remaining to be listened for.
         if (access(info->fileName.c_str(), F_OK) == 0) {
             return NotifyToWatchNewEvents(info->fileName, info->wd, remainingEvents);
         }
@@ -159,6 +160,7 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
         return ERRNO_NOERR;
     }
 
+    // No events remain to be listened for, and proceed to the file watch removal process.
     int32_t oldWd = -1;
     {
         lock_guard<mutex> lock(readMutex_);
@@ -173,13 +175,13 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
         int32_t rmErr = errno;
         if (access(info->fileName.c_str(), F_OK) == 0) {
             HILOGE("Failed to stop notify errCode:%{public}d", rmErr);
-            dataCache_.RemoveFileWatcher(info->fileName);
+            dataCache_.RemoveWatchedEvents(info->fileName);
             CloseNotifyFdLocked();
             return rmErr;
         }
     }
 
-    dataCache_.RemoveFileWatcher(info->fileName);
+    dataCache_.RemoveWatchedEvents(info->fileName);
     return CloseNotifyFdLocked();
 }
 
@@ -189,6 +191,7 @@ void FsFileWatcher::ReadNotifyEvent()
     int32_t index = 0;
     char buf[BUF_SIZE] = { 0 };
     struct inotify_event *event = nullptr;
+    int32_t eventSize = static_cast<int32_t>(sizeof(struct inotify_event));
 
     do {
         len = read(notifyFd_, &buf, sizeof(buf));
@@ -200,8 +203,19 @@ void FsFileWatcher::ReadNotifyEvent()
 
     while (index < len) {
         event = reinterpret_cast<inotify_event *>(buf + index);
+        if ((len - index) < eventSize) {
+            HILOGE(
+                "out of bounds access, len:%{public}d, index: %{public}d, inotify: %{public}d", len, index, eventSize);
+            break;
+        }
+        if (event->len > (static_cast<uint32_t>(len - index - eventSize))) {
+            HILOGE("out of bounds access, index: %{public}d, inotify: %{public}d, "
+                   "event :%{public}u, len: %{public}d",
+                index, eventSize, event->len, len);
+            break;
+        }
         NotifyEvent(event);
-        index += sizeof(struct inotify_event) + static_cast<int32_t>(event->len);
+        index += eventSize + static_cast<int32_t>(event->len);
     }
 }
 
@@ -215,11 +229,9 @@ void FsFileWatcher::ReadNotifyEventLocked()
         }
         reading_ = true;
     }
-
     ReadNotifyEvent();
-
     {
-        lock_guard<mutex> lock(readMutex_);
+        scoped_lock lock(readMutex_, notifyMutex_);
         reading_ = false;
         if (closed_) {
             HILOGE("Close after read");
@@ -231,10 +243,9 @@ void FsFileWatcher::ReadNotifyEventLocked()
 
 void FsFileWatcher::AsyncGetNotifyEvent()
 {
-    lock_guard<mutex> lock(taskMutex_);
-    if (!taskRunning_) {
-        taskRunning_ = true;
-        taskThead_ = thread(&FsFileWatcher::GetNotifyEvent, this);
+    bool expected = false;
+    if (taskRunning_.compare_exchange_strong(expected, true)) {
+        taskThread_ = thread(&FsFileWatcher::GetNotifyEvent, this);
     }
 }
 
@@ -271,7 +282,10 @@ void FsFileWatcher::GetNotifyEvent()
             HILOGE("Failed to poll NotifyFd, errno=%{public}d", errno);
             break;
         }
+        // Ignore cases where poll returns 0 (timeout) or EINTR (interrupted system call)
     }
+    DestroyTaskThread();
+    HILOGD("The task has been completed.");
 }
 
 bool FsFileWatcher::AddWatcherInfo(shared_ptr<WatcherInfo> info)
@@ -301,7 +315,7 @@ void FsFileWatcher::NotifyEvent(const struct inotify_event *event)
 
     auto [matched, fileName, watcherInfos] = dataCache_.FindWatcherInfos(event->wd, event->mask);
     if (!matched) {
-        HILOGE("Cannot find matched watcherInfos");
+        // ignore unmatched event
         return;
     }
 
@@ -323,23 +337,27 @@ bool FsFileWatcher::CheckEventValid(uint32_t event)
     }
 }
 
-void FsFileWatcher::DestroyTaskThead()
+void FsFileWatcher::DestroyTaskThread()
 {
-    if (taskThead_.joinable()) {
-        if (taskThead_.get_id() != std::this_thread::get_id()) {
-            taskThead_.join();
-        } else {
-            taskThead_.detach();
-        }
-    }
+    bool expected = true;
+    if (taskRunning_.compare_exchange_strong(expected, false)) {
+        run_ = false;
+        dataCache_.ClearCache();
 
-    {
-        lock_guard<mutex> lock(taskMutex_);
-        if (taskRunning_) {
-            taskRunning_ = false;
-            run_ = false;
+        if (taskThread_.joinable()) {
+            taskThread_.detach();
         }
     }
-    dataCache_.ClearCache();
+}
+
+void FsFileWatcher::WakeupThread()
+{
+    if (taskRunning_ && eventFd_ >= 0 && taskThread_.joinable()) {
+        uint64_t val = 1;
+        auto ret = write(eventFd_, &val, sizeof(val));
+        if (ret != sizeof(val)) {
+            HILOGE("WakeupThread failed! errno: %{public}d", errno);
+        }
+    }
 }
 } // namespace OHOS::FileManagement::ModuleFileIO
