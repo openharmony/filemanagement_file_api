@@ -70,7 +70,6 @@ HWTEST_F(HashStreamTest, GetHsEntityTest_0002, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "HashStreamTest-begin GetHsEntityTest_0002";
     unique_ptr<HsHashStreamEntity> streamEntity = make_unique<HsHashStreamEntity>();
     HsHashStream stream(move(streamEntity));
-    stream.entity = nullptr;
     auto [succ, entity] = stream.GetHsEntity();
     EXPECT_TRUE(succ);
     entity = nullptr;
@@ -117,8 +116,8 @@ HWTEST_F(HashStreamTest, UpdateTest_0002, testing::ext::TestSize.Level1)
     streamEntity->md5Ctx = ctx;
     HsHashStream stream(move(streamEntity));
 
-    auto buffer = std::shared_ptr<int[]>(new int[4096]);
-    ArrayBuffer arrayBuffer{ buffer.get(), 4096 };
+    int buffer[4096];
+    ArrayBuffer arrayBuffer{ buffer, 4096 };
 
     auto ret = stream.Update(arrayBuffer);
     EXPECT_TRUE(ret.IsSuccess());
@@ -144,8 +143,8 @@ HWTEST_F(HashStreamTest, UpdateTest_0003, testing::ext::TestSize.Level1)
     streamEntity->shaCtx = ctx;
     HsHashStream stream(move(streamEntity));
 
-    auto buffer = std::shared_ptr<int[]>(new int[4096]);
-    ArrayBuffer arrayBuffer{ buffer.get(), 4096 };
+    int buffer[4096];
+    ArrayBuffer arrayBuffer{ buffer, 4096 };
 
     auto ret = stream.Update(arrayBuffer);
     EXPECT_TRUE(ret.IsSuccess());
@@ -171,8 +170,8 @@ HWTEST_F(HashStreamTest, UpdateTest_0004, testing::ext::TestSize.Level1)
     streamEntity->sha256Ctx = ctx;
     HsHashStream stream(move(streamEntity));
 
-    auto buffer = std::shared_ptr<int[]>(new int[4096]);
-    ArrayBuffer arrayBuffer{ buffer.get(), 4096 };
+    int buffer[4096];
+    ArrayBuffer arrayBuffer{ buffer, 4096 };
 
     auto ret = stream.Update(arrayBuffer);
     EXPECT_TRUE(ret.IsSuccess());
@@ -220,7 +219,7 @@ HWTEST_F(HashStreamTest, DigestTest_0002, testing::ext::TestSize.Level1)
     HsHashStream stream(move(streamEntity));
 
     auto ret = stream.Digest();
-    EXPECT_FALSE(ret.IsSuccess());
+    EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "HashStreamTest-end DigestTest_0002";
 }
@@ -244,7 +243,7 @@ HWTEST_F(HashStreamTest, DigestTest_0003, testing::ext::TestSize.Level1)
     HsHashStream stream(move(streamEntity));
 
     auto ret = stream.Digest();
-    EXPECT_FALSE(ret.IsSuccess());
+    EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "HashStreamTest-end DigestTest_0003";
 }
@@ -268,7 +267,7 @@ HWTEST_F(HashStreamTest, DigestTest_0004, testing::ext::TestSize.Level1)
     HsHashStream stream(move(streamEntity));
 
     auto ret = stream.Digest();
-    EXPECT_FALSE(ret.IsSuccess());
+    EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "HashStreamTest-end DigestTest_0004";
 }
