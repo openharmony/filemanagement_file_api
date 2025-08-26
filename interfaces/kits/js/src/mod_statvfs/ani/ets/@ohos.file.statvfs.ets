@@ -78,7 +78,7 @@ export default statfs;
 class StatvfsImpl {
 
   static {
-    loadLibrary("ani_file_statvfs");
+    loadLibraryWithPermissionCheck("ani_file_statvfs", "@ohos.file.statvfs");
   }
 
   static native getFreeSizeSync(path: string): number;

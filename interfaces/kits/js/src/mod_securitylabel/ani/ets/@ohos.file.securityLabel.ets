@@ -78,7 +78,7 @@ export default securityLabel;
 class SecurityLabelImpl {
 
   static {
-    loadLibrary("ani_file_securitylabel");
+    loadLibraryWithPermissionCheck("ani_file_securitylabel", "@ohos.file.securityLabel");
   }
 
   static native setSecurityLabelSync(path: string, type: securityLabel.DataLevel): void;
