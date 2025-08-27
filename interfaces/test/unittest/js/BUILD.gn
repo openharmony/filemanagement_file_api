@@ -131,6 +131,8 @@ ohos_unittest("ani_file_fs_test") {
   ]
 
   defines = [ "private=public" ]
+
+  use_exceptions = true
 }
 
 ohos_unittest("ani_file_fs_mock_test") {
@@ -189,9 +191,11 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/stat_core_mock_test.cpp",
     "mod_fs/properties/symlink_core_mock_test.cpp",
     "mod_fs/properties/trans_listener_mock_test.cpp",
+    "mod_fs/properties/truncate_core_mock_test.cpp",
     "mod_fs/properties/unlink_core_mock_test.cpp",
     "mod_fs/properties/utimes_core_mock_test.cpp",
     "mod_fs/properties/watcher_core_mock_test.cpp",
+    "mod_fs/properties/write_core_mock_test.cpp",
     "mod_fs/properties/xattr_core_mock_test.cpp",
   ]
 
@@ -223,6 +227,8 @@ ohos_unittest("ani_file_fs_mock_test") {
     "ENABLE_DISTRIBUTED_FILE_MOCK",
     "private=public",
   ]
+
+  use_exceptions = true
 }
 
 ohos_unittest("ani_file_hash_test") {
@@ -250,6 +256,8 @@ ohos_unittest("ani_file_hash_test") {
     "hilog:libhilog",
     "libuv:uv",
   ]
+
+  use_exceptions = true
 }
 
 ohos_unittest("ani_file_securitylabel_test") {
@@ -277,6 +285,8 @@ ohos_unittest("ani_file_securitylabel_test") {
     "hilog:libhilog",
     "libuv:uv",
   ]
+
+  use_exceptions = true
 }
 
 ohos_unittest("ani_file_statvfs_test") {
@@ -304,6 +314,8 @@ ohos_unittest("ani_file_statvfs_test") {
     "hilog:libhilog",
     "libuv:uv",
   ]
+
+  use_exceptions = true
 }
 
 ohos_unittest("napi_file_fs_test") {

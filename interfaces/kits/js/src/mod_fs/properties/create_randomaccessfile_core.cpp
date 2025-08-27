@@ -34,7 +34,6 @@ static tuple<bool, FileInfo, int> ParseStringToFileInfo(const string &path)
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(sfd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
-        close(sfd);
         return { false, FileInfo { false, nullptr, nullptr }, ENOMEM};
     }
     size_t length = path.length() + 1;
