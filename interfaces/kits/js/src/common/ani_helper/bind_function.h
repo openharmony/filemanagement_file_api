@@ -52,6 +52,33 @@ ANI_EXPORT ani_status BindClass(ani_env *env, const char *className, const std::
 }
 
 template <std::size_t N>
+ANI_EXPORT ani_status BindClassStaticMethods(ani_env *env, const char *className,
+                                             const std::array<ani_native_function, N> &methods)
+{
+    if (env == nullptr) {
+        HILOGE("Invalid parameter env");
+        return ANI_INVALID_ARGS;
+    }
+
+    if (className == nullptr) {
+        HILOGE("Invalid parameter className");
+        return ANI_INVALID_ARGS;
+    }
+
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        HILOGE("Cannot find class '%{private}s'", className);
+        return ANI_NOT_FOUND;
+    }
+
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
+        HILOGE("Cannot bind static native methods to '%{private}s'", className);
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
+template <std::size_t N>
 ANI_EXPORT ani_status BindNamespace(
     ani_env *env, const char *namespaceStr, const std::array<ani_native_function, N> &methods)
 {

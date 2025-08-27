@@ -236,7 +236,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "utimes", nullptr, reinterpret_cast<void *>(UtimesAni::Utimes) },
         ani_native_function { "writeSync", nullptr, reinterpret_cast<void *>(WriteAni::WriteSync) },
     };
-    return BindClass(env, classDesc, methods);
+    return BindClassStaticMethods(env, classDesc, methods);
 }
 
 static ani_status DoBindMethods(ani_env *env)
