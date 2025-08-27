@@ -33,8 +33,6 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-static thread_local shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler;
-
 class AniHelper {
 public:
     template <typename T>
@@ -183,17 +181,10 @@ public:
             return false;
         }
 
-        if (mainHandler == nullptr) {
-            shared_ptr<OHOS::AppExecFwk::EventRunner> runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
-            if (!runner) {
-                HILOGE("get main event runner failed!");
-                return false;
-            }
-            mainHandler = CreateSharedPtr<OHOS::AppExecFwk::EventHandler>(runner);
-            if (mainHandler == nullptr) {
-                HILOGE("Failed to request heap memory.");
-                return false;
-            }
+        auto &mainHandler = GetMainHandler();
+        if (!mainHandler) {
+            HILOGE("mainHandler is not initialized!");
+            return false;
         }
         bool succ = mainHandler->PostTask(func, "", 0, OHOS::AppExecFwk::EventQueue::Priority::HIGH, {});
         if (!succ) {
@@ -201,6 +192,23 @@ public:
             return false;
         }
         return true;
+    }
+
+private:
+    static std::shared_ptr<OHOS::AppExecFwk::EventHandler> &GetMainHandler()
+    {
+        static std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler =
+            []() -> std::shared_ptr<OHOS::AppExecFwk::EventHandler> {
+            auto runner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
+            if (runner) {
+                return CreateSharedPtr<OHOS::AppExecFwk::EventHandler>(runner);
+            } else {
+                HILOGE("Get main event runner failed when initializing mainHandler!");
+                return nullptr;
+            }
+        }();
+
+        return mainHandler;
     }
 };
 
