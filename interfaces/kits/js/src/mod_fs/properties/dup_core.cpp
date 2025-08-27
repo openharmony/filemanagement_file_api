@@ -58,7 +58,7 @@ FsResult<FsFile *> DupCore::DoDup(const int32_t &fd)
     }
     string path = "/proc/self/fd/" + to_string(dstFd);
     int ret = uv_fs_readlink(nullptr, readLinkReq.get(), path.c_str(), nullptr);
-    if (ret < 0) {
+    if (ret < 0 || readLinkReq->ptr == nullptr) {
         HILOGE("Failed to readlink fd, ret: %{public}d", ret);
         close(dstFd);
         return FsResult<FsFile *>::Error(ret);

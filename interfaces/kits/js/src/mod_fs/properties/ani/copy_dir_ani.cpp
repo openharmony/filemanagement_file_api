@@ -56,7 +56,7 @@ static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ConflictFiles
     }
 
     auto [succDest, dest] = TypeConverter::ToAniString(env, files.destFiles);
-    if (!succSrc) {
+    if (!succDest) {
         HILOGE("Convert ConflictFiles destFiles to ani string failed!");
         return { false, nullptr };
     }
