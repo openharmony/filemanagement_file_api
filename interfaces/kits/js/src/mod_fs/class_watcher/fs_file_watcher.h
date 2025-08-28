@@ -61,6 +61,7 @@ private:
 
 private:
     static constexpr int32_t pollTimeoutMs = 500;
+    static constexpr uint64_t wakeupSignal = 1;
 
     mutex readMutex_;
     mutex notifyMutex_;
@@ -69,8 +70,8 @@ private:
     thread taskThread_;
 
     atomic<bool> run_ { false };
-    bool reading_ = false;
-    bool closed_ = false;
+    atomic<bool> reading_ { false };
+    atomic<bool> closed_ { false };
     int32_t notifyFd_ = -1;
     int32_t eventFd_ = -1;
     WatcherDataCache dataCache_;

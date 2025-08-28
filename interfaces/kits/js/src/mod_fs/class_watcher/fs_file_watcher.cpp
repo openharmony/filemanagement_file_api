@@ -120,6 +120,7 @@ int32_t FsFileWatcher::CloseNotifyFd()
             HILOGE("Failed to close eventfd errCode:%{public}d", errno);
         }
         eventFd_ = -1;
+        HILOGD("NotifyFd and eventFd have been closed");
     }
 
     closed_ = false;
@@ -182,16 +183,18 @@ int32_t FsFileWatcher::StopNotify(shared_ptr<WatcherInfo> info)
     }
 
     dataCache_.RemoveWatchedEvents(info->fileName);
-    return CloseNotifyFdLocked();
+    auto ret = CloseNotifyFdLocked();
+    HILOGD("Close notifyFd and eventFd ret: %{public}d", ret);
+    return ret;
 }
 
 void FsFileWatcher::ReadNotifyEvent()
 {
     int32_t len = 0;
-    int32_t index = 0;
+    uint32_t index = 0;
     char buf[BUF_SIZE] = { 0 };
     struct inotify_event *event = nullptr;
-    int32_t eventSize = static_cast<int32_t>(sizeof(struct inotify_event));
+    uint32_t eventSize = static_cast<uint32_t>(sizeof(struct inotify_event));
 
     do {
         len = read(notifyFd_, &buf, sizeof(buf));
@@ -201,21 +204,25 @@ void FsFileWatcher::ReadNotifyEvent()
         }
     } while (len < 0);
 
-    while (index < len) {
+    while (len > 0 && index < len) {
         event = reinterpret_cast<inotify_event *>(buf + index);
+
+        // Incomplete data: remaining bytes less than event struct size
         if ((len - index) < eventSize) {
             HILOGE(
-                "out of bounds access, len:%{public}d, index: %{public}d, inotify: %{public}d", len, index, eventSize);
+                "Out of bounds access, len:%{public}d, index: %{public}u, inotify: %{public}u", len, index, eventSize);
             break;
         }
-        if (event->len > (static_cast<uint32_t>(len - index - eventSize))) {
-            HILOGE("out of bounds access, index: %{public}d, inotify: %{public}d, "
-                   "event :%{public}u, len: %{public}d",
+
+        // Incomplete data: remaining bytes less than (event struct size + event->len)
+        if (event->len > len - index - eventSize) {
+            HILOGE("Out of bounds access, index: %{public}u, inotify: %{public}u, event :%{public}u, len: %{public}d",
                 index, eventSize, event->len, len);
             break;
         }
+
         NotifyEvent(event);
-        index += eventSize + static_cast<int32_t>(event->len);
+        index += eventSize + event->len;
     }
 }
 
@@ -316,6 +323,7 @@ void FsFileWatcher::NotifyEvent(const struct inotify_event *event)
     auto [matched, fileName, watcherInfos] = dataCache_.FindWatcherInfos(event->wd, event->mask);
     if (!matched) {
         // ignore unmatched event
+        HILOGD("Cannot find matched watcherInfos");
         return;
     }
 
@@ -353,11 +361,13 @@ void FsFileWatcher::DestroyTaskThread()
 void FsFileWatcher::WakeupThread()
 {
     if (taskRunning_ && eventFd_ >= 0 && taskThread_.joinable()) {
-        uint64_t val = 1;
-        auto ret = write(eventFd_, &val, sizeof(val));
-        if (ret != sizeof(val)) {
-            HILOGE("WakeupThread failed! errno: %{public}d", errno);
+        ssize_t ret = write(eventFd_, &wakeupSignal, sizeof(wakeupSignal));
+        if (ret != sizeof(wakeupSignal)) {
+            HILOGE("WakeupThread failed! write ret: %{public}zd, errno: %{public}d", ret, errno);
         }
+    } else {
+        HILOGE("Cannot wakeup thread! taskRunning: %{public}d, eventFd_: %{public}d, taskThread joinable: %{public}d",
+            static_cast<int>(taskRunning_), eventFd_, static_cast<int>(taskThread_.joinable()));
     }
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

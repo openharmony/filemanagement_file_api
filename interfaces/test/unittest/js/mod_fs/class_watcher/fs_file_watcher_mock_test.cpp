@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "eventfd_mock.h"
 #include "filemgmt_libhilog.h"
@@ -44,6 +45,7 @@ public:
 void FsFileWatcherMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "FsFileWatcherMockTest");
     EventfdMock::EnableMock();
     InotifyMock::EnableMock();
     PollMock::EnableMock();
@@ -87,7 +89,7 @@ inline const int32_t UNINITIALIZED_EVENTFD = -1;
 
 /**
  * @tc.name: FsFileWatcherMockTest_TryInitNotify_001
- * @tc.desc: Test function of FsFileWatcher::TryInitNotify interface SUCCESS When notifyFd_ has initialed.
+ * @tc.desc: Test function of FsFileWatcher::TryInitNotify interface for SUCCESS When notifyFd_ has initialed.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 0
@@ -1133,7 +1135,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_ReadNotifyEvent_004, testi
 
 /**
  * @tc.name: FsFileWatcherMockTest_ReadNotifyEvent_005
- * @tc.desc: Test function of FsFileWatcher::ReadNotifyEvent interface for FAILURE when read incomplete event struct.
+ * @tc.desc: Test function of FsFileWatcher::ReadNotifyEvent interface for FAILURE when read incomplete event data.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 0
@@ -1464,7 +1466,6 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_DestroyTaskThread_002, tes
     if (watcher.taskThread_.joinable()) {
         watcher.taskThread_.join();
     }
-    watcher.taskThread_ = std::thread();
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_DestroyTaskThread_002";
 }
 
@@ -1492,7 +1493,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_DestroyTaskThread_003, tes
 
 /**
  * @tc.name: FsFileWatcherMockTest_WakeupThread_001
- * @tc.desc: Test function of FsFileWatcher::WakeupThread interface SUCCESS.
+ * @tc.desc: Test function of FsFileWatcher::WakeupThread interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -1532,13 +1533,12 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_WakeupThread_001, testing:
     if (watcher.taskThread_.joinable()) {
         watcher.taskThread_.join();
     }
-    watcher.taskThread_ = std::thread();
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_WakeupThread_001";
 }
 
 /**
  * @tc.name: FsFileWatcherMockTest_WakeupThread_002
- * @tc.desc: Test function of FsFileWatcher::WakeupThread interface FAILURE when taskRunning_ is false.
+ * @tc.desc: Test function of FsFileWatcher::WakeupThread interface for FAILURE when taskRunning_ is false.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -1564,14 +1564,14 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_WakeupThread_002, testing:
 
 /**
  * @tc.name: FsFileWatcherMockTest_WakeupThread_003
- * @tc.desc: Test function of FsFileWatcher::WakeupThread interface FAILURE when eventFd_ < 0.
+ * @tc.desc: Test function of FsFileWatcher::WakeupThread interface for FAILURE when eventFd_ < 0.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
 HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_WakeupThread_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_WakeupThread_002";
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_WakeupThread_003";
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.taskRunning_ = true;
@@ -1585,19 +1585,19 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_WakeupThread_003, testing:
     testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     EXPECT_TRUE(watcher.taskRunning_);
     EXPECT_EQ(watcher.eventFd_, UNINITIALIZED_EVENTFD);
-    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_WakeupThread_002";
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_WakeupThread_003";
 }
 
 /**
  * @tc.name: FsFileWatcherMockTest_WakeupThread_004
- * @tc.desc: Test function of FsFileWatcher::WakeupThread interface FAILURE when eventFd_ < 0.
+ * @tc.desc: Test function of FsFileWatcher::WakeupThread interface for FAILURE when taskThread_ is not joinable.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
 HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_WakeupThread_004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_WakeupThread_002";
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_WakeupThread_004";
     // Prepare test condition
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.taskRunning_ = true;
@@ -1612,19 +1612,19 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_WakeupThread_004, testing:
     testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     EXPECT_TRUE(watcher.taskRunning_);
     EXPECT_EQ(watcher.eventFd_, INITIALIZED_EVENTFD);
-    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_WakeupThread_002";
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_WakeupThread_004";
 }
 
 /**
  * @tc.name: FsFileWatcherMockTest_WakeupThread_005
- * @tc.desc: Test function of FsFileWatcher::WakeupThread interface SUCCESS.
+ * @tc.desc: Test function of FsFileWatcher::WakeupThread interface for FAILURE when write fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
 HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_WakeupThread_005, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_WakeupThread_001";
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-begin FsFileWatcherMockTest_WakeupThread_005";
     // Prepare test condition
     std::atomic<bool> keepAlive(false);
     std::thread mockThread([&]() {
@@ -1658,8 +1658,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_WakeupThread_005, testing:
     if (watcher.taskThread_.joinable()) {
         watcher.taskThread_.join();
     }
-    watcher.taskThread_ = std::thread();
-    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_WakeupThread_001";
+    GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_WakeupThread_005";
 }
 
 /**
@@ -1711,7 +1710,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_CloseNotifyFdLocked_002, t
 
 /**
  * @tc.name: FsFileWatcherMockTest_CloseNotifyFd_001
- * @tc.desc: Test function of FsFileWatcher::CloseNotifyFd interface SUCCESS when HasWatcherInfo is true.
+ * @tc.desc: Test function of FsFileWatcher::CloseNotifyFd interface for SUCCESS when HasWatcherInfo is true.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -1748,7 +1747,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_CloseNotifyFd_001, testing
 
 /**
  * @tc.name: FsFileWatcherMockTest_CloseNotifyFd_002
- * @tc.desc: Test function of FsFileWatcher::CloseNotifyFd interface SUCCESS when HasWatcherInfo is false.
+ * @tc.desc: Test function of FsFileWatcher::CloseNotifyFd interface for SUCCESS when HasWatcherInfo is false.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -1780,7 +1779,8 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_CloseNotifyFd_002, testing
 
 /**
  * @tc.name: FsFileWatcherMockTest_CloseNotifyFd_003
- * @tc.desc: Test function of FsFileWatcher::CloseNotifyFd interface FAILURE when close notifyFd_ and eventFd_ fails.
+ * @tc.desc: Test function of FsFileWatcher::CloseNotifyFd interface for FAILURE when close notifyFd_ and eventFd_
+ * fails.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -1813,7 +1813,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_CloseNotifyFd_003, testing
 
 /**
  * @tc.name: FsFileWatcherMockTest_AsyncGetNotifyEvent_001
- * @tc.desc: Test function of FsFileWatcher::AsyncGetNotifyEvent interface SUCCESS.
+ * @tc.desc: Test function of FsFileWatcher::AsyncGetNotifyEvent interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -1830,6 +1830,9 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_AsyncGetNotifyEvent_001, t
     // Verify results
     EXPECT_TRUE(watcher.run_);
     EXPECT_TRUE(watcher.taskRunning_);
+    if (watcher.taskThread_.joinable()) {
+        watcher.taskThread_.join();
+    }
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_AsyncGetNotifyEvent_001";
 }
 

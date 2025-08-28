@@ -17,6 +17,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "eventfd_mock.h"
 #include "filemgmt_libhilog.h"
@@ -41,6 +42,7 @@ public:
 void WatcherCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "WatcherCoreMockTest");
     EventfdMock::EnableMock();
     InotifyMock::EnableMock();
 }

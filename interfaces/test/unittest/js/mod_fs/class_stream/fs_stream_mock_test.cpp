@@ -32,6 +32,10 @@ public:
     {
         CMock::EnableMock();
         int32_t fd = open(g_streamFilePath.c_str(), CREATE | O_RDWR, 0644);
+        if (fd < 0) {
+            GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+            ASSERT_TRUE(false);
+        }
         close(fd);
     };
     static void TearDownTestCase()

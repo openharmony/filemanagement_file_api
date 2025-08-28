@@ -17,6 +17,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -42,6 +43,7 @@ public:
 void FsWatcherMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "FsWatcherMockTest");
     InotifyMock::EnableMock();
     UnistdMock::EnableMock();
 }

@@ -15,26 +15,131 @@
 
 #include "system_mock.h"
 
-using namespace OHOS::FileManagement::ModuleFileIO;
+#include <dlfcn.h>
 
+namespace OHOS {
+namespace FileManagement {
+namespace ModuleFileIO {
+namespace Test {
+
+thread_local std::shared_ptr<SystemMock> SystemMock::systemMock = nullptr;
+thread_local bool SystemMock::mockable = false;
+
+std::shared_ptr<SystemMock> SystemMock::GetMock()
+{
+    if (systemMock == nullptr) {
+        systemMock = std::make_shared<SystemMock>();
+    }
+    return systemMock;
+}
+
+void SystemMock::EnableMock()
+{
+    mockable = true;
+}
+
+void SystemMock::DisableMock()
+{
+    systemMock = nullptr;
+    mockable = false;
+}
+
+bool SystemMock::IsMockable()
+{
+    return mockable;
+}
+
+} // namespace Test
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS
+
+#ifdef __cplusplus
 extern "C" {
+using namespace OHOS::FileManagement::ModuleFileIO::Test;
+
 int setxattr(const char *path, const char *name, const void *value, size_t size, int flags)
 {
-    return System::ins->setxattr(path, name, value, size, flags);
+    if (SystemMock::IsMockable()) {
+        return SystemMock::GetMock()->setxattr(path, name, value, size, flags);
+    }
+
+    static int (*realSetxattr)(const char *, const char *, const void *, size_t, int) = []() {
+        auto func = (int (*)(const char *, const char *, const void *, size_t, int))dlsym(RTLD_NEXT, "setxattr");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real setxattr: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realSetxattr) {
+        return -1;
+    }
+
+    return realSetxattr(path, name, value, size, flags);
 }
 
 ssize_t getxattr(const char *path, const char *name, void *value, size_t size)
 {
-    return System::ins->getxattr(path, name, value, size);
+    if (SystemMock::IsMockable()) {
+        return SystemMock::GetMock()->getxattr(path, name, value, size);
+    }
+
+    static int (*realGetxattr)(const char *, const char *, void *, size_t) = []() {
+        auto func = (int (*)(const char *, const char *, void *, size_t))dlsym(RTLD_NEXT, "getxattr");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real getxattr: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realGetxattr) {
+        return -1;
+    }
+
+    return realGetxattr(path, name, value, size);
 }
 
 int fgetxattr(int filedes, const char *name, void *value, size_t size)
 {
-    return System::ins->fgetxattr(filedes, name, value, size);
+    if (SystemMock::IsMockable()) {
+        return SystemMock::GetMock()->fgetxattr(filedes, name, value, size);
+    }
+
+    static int (*realFgetxattr)(int, const char *, void *, size_t) = []() {
+        auto func = (int (*)(int, const char *, void *, size_t))dlsym(RTLD_NEXT, "fgetxattr");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real fgetxattr: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realFgetxattr) {
+        return -1;
+    }
+
+    return realFgetxattr(filedes, name, value, size);
 }
 
 int flock(int fd, int operation)
 {
-    return System::ins->flock(fd, operation);
+    if (SystemMock::IsMockable()) {
+        return SystemMock::GetMock()->flock(fd, operation);
+    }
+
+    static int (*realFlock)(int, int) = []() {
+        auto func = (int (*)(int, int))dlsym(RTLD_NEXT, "flock");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real flock: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realFlock) {
+        return -1;
+    }
+
+    return realFlock(fd, operation);
 }
-}
+} // extern "C"
+#endif

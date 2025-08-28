@@ -62,7 +62,7 @@ inline const uint32_t EXPECTED_EVENTS = IN_ACCESS | IN_CREATE;
 
 /**
  * @tc.name: WatcherDataCacheTest_RemoveWatchedEvents_001
- * @tc.desc: Test function of WatcherDataCache::RemoveWatchedEvents SUCCESS.
+ * @tc.desc: Test function of WatcherDataCache::RemoveWatchedEvents for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 0
@@ -72,7 +72,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_RemoveWatchedEvents_001, tes
     GTEST_LOG_(INFO) << "WatcherDataCacheTest-begin WatcherDataCacheTest_RemoveWatchedEvents_001";
     // Prepare test condition
     WatcherDataCache cache;
-    auto fileName = "WatcherDataCacheTest_RemoveWatchedEvents_001";
+    auto fileName = "fakePath/WatcherDataCacheTest_RemoveWatchedEvents_001";
     cache.wdFileNameCache_[fileName] = std::make_pair(EXPECTED_WD, IN_ACCESS);
     // Do testing
     cache.RemoveWatchedEvents(fileName);
@@ -83,7 +83,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_RemoveWatchedEvents_001, tes
 
 /**
  * @tc.name: WatcherDataCacheTest_RemoveWatchedEvents_002
- * @tc.desc: Test function of WatcherDataCache::RemoveWatchedEvents SUCCESS when key(fileName) not exist.
+ * @tc.desc: Test function of WatcherDataCache::RemoveWatchedEvents for SUCCESS when key(fileName) not exist.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 0
@@ -93,7 +93,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_RemoveWatchedEvents_002, tes
     GTEST_LOG_(INFO) << "WatcherDataCacheTest-begin WatcherDataCacheTest_RemoveWatchedEvents_002";
     // Prepare test condition
     WatcherDataCache cache;
-    auto fileName = "WatcherDataCacheTest_RemoveWatchedEvents_002";
+    auto fileName = "fakePath/WatcherDataCacheTest_RemoveWatchedEvents_002";
     cache.wdFileNameCache_[fileName] = std::make_pair(EXPECTED_WD, IN_ACCESS);
     // Do testing
     cache.RemoveWatchedEvents("fileName_not_exist");
@@ -105,7 +105,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_RemoveWatchedEvents_002, tes
 
 /**
  * @tc.name: WatcherDataCacheTest_UpdateWatchedEvents_001
- * @tc.desc: Test function of WatcherDataCache::UpdateWatchedEvents SUCCESS when key(fileName) exist.
+ * @tc.desc: Test function of WatcherDataCache::UpdateWatchedEvents for SUCCESS when key(fileName) exist.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 0
@@ -115,7 +115,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_UpdateWatchedEvents_001, tes
     GTEST_LOG_(INFO) << "WatcherDataCacheTest-begin WatcherDataCacheTest_UpdateWatchedEvents_001";
     // Prepare test condition
     WatcherDataCache cache;
-    auto fileName = "WatcherDataCacheTest_UpdateWatchedEvents_001";
+    auto fileName = "fakePath/WatcherDataCacheTest_UpdateWatchedEvents_001";
     cache.wdFileNameCache_[fileName] = std::make_pair(UNEXPECTED_WD, IN_DELETE);
     // Do testing
     cache.UpdateWatchedEvents(fileName, EXPECTED_WD, EXPECTED_EVENTS);
@@ -129,18 +129,17 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_UpdateWatchedEvents_001, tes
 
 /**
  * @tc.name: WatcherDataCacheTest_UpdateWatchedEvents_002
- * @tc.desc: Test function of WatcherDataCache::UpdateWatchedEvents SUCCESS when key(fileName) not exist.
+ * @tc.desc: Test function of WatcherDataCache::UpdateWatchedEvents for SUCCESS when key(fileName) not exist.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 0
  */
 HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_UpdateWatchedEvents_002, testing::ext::TestSize.Level0)
 {
-    GTEST_LOG_(INFO) << "WatcherDataCacheTest-begin "
-                        "WatcherWatcherDataCacheTest_UpdateWatchedEvents_002DataCacheTest_UpdateWatchedEvents_001";
+    GTEST_LOG_(INFO) << "WatcherDataCacheTest-begin WatcherDataCacheTest_UpdateWatchedEvents_002";
     // Prepare test condition
     WatcherDataCache cache;
-    auto fileName = "WatcherDataCacheTest_UpdateWatchedEvents_002";
+    auto fileName = "fakePath/WatcherDataCacheTest_UpdateWatchedEvents_002";
     // Do testing
     cache.UpdateWatchedEvents(fileName, EXPECTED_WD, EXPECTED_EVENTS);
     // Verify results
@@ -153,7 +152,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_UpdateWatchedEvents_002, tes
 
 /**
  * @tc.name: WatcherDataCacheTest_FindWatchedEvents_001
- * @tc.desc: Test function of WatcherDataCache::FindWatchedEvents SUCCESS
+ * @tc.desc: Test function of WatcherDataCache::FindWatchedEvents for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 0
@@ -163,7 +162,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_FindWatchedEvents_001, testi
     GTEST_LOG_(INFO) << "WatcherDataCacheTest-begin WatcherDataCacheTest_FindWatchedEvents_001";
     // Prepare test condition
     WatcherDataCache cache;
-    auto fileName = "WatcherDataCacheTest_FindWatchedEvents_001";
+    auto fileName = "fakePath/WatcherDataCacheTest_FindWatchedEvents_001";
     cache.wdFileNameCache_[fileName] = std::make_pair(EXPECTED_WD, EXPECTED_EVENTS);
     // Do testing
     auto [isWatched, wd, events] = cache.FindWatchedEvents(fileName, IN_ACCESS);
@@ -177,7 +176,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_FindWatchedEvents_001, testi
 
 /**
  * @tc.name: WatcherDataCacheTest_FindWatchedEvents_002
- * @tc.desc: Test function of WatcherDataCache::FindWatchedEvents FAILURE when key(fileName) not exist
+ * @tc.desc: Test function of WatcherDataCache::FindWatchedEvents for FAILURE when key(fileName) not exist.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 0
@@ -187,7 +186,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_FindWatchedEvents_002, testi
     GTEST_LOG_(INFO) << "WatcherDataCacheTest-begin WatcherDataCacheTest_FindWatchedEvents_002";
     // Prepare test condition
     WatcherDataCache cache;
-    auto fileName = "WatcherDataCacheTest_FindWatchedEvents_002";
+    auto fileName = "fakePath/WatcherDataCacheTest_FindWatchedEvents_002";
     // Do testing
     auto [isWatched, wd, events] = cache.FindWatchedEvents(fileName, IN_ACCESS);
     // Verify results
@@ -200,7 +199,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_FindWatchedEvents_002, testi
 
 /**
  * @tc.name: WatcherDataCacheTest_FindWatchedEvents_003
- * @tc.desc: Test function of WatcherDataCache::FindWatchedEvents FAILURE when event unmatched
+ * @tc.desc: Test function of WatcherDataCache::FindWatchedEvents for FAILURE when event unmatched.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 0
@@ -210,7 +209,7 @@ HWTEST_F(WatcherDataCacheTest, WatcherDataCacheTest_FindWatchedEvents_003, testi
     GTEST_LOG_(INFO) << "WatcherDataCacheTest-begin WatcherDataCacheTest_FindWatchedEvents_003";
     // Prepare test condition
     WatcherDataCache cache;
-    auto fileName = "WatcherDataCacheTest_FindWatchedEvents_003";
+    auto fileName = "fakePath/WatcherDataCacheTest_FindWatchedEvents_003";
     cache.wdFileNameCache_[fileName] = std::make_pair(EXPECTED_WD, IN_DELETE);
     // Do testing
     auto [isWatched, wd, events] = cache.FindWatchedEvents(fileName, IN_ACCESS);

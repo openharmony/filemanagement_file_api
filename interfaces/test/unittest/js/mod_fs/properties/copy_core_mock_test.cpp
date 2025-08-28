@@ -17,7 +17,6 @@
 #include <filesystem>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <gtest/gtest.h>
 
 #include "copy_core.h"
 #include "inotify_mock.h"
@@ -46,11 +45,13 @@ public:
     static const string destFile;
 
 private:
+    // rwxr-xr-x
     static constexpr mode_t permission0755 = 0755;
+    // rw-r--r--
     static constexpr mode_t permission0644 = 0644;
 };
 
-const string CopyCoreMockTest::testDir = "/data/test";
+const string CopyCoreMockTest::testDir = "/data/test/CopyCoreMockTest";
 const string CopyCoreMockTest::srcDir = testDir + "/src";
 const string CopyCoreMockTest::destDir = testDir + "/dest";
 const string CopyCoreMockTest::srcFile = srcDir + "/src.txt";
@@ -64,7 +65,8 @@ void CopyCoreMockTest::SetUpTestCase(void)
     mkdir(destDir.c_str(), permission0755);
     int32_t fd = open(srcFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
-        EXPECT_TRUE(false);
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(fd);
     uvMock = std::make_shared<UvfsMock>();
@@ -170,7 +172,8 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_001, testing::ext::TestSi
     string subFile = subDir + "/sub_file.txt";
     int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
-        EXPECT_TRUE(false);
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(fd);
 
@@ -208,7 +211,8 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_002, testing::ext::TestSi
     string subFile = subDir + "/sub_file.txt";
     int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
-        EXPECT_TRUE(false);
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(fd);
 
@@ -247,8 +251,8 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_003, testing::ext::TestSi
     string subFile = subDir + "/sub_file.txt";
     int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
-        GTEST_LOG_(INFO) << "Open test file failed! ret: " << fd << ", errno: " << errno;
-        EXPECT_TRUE(false);
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(fd);
 
