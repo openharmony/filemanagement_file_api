@@ -226,7 +226,7 @@ static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "ECONNECTIONFAIL", ECONNECTIONFAIL },
     { "ECONNECTIONABORT", ECONNECTIONABORT },
     { "ECANCELED", ECANCELED },
-    { "ECONNABORTED", ECONNECTIONABORT },
+    { "ECONNABORTED", ECONNABORTED },
 };
 
 static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
