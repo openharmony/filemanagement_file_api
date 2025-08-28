@@ -38,7 +38,7 @@ ani_string MkdtempAni::MkdtempSync(ani_env *env, [[maybe_unused]] ani_class claz
 
     auto ret = MkdtempCore::DoMkdtemp(prefixPath);
     if (!ret.IsSuccess()) {
-        HILOGE("Mkdtemp faild");
+        HILOGE("Mkdtemp failed");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
         return nullptr;

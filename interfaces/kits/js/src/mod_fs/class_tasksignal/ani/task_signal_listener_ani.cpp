@@ -32,6 +32,9 @@ bool TaskSignalListenerAni::CreateGlobalReference()
         return true;
     }
     ani_env *env = AniHelper::GetThreadEnv(vm);
+    if (env == nullptr) {
+        return false;
+    }
     int ret = 0;
     if ((ret = env->GlobalReference_Create(static_cast<ani_ref>(signalObj), &signalRef)) != ANI_OK) {
         HILOGE("TaskSignalListenerAni GlobalReference_Create failed: %{public}d", ret);
@@ -84,6 +87,10 @@ TaskSignalListenerAni::~TaskSignalListenerAni()
         return;
     }
     ani_env *env = AniHelper::GetThreadEnv(vm);
+    if (env == nullptr) {
+        HILOGE("~TaskSignalListenerAni env is nullptr");
+        return;
+    }
     int ret = 0;
     if ((ret = env->GlobalReference_Delete(signalRef)) != ANI_OK) {
         HILOGE("TaskSignalListenerAni GlobalReference_Delete: %{public}d", ret);
