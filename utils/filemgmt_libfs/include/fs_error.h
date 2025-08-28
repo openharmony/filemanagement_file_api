@@ -226,6 +226,7 @@ static inline std::unordered_map<std::string_view, int> uvCode2ErrCodeTable {
     { "ECONNECTIONFAIL", ECONNECTIONFAIL },
     { "ECONNECTIONABORT", ECONNECTIONABORT },
     { "ECANCELED", ECANCELED },
+    { "ECONNABORTED", ECONNABORTED },
 };
 
 static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTable {
@@ -276,6 +277,8 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
     { ENETUNREACH, { FILEIO_SYS_CAP_TAG + E_NETUNREACH, "Network is unreachable" } },
     { ECONNECTIONFAIL, { FILEIO_SYS_CAP_TAG + E_CONNECTION_FAIL, "Connection failed" } },
     { ECONNECTIONABORT, { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT, "Software caused connection abort" } },
+    { ECONNABORTED, { FILEIO_SYS_CAP_TAG + E_CONNECTION_ABORT,
+        "Software caused connection abort" } },
     { NO_TASK_ERR, { FILEIO_SYS_CAP_TAG + E_NOTASK, "No task can be canceled" } },
     { CANCEL_ERR, { FILEIO_SYS_CAP_TAG + E_UNCANCELED, "Failed to cancel" } },
     { ECANCELED, { FILEIO_SYS_CAP_TAG + E_CANCELED, "Operation canceled" } },
