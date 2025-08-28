@@ -16,6 +16,7 @@
 #include <ani.h>
 #include "ani_signature.h"
 #include "bind_function.h"
+#include "cleaner_ani.h"
 #include "hash_ani.h"
 #include "hashstream_ani.h"
 
@@ -40,6 +41,17 @@ static ani_status BindHashStreamMethods(ani_env *env)
         ani_native_function { "digest", nullptr, reinterpret_cast<void *>(HashStreamAni::Digest) },
         ani_native_function { "update", nullptr, reinterpret_cast<void *>(HashStreamAni::Update) },
         ani_native_function { ctorDesc, ctorSig, reinterpret_cast<void *>(HashStreamAni::Constructor) },
+    };
+
+    return BindClass(env, classDesc, methods);
+}
+
+static ani_status BindCleanerMethods(ani_env *env)
+{
+    auto classDesc = HASH::CleanerImpl::classDesc.c_str();
+
+    std::array methods = {
+        ani_native_function { "clean", nullptr, reinterpret_cast<void *>(CleanerAni::Clean) },
     };
 
     return BindClass(env, classDesc, methods);
@@ -73,6 +85,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     status = BindHashStreamMethods(env);
     if (status != ANI_OK) {
         HILOGE("Cannot bind native static methods for hashstream! status: %{public}d", status);
+        return status;
+    };
+
+    status = BindCleanerMethods(env);
+    if (status != ANI_OK) {
+        HILOGE("Cannot bind native static methods for cleaner!");
         return status;
     };
 

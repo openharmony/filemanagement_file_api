@@ -46,9 +46,6 @@ public:
     FsResult<void> FailWrite();
     FsResult<void> Delete();
     static void FinalizeCallback(void *finalizeData, [[maybe_unused]] void *finalizeHint);
-    ~FsAtomicFile() {
-        HILOGE("~FsAtomicFile success.");
-    }
 
 private:
     unique_ptr<FsAtomicFileEntity> entity;

@@ -14,7 +14,6 @@
  */
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import stream from '@ohos.util.stream';
-import hilog from '@ohos.hilog'
 
 const UNKNOWN_ERR: int = 13900042
 const UNKNOWN_MSG: string = "Unknown error"
@@ -28,10 +27,10 @@ function createBusinessError(code: int, msg: string): BusinessError {
 
 class Cleaner {
     private ptr: long = 0
-    private name: string = "";
-    constructor(ptr: long, name: string) {
+    private classType: string = "";
+    constructor(ptr: long, classType: string) {
         this.ptr = ptr
-        this.name = name
+        this.classType = classType
     }
     native clean(): void
 }
@@ -41,7 +40,6 @@ function CleanerCallback(cleaner: Cleaner): void {
 }
 
 let destroyRegister = new FinalizationRegistry<Cleaner>(CleanerCallback)
-let unregisterToken = new object()
 
 namespace fileIo {
   export namespace OpenMode {

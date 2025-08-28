@@ -50,11 +50,7 @@ public:
         return *this;
     }
 
-    // ~FsFile() = default;
-    ~FsFile() {
-        HILOGE("~FsFile success.");
-    }
-
+    ~FsFile() = default;
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     FsResult<string> GetPath() const;

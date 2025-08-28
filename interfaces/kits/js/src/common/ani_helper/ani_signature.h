@@ -131,20 +131,6 @@ struct ConflictFilesInner : public BaseType {
     static const string ctorSig;
 };
 
-struct ReadStreamOptionsInner : public BaseType {
-    static const Type classType;
-    static const string classDesc;
-    static const string ctorDesc;
-    static const string ctorSig;
-};
-
-struct WriteStreamOptionsInner : public BaseType {
-    static const Type classType;
-    static const string classDesc;
-    static const string ctorDesc;
-    static const string ctorSig;
-};
-
 struct FileInner : public BaseType {
     static const Type classType;
     static const string classDesc;
@@ -193,7 +179,6 @@ struct TaskSignal : public BaseType {
     static const string ctorDesc;
     static const string ctorSig;
     static const string nativeTaskSignal;
-    static const string bindNativePtrSig;
 };
 
 struct WatcherInner : public BaseType {
@@ -230,7 +215,23 @@ struct AtomicFile : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string bindNativePtr;
     static const string bindNativePtrSig;
+};
+
+struct ReadStreamOptionsInner : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+};
+
+struct WriteStreamOptionsInner : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+};
+
+struct CleanerImpl : public BaseType {
+    static const Type classType;
+    static const string classDesc;
 };
 
 } // namespace FS
@@ -270,18 +271,15 @@ struct HashStreamImpl : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string bindNativePtrSig;
 };
-
-} // namespace HASH
-
-namespace CLEANER {
 
 struct CleanerImpl : public BaseType {
     static const Type classType;
     static const string classDesc;
 };
 
-} // namespace CLEANER
+} // namespace HASH
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature
 
