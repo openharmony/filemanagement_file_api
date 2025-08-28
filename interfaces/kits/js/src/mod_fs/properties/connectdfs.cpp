@@ -286,7 +286,7 @@ void UvWorkAfterOnStaus(ConnectDfsCB *connectDfsCB)
     HILOGI("UvWorkAfterOnStaus end");
 }
 
-void NAPIDfsListener::OnStatus(const std::string &networkId, int32_t status)
+void NAPIDfsListener::OnStatus(const std::string &networkId, int32_t status, const std::string &path, int32_t type)
 {
     HILOGI("NAPIDfsListener::OnStatus called");
 
