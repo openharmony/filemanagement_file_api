@@ -21,6 +21,7 @@
 #include "ani_signature.h"
 #include "atomicfile_ani.h"
 #include "bind_function.h"
+#include "cleaner_ani.h"
 #include "close_ani.h"
 #include "connectdfs_ani.h"
 #include "copy_ani.h"
@@ -34,8 +35,8 @@
 #include "fdopen_stream_ani.h"
 #include "file_ani.h"
 #include "filemgmt_libhilog.h"
-#include "fsync_ani.h"
 #include "fs_watcher_ani.h"
+#include "fsync_ani.h"
 #include "listfile_ani.h"
 #include "lseek_ani.h"
 #include "lstat_ani.h"
@@ -61,7 +62,6 @@
 #include "watcher_ani.h"
 #include "write_ani.h"
 #include "xattr_ani.h"
-#include "cleaner_ani.h"
 
 using namespace OHOS::FileManagement::ModuleFileIO::ANI;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
@@ -242,7 +242,7 @@ static ani_status BindStaticMethods(ani_env *env)
 
 static ani_status BindCleanerMethods(ani_env *env)
 {
-    auto classDesc = CLEANER::CleanerImpl::classDesc.c_str();
+    auto classDesc = FS::CleanerImpl::classDesc.c_str();
 
     std::array methods = {
         ani_native_function { "clean", nullptr, reinterpret_cast<void *>(CleanerAni::Clean) },

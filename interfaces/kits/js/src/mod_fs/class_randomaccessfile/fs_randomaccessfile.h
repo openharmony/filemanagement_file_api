@@ -52,9 +52,7 @@ public:
         return *this;
     }
 
-    ~FsRandomAccessFile() {
-        HILOGE("~FsRandomAccessFile success.");
-    }
+    ~FsRandomAccessFile() = default;
 
     FsResult<void> SetFilePointerSync(const int64_t &fp) const;
     FsResult<int64_t> WriteSync(const string &buffer, const optional<WriteOptions> &options = nullopt) const;

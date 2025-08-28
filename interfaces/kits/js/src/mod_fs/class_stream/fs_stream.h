@@ -24,9 +24,8 @@
 
 #include "filemgmt_libfs.h"
 #include "fs_utils.h"
-#include "write_options.h"
 #include "read_options.h"
-#include "filemgmt_libhilog.h"
+#include "write_options.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -51,9 +50,7 @@ public:
     FsResult<void> Flush();
     FsResult<int64_t> Seek(const int64_t &offset, const optional<int32_t> &typeOpt = nullopt);
 
-    ~FsStream() {
-        HILOGE("~FsStream success.");
-    }
+    ~FsStream() = default;
     static FsResult<FsStream *> Constructor();
 
 private:

@@ -18,7 +18,6 @@
 
 #include "filemgmt_libfs.h"
 #include "fs_stat_entity.h"
-#include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -61,9 +60,6 @@ public:
     int32_t GetLocation();
 #endif
 
-    ~FsStat() {
-        HILOGE("~FsStat success.");
-    };
 private:
     unique_ptr<StatEntity> entity;
     bool CheckStatMode(mode_t mode);

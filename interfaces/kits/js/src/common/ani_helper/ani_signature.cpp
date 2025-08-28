@@ -99,7 +99,8 @@ const string FS::ReaderIteratorInner::ctorSig = Builder::BuildSignatureDescripto
 const Type FS::ReaderIteratorResultInner::classType =
     Builder::BuildClass("@ohos.file.fs.fileIo.ReaderIteratorResultInner");
 const string FS::ReaderIteratorResultInner::classDesc = FS::ReaderIteratorResultInner::classType.Descriptor();
-const string FS::ReaderIteratorResultInner::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::booleanType, BuiltInTypes::stringType });
+const string FS::ReaderIteratorResultInner::ctorSig =
+    Builder::BuildSignatureDescriptor({ BasicTypes::booleanType, BuiltInTypes::stringType });
 // FS::StatInner
 const Type FS::StatInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.StatInner");
 const string FS::StatInner::classDesc = FS::StatInner::classType.Descriptor();
@@ -114,7 +115,6 @@ const string FS::TaskSignal::classDesc = FS::TaskSignal::classType.Descriptor();
 const string FS::TaskSignal::ctorDesc = Builder::BuildConstructorName();
 const string FS::TaskSignal::ctorSig = Builder::BuildSignatureDescriptor({});
 const string FS::TaskSignal::nativeTaskSignal = "nativeTaskSignal";
-const string FS::TaskSignal::bindNativePtrSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
 // FS::WatcherInner
 const Type FS::WatcherInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.WatcherInner");
 const string FS::WatcherInner::classDesc = FS::WatcherInner::classType.Descriptor();
@@ -138,6 +138,7 @@ const string FS::WriteStream::ctorSig =
 const Type FS::AtomicFile::classType = Builder::BuildClass("@ohos.file.fs.fileIo.AtomicFile");
 const string FS::AtomicFile::classDesc = FS::AtomicFile::classType.Descriptor();
 const string FS::AtomicFile::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
+const string FS::AtomicFile::bindNativePtr = "bindNativePtr";
 const string FS::AtomicFile::bindNativePtrSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
 // FS::ReadStreamOptionsInner
 const Type FS::ReadStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.ReadStreamOptionsInner");
@@ -167,8 +168,12 @@ const string Impl::StatvfsImpl::classDesc = Impl::StatvfsImpl::classType.Descrip
 const Type HASH::HashStreamImpl::classType = Builder::BuildClass("@ohos.file.hash.HashStreamImpl");
 const string HASH::HashStreamImpl::classDesc = HASH::HashStreamImpl::classType.Descriptor();
 const string HASH::HashStreamImpl::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
-// CLEANER::CleanerImpl
-const Type CLEANER::CleanerImpl::classType = Builder::BuildClass("@ohos.file.fs.Cleaner");
-const string CLEANER::CleanerImpl::classDesc = CLEANER::CleanerImpl::classType.Descriptor();
+const string HASH::HashStreamImpl::bindNativePtrSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
+// FS::CleanerImpl
+const Type FS::CleanerImpl::classType = Builder::BuildClass("@ohos.file.fs.Cleaner");
+const string FS::CleanerImpl::classDesc = FS::CleanerImpl::classType.Descriptor();
+// HASH::CleanerImpl
+const Type HASH::CleanerImpl::classType = Builder::BuildClass("@ohos.file.hash.Cleaner");
+const string HASH::CleanerImpl::classDesc = HASH::CleanerImpl::classType.Descriptor();
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature

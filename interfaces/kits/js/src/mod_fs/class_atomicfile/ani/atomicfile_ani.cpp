@@ -40,8 +40,9 @@ const std::string TEMP_FILE_SUFFIX = "_XXXXXX";
 void CallBindNativePtr(ani_env *env, ani_object obj, FsAtomicFile *fsAtomicFile)
 {
     auto bindNativePtrSig = FS::AtomicFile::bindNativePtrSig.c_str();
+    auto ptr = FS::AtomicFile::bindNativePtr.c_str();
     ani_long longValue = reinterpret_cast<ani_long>(fsAtomicFile);
-    ani_status ret = env->Object_CallMethodByName_Void(obj, "bindNativePtr", bindNativePtrSig, longValue);
+    ani_status ret = env->Object_CallMethodByName_Void(obj, ptr, bindNativePtrSig, longValue);
     if (ret != ANI_OK) {
         HILOGE("Object_CallMethodByName_Void failed. ret = %{public}d", static_cast<int32_t>(ret));
         return;

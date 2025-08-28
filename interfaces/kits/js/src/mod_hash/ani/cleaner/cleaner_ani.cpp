@@ -16,13 +16,7 @@
 #include "cleaner_ani.h"
 
 #include "filemgmt_libhilog.h"
-#include "fs_atomicfile.h"
-#include "fs_file.h"
-#include "fs_randomaccessfile.h"
-#include "fs_reader_iterator.h"
-#include "fs_stat.h"
-#include "fs_stream.h"
-#include "fs_watcher.h"
+#include "hs_hashstream.h"
 #include "type_converter.h"
 
 namespace OHOS {
@@ -40,24 +34,13 @@ static void DoCleanByClassType(ani_env *env, ani_long ptr, ani_ref classTypeObj)
         HILOGE("Clean ParseString failed.");
         return;
     }
-    if (classType == "File") {
-        delete reinterpret_cast<FsFile *>(ptr);
-    } else if (classType == "RandomAccessFile") {
-        delete reinterpret_cast<FsRandomAccessFile *>(ptr);
-    } else if (classType == "ReaderIterator") {
-        delete reinterpret_cast<FsReaderIterator *>(ptr);
-    } else if (classType == "Stat") {
-        delete reinterpret_cast<FsStat *>(ptr);
-    } else if (classType == "Stream") {
-        delete reinterpret_cast<FsStream *>(ptr);
-    } else if (classType == "AtomicFile") {
-        delete reinterpret_cast<FsAtomicFile *>(ptr);
+    if (classType == "HashStream") {
+        delete reinterpret_cast<HsHashStream *>(ptr);
     } else {
         HILOGE("Clean unsupport className: %{public}s", classType.c_str());
     }
     return;
 }
-
 void CleanerAni::Clean(ani_env *env, ani_object object)
 {
     if (env == nullptr) {
