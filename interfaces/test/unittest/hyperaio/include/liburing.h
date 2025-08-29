@@ -25,6 +25,7 @@ inline bool sqe_flag = true;
 inline bool init_flag = true;
 inline bool wait_flag = true;
 inline bool cqe_res_flag = true;
+inline bool submit_flag = true;
 struct io_uring_sqe {
     int32_t data;
 };
@@ -56,6 +57,7 @@ struct io_uring {
 inline struct io_uring_sqe *io_uring_get_sqe(struct io_uring *ring)
 {
     if (sqe_flag) {
+        sqe_flag = !sqe_flag;
         return ring->io_uring_get_sqe();
     }
     return nullptr;
@@ -63,11 +65,15 @@ inline struct io_uring_sqe *io_uring_get_sqe(struct io_uring *ring)
 
 inline int io_uring_submit(struct io_uring *ring)
 {
-    return 1;
+    if (submit_flag) {
+        return 1;
+    }
+    return -1;
 }
 
 inline int io_uring_queue_init(unsigned entries, struct io_uring *ring, unsigned flags)
 {
+    sqe_flag = true;
     if (init_flag) {
         return 1;
     }
