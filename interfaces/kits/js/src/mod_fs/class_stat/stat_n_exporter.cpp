@@ -229,6 +229,11 @@ napi_value StatNExporter::GetCtime(napi_env env, napi_callback_info info)
     return NVal::CreateInt64(env, static_cast<int64_t>(statEntity->stat_.st_ctim.tv_sec)).val_;
 }
 
+__attribute__((no_sanitize("unsigned-integer-overflow"))) uint64_t GetAtimeNsec(const StatEntity* statEntity)
+{
+    return statEntity->stat_.st_atim.tv_sec * SECOND_TO_NANOSECOND + statEntity->stat_.st_atim.tv_nsec;
+}
+
 napi_value StatNExporter::GetAtimeNs(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -245,9 +250,13 @@ napi_value StatNExporter::GetAtimeNs(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return NVal::CreateBigIntUint64(env, static_cast<uint64_t>
-        (statEntity->stat_.st_atim.tv_sec * SECOND_TO_NANOSECOND +
-         statEntity->stat_.st_atim.tv_nsec)).val_;
+    uint64_t aTimeNsec = GetAtimeNsec(statEntity);
+    return NVal::CreateBigIntUint64(env, aTimeNsec).val_;
+}
+
+__attribute__((no_sanitize("unsigned-integer-overflow"))) uint64_t GetMtimeNsec(const StatEntity* statEntity)
+{
+    return statEntity->stat_.st_mtim.tv_sec * SECOND_TO_NANOSECOND + statEntity->stat_.st_mtim.tv_nsec;
 }
 
 napi_value StatNExporter::GetMtimeNs(napi_env env, napi_callback_info info)
@@ -266,9 +275,13 @@ napi_value StatNExporter::GetMtimeNs(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return NVal::CreateBigIntUint64(env, static_cast<uint64_t>
-        (statEntity->stat_.st_mtim.tv_sec * SECOND_TO_NANOSECOND +
-         statEntity->stat_.st_mtim.tv_nsec)).val_;
+    uint64_t mTimeNsec = GetMtimeNsec(statEntity);
+    return NVal::CreateBigIntUint64(env, mTimeNsec).val_;
+}
+
+__attribute__((no_sanitize("unsigned-integer-overflow"))) uint64_t GetCtimeNsec(const StatEntity* statEntity)
+{
+    return statEntity->stat_.st_ctim.tv_sec * SECOND_TO_NANOSECOND + statEntity->stat_.st_ctim.tv_nsec;
 }
 
 napi_value StatNExporter::GetCtimeNs(napi_env env, napi_callback_info info)
@@ -287,9 +300,8 @@ napi_value StatNExporter::GetCtimeNs(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    return NVal::CreateBigIntUint64(env, static_cast<uint64_t>
-        (statEntity->stat_.st_ctim.tv_sec * SECOND_TO_NANOSECOND +
-         statEntity->stat_.st_ctim.tv_nsec)).val_;
+    uint64_t cTimeNsec = GetCtimeNsec(statEntity);
+    return NVal::CreateBigIntUint64(env, cTimeNsec).val_;
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)

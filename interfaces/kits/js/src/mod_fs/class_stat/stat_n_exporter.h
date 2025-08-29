@@ -21,7 +21,7 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace OHOS::FileManagement::LibN;
 
-const int64_t SECOND_TO_NANOSECOND = 1e9;
+const uint64_t SECOND_TO_NANOSECOND = 1e9;
 constexpr int S_PERMISSION = 00000777;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 const size_t MAX_ATTR_NAME = 64;
