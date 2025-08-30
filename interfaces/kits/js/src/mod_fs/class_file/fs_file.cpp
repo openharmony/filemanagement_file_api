@@ -194,7 +194,7 @@ FsResult<FsFile *> FsFile::Constructor()
         return FsResult<FsFile *>::Error(ENOMEM);
     }
 
-    FsFile *fsFilePtr = new FsFile(move(rafEntity));
+    FsFile *fsFilePtr = new (std::nothrow) FsFile(move(rafEntity));
     if (fsFilePtr == nullptr) {
         HILOGE("Failed to create FsFile object on heap.");
         return FsResult<FsFile *>::Error(ENOMEM);

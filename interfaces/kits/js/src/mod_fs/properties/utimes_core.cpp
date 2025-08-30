@@ -42,7 +42,8 @@ FsResult<void> UtimesCore::DoUtimes(const string &path, const double mtime)
         return FsResult<void>::Error(ret);
     }
  
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> utimesReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> utimesReq = {
+        new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (!utimesReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);

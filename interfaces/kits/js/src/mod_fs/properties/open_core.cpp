@@ -87,7 +87,8 @@ static tuple<bool, uint32_t> ValidAndConvertFlags(const optional<int32_t> &mode)
 
 static int OpenFileByPath(const string &path, uint32_t mode)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = { new (std::nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!openReq) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;

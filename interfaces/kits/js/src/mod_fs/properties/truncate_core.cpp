@@ -40,7 +40,8 @@ static bool ValidFileInfo(FileInfo &fileInfo)
 static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
 {
     if (fileInfo.isPath) {
-        unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+        unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = { new (nothrow) uv_fs_t,
+            FsUtils::FsReqCleanup };
         if (!openReq) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;
@@ -50,7 +51,8 @@ static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
         if (ret < 0) {
             return ret;
         }
-        unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+        unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = { new (nothrow) uv_fs_t,
+            FsUtils::FsReqCleanup };
         if (!ftruncateReq) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;
@@ -61,7 +63,8 @@ static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
             return ret;
         }
     } else {
-        unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+        unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = { new (nothrow) uv_fs_t,
+            FsUtils::FsReqCleanup };
         if (!ftruncateReq) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;

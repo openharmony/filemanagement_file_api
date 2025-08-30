@@ -240,7 +240,7 @@ FsResult<int64_t> FsRandomAccessFile::WriteSync(const ArrayBuffer &buffer, const
 
 static int CloseFd(int fd)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> closeReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> closeReq = { new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (!closeReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -274,7 +274,7 @@ FsResult<FsRandomAccessFile *> FsRandomAccessFile::Constructor()
         return FsResult<FsRandomAccessFile *>::Error(ENOMEM);
     }
 
-    FsRandomAccessFile *randomAccessFilePtr = new FsRandomAccessFile(move(rafEntity));
+    FsRandomAccessFile *randomAccessFilePtr = new (nothrow) FsRandomAccessFile(move(rafEntity));
     if (randomAccessFilePtr == nullptr) {
         HILOGE("INNER BUG. Failed to wrap entity for obj RandomAccessFile");
         return FsResult<FsRandomAccessFile *>::Error(EIO);

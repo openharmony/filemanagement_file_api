@@ -30,7 +30,8 @@ using namespace std;
 
 FsResult<void> SymlinkCore::DoSymlink(const string &target, const string &srcPath)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> symlinkReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> symlinkReq = { new (std::nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!symlinkReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);

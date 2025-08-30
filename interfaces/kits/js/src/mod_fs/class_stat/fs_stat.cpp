@@ -165,7 +165,13 @@ FsStat *FsStat::Constructor()
         return nullptr;
     }
 
-    return new FsStat(move(entity));
+    auto file = new (nothrow) FsStat(move(entity));
+    if (file == nullptr) {
+        HILOGE("Failed to create FsStat.");
+        return nullptr;
+    }
+
+    return file;
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO
