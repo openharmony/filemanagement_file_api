@@ -20,27 +20,34 @@
 #include <vector>
 #include <gmock/gmock.h>
 
-namespace OHOS::FileManagement::ModuleFileIO {
+namespace OHOS::FileManagement::ModuleFileIO::Test {
 
-class System {
+class ISystem {
 public:
-    static inline std::shared_ptr<System> ins = nullptr;
-
-public:
-    virtual ~System() = default;
+    virtual ~ISystem() = default;
     virtual int setxattr(const char *path, const char *name, const void *value, size_t size, int flags) = 0;
     virtual ssize_t getxattr(const char *path, const char *name, void *value, size_t size) = 0;
     virtual int fgetxattr(int filedes, const char *name, void *value, size_t size) = 0;
     virtual int flock(int fd, int operation) = 0;
 };
 
-class SystemMock : public System {
+class SystemMock : public ISystem {
 public:
     MOCK_METHOD5(setxattr, int(const char *path, const char *name, const void *value, size_t size, int flags));
     MOCK_METHOD4(getxattr, ssize_t(const char *path, const char *name, void *value, size_t size));
     MOCK_METHOD4(fgetxattr, int(int filedes, const char *name, void *value, size_t size));
     MOCK_METHOD2(flock, int(int fd, int operation));
+
+public:
+    static std::shared_ptr<SystemMock> GetMock();
+    static void EnableMock();
+    static void DisableMock();
+    static bool IsMockable();
+
+private:
+    static thread_local std::shared_ptr<SystemMock> systemMock;
+    static thread_local bool mockable;
 };
 
-} // namespace OHOS::FileManagement::ModuleFileIO
+} // namespace OHOS::FileManagement::ModuleFileIO::Test
 #endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_SYSTEM_MOCK_H

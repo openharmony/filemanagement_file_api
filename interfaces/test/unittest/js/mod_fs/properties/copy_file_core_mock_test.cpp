@@ -29,7 +29,7 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock>  uvfs = nullptr;
+    static inline shared_ptr<UvfsMock> uvfs = nullptr;
 };
 
 void CopyFileCoreMockTest::SetUpTestCase(void)
@@ -116,7 +116,7 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_005, testing::ext
     FileInfo dest;
     src.isPath = false;
     dest.isPath = true;
-    int fd = open("test.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int fd = open("CopyFileCoreMockTest_DoCopyFile_005.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     ASSERT_NE(fd, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(fd);
 
@@ -124,7 +124,6 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_005, testing::ext
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), false);
-    close(fd);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_005";
 }
@@ -144,7 +143,7 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_006, testing::ext
     FileInfo dest;
     src.isPath = false;
     dest.isPath = true;
-    int fd = open("test.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int fd = open("CopyFileCoreMockTest_DoCopyFile_006.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     ASSERT_NE(fd, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(fd);
 
@@ -152,7 +151,6 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_006, testing::ext
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), true);
-    close(fd);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_006";
 }
@@ -172,16 +170,17 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_007, testing::ext
     FileInfo dest;
     src.isPath = false;
     dest.isPath = false;
-    int fd = open("test.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-    ASSERT_NE(fd, -1);
-    src.fdg = make_unique<DistributedFS::FDGuard>(fd);
-    dest.fdg = make_unique<DistributedFS::FDGuard>(fd);
+    int srcFd = open("CopyFileCoreMockTest_DoCopyFile_007_src.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    ASSERT_NE(srcFd, -1);
+    int destFd = open("CopyFileCoreMockTest_DoCopyFile_007_dest.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    ASSERT_NE(destFd, -1);
+    src.fdg = make_unique<DistributedFS::FDGuard>(srcFd);
+    dest.fdg = make_unique<DistributedFS::FDGuard>(destFd);
 
     EXPECT_CALL(*uvfs, uv_fs_ftruncate(_, _, _, _, _)).Times(1).WillOnce(Return(-1));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), false);
-    close(fd);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_007";
 }
@@ -201,7 +200,7 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_008, testing::ext
     FileInfo dest;
     src.isPath = false;
     dest.isPath = false;
-    int fd = open("test.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int fd = open("CopyFileCoreMockTest_DoCopyFile_008.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     ASSERT_NE(fd, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(fd);
     dest.fdg = make_unique<DistributedFS::FDGuard>();
@@ -210,7 +209,6 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_008, testing::ext
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), false);
-    close(fd);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_008";
 }
@@ -231,8 +229,8 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_009, testing::ext
     src.isPath = false;
     dest.isPath = false;
 
-    int srcfd = open("src.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-    int destfd = open("dest.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int srcfd = open("CopyFileCoreMockTest_DoCopyFile_009_src.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int destfd = open("CopyFileCoreMockTest_DoCopyFile_009_dest.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     ASSERT_NE(srcfd, -1);
     ASSERT_NE(destfd, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
@@ -242,8 +240,6 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_009, testing::ext
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), true);
-    close(srcfd);
-    close(destfd);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_009";
 }
@@ -264,9 +260,9 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0010, testing::ex
     src.isPath = false;
     dest.isPath = true;
 
-    int srcfd = open("src.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int srcfd = open("CopyFileCoreMockTest_DoCopyFile_0010.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     ASSERT_NE(srcfd, -1);
-    const char* data = "Hello, World!";
+    const char *data = "Hello, World!";
     ssize_t len = write(srcfd, data, strlen(data));
     ASSERT_NE(len, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
@@ -276,7 +272,6 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0010, testing::ex
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), false);
-    close(srcfd);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0010";
 }
@@ -297,9 +292,9 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0011, testing::ex
     src.isPath = false;
     dest.isPath = true;
 
-    int srcfd = open("src.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int srcfd = open("CopyFileCoreMockTest_DoCopyFile_0011.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     ASSERT_NE(srcfd, -1);
-    const char* data = "Hello, World!";
+    const char *data = "Hello, World!";
     ssize_t len = write(srcfd, data, strlen(data));
     ASSERT_NE(len, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
@@ -309,7 +304,6 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0011, testing::ex
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), false);
-    close(srcfd);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0011";
 }
@@ -330,9 +324,9 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0012, testing::ex
     src.isPath = false;
     dest.isPath = true;
 
-    int srcfd = open("src.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int srcfd = open("CopyFileCoreMockTest_DoCopyFile_0012.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     ASSERT_NE(srcfd, -1);
-    const char* data = "Hello, World!";
+    const char *data = "Hello, World!";
     ssize_t len = write(srcfd, data, strlen(data));
     ASSERT_NE(len, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
@@ -342,7 +336,6 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0012, testing::ex
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), true);
-    close(srcfd);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0012";
 }
@@ -363,9 +356,9 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0013, testing::ex
     src.isPath = false;
     dest.isPath = true;
 
-    int srcfd = open("src.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int srcfd = open("CopyFileCoreMockTest_DoCopyFile_0013.txt", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     ASSERT_NE(srcfd, -1);
-    const char* data = "Hello, World!";
+    const char *data = "Hello, World!";
     ssize_t len = write(srcfd, data, strlen(data));
     ASSERT_NE(len, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
@@ -375,7 +368,6 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0013, testing::ex
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
     EXPECT_EQ(res.IsSuccess(), false);
-    close(srcfd);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0013";
 }

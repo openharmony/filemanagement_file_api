@@ -17,6 +17,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "eventfd_mock.h"
 #include "filemgmt_libhilog.h"
@@ -41,6 +42,7 @@ public:
 void WatcherCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "WatcherCoreMockTest");
     EventfdMock::EnableMock();
     InotifyMock::EnableMock();
 }
@@ -101,7 +103,7 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_001, testing::
 
 /**
  * @tc.name: WatcherCoreMockTest_DoCreateWatcher_002
- * @tc.desc: Test function of WatcherCore::DoCreateWatcher interface for FAILURE when InitNotify fails.
+ * @tc.desc: Test function of WatcherCore::DoCreateWatcher interface for FAILURE when TryInitNotify fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
