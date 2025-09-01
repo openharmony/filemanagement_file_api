@@ -59,6 +59,8 @@ void CloseCoreMockTest::TearDown(void)
     GTEST_LOG_(INFO) << "TearDown";
 }
 
+inline const int32_t EXPECTED_FD = 1;
+
 /**
  * @tc.name: CloseCoreMockTest_DoClose_001
  * @tc.desc: Test function of CloseCore::DoClose interface for FAILURE when uv_fs_close fails.
@@ -69,11 +71,19 @@ void CloseCoreMockTest::TearDown(void)
 HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CloseCoreMockTest-begin CloseCoreMockTest_DoClose_001";
+
+    // Prepare test parameters
+    int fd = EXPECTED_FD;
+    // Set mock behaviors
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(testing::Return(UV_EBADF));
-    auto ret = CloseCore::DoClose(1);
+    // Do testing
+    auto ret = CloseCore::DoClose(fd);
+    // Verify results
     EXPECT_FALSE(ret.IsSuccess());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+
     GTEST_LOG_(INFO) << "CloseCoreMockTest-end CloseCoreMockTest_DoClose_001";
 }
 

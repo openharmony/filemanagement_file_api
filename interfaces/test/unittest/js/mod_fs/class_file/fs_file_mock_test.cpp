@@ -33,7 +33,6 @@ public:
     void SetUp();
     void TearDown();
     static inline shared_ptr<UvfsMock> uvMock = nullptr;
-    // static inline shared_ptr<SystemMock> sys = nullptr;
     std::unique_ptr<FileEntity> fileEntity;
     std::unique_ptr<FsFile> fsFile;
 };
