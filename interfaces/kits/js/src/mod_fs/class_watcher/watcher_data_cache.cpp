@@ -30,7 +30,6 @@ bool WatcherDataCache::AddWatcherInfo(std::shared_ptr<WatcherInfo> info)
         }
     }
     watcherInfoCache_.push_back(info);
-    wdFileNameCache_[info->fileName] = std::make_pair(info->wd, info->events);
     return true;
 }
 
@@ -48,56 +47,39 @@ uint32_t WatcherDataCache::RemoveWatcherInfo(std::shared_ptr<WatcherInfo> info)
             remainingEvents |= iter->events;
         }
     }
-
     return remainingEvents;
 }
 
-bool WatcherDataCache::RemoveFileWatcher(const std::string &fileName)
+void WatcherDataCache::RemoveWatchedEvents(const std::string &fileName)
 {
     std::lock_guard<std::mutex> lock(cacheMutex_);
-
-    auto iter = wdFileNameCache_.find(fileName);
-    if (iter == wdFileNameCache_.end()) {
-        return false;
-    }
-    wdFileNameCache_.erase(iter);
-
-    watcherInfoCache_.erase(std::remove_if(watcherInfoCache_.begin(), watcherInfoCache_.end(),
-        [&fileName](const std::shared_ptr<WatcherInfo> &info) {
-            return info->fileName == fileName;
-        }), watcherInfoCache_.end());
-
-    return true;
+    wdFileNameCache_.erase(fileName);
 }
 
-std::tuple<bool, int32_t> WatcherDataCache::FindWatchedWd(const std::string &fileName, uint32_t event)
+std::tuple<bool, int32_t, uint32_t> WatcherDataCache::FindWatchedEvents(const std::string &fileName, uint32_t event)
 {
     std::lock_guard<std::mutex> lock(cacheMutex_);
 
     int32_t wd = -1;
+    uint32_t events = 0;
     auto iter = wdFileNameCache_.find(fileName);
     if (iter == wdFileNameCache_.end()) {
-        return { false, wd };
+        return { false, wd, events };
     }
 
     wd = iter->second.first;
-    if ((iter->second.second & event) == event) {
-        return { true, wd };
+    events = iter->second.second;
+    if ((iter->second.second & event) != event) {
+        return { false, wd, events };
     }
 
-    return { false, wd };
+    return { true, wd, events };
 }
 
-bool WatcherDataCache::UpdateWatchedEvents(const std::string &fileName, int32_t wd, uint32_t events)
+void WatcherDataCache::UpdateWatchedEvents(const std::string &fileName, int32_t wd, uint32_t events)
 {
     std::lock_guard<std::mutex> lock(cacheMutex_);
-    auto iter = wdFileNameCache_.find(fileName);
-    if (iter == wdFileNameCache_.end()) {
-        return false;
-    }
-
-    iter->second = std::make_pair(wd, events);
-    return true;
+    wdFileNameCache_[fileName] = std::make_pair(wd, events);
 }
 
 static bool CheckIncludeEvent(uint32_t mask, uint32_t event)
@@ -134,16 +116,6 @@ std::tuple<bool, std::string, std::vector<std::shared_ptr<WatcherInfo>>> Watcher
         }
     }
     return { !matchedInfos.empty(), fileName, matchedInfos };
-}
-
-uint32_t WatcherDataCache::GetFileEvents(const std::string &fileName)
-{
-    std::lock_guard<std::mutex> lock(cacheMutex_);
-    auto iter = wdFileNameCache_.find(fileName);
-    if (iter == wdFileNameCache_.end()) {
-        return 0;
-    }
-    return iter->second.second;
 }
 
 bool WatcherDataCache::HasWatcherInfo() const

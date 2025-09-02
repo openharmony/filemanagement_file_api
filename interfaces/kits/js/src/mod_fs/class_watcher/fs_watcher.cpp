@@ -48,7 +48,7 @@ FsResult<void> FsWatcher::Stop()
         HILOGE("Failed to get watchEntity when stop.");
         return FsResult<void>::Error(EINVAL);
     }
-    int ret = FsFileWatcher::GetInstance().StopNotify(watchEntity->watherInfo);
+    int ret = FsFileWatcher::GetInstance().StopNotify(watchEntity->watcherInfo);
     if (ret != ERRNO_NOERR) {
         HILOGE("Failed to stopNotify errno:%{public}d", errno);
         return FsResult<void>::Error(ret);
@@ -63,7 +63,7 @@ FsResult<void> FsWatcher::Start()
         return FsResult<void>::Error(EINVAL);
     }
 
-    shared_ptr<WatcherInfo> info = watchEntity->watherInfo;
+    shared_ptr<WatcherInfo> info = watchEntity->watcherInfo;
     int ret = FsFileWatcher::GetInstance().StartNotify(info);
     if (ret != ERRNO_NOERR) {
         HILOGE("Failed to startNotify.");

@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#include <filesystem>
-#include <fstream>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sys/xattr.h>
@@ -30,38 +27,28 @@ using namespace std;
 
 class XattrCoreMockTest : public testing::Test {
 public:
-    static filesystem::path tempFilePath;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<SystemMock> sys = nullptr;
 };
-
-filesystem::path XattrCoreMockTest::tempFilePath;
 
 void XattrCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    tempFilePath = "/data/local/tmp/xattr_test_file.txt";
-    ofstream tempfile(tempFilePath);
-    tempfile << "Test content\n123\n456";
-    tempfile.close();
-    sys = make_shared<SystemMock>();
-    System::ins = sys;
+    SystemMock::EnableMock();
 }
 
 void XattrCoreMockTest::TearDownTestCase(void)
 {
+    SystemMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    filesystem::remove(tempFilePath);
-    System::ins = nullptr;
-    sys = nullptr;
 }
 
 void XattrCoreMockTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
+    errno = 0;
 }
 
 void XattrCoreMockTest::TearDown(void)
@@ -80,12 +67,13 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_001, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoSetXattr_001";
 
-    string path = tempFilePath.string();
+    string path = "fakePath/XattrCoreMockTest_DoSetXattr_001";
     string key = "test_key";
     string value = "test_value";
-
+    auto sys = SystemMock::GetMock();
     EXPECT_CALL(*sys, setxattr(_, _, _, _, _)).WillOnce(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoSetXattr(path, key, value);
+    testing::Mock::VerifyAndClearExpectations(sys.get());
     EXPECT_FALSE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoSetXattr_001";
@@ -102,12 +90,14 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_002, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoSetXattr_002";
 
-    string path = tempFilePath.string();
+    string path = "fakePath/XattrCoreMockTest_DoSetXattr_002";
     string key = "test_key";
     string value = "test_value";
 
+    auto sys = SystemMock::GetMock();
     EXPECT_CALL(*sys, setxattr(_, _, _, _, _)).WillOnce(Return(0));
     auto ret = XattrCore::DoSetXattr(path, key, value);
+    testing::Mock::VerifyAndClearExpectations(sys.get());
     EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoSetXattr_002";
@@ -124,11 +114,13 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_001, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoGetXattr_001";
 
-    string path = tempFilePath.string();
+    string path = "fakePath/XattrCoreMockTest_DoGetXattr_001";
     string key = "test_key";
 
+    auto sys = SystemMock::GetMock();
     EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillRepeatedly(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoGetXattr(path, key);
+    testing::Mock::VerifyAndClearExpectations(sys.get());
     EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoGetXattr_001";
@@ -145,11 +137,13 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_002, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoGetXattr_002";
 
-    string path = tempFilePath.string();
+    string path = "fakePath/XattrCoreMockTest_DoGetXattr_002";
     string key = "test_key";
 
+    auto sys = SystemMock::GetMock();
     EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoGetXattr(path, key);
+    testing::Mock::VerifyAndClearExpectations(sys.get());
     EXPECT_FALSE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoGetXattr_002";
@@ -166,11 +160,13 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_003, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "XattrCoreMockTest-begin XattrCoreMockTest_DoGetXattr_003";
 
-    string path = tempFilePath.string();
+    string path = "fakePath/XattrCoreMockTest_DoGetXattr_003";
     string key = "test_key";
 
+    auto sys = SystemMock::GetMock();
     EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(Return(1));
     auto ret = XattrCore::DoGetXattr(path, key);
+    testing::Mock::VerifyAndClearExpectations(sys.get());
     EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoGetXattr_003";
