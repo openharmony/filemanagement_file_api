@@ -57,7 +57,7 @@ struct DfsConnectCB {
 
 class NAPIDfsListener : public FileDfsListenerStub {
 public:
-    void OnStatus(const std::string &networkId, int32_t status) override;
+    void OnStatus(const std::string &networkId, int32_t status, const std::string &path, int32_t type) override;
     void SetConnectDfsEnv(const napi_env &env);
     void SetConnectDfsCBRef(const napi_ref &ref);
     void SetConnectDfsPromiseRef(const napi_deferred &promiseDeferred);
