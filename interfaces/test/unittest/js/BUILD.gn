@@ -327,11 +327,15 @@ ohos_unittest("napi_file_fs_test") {
 
   module_out_path = "file_api/file_api"
 
-  include_dirs = [ "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher" ]
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/mock",
+  ]
 
   sources = [
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher/watcher_entity.cpp",
     "mod_fs/class_watcher/watcher_entity_test.cpp",
+    "mod_fs/mock/unistd_mock.cpp",
   ]
 
   deps = [
@@ -342,6 +346,7 @@ ohos_unittest("napi_file_fs_test") {
 
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "libuv:uv",
