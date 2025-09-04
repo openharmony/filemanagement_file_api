@@ -159,10 +159,13 @@ FsResult<string> FsAtomicFile::StartWrite()
     }
 
     char *tmpfile = const_cast<char *>(entity->newFileName.c_str());
-    if (mkstemp(tmpfile) == -1) {
+    int fd = mkstemp(tmpfile);
+    if (fd == -1) {
         HILOGE("Fail to create tmp file err:%{public}d!", errno);
         return FsResult<string>::Error(ENOENT);
     }
+
+    close(fd);
 
     return FsResult<string>::Success(entity->newFileName);
 }
