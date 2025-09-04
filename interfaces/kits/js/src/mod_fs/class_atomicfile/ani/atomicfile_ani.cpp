@@ -286,14 +286,13 @@ ani_object AtomicFileAni::StartWrite(ani_env *env, [[maybe_unused]] ani_object o
         ErrorHandler::Throw(env, ENOENT);
         return nullptr;
     }
+    close(fd);
 
     ani_object writeStream = CreateStream(env, object, WRITE_STREAM_CLASS, entity->newFileName);
     if (writeStream == nullptr) {
         HILOGE("Failed to create write stream");
         return nullptr;
     }
-
-    close(fd);
 
     return writeStream;
 }

@@ -164,7 +164,6 @@ FsResult<string> FsAtomicFile::StartWrite()
         HILOGE("Fail to create tmp file err:%{public}d!", errno);
         return FsResult<string>::Error(ENOENT);
     }
-
     close(fd);
 
     return FsResult<string>::Success(entity->newFileName);
