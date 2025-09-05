@@ -280,11 +280,13 @@ ani_object AtomicFileAni::StartWrite(ani_env *env, [[maybe_unused]] ani_object o
     }
 
     char *tmpfile = const_cast<char *>(entity->newFileName.c_str());
-    if (mkstemp(tmpfile) == -1) {
+    int fd = mkstemp(tmpfile);
+    if (fd == -1) {
         HILOGE("Fail to create tmp file err:%{public}d!", errno);
         ErrorHandler::Throw(env, ENOENT);
         return nullptr;
     }
+    close(fd);
 
     ani_object writeStream = CreateStream(env, object, WRITE_STREAM_CLASS, entity->newFileName);
     if (writeStream == nullptr) {
