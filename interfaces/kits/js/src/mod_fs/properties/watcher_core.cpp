@@ -28,7 +28,7 @@ using namespace std;
 
 static FsResult<FsWatcher *> InstantiateWatcher()
 {
-    if (FsFileWatcher::GetInstance().GetNotifyId() < 0 && !FsFileWatcher::GetInstance().InitNotify()) {
+    if (!FsFileWatcher::GetInstance().TryInitNotify()) {
         HILOGE("Failed to get notifyId or initnotify fail");
         return FsResult<FsWatcher *>::Error(errno);
     }
@@ -97,7 +97,7 @@ FsResult<FsWatcher *> WatcherCore::DoCreateWatcher(
         return FsResult<FsWatcher *>::Error(EIO);
     }
 
-    watchEntity->data_ = info;
+    watchEntity->watcherInfo = info;
 
     bool ret = FsFileWatcher::GetInstance().AddWatcherInfo(info);
     if (!ret) {

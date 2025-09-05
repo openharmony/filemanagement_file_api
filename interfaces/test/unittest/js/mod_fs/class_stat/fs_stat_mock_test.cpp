@@ -32,21 +32,18 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<SystemMock> sys = nullptr;
 };
 
 void FsStatMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    sys = make_shared<SystemMock>();
-    System::ins = sys;
+    SystemMock::EnableMock();
 }
 
 void FsStatMockTest::TearDownTestCase(void)
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    System::ins = nullptr;
-    sys = nullptr;
+    SystemMock::DisableMock();
 }
 
 void FsStatMockTest::SetUp(void)
@@ -58,6 +55,8 @@ void FsStatMockTest::TearDown(void)
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
+
+inline const int32_t EXPECTED_FD = 1;
 
 /**
  * @tc.name: FsStatMockTest_GetLocation_001
@@ -82,8 +81,10 @@ HWTEST_F(FsStatMockTest, FsStatMockTest_GetLocation_001, testing::ext::TestSize.
     statEntity->fileInfo_->path.get()[99] = '\0';
     fsStat = make_unique<FsStat>(move(statEntity));
 
+    auto sys = SystemMock::GetMock();
     EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1));
     EXPECT_EQ(fsStat->GetLocation(), 1);
+    testing::Mock::VerifyAndClearExpectations(sys.get());
 
     GTEST_LOG_(INFO) << "FsStatMockTes-end FsStatMockTest_GetLocation_001";
 }
@@ -104,15 +105,17 @@ HWTEST_F(FsStatMockTest, FsStatMockTest_GetLocation_002, testing::ext::TestSize.
     statEntity = make_unique<StatEntity>();
     statEntity->fileInfo_ = make_unique<FileInfo>();
     statEntity->fileInfo_->isPath = false;
-    const int fdValue = 3;
+    const int fdValue = EXPECTED_FD;
     const bool isClosed = false;
     statEntity->fileInfo_->fdg = make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
     fsStat = make_unique<FsStat>(move(statEntity));
 
+    auto sys = SystemMock::GetMock();
     EXPECT_CALL(*sys, fgetxattr(_, _, _, _)).WillOnce(Return(1));
     EXPECT_EQ(fsStat->GetLocation(), 1);
+    testing::Mock::VerifyAndClearExpectations(sys.get());
 
     GTEST_LOG_(INFO) << "FsStatMockTes-end FsStatMockTest_GetLocation_002";
 }
 
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

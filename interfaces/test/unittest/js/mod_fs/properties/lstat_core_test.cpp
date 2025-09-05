@@ -34,7 +34,8 @@ void LstatCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     int32_t fd = open("/data/test/lstat.txt", CREATE | O_RDWR, 0644);
-    if (fd <= 0) {
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
         ASSERT_TRUE(false);
     }
     close(fd);
@@ -66,7 +67,7 @@ void LstatCoreTest::TearDown(void)
 HWTEST_F(LstatCoreTest, LstatCoreTest_DoLstat_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "LstatCoreTest-begin LstatCoreTest_DoLstat_001";
-    
+
     auto res = LstatCore::DoLstat("/invalid/test/lstat.txt");
     EXPECT_EQ(res.IsSuccess(), false);
     auto err = res.GetError();
@@ -85,10 +86,10 @@ HWTEST_F(LstatCoreTest, LstatCoreTest_DoLstat_001, testing::ext::TestSize.Level1
 HWTEST_F(LstatCoreTest, LstatCoreTest_DoLstat_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "LstatCoreTest-begin LstatCoreTest_DoLstat_002";
-    
+
     auto res = LstatCore::DoLstat("/data/test/lstat.txt");
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "LstatCoreTest-end LstatCoreTest_DoLstat_002";
 }
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

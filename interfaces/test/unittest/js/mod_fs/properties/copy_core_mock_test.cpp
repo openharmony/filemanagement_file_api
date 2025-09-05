@@ -65,7 +65,8 @@ void CopyCoreMockTest::SetUpTestCase(void)
     mkdir(destDir.c_str(), permission0755);
     int32_t fd = open(srcFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
-        EXPECT_TRUE(false);
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(fd);
     uvMock = std::make_shared<UvfsMock>();
@@ -171,7 +172,8 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_001, testing::ext::TestSi
     string subFile = subDir + "/sub_file.txt";
     int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
-        EXPECT_TRUE(false);
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(fd);
 
@@ -209,7 +211,8 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_002, testing::ext::TestSi
     string subFile = subDir + "/sub_file.txt";
     int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
-        EXPECT_TRUE(false);
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(fd);
 
@@ -248,8 +251,8 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopySubDir_003, testing::ext::TestSi
     string subFile = subDir + "/sub_file.txt";
     int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
     if (fd < 0) {
-        GTEST_LOG_(INFO) << "Open test file failed! ret: " << fd << ", errno: " << errno;
-        EXPECT_TRUE(false);
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(fd);
 

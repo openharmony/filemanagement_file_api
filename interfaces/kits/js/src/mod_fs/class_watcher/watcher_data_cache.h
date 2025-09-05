@@ -29,12 +29,11 @@ class WatcherDataCache {
 public:
     bool AddWatcherInfo(std::shared_ptr<WatcherInfo> info);
     uint32_t RemoveWatcherInfo(std::shared_ptr<WatcherInfo> info);
-    bool RemoveFileWatcher(const std::string &fileName);
-    std::tuple<bool, int32_t> FindWatchedWd(const std::string &fileName, uint32_t event);
-    bool UpdateWatchedEvents(const std::string &fileName, int32_t wd, uint32_t events);
+    void RemoveWatchedEvents(const std::string &fileName);
+    std::tuple<bool, int32_t, uint32_t> FindWatchedEvents(const std::string &fileName, uint32_t event);
+    void UpdateWatchedEvents(const std::string &fileName, int32_t wd, uint32_t events);
     std::tuple<bool, std::string, std::vector<std::shared_ptr<WatcherInfo>>> FindWatcherInfos(
         int32_t wd, uint32_t eventMask);
-    uint32_t GetFileEvents(const std::string &fileName);
     bool HasWatcherInfo() const;
     void ClearCache();
 
