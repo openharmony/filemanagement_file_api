@@ -49,6 +49,8 @@ bool FileWatcher::InitNotify()
     eventFd_ = eventfd(0, EFD_CLOEXEC);
     if (eventFd_ < 0) {
         HILOGE("Failed to init eventfd errCode:%{public}d", errno);
+        close(notifyFd_); // Ignore the result of close
+        notifyFd_ = -1;
         return false;
     }
     return true;
@@ -59,13 +61,13 @@ tuple<bool, int> FileWatcher::CheckEventWatched(const string &fileName, const ui
     int wd = -1;
     auto iter = wdFileNameMap_.find(fileName);
     if (iter == wdFileNameMap_.end()) {
-        return {false, wd};
+        return { false, wd };
     }
     wd = iter->second.first;
     if ((iter->second.second & event) == event) {
-        return {true, wd};
+        return { true, wd };
     }
-    return {false, wd};
+    return { false, wd };
 }
 
 int FileWatcher::StartNotify(shared_ptr<WatcherInfoArg> arg)
@@ -190,21 +192,20 @@ void FileWatcher::ReadNotifyEvent(WatcherCallback callback)
 {
     int len = 0;
     int index = 0;
-    char buf[BUF_SIZE] = {0};
+    char buf[BUF_SIZE] = { 0 };
     struct inotify_event *event = nullptr;
     while (((len = read(notifyFd_, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
     while (index < len) {
         event = reinterpret_cast<inotify_event *>(buf + index);
         if ((len - index) < sizeof(struct inotify_event)) {
-            HILOGE("out of bounds access, len:%{public}d, index: %{public}d, inotify: %{public}zu",
-                   len, index, sizeof(struct inotify_event));
+            HILOGE("out of bounds access, len:%{public}d, index: %{public}d, inotify: %{public}zu", len, index,
+                sizeof(struct inotify_event));
             break;
         }
         if (event->len > (static_cast<unsigned int>(len - index - sizeof(struct inotify_event)))) {
             HILOGE("out of bounds access, index: %{public}d, inotify: %{public}zu, "
                    "event :%{public}u, len: %{public}d",
-                   index, sizeof(struct inotify_event),
-                   event->len, len);
+                index, sizeof(struct inotify_event), event->len, len);
             break;
         }
         NotifyEvent(event, callback);
@@ -307,10 +308,10 @@ void FileWatcher::NotifyEvent(const struct inotify_event *event, WatcherCallback
 {
     lock_guard<mutex> lock(watchMutex_);
     string tempFileName;
-    auto found = find_if(wdFileNameMap_.begin(), wdFileNameMap_.end(),
-        [event](const pair<std::string, std::pair<int, uint32_t>> &iter) {
+    auto found = find_if(
+        wdFileNameMap_.begin(), wdFileNameMap_.end(), [event](const pair<std::string, std::pair<int, uint32_t>> &iter) {
             return iter.second.first == event->wd;
-    });
+        });
     if (found != wdFileNameMap_.end()) {
         tempFileName = found->first;
     }
