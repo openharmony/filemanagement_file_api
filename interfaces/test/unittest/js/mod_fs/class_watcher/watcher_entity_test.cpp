@@ -15,9 +15,8 @@
 
 #include "watcher_entity.h"
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <thread>
+#include <gtest/gtest.h>
 
 #include "eventfd_mock.h"
 #include "inotify_mock.h"
