@@ -51,12 +51,6 @@ using namespace OHOS::FileManagement::LibN;
 const uint32_t API_VERSION_MOD = 1000;
 #endif
 
-namespace {
-    const std::vector<std::string> PUBLIC_DIR_PATHS = {
-        "/Documents"
-    };
-}
-
 void InitAccessModeType(napi_env env, napi_value exports)
 {
     char propertyName[] = "AccessModeType";
@@ -372,16 +366,6 @@ string CommonFunc::GetModeFromFlags(unsigned int flags)
         mode += ((flags & O_APPEND) ? appendMode : "");
     }
     return mode;
-}
-
-bool CommonFunc::CheckPublicDirPath(const std::string &sandboxPath)
-{
-    for (const std::string &path : PUBLIC_DIR_PATHS) {
-        if (sandboxPath.find(path) == 0) {
-            return true;
-        }
-    }
-    return false;
 }
 
 string CommonFunc::Decode(const std::string &uri)
