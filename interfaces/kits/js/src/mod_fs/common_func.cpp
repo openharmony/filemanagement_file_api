@@ -368,27 +368,6 @@ string CommonFunc::GetModeFromFlags(unsigned int flags)
     return mode;
 }
 
-string CommonFunc::Decode(const std::string &uri)
-{
-    std::ostringstream outPutStream;
-    const int32_t encodeLen = 2;
-    size_t index = 0;
-    while (index < uri.length()) {
-        if (uri[index] == '%') {
-            int hex = 0;
-            std::istringstream inputStream(uri.substr(index + 1, encodeLen));
-            inputStream >> std::hex >> hex;
-            outPutStream << static_cast<char>(hex);
-            index += encodeLen + 1;
-        } else {
-            outPutStream << uri[index];
-            index++;
-        }
-    }
-
-    return outPutStream.str();
-}
-
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
 bool IsNumeric(const string &str)
 {
