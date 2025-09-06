@@ -106,7 +106,6 @@ struct CommonFunc {
                                                                                              napi_value dstPath);
     static void fs_req_cleanup(uv_fs_t* req);
     static std::string GetModeFromFlags(unsigned int flags);
-    static bool CheckPublicDirPath(const std::string &sandboxPath);
     static std::string Decode(const std::string &uri);
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     static bool GetAndCheckUserId(Uri* uri, std::string &userId);

@@ -85,16 +85,6 @@ string FsUtils::GetModeFromFlags(const uint32_t &flags)
     return mode;
 }
 
-bool FsUtils::CheckPublicDirPath(const string &sandboxPath)
-{
-    for (const string &path : PUBLIC_DIR_PATHS) {
-        if (sandboxPath.find(path) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
 string FsUtils::Decode(const string &uri)
 {
     ostringstream outPutStream;

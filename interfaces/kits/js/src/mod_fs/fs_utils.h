@@ -91,7 +91,6 @@ public:
     static uint32_t ConvertFlags(const uint32_t &flags);
     static void FsReqCleanup(uv_fs_t *req);
     static string GetModeFromFlags(const uint32_t &flags);
-    static bool CheckPublicDirPath(const string &sandboxPath);
     static string Decode(const string &uri);
 };
 
