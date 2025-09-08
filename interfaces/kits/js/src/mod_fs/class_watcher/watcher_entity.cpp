@@ -49,6 +49,8 @@ bool FileWatcher::InitNotify()
     eventFd_ = eventfd(0, EFD_CLOEXEC);
     if (eventFd_ < 0) {
         HILOGE("Failed to init eventfd errCode:%{public}d", errno);
+        close(notifyFd_); // Ignore the result of close
+        notifyFd_ = -1;
         return false;
     }
     return true;
