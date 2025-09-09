@@ -335,6 +335,8 @@ ohos_unittest("napi_file_fs_test") {
   sources = [
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher/watcher_entity.cpp",
     "mod_fs/class_watcher/watcher_entity_test.cpp",
+    "mod_fs/mock/eventfd_mock.cpp",
+    "mod_fs/mock/inotify_mock.cpp",
     "mod_fs/mock/unistd_mock.cpp",
   ]
 
