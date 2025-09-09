@@ -273,8 +273,8 @@ int uv_fs_symlink(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *n
     }
 
     static int (*realUvFsSymlink)(uv_loop_t *, uv_fs_t *, const char *, const char *, int, uv_fs_cb) = []() {
-        auto func =
-            (int (*)(uv_loop_t *, uv_fs_t *, const char *, const char *, int, uv_fs_cb))dlsym(RTLD_NEXT, "uv_fs_symlink");
+        auto func = (int (*)(uv_loop_t *, uv_fs_t *, const char *, const char *, int, uv_fs_cb))
+            dlsym(RTLD_NEXT, "uv_fs_symlink");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real uv_fs_symlink: " << dlerror();
         }

@@ -12,15 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "libn_mock.h"
+#include "prop_n_exporter_mock.h"
+#include "prop_n_exporter.h"
+#include "uv_fs_mock.h"
 #include <cstring>
-#include <string.h>
-#include <stdio.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "prop_n_exporter_mock.h"
-#include "uv_fs_mock.h"
-#include "prop_n_exporter.h"
-#include "libn_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -35,7 +33,6 @@ public:
     void TearDown();
     static inline shared_ptr<UvfsMock> uvMock = nullptr;
 protected:
-    
 };
 
 void PropNExporterMockTest::SetUpTestCase(void)
@@ -55,7 +52,6 @@ void PropNExporterMockTest::TearDownTestCase(void)
 void PropNExporterMockTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
-    
 }
 
 void PropNExporterMockTest::TearDown(void)
@@ -74,13 +70,16 @@ void PropNExporterMockTest::TearDown(void)
 HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_UnlinkSync_001";
-    napi_env env = reinterpret_cast<napi_env>(0x1000);
-    napi_value nv = reinterpret_cast<napi_value>(0x1200);
-    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+    int envAddr = 0x1000;
+    int valueAddr = 0x1200;
+    int callbackInfoAddr = 0x1122;
+    napi_env env = reinterpret_cast<napi_env>(envAddr);
+    napi_value nv = reinterpret_cast<napi_value>(valueAddr);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(callbackInfoAddr);
     
     size_t strLen = 10;
     auto strPtr = make_unique<char []>(strLen);
-    tuple<bool, std::unique_ptr<char[]>, size_t> tp = { true, move(strPtr), 10 };
+    tuple<bool, std::unique_ptr<char[]>, size_t> tp = { true, move(strPtr), strLen };
 
     auto pMock = LibnMock::GetMock();
     EXPECT_CALL(*pMock, InitArgs(A<size_t>())).WillOnce(Return(true));

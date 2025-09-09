@@ -14,15 +14,15 @@
  */
 
 #include "fdatasync_mock.h"
- #include "n_class.h"
+#include "n_class.h"
 
- #include <dlfcn.h>
+#include <dlfcn.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace OHOS::FileManagement::ModuleFileIO;
 
-thread_local std::shared_ptr<FdatasyncMock>FdatasyncMock::fdatasyncMock = nullptr;
-thread_local bool FdatasyncMock::mockable = false;
+std::shared_ptr<FdatasyncMock>FdatasyncMock::fdatasyncMock = nullptr;
+bool FdatasyncMock::mockable = false;
 
 std::shared_ptr<FdatasyncMock> FdatasyncMock::GetMock()
 {

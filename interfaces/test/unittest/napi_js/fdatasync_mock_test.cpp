@@ -33,7 +33,6 @@ public:
     void TearDown();
     static inline shared_ptr<UvfsMock> uvMock = nullptr;
 protected:
-    
 };
 
 void FdatasyncMockTest::SetUpTestCase(void)
@@ -53,7 +52,6 @@ void FdatasyncMockTest::TearDownTestCase(void)
 void FdatasyncMockTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
-    
 }
 
 void FdatasyncMockTest::TearDown(void)
