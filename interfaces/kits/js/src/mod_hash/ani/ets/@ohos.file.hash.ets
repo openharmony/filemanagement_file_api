@@ -16,6 +16,22 @@
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import stream from '@ohos.util.stream';
 
+class Cleaner {
+    private ptr: long = 0
+    private classType: string = "";
+    constructor(ptr: long, classType: string) {
+        this.ptr = ptr
+        this.classType = classType
+    }
+    native clean(): void
+}
+
+function CleanerCallback(cleaner: Cleaner): void {
+    cleaner.clean()
+}
+
+let destroyRegister = new FinalizationRegistry<Cleaner>(CleanerCallback)
+
 export default namespace hash {
   export function hash(path: string, algorithm: string): Promise<string> {
     return new Promise<string>((resolve: (result: string) => void, reject: (e: BusinessError<void>) => void) => {
@@ -89,6 +105,22 @@ export class HashStreamImpl extends stream.Transform {
     loadLibrary("ani_file_hash");
   }
   private nativePtr: long = 0;
+  private cleaner: Cleaner | null = null;
+
+  registerCleaner(ptr: long): void {
+      this.cleaner = new Cleaner(ptr, "HashStream");
+      destroyRegister.register(this, this.cleaner!, this);
+  }
+  unregisterCleaner(): void {
+      destroyRegister.unregister(this);
+  }
+  bindNativePtr(ptr: long): void {
+      if (this.nativePtr === 0) {
+          this.nativePtr = ptr;
+      }
+      this.registerCleaner(this.nativePtr)
+
+  }
 
   native constructor(alg: string);
   native digest(): string;

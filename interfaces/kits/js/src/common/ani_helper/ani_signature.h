@@ -207,6 +207,8 @@ struct AtomicFile : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string bindNativePtr;
+    static const string bindNativePtrSig;
 };
 
 struct ReadStreamOptionsInner : public BaseType {
@@ -215,6 +217,11 @@ struct ReadStreamOptionsInner : public BaseType {
 };
 
 struct WriteStreamOptionsInner : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+};
+
+struct CleanerImpl : public BaseType {
     static const Type classType;
     static const string classDesc;
 };
@@ -256,6 +263,12 @@ struct HashStreamImpl : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string bindNativePtrSig;
+};
+
+struct CleanerImpl : public BaseType {
+    static const Type classType;
+    static const string classDesc;
 };
 
 } // namespace HASH

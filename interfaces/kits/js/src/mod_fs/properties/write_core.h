@@ -19,17 +19,12 @@
 #include "filemgmt_libfs.h"
 #include "filemgmt_libhilog.h"
 #include "fs_utils.h"
+#include "write_options.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
-
-struct WriteOptions {
-    optional<size_t> length = nullopt;
-    optional<int64_t> offset = nullopt;
-    optional<string> encoding = nullopt;
-};
 
 class WriteCore final {
 public:
