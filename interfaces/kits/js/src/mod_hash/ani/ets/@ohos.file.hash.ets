@@ -44,7 +44,7 @@ export default namespace hash {
 class HashImpl {
 
   static {
-    loadLibrary("ani_file_hash");
+    loadLibraryWithPermissionCheck("ani_file_hash", "@ohos.file.hash");
   }
 
   static native hashSync(path: string, algorithm: string): string;

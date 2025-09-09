@@ -91,7 +91,7 @@ export default Environment;
 class EnvironmentImpl {
 
   static {
-    loadLibrary("ani_file_environment");
+    loadLibraryWithPermissionCheck("ani_file_environment", "@ohos.file.environment");
   }
 
   static native getStorageDataDirSync(): string;

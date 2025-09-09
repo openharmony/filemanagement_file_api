@@ -1765,7 +1765,7 @@ export class StreamInner implements Stream {
 
 export class AtomicFile {
   static {
-    loadLibrary("ani_file_fs");
+    loadLibraryWithPermissionCheck("ani_file_fs", "@ohos.file.fs");
   }
 
   private nativePtr: long = 0;
@@ -1915,7 +1915,7 @@ type DfsListeners = fileIo.DfsListeners;
 export class FileIoImpl {
 
   static {
-    loadLibrary("ani_file_fs");
+    loadLibraryWithPermissionCheck("ani_file_fs", "@ohos.file.fs");
   }
 
   static native doAccessSync(path: string, mode?: fileIo.AccessModeType, flag?: fileIo.AccessFlagType): boolean;
