@@ -52,24 +52,9 @@ bool WatchEventListener::IsStrictEquals(const shared_ptr<IWatcherCallback> &othe
     return isSame;
 }
 
-void WatchEventListener::InvokeCallback(const string &fileName, uint32_t event, uint32_t cookie) const
-{
-    auto watchEvent = CreateSharedPtr<WatchEvent>();
-    if (watchEvent == nullptr) {
-        HILOGE("Failed to request heap memory.");
-        return;
-    }
-
-    watchEvent->fileName = fileName;
-    watchEvent->event = event;
-    watchEvent->cookie = cookie;
-    auto task = [this, watchEvent]() { SendWatchEvent(*watchEvent); };
-    AniHelper::SendEventToMainThread(task);
-}
-
 inline static const int32_t ANI_SCOPE_SIZE = 16;
 
-void WatchEventListener::SendWatchEvent(const WatchEvent &watchEvent) const
+static void SendWatchEvent(ani_vm *vm, ani_fn_object callback, const WatchEvent &watchEvent)
 {
     if (vm == nullptr) {
         HILOGE("Cannot send WatchEvent because the vm is null.");
@@ -101,8 +86,7 @@ void WatchEventListener::SendWatchEvent(const WatchEvent &watchEvent) const
     vector<ani_ref> args = { static_cast<ani_ref>(evtObj) };
     auto argc = args.size();
     ani_ref result;
-    auto cbObj = static_cast<ani_fn_object>(callback);
-    status = env->FunctionalObject_Call(cbObj, argc, args.data(), &result);
+    status = env->FunctionalObject_Call(callback, argc, args.data(), &result);
     if (status != ANI_OK) {
         HILOGE("Failed to call FunctionalObject_Call, status: %{public}d", static_cast<int32_t>(status));
     }
@@ -111,6 +95,25 @@ void WatchEventListener::SendWatchEvent(const WatchEvent &watchEvent) const
         HILOGE("Failed to destroy local scope, status: %{public}d", static_cast<int32_t>(status));
         return;
     }
+}
+
+void WatchEventListener::InvokeCallback(const string &fileName, uint32_t event, uint32_t cookie) const
+{
+    auto watchEvent = CreateSharedPtr<WatchEvent>();
+    if (watchEvent == nullptr) {
+        HILOGE("Failed to request heap memory.");
+        return;
+    }
+
+    watchEvent->fileName = fileName;
+    watchEvent->event = event;
+    watchEvent->cookie = cookie;
+    auto localVm = vm;
+    auto localCallback = static_cast<ani_fn_object>(callback);
+    auto task = [localVm, localCallback, watchEvent]() {
+        SendWatchEvent(localVm, localCallback, *watchEvent);
+    };
+    AniHelper::SendEventToMainThread(task);
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

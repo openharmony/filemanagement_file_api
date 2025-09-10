@@ -38,8 +38,6 @@ public:
 
 private:
     inline static const std::string className_ = "WatchEventListener";
-    void SendWatchEvent(const WatchEvent &watchEvent) const;
-
     ani_vm *vm;
     ani_ref callback;
 };
