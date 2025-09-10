@@ -254,11 +254,11 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
     void *buf = nullptr;
     ani_size len = 0;
 
-    if ((ANI_OK != env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(obj), &buf, &len)) && (!buf)) {
+    if ((ANI_OK != env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(obj), &buf, &len)) || (!buf)) {
         return { false, nullptr };
     }
 
-    int res = memcpy_s(buf, length, buffer, length);
+    int res = memcpy_s(buf, len, buffer, length);
     if (res != 0) {
         return { false, nullptr };
     }

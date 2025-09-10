@@ -231,7 +231,10 @@ FsResult<void> FsStream::Close()
         HILOGE("Failed to get entity of Stream, may closed twice");
         return FsResult<void>::Error(EIO);
     }
-    streamEntity = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        streamEntity = nullptr;
+    }
     return FsResult<void>::Success();
 }
 
