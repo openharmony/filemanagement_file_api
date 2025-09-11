@@ -31,11 +31,19 @@ class IUvfsMock {
 public:
     virtual ~IUvfsMock() = default;
     virtual int uv_fs_close(uv_loop_t *loop, uv_fs_t *req, uv_file file, uv_fs_cb cb) = 0;
+    virtual int uv_fs_mkdtemp(uv_loop_t *loop, uv_fs_t *req, const char *tpl, uv_fs_cb cb) = 0;
+    virtual int uv_fs_rename(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, uv_fs_cb cb) = 0;
+    virtual int uv_fs_open(uv_loop_t *loop, uv_fs_t *req, const char *path, int flags, int mode, uv_fs_cb cb) = 0;
+    virtual int uv_fs_ftruncate(uv_loop_t *loop, uv_fs_t *req, uv_file fd, int64_t offset, uv_fs_cb cb) = 0;
 };
 
 class UvfsMock : public IUvfsMock {
 public:
     MOCK_METHOD(int, uv_fs_close, (uv_loop_t *, uv_fs_t *, uv_file, uv_fs_cb), (override));
+    MOCK_METHOD(int, uv_fs_mkdtemp, (uv_loop_t *, uv_fs_t *, const char *, uv_fs_cb), (override));
+    MOCK_METHOD(int, uv_fs_rename, (uv_loop_t *, uv_fs_t *, const char *, const char *, uv_fs_cb), (override));
+    MOCK_METHOD(int, uv_fs_open, (uv_loop_t *, uv_fs_t *, const char *, int, int, uv_fs_cb), (override));
+    MOCK_METHOD(int, uv_fs_ftruncate, (uv_loop_t *, uv_fs_t *, uv_file, int64_t, uv_fs_cb), (override));
 
 public:
     static std::shared_ptr<UvfsMock> GetMock();

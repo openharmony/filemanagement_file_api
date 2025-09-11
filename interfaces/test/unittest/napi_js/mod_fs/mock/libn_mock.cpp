@@ -328,6 +328,27 @@ std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8String(std::string
     return realToUTF8String(defaultValue);
 }
 
+std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8StringPath() const
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->ToUTF8StringPath();
+    }
+
+    static std::tuple<bool, std::unique_ptr<char[]>, size_t> (*realToUTF8StringPath)() = []() {
+        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>(*)())dlsym(RTLD_NEXT, "ToUTF8StringPath");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real ToUTF8StringPath: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realToUTF8StringPath) {
+        return { false, nullptr, -1 };
+    }
+
+    return realToUTF8StringPath();
+}
+
 std::tuple<bool, bool> NVal::ToBool() const
 {
     if (LibnMock::IsMockable()) {
@@ -473,5 +494,71 @@ std::tuple<bool, double> NVal::ToDouble() const
     }
 
     return realToDouble();
+}
+
+bool NVal::HasProp(std::string propName) const
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->HasProp(propName);
+    }
+
+    static bool (*realHasProp)(std::string) = []() {
+        auto func = (bool (*)(std::string))dlsym(RTLD_NEXT, "HasProp");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real HasProp: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realHasProp) {
+        return false;
+    }
+
+    return realHasProp(propName);
+}
+
+NVal NVal::GetProp(std::string propName) const
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->GetProp(propName);
+    }
+
+    static NVal (*realGetProp)(std::string) = []() {
+        auto func = (NVal (*)(std::string))dlsym(RTLD_NEXT, "GetProp");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real GetProp: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realGetProp) {
+        napi_env env = reinterpret_cast<napi_env>(0x1000);
+        napi_value val = reinterpret_cast<napi_value>(0x1000);
+        NVal myOp(env, val);
+        return myOp;
+    }
+
+    return realGetProp(propName);
+}
+
+bool NVal::TypeIs(napi_valuetype expType) const
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->TypeIs(expType);
+    }
+
+    static bool (*realTypeIs)(napi_valuetype) = []() {
+        auto func = (bool (*)(napi_valuetype))dlsym(RTLD_NEXT, "TypeIs");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real TypeIs: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realTypeIs) {
+        return false;
+    }
+
+    return realTypeIs(expType);
 }
 #endif

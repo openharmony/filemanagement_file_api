@@ -51,6 +51,7 @@ public:
     // n_val
     virtual std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8String() = 0;
     virtual std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8String(std::string defaultValue) = 0;
+    virtual std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8StringPath() = 0;
     virtual std::tuple<bool, bool> ToBool() = 0;
     virtual std::tuple<bool, bool> ToBool(bool defaultValue) = 0;
     virtual std::tuple<bool, int32_t> ToInt32() = 0;
@@ -58,6 +59,10 @@ public:
     virtual std::tuple<bool, int64_t> ToInt64() = 0;
     virtual std::tuple<bool, int64_t> ToInt64(int64_t defaultValue) = 0;
     virtual std::tuple<bool, double> ToDouble() = 0;
+
+    virtual bool HasProp(std::string propName) = 0;
+    virtual NVal GetProp(std::string propName) = 0;
+    virtual bool TypeIs(napi_valuetype expType) = 0;
 };
 
 class LibnMock : public ILibnMock {
@@ -78,6 +83,7 @@ public:
 
     MOCK_METHOD((std::tuple<bool, std::unique_ptr<char[]>, size_t>), ToUTF8String, (), (override));
     MOCK_METHOD((std::tuple<bool, std::unique_ptr<char[]>, size_t>), ToUTF8String, (std::string), (override));
+    MOCK_METHOD((std::tuple<bool, std::unique_ptr<char[]>, size_t>), ToUTF8StringPath, (), (override));
     MOCK_METHOD((std::tuple<bool, bool>), ToBool, (), (override));
     MOCK_METHOD((std::tuple<bool, bool>), ToBool, (bool), (override));
     MOCK_METHOD((std::tuple<bool, int32_t>), ToInt32, (), (override));
@@ -85,6 +91,10 @@ public:
     MOCK_METHOD((std::tuple<bool, int64_t>), ToInt64, (), (override));
     MOCK_METHOD((std::tuple<bool, int64_t>), ToInt64, (int64_t), (override));
     MOCK_METHOD((std::tuple<bool, double>), ToDouble, (), (override));
+
+    MOCK_METHOD(bool, HasProp, (std::string), (override));
+    MOCK_METHOD(NVal, GetProp, (std::string), (override));
+    MOCK_METHOD(bool, TypeIs, (napi_valuetype), (override));
 
 public:
     static std::shared_ptr<LibnMock> GetMock();
