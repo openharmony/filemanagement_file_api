@@ -26,6 +26,10 @@ ohos_unittest("napi_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/test/unittest/napi_js/mod_fs/mock",
+    "${file_api_path}/interfaces/kits/native/task_signal",
+    "${utils_path}/common/include",
+    "mock",
+    "mod_fs/mock",
   ]
 
   sources = [
@@ -36,13 +40,19 @@ ohos_unittest("napi_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/read_text.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/rename.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/truncate.cpp",
-    "mod_fs/mock/libn_mock.cpp",
-    "mod_fs/mock/uv_fs_mock.cpp",
     "mod_fs/properties/close_mock_test.cpp",
     "mod_fs/properties/mkdtemp_mock_test.cpp",
     "mod_fs/properties/read_text_mock_test.cpp",
     "mod_fs/properties/rename_mock_test.cpp",
     "mod_fs/properties/truncate_mock_test.cpp",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/fdatasync.cpp",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/prop_n_exporter.cpp",
+    "mock/fdatasync_mock.cpp",
+    "fdatasync_mock_test.cpp",
+    "mock/prop_n_exporter_mock.cpp",
+    "prop_n_exporter_mock_test.cpp",
+    "mod_fs/mock/libn_mock.cpp",
+    "mod_fs/mock/uv_fs_mock.cpp",
   ]
 
   deps = [

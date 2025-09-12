@@ -180,4 +180,46 @@ void uv_fs_req_cleanup(uv_fs_t* req)
 
     return realUvFsReqCleanup(req);
 }
+
+int uv_fs_fdatasync(uv_loop_t *loop, uv_fs_t *req, uv_file file, uv_fs_cb cb)
+{
+    if (UvfsMock::IsMockable()) {
+        return UvfsMock::GetMock()->uv_fs_fdatasync(loop, req, file, cb);
+    }
+
+    static int (*realUvFsfdatasync)(uv_loop_t *, uv_fs_t *, uv_file, uv_fs_cb) = []() {
+        auto func = (int (*)(uv_loop_t *, uv_fs_t *, uv_file, uv_fs_cb))dlsym(RTLD_NEXT, "uv_fs_fdatasync");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real uv_fs_fdatasync: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realUvFsfdatasync) {
+        return -1;
+    }
+
+    return realUvFsfdatasync(loop, req, file, cb);
+}
+
+int uv_fs_unlink(uv_loop_t *loop, uv_fs_t *req, const char * file, uv_fs_cb cb)
+{
+    if (UvfsMock::IsMockable()) {
+        return UvfsMock::GetMock()->uv_fs_unlink(loop, req, file, cb);
+    }
+
+    static int (*realUvFsUnlink)(uv_loop_t *, uv_fs_t *, const char *, uv_fs_cb) = []() {
+        auto func = (int (*)(uv_loop_t *, uv_fs_t *, const char *, uv_fs_cb))dlsym(RTLD_NEXT, "uv_fs_unlink");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real uv_fs_unlink: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realUvFsUnlink) {
+        return -1;
+    }
+
+    return realUvFsUnlink(loop, req, file, cb);
+}
 #endif

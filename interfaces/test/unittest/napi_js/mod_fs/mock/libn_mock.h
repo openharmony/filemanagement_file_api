@@ -50,6 +50,7 @@ public:
 
     // n_val
     virtual std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8String() = 0;
+    virtual std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8StringPath() = 0;
     virtual std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8String(std::string defaultValue) = 0;
     virtual std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8StringPath() = 0;
     virtual std::tuple<bool, bool> ToBool() = 0;
@@ -82,6 +83,7 @@ public:
     MOCK_METHOD(void, ThrowErrAddData, (napi_env, int, napi_value), (override));
 
     MOCK_METHOD((std::tuple<bool, std::unique_ptr<char[]>, size_t>), ToUTF8String, (), (override));
+    MOCK_METHOD((std::tuple<bool, std::unique_ptr<char[]>, size_t>), ToUTF8StringPath, (), (override));
     MOCK_METHOD((std::tuple<bool, std::unique_ptr<char[]>, size_t>), ToUTF8String, (std::string), (override));
     MOCK_METHOD((std::tuple<bool, std::unique_ptr<char[]>, size_t>), ToUTF8StringPath, (), (override));
     MOCK_METHOD((std::tuple<bool, bool>), ToBool, (), (override));
