@@ -42,7 +42,7 @@ public:
     static void TearDownTestCase()
     {
         LibnMock::DisableMock();
-        UvfsMock::EnableMock();
+        UvfsMock::DisableMock();
     };
     void SetUp() {};
     void TearDown() {};
@@ -63,9 +63,9 @@ HWTEST_F(ReadTextMockTest, ReadTextSync_0001, testing::ext::TestSize.Level1)
     napi_value val = reinterpret_cast<napi_value>(0x1000);
     NVal myOp(env, val);
 
-    const char* initStr = "hello world";
-    size_t strLen = strlen (initStr) + 1;
-    auto strPtr = make_unique<char []>(strLen);
+    const char *initStr = "hello world";
+    size_t strLen = strlen(initStr) + 1;
+    auto strPtr = make_unique<char[]>(strLen);
     ASSERT_NE(strPtr, nullptr);
     auto ret = strncpy_s(strPtr.get(), strLen, initStr, strLen - 1);
     ASSERT_EQ(ret, EOK);
@@ -74,8 +74,10 @@ HWTEST_F(ReadTextMockTest, ReadTextSync_0001, testing::ext::TestSize.Level1)
     tuple<bool, int64_t> toIntRes = { false, -1 };
 
     auto libnMock_ = LibnMock::GetMock();
+    auto uvMock_ = UvfsMock::GetMock();
     EXPECT_CALL(*libnMock_, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock_, ToUTF8StringPath()).WillOnce(testing::Return(move(toUtfRes)));
+    EXPECT_CALL(*uvMock_, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*libnMock_, HasProp(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock_, GetProp(testing::_)).Times(2).WillRepeatedly(testing::Return(myOp));
     EXPECT_CALL(*libnMock_, TypeIs(testing::_)).WillOnce(testing::Return(false));

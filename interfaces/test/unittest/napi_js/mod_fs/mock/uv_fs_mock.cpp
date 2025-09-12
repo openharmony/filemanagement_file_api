@@ -159,4 +159,25 @@ int uv_fs_ftruncate(uv_loop_t *loop, uv_fs_t *req, uv_file fd, int64_t offset, u
 
     return realUvFsTruncate(loop, req, fd, offset, cb);
 }
+
+void uv_fs_req_cleanup(uv_fs_t* req)
+{
+    if (UvfsMock::IsMockable()) {
+        return UvfsMock::GetMock()->uv_fs_req_cleanup(req);
+    }
+
+    static void (*realUvFsReqCleanup)(uv_fs_t *) = []() {
+        auto func = (void (*)(uv_fs_t *))dlsym(RTLD_NEXT, "uv_fs_req_cleanup");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real uv_fs_req_cleanup: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realUvFsReqCleanup) {
+        return;
+    }
+
+    return realUvFsReqCleanup(req);
+}
 #endif

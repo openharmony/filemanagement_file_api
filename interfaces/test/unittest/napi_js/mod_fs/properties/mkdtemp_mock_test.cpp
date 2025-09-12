@@ -42,7 +42,7 @@ public:
     static void TearDownTestCase()
     {
         LibnMock::DisableMock();
-        UvfsMock::EnableMock();
+        UvfsMock::DisableMock();
     };
     void SetUp() {};
     void TearDown() {};
@@ -61,9 +61,9 @@ HWTEST_F(MkdtempMockTest, MkdtempSync_0001, testing::ext::TestSize.Level1)
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
-    const char* initStr = "hello world";
-    size_t strLen = strlen (initStr) + 1;
-    auto strPtr = make_unique<char []>(strLen);
+    const char *initStr = "hello world";
+    size_t strLen = strlen(initStr) + 1;
+    auto strPtr = make_unique<char[]>(strLen);
     ASSERT_NE(strPtr, nullptr);
     auto ret = strncpy_s(strPtr.get(), strLen, initStr, strLen - 1);
     ASSERT_EQ(ret, EOK);
@@ -74,6 +74,7 @@ HWTEST_F(MkdtempMockTest, MkdtempSync_0001, testing::ext::TestSize.Level1)
     auto uvMock_ = UvfsMock::GetMock();
     EXPECT_CALL(*libnMock_, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock_, ToUTF8StringPath()).WillOnce(testing::Return(move(toUtfRes)));
+    EXPECT_CALL(*uvMock_, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock_, uv_fs_mkdtemp(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
     EXPECT_CALL(*libnMock_, ThrowErr(testing::_));
 

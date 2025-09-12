@@ -42,7 +42,7 @@ public:
     static void TearDownTestCase()
     {
         LibnMock::DisableMock();
-        UvfsMock::EnableMock();
+        UvfsMock::DisableMock();
     };
     void SetUp() {};
     void TearDown() {};
@@ -77,6 +77,7 @@ HWTEST_F(TruncateMockTest, TruncateSync_0001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock_, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock_, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     EXPECT_CALL(*libnMock_, GetArgc()).WillOnce(testing::Return(move(NARG_CNT::ONE)));
+    EXPECT_CALL(*uvMock_, uv_fs_req_cleanup(testing::_)).Times(2);
     EXPECT_CALL(*uvMock_, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(1));
     EXPECT_CALL(*uvMock_, uv_fs_ftruncate(testing::_, testing::_, testing::_, testing::_, testing::_))
@@ -121,6 +122,7 @@ HWTEST_F(TruncateMockTest, TruncateSync_0002, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock_, ToInt32()).WillOnce(testing::Return(isFd));
 
     EXPECT_CALL(*libnMock_, GetArgc()).WillOnce(testing::Return(move(NARG_CNT::ONE)));
+    EXPECT_CALL(*uvMock_, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock_, uv_fs_ftruncate(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
     EXPECT_CALL(*libnMock_, ThrowErr(testing::_));

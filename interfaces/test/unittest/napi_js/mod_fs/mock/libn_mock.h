@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_NAPI_JS_MOD_FS_MOCK_NAPI_MOCK_H
-#define INTERFACES_TEST_UNITTEST_NAPI_JS_MOD_FS_MOCK_NAPI_MOCK_H
-
-#include "n_napi.h"
-#include "filemgmt_libn.h"
+#ifndef INTERFACES_TEST_UNITTEST_NAPI_JS_MOD_FS_MOCK_LIBN_MOCK_H
+#define INTERFACES_TEST_UNITTEST_NAPI_JS_MOD_FS_MOCK_LIBN_MOCK_H
 
 #include <cstdio>
 #include <gmock/gmock.h>
+
+#include "filemgmt_libn.h"
+#include "n_napi.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace std::filesystem;
@@ -108,4 +108,4 @@ private:
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
-#endif // INTERFACES_TEST_UNITTEST_NAPI_JS_MOD_FS_MOCK_NAPI_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_NAPI_JS_MOD_FS_MOCK_LIBN_MOCK_H

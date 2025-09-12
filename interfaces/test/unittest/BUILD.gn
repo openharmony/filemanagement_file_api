@@ -19,7 +19,6 @@ group("file_api_unittest") {
     "class_atomicfile:class_atomicfile_test",
     "class_file:class_file_test",
     "filemgmt_libn_test:filemgmt_libn_test",
-    "napi_js:napi_fs_test",
     "js:ani_file_environment_test",
     "js:ani_file_fs_mock_test",
     "js:ani_file_fs_test",
@@ -27,6 +26,7 @@ group("file_api_unittest") {
     "js:ani_file_securitylabel_test",
     "js:ani_file_statvfs_test",
     "js:napi_file_fs_test",
+    "napi_js:napi_fs_test",
     "remote_uri:remote_uri_test",
     "task_signal:task_signal_test",
   ]

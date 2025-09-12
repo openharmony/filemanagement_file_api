@@ -26,7 +26,6 @@ ohos_unittest("napi_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/test/unittest/napi_js/mod_fs/mock",
-    # "${utils_path}/common/include",
   ]
 
   sources = [
