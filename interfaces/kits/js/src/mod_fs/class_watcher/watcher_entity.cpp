@@ -168,7 +168,6 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
         lock_guard<mutex> lock(readMutex_);
         if (!(closed_ && reading_)) {
             oldWd = inotify_rm_watch(notifyFd_, arg->wd);
-            HILOGE("rm watch failed, err: %{public}d", errno);
         } else {
             HILOGE("rm watch fail");
         }
@@ -195,14 +194,15 @@ void FileWatcher::ReadNotifyEvent(WatcherCallback callback)
     while (((len = read(notifyFd_, &buf, sizeof(buf))) < 0) && (errno == EINTR)) {};
     while (index < len) {
         event = reinterpret_cast<inotify_event *>(buf + index);
-        if ((len - index) < sizeof(struct inotify_event)) {
+        if (sizeof(struct inotify_event) > (len - index)) {
             HILOGE("out of bounds access, len:%{public}d, index: %{public}d, inotify: %{public}zu",
                    len, index, sizeof(struct inotify_event));
             break;
         }
-        if (event->len > (static_cast<unsigned int>(len - index - sizeof(struct inotify_event)))) {
+        if (static_cast<unsigned int>(event->len) >
+           (static_cast<unsigned int>(len - index - sizeof(struct inotify_event)))) {
             HILOGE("out of bounds access, index: %{public}d, inotify: %{public}zu, "
-                   "event :%{public}u, len: %{public}d",
+                   "event->len :%{public}u, len: %{public}d",
                    index, sizeof(struct inotify_event),
                    event->len, len);
             break;
