@@ -55,6 +55,14 @@ constexpr int SOFTBUS_TRANS_FILE_EXISTED = -426114933;
 constexpr int DFS_CANCEL_SUCCESS = 204;
 const std::string FILEIO_TAG_ERR_CODE = "code";
 const std::string FILEIO_TAG_ERR_DATA = "data";
+constexpr int UFS_CLOUD_DISK_TAG = 34400000;
+
+// Cloud disk error code suffixes
+enum ErrCodeSuffixOfCloudDisk {
+    E_IPC_FAILED = 3,
+    E_INTERNAL_ERROR = 15,
+    E_SYSTEM_RESTRICTED = 16,
+};
 
 enum ErrCodeSuffixOfFileIO {
     E_PERM = 1,
@@ -427,7 +435,13 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         E_OTHER_TASK_RUNNING, "The same task is already in progress" } },
     { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG + E_VERSION_FILE_NO_EXIST, { DISTRIBUTEDFILE_SERVICE_SYS_CAP_TAG +
         E_VERSION_FILE_NO_EXIST, "The version file specified to replace the original file does not exist." } },
-
+    // Cloud disk error codes
+    { UFS_CLOUD_DISK_TAG + E_IPC_FAILED, { UFS_CLOUD_DISK_TAG + E_IPC_FAILED,
+        "IPC falied" } },
+    { UFS_CLOUD_DISK_TAG + E_INTERNAL_ERROR, { UFS_CLOUD_DISK_TAG + E_INTERNAL_ERROR,
+        "Internal error" } },
+    { UFS_CLOUD_DISK_TAG + E_SYSTEM_RESTRICTED, { UFS_CLOUD_DISK_TAG + E_SYSTEM_RESTRICTED,
+        "Not support for current system" } },
 };
 
 class NError {
