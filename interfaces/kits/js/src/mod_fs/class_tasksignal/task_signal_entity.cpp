@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ void TaskSignalEntity::OnCancel()
         }
         napi_handle_scope scope = nullptr;
         napi_status ret = napi_open_handle_scope(callbackContext->env_, &scope);
-        if (ret != napi_ok) {
+        if (ret != napi_ok || scope == nullptr) {
             return;
         }
         napi_env env = callbackContext->env_;
