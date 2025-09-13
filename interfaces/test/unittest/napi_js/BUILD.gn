@@ -63,6 +63,7 @@ ohos_unittest("napi_fs_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "ipc:ipc_single",
     "libuv:uv",
     "napi:ace_napi",
     "samgr:samgr_proxy",
