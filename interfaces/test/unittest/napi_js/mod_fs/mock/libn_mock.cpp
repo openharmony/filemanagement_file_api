@@ -314,7 +314,8 @@ std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8String(std::string
     }
 
     static std::tuple<bool, std::unique_ptr<char[]>, size_t> (*realToUTF8String)(std::string) = []() {
-        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t> (*)(std::string))dlsym(RTLD_NEXT, "ToUTF8String");
+        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>
+            (*)(std::string))dlsym(RTLD_NEXT, "ToUTF8String");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToUTF8String: " << dlerror();
         }
