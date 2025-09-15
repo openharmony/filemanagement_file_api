@@ -37,7 +37,7 @@ ohos_unittest("hyperaio_test") {
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "c_utils:utilsbase",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "hilog:libhilog",
     "googletest:gtest_main",
     "hitrace:hitrace_meter"
