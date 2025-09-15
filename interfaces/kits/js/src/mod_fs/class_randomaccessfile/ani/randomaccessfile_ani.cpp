@@ -320,9 +320,6 @@ static ani_object CreateReadStreamOptions(ani_env *env, int64_t start, int64_t e
     if (end >= 0) {
         env->Object_SetField_Int(obj, endField, end);
     }
-    if (obj == nullptr) {
-        HILOGE("CreateReadStreamOptions is nullptr");
-    }
 
     return move(obj);
 }
