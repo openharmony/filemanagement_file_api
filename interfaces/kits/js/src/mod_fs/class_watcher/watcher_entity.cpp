@@ -184,6 +184,7 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
             return rmErr;
         }
     }
+    HILOGI("inotify rm watch, fileNameMap erase");
     wdFileNameMap_.erase(arg->fileName);
     return CloseNotifyFdLocked();
 }
