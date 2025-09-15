@@ -381,7 +381,7 @@ int32_t Copy::ExecCopy(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallb
         infos->taskSignal->SetCopyTaskUri(infos->srcUri, infos->destUri);
     }
     LOGI("Copy begin");
-    auto result = Storage::DistributedFile::FileCopyManager::GetInstance()->Copy(infos->srcUri, infos->destUri,
+    auto result = Storage::DistributedFile::FileCopyManager::GetInstance().Copy(infos->srcUri, infos->destUri,
         processListener);
     LOGI("Copy end, result = %{public}d", result);
     return result;
