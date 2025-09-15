@@ -27,7 +27,7 @@ int32_t TaskSignal::Cancel()
 {
     HILOGD("TaskSignal Cancel in.");
     if (dfsCopyTask_.load()) {
-        auto ret = Storage::DistributedFile::FileCopyManager::GetInstance()->Cancel(srcUri_, dstUri_, true);
+        auto ret = Storage::DistributedFile::FileCopyManager::GetInstance().Cancel(srcUri_, dstUri_, true);
         if (ret != 0) {
             HILOGE("Cancel failed, ret = %{public}d", ret);
             return ret;
@@ -38,7 +38,7 @@ int32_t TaskSignal::Cancel()
     if (remoteTask_.load()) {
         int32_t ret = 0;
         if (sessionName_.empty()) {
-            ret = Storage::DistributedFile::FileCopyManager::GetInstance()->Cancel(srcUri_, dstUri_, true);
+            ret = Storage::DistributedFile::FileCopyManager::GetInstance().Cancel(srcUri_, dstUri_, true);
         } else {
             ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().
                 CancelCopyTask(sessionName_);
