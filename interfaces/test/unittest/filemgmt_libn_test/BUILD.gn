@@ -36,7 +36,7 @@ ohos_unittest("filemgmt_libn_test") {
     "c_utils:utilsbase",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 }
