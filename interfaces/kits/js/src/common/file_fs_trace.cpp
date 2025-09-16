@@ -13,32 +13,29 @@
  * limitations under the License.
  */
 
-#include "create_stream_core.h"
-
-#include <memory>
-
 #include "file_fs_trace.h"
-#include "file_utils.h"
-#include "filemgmt_libhilog.h"
-#include "fs_utils.h"
-#include "stream_instantiator.h"
-#include "stream_entity.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-using namespace std;
 
-FsResult<FsStream *> CreateStreamCore::DoCreateStream(const std::string &path, const std::string &mode)
+FileFsTrace::FileFsTrace(const std::string& value)
 {
-    FileFsTrace traceDoCreateStream("DoCreateStream");
-    FILE *file = fopen(path.c_str(), mode.c_str());
-    if (!file) {
-        HILOGE("Failed to fopen file by path");
-        return FsResult<FsStream *>::Error(errno);
+    if (FileApiDebug::isTraceEnhanced) {
+        StartTrace(HITRACE_TAG_FILEMANAGEMENT, "[FileFs]" + value);
     }
+}
 
-    return StreamInstantiator::InstantiateStream(move(file));
+void FileFsTrace::End()
+{
+    if (FileApiDebug::isTraceEnhanced) {
+        FinishTrace(HITRACE_TAG_FILEMANAGEMENT);
+    }
+}
+
+FileFsTrace::~FileFsTrace()
+{
+    End();
 }
 
 } // namespace ModuleFileIO

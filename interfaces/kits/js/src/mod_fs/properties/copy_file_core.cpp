@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -33,6 +34,7 @@ using namespace std;
 
 static int32_t IsAllPath(FileInfo &srcFile, FileInfo &destFile)
 {
+    FileFsTrace traceIsAllPath("IsAllPath");
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     filesystem::path srcPath(string(srcFile.path.get()));
     filesystem::path dstPath(string(destFile.path.get()));
@@ -61,6 +63,7 @@ static int32_t IsAllPath(FileInfo &srcFile, FileInfo &destFile)
 
 static int32_t SendFileCore(FileInfo &srcFdg, FileInfo &destFdg, struct stat &statbf)
 {
+    FileFsTrace traceSendFileCore("SendFileCore");
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> sendfileReq = {
         new (nothrow) uv_fs_t, FsUtils::FsReqCleanup};
     if (!sendfileReq) {
@@ -100,6 +103,7 @@ static int32_t SendFileCore(FileInfo &srcFdg, FileInfo &destFdg, struct stat &st
 
 static int32_t TruncateCore(const FileInfo &fileInfo)
 {
+    FileFsTrace traceTruncateCore("TruncateCore");
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = {
         new (nothrow) uv_fs_t, FsUtils::FsReqCleanup};
     if (!ftruncateReq) {
@@ -116,6 +120,7 @@ static int32_t TruncateCore(const FileInfo &fileInfo)
 
 static int32_t OpenCore(FileInfo &fileInfo, const int flags, const int mode)
 {
+    FileFsTrace traceOpenCore("OpenCore");
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = {
         new (nothrow) uv_fs_t, FsUtils::FsReqCleanup};
     if (!openReq) {
@@ -123,6 +128,9 @@ static int32_t OpenCore(FileInfo &fileInfo, const int flags, const int mode)
         return ENOMEM;
     }
     int ret = uv_fs_open(nullptr, openReq.get(), fileInfo.path.get(), flags, mode, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", fileInfo.path.get());
+    }
     if (ret < 0) {
         HILOGE("Failed to open srcFile with ret: %{public}d", ret);
         return ret;
@@ -187,6 +195,7 @@ static tuple<bool, int32_t> ValidMode(const optional<int32_t> &mode)
 FsResult<void> CopyFileCore::DoCopyFile(FileInfo &src, FileInfo &dest,
     const optional<int32_t> &mode)
 {
+    FileFsTrace traceDoCopyFile("DoCopyFile");
     auto [succMode, modeValue] = ValidMode(mode);
     if (!succMode) {
         HILOGE("Failed to convert mode to int32");

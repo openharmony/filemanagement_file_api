@@ -21,6 +21,7 @@
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
 #include "common_func.h"
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -56,6 +57,7 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
 
 static NError CheckFsStat(const FileInfo &fileInfo, uv_fs_t* req)
 {
+    FileFsTrace traceCheckFsStat("CheckFsStat");
     if (fileInfo.isPath) {
         int ret = uv_fs_stat(nullptr, req, fileInfo.path.get(), nullptr);
         if (ret < 0) {
@@ -74,6 +76,7 @@ static NError CheckFsStat(const FileInfo &fileInfo, uv_fs_t* req)
 
 napi_value Stat::Sync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceStatSync("StatSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE)) {
         HILOGE("Number of arguments unmatched");

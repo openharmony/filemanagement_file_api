@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -71,6 +72,7 @@ static tuple<bool, int64_t, bool, int64_t, unique_ptr<char[]>> ValidReadTextArg(
 
 static int OpenFile(const std::string& path)
 {
+    FileFsTrace traceOpenFile("OpenFile");
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> openReq = {
         new uv_fs_t, FsUtils::FsReqCleanup
     };
@@ -79,12 +81,17 @@ static int OpenFile(const std::string& path)
         return -ENOMEM;
     }
 
-    return uv_fs_open(nullptr, openReq.get(), path.c_str(), O_RDONLY,
-        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    int ret = uv_fs_open(nullptr, openReq.get(), path.c_str(),
+                         O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", path.c_str());
+    }
+    return ret;
 }
 
 static int ReadFromFile(int fd, int64_t offset, string& buffer)
 {
+    FileFsTrace traceReadFromFile("ReadFromFile");
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(buffer.size()));
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> readReq = {
         new uv_fs_t, FsUtils::FsReqCleanup };
@@ -92,12 +99,14 @@ static int ReadFromFile(int fd, int64_t offset, string& buffer)
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;
     }
+
     return uv_fs_read(nullptr, readReq.get(), fd, &readbuf, 1, offset, nullptr);
 }
 
 FsResult<tuple<string, int64_t>> ReadTextCore::DoReadText(const std::string &path,
     const std::optional<ReadTextOptions> &options)
 {
+    FileFsTrace traceDoReadText("DoReadText");
     auto [resGetReadTextArg, offset, hasLen, len, encoding] = ValidReadTextArg(options);
     if (!resGetReadTextArg) {
         return FsResult<tuple<string, int64_t>>::Error(EINVAL);
@@ -112,10 +121,12 @@ FsResult<tuple<string, int64_t>> ReadTextCore::DoReadText(const std::string &pat
     sfd.SetFD(fd);
 
     struct stat statbf;
+    FileFsTrace traceFstat("Fstat");
     if ((!sfd) || (fstat(sfd.GetFD(), &statbf) < 0)) {
         HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
         return FsResult<tuple<string, int64_t>>::Error(errno);
     }
+    traceFstat.End();
 
     if (offset > statbf.st_size) {
         HILOGE("Invalid offset: %{public}" PRIu64, offset);

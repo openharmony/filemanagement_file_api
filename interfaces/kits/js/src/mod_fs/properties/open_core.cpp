@@ -19,6 +19,7 @@
 #include <cstring>
 
 #include "file_entity.h"
+#include "file_fs_trace.h"
 #include "file_instantiator.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -86,12 +87,16 @@ static tuple<bool, uint32_t> ValidAndConvertFlags(const optional<int32_t> &mode)
 
 static int OpenFileByPath(const string &path, uint32_t mode)
 {
+    FileFsTrace traceOpenFileByPath("OpenFileByPath");
     unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!openReq) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;
     }
     int ret = uv_fs_open(nullptr, openReq.get(), path.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", path.c_str());
+    }
     return ret;
 }
 
@@ -181,6 +186,7 @@ FsResult<FsFile *> OpenCore::DoOpen(const string &path, const optional<int32_t> 
 #ifdef FILE_API_TRACE
     HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
 #endif
+    FileFsTrace traceDoOpen("DoOpen");
     auto [succMode, modeValue] = ValidAndConvertFlags(mode);
     if (!succMode) {
         return FsResult<FsFile *>::Error(EINVAL);

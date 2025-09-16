@@ -25,6 +25,7 @@
 #include <string>
 
 #include "common_func.h"
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "stream_entity.h"
@@ -56,6 +57,7 @@ StreamEntity* StreamNExporter::GetEntityOf(napi_env env, NFuncArg &funcArg)
 
 napi_value StreamNExporter::FlushSync(napi_env env, napi_callback_info cbInfo)
 {
+    FileFsTrace traceFlushSync("FlushSync");
     NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Number of arguments unmatched");
@@ -74,8 +76,9 @@ napi_value StreamNExporter::FlushSync(napi_env env, napi_callback_info cbInfo)
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
-
+    FileFsTrace traceFflush("fflush");
     int ret = fflush(fp.get());
+    traceFflush.End();
     if (ret < 0) {
         HILOGE("Failed to fflush file in the stream, ret: %{public}d", ret);
         NError(errno).ThrowErr(env);
@@ -183,6 +186,7 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info cbInfo)
 
 napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info cbInfo)
 {
+    FileFsTrace traceCloseSync("CloseSync");
     NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Number of arguments unmatched");
@@ -204,6 +208,7 @@ napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info cbInfo)
 
 napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
 {
+    FileFsTrace traceWriteSync("WriteSync");
     NFuncArg funcArg(env, cbInfo);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
@@ -230,7 +235,9 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
         return nullptr;
     }
     if (offset >= 0) {
+        FileFsTrace traceFseek("fseek");
         int ret = fseek(fp.get(), static_cast<long>(offset), SEEK_SET);
+        traceFseek.End();
         if (ret < 0) {
             HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
             NError(errno).ThrowErr(env);
@@ -238,7 +245,9 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info cbInfo)
         }
     }
 
+    FileFsTrace traceFwrite("fwrite");
     size_t writeLen = fwrite(buf, 1, len, fp.get());
+    traceFwrite.End();
     if ((writeLen == 0) && (writeLen != len)) {
         HILOGE("Failed to fwrite stream");
         NError(EIO).ThrowErr(env);

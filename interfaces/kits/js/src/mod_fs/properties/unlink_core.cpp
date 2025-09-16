@@ -19,6 +19,7 @@
 #include "hitrace_meter.h"
 #endif
 
+#include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -28,6 +29,7 @@ using namespace std;
 
 FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
 {
+    FileFsTrace traceDoUnlink("DoUnlink");
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> unlinkReq = {
         new uv_fs_t, FsUtils::FsReqCleanup };
     if (!unlinkReq) {

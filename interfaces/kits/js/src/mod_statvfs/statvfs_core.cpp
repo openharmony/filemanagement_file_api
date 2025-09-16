@@ -16,6 +16,7 @@
 #include "statvfs_core.h"
 
 #include <sys/statvfs.h>
+#include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -25,6 +26,7 @@ using namespace std;
 
 FsResult<int64_t> StatvfsCore::DoGetFreeSize(const string &path)
 {
+    FileFsTrace traceDoGetFreeSize("DoGetFreeSize");
     struct statvfs diskInfo;
     int ret = statvfs(path.c_str(), &diskInfo);
     if (ret != 0) {

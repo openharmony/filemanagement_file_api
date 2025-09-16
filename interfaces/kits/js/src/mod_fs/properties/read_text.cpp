@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -125,6 +126,7 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
 
 static int OpenFile(const std::string& path)
 {
+    FileFsTrace traceOpenFile("OpenFile");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup
     };
@@ -133,12 +135,17 @@ static int OpenFile(const std::string& path)
         return -ENOMEM;
     }
 
-    return uv_fs_open(nullptr, open_req.get(), path.c_str(), O_RDONLY,
-        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(),
+                         O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", path.c_str());
+    }
+    return ret;
 }
 
 static int ReadFromFile(int fd, int64_t offset, string& buffer)
 {
+    FileFsTrace traceReadFromFile("ReadFromFile");
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(buffer.size()));
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> read_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
@@ -151,6 +158,7 @@ static int ReadFromFile(int fd, int64_t offset, string& buffer)
 
 napi_value ReadText::Sync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceReadTextSync("ReadTextSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
@@ -181,11 +189,13 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     sfd.SetFD(fd);
 
     struct stat statbf;
+    FileFsTrace traceFstat("fstat");
     if ((!sfd) || (fstat(sfd.GetFD(), &statbf) < 0)) {
         HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
+    traceFstat.End();
 
     if (offset > statbf.st_size) {
         HILOGE("Invalid offset: %{public}" PRIu64, offset);

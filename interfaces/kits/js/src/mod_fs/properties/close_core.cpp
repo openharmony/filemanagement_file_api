@@ -19,6 +19,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -27,6 +28,7 @@ using namespace std;
 
 static int32_t CloseFd(int fd)
 {
+    FileFsTrace traceCloseFd("CloseFd");
     unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> closeReq = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!closeReq) {
         HILOGE("Failed to request heap memory.");
@@ -51,6 +53,7 @@ static bool ValidFd(const int32_t &fd)
 
 FsResult<void> CloseCore::DoClose(const int32_t &fd)
 {
+    FileFsTrace traceDoClose("DoClose");
     if (!ValidFd(fd)) {
         return FsResult<void>::Error(EINVAL);
     }
@@ -64,6 +67,7 @@ FsResult<void> CloseCore::DoClose(const int32_t &fd)
 
 FsResult<void> CloseCore::DoClose(FsFile *file)
 {
+    FileFsTrace traceDoClose("DoClose");
     auto ret = file->GetFD();
     if (!ret.IsSuccess()) {
         HILOGE("Failed to get fd");

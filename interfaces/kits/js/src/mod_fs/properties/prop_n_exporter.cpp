@@ -27,11 +27,12 @@
 #include "close.h"
 #include "common_func.h"
 #include "fdatasync.h"
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libn.h"
 #include "fsync.h"
-#include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "js_native_api.h"
 #include "lstat.h"
 #include "mkdtemp.h"
 #include "open.h"
@@ -104,13 +105,19 @@ struct AccessArgs {
 
 static int UvAccess(const string &path, int mode)
 {
+    FileFsTrace traceUvAccess("UvAccess");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup) *> access_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup};
     if (!access_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    return uv_fs_access(nullptr, access_req.get(), path.c_str(), mode, nullptr);
+
+    int ret = uv_fs_access(nullptr, access_req.get(), path.c_str(), mode, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", path.c_str());
+    }
+    return ret;
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
@@ -247,6 +254,7 @@ static bool GetAccessArgs(napi_env env, const NFuncArg &funcArg, AccessArgs &arg
 
 napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceAccessSync("AccessSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
@@ -322,6 +330,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceUnlink("Unlink");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of Arguments Unmatched");
@@ -343,6 +352,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
+        FileFsTrace traceUvUnlink("uv_fs_unlink");
         int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
             HILOGD("Failed to unlink with path ret %{public}d", ret);
@@ -402,13 +412,19 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
 
 static int MkdirCore(const string &path)
 {
+    FileFsTrace traceMkdirCore("MkdirCore");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!mkdir_req) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    return uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
+
+    int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", path.c_str());
+    }
+    return ret;
 }
 
 static NError MkdirExec(const string &path, bool recursion, bool hasOption)
@@ -494,6 +510,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceMkdirSync("MkdirSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
@@ -733,6 +750,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceWriteSync("WriteSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
@@ -768,6 +786,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    FileFsTrace traceUvWrite("uv_fs_write");
     int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);

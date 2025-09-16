@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -35,6 +36,7 @@ using namespace OHOS::FileManagement::LibN;
 
 static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 {
+    FileFsTrace trace("IsAllPath");
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     filesystem::path srcPath(string(srcFile.path.get()));
     filesystem::path dstPath(string(destFile.path.get()));
@@ -62,6 +64,7 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 
 static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& statbf)
 {
+    FileFsTrace traceSendFileCore("SendFileCore");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendfile_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!sendfile_req) {
@@ -98,6 +101,7 @@ static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& sta
 
 static NError TruncateCore(const FileInfo& fileInfo)
 {
+    FileFsTrace traceTruncateCore("TruncateCore");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!ftruncate_req) {
@@ -114,6 +118,7 @@ static NError TruncateCore(const FileInfo& fileInfo)
 
 static NError OpenCore(FileInfo& fileInfo, const int flags, const int mode)
 {
+    FileFsTrace traceOpenCore("OpenCore");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
@@ -121,6 +126,9 @@ static NError OpenCore(FileInfo& fileInfo, const int flags, const int mode)
         return NError(ENOMEM);
     }
     int ret = uv_fs_open(nullptr, open_req.get(), fileInfo.path.get(), flags, mode, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", fileInfo.path.get());
+    }
     if (ret < 0) {
         HILOGE("Failed to open srcFile with ret: %{public}d", ret);
         return NError(ret);

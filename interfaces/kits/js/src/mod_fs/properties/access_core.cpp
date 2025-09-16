@@ -33,6 +33,7 @@
 #include "hitrace_meter.h"
 #endif
 
+#include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -55,12 +56,18 @@ const int BASE_USER_RANGE = 200000;
 
 static int UvAccess(const string &path, int mode)
 {
+    FileFsTrace traceUvAccess("UvAccess");
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> accessReq = {new uv_fs_t, FsUtils::FsReqCleanup};
     if (!accessReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    return uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
+
+    int ret = uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", path.c_str());
+    }
+    return ret;
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
@@ -182,6 +189,7 @@ static bool ValidAccessArgs(const std::string &path, const std::optional<AccessM
 
 FsResult<bool> AccessCore::DoAccess(const std::string& path, const std::optional<AccessModeType> &mode)
 {
+    FileFsTrace traceDoAccess("DoAccess");
     int finalMode = 0;
     int flag = DEFAULT_FLAG;
     if (!ValidAccessArgs(path, mode, finalMode)) {
@@ -198,6 +206,7 @@ FsResult<bool> AccessCore::DoAccess(const std::string& path, const std::optional
 
 FsResult<bool> AccessCore::DoAccess(const std::string& path, const AccessModeType &mode, const AccessFlag &flag)
 {
+    FileFsTrace traceDoAccess("DoAccess");
     int finalMode = static_cast<int>(mode);
     int finalFlag = static_cast<int>(flag);
     if (!ValidAccessArgs(path, std::make_optional(mode), finalMode)) {

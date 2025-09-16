@@ -22,6 +22,7 @@
 #include <sstream>
 #include <unistd.h>
 
+#include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
@@ -39,22 +40,34 @@ using namespace std;
 
 static int UvAccess(const string &path, int mode)
 {
+    FileFsTrace traceUvAccess("UvAccess");
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> accessReq = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!accessReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    return uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
+
+    int ret = uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", path.c_str());
+    }
+    return ret;
 }
 
 static int MkdirCore(const string &path)
 {
+    FileFsTrace traceMkdirCore("MkdirCore");
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> mkdirReq = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!mkdirReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    return uv_fs_mkdir(nullptr, mkdirReq.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
+
+    int ret = uv_fs_mkdir(nullptr, mkdirReq.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", path.c_str());
+    }
+    return ret;
 }
 
 static int32_t MkdirExec(const string &path, bool recursion, bool hasOption)
@@ -92,6 +105,7 @@ static int32_t MkdirExec(const string &path, bool recursion, bool hasOption)
 
 FsResult<void> MkdirCore::DoMkdir(const std::string &path, std::optional<bool> recursion)
 {
+    FileFsTrace traceDoMkdir("DoMkdir");
     bool hasOption = false;
     bool mkdirRecursion = false;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)

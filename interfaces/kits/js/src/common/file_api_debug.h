@@ -13,34 +13,20 @@
  * limitations under the License.
  */
 
-#include "create_stream_core.h"
-
-#include <memory>
-
-#include "file_fs_trace.h"
-#include "file_utils.h"
-#include "filemgmt_libhilog.h"
-#include "fs_utils.h"
-#include "stream_instantiator.h"
-#include "stream_entity.h"
+#ifndef INTERFACES_KITS_JS_SRC_COMMON_FILE_API_DEBUG_H
+#define INTERFACES_KITS_JS_SRC_COMMON_FILE_API_DEBUG_H
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-using namespace std;
 
-FsResult<FsStream *> CreateStreamCore::DoCreateStream(const std::string &path, const std::string &mode)
-{
-    FileFsTrace traceDoCreateStream("DoCreateStream");
-    FILE *file = fopen(path.c_str(), mode.c_str());
-    if (!file) {
-        HILOGE("Failed to fopen file by path");
-        return FsResult<FsStream *>::Error(errno);
-    }
-
-    return StreamInstantiator::InstantiateStream(move(file));
-}
+class FileApiDebug {
+public:
+    static bool isLogEnabled;
+    static bool isTraceEnhanced;
+};
 
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
+#endif // INTERFACES_KITS_JS_SRC_COMMON_FILE_API_DEBUG_H

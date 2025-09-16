@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "common_func.h"
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
@@ -55,6 +56,7 @@ napi_value WatcherNExporter::Constructor(napi_env env, napi_callback_info info)
 
 napi_value WatcherNExporter::Stop(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceWatcherStop("WatcherStop");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Failed to get param when stop.");
@@ -79,6 +81,7 @@ napi_value WatcherNExporter::Stop(napi_env env, napi_callback_info info)
 
 napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceWatcherStart("WatcherStart");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Failed to get param when start.");
