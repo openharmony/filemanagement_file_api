@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -196,8 +196,8 @@ ConnectDfsCB *CheckAndGetParameters(ConnectDfsCB *connectDfsCB, napi_handle_scop
         HILOGE("ConnectDfsCB, GetParam connectDfsCB is null");
         return nullptr;
     }
-    napi_open_handle_scope(connectDfsCB->cbBase.cbInfo.env, scope);
-    if (scope == nullptr) {
+    napi_status ret = napi_open_handle_scope(connectDfsCB->cbBase.cbInfo.env, scope);
+    if (ret != napi_ok || scope == nullptr) {
         delete connectDfsCB;
         connectDfsCB = nullptr;
         return nullptr;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -260,7 +260,7 @@ void TransListener::CallbackComplete(std::shared_ptr<UvEntry> entry)
     napi_handle_scope scope = nullptr;
     napi_env env = entry->callback->env;
     napi_status status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok) {
+    if (status != napi_ok || scope == nullptr) {
         HILOGE("Failed to open handle scope, status: %{public}d.", status);
         return;
     }

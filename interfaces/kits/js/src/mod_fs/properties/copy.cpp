@@ -183,7 +183,7 @@ void Copy::ReceiveComplete(std::shared_ptr<UvEntry> entry)
     napi_handle_scope scope = nullptr;
     napi_env env = entry->callback->env;
     napi_status status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok) {
+    if (status != napi_ok || scope == nullptr) {
         HILOGE("Failed to open handle scope, status: %{public}d.", status);
         return;
     }
