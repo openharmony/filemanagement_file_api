@@ -222,4 +222,69 @@ int uv_fs_unlink(uv_loop_t *loop, uv_fs_t *req, const char * file, uv_fs_cb cb)
 
     return realUvFsUnlink(loop, req, file, cb);
 }
+
+int uv_fs_stat(uv_loop_t *loop, uv_fs_t *req, const char *path, uv_fs_cb cb)
+{
+    if (UvfsMock::IsMockable()) {
+        return UvfsMock::GetMock()->uv_fs_stat(loop, req, path, cb);
+    }
+
+    static int (*realUvFsStat)(uv_loop_t *, uv_fs_t *, const char *, uv_fs_cb) = []() {
+        auto func = (int (*)(uv_loop_t *, uv_fs_t *, const char *, uv_fs_cb))dlsym(RTLD_NEXT, "uv_fs_stat");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real uv_fs_stat: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realUvFsStat) {
+        return -1;
+    }
+
+    return realUvFsStat(loop, req, path, cb);
+}
+
+int uv_fs_utime(uv_loop_t *loop, uv_fs_t *req, const char *path, double atime, double mtime, uv_fs_cb cb)
+{
+    if (UvfsMock::IsMockable()) {
+        return UvfsMock::GetMock()->uv_fs_utime(loop, req, path, atime, mtime, cb);
+    }
+
+    static int (*realUvFsUtime)(uv_loop_t *, uv_fs_t *, const char *, double, double, uv_fs_cb) = []() {
+        auto func =
+            (int (*)(uv_loop_t *, uv_fs_t *, const char *, double, double, uv_fs_cb))dlsym(RTLD_NEXT, "uv_fs_utime");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real uv_fs_utime: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realUvFsUtime) {
+        return -1;
+    }
+
+    return realUvFsUtime(loop, req, path, atime, mtime, cb);
+}
+
+int uv_fs_symlink(uv_loop_t *loop, uv_fs_t *req, const char *path, const char *newPath, int flags, uv_fs_cb cb)
+{
+    if (UvfsMock::IsMockable()) {
+        return UvfsMock::GetMock()->uv_fs_symlink(loop, req, path, newPath, flags, cb);
+    }
+
+    static int (*realUvFsSymlink)(uv_loop_t *, uv_fs_t *, const char *, const char *, int, uv_fs_cb) = []() {
+        auto func =
+            (int (*)(uv_loop_t *, uv_fs_t *, const char *, const char *, int, uv_fs_cb))dlsym(RTLD_NEXT, "uv_fs_symlink");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real uv_fs_symlink: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realUvFsSymlink) {
+        return -1;
+    }
+
+    return realUvFsSymlink(loop, req, path, newPath, flags, cb);
+}
 #endif
