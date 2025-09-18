@@ -52,17 +52,17 @@ static tuple<bool, bool> JudgeExistAndEmpty(const string &path)
 static int RmDirectory(const string &path)
 {
     filesystem::path pathName(path);
-    std::error_code errCode;
-    if (filesystem::exists(pathName, errCode)) {
-        std::error_code errCode;
-        (void)filesystem::remove_all(pathName, errCode);
-        if (errCode.value() != 0) {
-            HILOGE("Failed to remove directory, error code: %{public}d", errCode.value());
-            return errCode.value();
+    std::error_code existsErrCode;
+    if (filesystem::exists(pathName, existsErrCode)) {
+        std::error_code removeErrCode;
+        (void)filesystem::remove_all(pathName, removeErrCode);
+        if (removeErrCode.value() != 0) {
+            HILOGE("Failed to remove directory, error code: %{public}d", removeErrCode.value());
+            return removeErrCode.value();
         }
-    } else if (errCode.value() != ERRNO_NOERR) {
-        HILOGE("fs exists fail, errcode is %{public}d", errCode.value());
-        return errCode.value();
+    } else if (existsErrCode.value() != ERRNO_NOERR) {
+        HILOGE("fs exists fail, errcode is %{public}d", existsErrCode.value());
+        return existsErrCode.value();
     }
     return ERRNO_NOERR;
 }
