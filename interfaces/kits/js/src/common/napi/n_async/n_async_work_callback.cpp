@@ -43,7 +43,11 @@ static void CallbackExecute(napi_env env, void *data)
 static void CallbackComplete(napi_env env, napi_status status, void *data)
 {
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    napi_status result = napi_open_handle_scope(env, &scope);
+    if (result != napi_ok || scope == nullptr) {
+        HILOGE("open handle scope failed");
+        return;
+    }
     auto ctx = static_cast<NAsyncContextCallback *>(data);
     if (ctx == nullptr) {
         napi_close_handle_scope(env, scope);
