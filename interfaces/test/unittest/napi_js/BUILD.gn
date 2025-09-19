@@ -26,6 +26,10 @@ ohos_unittest("napi_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/test/unittest/napi_js/mod_fs/mock",
+    "${file_api_path}/interfaces/kits/native/task_signal",
+    "${utils_path}/common/include",
+    "mock",
+    "mod_fs/mock",
   ]
 
   sources = [
@@ -36,13 +40,16 @@ ohos_unittest("napi_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/read_text.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/rename.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/truncate.cpp",
-    "mod_fs/mock/libn_mock.cpp",
-    "mod_fs/mock/uv_fs_mock.cpp",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/utimes.cpp",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/symlink.cpp",
     "mod_fs/properties/close_mock_test.cpp",
     "mod_fs/properties/mkdtemp_mock_test.cpp",
     "mod_fs/properties/read_text_mock_test.cpp",
     "mod_fs/properties/rename_mock_test.cpp",
     "mod_fs/properties/truncate_mock_test.cpp",
+    "mod_fs/mock/libn_mock.cpp",
+    "mod_fs/mock/uv_fs_mock.cpp",
+    "mod_fs/properties/utimes_mock_test.cpp",
   ]
 
   deps = [
@@ -67,6 +74,79 @@ ohos_unittest("napi_fs_test") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
+
+  defines = [ "private=public" ]
+
+  use_exceptions = true
+}
+
+ohos_unittest("napi_file_fs_properties_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
+  module_out_path = "file_api/file_api"
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/common",
+    "${file_api_path}/interfaces/kits/js/src/common/file_helper",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/kits/native/task_signal",
+    "${utils_path}/common/include",
+    "mock",
+    "mod_fs/mock",
+  ]
+
+  sources = [
+    "${file_api_path}/interfaces/kits/js/src/common/file_helper/fd_guard.cpp",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/common_func.cpp",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/fdatasync.cpp",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/prop_n_exporter.cpp",
+    "fdatasync_mock_test.cpp",
+    "mock/fdatasync_mock.cpp",
+    "mock/prop_n_exporter_mock.cpp",
+    "mod_fs/mock/libn_mock.cpp",
+    "mod_fs/mock/uv_fs_mock.cpp",
+    "prop_n_exporter_mock_test.cpp",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/js:fs",
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
+
+  external_deps = [
+    "ability_base:zuri",
+    "app_file_service:fileuri_native",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "libuv:uv",
+    "napi:ace_napi",
+    "samgr:samgr_proxy",
+  ]
+
+  include_dirs += [ "${file_api_path}/interfaces/kits/rust/include" ]
+
+  external_deps += [
+      "ability_runtime:ability_manager",
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:extensionkit_native",
+      "access_token:libtokenid_sdk",
+      "app_file_service:fileuri_native",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "data_share:datashare_common",
+      "data_share:datashare_consumer",
+      "dfs_service:distributed_file_daemon_kit_inner",
+      "dfs_service:libdistributedfileutils",
+      "hisysevent:libhisysevent",
+      "hitrace:hitrace_meter",
+    ]
 
   defines = [ "private=public" ]
 

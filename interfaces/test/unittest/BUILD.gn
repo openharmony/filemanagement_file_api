@@ -30,6 +30,7 @@ group("file_api_unittest") {
     "napi_js:napi_fs_test",
     "remote_uri:remote_uri_test",
     "task_signal:task_signal_test",
+    "napi_js:napi_file_fs_properties_test",
   ]
   if (file_api_feature_hyperaio) {
     deps += [ "hyperaio:hyperaio_test" ]
