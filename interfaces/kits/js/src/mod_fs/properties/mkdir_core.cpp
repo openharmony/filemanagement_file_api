@@ -46,12 +46,7 @@ static int UvAccess(const string &path, int mode)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-
-    int ret = uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", path.c_str());
-    }
-    return ret;
+    return uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
 }
 
 static int MkdirCore(const string &path)
@@ -64,9 +59,6 @@ static int MkdirCore(const string &path)
     }
 
     int ret = uv_fs_mkdir(nullptr, mkdirReq.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", path.c_str());
-    }
     return ret;
 }
 
@@ -116,6 +108,9 @@ FsResult<void> MkdirCore::DoMkdir(const std::string &path, std::optional<bool> r
 #endif
     auto err = MkdirExec(path, mkdirRecursion, hasOption);
     if (err) {
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Path is %{public}s, mkdirRecursion is %{public}d", path.c_str(), mkdirRecursion);
+        }
         return FsResult<void>::Error(err);
     }
     return FsResult<void>::Success();

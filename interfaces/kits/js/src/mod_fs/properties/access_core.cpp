@@ -62,12 +62,7 @@ static int UvAccess(const string &path, int mode)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-
-    int ret = uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", path.c_str());
-    }
-    return ret;
+    return uv_fs_access(nullptr, accessReq.get(), path.c_str(), mode, nullptr);
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
@@ -149,6 +144,9 @@ static int HandleLocalCheck(const string &path, int mode)
 
 static int Access(const string &path, int mode, int flag)
 {
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s, mode is %{public}d", path.c_str(), mode);
+    }
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {
         return HandleLocalCheck(path, mode);
@@ -197,7 +195,7 @@ FsResult<bool> AccessCore::DoAccess(const std::string& path, const std::optional
     }
     int ret = Access(path, finalMode, flag);
     if (ret < 0 && (std::string_view(uv_err_name(ret)) != "ENOENT")) {
-        HILOGE("Failed to access file by path");
+        HILOGE("Failed to access file by path, ret:%{public}d", ret);
         return FsResult<bool>::Error(ret);
     }
     bool isAccess = (ret == 0);

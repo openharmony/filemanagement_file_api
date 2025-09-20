@@ -143,11 +143,7 @@ static int OpenFileByPath(const string &path, unsigned int mode)
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;
     }
-    int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode, S_IRUSR |
-        S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", path.c_str());
-    }
+    int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     return ret;
 }
 
@@ -197,6 +193,9 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, unsi
     string bundleName = uri.GetAuthority();
     AppFileService::ModuleFileUri::FileUri fileUri(uriStr);
     string realPath = fileUri.GetRealPath();
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("UriStr is %{public}s, realPath is %{public}s", uriStr.c_str(), realPath.c_str());
+    }
     if (bundleName == MEDIA) {
         string userId;
         if (CommonFunc::GetAndCheckUserId(&uri, userId) && CommonFunc::IsSystemApp()) {

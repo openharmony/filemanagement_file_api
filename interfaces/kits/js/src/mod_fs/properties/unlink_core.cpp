@@ -39,7 +39,10 @@ FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
 
     int ret = uv_fs_unlink(nullptr, unlinkReq.get(), src.c_str(), nullptr);
     if (ret < 0) {
-        HILOGD("Failed to unlink with path");
+        HILOGD("Failed to unlink with path, ret is %{public}d", ret);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Src is %{public}s", src.c_str());
+        }
         return FsResult<void>::Error(ret);
     }
 

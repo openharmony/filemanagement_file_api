@@ -112,12 +112,7 @@ static int UvAccess(const string &path, int mode)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-
-    int ret = uv_fs_access(nullptr, access_req.get(), path.c_str(), mode, nullptr);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", path.c_str());
-    }
-    return ret;
+    return uv_fs_access(nullptr, access_req.get(), path.c_str(), mode, nullptr);
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
@@ -178,6 +173,9 @@ static int HandleLocalCheck(const string &path, int mode)
         if (val[0] == POSITION_LOCAL || val[0] == POSITION_BOTH) {
             return 0;
         }
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Path is %{public}s, the attributea value of the file is %{public}c", path.c_str(), val[0]);
+        }
         return ENOENT;
     }
     // check if the distributed file of /data/storage/el2/distributedfiles is on the local,
@@ -199,6 +197,9 @@ static int HandleLocalCheck(const string &path, int mode)
 
 static int AccessCore(const string &path, int mode, int flag = DEFAULT_FLAG)
 {
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s, mode is %{public}d", path.c_str(), mode);
+    }
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {
         return HandleLocalCheck(path, mode);
@@ -404,6 +405,9 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     if (ret < 0) {
         HILOGD("Failed to unlink with path ret %{public}d", ret);
         NError(ret).ThrowErr(env);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Path is %{public}s", path.get());
+        }
         return nullptr;
     }
 
@@ -419,12 +423,7 @@ static int MkdirCore(const string &path)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-
-    int ret = uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", path.c_str());
-    }
-    return ret;
+    return uv_fs_mkdir(nullptr, mkdir_req.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
 }
 
 static NError MkdirExec(const string &path, bool recursion, bool hasOption)
@@ -539,6 +538,9 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
     auto err = MkdirExec(path.get(), recursion, hasOption);
     if (err) {
         err.ThrowErr(env);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Path is %{public}s, recursion is %{public}d", path.get(), recursion);
+        }
         return nullptr;
     }
     return NVal::CreateUndefined(env).val_;

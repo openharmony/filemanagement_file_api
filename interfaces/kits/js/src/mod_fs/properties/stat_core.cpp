@@ -77,6 +77,9 @@ static int32_t CheckFsStat(const FileInfo &fileInfo, uv_fs_t *req)
         int ret = uv_fs_stat(nullptr, req, fileInfo.path.get(), nullptr);
         if (ret < 0) {
             HILOGD("Failed to stat file with path, ret is %{public}d", ret);
+            if (FileApiDebug::isLogEnabled) {
+                HILOGD("Path is %{public}s", fileInfo.path.get());
+            }
             return ret;
         }
     } else {

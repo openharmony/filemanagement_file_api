@@ -28,6 +28,8 @@ public:
     explicit FileFsTrace(const std::string& value);
     ~FileFsTrace();
     void End();
+private:
+    bool isEnded = false;
 };
 
 } // namespace ModuleFileIO

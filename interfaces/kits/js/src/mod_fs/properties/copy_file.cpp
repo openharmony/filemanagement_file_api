@@ -126,9 +126,6 @@ static NError OpenCore(FileInfo& fileInfo, const int flags, const int mode)
         return NError(ENOMEM);
     }
     int ret = uv_fs_open(nullptr, open_req.get(), fileInfo.path.get(), flags, mode, nullptr);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", fileInfo.path.get());
-    }
     if (ret < 0) {
         HILOGE("Failed to open srcFile with ret: %{public}d", ret);
         return NError(ret);
@@ -237,6 +234,10 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Src isPath is %{public}d, Src is %{public}s, Dest isPath is %{public}d, Dest is %{public}s", src.isPath,
+            src.path.get(), dest.isPath, dest.path.get());
+    }
     if (src.isPath && dest.isPath) {
         auto err = IsAllPath(src, dest);
         if (err) {

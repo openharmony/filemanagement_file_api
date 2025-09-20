@@ -28,8 +28,9 @@ FileFsTrace::FileFsTrace(const std::string& value)
 
 void FileFsTrace::End()
 {
-    if (FileApiDebug::isTraceEnhanced) {
+    if (!isEnded && FileApiDebug::isTraceEnhanced) {
         FinishTrace(HITRACE_TAG_FILEMANAGEMENT);
+        isEnded = true;
     }
 }
 

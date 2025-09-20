@@ -127,6 +127,9 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
 static int OpenFile(const std::string& path)
 {
     FileFsTrace traceOpenFile("OpenFile");
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s", path.c_str());
+    }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup
     };
@@ -135,12 +138,8 @@ static int OpenFile(const std::string& path)
         return -ENOMEM;
     }
 
-    int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(),
-                         O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", path.c_str());
-    }
-    return ret;
+    return uv_fs_open(nullptr, open_req.get(), path.c_str(), O_RDONLY,
+        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
 }
 
 static int ReadFromFile(int fd, int64_t offset, string& buffer)

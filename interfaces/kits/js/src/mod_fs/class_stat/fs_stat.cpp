@@ -23,6 +23,7 @@
 #include <sys/xattr.h>
 #endif
 
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -31,6 +32,9 @@ using namespace std;
 
 bool FsStat::CheckStatMode(mode_t mode)
 {
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Mode is %{public}llu", (entity->stat_.st_mode & S_IFMT));
+    }
     return (entity->stat_.st_mode & S_IFMT) == mode;
 }
 

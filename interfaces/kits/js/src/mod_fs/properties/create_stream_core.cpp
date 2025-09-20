@@ -34,7 +34,10 @@ FsResult<FsStream *> CreateStreamCore::DoCreateStream(const std::string &path, c
     FileFsTrace traceDoCreateStream("DoCreateStream");
     FILE *file = fopen(path.c_str(), mode.c_str());
     if (!file) {
-        HILOGE("Failed to fopen file by path");
+        HILOGE("Failed to fdopen file by path, errno is %{public}d", errno);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("StreamPath is %{public}s, StreamMode is %{public}s", path.c_str(), mode.c_str());
+        }
         return FsResult<FsStream *>::Error(errno);
     }
 

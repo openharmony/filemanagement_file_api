@@ -25,6 +25,7 @@ namespace FileManagement {
 namespace ModuleStatvfs {
 using namespace FileManagement::LibN;
 using ModuleFileIO::FileFsTrace;
+using ModuleFileIO::FileApiDebug;
 
 napi_value GetFreeSizeSync(napi_env env, napi_callback_info info)
 {
@@ -51,6 +52,9 @@ napi_value GetFreeSizeSync(napi_env env, napi_callback_info info)
     traceStatvfs.End();
     if (ret != 0) {
         NError(errno).ThrowErr(env);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Path is %{public}s", path.get());
+        }
         return nullptr;
     }
     unsigned long long freeSize = static_cast<unsigned long long>(diskInfo.f_bsize) *

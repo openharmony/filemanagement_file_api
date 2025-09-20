@@ -66,8 +66,11 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
     FILE *file = fopen(argPath.c_str(), argMode.c_str());
     traceFopen.End();
     if (!file) {
-        HILOGE("Failed to fdopen file by path");
+        HILOGE("Failed to fdopen file by path, errno is %{public}d", errno);
         NError(errno).ThrowErr(env);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("StreamPath is %{public}s, StreamMode is %{public}s", argPath.c_str(), argMode.c_str());
+        }
         return nullptr;
     }
     std::shared_ptr<FILE> fp(file, fclose);

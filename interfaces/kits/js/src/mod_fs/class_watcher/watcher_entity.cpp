@@ -60,19 +60,8 @@ bool FileWatcher::InitNotify()
 tuple<bool, int> FileWatcher::CheckEventWatched(const string &fileName, const uint32_t &event)
 {
     int wd = -1;
-    if (FileApiDebug::isLogEnabled) {
-        for (const auto& entry : wdFileNameMap_) {
-            std::string key = entry.first;
-            int key1 = entry.second.first;
-            uint32_t value2 = entry.second.second;
-            HILOGD("fileName %{public}s, wd %{public}d, event %{public}d", key.c_str(), key1, value2);
-        }
-    }
     auto iter = wdFileNameMap_.find(fileName);
     if (iter == wdFileNameMap_.end()) {
-        if (FileApiDebug::isLogEnabled) {
-            HILOGD("Not find filename in map filename %{public}s", fileName.c_str());
-        }
         return {false, wd};
     }
     wd = iter->second.first;
@@ -89,16 +78,13 @@ int FileWatcher::StartNotify(shared_ptr<WatcherInfoArg> arg)
         HILOGE("Failed to start notify notifyFd_:%{public}d", notifyFd_);
         return EIO;
     }
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Start notify notifyFd_ %{public}d, filename %{public}s, arg->event %{public}d", notifyFd_,
-            arg->fileName.c_str(), arg->events);
-    }
 
     auto [isWatched, wd] = CheckEventWatched(arg->fileName, arg->events);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Not find filename in map filename %{public}s, arg->filename %{public}d, isWatched %{public}d, "
+            "wd %{public}d", arg->fileName.c_str(), arg->events, isWatched, wd);
+    }
     if (isWatched && wd > 0) {
-        if (FileApiDebug::isLogEnabled) {
-            HILOGD("IsWatched && wd > 0, wd is %{public}d", wd);
-        }
         arg->wd = wd;
         return ERRNO_NOERR;
     }
@@ -109,22 +95,17 @@ int FileWatcher::StartNotify(shared_ptr<WatcherInfoArg> arg)
         watchEvents = arg->events;
     }
     int newWd = inotify_add_watch(notifyFd_, arg->fileName.c_str(), watchEvents);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Start intify_add_watch notifyFd_ %{public}d, filename %{public}s, arg->event %{public}d, "
-            "watchEvents %{public}d", notifyFd_, arg->fileName.c_str(), arg->events, watchEvents);
-    }
-
     if (newWd < 0) {
         HILOGE("Failed to start notify errCode:%{public}d", errno);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Start intify_add_watch notifyFd_ %{public}d, filename %{public}s, arg->event %{public}d, "
+                "watchEvents %{public}d", notifyFd_, arg->fileName.c_str(), arg->events, watchEvents);
+        }
         return errno;
     }
     arg->wd = newWd;
     wdFileNameMap_[arg->fileName].first = newWd;
     wdFileNameMap_[arg->fileName].second = watchEvents;
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Success start watcher wd %{public}d, filename %{public}s, watchEvents %{public}d",
-            arg->wd, arg->fileName.c_str(), watchEvents);
-    }
     return ERRNO_NOERR;
 }
 
@@ -180,9 +161,6 @@ int FileWatcher::CloseNotifyFdLocked()
 
 int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
 {
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Stop notify notifyFd_ %{public}d", notifyFd_);
-    }
     unique_lock<mutex> lock(watchMutex_);
     if (notifyFd_ < 0) {
         HILOGE("Failed to stop notify notifyFd_:%{public}d", notifyFd_);
@@ -201,10 +179,10 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
         lock_guard<mutex> lock(readMutex_);
         if (!(closed_ && reading_)) {
             oldWd = inotify_rm_watch(notifyFd_, arg->wd);
+            HILOGE("rm watch failed, err: %{public}d", errno);
             if (FileApiDebug::isLogEnabled) {
                 HILOGD("Stop inotify_rm_watch, notifyFd_ %{public}d, arg->wd %{public}d", notifyFd_, arg->wd);
             }
-            HILOGE("rm watch failed, err: %{public}d", errno);
         } else {
             HILOGE("rm watch fail");
         }
@@ -325,10 +303,6 @@ uint32_t FileWatcher::RemoveWatcherInfo(shared_ptr<WatcherInfoArg> arg)
     watcherInfoSet_.erase(arg);
     uint32_t otherEvents = 0;
     for (const auto &iter : watcherInfoSet_) {
-        if (FileApiDebug::isLogEnabled) {
-            HILOGD("Stop removewatcherinfo filename %{public}s, wd %{public}d, event %{public}d",
-                arg->fileName.c_str(), iter->wd, iter->events);
-        }
         if (iter->fileName == arg->fileName && iter->wd > 0) {
             otherEvents |= iter->events;
         }
@@ -363,16 +337,13 @@ void FileWatcher::NotifyEvent(const struct inotify_event *event, WatcherCallback
             watchEvent = iter->events;
         }
         if (!CheckIncludeEvent(event->mask, watchEvent)) {
-            if (FileApiDebug::isLogEnabled) {
-                HILOGD("Watcher event %{public}d", watchEvent);
-            }
             continue;
         }
         if (event->len > 0) {
             fileName += "/" + string(event->name);
         }
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("event->mask %{public}d", event->mask);
+            HILOGD("Watcher event %{public}d, event->mask %{public}d", watchEvent, event->mask);
         }
         callback(iter->env, iter->nRef, fileName, event->mask & IN_ALL_EVENTS, event->cookie);
     }

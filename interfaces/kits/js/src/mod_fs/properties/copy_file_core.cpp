@@ -128,9 +128,6 @@ static int32_t OpenCore(FileInfo &fileInfo, const int flags, const int mode)
         return ENOMEM;
     }
     int ret = uv_fs_open(nullptr, openReq.get(), fileInfo.path.get(), flags, mode, nullptr);
-    if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", fileInfo.path.get());
-    }
     if (ret < 0) {
         HILOGE("Failed to open srcFile with ret: %{public}d", ret);
         return ret;
@@ -202,6 +199,10 @@ FsResult<void> CopyFileCore::DoCopyFile(FileInfo &src, FileInfo &dest,
         return FsResult<void>::Error(EINVAL);
     }
 
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Src isPath is %{public}d, Src is %{public}s, Dest isPath is %{public}d, Dest is %{public}s", src.isPath,
+            src.path.get(), dest.isPath, dest.path.get());
+    }
     if (src.isPath && dest.isPath) {
         auto err = IsAllPath(src, dest);
         if (err) {
