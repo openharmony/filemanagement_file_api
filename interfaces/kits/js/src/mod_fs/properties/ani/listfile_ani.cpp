@@ -59,10 +59,12 @@ tuple<bool, long> ParseLongParam(ani_env *env, ani_object obj, string tag)
     if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &result_ref)) {
         return { false, result };
     }
+
     env->Reference_IsUndefined(result_ref, &isUndefined);
     if (isUndefined) {
         return { true, result };
     }
+    
     ani_long result_ref_res;
     if (ANI_OK != env->Object_CallMethodByName_Long(
         static_cast<ani_object>(result_ref), "toLong", nullptr, &result_ref_res)) {

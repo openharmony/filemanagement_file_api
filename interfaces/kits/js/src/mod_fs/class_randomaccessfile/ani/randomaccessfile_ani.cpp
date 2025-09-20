@@ -453,7 +453,7 @@ static ani_object CreateWriteStreamOptions(ani_env *env, int64_t start, int flag
         }
     }
 
-    return move(obj);
+    return obj;
 }
 
 static ani_object CreateReadStream(ani_env *env, ani_string filePath, ani_object options)
@@ -487,8 +487,8 @@ static ani_object CreateWriteStream(ani_env *env, ani_string filePath, ani_objec
 {
     auto classDesc = FS::WriteStream::classDesc.c_str();
     ani_class cls;
-    ani_status res;
-    if ((res = env->FindClass(classDesc, &cls)) != ANI_OK) {
+    ani_status res = env->FindClass(classDesc, &cls);
+    if (res != ANI_OK) {
         HILOGE("Cannot find class %{public}s, err: %{public}d", classDesc, res);
         return nullptr;
     }
@@ -496,13 +496,15 @@ static ani_object CreateWriteStream(ani_env *env, ani_string filePath, ani_objec
     auto ctorDesc = FS::WriteStream::ctorDesc.c_str();
     auto ctorSig = FS::WriteStream::ctorSig.c_str();
     ani_method ctor;
-    if ((res = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
+    res = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor);
+    if (res != ANI_OK) {
         HILOGE("Cannot find constructor method for class %{public}s, err: %{public}d", classDesc, res);
         return nullptr;
     }
 
     ani_object obj;
-    if ((res = env->Object_New(cls, ctor, &obj, filePath, options)) != ANI_OK) {
+    res = env->Object_New(cls, ctor, &obj, filePath, options);
+    if (res != ANI_OK) {
         HILOGE("New %{public}s obj Failed, err: %{public}d", classDesc, res);
         return nullptr;
     }

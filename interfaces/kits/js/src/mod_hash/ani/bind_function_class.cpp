@@ -71,7 +71,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     status = BindHashStreamMethods(env);
     if (status != ANI_OK) {
-        HILOGE("Cannot bind native static methods for hashstream!");
+        HILOGE("Cannot bind native static methods for hashstream! status: %{public}d", status);
         return status;
     };
 

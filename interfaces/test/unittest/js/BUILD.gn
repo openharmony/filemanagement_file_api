@@ -480,20 +480,20 @@ ohos_unittest("napi_file_fs_test") {
   include_dirs += [ "${file_api_path}/interfaces/kits/rust/include" ]
 
   external_deps += [
-      "ability_runtime:ability_manager",
-      "ability_runtime:abilitykit_native",
-      "ability_runtime:extensionkit_native",
-      "access_token:libtokenid_sdk",
-      "app_file_service:fileuri_native",
-      "bundle_framework:appexecfwk_base",
-      "bundle_framework:appexecfwk_core",
-      "data_share:datashare_common",
-      "data_share:datashare_consumer",
-      "dfs_service:distributed_file_daemon_kit_inner",
-      "dfs_service:libdistributedfileutils",
-      "hisysevent:libhisysevent",
-      "hitrace:hitrace_meter",
-    ]
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:extensionkit_native",
+    "access_token:libtokenid_sdk",
+    "app_file_service:fileuri_native",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "dfs_service:libdistributedfileutils",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+  ]
 
   defines = [ "private=public" ]
 

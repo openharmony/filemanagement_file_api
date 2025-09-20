@@ -99,7 +99,8 @@ tuple<bool, optional<double>> TypeConverter::ToOptionalDouble(ani_env *env, cons
     }
 
     ani_double doubleValue;
-    if (ANI_OK == env->Object_CallMethodByName_Double(value, "toDouble", nullptr, &doubleValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Double(value, BasicTypesConverter::toDouble.c_str(), nullptr,
+        &doubleValue)) {
         return { true, make_optional<double>(doubleValue) };
     }
 

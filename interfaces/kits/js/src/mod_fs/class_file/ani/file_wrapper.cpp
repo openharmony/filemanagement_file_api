@@ -64,7 +64,7 @@ static bool SetFileProperties(ani_env *env, ani_class cls, ani_object obj, const
     }
 
     const auto &path = pathRet.GetData().value();
-    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "path", path)) {
+    if ((ret = AniHelper::SetPropertyValue(env, obj, "path", path)) != ANI_OK) {
         HILOGE("Set path field value failed! ret: %{public}d", ret);
         return false;
     }
@@ -76,7 +76,7 @@ static bool SetFileProperties(ani_env *env, ani_class cls, ani_object obj, const
     }
 
     const auto &name = nameRet.GetData().value();
-    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "name", name)) {
+    if ((ret= AniHelper::SetPropertyValue(env, obj, "name", name)) != ANI_OK) {
         HILOGE("Set name field value failed! ret: %{public}d", ret);
         return false;
     }

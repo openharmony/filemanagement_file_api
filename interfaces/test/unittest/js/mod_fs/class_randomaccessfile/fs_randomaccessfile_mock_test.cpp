@@ -34,7 +34,7 @@ public:
     void TearDown();
     static inline shared_ptr<UvfsMock> uvMock = nullptr;
 protected:
-unique_ptr<RandomAccessFileEntity> rafEntity;
+    unique_ptr<RandomAccessFileEntity> rafEntity;
     unique_ptr<FsRandomAccessFile> raf;
 };
 
