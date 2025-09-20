@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_SYSTEM_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_SYSTEM_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYSTEM_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYSTEM_MOCK_H
 
+#include <sys/xattr.h>
 #include <sys/file.h>
-#include <vector>
+
 #include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -33,10 +34,11 @@ public:
 
 class SystemMock : public ISystem {
 public:
-    MOCK_METHOD5(setxattr, int(const char *path, const char *name, const void *value, size_t size, int flags));
-    MOCK_METHOD4(getxattr, ssize_t(const char *path, const char *name, void *value, size_t size));
-    MOCK_METHOD4(fgetxattr, int(int filedes, const char *name, void *value, size_t size));
-    MOCK_METHOD2(flock, int(int fd, int operation));
+    MOCK_METHOD(
+        int, setxattr, (const char *path, const char *name, const void *value, size_t size, int flags), (override));
+    MOCK_METHOD(ssize_t, getxattr, (const char *path, const char *name, void *value, size_t size), (override));
+    MOCK_METHOD(int, fgetxattr, (int filedes, const char *name, void *value, size_t size), (override));
+    MOCK_METHOD(int, flock, (int fd, int operation), (override));
 
 public:
     static std::shared_ptr<SystemMock> GetMock();
@@ -50,4 +52,4 @@ private:
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_PROPERTIES_MOCK_SYSTEM_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYSTEM_MOCK_H
