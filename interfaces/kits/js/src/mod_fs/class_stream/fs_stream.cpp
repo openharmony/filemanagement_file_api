@@ -146,9 +146,6 @@ FsResult<size_t> FsStream::Write(const ArrayBuffer &buf, const optional<WriteOpt
     traceFwrite.End();
     if ((writeLen == 0) && (writeLen != retLen)) {
         HILOGE("Failed to fwrite stream");
-        if (FileApiDebug::isLogEnabled) {
-            HILOGD("WriteLen is %{public}d, RetLen is %{public}d", writeLen, retLen);
-        }
         return FsResult<size_t>::Error(EIO);
     }
     return FsResult<size_t>::Success(writeLen);

@@ -14,6 +14,9 @@
  */
 
 #include "file_fs_trace.h"
+#ifdef FILE_API_TRACE
+#include "hitrace_meter.h"
+#endif
 
 namespace OHOS {
 namespace FileManagement {
@@ -21,17 +24,21 @@ namespace ModuleFileIO {
 
 FileFsTrace::FileFsTrace(const std::string& value)
 {
+#ifdef FILE_API_TRACE
     if (FileApiDebug::isTraceEnhanced) {
         StartTrace(HITRACE_TAG_FILEMANAGEMENT, "[FileFs]" + value);
     }
+#endif
 }
 
 void FileFsTrace::End()
 {
+#ifdef FILE_API_TRACE
     if (!isEnded && FileApiDebug::isTraceEnhanced) {
         FinishTrace(HITRACE_TAG_FILEMANAGEMENT);
         isEnded = true;
     }
+#endif
 }
 
 FileFsTrace::~FileFsTrace()

@@ -31,7 +31,9 @@
 #include "file_api_debug.h"
 #include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "parameter.h"
+#endif
 #include "properties/prop_n_exporter.h"
 
 using namespace std;
@@ -41,9 +43,12 @@ namespace FileManagement {
 namespace ModuleFileIO {
 static bool GetParaBool(const char* key)
 {
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     char value[] = "false";
     int ret = GetParameter(key, "false", value, sizeof(value));
     return (ret > 0 && !std::strcmp(value, "true"));
+#endif
+    return false;
 }
 
 static napi_value Export(napi_env env, napi_value exports)

@@ -186,7 +186,6 @@ ohos_shared_library("fs") {
 
   external_deps = [
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "napi:ace_napi",
   ]
 
@@ -469,9 +468,15 @@ ohos_shared_library("statvfs") {
 
   external_deps = [
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "napi:ace_napi",
   ]
+
+  if (!use_mingw_win && !use_mac) {
+    defines = [ "FILE_API_TRACE" ]
+    external_deps += [
+      "hitrace:hitrace_meter"
+    ]
+  }
 }
 
 ohos_shared_library("environment") {

@@ -16,7 +16,7 @@
 #ifndef INTERFACES_KITS_JS_SRC_COMMON_FILE_FS_TRACE_H
 #define INTERFACES_KITS_JS_SRC_COMMON_FILE_FS_TRACE_H
 
-#include "hitrace_meter.h"
+#include <string>
 #include "file_api_debug.h"
 
 namespace OHOS {
@@ -29,7 +29,9 @@ public:
     ~FileFsTrace();
     void End();
 private:
+#ifdef FILE_API_TRACE
     bool isEnded = false;
+#endif
 };
 
 } // namespace ModuleFileIO

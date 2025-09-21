@@ -50,7 +50,7 @@ static napi_value CheckStatMode(napi_env env, napi_callback_info info, mode_t mo
 
     bool check = (statEntity->stat_.st_mode & S_IFMT) == mode;
     if (FileApiDebug::isLogEnabled) {
-        HILOGD("Mode is %{public}llu", (statEntity->stat_.st_mode & S_IFMT));
+        HILOGD("Mode is %{public}lo", static_cast<unsigned long>(statEntity->stat_.st_mode & S_IFMT));
     }
     return NVal::CreateBool(env, check).val_;
 }

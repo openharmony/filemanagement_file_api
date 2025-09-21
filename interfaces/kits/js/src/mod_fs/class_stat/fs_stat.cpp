@@ -33,7 +33,7 @@ using namespace std;
 bool FsStat::CheckStatMode(mode_t mode)
 {
     if (FileApiDebug::isLogEnabled) {
-        HILOGD("Mode is %{public}llu", (entity->stat_.st_mode & S_IFMT));
+        HILOGD("Mode is %{public}lo", static_cast<unsigned long>(entity->stat_.st_mode & S_IFMT));
     }
     return (entity->stat_.st_mode & S_IFMT) == mode;
 }

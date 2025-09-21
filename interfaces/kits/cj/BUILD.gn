@@ -103,7 +103,6 @@ ohos_shared_library("cj_file_fs_ffi") {
     "data_share:datashare_consumer",
     "dfs_service:distributed_file_daemon_kit_inner",
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "ipc:ipc_single",
     "napi:ace_napi",
     "napi:cj_bind_ffi",
@@ -132,6 +131,9 @@ ohos_shared_library("cj_file_fs_ffi") {
       cfi_cross_dso = true
       debug = false
     }
+    external_deps += [
+      "hitrace:hitrace_meter",
+    ]
   }
 
   innerapi_tags = [ "platformsdk" ]
