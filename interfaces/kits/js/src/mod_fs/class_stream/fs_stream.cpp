@@ -18,6 +18,7 @@
 #include <cstring>
 #include <tuple>
 
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -117,6 +118,7 @@ static tuple<bool, size_t, int64_t> ValidReadArg(const size_t bufLen, const opti
 
 FsResult<size_t> FsStream::Write(const ArrayBuffer &buf, const optional<WriteOptions> &options)
 {
+    FileFsTrace traceFsStreamWrite("FsStreamWrite");
     auto fp = GetFilePtr();
     if (!fp) {
         HILOGE("Failed to get file ptr");
@@ -130,14 +132,18 @@ FsResult<size_t> FsStream::Write(const ArrayBuffer &buf, const optional<WriteOpt
     }
 
     if (offset >= 0) {
+        FileFsTrace traceFseek("Fseek");
         int ret = fseek(fp.get(), static_cast<long>(offset), SEEK_SET);
+        traceFseek.End();
         if (ret < 0) {
             HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
             return FsResult<size_t>::Error(errno);
         }
     }
 
+    FileFsTrace traceFwrite("Fwrite");
     size_t writeLen = fwrite(buf.buf, 1, retLen, fp.get());
+    traceFwrite.End();
     if ((writeLen == 0) && (writeLen != retLen)) {
         HILOGE("Failed to fwrite stream");
         return FsResult<size_t>::Error(EIO);
@@ -147,6 +153,7 @@ FsResult<size_t> FsStream::Write(const ArrayBuffer &buf, const optional<WriteOpt
 
 FsResult<size_t> FsStream::Write(const string &buf, const optional<WriteOptions> &options)
 {
+    FileFsTrace traceFsStreamWrite("FsStreamWrite");
     auto fp = GetFilePtr();
     if (!fp) {
         HILOGE("Failed to get file ptr");
@@ -162,14 +169,18 @@ FsResult<size_t> FsStream::Write(const string &buf, const optional<WriteOptions>
     }
 
     if (offset >= 0) {
+        FileFsTrace traceFseek("Fseek");
         int ret = fseek(fp.get(), static_cast<long>(offset), SEEK_SET);
+        traceFseek.End();
         if (ret < 0) {
             HILOGE("Failed to set the offset location of the file stream pointer, ret: %{public}d", ret);
             return FsResult<size_t>::Error(errno);
         }
     }
 
+    FileFsTrace traceFwrite("Fwrite");
     size_t writeLen = fwrite(buf.c_str(), 1, retLen, fp.get());
+    traceFwrite.End();
     if ((writeLen == 0) && (writeLen != retLen)) {
         HILOGE("Failed to fwrite stream");
         return FsResult<size_t>::Error(EIO);
@@ -210,13 +221,16 @@ FsResult<size_t> FsStream::Read(ArrayBuffer &buf, const optional<ReadOptions> &o
 
 FsResult<void> FsStream::Flush()
 {
+    FileFsTrace traceFsStreamFlush("FsStreamFlush");
     auto fp = GetFilePtr();
     if (fp == nullptr) {
         HILOGE("Failed to get entity of Stream");
         return FsResult<void>::Error(EIO);
     }
 
+    FileFsTrace traceFflush("Fflush");
     int ret = fflush(fp.get());
+    traceFflush.End();
     if (ret < 0) {
         HILOGE("Failed to fflush file in the stream, ret: %{public}d", ret);
         return FsResult<void>::Error(errno);
@@ -227,6 +241,7 @@ FsResult<void> FsStream::Flush()
 
 FsResult<void> FsStream::Close()
 {
+    FileFsTrace traceFsStreamClose("FsStreamClose");
     if (!streamEntity) {
         HILOGE("Failed to get entity of Stream, may closed twice");
         return FsResult<void>::Error(EIO);

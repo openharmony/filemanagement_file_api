@@ -17,6 +17,7 @@
 
 #include <sys/file.h>
 
+#include "file_fs_trace.h"
 #include "file_uri.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -147,6 +148,7 @@ FsResult<void> FsFile::Lock(bool exclusive) const
 
 FsResult<void> FsFile::TryLock(bool exclusive) const
 {
+    FileFsTrace traceTryLock("TryLock");
     if (!fileEntity) {
         HILOGE("Failed to get file entity");
         return FsResult<void>::Error(EINVAL);
@@ -154,7 +156,9 @@ FsResult<void> FsFile::TryLock(bool exclusive) const
 
     int ret = 0;
     auto mode = static_cast<uint32_t>(exclusive ? LOCK_EX : LOCK_SH);
+    FileFsTrace traceFlock("Flock");
     ret = flock(fileEntity->fd_.get()->GetFD(), mode | LOCK_NB);
+    traceFlock.End();
     if (ret < 0) {
         HILOGE("Failed to try to lock file");
         return FsResult<void>::Error(errno);
@@ -165,13 +169,16 @@ FsResult<void> FsFile::TryLock(bool exclusive) const
 
 FsResult<void> FsFile::UnLock() const
 {
+    FileFsTrace traceUnLock("UnLock");
     if (!fileEntity) {
         HILOGE("Failed to get file entity");
         return FsResult<void>::Error(EINVAL);
     }
 
     int ret = 0;
+    FileFsTrace traceFlock("Flock");
     ret = flock(fileEntity->fd_.get()->GetFD(), LOCK_UN);
+    traceFlock.End();
     if (ret < 0) {
         HILOGE("Failed to unlock file");
         return FsResult<void>::Error(errno);

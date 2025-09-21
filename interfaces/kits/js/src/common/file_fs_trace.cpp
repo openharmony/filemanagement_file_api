@@ -13,40 +13,37 @@
  * limitations under the License.
  */
 
-#include "unlink_core.h"
-
+#include "file_fs_trace.h"
 #ifdef FILE_API_TRACE
 #include "hitrace_meter.h"
 #endif
 
-#include "file_fs_trace.h"
-#include "filemgmt_libhilog.h"
-
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-using namespace std;
 
-FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
+FileFsTrace::FileFsTrace(const std::string& value)
 {
-    FileFsTrace traceDoUnlink("DoUnlink");
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> unlinkReq = {
-        new uv_fs_t, FsUtils::FsReqCleanup };
-    if (!unlinkReq) {
-        HILOGE("Failed to request heap memory.");
-        return FsResult<void>::Error(ENOMEM);
+#ifdef FILE_API_TRACE
+    if (FileApiDebug::isTraceEnhanced) {
+        StartTrace(HITRACE_TAG_FILEMANAGEMENT, "[FileFs]" + value);
     }
+#endif
+}
 
-    int ret = uv_fs_unlink(nullptr, unlinkReq.get(), src.c_str(), nullptr);
-    if (ret < 0) {
-        HILOGD("Failed to unlink with path, ret is %{public}d", ret);
-        if (FileApiDebug::isLogEnabled) {
-            HILOGD("Src is %{public}s", src.c_str());
-        }
-        return FsResult<void>::Error(ret);
+void FileFsTrace::End()
+{
+#ifdef FILE_API_TRACE
+    if (!isEnded && FileApiDebug::isTraceEnhanced) {
+        FinishTrace(HITRACE_TAG_FILEMANAGEMENT);
+        isEnded = true;
     }
+#endif
+}
 
-    return FsResult<void>::Success();
+FileFsTrace::~FileFsTrace()
+{
+    End();
 }
 
 } // namespace ModuleFileIO

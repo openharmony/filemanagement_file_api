@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -35,6 +36,7 @@ using namespace OHOS::FileManagement::LibN;
 
 static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 {
+    FileFsTrace trace("IsAllPath");
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     filesystem::path srcPath(string(srcFile.path.get()));
     filesystem::path dstPath(string(destFile.path.get()));
@@ -62,6 +64,7 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 
 static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& statbf)
 {
+    FileFsTrace traceSendFileCore("SendFileCore");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> sendfile_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!sendfile_req) {
@@ -98,6 +101,7 @@ static NError SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& sta
 
 static NError TruncateCore(const FileInfo& fileInfo)
 {
+    FileFsTrace traceTruncateCore("TruncateCore");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> ftruncate_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!ftruncate_req) {
@@ -114,6 +118,7 @@ static NError TruncateCore(const FileInfo& fileInfo)
 
 static NError OpenCore(FileInfo& fileInfo, const int flags, const int mode)
 {
+    FileFsTrace traceOpenCore("OpenCore");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
@@ -229,6 +234,10 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Src isPath is %{public}d, Src is %{public}s, Dest isPath is %{public}d, Dest is %{public}s", src.isPath,
+            src.path.get(), dest.isPath, dest.path.get());
+    }
     if (src.isPath && dest.isPath) {
         auto err = IsAllPath(src, dest);
         if (err) {

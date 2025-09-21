@@ -147,6 +147,8 @@ ohos_shared_library("fs") {
   ]
 
   sources = [
+    "src/common/file_api_debug.cpp",
+    "src/common/file_fs_trace.cpp",
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/class_file/file_n_exporter.cpp",
     "src/mod_fs/class_stat/stat_n_exporter.cpp",
@@ -450,7 +452,11 @@ ohos_shared_library("statvfs") {
 
   relative_install_dir = "module/file"
 
+  include_dirs = [ "src/common" ]
+
   sources = [
+    "src/common/file_api_debug.cpp",
+    "src/common/file_fs_trace.cpp",
     "src/mod_statvfs/statvfs_n_exporter.cpp",
     "src/mod_statvfs/statvfs_napi.cpp",
   ]
@@ -464,6 +470,13 @@ ohos_shared_library("statvfs") {
     "hilog:libhilog",
     "napi:ace_napi",
   ]
+
+  if (!use_mingw_win && !use_mac) {
+    defines = [ "FILE_API_TRACE" ]
+    external_deps += [
+      "hitrace:hitrace_meter"
+    ]
+  }
 }
 
 ohos_shared_library("environment") {
@@ -663,6 +676,7 @@ ohos_shared_library("ani_file_fs") {
   public_configs = [ ":ani_config" ]
   include_dirs = [
     "include/ipc",
+    "src/common",
     "src/mod_fs/ani",
     "src/mod_fs/class_atomicfile",
     "src/mod_fs/class_atomicfile/ani",
@@ -689,6 +703,8 @@ ohos_shared_library("ani_file_fs") {
     "src/common/ani_helper/ani_signature.cpp",
     "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",
+    "src/common/file_api_debug.cpp",
+    "src/common/file_fs_trace.cpp",
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/ani/bind_function_class.cpp",
     "src/mod_fs/class_atomicfile/ani/atomicfile_ani.cpp",
@@ -811,10 +827,11 @@ ohos_shared_library("ani_file_fs") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "ipc:ipc_single",
     "libuv:uv",
-    "runtime_core:ani",
     "runtime_core:ani_helpers",
+    "runtime_core:ani",
     "runtime_core:libarkruntime",
     "samgr:samgr_proxy",
   ]
@@ -1059,13 +1076,16 @@ ohos_prebuilt_etc("ohos_file_environment_abc_etc") {
 ohos_shared_library("ani_file_statvfs") {
   public_configs = [ ":ani_config" ]
   include_dirs = [
-    "src/mod_statvfs/ani",
+    "${src_path}/common",
     "src/mod_statvfs",
+    "src/mod_statvfs/ani",
   ]
   sources = [
     "src/common/ani_helper/ani_signature.cpp",
     "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",
+    "src/common/file_api_debug.cpp",
+    "src/common/file_fs_trace.cpp",
     "src/common/file_helper/fd_guard.cpp",
     "src/mod_fs/fs_utils.cpp",
     "src/mod_statvfs/ani/bind_function_class.cpp",
@@ -1084,10 +1104,11 @@ ohos_shared_library("ani_file_statvfs") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_single",
     "libuv:uv",
-    "runtime_core:ani",
     "runtime_core:ani_helpers",
+    "runtime_core:ani",
     "runtime_core:libarkruntime",
   ]
   use_exceptions = true

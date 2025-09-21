@@ -18,13 +18,18 @@
 #include <sys/statvfs.h>
 #include <tuple>
 
+#include "file_fs_trace.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleStatvfs {
 using namespace FileManagement::LibN;
+using ModuleFileIO::FileFsTrace;
+using ModuleFileIO::FileApiDebug;
 
 napi_value GetFreeSizeSync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceGetFreeSizeSync("GetFreeSizeSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE)) {
         HILOGE("Number of arguments unmatched");
@@ -42,9 +47,14 @@ napi_value GetFreeSizeSync(napi_env env, napi_callback_info info)
     }
 
     struct statvfs diskInfo;
+    FileFsTrace traceStatvfs("statvfs");
     int ret = statvfs(path.get(), &diskInfo);
+    traceStatvfs.End();
     if (ret != 0) {
         NError(errno).ThrowErr(env);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Path is %{public}s", path.get());
+        }
         return nullptr;
     }
     unsigned long long freeSize = static_cast<unsigned long long>(diskInfo.f_bsize) *

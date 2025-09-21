@@ -24,6 +24,7 @@
 #include <sys/xattr.h>
 #endif
 
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -33,6 +34,7 @@ using namespace OHOS::FileManagement::LibN;
 
 static napi_value CheckStatMode(napi_env env, napi_callback_info info, mode_t mode)
 {
+    FileFsTrace traceCheckStatMode("CheckStatMode");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Number of arguments unmatched");
@@ -47,6 +49,9 @@ static napi_value CheckStatMode(napi_env env, napi_callback_info info, mode_t mo
     }
 
     bool check = (statEntity->stat_.st_mode & S_IFMT) == mode;
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Mode is %{public}lo", static_cast<unsigned long>(statEntity->stat_.st_mode & S_IFMT));
+    }
     return NVal::CreateBool(env, check).val_;
 }
 

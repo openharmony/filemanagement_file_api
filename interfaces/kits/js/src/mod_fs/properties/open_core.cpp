@@ -19,6 +19,7 @@
 #include <cstring>
 
 #include "file_entity.h"
+#include "file_fs_trace.h"
 #include "file_instantiator.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -86,6 +87,7 @@ static tuple<bool, uint32_t> ValidAndConvertFlags(const optional<int32_t> &mode)
 
 static int OpenFileByPath(const string &path, uint32_t mode)
 {
+    FileFsTrace traceOpenFileByPath("OpenFileByPath");
     unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> openReq = { new uv_fs_t, FsUtils::FsReqCleanup };
     if (!openReq) {
         HILOGE("Failed to request heap memory.");
@@ -122,6 +124,9 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, uint
     string bundleName = uri.GetAuthority();
     AppFileService::ModuleFileUri::FileUri fileUri(uriStr);
     string realPath = fileUri.GetRealPath();
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("UriStr is %{public}s, realPath is %{public}s", uriStr.c_str(), realPath.c_str());
+    }
     if (bundleName == MEDIA) {
         int res = OpenFileByDatashare(uri.ToString(), mode);
         if (res < 0) {
@@ -181,6 +186,7 @@ FsResult<FsFile *> OpenCore::DoOpen(const string &path, const optional<int32_t> 
 #ifdef FILE_API_TRACE
     HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
 #endif
+    FileFsTrace traceDoOpen("DoOpen");
     auto [succMode, modeValue] = ValidAndConvertFlags(mode);
     if (!succMode) {
         return FsResult<FsFile *>::Error(EINVAL);

@@ -28,7 +28,12 @@
 #include "class_tasksignal/task_signal_n_exporter.h"
 #include "class_watcher/watcher_n_exporter.h"
 #endif
+#include "file_api_debug.h"
+#include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include "parameter.h"
+#endif
 #include "properties/prop_n_exporter.h"
 
 using namespace std;
@@ -36,6 +41,16 @@ using namespace std;
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
+static bool GetParaBool(const char* key)
+{
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    char value[] = "false";
+    int ret = GetParameter(key, "false", value, sizeof(value));
+    return (ret > 0 && !std::strcmp(value, "true"));
+#endif
+    return false;
+}
+
 static napi_value Export(napi_env env, napi_value exports)
 {
     InitAccessModeType(env, exports);
@@ -66,6 +81,10 @@ static napi_value Export(napi_env env, napi_value exports)
             return nullptr;
         }
     }
+
+    FileApiDebug::isLogEnabled = GetParaBool("param.key.fileapi.debug.log");
+    FileApiDebug::isTraceEnhanced = GetParaBool("param.key.fileapi.debug.trace");
+
     return exports;
 }
 
