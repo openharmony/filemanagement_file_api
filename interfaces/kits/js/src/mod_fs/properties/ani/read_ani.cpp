@@ -53,8 +53,8 @@ static tuple<bool, optional<ReadOptions>> ToReadOptions(ani_env *env, ani_object
     return { true, make_optional<ReadOptions>(move(options)) };
 }
 
-ani_double ReadAni::ReadSync(
-    ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd, ani_arraybuffer buffer, ani_object options)
+ani_long ReadAni::ReadSync(
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_arraybuffer buffer, ani_object options)
 {
     auto [succBuf, arrayBuffer] = TypeConverter::ToArrayBuffer(env, buffer);
     if (!succBuf) {
@@ -70,13 +70,13 @@ ani_double ReadAni::ReadSync(
         return -1;
     }
 
-    auto ret = ReadCore::DoRead(static_cast<int32_t>(fd), arrayBuffer, op);
+    auto ret = ReadCore::DoRead(fd, arrayBuffer, op);
     if (!ret.IsSuccess()) {
         HILOGE("Read file content failed!");
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
         return -1;
     }
-    return static_cast<double>(ret.GetData().value());
+    return ret.GetData().value();
 }
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

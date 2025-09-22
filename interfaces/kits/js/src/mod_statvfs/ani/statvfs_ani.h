@@ -25,8 +25,8 @@ namespace ANI {
 
 class StatvfsAni final {
 public:
-    static ani_double GetFreeSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
-    static ani_double GetTotalSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
+    static ani_long GetFreeSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
+    static ani_long GetTotalSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
 };
 
 } // namespace ANI

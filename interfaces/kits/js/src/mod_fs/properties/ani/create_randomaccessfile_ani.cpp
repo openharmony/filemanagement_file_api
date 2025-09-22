@@ -66,7 +66,7 @@ static ani_object Wrap(ani_env *env, const FsRandomAccessFile *rafFile)
     }
 
     const auto &fd = fdRet.GetData().value();
-    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "fd", static_cast<double>(fd))) {
+    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "fd", fd)) {
         HILOGE("Set fd field value failed!");
         return nullptr;
     }
@@ -78,7 +78,7 @@ static ani_object Wrap(ani_env *env, const FsRandomAccessFile *rafFile)
     }
 
     const auto &fp = fpRet.GetData().value();
-    if (ANI_OK != AniHelper::SetPropertyValue(env, cls, obj, "filePointer", static_cast<double>(fp))) {
+    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "filePointer", fp)) {
         HILOGE("Set fp field value failed!");
         return nullptr;
     }
@@ -89,7 +89,10 @@ static tuple<bool, bool> JudgeFile(ani_env *env, ani_object obj)
 {
     auto stringTypeDesc = BuiltInTypes::String::classDesc.c_str();
     ani_class stringClass;
-    env->FindClass(stringTypeDesc, &stringClass);
+    if (ANI_OK != env->FindClass(stringTypeDesc, &stringClass)) {
+        HILOGE("Cannot find class %{public}s", stringTypeDesc);
+        return { false, false };
+    }
     ani_boolean isString = false;
     env->Object_InstanceOf(obj, stringClass, &isString);
     if (isString) {
@@ -98,7 +101,10 @@ static tuple<bool, bool> JudgeFile(ani_env *env, ani_object obj)
 
     auto fileClassDesc = FS::FileInner::classDesc.c_str();
     ani_class fileClass;
-    env->FindClass(fileClassDesc, &fileClass);
+    if (ANI_OK != env->FindClass(fileClassDesc, &fileClass)) {
+        HILOGE("Cannot find class %{public}s", fileClassDesc);
+        return { false, false };
+    }
     ani_boolean isFile = false;
     env->Object_InstanceOf(obj, fileClass, &isFile);
     if (isFile) {
@@ -140,14 +146,17 @@ static ani_object CreateRandomAccessFileByString(
     auto [succPath, path] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(file));
     if (!succPath) {
         HILOGE("Parse file path failed");
+        ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
+
     auto [succMode, modeOp] = TypeConverter::ToOptionalInt32(env, mode);
     if (!succMode) {
         HILOGE("Invalid mode");
         ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
+
     FsResult<FsRandomAccessFile *> ret = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, modeOp, op);
     if (!ret.IsSuccess()) {
         HILOGE("CreateRandomAccessFile failed");
@@ -155,6 +164,7 @@ static ani_object CreateRandomAccessFileByString(
         ErrorHandler::Throw(env, err);
         return nullptr;
     }
+
     const FsRandomAccessFile *refFile = ret.GetData().value();
     auto result = Wrap(env, move(refFile));
     if (result == nullptr) {
@@ -186,13 +196,13 @@ ani_object CreateRandomAccessFileAni::CreateRandomAccessFileSync(
     if (isPath) {
         return CreateRandomAccessFileByString(env, file, mode, op);
     } else {
-        ani_double fdOp;
-        if (ANI_OK != env->Object_GetPropertyByName_Double(file, "fd", &fdOp)) {
+        ani_int fd;
+        if (ANI_OK != env->Object_GetPropertyByName_Int(file, "fd", &fd)) {
             HILOGE("Get fd in class file failed");
             ErrorHandler::Throw(env, EINVAL);
             return nullptr;
         }
-        int32_t fd = static_cast<int32_t>(fdOp);
+
         FsResult<FsRandomAccessFile *> ret = CreateRandomAccessFileCore::DoCreateRandomAccessFile(fd, op);
         if (!ret.IsSuccess()) {
             HILOGE("CreateRandomAccessFile failed");
@@ -200,6 +210,7 @@ ani_object CreateRandomAccessFileAni::CreateRandomAccessFileSync(
             ErrorHandler::Throw(env, err);
             return nullptr;
         }
+
         const FsRandomAccessFile *refFile = ret.GetData().value();
         auto result = Wrap(env, move(refFile));
         if (result == nullptr) {

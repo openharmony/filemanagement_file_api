@@ -31,6 +31,20 @@ static ani_status BindStaticMethods(ani_env *env)
     return BindClass(env, classDesc, methods);
 }
 
+static ani_status BindHashStreamMethods(ani_env *env)
+{
+    auto classDesc = HASH::HashStreamImpl::classDesc.c_str();
+    auto ctorDesc = HASH::HashStreamImpl::ctorDesc.c_str();
+    auto ctorSig = HASH::HashStreamImpl::ctorSig.c_str();
+    std::array methods = {
+        ani_native_function { "digest", nullptr, reinterpret_cast<void *>(HashStreamAni::Digest) },
+        ani_native_function { "update", nullptr, reinterpret_cast<void *>(HashStreamAni::Update) },
+        ani_native_function { ctorDesc, ctorSig, reinterpret_cast<void *>(HashStreamAni::Constructor) },
+    };
+
+    return BindClass(env, classDesc, methods);
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     if (vm == nullptr) {
@@ -53,6 +67,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     status = BindStaticMethods(env);
     if (status != ANI_OK) {
         HILOGE("Cannot bind native static methods for hash!");
+        return status;
+    };
+
+    status = BindHashStreamMethods(env);
+    if (status != ANI_OK) {
+        HILOGE("Cannot bind native static methods for hashstream! status: %{public}d", status);
         return status;
     };
 

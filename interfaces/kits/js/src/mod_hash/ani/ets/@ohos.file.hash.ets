@@ -14,6 +14,7 @@
  */
 
 import { BusinessError, AsyncCallback } from '@ohos.base';
+import stream from '@ohos.util.stream';
 
 export default namespace hash {
   export function hash(path: string, algorithm: string): Promise<string> {
@@ -39,6 +40,59 @@ export default namespace hash {
       callback(e as BusinessError, "");
     });
   }
+
+  export function createHash(algorithm: string): HashStream {
+    return new HashStream(algorithm);
+  }
+
+  export class HashStream extends stream.Transform {
+    hs: HashStreamImpl;
+    hashBuf?: ArrayBuffer;
+
+    constructor(algorithm: string) {
+      super();
+      this.hs = new HashStreamImpl(algorithm);
+    }
+
+    digest(): string {
+      return this.hs.digest();
+    }
+
+    update(data: ArrayBuffer): void {
+      this.hs.update(data);
+    }
+
+    doTransform(chunk: string, encoding: string, callback: Function): void {
+      let charCodes: number[] = [];
+      for (let i = 0; i < chunk.length; i++) {
+        charCodes = [...charCodes, chunk.charCodeAt(i)];
+      }
+      const buf = new Uint8Array(charCodes).buffer;
+      this.hs.update((buf as ArrayBuffer));
+      this.push(chunk);
+      callback.unsafeCall();
+    }
+
+    doWrite(chunk: string | Uint8Array, encoding: string, callback: Function): void {
+      callback.unsafeCall();
+    }
+
+    doFlush(callback: Function): void {
+      callback.unsafeCall();
+    }
+  }
+}
+
+export class HashStreamImpl extends stream.Transform {
+
+  static {
+    loadLibrary("ani_file_hash");
+  }
+  private nativePtr: long = 0;
+
+  native constructor(alg: string);
+  native digest(): string;
+  native update(data: ArrayBuffer): void;
 }
 
 class HashImpl {

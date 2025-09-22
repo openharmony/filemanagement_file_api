@@ -19,10 +19,6 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 
-namespace {
-const vector<string> PUBLIC_DIR_PATHS = { "/Documents" };
-}
-
 tuple<bool, size_t> FsUtils::GetActualLen(size_t bufLen, size_t bufOff, const optional<int64_t> &length)
 {
     if (bufLen < bufOff) {

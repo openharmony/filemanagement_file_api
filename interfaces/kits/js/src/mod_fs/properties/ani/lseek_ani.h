@@ -24,8 +24,8 @@ namespace ModuleFileIO {
 namespace ANI {
 class LseekAni final {
 public:
-    static ani_double LseekSync(
-        ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd, ani_double offset, ani_enum_item whence);
+    static ani_long LseekSync(
+        ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_long offset, ani_enum_item whence);
 };
 } // namespace ANI
 } // namespace ModuleFileIO

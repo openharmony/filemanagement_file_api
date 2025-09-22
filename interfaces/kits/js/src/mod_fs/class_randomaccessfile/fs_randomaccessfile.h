@@ -16,9 +16,8 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_FS_RANDOMACCESSFILE_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_RANDOMACCESSFILE_FS_RANDOMACCESSFILE_H
 
-#include "randomaccessfile_entity.h"
-
 #include "filemgmt_libfs.h"
+#include "randomaccessfile_entity.h"
 
 namespace OHOS {
 namespace FileManagement {

@@ -35,8 +35,8 @@ optional<SeekPos> ParseSeekPos(const optional<int32_t> &whence)
     return make_optional(static_cast<SeekPos>(move(whence.value())));
 }
 
-ani_double LseekAni::LseekSync(
-    ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd, ani_double offset, ani_enum_item whence)
+ani_long LseekAni::LseekSync(
+    ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd, ani_long offset, ani_enum_item whence)
 {
     auto [succWhence, whenceOp] = TypeConverter::EnumToInt32(env, whence);
     if (!succWhence) {
@@ -46,7 +46,8 @@ ani_double LseekAni::LseekSync(
     }
     
     auto pos = ParseSeekPos(whenceOp);
-    auto ret = LseekCore::DoLseek(static_cast<int32_t>(fd), static_cast<int64_t>(offset), pos);
+
+    auto ret = LseekCore::DoLseek(fd, offset, pos);
     if (!ret.IsSuccess()) {
         HILOGE("DoLseek failed!");
         const FsError &err = ret.GetError();
@@ -54,7 +55,7 @@ ani_double LseekAni::LseekSync(
         return -1;
     }
 
-    return ani_double(static_cast<double>(ret.GetData().value()));
+    return ret.GetData().value();
 }
 
 } // namespace ANI

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_DUP_ANI_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_DUP_ANI_H
+#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_DUP_ANI_H
+#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_DUP_ANI_H
 
 #include <ani.h>
 
@@ -25,11 +25,11 @@ namespace ANI {
 
 class DupAni final {
 public:
-    static ani_object Dup(ani_env *env, [[maybe_unused]] ani_class clazz, ani_double fd);
+    static ani_object Dup(ani_env *env, [[maybe_unused]] ani_class clazz, ani_int fd);
 };
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_DUP_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_DUP_ANI_H

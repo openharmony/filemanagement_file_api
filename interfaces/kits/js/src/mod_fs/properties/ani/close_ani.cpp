@@ -36,13 +36,12 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
 {
     int32_t result = -1;
-    auto doubleClassDesc = BoxedTypes::Double::classDesc.c_str();
-    ani_class doubleClass;
-    env->FindClass(doubleClassDesc, &doubleClass);
-    ani_boolean isDouble;
-    env->Object_InstanceOf(obj, doubleClass, &isDouble);
-
-    if (isDouble) {
+    auto intClassDesc = BoxedTypes::Int::classDesc.c_str();
+    ani_class intClass;
+    env->FindClass(intClassDesc, &intClass);
+    ani_boolean isInt;
+    env->Object_InstanceOf(obj, intClass, &isInt);
+    if (isInt) {
         ani_int fd;
         if (ANI_OK != env->Object_CallMethodByName_Int(obj, BasicTypesConverter::toInt.c_str(), nullptr, &fd)) {
             HILOGE("Get fd value failed");

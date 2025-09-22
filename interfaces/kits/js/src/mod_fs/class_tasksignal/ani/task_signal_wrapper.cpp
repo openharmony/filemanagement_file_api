@@ -56,7 +56,7 @@ bool TaskSignalWrapper::Wrap(ani_env *env, ani_object object, unique_ptr<FsTaskS
 
     ani_long ptr = reinterpret_cast<ani_long>(signal.get());
 
-    auto status = env->Object_SetFieldByName_Long(object, "nativeTaskSignal", ptr);
+    auto status = AniHelper::SetFieldValue(env, object, "nativeTaskSignal", ptr);
     if (status != ANI_OK) {
         HILOGE("Wrap taskSignal obj failed! status: %{public}d", status);
         return false;

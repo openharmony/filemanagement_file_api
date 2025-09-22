@@ -473,9 +473,7 @@ ohos_shared_library("statvfs") {
 
   if (!use_mingw_win && !use_mac) {
     defines = [ "FILE_API_TRACE" ]
-    external_deps += [
-      "hitrace:hitrace_meter"
-    ]
+    external_deps += [ "hitrace:hitrace_meter" ]
   }
 }
 
@@ -830,8 +828,8 @@ ohos_shared_library("ani_file_fs") {
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
     "libuv:uv",
-    "runtime_core:ani_helpers",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
     "runtime_core:libarkruntime",
     "samgr:samgr_proxy",
   ]
@@ -845,6 +843,7 @@ ohos_shared_library("ani_file_fs") {
     cfi_cross_dso = true
     debug = false
   }
+  shlib_type = "ani"
   output_extension = "so"
   subsystem_name = "filemanagement"
   part_name = "file_api"
@@ -894,9 +893,9 @@ ohos_shared_library("ani_file_hash") {
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
   ]
   external_deps = [
-    "eventhandler:libeventhandler",
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_single",
     "libuv:uv",
@@ -916,6 +915,7 @@ ohos_shared_library("ani_file_hash") {
     cfi_cross_dso = true
     debug = false
   }
+  shlib_type = "ani"
   output_extension = "so"
   subsystem_name = "filemanagement"
   part_name = "file_api"
@@ -981,6 +981,7 @@ ohos_shared_library("ani_file_securitylabel") {
     cfi_cross_dso = true
     debug = false
   }
+  shlib_type = "ani"
   output_extension = "so"
   subsystem_name = "filemanagement"
   part_name = "file_api"
@@ -1053,6 +1054,7 @@ ohos_shared_library("ani_file_environment") {
     cfi_cross_dso = true
     debug = false
   }
+  shlib_type = "ani"
   output_extension = "so"
   subsystem_name = "filemanagement"
   part_name = "file_api"
@@ -1107,8 +1109,8 @@ ohos_shared_library("ani_file_statvfs") {
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
     "libuv:uv",
-    "runtime_core:ani_helpers",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
     "runtime_core:libarkruntime",
   ]
   use_exceptions = true
@@ -1130,6 +1132,7 @@ ohos_shared_library("ani_file_statvfs") {
     cfi_cross_dso = true
     debug = false
   }
+  shlib_type = "ani"
   output_extension = "so"
   subsystem_name = "filemanagement"
   part_name = "file_api"

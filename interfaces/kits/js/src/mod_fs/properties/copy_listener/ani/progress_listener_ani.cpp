@@ -42,8 +42,8 @@ static ani_object WrapCopyProgress(ani_env *env, uint64_t progressSize, uint64_t
         return nullptr;
     }
 
-    const ani_double aniProgressSize = static_cast<ani_double>(progressSize <= MAX_VALUE ? progressSize : 0);
-    const ani_double aniTotalSize = static_cast<ani_double>(totalSize <= MAX_VALUE ? totalSize : 0);
+    const ani_long aniProgressSize = static_cast<ani_long>(progressSize <= MAX_VALUE ? progressSize : 0);
+    const ani_long aniTotalSize = static_cast<ani_long>(totalSize <= MAX_VALUE ? totalSize : 0);
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, aniProgressSize, aniTotalSize)) {
