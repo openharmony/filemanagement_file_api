@@ -148,9 +148,10 @@ HWTEST_F(TaskSignalTest, Task_Signal_MarkDfsTask_0000, testing::ext::TestSize.Le
     GTEST_LOG_(INFO) << "TaskSignalTest-begin Task_Signal_MarkDfsTask_0000";
     auto signal = std::make_shared<TaskSignal>();
     signal->MarkDfsTask();
+    std::string srcPath = "/data/test/srcPath.txt";
     std::string localUri = "/data/test/test.txt";
     std::string dstUri = "/data/test/test.txt";
-    signal->SetCopyTaskUri(localUri, dstUri);
+    signal->SetCopyTaskUri(localUri, dstUri, srcPath);
     auto ret = signal->Cancel();
     EXPECT_EQ(ret, 0);
 }
