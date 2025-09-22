@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_CLASS_STREAM_MOCK_C_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_CLASS_STREAM_MOCK_C_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_C_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_C_MOCK_H
 
 #include <cstdio>
+
 #include <gmock/gmock.h>
-#include <sys/stat.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 
@@ -46,4 +46,4 @@ private:
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_CLASS_STREAM_MOCK_C_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_C_MOCK_H
