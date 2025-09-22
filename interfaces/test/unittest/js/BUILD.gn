@@ -137,25 +137,26 @@ ohos_unittest("ani_file_fs_mock_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
-    "${file_api_path}/interfaces/test/unittest/js/mod_fs/class_stream/mock",
+    "${file_api_path}/interfaces/test/unittest/common_mock",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/mock",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/properties/mock",
   ]
 
   sources = [
+    "${file_api_path}/interfaces/test/unittest/common_mock/c_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/eventfd_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/inotify_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/poll_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/system_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/unistd_mock.cpp",
     "mod_fs/class_file/fs_file_mock_test.cpp",
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
     "mod_fs/class_readeriterator/fs_reader_iterator_mock_test.cpp",
     "mod_fs/class_stat/fs_stat_mock_test.cpp",
     "mod_fs/class_stream/fs_stream_mock_test.cpp",
-    "mod_fs/class_stream/mock/c_mock.cpp",
     "mod_fs/class_watcher/fs_file_watcher_mock_test.cpp",
     "mod_fs/class_watcher/fs_watcher_mock_test.cpp",
-    "mod_fs/mock/eventfd_mock.cpp",
-    "mod_fs/mock/inotify_mock.cpp",
-    "mod_fs/mock/poll_mock.cpp",
-    "mod_fs/mock/unistd_mock.cpp",
     "mod_fs/properties/access_core_mock_test.cpp",
     "mod_fs/properties/close_core_mock_test.cpp",
     "mod_fs/properties/copy_core_mock_test.cpp",
@@ -167,7 +168,6 @@ ohos_unittest("ani_file_fs_mock_test") {
     "mod_fs/properties/lstat_core_mock_test.cpp",
     "mod_fs/properties/mkdir_core_mock_test.cpp",
     "mod_fs/properties/mkdtemp_core_mock_test.cpp",
-    "mod_fs/properties/mock/system_mock.cpp",
     "mod_fs/properties/mock/uv_fs_mock.cpp",
     "mod_fs/properties/move_core_mock_test.cpp",
     "mod_fs/properties/open_core_mock_test.cpp",
@@ -322,7 +322,6 @@ ohos_unittest("ani_file_hash_test") {
   sources += ani_file_hash_core
 
   include_dirs = [
-    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_fs",
@@ -358,7 +357,6 @@ ohos_unittest("ani_file_securitylabel_test") {
   sources += ani_file_securitylabel_core
 
   include_dirs = [
-    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_securitylabel",
@@ -392,7 +390,6 @@ ohos_unittest("ani_file_statvfs_test") {
   sources += ani_file_statvfs_core
 
   include_dirs = [
-    "mock/libuv",
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_statvfs",
