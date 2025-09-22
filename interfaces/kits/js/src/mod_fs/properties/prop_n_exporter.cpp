@@ -128,7 +128,7 @@ static int GetCurrentUserId()
     return userId;
 }
 
-static sptr<BundleMgrProxy> GetBundleMgrProxy()
+static sptr<IBundleMgr> GetBundleMgrProxy()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -142,12 +142,12 @@ static sptr<BundleMgrProxy> GetBundleMgrProxy()
         return nullptr;
     }
 
-    return iface_cast<BundleMgrProxy>(remoteObject);
+    return iface_cast<IBundleMgr>(remoteObject);
 }
 
 static string GetSelfBundleName()
 {
-    sptr<BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    sptr<IBundleMgr> bundleMgrProxy = GetBundleMgrProxy();
     if (!bundleMgrProxy) {
         HILOGE("bundleMgrProxy is nullptr");
         return "";
