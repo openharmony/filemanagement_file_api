@@ -16,8 +16,8 @@
 #include <string>
 #include <vector>
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "n_class.h"
 #include "napi_mock.h"
@@ -97,15 +97,14 @@ HWTEST_F(NClassTest, NClassTest_DefineClass_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NClassTest-begin NClassTest_DefineClass_002";
     // Prepare test parameters
-    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_env env = reinterpret_cast<napi_env>(0x1000); // 分配内存给env，保证创建一个非空的env。
     string className = "NClassTest_DefineClass_002";
     napi_callback callback = reinterpret_cast<napi_callback>(0x1122);
     vector<napi_property_descriptor> props = {};
 
     // Set mock behaviors
     EXPECT_CALL(GetMock(), napi_define_class(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
-                               testing::_, testing::_))
-        .WillOnce(testing::Return(napi_generic_failure));
+                               testing::_, testing::_)).WillOnce(testing::Return(napi_generic_failure));
 
     // Do testing
     auto [succ, classValue] = NClass::DefineClass(env, className, callback, std::move(props));
@@ -131,8 +130,8 @@ HWTEST_F(NClassTest, NClassTest_SaveClass_001, testing::ext::TestSize.Level1)
     string className = "NClassTest_SaveClass_001";
 
     // Set mock behaviors
-    napi_value classValue = reinterpret_cast<napi_value>(0x1234);
-    napi_ref mockReference = reinterpret_cast<napi_ref>(0x2345);
+    napi_value classValue = reinterpret_cast<napi_value>(0x1234); // 分配内存给value，保证创建一个非空的value。
+    napi_ref mockReference = reinterpret_cast<napi_ref>(0x2345); // 分配内存给ref，保证创建一个非空的ref。
     EXPECT_CALL(GetMock(), napi_create_reference(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<3>(mockReference), testing::Return(napi_ok)));
 

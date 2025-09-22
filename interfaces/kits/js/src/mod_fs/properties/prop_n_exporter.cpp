@@ -27,11 +27,12 @@
 #include "close.h"
 #include "common_func.h"
 #include "fdatasync.h"
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libn.h"
 #include "fsync.h"
-#include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "js_native_api.h"
 #include "lstat.h"
 #include "mkdtemp.h"
 #include "open.h"
@@ -104,6 +105,7 @@ struct AccessArgs {
 
 static int UvAccess(const string &path, int mode)
 {
+    FileFsTrace traceUvAccess("UvAccess");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup) *> access_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup};
     if (!access_req) {
@@ -171,6 +173,9 @@ static int HandleLocalCheck(const string &path, int mode)
         if (val[0] == POSITION_LOCAL || val[0] == POSITION_BOTH) {
             return 0;
         }
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Path is %{public}s, the attributea value of the file is %{public}c", path.c_str(), val[0]);
+        }
         return ENOENT;
     }
     // check if the distributed file of /data/storage/el2/distributedfiles is on the local,
@@ -192,6 +197,9 @@ static int HandleLocalCheck(const string &path, int mode)
 
 static int AccessCore(const string &path, int mode, int flag = DEFAULT_FLAG)
 {
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s, mode is %{public}d", path.c_str(), mode);
+    }
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {
         return HandleLocalCheck(path, mode);
@@ -247,6 +255,7 @@ static bool GetAccessArgs(napi_env env, const NFuncArg &funcArg, AccessArgs &arg
 
 napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceAccessSync("AccessSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
@@ -322,6 +331,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceUnlink("Unlink");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of Arguments Unmatched");
@@ -343,6 +353,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
+        FileFsTrace traceUvUnlink("uv_fs_unlink");
         int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
             HILOGD("Failed to unlink with path ret %{public}d", ret);
@@ -394,6 +405,9 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     if (ret < 0) {
         HILOGD("Failed to unlink with path ret %{public}d", ret);
         NError(ret).ThrowErr(env);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Path is %{public}s", path.get());
+        }
         return nullptr;
     }
 
@@ -402,6 +416,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
 
 static int MkdirCore(const string &path)
 {
+    FileFsTrace traceMkdirCore("MkdirCore");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> mkdir_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!mkdir_req) {
@@ -494,6 +509,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceMkdirSync("MkdirSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
@@ -522,6 +538,9 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
     auto err = MkdirExec(path.get(), recursion, hasOption);
     if (err) {
         err.ThrowErr(env);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Path is %{public}s, recursion is %{public}d", path.get(), recursion);
+        }
         return nullptr;
     }
     return NVal::CreateUndefined(env).val_;
@@ -733,6 +752,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceWriteSync("WriteSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
@@ -768,6 +788,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    FileFsTrace traceUvWrite("uv_fs_write");
     int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);

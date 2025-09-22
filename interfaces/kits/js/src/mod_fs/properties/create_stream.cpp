@@ -21,6 +21,7 @@
 #include "class_stream/stream_entity.h"
 #include "class_stream/stream_n_exporter.h"
 #include "common_func.h"
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -47,6 +48,7 @@ static tuple<bool, string, string> GetCreateStreamArgs(napi_env env, const NFunc
 
 napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceCreateStreamSync("CreateStreamSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
@@ -60,10 +62,15 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    FileFsTrace traceFopen("fopen");
     FILE *file = fopen(argPath.c_str(), argMode.c_str());
+    traceFopen.End();
     if (!file) {
-        HILOGE("Failed to fdopen file by path");
+        HILOGE("Failed to fdopen file by path, errno is %{public}d", errno);
         NError(errno).ThrowErr(env);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("StreamPath is %{public}s, StreamMode is %{public}s", argPath.c_str(), argMode.c_str());
+        }
         return nullptr;
     }
     std::shared_ptr<FILE> fp(file, fclose);

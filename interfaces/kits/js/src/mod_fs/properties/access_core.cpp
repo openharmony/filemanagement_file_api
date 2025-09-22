@@ -33,6 +33,7 @@
 #include "hitrace_meter.h"
 #endif
 
+#include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -55,6 +56,7 @@ const int BASE_USER_RANGE = 200000;
 
 static int UvAccess(const string &path, int mode)
 {
+    FileFsTrace traceUvAccess("UvAccess");
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> accessReq = {new uv_fs_t, FsUtils::FsReqCleanup};
     if (!accessReq) {
         HILOGE("Failed to request heap memory.");
@@ -142,6 +144,9 @@ static int HandleLocalCheck(const string &path, int mode)
 
 static int Access(const string &path, int mode, int flag)
 {
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Path is %{public}s, mode is %{public}d", path.c_str(), mode);
+    }
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {
         return HandleLocalCheck(path, mode);
@@ -182,6 +187,7 @@ static bool ValidAccessArgs(const std::string &path, const std::optional<AccessM
 
 FsResult<bool> AccessCore::DoAccess(const std::string& path, const std::optional<AccessModeType> &mode)
 {
+    FileFsTrace traceDoAccess("DoAccess");
     int finalMode = 0;
     int flag = DEFAULT_FLAG;
     if (!ValidAccessArgs(path, mode, finalMode)) {
@@ -189,7 +195,7 @@ FsResult<bool> AccessCore::DoAccess(const std::string& path, const std::optional
     }
     int ret = Access(path, finalMode, flag);
     if (ret < 0 && (std::string_view(uv_err_name(ret)) != "ENOENT")) {
-        HILOGE("Failed to access file by path");
+        HILOGE("Failed to access file by path, ret:%{public}d", ret);
         return FsResult<bool>::Error(ret);
     }
     bool isAccess = (ret == 0);
@@ -198,6 +204,7 @@ FsResult<bool> AccessCore::DoAccess(const std::string& path, const std::optional
 
 FsResult<bool> AccessCore::DoAccess(const std::string& path, const AccessModeType &mode, const AccessFlag &flag)
 {
+    FileFsTrace traceDoAccess("DoAccess");
     int finalMode = static_cast<int>(mode);
     int finalFlag = static_cast<int>(flag);
     if (!ValidAccessArgs(path, std::make_optional(mode), finalMode)) {

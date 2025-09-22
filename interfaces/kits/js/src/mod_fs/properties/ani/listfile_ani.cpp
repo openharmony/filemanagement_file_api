@@ -67,11 +67,14 @@ tuple<bool, long> ParseLongParam(ani_env *env, ani_object obj, string tag)
     
     ani_long result_ref_res;
     if (ANI_OK != env->Object_CallMethodByName_Long(
-        static_cast<ani_object>(result_ref), "toLong", nullptr, &result_ref_res)) {
+        static_cast<ani_object>(result_ref), BasicTypesConverter::toLong.c_str(), nullptr, &result_ref_res)) {
+        HILOGE("Failed to call toLong method on result_ref");
         result = -1;
         return { false, result };
     }
+
     result = static_cast<int64_t>(result_ref_res);
+
     return { true, result };
 }
 

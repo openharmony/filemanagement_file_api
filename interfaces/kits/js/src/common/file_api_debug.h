@@ -13,27 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ANI_READER_ITERATOR_ANI_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ANI_READER_ITERATOR_ANI_H
-
-#include <ani.h>
-
-#include "fs_reader_iterator.h"
+#ifndef INTERFACES_KITS_JS_SRC_COMMON_FILE_API_DEBUG_H
+#define INTERFACES_KITS_JS_SRC_COMMON_FILE_API_DEBUG_H
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-namespace ANI {
 
-class ReaderIteratorAni final {
+class FileApiDebug {
 public:
-    static ani_object Wrap(ani_env *env, const FsReaderIterator *it);
-    static FsReaderIterator *Unwrap(ani_env *env, ani_object object);
-    static ani_object Next(ani_env *env, [[maybe_unused]] ani_object object);
+    static bool isLogEnabled;
+    static bool isTraceEnhanced;
 };
-} // namespace ANI
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
-
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_READERITERATOR_ANI_READER_ITERATOR_ANI_H
+#endif // INTERFACES_KITS_JS_SRC_COMMON_FILE_API_DEBUG_H

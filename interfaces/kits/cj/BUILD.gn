@@ -35,6 +35,8 @@ ohos_shared_library("cj_file_fs_ffi") {
   ]
 
   sources = [
+    "../js/src/common/file_api_debug.cpp",
+    "../js/src/common/file_fs_trace.cpp",
     "../js/src/common/file_helper/fd_guard.cpp",
     "../js/src/mod_fs/class_file/file_n_exporter.cpp",
     "../js/src/mod_fs/class_stream/stream_n_exporter.cpp",
@@ -129,6 +131,9 @@ ohos_shared_library("cj_file_fs_ffi") {
       cfi_cross_dso = true
       debug = false
     }
+    external_deps += [
+      "hitrace:hitrace_meter",
+    ]
   }
 
   innerapi_tags = [ "platformsdk" ]

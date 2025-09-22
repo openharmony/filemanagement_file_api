@@ -23,6 +23,7 @@
 #include <sys/file.h>
 #include <tuple>
 
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
@@ -250,6 +251,7 @@ napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
 
 napi_value FileNExporter::TryLock(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceTryLock("TryLock");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO, NARG_CNT::ONE)) {
         HILOGE("Number of arguments unmatched");
@@ -271,7 +273,9 @@ napi_value FileNExporter::TryLock(napi_env env, napi_callback_info info)
 
     int ret = 0;
     auto mode = exclusive ? LOCK_EX : LOCK_SH;
+    FileFsTrace traceFlock("flock");
     ret = flock(fileEntity->fd_.get()->GetFD(), mode | LOCK_NB);
+    traceFlock.End();
     if (ret < 0) {
         HILOGE("Failed to try to lock file");
         NError(errno).ThrowErr(env);
@@ -282,6 +286,7 @@ napi_value FileNExporter::TryLock(napi_env env, napi_callback_info info)
 
 napi_value FileNExporter::UnLock(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceUnLock("UnLock");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ZERO)) {
         HILOGE("Number of arguments unmatched");
@@ -297,7 +302,9 @@ napi_value FileNExporter::UnLock(napi_env env, napi_callback_info info)
     }
 
     int ret = 0;
+    FileFsTrace traceFlock("flock");
     ret = flock(fileEntity->fd_.get()->GetFD(), LOCK_UN);
+    traceFlock.End();
     if (ret < 0) {
         HILOGE("Failed to unlock file");
         NError(errno).ThrowErr(env);

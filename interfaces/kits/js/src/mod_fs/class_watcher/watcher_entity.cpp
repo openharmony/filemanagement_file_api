@@ -21,6 +21,7 @@
 #include <sys/eventfd.h>
 #include <unistd.h>
 
+#include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
 #include "uv.h"
 
@@ -79,6 +80,10 @@ int FileWatcher::StartNotify(shared_ptr<WatcherInfoArg> arg)
     }
 
     auto [isWatched, wd] = CheckEventWatched(arg->fileName, arg->events);
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("Not find filename in map filename %{public}s, arg->filename %{public}d, isWatched %{public}d, "
+            "wd %{public}d", arg->fileName.c_str(), arg->events, isWatched, wd);
+    }
     if (isWatched && wd > 0) {
         arg->wd = wd;
         return ERRNO_NOERR;
@@ -92,6 +97,10 @@ int FileWatcher::StartNotify(shared_ptr<WatcherInfoArg> arg)
     int newWd = inotify_add_watch(notifyFd_, arg->fileName.c_str(), watchEvents);
     if (newWd < 0) {
         HILOGE("Failed to start notify errCode:%{public}d", errno);
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Start intify_add_watch notifyFd_ %{public}d, filename %{public}s, arg->event %{public}d, "
+                "watchEvents %{public}d", notifyFd_, arg->fileName.c_str(), arg->events, watchEvents);
+        }
         return errno;
     }
     arg->wd = newWd;
@@ -171,6 +180,9 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
         if (!(closed_ && reading_)) {
             oldWd = inotify_rm_watch(notifyFd_, arg->wd);
             HILOGE("rm watch failed, err: %{public}d", errno);
+            if (FileApiDebug::isLogEnabled) {
+                HILOGD("Stop inotify_rm_watch, notifyFd_ %{public}d, arg->wd %{public}d", notifyFd_, arg->wd);
+            }
         } else {
             HILOGE("rm watch fail");
         }
@@ -329,6 +341,9 @@ void FileWatcher::NotifyEvent(const struct inotify_event *event, WatcherCallback
         }
         if (event->len > 0) {
             fileName += "/" + string(event->name);
+        }
+        if (FileApiDebug::isLogEnabled) {
+            HILOGD("Watcher event %{public}d, event->mask %{public}d", watchEvent, event->mask);
         }
         callback(iter->env, iter->nRef, fileName, event->mask & IN_ALL_EVENTS, event->cookie);
     }

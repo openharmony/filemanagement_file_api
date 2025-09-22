@@ -73,8 +73,7 @@ public:
 
     MOCK_METHOD(napi_status, napi_wrap,
         (napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb, void *finalize_hint,
-            napi_ref *result),
-        (override));
+            napi_ref *result), (override));
 
     MOCK_METHOD(napi_status, napi_remove_wrap, (napi_env env, napi_value js_object, void **result), (override));
 };

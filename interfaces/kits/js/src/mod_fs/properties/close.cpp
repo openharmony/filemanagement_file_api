@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -44,6 +45,7 @@ static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
 
 static NError CloseFd(int fd)
 {
+    FileFsTrace traceCloseFd("CloseFd");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!close_req) {
@@ -77,6 +79,7 @@ static tuple<bool, FileStruct> ParseJsOperand(napi_env env, napi_value fdOrFileF
 
 napi_value Close::Sync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceCloseSync("CloseSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE)) {
         HILOGE("Number of arguments unmatched");

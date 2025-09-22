@@ -19,6 +19,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "fs_stat_entity.h"
@@ -71,10 +72,14 @@ static tuple<bool, FileInfo> ValidFileInfo(const FileInfo &fileInfo)
 
 static int32_t CheckFsStat(const FileInfo &fileInfo, uv_fs_t *req)
 {
+    FileFsTrace traceCheckFsStat("CheckFsStat");
     if (fileInfo.isPath) {
         int ret = uv_fs_stat(nullptr, req, fileInfo.path.get(), nullptr);
         if (ret < 0) {
             HILOGD("Failed to stat file with path, ret is %{public}d", ret);
+            if (FileApiDebug::isLogEnabled) {
+                HILOGD("Path is %{public}s", fileInfo.path.get());
+            }
             return ret;
         }
     } else {
@@ -89,6 +94,7 @@ static int32_t CheckFsStat(const FileInfo &fileInfo, uv_fs_t *req)
 
 FsResult<FsStat *> StatCore::DoStat(const FileInfo &fileinfo)
 {
+    FileFsTrace traceDoStat("DoStat");
     auto [succ, info] = ValidFileInfo(fileinfo);
     if (!succ) {
         return FsResult<FsStat *>::Error(EINVAL);

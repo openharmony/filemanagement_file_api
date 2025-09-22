@@ -15,6 +15,7 @@
 
 #include "fs_watcher.h"
 
+#include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "fs_file_watcher.h"
@@ -44,6 +45,7 @@ FsResult<FsWatcher *> FsWatcher::Constructor()
 
 FsResult<void> FsWatcher::Stop()
 {
+    FileFsTrace traceFsWatcherStop("FsWatcherStop");
     if (!watchEntity) {
         HILOGE("Failed to get watchEntity when stop.");
         return FsResult<void>::Error(EINVAL);
@@ -58,6 +60,7 @@ FsResult<void> FsWatcher::Stop()
 
 FsResult<void> FsWatcher::Start()
 {
+    FileFsTrace traceFsWatcherStart("FsWatcherStart");
     if (!watchEntity) {
         HILOGE("Failed to get watchEntity when start.");
         return FsResult<void>::Error(EINVAL);

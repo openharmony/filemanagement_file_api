@@ -24,6 +24,7 @@
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
 #include "file_utils.h"
+#include "file_fs_trace.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "ability.h"
 #include "ability_manager_client.h"
@@ -135,14 +136,14 @@ static NVal InstantiateFile(napi_env env, int fd, string pathOrUri, bool isUri, 
 
 static int OpenFileByPath(const string &path, unsigned int mode)
 {
+    FileFsTrace traceOpenFileByPath("OpenFileByPath");
     unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> open_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;
     }
-    int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode, S_IRUSR |
-        S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
+    int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), mode, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     return ret;
 }
 
@@ -192,6 +193,9 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, unsi
     string bundleName = uri.GetAuthority();
     AppFileService::ModuleFileUri::FileUri fileUri(uriStr);
     string realPath = fileUri.GetRealPath();
+    if (FileApiDebug::isLogEnabled) {
+        HILOGD("UriStr is %{public}s, realPath is %{public}s", uriStr.c_str(), realPath.c_str());
+    }
     if (bundleName == MEDIA) {
         string userId;
         if (CommonFunc::GetAndCheckUserId(&uri, userId) && CommonFunc::IsSystemApp()) {
@@ -262,6 +266,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
 #ifdef FILE_API_TRACE
     HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
 #endif
+    FileFsTrace traceOpenSync("OpenSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");

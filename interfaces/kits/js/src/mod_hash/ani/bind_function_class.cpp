@@ -41,6 +41,7 @@ static ani_status BindHashStreamMethods(ani_env *env)
         ani_native_function { "update", nullptr, reinterpret_cast<void *>(HashStreamAni::Update) },
         ani_native_function { ctorDesc, ctorSig, reinterpret_cast<void *>(HashStreamAni::Constructor) },
     };
+
     return BindClass(env, classDesc, methods);
 }
 
