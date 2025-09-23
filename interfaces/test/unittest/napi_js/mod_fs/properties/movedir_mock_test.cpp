@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "movedir_mock.h"
+#include "movedir.h"
 
 #include <cstring>
 #include <fcntl.h>

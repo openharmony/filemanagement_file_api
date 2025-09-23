@@ -74,6 +74,27 @@ napi_status napi_unwrap(napi_env env, napi_value js_object, void **result)
     return realNapi(env, js_object, result);
 }
 
+napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_remove_wrap(env, js_object, result);
+    }
+
+    static napi_status (*realNapi)(napi_env, napi_value, void **) = []() {
+        auto func = (napi_status(*)(napi_env, napi_value, void **))dlsym(RTLD_NEXT, "napi_remove_wrap");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_remove_wrap: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realNapi) {
+        return napi_ok;
+    }
+
+    return realNapi(env, js_object, result);
+}
+
 } // extern "C"
 
 bool NFuncArg::InitArgs(std::function<bool()> argcChecker)
@@ -146,7 +167,7 @@ size_t NFuncArg::GetArgc() const
     }
 
     static size_t (*realGetArgc)() = []() {
-        auto func = (size_t (*)())dlsym(RTLD_NEXT, "GetArgc");
+        auto func = (size_t(*)())dlsym(RTLD_NEXT, "GetArgc");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real GetArgc: " << dlerror();
         }
@@ -167,7 +188,7 @@ napi_value NFuncArg::GetThisVar() const
     }
 
     static napi_value (*realGetThisVar)() = []() {
-        auto func = (napi_value (*)())dlsym(RTLD_NEXT, "GetThisVar");
+        auto func = (napi_value(*)())dlsym(RTLD_NEXT, "GetThisVar");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real GetThisVar: " << dlerror();
         }
@@ -188,7 +209,7 @@ napi_value NFuncArg::GetArg(size_t argPos) const
     }
 
     static napi_value (*realGetArg)(size_t) = []() {
-        auto func = (napi_value (*)(size_t))dlsym(RTLD_NEXT, "GetArg");
+        auto func = (napi_value(*)(size_t))dlsym(RTLD_NEXT, "GetArg");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real GetArg: " << dlerror();
         }
@@ -293,7 +314,7 @@ std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8String() const
     }
 
     static std::tuple<bool, std::unique_ptr<char[]>, size_t> (*realToUTF8String)() = []() {
-        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t> (*)())dlsym(RTLD_NEXT, "ToUTF8String");
+        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>(*)())dlsym(RTLD_NEXT, "ToUTF8String");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToUTF8String: " << dlerror();
         }
@@ -314,8 +335,7 @@ std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8String(std::string
     }
 
     static std::tuple<bool, std::unique_ptr<char[]>, size_t> (*realToUTF8String)(std::string) = []() {
-        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>
-            (*)(std::string))dlsym(RTLD_NEXT, "ToUTF8String");
+        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>(*)(std::string))dlsym(RTLD_NEXT, "ToUTF8String");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToUTF8String: " << dlerror();
         }
@@ -357,7 +377,7 @@ std::tuple<bool, bool> NVal::ToBool() const
     }
 
     static std::tuple<bool, bool> (*realToBool)() = []() {
-        auto func = (std::tuple<bool, bool> (*)())dlsym(RTLD_NEXT, "ToBool");
+        auto func = (std::tuple<bool, bool>(*)())dlsym(RTLD_NEXT, "ToBool");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToBool: " << dlerror();
         }
@@ -378,7 +398,7 @@ std::tuple<bool, bool> NVal::ToBool(bool defaultValue) const
     }
 
     static std::tuple<bool, bool> (*realToBool)(bool) = []() {
-        auto func = (std::tuple<bool, bool> (*)(bool))dlsym(RTLD_NEXT, "ToBool");
+        auto func = (std::tuple<bool, bool>(*)(bool))dlsym(RTLD_NEXT, "ToBool");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToBool: " << dlerror();
         }
@@ -399,7 +419,7 @@ std::tuple<bool, int32_t> NVal::ToInt32() const
     }
 
     static std::tuple<bool, int32_t> (*realToInt32)() = []() {
-        auto func = (std::tuple<bool, int32_t> (*)())dlsym(RTLD_NEXT, "ToInt32");
+        auto func = (std::tuple<bool, int32_t>(*)())dlsym(RTLD_NEXT, "ToInt32");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToInt32: " << dlerror();
         }
@@ -420,7 +440,7 @@ std::tuple<bool, int32_t> NVal::ToInt32(int32_t defaultValue) const
     }
 
     static std::tuple<bool, int32_t> (*realToInt32)(int32_t) = []() {
-        auto func = (std::tuple<bool, int32_t> (*)(int32_t))dlsym(RTLD_NEXT, "ToInt32");
+        auto func = (std::tuple<bool, int32_t>(*)(int32_t))dlsym(RTLD_NEXT, "ToInt32");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToInt32: " << dlerror();
         }
@@ -441,7 +461,7 @@ std::tuple<bool, int64_t> NVal::ToInt64() const
     }
 
     static std::tuple<bool, int64_t> (*realToInt64)() = []() {
-        auto func = (std::tuple<bool, int64_t> (*)())dlsym(RTLD_NEXT, "ToInt64");
+        auto func = (std::tuple<bool, int64_t>(*)())dlsym(RTLD_NEXT, "ToInt64");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToInt64: " << dlerror();
         }
@@ -462,7 +482,7 @@ std::tuple<bool, int64_t> NVal::ToInt64(int64_t defaultValue) const
     }
 
     static std::tuple<bool, int64_t> (*realToInt64)(int64_t) = []() {
-        auto func = (std::tuple<bool, int64_t> (*)(int64_t))dlsym(RTLD_NEXT, "ToInt64");
+        auto func = (std::tuple<bool, int64_t>(*)(int64_t))dlsym(RTLD_NEXT, "ToInt64");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToInt64: " << dlerror();
         }
@@ -483,7 +503,7 @@ std::tuple<bool, double> NVal::ToDouble() const
     }
 
     static std::tuple<bool, double> (*realToDouble)() = []() {
-        auto func = (std::tuple<bool, double> (*)())dlsym(RTLD_NEXT, "ToDouble");
+        auto func = (std::tuple<bool, double>(*)())dlsym(RTLD_NEXT, "ToDouble");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToDouble: " << dlerror();
         }
@@ -525,7 +545,7 @@ NVal NVal::GetProp(std::string propName) const
     }
 
     static NVal (*realGetProp)(std::string) = []() {
-        auto func = (NVal (*)(std::string))dlsym(RTLD_NEXT, "GetProp");
+        auto func = (NVal(*)(std::string))dlsym(RTLD_NEXT, "GetProp");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real GetProp: " << dlerror();
         }
@@ -561,5 +581,26 @@ bool NVal::TypeIs(napi_valuetype expType) const
     }
 
     return realTypeIs(expType);
+}
+
+NVal NVal::CreateUndefined(napi_env env)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->CreateUndefined(env);
+    }
+
+    static NVal (*realCreateUndefined)(napi_env) = []() {
+        auto func = (NVal(*)(napi_env))dlsym(RTLD_NEXT, "CreateUndefined");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real CreateUndefined: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realCreateUndefined) {
+        return { nullptr, nullptr };
+    }
+
+    return realCreateUndefined(env);
 }
 #endif
