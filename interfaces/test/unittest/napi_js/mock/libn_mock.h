@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_NAPI_JS_MOD_FS_MOCK_LIBN_MOCK_H
-#define INTERFACES_TEST_UNITTEST_NAPI_JS_MOD_FS_MOCK_LIBN_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_NAPI_JS_MOCK_LIBN_MOCK_H
+#define INTERFACES_TEST_UNITTEST_NAPI_JS_MOCK_LIBN_MOCK_H
 
 #include <cstdio>
 #include <gmock/gmock.h>
@@ -41,6 +41,7 @@ public:
 
     // n_class GetEntityOf
     virtual napi_status napi_unwrap(napi_env env, napi_value js_object, void **result) = 0;
+    virtual napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result) = 0;
 
     // n_error
     virtual void ThrowErr(napi_env env) = 0;
@@ -63,6 +64,7 @@ public:
     virtual bool HasProp(std::string propName) = 0;
     virtual NVal GetProp(std::string propName) = 0;
     virtual bool TypeIs(napi_valuetype expType) = 0;
+    virtual NVal CreateUndefined(napi_env env) = 0;
 };
 
 class LibnMock : public ILibnMock {
@@ -75,6 +77,7 @@ public:
     MOCK_METHOD(napi_value, GetThisVar, (), (override));
 
     MOCK_METHOD(napi_status, napi_unwrap, (napi_env, napi_value, void **), (override));
+    MOCK_METHOD(napi_status, napi_remove_wrap, (napi_env, napi_value, void **), (override));
 
     MOCK_METHOD(void, ThrowErr, (napi_env), (override));
     MOCK_METHOD(void, ThrowErr, (napi_env, int), (override));
@@ -95,6 +98,7 @@ public:
     MOCK_METHOD(bool, HasProp, (std::string), (override));
     MOCK_METHOD(NVal, GetProp, (std::string), (override));
     MOCK_METHOD(bool, TypeIs, (napi_valuetype), (override));
+    MOCK_METHOD(NVal, CreateUndefined, (napi_env), (override));
 
 public:
     static std::shared_ptr<LibnMock> GetMock();
@@ -108,4 +112,4 @@ private:
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
-#endif // INTERFACES_TEST_UNITTEST_NAPI_JS_MOD_FS_MOCK_LIBN_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_NAPI_JS_MOCK_LIBN_MOCK_H

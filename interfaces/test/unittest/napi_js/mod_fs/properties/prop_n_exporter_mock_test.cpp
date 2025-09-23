@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "libn_mock.h"
-#include "prop_n_exporter_mock.h"
 #include "prop_n_exporter.h"
 #include "uv_fs_mock.h"
 #include <cstring>
@@ -31,21 +30,19 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
-protected:
 };
 
 void PropNExporterMockTest::SetUpTestCase(void)
 {
-    uvMock = make_shared<UvfsMock>();
-    PropNExporterMock::EnableMock();
+    UvfsMock::EnableMock();
+    LibnMock::EnableMock();
     GTEST_LOG_(INFO) << "SetUpTestCase";
 }
 
 void PropNExporterMockTest::TearDownTestCase(void)
 {
-    uvMock = nullptr;
-    PropNExporterMock::DisableMock();
+    UvfsMock::DisableMock();
+    LibnMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -65,7 +62,7 @@ void PropNExporterMockTest::TearDown(void)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.Level1)
 {
@@ -76,22 +73,26 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.L
     napi_env env = reinterpret_cast<napi_env>(envAddr);
     napi_value nv = reinterpret_cast<napi_value>(valueAddr);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(callbackInfoAddr);
-    
+
     size_t strLen = 10;
-    auto strPtr = make_unique<char []>(strLen);
+    auto strPtr = make_unique<char[]>(strLen);
     tuple<bool, std::unique_ptr<char[]>, size_t> tp = { true, move(strPtr), strLen };
 
-    auto pMock = LibnMock::GetMock();
-    EXPECT_CALL(*pMock, InitArgs(A<size_t>())).WillOnce(Return(true));
-    EXPECT_CALL(*pMock, GetArg(_)).WillOnce(Return(nv));
-    EXPECT_CALL(*pMock, ToUTF8StringPath()).WillOnce(Return(move(tp)));
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvfsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(tp)));
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(-1));
-    EXPECT_CALL(*pMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
 
     auto res = PropNExporter::UnlinkSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_UnlinkSync_001";
 }
 
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

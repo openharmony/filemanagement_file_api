@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+#include "randomaccessfile_n_exporter.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "randomaccessfile_n_exporter.h"
+
+#include "libn_mock.h"
 #include "randomaccessfile_entity.h"
 #include "uv_fs_mock.h"
-#include "randomaccessfile_n_exporter_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -31,24 +33,22 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
+
 protected:
     unique_ptr<RandomAccessFileEntity> rafEntity;
 };
 
 void RandomAccessFileNExporterMockTest::SetUpTestCase(void)
 {
-    uvMock = make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
-    RandomAccessFileNExporterMock::EnableMock();
+    UvfsMock::EnableMock();
+    LibnMock::EnableMock();
     GTEST_LOG_(INFO) << "SetUpTestCase";
 }
 
 void RandomAccessFileNExporterMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
-    RandomAccessFileNExporterMock::DisableMock();
+    UvfsMock::DisableMock();
+    LibnMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -73,7 +73,7 @@ void RandomAccessFileNExporterMockTest::TearDown(void)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_CloseSync_001, TestSize.Level1)
 {
@@ -81,22 +81,26 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
-    NVal mockNval = {env, nv};
+    NVal mockNval = { env, nv };
 
-    auto rafNEMock = RandomAccessFileNExporterMock::GetMock();
-    EXPECT_CALL(*rafNEMock, InitArgs(_)).WillOnce(Return(true));
-    EXPECT_CALL(*rafNEMock, GetThisVar()).WillOnce(Return(nv)).WillOnce(Return(nv));
-    EXPECT_CALL(*rafNEMock, napi_unwrap(_, _, _))
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvfsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
     EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
-    EXPECT_CALL(*rafNEMock, napi_remove_wrap(_, _, _))
+    EXPECT_CALL(*libnMock, napi_remove_wrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
-    EXPECT_CALL(*rafNEMock, CreateUndefined(_)).WillOnce(Return(mockNval));
+    EXPECT_CALL(*libnMock, CreateUndefined(_)).WillOnce(Return(mockNval));
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_NE(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_001";
 }
 
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

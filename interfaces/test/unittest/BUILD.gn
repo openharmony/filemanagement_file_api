@@ -25,12 +25,9 @@ group("file_api_unittest") {
     "js:ani_file_hash_test",
     "js:ani_file_securitylabel_test",
     "js:ani_file_statvfs_test",
-    "js:napi_file_fs_test",
-    "movedir:movedir_test",
-    "napi_js:napi_fs_test",
+    "napi_js:napi_file_fs_mock_test",
     "remote_uri:remote_uri_test",
     "task_signal:task_signal_test",
-    "napi_js:napi_file_fs_properties_test",
   ]
   if (file_api_feature_hyperaio) {
     deps += [ "hyperaio:hyperaio_test" ]

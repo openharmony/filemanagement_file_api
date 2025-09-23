@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "fdatasync.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "fdatasync.h"
-#include "uv_fs_mock.h"
-#include "fdatasync_mock.h"
+
 #include "libn_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -31,21 +32,19 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
-protected:
 };
 
 void FdatasyncMockTest::SetUpTestCase(void)
 {
-    uvMock = make_shared<UvfsMock>();
-    FdatasyncMock::EnableMock();
+    UvfsMock::EnableMock();
+    LibnMock::EnableMock();
     GTEST_LOG_(INFO) << "SetUpTestCase";
 }
 
 void FdatasyncMockTest::TearDownTestCase(void)
 {
-    uvMock = nullptr;
-    FdatasyncMock::DisableMock();
+    UvfsMock::DisableMock();
+    LibnMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -65,7 +64,7 @@ void FdatasyncMockTest::TearDown(void)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_001, TestSize.Level1)
 {
@@ -73,19 +72,23 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_001, TestSize.Level1)
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
-    tuple<bool, int32_t> tp = {true, 1};
+    tuple<bool, int32_t> tp = { true, 1 };
 
-    auto pMock = LibnMock::GetMock();
-    EXPECT_CALL(*pMock, InitArgs(A<size_t>())).WillOnce(Return(true));
-    EXPECT_CALL(*pMock, GetArg(_)).WillOnce(Return(nv));
-    EXPECT_CALL(*pMock, ToInt32()).WillOnce(Return(tp));
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvfsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(tp));
     EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(-1));
-    EXPECT_CALL(*pMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
 
     auto res = Fdatasync::Sync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FdatasyncMockTest-end FdatasyncMockTest_Sync_001";
 }
 
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test
