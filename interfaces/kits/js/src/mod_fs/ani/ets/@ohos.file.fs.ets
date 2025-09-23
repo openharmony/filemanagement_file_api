@@ -193,7 +193,22 @@ function copyDir(src: string, dest: string, mode?: int): Promise<void> {
   });
 }
 
-function copyDir(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+function copyDir(src: string, dest: string, callback: AsyncCallback<void, void>): void {
+  let promise = taskpool.execute((src: string, dest: string) =>
+    FileIoImpl.copyDirSync(src, dest), src, dest);
+  let res = new BusinessError<void>();
+  promise.then((ret: NullishType): void => {
+    res.code = 0;
+    callback(res, undefined);
+  }).catch((e: Error): void => {
+    let conflictErr = e as BusinessError<Array<ConflictFiles>>;
+    res.code = conflictErr.code;
+    res.message = conflictErr.message;
+    callback(res, undefined);
+  });
+}
+
+function copyDirWithConflictFiles(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
   let promise = taskpool.execute((src: string, dest: string) =>
     FileIoImpl.copyDirSync(src, dest), src, dest);
   promise.then((ret: NullishType): void => {
@@ -206,7 +221,22 @@ function copyDir(src: string, dest: string, callback: AsyncCallback<void, Array<
   });
 }
 
-function copyDir(src: string, dest: string, mode: int, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+function copyDir(src: string, dest: string, mode: int, callback: AsyncCallback<void, void>): void {
+  let promise = taskpool.execute((src: string, dest: string, mode: int) =>
+    FileIoImpl.copyDirSync(src, dest, mode), src, dest, mode);
+  let res = new BusinessError<void>();
+  promise.then((ret: NullishType): void => {
+    res.code = 0;
+    callback(res, undefined);
+  }).catch((e: Error): void => {
+    let conflictErr = e as BusinessError<Array<ConflictFiles>>;
+    res.code = conflictErr.code;
+    res.message = conflictErr.message;
+    callback(res, undefined);
+  });
+}
+
+function copyDirWithConflictFiles(src: string, dest: string, mode: int, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
   let promise = taskpool.execute((src: string, dest: string, mode: int) =>
     FileIoImpl.copyDirSync(src, dest, mode), src, dest, mode);
   promise.then((ret: NullishType): void => {
@@ -217,27 +247,6 @@ function copyDir(src: string, dest: string, mode: int, callback: AsyncCallback<v
   }).catch((e: Error): void => {
     callback(e as BusinessError<Array<ConflictFiles>>, undefined);
   });
-}
-
-function copyDir(arg0: Object, arg1: Object, arg2: NullishType, arg3: NullishType): void {
-  let src = arg0 as string;
-  let dest = arg1 as string;
-  if (typeof arg2 === 'int' && typeof arg3 === 'function') {
-    let mode: int = 0;
-    try {
-      mode = arg2 as int;
-    } catch (error) {
-      mode = (arg2 as int) + 0;
-    }
-    let callback = arg3 as AsyncCallback<void, Array<ConflictFiles>>;
-    copyDir(src, dest, mode, callback);
-    return;
-  }
-  if (typeof arg2 === 'function') {
-    let callback = arg2 as AsyncCallback<void, Array<ConflictFiles>>;
-    copyDir(src, dest, callback);
-    return;
-  }
 }
 
 function mkdirSync(path: string): void {
@@ -348,7 +357,23 @@ function moveDir(src: string, dest: string, mode?: int): Promise<void> {
   })
 }
 
-function moveDir(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+function moveDir(src: string, dest: string, callback: AsyncCallback<void, void>): void {
+  let promise = taskpool.execute((src: string, dest: string) => {
+    FileIoImpl.movedirSync(src, dest);
+  }, src, dest);
+  let res = new BusinessError<void>();
+  promise.then((ret: NullishType): void => {
+    res.code = 0;
+    callback(res, undefined);
+  }).catch((e: Error): void => {
+    let conflictErr = e as BusinessError<Array<ConflictFiles>>;
+    res.code = conflictErr.code;
+    res.message = conflictErr.message;
+    callback(res, undefined);
+  });
+}
+
+function moveDirWithConflictFiles(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
   let promise = taskpool.execute((src: string, dest: string) => {
     FileIoImpl.movedirSync(src, dest);
   }, src, dest);
@@ -362,7 +387,23 @@ function moveDir(src: string, dest: string, callback: AsyncCallback<void, Array<
   });
 }
 
-function moveDir(src: string, dest: string, mode: int, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+function moveDir(src: string, dest: string, mode: int, callback: AsyncCallback<void, void>): void {
+  let promise = taskpool.execute((src: string, dest: string, mode: int) => {
+    FileIoImpl.movedirSync(src, dest, mode);
+  }, src, dest, mode);
+  let res = new BusinessError<void>();
+  promise.then((ret: NullishType): void => {
+    res.code = 0;
+    callback(res, undefined);
+  }).catch((e: Error): void => {
+    let conflictErr = e as BusinessError<Array<ConflictFiles>>;
+    res.code = conflictErr.code;
+    res.message = conflictErr.message;
+    callback(res, undefined);
+  });
+}
+
+function moveDirWithConflictFiles(src: string, dest: string, mode: int, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
   let promise = taskpool.execute((src: string, dest: string, mode: int) => {
     FileIoImpl.movedirSync(src, dest, mode);
   }, src, dest, mode);
@@ -374,27 +415,6 @@ function moveDir(src: string, dest: string, mode: int, callback: AsyncCallback<v
   }).catch((e: Error): void => {
     callback(e as BusinessError<Array<ConflictFiles>>, undefined);
   });
-}
-
-function moveDir(arg0: Object, arg1: Object, arg2: NullishType, arg3: NullishType): void {
-  let src = arg0 as string;
-  let dest = arg1 as string;
-  if (typeof arg2 === 'int' && typeof arg3 === 'function') {
-    let mode: int = 0;
-    try {
-      mode = arg2 as int;
-    } catch (error) {
-      mode = (arg2 as int) + 0;
-    }
-    let callback = arg3 as AsyncCallback<void, Array<ConflictFiles>>;
-    moveDir(src, dest, mode, callback);
-    return;
-  }
-  if (typeof arg2 === 'function') {
-    let callback = arg2 as AsyncCallback<void, Array<ConflictFiles>>;
-    moveDir(src, dest, callback);
-    return;
-  }
 }
 
 function mkdtempSync(prefix: string): string {
