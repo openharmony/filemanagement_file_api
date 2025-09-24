@@ -13,35 +13,44 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_EVENTFD_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_EVENTFD_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_UNISTD_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_UNISTD_MOCK_H
+
+#include <unistd.h>
 
 #include <gmock/gmock.h>
-#include <sys/eventfd.h>
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-class IEventfdMock {
+class IUnistdMock {
 public:
-    virtual ~IEventfdMock() = default;
-    virtual int eventfd(unsigned int, int) = 0;
+    virtual ~IUnistdMock() = default;
+    virtual int access(const char *, int) = 0;
+    virtual int close(int) = 0;
+    virtual ssize_t read(int, void *, size_t) = 0;
+    virtual ssize_t write(int, const void *, size_t) = 0;
+    virtual int dup(int) = 0;
 };
 
-class EventfdMock : public IEventfdMock {
+class UnistdMock : public IUnistdMock {
 public:
-    MOCK_METHOD(int, eventfd, (unsigned int, int), (override));
+    MOCK_METHOD(int, access, (const char *, int), (override));
+    MOCK_METHOD(int, close, (int), (override));
+    MOCK_METHOD(ssize_t, read, (int, void *, size_t), (override));
+    MOCK_METHOD(ssize_t, write, (int, const void *, size_t), (override));
+    MOCK_METHOD(int, dup, (int), (override));
 
 public:
-    static std::shared_ptr<EventfdMock> GetMock();
+    static std::shared_ptr<UnistdMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<EventfdMock> eventfdMock;
+    static thread_local std::shared_ptr<UnistdMock> unistdMock;
     static thread_local bool mockable;
 };
 
@@ -50,4 +59,4 @@ private:
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_EVENTFD_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_UNISTD_MOCK_H

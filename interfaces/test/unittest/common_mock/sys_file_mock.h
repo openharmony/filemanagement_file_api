@@ -13,41 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_POLL_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_POLL_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYS_FILE_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYS_FILE_MOCK_H
+
+#include <sys/file.h>
 
 #include <gmock/gmock.h>
-#include <poll.h>
 
-namespace OHOS {
-namespace FileManagement {
-namespace ModuleFileIO {
-namespace Test {
+namespace OHOS::FileManagement::ModuleFileIO::Test {
 
-class IPollMock {
+class ISysFile {
 public:
-    virtual ~IPollMock() = default;
-    virtual int poll(struct pollfd *, nfds_t, int) = 0;
+    virtual ~IFile() = default;
+    virtual int flock(int fd, int operation) = 0;
 };
 
-class PollMock : public IPollMock {
+class SysFileMock : public ISysFile {
 public:
-    MOCK_METHOD(int, poll, (struct pollfd *, nfds_t, int), (override));
+    MOCK_METHOD(int, flock, (int fd, int operation), (override));
 
 public:
-    static std::shared_ptr<PollMock> GetMock();
+    static std::shared_ptr<SysFileMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<PollMock> pollMock;
+    static thread_local std::shared_ptr<SysFileMock> fileMock;
     static thread_local bool mockable;
 };
 
-} // namespace Test
-} // namespace ModuleFileIO
-} // namespace FileManagement
-} // namespace OHOS
-
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_POLL_MOCK_H
+} // namespace OHOS::FileManagement::ModuleFileIO::Test
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYS_FILE_MOCK_H

@@ -143,5 +143,26 @@ ssize_t write(int fd, const void *buf, size_t count)
     return realWrite(fd, buf, count);
 }
 
+int dup(int fd)
+{
+    if (UnistdMock::IsMockable()) {
+        return UnistdMock::GetMock()->dup(fd);
+    }
+
+    static int (*realDup)(int fd) = []() {
+        auto func = (int (*)(int))dlsym(RTLD_NEXT, "dup");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real dup: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realDup) {
+        return 0;
+    }
+
+    return realDup(fd);
+}
+
 } // extern "C"
 #endif
