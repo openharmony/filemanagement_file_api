@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -85,8 +85,8 @@ ssize_t getxattr(const char *path, const char *name, void *value, size_t size)
         return SystemMock::GetMock()->getxattr(path, name, value, size);
     }
 
-    static int (*realGetxattr)(const char *, const char *, void *, size_t) = []() {
-        auto func = (int (*)(const char *, const char *, void *, size_t))dlsym(RTLD_NEXT, "getxattr");
+    static ssize_t (*realGetxattr)(const char *, const char *, void *, size_t) = []() {
+        auto func = (ssize_t(*)(const char *, const char *, void *, size_t))dlsym(RTLD_NEXT, "getxattr");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real getxattr: " << dlerror();
         }
@@ -100,14 +100,14 @@ ssize_t getxattr(const char *path, const char *name, void *value, size_t size)
     return realGetxattr(path, name, value, size);
 }
 
-int fgetxattr(int filedes, const char *name, void *value, size_t size)
+ssize_t fgetxattr(int filedes, const char *name, void *value, size_t size)
 {
     if (SystemMock::IsMockable()) {
         return SystemMock::GetMock()->fgetxattr(filedes, name, value, size);
     }
 
-    static int (*realFgetxattr)(int, const char *, void *, size_t) = []() {
-        auto func = (int (*)(int, const char *, void *, size_t))dlsym(RTLD_NEXT, "fgetxattr");
+    static ssize_t (*realFgetxattr)(int, const char *, void *, size_t) = []() {
+        auto func = (ssize_t(*)(int, const char *, void *, size_t))dlsym(RTLD_NEXT, "fgetxattr");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real fgetxattr: " << dlerror();
         }

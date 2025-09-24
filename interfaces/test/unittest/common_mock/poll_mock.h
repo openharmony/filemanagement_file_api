@@ -13,39 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_INOTIFY_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_INOTIFY_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_POLL_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_POLL_MOCK_H
+
+#include <poll.h>
 
 #include <gmock/gmock.h>
-#include <sys/inotify.h>
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-class IInotifyMock {
+class IPollMock {
 public:
-    virtual ~IInotifyMock() = default;
-    virtual int inotify_init() = 0;
-    virtual int inotify_add_watch(int, const char *, uint32_t) = 0;
-    virtual int inotify_rm_watch(int, int) = 0;
+    virtual ~IPollMock() = default;
+    virtual int poll(struct pollfd *, nfds_t, int) = 0;
 };
 
-class InotifyMock : public IInotifyMock {
+class PollMock : public IPollMock {
 public:
-    MOCK_METHOD(int, inotify_init, (), (override));
-    MOCK_METHOD(int, inotify_add_watch, (int, const char *, uint32_t), (override));
-    MOCK_METHOD(int, inotify_rm_watch, (int, int), (override));
+    MOCK_METHOD(int, poll, (struct pollfd *, nfds_t, int), (override));
 
 public:
-    static std::shared_ptr<InotifyMock> GetMock();
+    static std::shared_ptr<PollMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<InotifyMock> inotifyMock;
+    static thread_local std::shared_ptr<PollMock> pollMock;
     static thread_local bool mockable;
 };
 
@@ -54,4 +51,4 @@ private:
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_FS_MOCK_INOTIFY_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_POLL_MOCK_H
