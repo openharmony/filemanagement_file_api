@@ -81,25 +81,4 @@ string FsUtils::GetModeFromFlags(const uint32_t &flags)
     return mode;
 }
 
-string FsUtils::Decode(const string &uri)
-{
-    ostringstream outPutStream;
-    const int32_t encodeLen = 2;
-    size_t index = 0;
-    while (index < uri.length()) {
-        if (uri[index] == '%') {
-            int hex = 0;
-            istringstream inputStream(uri.substr(index + 1, encodeLen));
-            inputStream >> hex >> hex;
-            outPutStream << static_cast<char>(hex);
-            index += encodeLen + 1;
-        } else {
-            outPutStream << uri[index];
-            index++;
-        }
-    }
-
-    return outPutStream.str();
-}
-
 } // namespace OHOS::FileManagement::ModuleFileIO
