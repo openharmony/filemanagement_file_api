@@ -331,17 +331,18 @@ void HyperAio::GetIoResult()
     }
     cqeCount_++;
     if (cqe->res < 0) {
-        HILOGI("cqe failed, cqe ->res = %{public}d", cqe->res);
+        HILOGI("cqe failed, cqe->res = %{public}d", cqe->res);
     }
     auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
     HyperaioTrace trace("harvest: userdata " + std::to_string(cqe->user_data)
-        + " res " + std::to_string(cqe->res) + "flags " + std::to_string(cqe->flags));
+        + " res " + std::to_string(cqe->res) + " flags " + std::to_string(cqe->flags));
     io_uring_cqe_seen(&pImpl_->uring_, cqe);
     if (ioResultCallBack_) {
         ioResultCallBack_(std::move(response));
     }
     pendingCqeCount_--;
 }
+
 void HyperAio::HarvestRes()
 {
     if (pImpl_ == nullptr) {
@@ -371,7 +372,6 @@ int32_t HyperAio::DestroyCtx()
         return EOK;
     }
     destroyed_.store(true);
-    stopThread_.store(true);
     if (harvestThread_.joinable()) {
         HILOGI("start harvest thread join");
         {

@@ -15,57 +15,158 @@
 #include "hyperaio_fuzzer.h"
 
 #include <fcntl.h>
-#include "hyperaio.h"
-#include "fileapi_fuzzer_helper.h"
+#include <filesystem>
+#include <stdio.h>
 
+#include "fileapi_fuzzer_helper.h"
+#include "filemgmt_libhilog.h"
+#include "hyperaio.h"
+
+using namespace OHOS::HyperAio;
 namespace OHOS {
+using namespace std;
 constexpr size_t U32_AT_SIZE = 4;
 constexpr size_t U64_AT_SIZE = 8;
 constexpr uint32_t URING_QUEUE_SIZE = 512;
-std::function<void(std::unique_ptr<OHOS::HyperAio::IoResponse>)> callBack = [](std::unique_ptr<OHOS::HyperAio::IoResponse> response) {};
+uint64_t MAX_UINT64 = std::numeric_limits<uint64_t>::max();
+uint64_t HALF_MAX_UINT64 = MAX_UINT64 / 2;
+std::function<void(std::unique_ptr<IoResponse>)> callBack = [](std::unique_ptr<IoResponse> response) {
+    if (response == nullptr) {
+        return;
+    }
+    if (response->userData < HALF_MAX_UINT64) {
+        close(response->res);
+    }
+    return;
+};
 
 bool HyperaioStartOpenReqsFuzzTest(FuzzData &fuzzData, size_t size)
 {
     fuzzData.ResetData(size);
-    std::unique_ptr<OHOS::HyperAio::HyperAio> hyperAio_ = std::make_unique<OHOS::HyperAio::HyperAio>();
+    std::unique_ptr<HyperAio::HyperAio> hyperAio_ = std::make_unique<HyperAio::HyperAio>();
     hyperAio_->CtxInit(&callBack);
-
-    // userData
+    std::filesystem::path directory = "/data/local/tmp";
+    if (!std::filesystem::exists(directory)) {
+        HILOGE("hyperaio testsync dir not exist");
+        return false;
+    }
     uint64_t userData = fuzzData.GetData<uint64_t>();
-
-    OHOS::HyperAio::OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
-    OHOS::HyperAio::OpenReqs openReqs = {1, &openInfo};
-
-    hyperAio_->StartOpenReqs(&openReqs);
-    hyperAio_->DestroyCtx();
-
+    userData = userData % HALF_MAX_UINT64;
+    OpenReqs reqs;
+    std::vector<OpenInfo> openInfoArray;
+    OpenInfo openInfo;
+    OpenInfo.dfd = -1;
+    openInfo.flags = O_RDONLY;
+    openInfo.mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
+    std::string pathStr = "/data/local/tmp/1.txt";
+    openInfo.path = strdup(pathStr.c_str());
+    openInfo.userData = static_cast<uint64_t>(userData);
+    openInfoArray.push_back(openInfo);
+    reqs.reqNum = openInfoArray.size();
+    reqs.reqs = openInfoArray.data();
+    hyperAio_->StartOepnReqs(&reqs);
+    if (hyperAio_ != nullptr) {
+        hyperAio_->DestroyCtx();
+    }
     return true;
 }
 
 bool HyperaioStartOpenReqsBatchFuzzTest(FuzzData &fuzzData, size_t size)
 {
     fuzzData.ResetData(size);
-    std::unique_ptr<OHOS::HyperAio::HyperAio> hyperAio_ = std::make_unique<OHOS::HyperAio::HyperAio>();
+    std::unique_ptr<HyperAio::HyperAio> hyperAio_ = std::make_unique<HyperAio::HyperAio>();
     hyperAio_->CtxInit(&callBack);
-
-    // userData
+    std::filesystem::path directory = "/data/local/tmp";
+    if (!std::filesystem::exists(directory)) {
+        HILOGE("hyperaio testsync dir not exist");
+        return false;
+    }
     uint64_t userData = fuzzData.GetData<uint64_t>();
+    userData = userData % HALF_MAX_UINT64;
     uint32_t batchSize = fuzzData.GetData<uint32_t>();
     batchSize = batchSize % URING_QUEUE_SIZE;
-
-    auto openInfos = std::make_unique<OHOS::HyperAio::OpenInfo[]>(batchSize);
-    for (uint32_t i = 0; i < batchSize; ++i) {
-        openInfos[i].dfd = 0;
-        openInfos[i].flags = O_RDWR;
-        openInfos[i].mode = 0;
-        openInfos[i].path = nullptr;
-        openInfos[i].userData = userData + i;
+    if (batchSize == 0) {
+        batchSize++;
     }
-    OHOS::HyperAio::OpenReqs openReqs = {batchSize, openInfos.get()};
+    OpenReqs reqs;
+    std::vector<OpenInfo> openInfoArray;
+    for (uint32_t i = 0; i < batchSize; ++i) {
+        OpenInfo openInfo;
+        openInfo.dfd = -1;
+        openInfo.flags = O_RDONLY;
+        openInfo.mode = S_IRUSR | S_IWUSR | S_IRGRP | SIWGRP;
+        std::string pathStr = "/data/local/tmp/" + std::to_string(i) + ".txt";
+        openInfo.path = strdup(pathStr.c_str());
+        openInfo.userData = userData;
+        openInfoArray.push_back(openInfo);
+    }
+    reqs.reqNum = openInfoArray.size();
+    reqs.reqs = openInfoArray.data();
+    hyperAio_->StartOpenReqs(&reqs);
+    if (hyperAio_ != nullptr) {
+        hyperAio_->DestroyCtx();
+    }
+    return true;
+}
 
-    hyperAio_->StartOpenReqs(&openReqs);
-    hyperAio_->DestroyCtx();
+bool HyperaioStartReadReqsFuzzTest(FuzzData &fuzzData, size_t size)
+{
+    fuzzData.ResetData(size);
+    std::unique_ptr<HyperAio::HyperAio> hyperAio_ = std::make_unique<HyperAio::HyperAio>();
+    hyperAio_->CtxInit(&callBack);
+    uint64_t userData = fuzzData.GetData<uint64_t>();
+    userData = userData % HALF_MAX_UINT64 + HALF_MAX_UINT64 + 1;
+    int fd = open("/data/local/tmp/1.txt", O_RDONLY);
+    uint32_t batchSize = fuzzData.GetData<uint32_t>();
+    batchSize = batchSize % URING_QUEUE_SIZE;
+    if (batchSize == 0) {
+        barchSize += 1;
+    }
+    char *buf;
+    size_t buffSize = 1024;
+    buf = (char *)malloc(buffSize);
+    if (!buf) {
+        return false;
+    }
+    std::vector<ReadInfo> infos;
+    ReadInfo info;
+    info.fd = fd;
+    info.len = buffSize;
+    info.offset = 0;
+    info.buf = buf;
+    info.userData = userData;
+    infos.emplace_back(info);
+    ReadReqs reqs;
+    reqs.reqNum = infos.size();
+    reqs.reqs = infos.data();
+    hyperAio_->StartReadReqs(&reqs);
+    if (hyperAio_ != nullptr) {
+        hyperAio_->DestroyCtx();
+    }
+    free(buf);
+    close(fd);
+    return true;
+}
 
+bool HyperaioStartCancelReqsFuzzTest(FuzzData &fuzzData, size_t size)
+{
+    fuzzData.ResetData(size);
+    std::unique_ptr<HyperAio::HyperAio> hyperAio_ = std::make_unique<HyperAio::HyperAio>();
+    hyperAio_->CtxInit(&callBack);
+    uint64_t userData = fuzzData.GetData<uint64_t>();
+    userData = userData % HALF_MAX_UINT64 + HALF_MAX_UINT64 + 1;
+    CancelReqs reqs;
+    std::vector<CancelInfo> cancelInfoArray;
+    CancelInfo cancelInfo;
+    cancelInfo.userData = userData;
+    cancelInfo.targetUserData = userData + 100;
+    cancelInfoArray.push_back(cancelInfo);
+    reqs.reqNum = cancelInfoArray.size();
+    reqs.reqs = cancelInfoArray.data();
+    hyperAio_->StartCancelReqs(&reqs);
+    if (hyperAio_ != nullptr) {
+        hyperAio_->DestroyCtx();
+    }
     return true;
 }
 } // namespace OHOS
@@ -82,6 +183,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::FuzzData fuzzData(data, size);
     OHOS::HyperaioStartOpenReqsFuzzTest(fuzzData, size);
     OHOS::HyperaioStartOpenReqsBatchFuzzTest(fuzzData, size);
+    OHOS::HyperaioStartReadReqsFuzzTest(fuzzData, size);
+    OHOS::HyperaioStartCancelReqsFuzzTest(fuzzData, size);
 #endif
     return 0;
 }
