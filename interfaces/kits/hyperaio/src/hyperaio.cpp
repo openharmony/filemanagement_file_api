@@ -164,12 +164,10 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         HILOGE("the request is empty");
         return -EINVAL;
     }
-
     int32_t ret = CheckParameter(req->reqNum);
     if (ret < 0) {
         return ret;
     }
-
     HyperaioTrace trace("StartOpenReqs" + std::to_string(req->reqNum));
     uint32_t totalReqs = req->reqNum;
     uint32_t count = 0;
@@ -220,7 +218,6 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         HILOGE("the request is empty");
         return -EINVAL;
     }
-
     int32_t ret = CheckParameter(req->reqNum);
     if (ret < 0) {
         return ret;
@@ -274,7 +271,6 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         HILOGE("the request is empty");
         return -EINVAL;
     }
-
     int32_t ret = CheckParameter(req->reqNum);
     if (ret < 0) {
         return ret;

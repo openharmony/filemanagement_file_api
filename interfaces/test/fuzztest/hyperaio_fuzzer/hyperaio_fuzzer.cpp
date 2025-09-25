@@ -16,7 +16,6 @@
 
 #include <fcntl.h>
 #include <filesystem>
-#include <stdio.h>
 
 #include "fileapi_fuzzer_helper.h"
 #include "filemgmt_libhilog.h"
@@ -117,7 +116,7 @@ bool HyperaioStartReadReqsFuzzTest(FuzzData &fuzzData, size_t size)
     hyperAio_->CtxInit(&callBack);
     uint64_t userData = fuzzData.GetData<uint64_t>();
     userData = userData % HALF_MAX_UINT64 + HALF_MAX_UINT64 + 1;
-    int fd = open("/data/local/tmp/1.txt", O_RDONLY);
+    int32_t fd = fuzzData.GetData<int32_t>();
     uint32_t batchSize = fuzzData.GetData<uint32_t>();
     batchSize = batchSize % URING_QUEUE_SIZE;
     if (batchSize == 0) {
@@ -125,7 +124,7 @@ bool HyperaioStartReadReqsFuzzTest(FuzzData &fuzzData, size_t size)
     }
     char *buf;
     size_t buffSize = 1024;
-    buf = (char *)malloc(buffSize);
+    buf = static_cast<char*>(malloc(buffSize));
     if (!buf) {
         return false;
     }
@@ -160,7 +159,7 @@ bool HyperaioStartCancelReqsFuzzTest(FuzzData &fuzzData, size_t size)
     std::vector<CancelInfo> cancelInfoArray;
     CancelInfo cancelInfo;
     cancelInfo.userData = userData;
-    cancelInfo.targetUserData = userData + 100;
+    cancelInfo.targetUserData = userData + U32_AT_SIZE;
     cancelInfoArray.push_back(cancelInfo);
     reqs.reqNum = cancelInfoArray.size();
     reqs.reqs = cancelInfoArray.data();
