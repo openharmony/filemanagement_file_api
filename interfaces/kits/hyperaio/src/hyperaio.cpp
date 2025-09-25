@@ -201,11 +201,9 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
                 HandleRequestError(openInfoVec, -EBUSY);
             }
             openReqCount_ += count;
-            {
-                std::unique_lock<std::mutex> lock(cqeMutex_);
-                pendingCqeCount_ += count;
-                cqeCond_.notify_one();
-            }
+            std::unique_lock<std::mutex> lock(cqeMutex_);
+            pendingCqeCount_ += count;
+            cqeCond_.notify_one();
             count = 0;
         }
     }
@@ -254,11 +252,9 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
                 HandleRequestError(readInfoVec, -EBUSY);
             }
             readReqCount_ += count;
-            {
-                std::unique_lock<std::mutex> lock(cqeMutex_);
-                pendingCqeCount_ += count;
-                cqeCond_.notify_one();
-            }
+            std::unique_lock<std::mutex> lock(cqeMutex_);
+            pendingCqeCount_ += count;
+            cqeCond_.notify_one();
             count = 0;
         }
     }
@@ -307,11 +303,9 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
                 HandleRequestError(cancelInfoVec, -EBUSY);
             }
             cancelReqCount_ += count;
-            {
-                std::unique_lock<std::mutex> lock(cqeMutex_);
-                pendingCqeCount_ += count;
-                cqeCond_.notify_one();
-            }
+            std::unique_lock<std::mutex> lock(cqeMutex_);
+            pendingCqeCount_ += count;
+            cqeCond_.notify_one();
             count = 0;
         }
     }
