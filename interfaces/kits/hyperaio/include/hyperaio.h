@@ -96,7 +96,16 @@ private:
     std::thread harvestThread_;
     std::atomic<bool> stopThread_ = true;
     std::atomic<bool> initialized_ = false;
+    std::atomic<bool> destroyed_ = false;
+    std::atomic<uint32_t> openReqCount_{0};
+    std::atomic<uint32_t> readReqCount_{0};
+    std::atomic<uint32_t> cancelReqCount_{0};
+    std::atomic<uint32_t> cqeCount_{0};
+    std::atomic<uint32_t> pendingCqeCount_{0};
+    std::condition_variable cqeCond_;
+    std::mutex cqeMutex_;
     void HarvestRes();
+    void GetIoResult();
     void HandleRequestError(std::vector<uint64_t> &errorVec, int32_t errorcode);
     void HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec);
     int32_t CheckParameter(uint32_t reqNum);

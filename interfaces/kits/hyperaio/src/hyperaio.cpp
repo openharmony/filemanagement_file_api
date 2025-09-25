@@ -31,10 +31,7 @@ const uint32_t URING_QUEUE_SIZE = 512;
 const uint32_t DELAY = 20;
 const uint32_t BATCH_SIZE = 128;
 const uint32_t RETRIES = 3;
-std::atomic<uint32_t> openReqCount_{0};
-std::atomic<uint32_t> readReqCount_{0};
-std::atomic<uint32_t> cancelReqCount_{0};
-std::atomic<uint32_t> cqeCount_{0};
+
 class HyperAio::Impl {
 public:
     io_uring uring_;
@@ -150,6 +147,10 @@ int32_t HyperAio::CheckParameter(uint32_t reqNum)
         HILOGE("HyperAio is not initialized");
         return -EPERM;
     }
+    if (destroyed_.load()) {
+        HILOGE("HyperAio is destroyed");
+        return -EPERM;
+    }
     if (!ValidateReqNum(reqNum)) {
         HILOGE("reqNum is out of range: %{public}u", reqNum);
         return -EINVAL;
@@ -202,6 +203,11 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
                 HandleRequestError(openInfoVec, -EBUSY);
             }
             openReqCount_ += count;
+            {
+                std::unique_lock<std::mutex> lock(cqeMutex_);
+                pendingCqeCount_ += count;
+                cqeCond_.notify_one();
+            }
             count = 0;
         }
     }
@@ -251,6 +257,11 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
                 HandleRequestError(readInfoVec, -EBUSY);
             }
             readReqCount_ += count;
+            {
+                std::unique_lock<std::mutex> lock(cqeMutex_);
+                pendingCqeCount_ += count;
+                cqeCond_.notify_one();
+            }
             count = 0;
         }
     }
@@ -300,12 +311,37 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
                 HandleRequestError(cancelInfoVec, -EBUSY);
             }
             cancelReqCount_ += count;
+            {
+                std::unique_lock<std::mutex> lock(cqeMutex_);
+                pendingCqeCount_ += count;
+                cqeCond_.notify_one();
+            }
             count = 0;
         }
     }
     return EOK;
 }
 
+void HyperAio::GetIoResult()
+{
+    struct io_uring_cqe *cqe;
+    int32_t ret = io_uring_wait_cqe(&pImpl_->uring_, &cqe);
+    if (ret < 0 || cqe == nullptr) {
+        HILOGI("wait cqe failed, ret = %{public}d", ret);
+    }
+    cqeCount_++;
+    if (cqe->res < 0) {
+        HILOGI("cqe failed, cqe ->res = %{public}d", cqe->res);
+    }
+    auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
+    HyperaioTrace trace("harvest: userdata " + std::to_string(cqe->user_data)
+        + " res " + std::to_string(cqe->res) + "flags " + std::to_string(cqe->flags));
+    io_uring_cqe_seen(&pImpl_->uring_, cqe);
+    if (ioResultCallBack_) {
+        ioResultCallBack_(std::move(response));
+    }
+    pendingCqeCount_--;
+}
 void HyperAio::HarvestRes()
 {
     if (pImpl_ == nullptr) {
@@ -313,23 +349,14 @@ void HyperAio::HarvestRes()
         return;
     }
 
-    while (!stopThread_.load()) {
-        struct io_uring_cqe *cqe;
-        int32_t ret = io_uring_wait_cqe(&pImpl_->uring_, &cqe);
-        if (ret < 0 || cqe == nullptr) {
-            HILOGI("wait cqe failed, ret = %{public}d", ret);
-            continue;
+    while (true) {
+        std::unique_lock<std::mutex> lock(cqeMutex_);
+        cqeCond_.wait(lock, [this] { return pendingCqeCount_.load() > 0 || stopThread_.load(); });
+        while (pendingCqeCount_.load() > 0) {
+            GetIoResult();
         }
-        cqeCount_++;
-        if (cqe->res < 0) {
-            HILOGI("cqe failed, cqe->res = %{public}d", cqe->res);
-        }
-        auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
-        HyperaioTrace trace("harvest: userdata " + std::to_string(cqe->user_data)
-            + " res " + std::to_string(cqe->res) + "flags " + std::to_string(cqe->flags));
-        io_uring_cqe_seen(&pImpl_->uring_, cqe);
-        if (ioResultCallBack_) {
-            ioResultCallBack_(std::move(response));
+        if (stopThread_.load()) {
+            break;
         }
     }
     HILOGI("exit harvest thread");
@@ -343,10 +370,15 @@ int32_t HyperAio::DestroyCtx()
         HILOGI("not initialized");
         return EOK;
     }
-
+    destroyed_.store(true);
     stopThread_.store(true);
     if (harvestThread_.joinable()) {
         HILOGI("start harvest thread join");
+        {
+            std::unique_lock<std::mutex> lock(cqeMutex_);
+            stopThread_.store(true);
+            cqeCond_.notify_all();
+        }
         harvestThread_.join();
         // This log is only printed after join() completes successfully
         HILOGI("join success");
