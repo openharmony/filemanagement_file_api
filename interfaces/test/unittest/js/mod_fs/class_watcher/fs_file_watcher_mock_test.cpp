@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "fs_file_watcher.h"
+
 #include <string>
 #include <vector>
 
@@ -22,7 +24,6 @@
 
 #include "eventfd_mock.h"
 #include "filemgmt_libhilog.h"
-#include "fs_file_watcher.h"
 #include "inotify_mock.h"
 #include "mock_watcher_callback.h"
 #include "poll_mock.h"

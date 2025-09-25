@@ -14,9 +14,12 @@
  */
 
 #include "copy_file_core.h"
-#include "uv_fs_mock.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -29,20 +32,18 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvfs = nullptr;
 };
 
 void CopyFileCoreMockTest::SetUpTestCase(void)
 {
-    uvfs = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvfs;
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "CopyFileCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void CopyFileCoreMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvfs = nullptr;
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -93,9 +94,12 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_003, testing::ext
     src.isPath = true;
     dest.isPath = false;
 
-    EXPECT_CALL(*uvfs, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(-1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(-1));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_003";
@@ -120,9 +124,12 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_005, testing::ext
     ASSERT_NE(fd, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(fd);
 
-    EXPECT_CALL(*uvfs, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(-1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(-1));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_005";
@@ -147,9 +154,12 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_006, testing::ext
     ASSERT_NE(fd, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(fd);
 
-    EXPECT_CALL(*uvfs, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_006";
@@ -177,9 +187,12 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_007, testing::ext
     src.fdg = make_unique<DistributedFS::FDGuard>(srcFd);
     dest.fdg = make_unique<DistributedFS::FDGuard>(destFd);
 
-    EXPECT_CALL(*uvfs, uv_fs_ftruncate(_, _, _, _, _)).Times(1).WillOnce(Return(-1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_ftruncate(_, _, _, _, _)).Times(1).WillOnce(Return(-1));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_007";
@@ -205,9 +218,12 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_008, testing::ext
     src.fdg = make_unique<DistributedFS::FDGuard>(fd);
     dest.fdg = make_unique<DistributedFS::FDGuard>();
 
-    EXPECT_CALL(*uvfs, uv_fs_ftruncate(_, _, _, _, _)).Times(1).WillOnce(Return(1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_ftruncate(_, _, _, _, _)).Times(1).WillOnce(Return(1));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_008";
@@ -236,9 +252,12 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_009, testing::ext
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
     dest.fdg = make_unique<DistributedFS::FDGuard>(destfd);
 
-    EXPECT_CALL(*uvfs, uv_fs_ftruncate(_, _, _, _, _)).Times(1).WillOnce(Return(1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_ftruncate(_, _, _, _, _)).Times(1).WillOnce(Return(1));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_009";
@@ -267,10 +286,13 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0010, testing::ex
     ASSERT_NE(len, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
 
-    EXPECT_CALL(*uvfs, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
-    EXPECT_CALL(*uvfs, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(-1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(-1));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0010";
@@ -299,10 +321,13 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0011, testing::ex
     ASSERT_NE(len, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
 
-    EXPECT_CALL(*uvfs, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
-    EXPECT_CALL(*uvfs, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(len + 1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(len + 1));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0011";
@@ -331,10 +356,13 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0012, testing::ex
     ASSERT_NE(len, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
 
-    EXPECT_CALL(*uvfs, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
-    EXPECT_CALL(*uvfs, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(len));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(len));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0012";
@@ -363,10 +391,13 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_0013, testing::ex
     ASSERT_NE(len, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(srcfd);
 
-    EXPECT_CALL(*uvfs, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
-    EXPECT_CALL(*uvfs, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(0));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(0));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_0013";

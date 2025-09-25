@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "fs_watcher.h"
+
 #include <string>
 
 #include <gmock/gmock.h>
@@ -23,7 +25,6 @@
 #include "filemgmt_libhilog.h"
 #include "fs_err_code.h"
 #include "fs_file_watcher.h"
-#include "fs_watcher.h"
 #include "inotify_mock.h"
 #include "unistd_mock.h"
 

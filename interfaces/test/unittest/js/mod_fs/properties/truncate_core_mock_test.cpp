@@ -14,9 +14,12 @@
  */
 
 #include "truncate_core.h"
-#include "uv_fs_mock.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -29,21 +32,19 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void TruncateCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    prctl(PR_SET_NAME, "TruncateCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void TruncateCoreMockTest::TearDownTestCase(void)
 {
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
 }
 
 void TruncateCoreMockTest::SetUp(void)
@@ -69,10 +70,13 @@ HWTEST_F(TruncateCoreMockTest, TruncateCoreMockTest_DoTruncate_001, testing::ext
 
     FileInfo fileInfo;
     fileInfo.isPath = true;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1, false);
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(-1));
+
     auto res = TruncateCore::DoTruncate(fileInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "TruncateCoreMockTest-end TruncateCoreMockTest_DoTruncate_001";
@@ -91,11 +95,14 @@ HWTEST_F(TruncateCoreMockTest, TruncateCoreMockTest_DoTruncate_002, testing::ext
 
     FileInfo fileInfo;
     fileInfo.isPath = true;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1, false);
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_ftruncate(_, _, _, _, _)).WillOnce(Return(-1));
+
     auto res = TruncateCore::DoTruncate(fileInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "TruncateCoreMockTest-end TruncateCoreMockTest_DoTruncate_002";
@@ -114,11 +121,14 @@ HWTEST_F(TruncateCoreMockTest, TruncateCoreMockTest_DoTruncate_003, testing::ext
 
     FileInfo fileInfo;
     fileInfo.isPath = true;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1, false);
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_ftruncate(_, _, _, _, _)).WillOnce(Return(1));
+
     auto res = TruncateCore::DoTruncate(fileInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "TruncateCoreMockTest-end TruncateCoreMockTest_DoTruncate_003";
@@ -136,10 +146,12 @@ HWTEST_F(TruncateCoreMockTest, TruncateCoreMockTest_DoTruncate_004, testing::ext
     GTEST_LOG_(INFO) << "TruncateCoreMockTest-begin TruncateCoreMockTest_DoTruncate_004";
 
     FileInfo fileInfo;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1, false);
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_ftruncate(_, _, _, _, _)).WillOnce(Return(-1));
     auto res = TruncateCore::DoTruncate(fileInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "TruncateCoreMockTest-end TruncateCoreMockTest_DoTruncate_004";
@@ -157,10 +169,12 @@ HWTEST_F(TruncateCoreMockTest, TruncateCoreMockTest_DoTruncate_005, testing::ext
     GTEST_LOG_(INFO) << "TruncateCoreMockTest-begin TruncateCoreMockTest_DoTruncate_005";
 
     FileInfo fileInfo;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
-
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1, false);
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_ftruncate(_, _, _, _, _)).WillOnce(Return(1));
     auto res = TruncateCore::DoTruncate(fileInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "TruncateCoreMockTest-end TruncateCoreMockTest_DoTruncate_005";

@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#include "file_entity.h"
 #include "fs_file.h"
-#include "system_mock.h"
-#include "uv_fs_mock.h"
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <sys/prctl.h>
+
+#include "file_entity.h"
+#include "system_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -32,7 +34,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
     std::unique_ptr<FileEntity> fileEntity;
     std::unique_ptr<FsFile> fsFile;
 };
@@ -40,17 +41,16 @@ public:
 void FsFileMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "FsFileMockTest");
     SystemMock::EnableMock();
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    UvFsMock::EnableMock();
 }
 
 void FsFileMockTest::TearDownTestCase(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
     SystemMock::DisableMock();
+    UvFsMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
 void FsFileMockTest::SetUp(void)
@@ -85,12 +85,15 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_001, testing::ext::TestSize.Leve
     uv_fs_t mock_req;
     mock_req.ptr = const_cast<char *>("/data/test/file_test.txt");
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
         .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
             *req = mock_req;
             return 0;
         }));
     auto result = fsFile->GetPath();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetPath_001";
@@ -108,8 +111,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_002, testing::ext::TestSize.Leve
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetPath_002";
 
     fsFile->fileEntity->path_ = "/invalid/path";
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
+
     auto result = fsFile->GetPath();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetPath_002";
@@ -127,8 +134,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_003, testing::ext::TestSize.Leve
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_003";
 
     fsFile->fileEntity->path_ = "/invalid/path";
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
+
     auto result = fsFile->GetName();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_003";
@@ -146,8 +157,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_004, testing::ext::TestSize.Leve
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_004";
 
     fsFile->fileEntity->path_ = "file_test.txt";
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
+
     auto result = fsFile->GetName();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_004";
@@ -165,8 +180,12 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_005, testing::ext::TestSize.Le
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_005";
 
     fsFile->fileEntity->path_ = "/invalid/path";
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
+
     auto result = fsFile->GetParent();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetParent_005";
@@ -186,12 +205,16 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_006, testing::ext::TestSize.Leve
     uv_fs_t mock_req;
     mock_req.ptr = const_cast<char *>("/file_test.txt");
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
         .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
             *req = mock_req;
             return 0;
         }));
+
     auto result = fsFile->GetName();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_006";
@@ -211,12 +234,16 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_007, testing::ext::TestSize.Le
     uv_fs_t mock_req;
     mock_req.ptr = const_cast<char *>("/test/dir_test");
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
         .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
             *req = mock_req;
             return 0;
         }));
+
     auto result = fsFile->GetParent();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetParent_007";
@@ -236,12 +263,16 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_008, testing::ext::TestSize.Leve
     uv_fs_t mock_req;
     mock_req.ptr = const_cast<char *>("file_test.txt");
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
         .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
             *req = mock_req;
             return 0;
         }));
+
     auto result = fsFile->GetName();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_008";
@@ -261,12 +292,16 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_009, testing::ext::TestSize.Le
     uv_fs_t mock_req;
     mock_req.ptr = const_cast<char *>("dir_test");
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
         .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
             *req = mock_req;
             return 0;
         }));
+
     auto result = fsFile->GetParent();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetParent_009";

@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
+#include "mkdir_core.h"
+
 #include <filesystem>
 #include <fstream>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "mkdir_core.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -33,7 +36,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 filesystem::path MkdirCoreMockTest::tempFilePath;
@@ -41,18 +43,17 @@ filesystem::path MkdirCoreMockTest::tempFilePath;
 void MkdirCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "MkdirCoreMockTest");
     tempFilePath = filesystem::temp_directory_path() / "mkdir_test";
     std::filesystem::create_directory(tempFilePath);
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    UvFsMock::EnableMock();
 }
 
 void MkdirCoreMockTest::TearDownTestCase(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
     filesystem::remove_all(tempFilePath);
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    UvFsMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
 void MkdirCoreMockTest::SetUp(void)
@@ -76,10 +77,13 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0001, testing::ext::TestSi
 {
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0001";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_mkdir(_, _, _, _, _)).WillOnce(Return(0));
 
     string path = tempFilePath.string() + "/test01";
     auto ret = MkdirCore::DoMkdir(path);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_0001";
@@ -96,10 +100,13 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0002, testing::ext::TestSi
 {
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0002";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(-2)).WillOnce(Return(0));
 
     string path = tempFilePath.string() + "/test02/testDir";
     auto ret = MkdirCore::DoMkdir(path, true);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_0002";
@@ -116,10 +123,13 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0003, testing::ext::TestSi
 {
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0003";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_mkdir(_, _, _, _, _)).WillOnce(Return(1));
 
     string path = tempFilePath.string() + "/test03";
     auto ret = MkdirCore::DoMkdir(path);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_0003";
@@ -136,10 +146,13 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0004, testing::ext::TestSi
 {
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0004";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(0));
 
     string path = "/";
     auto ret = MkdirCore::DoMkdir(path, true);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), false);
     auto err = ret.GetError();
     int errCode = err.GetErrNo();
@@ -161,10 +174,13 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0005, testing::ext::TestSi
 {
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0005";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(2));
 
     string path = "";
     auto ret = MkdirCore::DoMkdir(path, true);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), false);
     auto err = ret.GetError();
     int errCode = err.GetErrNo();

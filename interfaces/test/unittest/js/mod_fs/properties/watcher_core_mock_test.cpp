@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "watcher_core.h"
+
 #include <string>
 
 #include <gmock/gmock.h>
@@ -24,7 +26,6 @@
 #include "fs_file_watcher.h"
 #include "inotify_mock.h"
 #include "mock_watcher_callback.h"
-#include "watcher_core.h"
 
 namespace OHOS {
 namespace FileManagement {

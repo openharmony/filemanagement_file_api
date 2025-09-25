@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include "fs_stat.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "fs_stat_entity.h"
-#include "fs_stat.h"
 #include "securec.h"
 #include "system_mock.h"
 
@@ -37,13 +39,14 @@ public:
 void FsStatMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "FsStatMockTest");
     SystemMock::EnableMock();
 }
 
 void FsStatMockTest::TearDownTestCase(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
     SystemMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
 void FsStatMockTest::SetUp(void)

@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "lstat_core.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "lstat_core.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -30,21 +32,19 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void LstatCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    prctl(PR_SET_NAME, "LstatCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void LstatCoreMockTest::TearDownTestCase(void)
 {
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
 }
 
 void LstatCoreMockTest::SetUp(void)
@@ -67,13 +67,16 @@ void LstatCoreMockTest::TearDown(void)
 HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_001";
-    
+
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
 
     auto res = LstatCore::DoLstat("/data/test/lstat.txt");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_001";
 }
 
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test
