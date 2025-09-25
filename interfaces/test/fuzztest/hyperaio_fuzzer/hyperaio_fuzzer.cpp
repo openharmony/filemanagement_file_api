@@ -16,6 +16,7 @@
 
 #include <fcntl.h>
 #include <filesystem>
+#include <unistd.h>
 
 #include "fileapi_fuzzer_helper.h"
 #include "filemgmt_libhilog.h"
