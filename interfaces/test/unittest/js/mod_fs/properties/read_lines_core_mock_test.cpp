@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
+#include "read_lines_core.h"
+
 #include <filesystem>
 #include <fstream>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "mock/uv_fs_mock.h"
-#include "read_lines_core.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -33,7 +36,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 filesystem::path ReadLinesCoreMockTest::tempFilePath;
@@ -41,19 +43,18 @@ filesystem::path ReadLinesCoreMockTest::tempFilePath;
 void ReadLinesCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "ReadLinesCoreMockTest");
     tempFilePath = filesystem::temp_directory_path() / "read_lines_test_file.txt";
     ofstream(tempFilePath) << "Test content\n123\n456";
     ofstream(tempFilePath).close();
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    UvFsMock::EnableMock();
 }
 
 void ReadLinesCoreMockTest::TearDownTestCase(void)
 {
     filesystem::remove(tempFilePath);
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
 }
 
 void ReadLinesCoreMockTest::SetUp(void)
@@ -81,8 +82,12 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_001, testing::
     Options option;
     option.encoding = "utf-8";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
+
     auto res = ReadLinesCore::DoReadLines(path, option);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_001";
@@ -101,8 +106,12 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_002, testing::
 
     string path = tempFilePath.string();
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
+
     auto res = ReadLinesCore::DoReadLines(path);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_002";
@@ -123,8 +132,12 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_003, testing::
     Options option;
     option.encoding = "utf-8";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+
     auto res = ReadLinesCore::DoReadLines(path, option);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_003";

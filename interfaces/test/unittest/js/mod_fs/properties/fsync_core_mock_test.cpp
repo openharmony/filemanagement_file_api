@@ -14,9 +14,12 @@
  */
 
 #include "fsync_core.h"
-#include "uv_fs_mock.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -29,20 +32,18 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock>  uvfs = nullptr;
 };
 
 void FsyncCoreMockTest::SetUpTestCase(void)
 {
-    uvfs = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvfs;
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "FsyncCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void FsyncCoreMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvfs = nullptr;
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -67,9 +68,12 @@ HWTEST_F(FsyncCoreMockTest, FsyncCoreMockTest_DoFsync_001, testing::ext::TestSiz
 {
     GTEST_LOG_(INFO) << "FsyncCoreMockTest-begin FsyncCoreMockTest_DoFsync_001";
 
-    EXPECT_CALL(*uvfs, uv_fs_fsync(_, _, _, _)).WillOnce(Return(-1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_fsync(_, _, _, _)).WillOnce(Return(-1));
 
     auto res = FsyncCore::DoFsync(1);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsyncCoreMockTest-end FsyncCoreMockTest_DoFsync_001";
@@ -86,13 +90,15 @@ HWTEST_F(FsyncCoreMockTest, FsyncCoreMockTest_DoFsync_002, testing::ext::TestSiz
 {
     GTEST_LOG_(INFO) << "FsyncCoreMockTest-begin FsyncCoreMockTest_DoFsync_002";
 
-    EXPECT_CALL(*uvfs, uv_fs_fsync(_, _, _, _)).WillOnce(Return(1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_fsync(_, _, _, _)).WillOnce(Return(1));
 
     auto res = FsyncCore::DoFsync(1);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FsyncCoreMockTest-end FsyncCoreMockTest_DoFsync_002";
 }
-
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

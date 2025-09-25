@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_UV_MOCK_H
-#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_UV_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_UV_FS_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_UV_FS_MOCK_H
 
 #include "uv.h"
 
@@ -23,7 +23,6 @@
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 
 class IUvFs {
-
 public:
     virtual ~IUvFs() = default;
     virtual int uv_fs_read(uv_loop_t *, uv_fs_t *, uv_file, const uv_buf_t[], unsigned int, int64_t, uv_fs_cb) = 0;
@@ -93,4 +92,4 @@ private:
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
-#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_UV_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_UV_FS_MOCK_H

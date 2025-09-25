@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "uv_mock.h"
+#include "uv_fs_mock.h"
 
 #include <dlfcn.h>
 

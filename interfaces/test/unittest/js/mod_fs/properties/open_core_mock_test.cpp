@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
+#include "open_core.h"
+
 #include <filesystem>
 #include <fstream>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "mock/uv_fs_mock.h"
-#include "open_core.h"
 #include "unistd_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -33,25 +36,21 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-
-private:
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void OpenCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    prctl(PR_SET_NAME, "OpenCoreMockTest");
+    UvFsMock::EnableMock();
     UnistdMock::EnableMock();
 }
 
 void OpenCoreMockTest::TearDownTestCase(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    UvFsMock::DisableMock();
     UnistdMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
 void OpenCoreMockTest::SetUp(void)
@@ -78,8 +77,12 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_001, testing::ext::TestSize.L
     string path = "/test/OpenCoreMockTest_DoOpen_001";
     int32_t mode = 0;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(0));
+
     auto res = OpenCore::DoOpen(path, mode);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "OpenCoreMockTest-end OpenCoreMockTest_DoOpen_001";
@@ -99,11 +102,15 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_002, testing::ext::TestSize.L
     string path = "file://test/OpenCoreMockTest_DoOpen_002";
     int32_t mode = 0;
 
+    auto uvMock = UvFsMock::GetMock();
     auto unistdMock = UnistdMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).WillRepeatedly(testing::Return(0));
+
     auto res = OpenCore::DoOpen(path, mode);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
@@ -124,11 +131,15 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_003, testing::ext::TestSize.L
     string path = "file://test/OpenCoreMockTest_DoOpen_003";
     int32_t mode = 0;
 
+    auto uvMock = UvFsMock::GetMock();
     auto unistdMock = UnistdMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).WillRepeatedly(testing::Return(0));
+
     auto res = OpenCore::DoOpen(path, mode);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(&unistdMock);
     EXPECT_EQ(res.IsSuccess(), false);
 
@@ -149,8 +160,12 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_004, testing::ext::TestSize.L
     string path = "/test/OpenCoreMockTest_DoOpen_004";
     int32_t mode = 0;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(-1));
+
     auto res = OpenCore::DoOpen(path, mode);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "OpenCoreMockTest-end OpenCoreMockTest_DoOpen_004";

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "watcher_data_cache.h"
+
 #include <string>
 #include <vector>
 
@@ -20,7 +22,6 @@
 #include <sys/inotify.h>
 
 #include "filemgmt_libhilog.h"
-#include "watcher_data_cache.h"
 
 namespace OHOS {
 namespace FileManagement {

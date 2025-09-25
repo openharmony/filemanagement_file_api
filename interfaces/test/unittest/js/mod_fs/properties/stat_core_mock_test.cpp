@@ -14,10 +14,16 @@
  */
 
 #include "stat_core.h"
-#include "uv_fs_mock.h"
 
 #include <cstring>
+#include <string>
+
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "securec.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -30,20 +36,18 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvfs = nullptr;
 };
 
 void StatCoreMockTest::SetUpTestCase(void)
 {
-    uvfs = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvfs;
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "StatCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void StatCoreMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvfs = nullptr;
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -57,9 +61,23 @@ void StatCoreMockTest::TearDown(void)
     GTEST_LOG_(INFO) << "TearDown";
 }
 
+static bool SetPathForFileInfo(FileInfo &fileInfo, const string_view &path)
+{
+    auto len = path.length() + 1;
+    auto pathPtr = std::make_unique<char[]>(len);
+    int ret = strcpy_s(pathPtr.get(), len, path.data());
+    if (ret != 0) {
+        GTEST_LOG_(ERROR) << "SetPathForFileInfo failed! ret: " << ret;
+        return false;
+    }
+    fileInfo.path = std::move(pathPtr);
+    fileInfo.isPath = true;
+    return true;
+}
+
 /**
  * @tc.name: StatCoreMockTest_DoStat_001
- * @tc.desc: Test function of StatCore::DoStat interface for FALSE.
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE when is path.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -69,12 +87,16 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_001, testing::ext::TestSize.L
     GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_001";
 
     FileInfo fileinfo;
-    fileinfo.path = std::make_unique<char[]>(1);
-    fileinfo.isPath = true;
+    fileinfo.fdg = nullptr;
+    auto succ = SetPathForFileInfo(fileinfo, "StatCoreMockTest_DoStat_001");
+    ASSERT_TRUE(succ);
 
-    EXPECT_CALL(*uvfs, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
 
     auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_001";
@@ -82,7 +104,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_001, testing::ext::TestSize.L
 
 /**
  * @tc.name: StatCoreMockTest_DoStat_002
- * @tc.desc: Test function of StatCore::DoStat interface for FALSE.
+ * @tc.desc: Test function of StatCore::DoStat interface for SUCCESS when is path.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -92,20 +114,23 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_002, testing::ext::TestSize.L
     GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_002";
 
     FileInfo fileinfo;
-    fileinfo.path = std::make_unique<char[]>(1);
-    fileinfo.isPath = true;
-
-    EXPECT_CALL(*uvfs, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
+    fileinfo.fdg = nullptr;
+    auto succ = SetPathForFileInfo(fileinfo, "StatCoreMockTest_DoStat_002");
+    ASSERT_TRUE(succ);
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
 
     auto res = StatCore::DoStat(fileinfo);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_002";
 }
 
 /**
  * @tc.name: StatCoreMockTest_DoStat_003
- * @tc.desc: Test function of StatCore::DoStat interface for FALSE.
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE when is FD.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -115,12 +140,15 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_003, testing::ext::TestSize.L
     GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_003";
 
     FileInfo fileinfo;
-    fileinfo.path = std::make_unique<char[]>(1);
+    fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(1, false);
+    fileinfo.path = nullptr;
     fileinfo.isPath = false;
-
-    EXPECT_CALL(*uvfs, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_fstat(_, _, _, _)).WillOnce(Return(-1));
 
     auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_003";
@@ -128,7 +156,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_003, testing::ext::TestSize.L
 
 /**
  * @tc.name: StatCoreMockTest_DoStat_004
- * @tc.desc: Test function of StatCore::DoStat interface for SUCCESS.
+ * @tc.desc: Test function of StatCore::DoStat interface for SUCCESS when is FD.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -138,13 +166,15 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_004, testing::ext::TestSize.L
     GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_004";
 
     FileInfo fileinfo;
-    fileinfo.path = std::make_unique<char[]>(1);
     fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(1, false);
+    fileinfo.path = nullptr;
     fileinfo.isPath = false;
-
-    EXPECT_CALL(*uvfs, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_fstat(_, _, _, _)).WillOnce(Return(1));
 
     auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_004";

@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
+#include "fs_reader_iterator.h"
+
 #include <filesystem>
 #include <fstream>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "fs_reader_iterator.h"
 #include "read_lines_core.h"
 #include "uv_fs_mock.h"
 
@@ -35,7 +37,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 filesystem::path FsReaderIteratorMockTest::tempFilePath;
@@ -43,20 +44,19 @@ filesystem::path FsReaderIteratorMockTest::tempFilePath;
 void FsReaderIteratorMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "FsReaderIteratorMockTest");
     tempFilePath = std::filesystem::temp_directory_path() / "test_file.txt";
     ofstream tempfile(tempFilePath);
     tempfile << "";
     tempfile.close();
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    UvFsMock::EnableMock();
 }
 
 void FsReaderIteratorMockTest::TearDownTestCase(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
     filesystem::remove(tempFilePath);
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    UvFsMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
 void FsReaderIteratorMockTest::SetUp(void)
@@ -79,10 +79,11 @@ void FsReaderIteratorMockTest::TearDown(void)
 HWTEST_F(FsReaderIteratorMockTest, FsReaderIteratorMockTest_Next_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsReaderIteratorMockTest-begin FsReaderIteratorMockTest_Next_001";
-    
+
     std::string path = tempFilePath.string();
     std::optional<Options> option = std::nullopt;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
 
     auto result = ReadLinesCore::DoReadLines(path, option);
@@ -92,6 +93,8 @@ HWTEST_F(FsReaderIteratorMockTest, FsReaderIteratorMockTest_Next_001, testing::e
     ASSERT_NE(iterator, nullptr);
 
     auto nextResult = iterator->Next();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_TRUE(nextResult.IsSuccess());
     EXPECT_TRUE(nextResult.GetData().value().done);
     EXPECT_EQ(nextResult.GetData().value().value, "");
@@ -99,4 +102,4 @@ HWTEST_F(FsReaderIteratorMockTest, FsReaderIteratorMockTest_Next_001, testing::e
     GTEST_LOG_(INFO) << "FsReaderIteratorMockTest-end FsReaderIteratorMockTest_Next_001";
 }
 
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test
