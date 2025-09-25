@@ -23,6 +23,7 @@
 #include "hyperaio.h"
 
 using namespace OHOS::HyperAio;
+
 namespace OHOS {
 using namespace std;
 constexpr size_t U32_AT_SIZE = 4;
@@ -30,7 +31,7 @@ constexpr size_t U64_AT_SIZE = 8;
 constexpr uint32_t URING_QUEUE_SIZE = 512;
 uint64_t MAX_UINT64 = std::numeric_limits<uint64_t>::max();
 uint64_t HALF_MAX_UINT64 = MAX_UINT64 / 2;
-std::function<void(std::unique_ptr<IoResponse>)> callBack = [](std::unique_ptr<IoResponse> response) {
+std::function<void(unique_ptr<IoResponse>)> callBack = [](unique_ptr<IoResponse> response) {
     if (response == nullptr) {
         return;
     }
@@ -47,7 +48,7 @@ bool HyperaioStartOpenReqsFuzzTest(FuzzData &fuzzData, size_t size)
     hyperAio_->CtxInit(&callBack);
     std::filesystem::path directory = "/data/local/tmp";
     if (!std::filesystem::exists(directory)) {
-        HILOGE("hyperaio testsync dir not exist");
+        HILOGE("hyperaio testsync dir not exists");
         return false;
     }
     uint64_t userData = fuzzData.GetData<uint64_t>();
@@ -55,16 +56,16 @@ bool HyperaioStartOpenReqsFuzzTest(FuzzData &fuzzData, size_t size)
     OpenReqs reqs;
     std::vector<OpenInfo> openInfoArray;
     OpenInfo openInfo;
-    OpenInfo.dfd = -1;
+    openInfo.dfd = -1;
     openInfo.flags = O_RDONLY;
     openInfo.mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
     std::string pathStr = "/data/local/tmp/1.txt";
     openInfo.path = strdup(pathStr.c_str());
-    openInfo.userData = static_cast<uint64_t>(userData);
+    openInfo.userData = userData;
     openInfoArray.push_back(openInfo);
     reqs.reqNum = openInfoArray.size();
     reqs.reqs = openInfoArray.data();
-    hyperAio_->StartOepnReqs(&reqs);
+    hyperAio_->StartOpenReqs(&reqs);
     if (hyperAio_ != nullptr) {
         hyperAio_->DestroyCtx();
     }
@@ -78,7 +79,7 @@ bool HyperaioStartOpenReqsBatchFuzzTest(FuzzData &fuzzData, size_t size)
     hyperAio_->CtxInit(&callBack);
     std::filesystem::path directory = "/data/local/tmp";
     if (!std::filesystem::exists(directory)) {
-        HILOGE("hyperaio testsync dir not exist");
+        HILOGE("hyperaio testsync dir not exists");
         return false;
     }
     uint64_t userData = fuzzData.GetData<uint64_t>();
@@ -94,7 +95,7 @@ bool HyperaioStartOpenReqsBatchFuzzTest(FuzzData &fuzzData, size_t size)
         OpenInfo openInfo;
         openInfo.dfd = -1;
         openInfo.flags = O_RDONLY;
-        openInfo.mode = S_IRUSR | S_IWUSR | S_IRGRP | SIWGRP;
+        openInfo.mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
         std::string pathStr = "/data/local/tmp/" + std::to_string(i) + ".txt";
         openInfo.path = strdup(pathStr.c_str());
         openInfo.userData = userData;
@@ -120,7 +121,7 @@ bool HyperaioStartReadReqsFuzzTest(FuzzData &fuzzData, size_t size)
     uint32_t batchSize = fuzzData.GetData<uint32_t>();
     batchSize = batchSize % URING_QUEUE_SIZE;
     if (batchSize == 0) {
-        barchSize += 1;
+        batchSize += 1;
     }
     char *buf;
     size_t buffSize = 1024;
