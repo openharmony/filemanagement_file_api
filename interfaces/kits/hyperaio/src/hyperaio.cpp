@@ -316,8 +316,10 @@ void HyperAio::GetIoResult()
 {
     struct io_uring_cqe *cqe;
     int32_t ret = io_uring_wait_cqe(&pImpl_->uring_, &cqe);
+    pendingCqeCount_--;
     if (ret < 0 || cqe == nullptr) {
         HILOGI("wait cqe failed, ret = %{public}d", ret);
+        return;
     }
     cqeCount_++;
     if (cqe->res < 0) {
@@ -330,7 +332,6 @@ void HyperAio::GetIoResult()
     if (ioResultCallBack_) {
         ioResultCallBack_(std::move(response));
     }
-    pendingCqeCount_--;
 }
 
 void HyperAio::HarvestRes()

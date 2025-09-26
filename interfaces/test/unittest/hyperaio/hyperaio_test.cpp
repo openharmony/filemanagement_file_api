@@ -634,5 +634,59 @@ namespace OHOS::HyperAio {
         EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_DestroyCtx_0000";
     }
+    
+    /**
+     * @tc.name: HyperAio_CheckParameter_0000
+     * @tc.desc: Test function of CheckParameter() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     */
+    HWTEST_F(HyperAioTest, HyperAio_CheckParameter_0000, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CheckParameter_0000";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        hyperAio_->destroyed.store(true);
+        OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
+        OpenReqs openReqs = {1, &openInfo};
+        result = hyperAio_->StartOpenReqs(&openReqs);
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CheckParameter_0000";
+    }
+
+    /**
+     * @tc.name: HyperAio_GetIoResult_0000
+     * @tc.desc: Test function of GetIoResult() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     */
+    HWTEST_F(HyperAioTest, HyperAio_GetIoResult_0000, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_GetIoResult_0000";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        hyperAio_->destroyed.store(true);
+        wait_flag = false;
+        hyperAio_->GetIoResult();
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_GetIoResult_0000";
+    }
+
+    /**
+     * @tc.name: HyperAio_GetIoResult_0001
+     * @tc.desc: Test function of GetIoResult() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     */
+    HWTEST_F(HyperAioTest, HyperAio_GetIoResult_0001, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_GetIoResult_0001";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        hyperAio_->destroyed.store(true);
+        cqe_res_flag = false;
+        hyperAio_->GetIoResult();
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_GetIoResult_0001";
+    }
+
 #endif
 }
