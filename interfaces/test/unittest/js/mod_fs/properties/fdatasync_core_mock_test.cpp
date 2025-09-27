@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
+#include "fdatasync_core.h"
+
 #include <filesystem>
 #include <fstream>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "fdatasync_core.h"
-#include "mock/uv_fs_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -32,21 +35,19 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void FDataSyncCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    prctl(PR_SET_NAME, "FDataSyncCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void FDataSyncCoreMockTest::TearDownTestCase(void)
 {
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
 }
 
 void FDataSyncCoreMockTest::SetUp(void)
@@ -71,9 +72,12 @@ HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_001, testing::
     GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-begin FDataSyncCoreMockTest_DoFDataSync_001";
 
     int fd = 3;
-
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(1));
+
     auto res = FDataSyncCore::DoFDataSync(fd);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-end FDataSyncCoreMockTest_DoFDataSync_001";
@@ -91,9 +95,12 @@ HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_002, testing::
     GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-begin FDataSyncCoreMockTest_DoFDataSync_002";
 
     int fd = 3;
-
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(-1));
+
     auto res = FDataSyncCore::DoFDataSync(fd);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-end FDataSyncCoreMockTest_DoFDataSync_002";

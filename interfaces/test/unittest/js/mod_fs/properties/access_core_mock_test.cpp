@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-
 #include "access_core.h"
-#include "uv_fs_mock.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -30,21 +32,19 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline std::shared_ptr<UvfsMock> uvMock = nullptr;
     const string DISTRIBUTED_FILE_PREFIX = "/data/storage/el2/distributedfiles";
 };
 
 void AccessCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    prctl(PR_SET_NAME, "AccessCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void AccessCoreMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -72,8 +72,12 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_001, testing::ext::Test
     std::string path = "TEST";
     std::optional<AccessModeType> mode;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(-1));
+
     auto res = AccessCore::DoAccess(path, mode);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_001";
@@ -93,9 +97,12 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_002, testing::ext::Test
     std::string path = "TEST";
     std::optional<AccessModeType> mode;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(0));
 
     auto res = AccessCore::DoAccess(path, mode);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_002";
@@ -116,8 +123,12 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_003, testing::ext::Test
     AccessModeType mode = AccessModeType::EXIST;
     AccessFlag flag = DEFAULT_FLAG;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(-1));
+
     auto res = AccessCore::DoAccess(path, mode, flag);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_003";
@@ -138,12 +149,15 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_004, testing::ext::Test
     AccessModeType mode = AccessModeType::EXIST;
     AccessFlag flag = DEFAULT_FLAG;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(0));
 
     auto res = AccessCore::DoAccess(path, mode, flag);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_004";
 }
 
-} // OHOS::FileManagement::ModuleFileIO::Test
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

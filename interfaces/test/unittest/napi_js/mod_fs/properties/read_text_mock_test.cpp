@@ -17,8 +17,11 @@
 
 #include <cstring>
 #include <fcntl.h>
-#include <gtest/gtest.h>
 #include <memory>
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "libn_mock.h"
 #include "securec.h"
@@ -34,30 +37,45 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class ReadTextMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        LibnMock::EnableMock();
-        UvfsMock::EnableMock();
-    };
-    static void TearDownTestCase()
-    {
-        LibnMock::DisableMock();
-        UvfsMock::DisableMock();
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 };
 
+void ReadTextMockTest::SetUpTestCase(void)
+{
+    GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "ReadTextMockTest");
+    LibnMock::EnableMock();
+}
+
+void ReadTextMockTest::TearDownTestCase(void)
+{
+    LibnMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
+}
+
+void ReadTextMockTest::SetUp(void)
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void ReadTextMockTest::TearDown(void)
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
+
 /**
- * @tc.name: ReadTextSync_0001
- * @tc.desc: Test function of ReadTextSync() interface for fail.
+ * @tc.name: ReadTextMockTest_Sync_001
+ * @tc.desc: Test function of ReadText::Sync interface for FAILURE when TypeIs fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ReadTextMockTest, ReadTextSync_0001, testing::ext::TestSize.Level1)
+HWTEST_F(ReadTextMockTest, ReadTextMockTest_Sync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ReadTextMockTest-begin ReadTextSync_0001";
+    GTEST_LOG_(INFO) << "ReadTextMockTest-begin ReadTextMockTest_Sync_001";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     napi_value val = reinterpret_cast<napi_value>(0x1000);
@@ -73,21 +91,21 @@ HWTEST_F(ReadTextMockTest, ReadTextSync_0001, testing::ext::TestSize.Level1)
     tuple<bool, std::unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
     tuple<bool, int64_t> toIntRes = { false, -1 };
 
-    auto libnMock_ = LibnMock::GetMock();
-    auto uvMock_ = UvfsMock::GetMock();
-    EXPECT_CALL(*libnMock_, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock_, ToUTF8StringPath()).WillOnce(testing::Return(move(toUtfRes)));
-    EXPECT_CALL(*uvMock_, uv_fs_req_cleanup(testing::_));
-    EXPECT_CALL(*libnMock_, HasProp(testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock_, GetProp(testing::_)).Times(2).WillRepeatedly(testing::Return(myOp));
-    EXPECT_CALL(*libnMock_, TypeIs(testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock_, ToInt64()).WillOnce(testing::Return(toIntRes));
-    EXPECT_CALL(*libnMock_, ThrowErr(testing::_));
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(toUtfRes)));
+    EXPECT_CALL(*libnMock, HasProp(testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, GetProp(testing::_)).Times(2).WillRepeatedly(testing::Return(myOp));
+    EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ToInt64()).WillOnce(testing::Return(toIntRes));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = ReadText::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_EQ(res, nullptr);
 
-    GTEST_LOG_(INFO) << "ReadTextMockTest-end ReadTextSync_0001";
+    GTEST_LOG_(INFO) << "ReadTextMockTest-end ReadTextMockTest_Sync_001";
 }
 
 } // namespace Test

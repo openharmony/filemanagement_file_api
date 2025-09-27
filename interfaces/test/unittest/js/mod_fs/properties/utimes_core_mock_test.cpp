@@ -14,9 +14,12 @@
  */
 
 #include "utimes_core.h"
-#include "uv_fs_mock.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -29,21 +32,19 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void UtimesCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    prctl(PR_SET_NAME, "UtimesCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void UtimesCoreMockTest::TearDownTestCase(void)
 {
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
 }
 
 void UtimesCoreMockTest::SetUp(void)
@@ -69,9 +70,12 @@ HWTEST_F(UtimesCoreMockTest, UtimesCoreMockTest_DoUtimes_001, testing::ext::Test
 
     string path;
     double mtime = 1;
-
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+
     auto res = UtimesCore::DoUtimes(path, mtime);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "UtimesCoreMockTest-end UtimesCoreMockTest_DoUtimes_001";
@@ -90,10 +94,13 @@ HWTEST_F(UtimesCoreMockTest, UtimesCoreMockTest_DoUtimes_002, testing::ext::Test
 
     string path;
     double mtime = 1;
-
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_utime(_, _, _, _, _, _)).WillOnce(Return(-1));
+
     auto res = UtimesCore::DoUtimes(path, mtime);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "UtimesCoreMockTest-end UtimesCoreMockTest_DoUtimes_002";
@@ -112,10 +119,13 @@ HWTEST_F(UtimesCoreMockTest, UtimesCoreMockTest_DoUtimes_003, testing::ext::Test
 
     string path;
     double mtime = 1;
-
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_utime(_, _, _, _, _, _)).WillOnce(Return(1));
+
     auto res = UtimesCore::DoUtimes(path, mtime);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "UtimesCoreMockTest-end UtimesCoreMockTest_DoUtimes_003";

@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
+#include "mkdtemp_core.h"
+
 #include <filesystem>
 #include <fstream>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "mkdtemp_core.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -33,7 +36,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 filesystem::path MkdtempCoreMockTest::tempFilePath;
@@ -41,18 +43,17 @@ filesystem::path MkdtempCoreMockTest::tempFilePath;
 void MkdtempCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "MkdtempCoreMockTest");
     tempFilePath = filesystem::temp_directory_path() / "test";
     std::filesystem::create_directory(tempFilePath);
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    UvFsMock::EnableMock();
 }
 
 void MkdtempCoreMockTest::TearDownTestCase(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    UvFsMock::DisableMock();
     filesystem::remove_all(tempFilePath);
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
 void MkdtempCoreMockTest::SetUp(void)
@@ -79,13 +80,16 @@ HWTEST_F(MkdtempCoreMockTest, MkdtempCoreMockTest_DoMkdtemp_0001, testing::ext::
     uv_fs_t mock_req;
     mock_req.path = const_cast<char *>("/data/local/tmp/test/XXXXXX");
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_mkdtemp(_, _, _, _))
-        .WillOnce(Invoke([&](uv_loop_t*, uv_fs_t* req, const char*, uv_fs_cb) {
+        .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
             *req = mock_req;
             return 0;
         }));
 
     auto ret = MkdtempCore::DoMkdtemp("/data/local/tmp/test/XXXXXX");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "MkdtempCoreMockTest-end MkdtempCoreMockTest_DoMkdtemp_0001";
@@ -104,8 +108,12 @@ HWTEST_F(MkdtempCoreMockTest, MkdtempCoreMockTest_DoMkdtemp_0002, testing::ext::
 
     string path = tempFilePath.string() + "/XXXXXX";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_mkdtemp(_, _, _, _)).WillOnce(Return(-1));
+
     auto ret = MkdtempCore::DoMkdtemp(path);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "MkdtempCoreMockTest-end MkdtempCoreMockTest_DoMkdtemp_0002";

@@ -95,6 +95,27 @@ napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result)
     return realNapi(env, js_object, result);
 }
 
+napi_status napi_create_array(napi_env env, napi_value *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_create_array(env, result);
+    }
+
+    static napi_status (*realNapiCreateArray)(napi_env, napi_value *) = []() {
+        auto func = (napi_status(*)(napi_env, napi_value *))dlsym(RTLD_NEXT, "napi_create_array");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_create_array: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realNapiCreateArray) {
+        return napi_ok;
+    }
+
+    return realNapiCreateArray(env, result);
+}
+
 } // extern "C"
 
 bool NFuncArg::InitArgs(std::function<bool()> argcChecker)

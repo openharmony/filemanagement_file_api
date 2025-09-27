@@ -81,7 +81,6 @@ HWTEST_F(StatCoreTest, StatCoreTest_DoStat_002, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "StatCoreTest-begin StatCoreTest_DoStat_002";
 
     FileInfo fileinfo;
-    fileinfo.path = std::make_unique<char[]>(1);
     fileinfo.fdg = std::make_unique<DistributedFS::FDGuard>(-1);
     fileinfo.isPath = false;
 

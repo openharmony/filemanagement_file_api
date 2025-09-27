@@ -14,11 +14,15 @@
  */
 
 #include "read_core.h"
-#include "uv_fs_mock.h"
 
-#include <cstdint>
 #include <climits>
+#include <cstdint>
+
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -31,21 +35,19 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline std::shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void ReadCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    prctl(PR_SET_NAME, "ReadCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void ReadCoreMockTest::TearDownTestCase(void)
 {
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
 }
 
 void ReadCoreMockTest::SetUp(void)
@@ -73,9 +75,12 @@ HWTEST_F(ReadCoreMockTest, ReadCoreMockTest_DoRead_001, testing::ext::TestSize.L
     void *buf = nullptr;
     ArrayBuffer arrayBuffer(buf, 0);
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(-1));
 
     auto res = ReadCore::DoRead(fd, arrayBuffer);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "ReadCoreMockTest-end ReadCoreMockTest_DoRead_001";
@@ -96,9 +101,12 @@ HWTEST_F(ReadCoreMockTest, ReadCoreMockTest_DoRead_002, testing::ext::TestSize.L
     void *buf = nullptr;
     ArrayBuffer arrayBuffer(buf, 0);
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(1));
 
     auto res = ReadCore::DoRead(fd, arrayBuffer);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "ReadCoreMockTest-end ReadCoreMockTest_DoRead_002";

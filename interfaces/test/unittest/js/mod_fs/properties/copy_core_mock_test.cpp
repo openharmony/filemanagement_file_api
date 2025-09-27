@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
+#include "copy_core.h"
+
 #include <fcntl.h>
 #include <filesystem>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "copy_core.h"
 #include "inotify_mock.h"
 #include "mock_progress_listener.h"
 #include "poll_mock.h"
@@ -36,7 +39,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 
     static const string testDir;
     static const string srcDir;
@@ -60,6 +62,7 @@ const string CopyCoreMockTest::destFile = destDir + "/dest.txt";
 void CopyCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "CopyCoreMockTest");
     mkdir(testDir.c_str(), permission0755);
     mkdir(srcDir.c_str(), permission0755);
     mkdir(destDir.c_str(), permission0755);
@@ -69,8 +72,7 @@ void CopyCoreMockTest::SetUpTestCase(void)
         ASSERT_TRUE(false);
     }
     close(fd);
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    UvFsMock::EnableMock();
     InotifyMock::EnableMock();
     PollMock::EnableMock();
     UnistdMock::EnableMock();
@@ -78,17 +80,16 @@ void CopyCoreMockTest::SetUpTestCase(void)
 
 void CopyCoreMockTest::TearDownTestCase(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
     int ret = remove(srcFile.c_str());
     EXPECT_TRUE(ret == 0);
     rmdir(srcDir.c_str());
     rmdir(destDir.c_str());
     rmdir(testDir.c_str());
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    UvFsMock::DisableMock();
     InotifyMock::DisableMock();
     PollMock::DisableMock();
     UnistdMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
 void CopyCoreMockTest::SetUp(void)
@@ -117,12 +118,16 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CopyFile_001, testing::ext::TestSize
     infos->isFile = true;
     infos->srcPath = CopyCoreMockTest::srcFile;
     infos->destPath = CopyCoreMockTest::destFile;
-    auto unistdMock = UnistdMock::GetMock();
 
+    auto unistdMock = UnistdMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).WillOnce(Return(-1));
 
     auto res = CopyCore::CopyFile(srcFile, destFile, infos);
+
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res, errno);
 
     GTEST_LOG_(INFO) << "CopyCoreMockTest-end CopyCoreMockTest_CopyFile_001";
@@ -142,14 +147,20 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_DoCopy_001, testing::ext::TestSize.L
     string srcUri = "file://" + srcFile;
     string destUri = "file://" + destFile;
     optional<CopyOptions> options;
-    auto unistdMock = UnistdMock::GetMock();
 
+    auto unistdMock = UnistdMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).WillOnce(Return(0));
 
     auto res = CopyCore::DoCopy(srcUri, destUri, options);
+
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+
     EXPECT_EQ(res.IsSuccess(), true);
     EXPECT_TRUE(filesystem::exists(destFile));
+
     int ret = remove(destFile.c_str());
     EXPECT_TRUE(ret == 0);
 

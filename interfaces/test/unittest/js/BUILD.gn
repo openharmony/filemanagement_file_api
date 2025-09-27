@@ -19,6 +19,7 @@ ani_file_environment_core = [
   "${src_path}/mod_environment/environment_core.cpp",
   "${src_path}/mod_fs/fs_utils.cpp",
 ]
+
 ohos_unittest("ani_file_environment_test") {
   branch_protector_ret = "pac_ret"
   testonly = true
@@ -118,6 +119,108 @@ ani_file_fs_core = [
   "${src_path}/mod_fs/properties/xattr_core.cpp",
 ]
 
+ohos_unittest("ani_file_fs_mock_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
+  module_out_path = "file_api/file_api"
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/common",
+    "${file_api_path}/interfaces/kits/js/src/common/file_helper",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
+    "${file_api_path}/interfaces/test/unittest/common_mock",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/common",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/mock",
+  ]
+
+  sources = [
+    "${file_api_path}/interfaces/test/unittest/common_mock/c_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/eventfd_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/inotify_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/poll_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/system_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/unistd_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/uv_fs_mock.cpp",
+    "mod_fs/class_file/fs_file_mock_test.cpp",
+    "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
+    "mod_fs/class_readeriterator/fs_reader_iterator_mock_test.cpp",
+    "mod_fs/class_stat/fs_stat_mock_test.cpp",
+    "mod_fs/class_stream/fs_stream_mock_test.cpp",
+    "mod_fs/class_watcher/fs_file_watcher_mock_test.cpp",
+    "mod_fs/class_watcher/fs_watcher_mock_test.cpp",
+    "mod_fs/properties/access_core_mock_test.cpp",
+    "mod_fs/properties/close_core_mock_test.cpp",
+    "mod_fs/properties/copy_core_mock_test.cpp",
+    "mod_fs/properties/copy_file_core_mock_test.cpp",
+    "mod_fs/properties/create_randomaccessfile_core_mock_test.cpp",
+    "mod_fs/properties/dup_core_mock_test.cpp",
+    "mod_fs/properties/fdatasync_core_mock_test.cpp",
+    "mod_fs/properties/fsync_core_mock_test.cpp",
+    "mod_fs/properties/lstat_core_mock_test.cpp",
+    "mod_fs/properties/mkdir_core_mock_test.cpp",
+    "mod_fs/properties/mkdtemp_core_mock_test.cpp",
+    "mod_fs/properties/move_core_mock_test.cpp",
+    "mod_fs/properties/open_core_mock_test.cpp",
+    "mod_fs/properties/read_core_mock_test.cpp",
+    "mod_fs/properties/read_lines_core_mock_test.cpp",
+    "mod_fs/properties/rename_core_mock_test.cpp",
+    "mod_fs/properties/stat_core_mock_test.cpp",
+    "mod_fs/properties/symlink_core_mock_test.cpp",
+    "mod_fs/properties/trans_listener_mock_test.cpp",
+    "mod_fs/properties/truncate_core_mock_test.cpp",
+    "mod_fs/properties/unlink_core_mock_test.cpp",
+    "mod_fs/properties/utimes_core_mock_test.cpp",
+    "mod_fs/properties/watcher_core_mock_test.cpp",
+    "mod_fs/properties/write_core_mock_test.cpp",
+    "mod_fs/properties/xattr_core_mock_test.cpp",
+  ]
+  sources += ani_file_fs_core
+
+  deps = [
+    "${file_api_path}/interfaces/kits/native:remote_uri_native",
+    "${file_api_path}/interfaces/kits/native:task_signal_native",
+    "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "app_file_service:fileuri_native",
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "dfs_service:distributed_file_daemon_kit_inner",
+    "dfs_service:libdistributedfileutils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "ipc:ipc_single",
+    "libuv:uv",
+  ]
+
+  libs = [ "dl" ]
+
+  defines = [
+    "ENABLE_DISTRIBUTED_FILE_MOCK",
+    "private=public",
+  ]
+
+  use_exceptions = true
+}
+
 ohos_unittest("ani_file_fs_test") {
   branch_protector_ret = "pac_ret"
   testonly = true
@@ -128,15 +231,14 @@ ohos_unittest("ani_file_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_fs",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
   ]
@@ -206,109 +308,6 @@ ohos_unittest("ani_file_fs_test") {
   use_exceptions = true
 }
 
-ohos_unittest("ani_file_fs_mock_test") {
-  branch_protector_ret = "pac_ret"
-  testonly = true
-
-  module_out_path = "file_api/file_api"
-
-  include_dirs = [
-    "${file_api_path}/interfaces/kits/js/src/common",
-    "${file_api_path}/interfaces/kits/js/src/common/file_helper",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_atomicfile",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_file",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_randomaccessfile",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_readeriterator",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stream",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_tasksignal",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/class_watcher",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
-    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
-    "${file_api_path}/interfaces/test/unittest/common_mock",
-    "${file_api_path}/interfaces/test/unittest/js/mod_fs/common",
-    "${file_api_path}/interfaces/test/unittest/js/mod_fs/mock",
-    "${file_api_path}/interfaces/test/unittest/js/mod_fs/properties/mock",
-  ]
-
-  sources = [
-    "${file_api_path}/interfaces/test/unittest/common_mock/c_mock.cpp",
-    "${file_api_path}/interfaces/test/unittest/common_mock/eventfd_mock.cpp",
-    "${file_api_path}/interfaces/test/unittest/common_mock/inotify_mock.cpp",
-    "${file_api_path}/interfaces/test/unittest/common_mock/poll_mock.cpp",
-    "${file_api_path}/interfaces/test/unittest/common_mock/system_mock.cpp",
-    "${file_api_path}/interfaces/test/unittest/common_mock/unistd_mock.cpp",
-    "mod_fs/class_file/fs_file_mock_test.cpp",
-    "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
-    "mod_fs/class_readeriterator/fs_reader_iterator_mock_test.cpp",
-    "mod_fs/class_stat/fs_stat_mock_test.cpp",
-    "mod_fs/class_stream/fs_stream_mock_test.cpp",
-    "mod_fs/class_watcher/fs_file_watcher_mock_test.cpp",
-    "mod_fs/class_watcher/fs_watcher_mock_test.cpp",
-    "mod_fs/properties/access_core_mock_test.cpp",
-    "mod_fs/properties/close_core_mock_test.cpp",
-    "mod_fs/properties/copy_core_mock_test.cpp",
-    "mod_fs/properties/copy_file_core_mock_test.cpp",
-    "mod_fs/properties/create_randomaccessfile_core_mock_test.cpp",
-    "mod_fs/properties/dup_core_mock_test.cpp",
-    "mod_fs/properties/fdatasync_core_mock_test.cpp",
-    "mod_fs/properties/fsync_core_mock_test.cpp",
-    "mod_fs/properties/lstat_core_mock_test.cpp",
-    "mod_fs/properties/mkdir_core_mock_test.cpp",
-    "mod_fs/properties/mkdtemp_core_mock_test.cpp",
-    "mod_fs/properties/mock/uv_fs_mock.cpp",
-    "mod_fs/properties/move_core_mock_test.cpp",
-    "mod_fs/properties/open_core_mock_test.cpp",
-    "mod_fs/properties/read_core_mock_test.cpp",
-    "mod_fs/properties/read_lines_core_mock_test.cpp",
-    "mod_fs/properties/rename_core_mock_test.cpp",
-    "mod_fs/properties/stat_core_mock_test.cpp",
-    "mod_fs/properties/symlink_core_mock_test.cpp",
-    "mod_fs/properties/trans_listener_mock_test.cpp",
-    "mod_fs/properties/truncate_core_mock_test.cpp",
-    "mod_fs/properties/unlink_core_mock_test.cpp",
-    "mod_fs/properties/utimes_core_mock_test.cpp",
-    "mod_fs/properties/watcher_core_mock_test.cpp",
-    "mod_fs/properties/write_core_mock_test.cpp",
-    "mod_fs/properties/xattr_core_mock_test.cpp",
-  ]
-  sources += ani_file_fs_core
-
-  deps = [
-    "${file_api_path}/interfaces/kits/native:remote_uri_native",
-    "${file_api_path}/interfaces/kits/native:task_signal_native",
-    "${file_api_path}/interfaces/kits/rust:rust_file",
-    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
-    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
-  ]
-
-  external_deps = [
-    "ability_runtime:ability_manager",
-    "app_file_service:fileuri_native",
-    "c_utils:utils",
-    "data_share:datashare_common",
-    "data_share:datashare_consumer",
-    "dfs_service:distributed_file_daemon_kit_inner",
-    "dfs_service:libdistributedfileutils",
-    "googletest:gmock_main",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-    "hisysevent:libhisysevent",
-    "ipc:ipc_single",
-    "libuv:uv",
-  ]
-
-  libs = [ "dl" ]
-
-  defines = [
-    "ENABLE_DISTRIBUTED_FILE_MOCK",
-    "private=public",
-  ]
-
-  use_exceptions = true
-}
-
 ani_file_hash_core = [
   "${src_path}/common/file_helper/fd_guard.cpp",
   "${src_path}/common/file_helper/hash_file.cpp",
@@ -355,6 +354,7 @@ ani_file_securitylabel_core = [
   "${src_path}/mod_fs/fs_utils.cpp",
   "${src_path}/mod_securitylabel/securitylabel_core.cpp",
 ]
+
 ohos_unittest("ani_file_securitylabel_test") {
   module_out_path = "file_api/file_api"
 
@@ -393,6 +393,7 @@ ani_file_statvfs_core = [
   "${src_path}/mod_fs/fs_utils.cpp",
   "${src_path}/mod_statvfs/statvfs_core.cpp",
 ]
+
 ohos_unittest("ani_file_statvfs_test") {
   module_out_path = "file_api/file_api"
 

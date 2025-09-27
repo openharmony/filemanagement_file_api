@@ -14,9 +14,12 @@
  */
 
 #include "write_core.h"
-#include "uv_fs_mock.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -29,21 +32,19 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void WriteCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    prctl(PR_SET_NAME, "WriteCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void WriteCoreMockTest::TearDownTestCase(void)
 {
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
 }
 
 void WriteCoreMockTest::SetUp(void)
@@ -57,66 +58,99 @@ void WriteCoreMockTest::TearDown(void)
 }
 
 /**
- * @tc.name: WriteCoreMockTest_DoWrite1_001
- * @tc.desc: Test function of WriteCore::DoWrite3 interface for FALSE.
+ * @tc.name: WriteCoreMockTest_DoWrite_001
+ * @tc.desc: Test function of WriteCore::DoWrite(StringBuffer) interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite1_001, testing::ext::TestSize.Level1)
+HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WriteCoreMockTest-begin WriteCoreMockTest_DoWrite1_001";
+    GTEST_LOG_(INFO) << "WriteCoreMockTest-begin WriteCoreMockTest_DoWrite_001";
 
     int32_t fd = 1;
     string buffer;
-
-    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
-    auto res = WriteCore::DoWrite(fd, buffer);
-    EXPECT_EQ(res.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite1_001";
-}
-
-/**
- * @tc.name: WriteCoreMockTest_DoWrite1_002
- * @tc.desc: Test function of WriteCore::DoWrite3 interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite1_002, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WriteCoreMockTest-begin WriteCoreMockTest_DoWrite1_002";
-
-    int32_t fd = 1;
-    string buffer;
-
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(1));
-    auto res = WriteCore::DoWrite(fd, buffer);
-    EXPECT_EQ(res.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite1_002";
+    auto res = WriteCore::DoWrite(fd, buffer);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_TRUE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite_001";
 }
 
 /**
- * @tc.name: WriteCoreMockTest_DoWrite2_003
- * @tc.desc: Test function of WriteCore::DoWrite2 interface for FALSE.
+ * @tc.name: WriteCoreMockTest_DoWrite_002
+ * @tc.desc: Test function of WriteCore::DoWrite(StringBuffer) interface for FAILURE when uv_fs_write fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite2_003, testing::ext::TestSize.Level1)
+HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WriteCoreMockTest-begin WriteCoreMockTest_DoWrite2_003";
+    GTEST_LOG_(INFO) << "WriteCoreMockTest-begin WriteCoreMockTest_DoWrite_002";
 
-    int32_t fd = -1;
+    int32_t fd = 1;
     string buffer;
-
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
-    auto res = WriteCore::DoWrite(fd, buffer);
-    EXPECT_EQ(res.IsSuccess(), false);
 
-    GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite2_003";
+    auto res = WriteCore::DoWrite(fd, buffer);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite_002";
+}
+
+/**
+ * @tc.name: WriteCoreMockTest_DoWrite_003
+ * @tc.desc: Test function of WriteCore::DoWrite(ArrayBuffer) interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WriteCoreMockTest-begin WriteCoreMockTest_DoWrite_003";
+
+    int32_t fd = 1;
+    ArrayBuffer buffer(nullptr, 1);
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(1));
+
+    auto res = WriteCore::DoWrite(fd, buffer);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_TRUE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite_003";
+}
+
+/**
+ * @tc.name: WriteCoreMockTest_DoWrite_004
+ * @tc.desc: Test function of WriteCore::DoWrite(ArrayBuffer) interface for FAILURE when uv_fs_write fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_004, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WriteCoreMockTest-begin WriteCoreMockTest_DoWrite_004";
+
+    int32_t fd = 1;
+    ArrayBuffer buffer(nullptr, 1);
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
+
+    auto res = WriteCore::DoWrite(fd, buffer);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite_004";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
