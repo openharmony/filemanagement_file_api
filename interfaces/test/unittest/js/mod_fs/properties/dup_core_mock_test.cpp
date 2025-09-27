@@ -14,9 +14,13 @@
  */
 
 #include "dup_core.h"
-#include "uv_fs_mock.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "unistd_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -29,20 +33,20 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void DupCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    uvMock = make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    prctl(PR_SET_NAME, "DupCoreMockTest");
+    UvFsMock::EnableMock();
+    UnistdMock::EnableMock();
 }
 
 void DupCoreMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    UvFsMock::DisableMock();
+    UnistdMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -68,9 +72,15 @@ HWTEST_F(DupCoreMockTest, DupCoreMockTest_DoDup_001, testing::ext::TestSize.Leve
     GTEST_LOG_(INFO) << "DupCoreMockTest-begin DupCoreMockTest_DoDup_001";
 
     int32_t fd = 1;
-    
+
+    auto unistdMock = UnistdMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_readlink(_, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*unistdMock, dup(_)).WillOnce(Return(1));
+
     auto res = DupCore::DoDup(fd);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "DupCoreMockTest-end DupCoreMockTest_DoDup_001";

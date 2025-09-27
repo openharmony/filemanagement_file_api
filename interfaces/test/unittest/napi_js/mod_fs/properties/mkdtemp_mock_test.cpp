@@ -17,8 +17,11 @@
 
 #include <cstring>
 #include <fcntl.h>
-#include <gtest/gtest.h>
 #include <memory>
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "libn_mock.h"
 #include "securec.h"
@@ -34,30 +37,47 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class MkdtempMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        LibnMock::EnableMock();
-        UvfsMock::EnableMock();
-    };
-    static void TearDownTestCase()
-    {
-        LibnMock::DisableMock();
-        UvfsMock::DisableMock();
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 };
 
+void MkdtempMockTest::SetUpTestCase(void)
+{
+    GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "MkdtempMockTest");
+    LibnMock::EnableMock();
+    UvFsMock::EnableMock();
+}
+
+void MkdtempMockTest::TearDownTestCase(void)
+{
+    LibnMock::DisableMock();
+    UvFsMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
+}
+
+void MkdtempMockTest::SetUp(void)
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void MkdtempMockTest::TearDown(void)
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
+
 /**
- * @tc.name: MkdtempSync_0001
- * @tc.desc: Test function of MkdtempSync() interface for fail.
+ * @tc.name: MkdtempMockTest_Sync_001
+ * @tc.desc: Test function of Mkdtemp::Sync interface for FAILURE when uv_fs_mkdtemp fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(MkdtempMockTest, MkdtempSync_0001, testing::ext::TestSize.Level1)
+HWTEST_F(MkdtempMockTest, MkdtempMockTest_Sync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "MkdtempMockTest-begin MkdtempSync_0001";
+    GTEST_LOG_(INFO) << "MkdtempMockTest-begin MkdtempMockTest_Sync_001";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
@@ -70,18 +90,21 @@ HWTEST_F(MkdtempMockTest, MkdtempSync_0001, testing::ext::TestSize.Level1)
 
     tuple<bool, std::unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
 
-    auto libnMock_ = LibnMock::GetMock();
-    auto uvMock_ = UvfsMock::GetMock();
-    EXPECT_CALL(*libnMock_, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock_, ToUTF8StringPath()).WillOnce(testing::Return(move(toUtfRes)));
-    EXPECT_CALL(*uvMock_, uv_fs_req_cleanup(testing::_));
-    EXPECT_CALL(*uvMock_, uv_fs_mkdtemp(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock_, ThrowErr(testing::_));
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(toUtfRes)));
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
+    EXPECT_CALL(*uvMock, uv_fs_mkdtemp(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = Mkdtemp::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res, nullptr);
 
-    GTEST_LOG_(INFO) << "MkdtempMockTest-end MkdtempSync_0001";
+    GTEST_LOG_(INFO) << "MkdtempMockTest-end MkdtempMockTest_Sync_001";
 }
 
 } // namespace Test

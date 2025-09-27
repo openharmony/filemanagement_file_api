@@ -16,11 +16,10 @@
 #ifndef INTERFACES_TEST_UNITTEST_NAPI_JS_MOCK_LIBN_MOCK_H
 #define INTERFACES_TEST_UNITTEST_NAPI_JS_MOCK_LIBN_MOCK_H
 
-#include <cstdio>
 #include <gmock/gmock.h>
 
-#include "filemgmt_libn.h"
 #include "n_napi.h"
+#include "filemgmt_libn.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace std::filesystem;
@@ -42,6 +41,7 @@ public:
     // n_class GetEntityOf
     virtual napi_status napi_unwrap(napi_env env, napi_value js_object, void **result) = 0;
     virtual napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result) = 0;
+    virtual napi_status napi_create_array(napi_env env, napi_value *result) = 0;
 
     // n_error
     virtual void ThrowErr(napi_env env) = 0;
@@ -78,6 +78,7 @@ public:
 
     MOCK_METHOD(napi_status, napi_unwrap, (napi_env, napi_value, void **), (override));
     MOCK_METHOD(napi_status, napi_remove_wrap, (napi_env, napi_value, void **), (override));
+    MOCK_METHOD(napi_status, napi_create_array, (napi_env, napi_value *), (override));
 
     MOCK_METHOD(void, ThrowErr, (napi_env), (override));
     MOCK_METHOD(void, ThrowErr, (napi_env, int), (override));

@@ -17,6 +17,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "libn_mock.h"
 #include "uv_fs_mock.h"
@@ -36,14 +37,15 @@ public:
 
 void FdatasyncMockTest::SetUpTestCase(void)
 {
-    UvfsMock::EnableMock();
-    LibnMock::EnableMock();
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "FdatasyncMockTest");
+    UvFsMock::EnableMock();
+    LibnMock::EnableMock();
 }
 
 void FdatasyncMockTest::TearDownTestCase(void)
 {
-    UvfsMock::DisableMock();
+    UvFsMock::DisableMock();
     LibnMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
@@ -60,7 +62,7 @@ void FdatasyncMockTest::TearDown(void)
 
 /**
  * @tc.name: FdatasyncMockTest_Sync_001
- * @tc.desc: Test function of Sync() interface for uv_fs_fdatasync failed.
+ * @tc.desc: Test function of Fdatasync::Sync interface for FAILURE when uv_fs_fdatasync fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -75,7 +77,7 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_001, TestSize.Level1)
     tuple<bool, int32_t> tp = { true, 1 };
 
     auto libnMock = LibnMock::GetMock();
-    auto uvMock = UvfsMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(tp));

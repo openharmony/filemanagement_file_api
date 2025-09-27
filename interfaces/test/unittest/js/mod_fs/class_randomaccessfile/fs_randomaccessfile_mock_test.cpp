@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+#include "fs_randomaccessfile.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "file_entity.h"
-#include "fs_randomaccessfile.h"
 #include "uv_fs_mock.h"
-
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -32,7 +33,7 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
+
 protected:
     unique_ptr<RandomAccessFileEntity> rafEntity;
     unique_ptr<FsRandomAccessFile> raf;
@@ -40,15 +41,14 @@ protected:
 
 void FsRandomAccessFileMockTest::SetUpTestCase(void)
 {
-    uvMock = make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "FsRandomAccessFileMockTest");
+    UvFsMock::EnableMock();
 }
 
 void FsRandomAccessFileMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -74,15 +74,19 @@ void FsRandomAccessFileMockTest::TearDown(void)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_ReadSync_001";
 
     ArrayBuffer buffer(malloc(100), 100);
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(-1));
-    auto result = raf->ReadSync(buffer, nullopt);
+
+    auto result = raf->ReadSync(buffer, std::nullopt);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
     free(buffer.buf);
 
@@ -95,7 +99,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, Te
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, TestSize.Level1)
 {
@@ -106,9 +110,12 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, Te
     options.offset = 10;
     options.length = 10;
     raf->rafEntity->filePointer = 20;
-
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(0));
+
     auto result = raf->ReadSync(buffer, options);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
     free(buffer.buf);
 
@@ -121,15 +128,19 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, Te
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_003";
 
-    string data = "test data";
+    std::string data = "test data";
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
-    auto result = raf->WriteSync(data, nullopt);
+
+    auto result = raf->WriteSync(data, std::nullopt);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_WriteSync_003";
@@ -141,7 +152,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, TestSize.Level1)
 {
@@ -152,8 +163,12 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, T
     options.length = 4;
     options.offset = 0;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(0));
+
     auto result = raf->WriteSync(data, options);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_WriteSync_004";
@@ -165,7 +180,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, TestSize.Level1)
 {
@@ -176,8 +191,12 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, T
     options.length = 4;
     options.offset = 0;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
+
     auto result = raf->WriteSync(buffer, options);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
     free(buffer.buf);
 
@@ -190,7 +209,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, TestSize.Level1)
 {
@@ -201,8 +220,12 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, T
     options.length = 4;
     options.offset = 0;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(0));
+
     auto result = raf->WriteSync(buffer, options);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
     free(buffer.buf);
 
@@ -215,14 +238,18 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_007";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(-1));
+
     auto result = raf->CloseSync();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_007";
@@ -234,17 +261,21 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_008";
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
+
     auto result = raf->CloseSync();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_008";
 }
 
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

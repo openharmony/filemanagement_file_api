@@ -14,9 +14,12 @@
  */
 
 #include "rename_core.h"
-#include "uv_fs_mock.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -29,20 +32,18 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock>  uvfs = nullptr;
 };
 
 void RenameCoreMockTest::SetUpTestCase(void)
 {
-    uvfs = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvfs;
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "RenameCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void RenameCoreMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvfs = nullptr;
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -69,9 +70,12 @@ HWTEST_F(RenameCoreMockTest, RenameCoreMockTest_DoRename_001, testing::ext::Test
     string src;
     string dest;
 
-    EXPECT_CALL(*uvfs, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
 
     auto res = RenameCore::DoRename(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "RenameCoreMockTest-end RenameCoreMockTest_DoRename_001";
@@ -90,13 +94,15 @@ HWTEST_F(RenameCoreMockTest, RenameCoreMockTest_DoRename_002, testing::ext::Test
     string src;
     string dest;
 
-    EXPECT_CALL(*uvfs, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(1));
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(1));
 
     auto res = RenameCore::DoRename(src, dest);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "RenameCoreMockTest-end RenameCoreMockTest_DoRename_002";
 }
-
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

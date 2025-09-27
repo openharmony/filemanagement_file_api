@@ -12,12 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "libn_mock.h"
-#include "prop_n_exporter.h"
+
 #include "uv_fs_mock.h"
+
 #include <cstring>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "libn_mock.h"
+#include "prop_n_exporter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -34,14 +38,15 @@ public:
 
 void PropNExporterMockTest::SetUpTestCase(void)
 {
-    UvfsMock::EnableMock();
-    LibnMock::EnableMock();
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "PropNExporterMockTest");
+    UvFsMock::EnableMock();
+    LibnMock::EnableMock();
 }
 
 void PropNExporterMockTest::TearDownTestCase(void)
 {
-    UvfsMock::DisableMock();
+    UvFsMock::DisableMock();
     LibnMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
@@ -58,7 +63,7 @@ void PropNExporterMockTest::TearDown(void)
 
 /**
  * @tc.name: PropNExporterMockTest_UnlinkSync_001
- * @tc.desc: Test function of UnlinkSync() interface for failed.
+ * @tc.desc: Test function of PropNExporter::UnlinkSync interface for FAILURE when uv_fs_unlink fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -79,7 +84,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.L
     tuple<bool, std::unique_ptr<char[]>, size_t> tp = { true, move(strPtr), strLen };
 
     auto libnMock = LibnMock::GetMock();
-    auto uvMock = UvfsMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(tp)));

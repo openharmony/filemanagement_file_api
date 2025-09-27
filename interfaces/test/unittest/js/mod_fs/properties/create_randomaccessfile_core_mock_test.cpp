@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "create_randomaccessfile_core.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "create_randomaccessfile_core.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -30,20 +32,18 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void CreateRandomAccessFileCoreMockTest::SetUpTestCase(void)
 {
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "CreateRandomAccessFileCoreMockTest");
+    UvFsMock::EnableMock();
 }
 
 void CreateRandomAccessFileCoreMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -65,7 +65,7 @@ void CreateRandomAccessFileCoreMockTest::TearDown(void)
  * @tc.level Level 1
  */
 HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_001,
-         testing::ext::TestSize.Level1)
+    testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_001";
 
@@ -73,8 +73,12 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
     int32_t mode = 0;
     optional<RandomAccessFileOptions> options = nullopt;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(-1));
+
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, mode, options);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_001";
@@ -88,7 +92,7 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
  * @tc.level Level 1
  */
 HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_002,
-         testing::ext::TestSize.Level1)
+    testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_002";
 
@@ -98,8 +102,12 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
     opts.start = 0;
     opts.end = 100;
 
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(0));
+
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, mode, opts);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_002";

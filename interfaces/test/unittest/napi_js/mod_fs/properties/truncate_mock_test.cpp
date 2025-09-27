@@ -17,8 +17,11 @@
 
 #include <cstring>
 #include <fcntl.h>
-#include <gtest/gtest.h>
 #include <memory>
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "libn_mock.h"
 #include "securec.h"
@@ -34,30 +37,48 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class TruncateMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        LibnMock::EnableMock();
-        UvfsMock::EnableMock();
-    };
-    static void TearDownTestCase()
-    {
-        LibnMock::DisableMock();
-        UvfsMock::DisableMock();
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 };
 
+void TruncateMockTest::SetUpTestCase(void)
+{
+    GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "TruncateMockTest");
+    LibnMock::EnableMock();
+    UvFsMock::EnableMock();
+}
+
+void TruncateMockTest::TearDownTestCase(void)
+{
+    LibnMock::DisableMock();
+    UvFsMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
+}
+
+void TruncateMockTest::SetUp(void)
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void TruncateMockTest::TearDown(void)
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
+
 /**
- * @tc.name: TruncateSync_0001
- * @tc.desc: Test function of TruncateSync() interface for fail.
+ * @tc.name: TruncateMockTest_Sync_001
+ * @tc.desc: Test function of Truncate::Sync interface for FAILURE when isPath but uv_fs_ftruncate fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(TruncateMockTest, TruncateSync_0001, testing::ext::TestSize.Level1)
+HWTEST_F(TruncateMockTest, TruncateMockTest_Sync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "TruncateMockTest-begin TruncateSync_0001";
+    GTEST_LOG_(INFO) << "TruncateMockTest-begin TruncateMockTest_Sync_001";
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     napi_value val = reinterpret_cast<napi_value>(0x1000);
@@ -72,34 +93,38 @@ HWTEST_F(TruncateMockTest, TruncateSync_0001, testing::ext::TestSize.Level1)
 
     tuple<bool, std::unique_ptr<char[]>, size_t> srcRes = { true, move(srcPtr), 1 };
 
-    auto libnMock_ = LibnMock::GetMock();
-    auto uvMock_ = UvfsMock::GetMock();
-    EXPECT_CALL(*libnMock_, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock_, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
-    EXPECT_CALL(*libnMock_, GetArgc()).WillOnce(testing::Return(move(NARG_CNT::ONE)));
-    EXPECT_CALL(*uvMock_, uv_fs_req_cleanup(testing::_)).Times(2);
-    EXPECT_CALL(*uvMock_, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
+    EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(move(NARG_CNT::ONE)));
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_)).Times(2);
+    EXPECT_CALL(*uvMock, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(1));
-    EXPECT_CALL(*uvMock_, uv_fs_ftruncate(testing::_, testing::_, testing::_, testing::_, testing::_))
+    EXPECT_CALL(*uvMock, uv_fs_ftruncate(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock_, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = Truncate::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res, nullptr);
 
-    GTEST_LOG_(INFO) << "TruncateMockTest-end TruncateSync_0001";
+    GTEST_LOG_(INFO) << "TruncateMockTest-end TruncateMockTest_Sync_001";
 }
 
 /**
- * @tc.name: TruncateSync_0002
- * @tc.desc: Test function of TruncateSync() interface for fail.
+ * @tc.name: TruncateMockTest_Sync_002
+ * @tc.desc: Test function of Truncate::Sync interface for FAILURE when isFd but uv_fs_ftruncate fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(TruncateMockTest, TruncateSync_0002, testing::ext::TestSize.Level1)
+HWTEST_F(TruncateMockTest, TruncateMockTest_Sync_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "TruncateMockTest-begin TruncateSync_0002";
+    GTEST_LOG_(INFO) << "TruncateMockTest-begin TruncateMockTest_Sync_002";
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     napi_value val = reinterpret_cast<napi_value>(0x1000);
@@ -115,22 +140,25 @@ HWTEST_F(TruncateMockTest, TruncateSync_0002, testing::ext::TestSize.Level1)
     tuple<bool, std::unique_ptr<char[]>, size_t> srcRes = { false, move(srcPtr), 1 };
     tuple<bool, int32_t> isFd = { true, 1 };
 
-    auto libnMock_ = LibnMock::GetMock();
-    auto uvMock_ = UvfsMock::GetMock();
-    EXPECT_CALL(*libnMock_, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock_, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
-    EXPECT_CALL(*libnMock_, ToInt32()).WillOnce(testing::Return(isFd));
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
 
-    EXPECT_CALL(*libnMock_, GetArgc()).WillOnce(testing::Return(move(NARG_CNT::ONE)));
-    EXPECT_CALL(*uvMock_, uv_fs_req_cleanup(testing::_));
-    EXPECT_CALL(*uvMock_, uv_fs_ftruncate(testing::_, testing::_, testing::_, testing::_, testing::_))
+    EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(move(NARG_CNT::ONE)));
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
+    EXPECT_CALL(*uvMock, uv_fs_ftruncate(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock_, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = Truncate::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res, nullptr);
 
-    GTEST_LOG_(INFO) << "TruncateMockTest-end TruncateSync_0002";
+    GTEST_LOG_(INFO) << "TruncateMockTest-end TruncateMockTest_Sync_002";
 }
 
 } // namespace Test

@@ -17,8 +17,11 @@
 
 #include <cstring>
 #include <fcntl.h>
-#include <gtest/gtest.h>
 #include <memory>
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "libn_mock.h"
 #include "securec.h"
@@ -34,34 +37,50 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class RenameMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        LibnMock::EnableMock();
-        UvfsMock::EnableMock();
-    };
-    static void TearDownTestCase()
-    {
-        LibnMock::DisableMock();
-        UvfsMock::DisableMock();
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 };
 
+void RenameMockTest::SetUpTestCase(void)
+{
+    GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "RenameMockTest");
+    LibnMock::EnableMock();
+    UvFsMock::EnableMock();
+}
+
+void RenameMockTest::TearDownTestCase(void)
+{
+    LibnMock::DisableMock();
+    UvFsMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
+}
+
+void RenameMockTest::SetUp(void)
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void RenameMockTest::TearDown(void)
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
+
 /**
- * @tc.name: RenameSync_0001
- * @tc.desc: Test function of RenameSync() interface for fail.
+ * @tc.name: RenameMockTest_Sync_001
+ * @tc.desc: Test function of Rename::Sync interface for FAILURE when uv_fs_rename fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(RenameMockTest, RenameSync_0001, testing::ext::TestSize.Level1)
+HWTEST_F(RenameMockTest, RenameMockTest_Sync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "RenameMockTest-begin RenameSync_0001";
+    GTEST_LOG_(INFO) << "RenameMockTest-begin RenameMockTest_Sync_001";
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
-    napi_value val = reinterpret_cast<napi_value>(0x1000);
-    NVal myOp(env, val);
 
     const char *initSrc = "hello world";
     size_t strLen = strlen(initSrc) + 1;
@@ -80,21 +99,24 @@ HWTEST_F(RenameMockTest, RenameSync_0001, testing::ext::TestSize.Level1)
     tuple<bool, std::unique_ptr<char[]>, size_t> srcRes = { true, move(srcPtr), 1 };
     tuple<bool, std::unique_ptr<char[]>, size_t> destRes = { true, move(destPtr), 1 };
 
-    auto libnMock_ = LibnMock::GetMock();
-    auto uvMock_ = UvfsMock::GetMock();
-    EXPECT_CALL(*libnMock_, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock_, ToUTF8StringPath())
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath())
         .WillOnce(testing::Return(move(srcRes)))
         .WillOnce(testing::Return(move(destRes)));
-    EXPECT_CALL(*uvMock_, uv_fs_req_cleanup(testing::_));
-    EXPECT_CALL(*uvMock_, uv_fs_rename(testing::_, testing::_, testing::_, testing::_, testing::_))
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
+    EXPECT_CALL(*uvMock, uv_fs_rename(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock_, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = Rename::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res, nullptr);
 
-    GTEST_LOG_(INFO) << "RenameMockTest-end RenameSync_0001";
+    GTEST_LOG_(INFO) << "RenameMockTest-end RenameMockTest_Sync_001";
 }
 
 } // namespace Test

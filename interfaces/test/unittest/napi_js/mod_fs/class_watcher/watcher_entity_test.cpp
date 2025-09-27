@@ -17,6 +17,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "eventfd_mock.h"
 #include "inotify_mock.h"
@@ -35,6 +36,7 @@ public:
 void WatcherEntityTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "WatcherEntityTest");
 }
 
 void WatcherEntityTest::TearDownTestCase(void)
@@ -253,7 +255,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_ReadNotifyEvent_001, testing::ext:
 
     GTEST_LOG_(INFO) << "WatcherEntityTest-end WatcherEntityTest_ReadNotifyEvent_001";
 }
- 
+
 /**
  * @tc.name: WatcherEntityTest_ReadNotifyEvent_002
  * @tc.desc: Test first if branch - remaining data < sizeof(inotify_event)
@@ -278,7 +280,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_ReadNotifyEvent_002, testing::ext:
 
     GTEST_LOG_(INFO) << "WatcherEntityTest-end WatcherEntityTest_ReadNotifyEvent_002";
 }
- 
+
 /**
  * @tc.name: WatcherEntityTest_ReadNotifyEvent_003
  * @tc.desc: Test second if branch - event->len exceeds available buffer
@@ -296,8 +298,8 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_ReadNotifyEvent_003, testing::ext:
     int32_t bufferSize = eventSize + 10;
     WatcherCallback callback = nullptr;
 
-    char buf[BUF_SIZE] = {0};
-    struct inotify_event* mockEvent = reinterpret_cast<inotify_event*>(buf);
+    char buf[BUF_SIZE] = { 0 };
+    struct inotify_event *mockEvent = reinterpret_cast<inotify_event *>(buf);
     mockEvent->wd = 1;
     mockEvent->len = nameLen;
 

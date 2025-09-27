@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
+#include "close_core.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
-#include "close_core.h"
-#include "mock/uv_fs_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
+namespace Test {
 using namespace std;
 class CloseCoreMockTest : public testing::Test {
 public:
@@ -30,21 +32,18 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-    static inline std::shared_ptr<UvfsMock> uvMock = nullptr;
 };
 
 void CloseCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "CloseCoreMockTest");
-    uvMock = std::make_shared<UvfsMock>();
-    Uvfs::ins = uvMock;
+    UvFsMock::EnableMock();
 }
 
 void CloseCoreMockTest::TearDownTestCase(void)
 {
-    Uvfs::ins = nullptr;
-    uvMock = nullptr;
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -75,6 +74,7 @@ HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_001, testing::ext::TestSiz
     // Prepare test parameters
     int fd = EXPECTED_FD;
     // Set mock behaviors
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(testing::Return(UV_EBADF));
@@ -87,6 +87,7 @@ HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_001, testing::ext::TestSiz
     GTEST_LOG_(INFO) << "CloseCoreMockTest-end CloseCoreMockTest_DoClose_001";
 }
 
+} // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
