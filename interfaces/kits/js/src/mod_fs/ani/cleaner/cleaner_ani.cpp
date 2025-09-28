@@ -71,6 +71,11 @@ void CleanerAni::Clean(ani_env *env, ani_object object)
         return;
     }
 
+    if (ptr <= 0) {
+        HILOGE("The ptr is invalid");
+        return;
+    }
+
     ani_ref classTypeObj = nullptr;
     if ((status = env->Object_GetFieldByName_Ref(object, "classType", &classTypeObj)) != ANI_OK) {
         HILOGE("Clean Object_GetFieldByName_Ref status: %{public}d", status);
