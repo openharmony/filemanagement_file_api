@@ -13,35 +13,35 @@
  * limitations under the License.
  */
 
-#include "c_mock.h"
+#include "stdio_mock.h"
 
 #include <dlfcn.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 
-thread_local std::shared_ptr<CMock> CMock::cMock = nullptr;
-thread_local bool CMock::mockable = false;
+thread_local std::shared_ptr<StdioMock> StdioMock::stdioMock = nullptr;
+thread_local bool StdioMock::mockable = false;
 
-std::shared_ptr<CMock> CMock::GetMock()
+std::shared_ptr<StdioMock> StdioMock::GetMock()
 {
-    if (cMock == nullptr) {
-        cMock = std::make_shared<CMock>();
+    if (stdioMock == nullptr) {
+        stdioMock = std::make_shared<StdioMock>();
     }
-    return cMock;
+    return stdioMock;
 }
 
-void CMock::EnableMock()
+void StdioMock::EnableMock()
 {
     mockable = true;
 }
 
-void CMock::DisableMock()
+void StdioMock::DisableMock()
 {
-    cMock = nullptr;
+    stdioMock = nullptr;
     mockable = false;
 }
 
-bool CMock::IsMockable()
+bool StdioMock::IsMockable()
 {
     return mockable;
 }
@@ -54,8 +54,8 @@ using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
 int fseek(FILE *stream, long len, int offset)
 {
-    if (CMock::IsMockable()) {
-        return CMock::GetMock()->fseek(stream, len, offset);
+    if (StdioMock::IsMockable()) {
+        return StdioMock::GetMock()->fseek(stream, len, offset);
     }
 
     static int (*realFseek)(FILE *, long, int) = []() {
@@ -75,8 +75,8 @@ int fseek(FILE *stream, long len, int offset)
 
 long ftell(FILE *stream)
 {
-    if (CMock::IsMockable()) {
-        return CMock::GetMock()->ftell(stream);
+    if (StdioMock::IsMockable()) {
+        return StdioMock::GetMock()->ftell(stream);
     }
 
     static long (*realFtell)(FILE *) = []() {

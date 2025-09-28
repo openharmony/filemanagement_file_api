@@ -15,12 +15,12 @@
 
 #include "fs_file.h"
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <sys/prctl.h>
 
 #include "file_entity.h"
-#include "system_mock.h"
+#include "sys_file_mock.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -42,13 +42,13 @@ void FsFileMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "FsFileMockTest");
-    SystemMock::EnableMock();
+    SysFileMock::EnableMock();
     UvFsMock::EnableMock();
 }
 
 void FsFileMockTest::TearDownTestCase(void)
 {
-    SystemMock::DisableMock();
+    SysFileMock::DisableMock();
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
@@ -317,10 +317,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_009, testing::ext::TestSize.Le
 HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_010, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_010";
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, flock(_, _)).WillOnce(Return(1));
+    auto fileMock = SysFileMock::GetMock();
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(1));
     auto result = fsFile->Lock(true);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_Lock_010";
@@ -337,10 +337,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_011, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_011";
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, flock(_, _)).WillOnce(Return(-1));
+    auto fileMock = SysFileMock::GetMock();
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(-1));
     auto result = fsFile->Lock(false);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_Lock_011";
@@ -357,10 +357,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_012, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_012";
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, flock(_, _)).WillOnce(Return(1));
+    auto fileMock = SysFileMock::GetMock();
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(1));
     auto result = fsFile->TryLock(true);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_TryLock_012";
@@ -377,10 +377,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_013, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_013";
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, flock(_, _)).WillOnce(Return(-1));
+    auto fileMock = SysFileMock::GetMock();
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(-1));
     auto result = fsFile->TryLock(false);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_TryLock_013";
@@ -397,10 +397,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_014, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_014";
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, flock(_, _)).WillOnce(Return(1));
+    auto fileMock = SysFileMock::GetMock();
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(1));
     auto result = fsFile->UnLock();
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
     EXPECT_EQ(result.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_UnLock_014";
@@ -417,10 +417,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_015, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_015";
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, flock(_, _)).WillOnce(Return(-1));
+    auto fileMock = SysFileMock::GetMock();
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(-1));
     auto result = fsFile->UnLock();
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
     EXPECT_EQ(result.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_UnLock_015";

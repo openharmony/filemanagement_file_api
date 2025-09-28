@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+#include "xattr_core.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 #include <sys/xattr.h>
 
-#include "system_mock.h"
-#include "xattr_core.h"
+#include "sys_xattr_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -36,12 +38,13 @@ public:
 void XattrCoreMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    SystemMock::EnableMock();
+    prctl(PR_SET_NAME, "XattrCoreMockTest");
+    SysXattrMock::EnableMock();
 }
 
 void XattrCoreMockTest::TearDownTestCase(void)
 {
-    SystemMock::DisableMock();
+    SysXattrMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -70,10 +73,10 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_001, testing::ext::Test
     string path = "fakePath/XattrCoreMockTest_DoSetXattr_001";
     string key = "test_key";
     string value = "test_value";
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, setxattr(_, _, _, _, _)).WillOnce(SetErrnoAndReturn(EIO, -1));
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*xattrMock, setxattr(_, _, _, _, _)).WillOnce(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoSetXattr(path, key, value);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_FALSE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoSetXattr_001";
@@ -94,10 +97,10 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_002, testing::ext::Test
     string key = "test_key";
     string value = "test_value";
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, setxattr(_, _, _, _, _)).WillOnce(Return(0));
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*xattrMock, setxattr(_, _, _, _, _)).WillOnce(Return(0));
     auto ret = XattrCore::DoSetXattr(path, key, value);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoSetXattr_002";
@@ -117,10 +120,10 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_001, testing::ext::Test
     string path = "fakePath/XattrCoreMockTest_DoGetXattr_001";
     string key = "test_key";
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillRepeatedly(SetErrnoAndReturn(EIO, -1));
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillRepeatedly(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoGetXattr(path, key);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoGetXattr_001";
@@ -140,10 +143,10 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_002, testing::ext::Test
     string path = "fakePath/XattrCoreMockTest_DoGetXattr_002";
     string key = "test_key";
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(SetErrnoAndReturn(EIO, -1));
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(SetErrnoAndReturn(EIO, -1));
     auto ret = XattrCore::DoGetXattr(path, key);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_FALSE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoGetXattr_002";
@@ -163,10 +166,10 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_003, testing::ext::Test
     string path = "fakePath/XattrCoreMockTest_DoGetXattr_003";
     string key = "test_key";
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(Return(1));
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(Return(1));
     auto ret = XattrCore::DoGetXattr(path, key);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoGetXattr_003";

@@ -19,6 +19,7 @@ ani_file_environment_core = [
   "${src_path}/mod_environment/environment_core.cpp",
   "${src_path}/mod_fs/fs_utils.cpp",
 ]
+
 ohos_unittest("ani_file_environment_test") {
   branch_protector_ret = "pac_ret"
   testonly = true
@@ -117,6 +118,7 @@ ani_file_fs_core = [
   "${src_path}/mod_fs/properties/write_core.cpp",
   "${src_path}/mod_fs/properties/xattr_core.cpp",
 ]
+
 ohos_unittest("ani_file_fs_mock_test") {
   branch_protector_ret = "pac_ret"
   testonly = true
@@ -144,12 +146,15 @@ ohos_unittest("ani_file_fs_mock_test") {
   ]
 
   sources = [
-    "${file_api_path}/interfaces/test/unittest/common_mock/c_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/dfs_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/eventfd_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/inotify_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/poll_mock.cpp",
-    "${file_api_path}/interfaces/test/unittest/common_mock/system_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/stdio_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/sys_file_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/sys_xattr_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/unistd_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/uv_err_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/uv_fs_mock.cpp",
     "mod_fs/class_file/fs_file_mock_test.cpp",
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
@@ -355,6 +360,7 @@ ani_file_securitylabel_core = [
   "${src_path}/mod_fs/fs_utils.cpp",
   "${src_path}/mod_securitylabel/securitylabel_core.cpp",
 ]
+
 ohos_unittest("ani_file_securitylabel_test") {
   module_out_path = "file_api/file_api"
 
@@ -388,6 +394,7 @@ ani_file_statvfs_core = [
   "${src_path}/mod_fs/fs_utils.cpp",
   "${src_path}/mod_statvfs/statvfs_core.cpp",
 ]
+
 ohos_unittest("ani_file_statvfs_test") {
   module_out_path = "file_api/file_api"
 

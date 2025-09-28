@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "sys_file_mock.h"
+#include "uv_err_mock.h"
 
 #include <dlfcn.h>
 
@@ -22,29 +22,29 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-thread_local std::shared_ptr<SysFileMock> SysFileMock::fileMock = nullptr;
-thread_local bool SysFileMock::mockable = false;
+thread_local std::shared_ptr<UvErrMock> UvErrMock::uvErrMock = nullptr;
+thread_local bool UvErrMock::mockable = false;
 
-std::shared_ptr<SysFileMock> SysFileMock::GetMock()
+std::shared_ptr<UvErrMock> UvErrMock::GetMock()
 {
-    if (fileMock == nullptr) {
-        fileMock = std::make_shared<SysFileMock>();
+    if (uvErrMock == nullptr) {
+        uvErrMock = std::make_shared<UvErrMock>();
     }
-    return fileMock;
+    return uvErrMock;
 }
 
-void SysFileMock::EnableMock()
+void UvErrMock::EnableMock()
 {
     mockable = true;
 }
 
-void SysFileMock::DisableMock()
+void UvErrMock::DisableMock()
 {
-    fileMock = nullptr;
+    uvErrMock = nullptr;
     mockable = false;
 }
 
-bool SysFileMock::IsMockable()
+bool UvErrMock::IsMockable()
 {
     return mockable;
 }
@@ -58,26 +58,25 @@ bool SysFileMock::IsMockable()
 extern "C" {
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
-int flock(int fd, int operation)
+const char *uv_err_name(int err)
 {
-    if (SysFileMock::IsMockable()) {
-        return SysFileMock::GetMock()->flock(fd, operation);
+    if (UvErrMock::IsMockable()) {
+        return UvErrMock::GetMock()->uv_err_name(err);
     }
 
-    static int (*realFlock)(int, int) = []() {
-        auto func = (int (*)(int, int))dlsym(RTLD_NEXT, "flock");
+    static const char *(*realUvErrName)(int) = []() {
+        auto func = (const char *(*)(int))dlsym(RTLD_NEXT, "uv_err_name");
         if (!func) {
-            GTEST_LOG_(ERROR) << "Failed to resolve real flock: " << dlerror();
+            GTEST_LOG_(ERROR) << "Failed to resolve real uv_err_name: " << dlerror();
         }
         return func;
     }();
 
-    if (!realFlock) {
-        return -1;
+    if (!realUvErrName) {
+        return "";
     }
 
-    return realFlock(fd, operation);
+    return realUvErrName(err);
 }
-
 } // extern "C"
 #endif

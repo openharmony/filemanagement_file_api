@@ -21,7 +21,7 @@
 
 #include "fs_stat_entity.h"
 #include "securec.h"
-#include "system_mock.h"
+#include "sys_xattr_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -40,12 +40,12 @@ void FsStatMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "FsStatMockTest");
-    SystemMock::EnableMock();
+    SysXattrMock::EnableMock();
 }
 
 void FsStatMockTest::TearDownTestCase(void)
 {
-    SystemMock::DisableMock();
+    SysXattrMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -84,10 +84,10 @@ HWTEST_F(FsStatMockTest, FsStatMockTest_GetLocation_001, testing::ext::TestSize.
     statEntity->fileInfo_->path.get()[99] = '\0';
     fsStat = make_unique<FsStat>(move(statEntity));
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, getxattr(_, _, _, _)).WillOnce(Return(1));
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillOnce(Return(1));
     EXPECT_EQ(fsStat->GetLocation(), 1);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
 
     GTEST_LOG_(INFO) << "FsStatMockTes-end FsStatMockTest_GetLocation_001";
 }
@@ -113,10 +113,10 @@ HWTEST_F(FsStatMockTest, FsStatMockTest_GetLocation_002, testing::ext::TestSize.
     statEntity->fileInfo_->fdg = make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
     fsStat = make_unique<FsStat>(move(statEntity));
 
-    auto sys = SystemMock::GetMock();
-    EXPECT_CALL(*sys, fgetxattr(_, _, _, _)).WillOnce(Return(1));
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*xattrMock, fgetxattr(_, _, _, _)).WillOnce(Return(1));
     EXPECT_EQ(fsStat->GetLocation(), 1);
-    testing::Mock::VerifyAndClearExpectations(sys.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
 
     GTEST_LOG_(INFO) << "FsStatMockTes-end FsStatMockTest_GetLocation_002";
 }

@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "c_mock.h"
 #include "create_stream_core.h"
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
+
 #include "fs_utils.h"
+#include "stdio_mock.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -28,24 +32,41 @@ static const string g_streamFilePath = "/data/test/FsStreamCoreTest.txt";
 
 class FsStreamMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        CMock::EnableMock();
-        int32_t fd = open(g_streamFilePath.c_str(), CREATE | O_RDWR, 0644);
-        if (fd < 0) {
-            GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
-            ASSERT_TRUE(false);
-        }
-        close(fd);
-    };
-    static void TearDownTestCase()
-    {
-        CMock::DisableMock();
-        rmdir(g_streamFilePath.c_str());
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 };
+
+void FsStreamMockTest::SetUpTestCase(void)
+{
+    GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "FsStreamMockTest");
+    StdioMock::EnableMock();
+    int32_t fd = open(g_streamFilePath.c_str(), CREATE | O_RDWR, 0644);
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+        ASSERT_TRUE(false);
+    }
+    close(fd);
+}
+
+void FsStreamMockTest::TearDownTestCase()
+{
+    StdioMock::DisableMock();
+    rmdir(g_streamFilePath.c_str());
+    GTEST_LOG_(INFO) << "TearDownTestCase";
+}
+
+void FsStreamMockTest::SetUp(void)
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void FsStreamMockTest::TearDown(void)
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
 
 /**
  * @tc.name: FsStreamSeekTest_0001
@@ -61,8 +82,8 @@ HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
-    auto mock_ = CMock::GetMock();
-    EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    auto stdioMock = StdioMock::GetMock();
+    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
 
     auto retSk = result->Seek(1);
     EXPECT_FALSE(retSk.IsSuccess());
@@ -87,9 +108,9 @@ HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
-    auto mock_ = CMock::GetMock();
-    EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
-    EXPECT_CALL(*mock_, ftell(testing::_)).WillOnce(testing::Return(-1));
+    auto stdioMock = StdioMock::GetMock();
+    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
+    EXPECT_CALL(*stdioMock, ftell(testing::_)).WillOnce(testing::Return(-1));
 
     auto retSk = result->Seek(1);
     EXPECT_FALSE(retSk.IsSuccess());
@@ -114,8 +135,8 @@ HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
-    auto mock_ = CMock::GetMock();
-    EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    auto stdioMock = StdioMock::GetMock();
+    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
 
     WriteOptions opt;
     opt.offset = 5;
@@ -142,8 +163,8 @@ HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1
     ASSERT_TRUE(ret.IsSuccess());
     auto result = ret.GetData().value();
 
-    auto mock_ = CMock::GetMock();
-    EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    auto stdioMock = StdioMock::GetMock();
+    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
 
     WriteOptions opt;
     opt.offset = 5;
@@ -174,8 +195,8 @@ HWTEST_F(FsStreamMockTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
     void *buffer = std::malloc(4096);
     ArrayBuffer arrayBuffer(buffer, 4096);
 
-    auto mock_ = CMock::GetMock();
-    EXPECT_CALL(*mock_, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    auto stdioMock = StdioMock::GetMock();
+    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
 
     ReadOptions opt;
     opt.offset = 5;
