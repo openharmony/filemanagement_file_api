@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
+#include "uv_err_mock.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -55,13 +56,6 @@ void MoveCoreMockTest::SetUp(void)
 void MoveCoreMockTest::TearDown(void)
 {
     GTEST_LOG_(INFO) << "TearDown";
-}
-
-extern "C" {
-const char *uv_err_name(int err)
-{
-    return "EXDEV";
-}
 }
 
 /**
@@ -103,15 +97,19 @@ HWTEST_F(MoveCoreMockTest, MoveCoreMockTest_DoMove_001, testing::ext::TestSize.L
 
     std::string src;
     std::string dest;
-
+    UvErrMock::EnableMock();
     auto uvMock = UvFsMock::GetMock();
+    auto uvErrMock = UvErrMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvErrMock, uv_err_name(_)).WillRepeatedly(Return("EXDEV"));
 
     auto res = MoveCore::DoMove(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvErrMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
+    UvErrMock::DisableMock();
 
     GTEST_LOG_(INFO) << "MoveCoreMockTest-end MoveCoreMockTest_DoMove_001";
 }
@@ -315,15 +313,20 @@ HWTEST_F(MoveCoreMockTest, MoveCoreMockTest_DoMove_009, testing::ext::TestSize.L
     std::string dest;
     optional<int> mode = std::make_optional<int>(MODE_FORCE_MOVE);
 
+    UvErrMock::EnableMock();
+    auto uvErrMock = UvErrMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvErrMock, uv_err_name(_)).WillRepeatedly(Return("EXDEV"));
 
     auto res = MoveCore::DoMove(src, dest, mode);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvErrMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
+    UvErrMock::DisableMock();
 
     GTEST_LOG_(INFO) << "MoveCoreMockTest-end MoveCoreMockTest_DoMove_009";
 }
@@ -344,17 +347,22 @@ HWTEST_F(MoveCoreMockTest, MoveCoreMockTest_DoMove_0010, testing::ext::TestSize.
     optional<int> mode = std::make_optional<int>(MODE_FORCE_MOVE);
 
     int fd = open(dest.c_str(), O_RDWR | O_CREAT, 0666);
-    ASSERT_NE(fd, -1);
+    ASSERT_GT(fd, -1);
 
+    UvErrMock::EnableMock();
+    auto uvErrMock = UvErrMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvErrMock, uv_err_name(_)).WillRepeatedly(Return("EXDEV"));
 
     auto res = MoveCore::DoMove(src, dest, mode);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvErrMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
+    UvErrMock::DisableMock();
     close(fd);
 
     GTEST_LOG_(INFO) << "MoveCoreMockTest-end MoveCoreMockTest_DoMove_0010";
@@ -375,15 +383,20 @@ HWTEST_F(MoveCoreMockTest, MoveCoreMockTest_DoMove_0011, testing::ext::TestSize.
     std::string dest;
     optional<int> mode = std::make_optional<int>(MODE_FORCE_MOVE);
 
+    UvErrMock::EnableMock();
+    auto uvErrMock = UvErrMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvErrMock, uv_err_name(_)).WillRepeatedly(Return("EXDEV"));
 
     auto res = MoveCore::DoMove(src, dest, mode);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvErrMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
+    UvErrMock::DisableMock();
 
     GTEST_LOG_(INFO) << "MoveCoreMockTest-end MoveCoreMockTest_DoMove_0011";
 }
@@ -404,20 +417,25 @@ HWTEST_F(MoveCoreMockTest, MoveCoreMockTest_DoMove_0012, testing::ext::TestSize.
     optional<int> mode = std::make_optional<int>(MODE_FORCE_MOVE);
 
     int fd = open(src.c_str(), O_RDWR | O_CREAT, 0666);
-    ASSERT_NE(fd, -1);
+    ASSERT_GT(fd, -1);
 
+    UvErrMock::EnableMock();
+    auto uvErrMock = UvErrMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(-1)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvErrMock, uv_err_name(_)).WillRepeatedly(Return("EXDEV"));
 
     auto res = MoveCore::DoMove(src, dest, mode);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvErrMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
-    close(fd);
     ASSERT_EQ(unlink(src.c_str()), 0);
+    UvErrMock::DisableMock();
+    close(fd);
 
     GTEST_LOG_(INFO) << "MoveCoreMockTest-end MoveCoreMockTest_DoMove_0012";
 }
@@ -438,20 +456,25 @@ HWTEST_F(MoveCoreMockTest, MoveCoreMockTest_DoMove_0013, testing::ext::TestSize.
     optional<int> mode = std::make_optional<int>(MODE_FORCE_MOVE);
 
     int fd = open(src.c_str(), O_RDWR | O_CREAT, 0666);
-    ASSERT_NE(fd, -1);
+    ASSERT_GT(fd, -1);
 
+    UvErrMock::EnableMock();
+    auto uvErrMock = UvErrMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(-1)).WillOnce(Return(1));
+    EXPECT_CALL(*uvErrMock, uv_err_name(_)).WillRepeatedly(Return("EXDEV"));
 
     auto res = MoveCore::DoMove(src, dest, mode);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvErrMock.get());
     EXPECT_EQ(res.IsSuccess(), false);
-    close(fd);
     ASSERT_EQ(unlink(src.c_str()), 0);
+    UvErrMock::DisableMock();
+    close(fd);
 
     GTEST_LOG_(INFO) << "MoveCoreMockTest-end MoveCoreMockTest_DoMove_0013";
 }
@@ -472,20 +495,25 @@ HWTEST_F(MoveCoreMockTest, MoveCoreMockTest_DoMove_0014, testing::ext::TestSize.
     optional<int> mode = std::make_optional<int>(MODE_FORCE_MOVE);
 
     int fd = open(src.c_str(), O_RDWR | O_CREAT, 0666);
-    ASSERT_NE(fd, -1);
+    ASSERT_GT(fd, -1);
 
+    UvErrMock::EnableMock();
+    auto uvErrMock = UvErrMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvErrMock, uv_err_name(_)).WillRepeatedly(Return("EXDEV"));
 
     auto res = MoveCore::DoMove(src, dest, mode);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvErrMock.get());
     EXPECT_EQ(res.IsSuccess(), true);
-    close(fd);
     ASSERT_EQ(unlink(src.c_str()), 0);
+    UvErrMock::DisableMock();
+    close(fd);
 
     GTEST_LOG_(INFO) << "MoveCoreMockTest-end MoveCoreMockTest_DoMove_0013";
 }

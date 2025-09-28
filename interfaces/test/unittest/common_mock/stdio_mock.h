@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_C_MOCK_H
-#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_C_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_STDIO_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_STDIO_MOCK_H
 
 #include <cstdio>
 
@@ -22,28 +22,28 @@
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 
-class ICMock {
+class IStdioMock {
 public:
-    virtual ~ICMock() = default;
+    virtual ~IStdioMock() = default;
     virtual int fseek(FILE *, long, int) = 0;
     virtual long ftell(FILE *) = 0;
 };
 
-class CMock : public ICMock {
+class StdioMock : public IStdioMock {
 public:
     MOCK_METHOD(int, fseek, (FILE *, long, int), (override));
     MOCK_METHOD(long, ftell, (FILE *), (override));
 
 public:
-    static std::shared_ptr<CMock> GetMock();
+    static std::shared_ptr<StdioMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<CMock> cMock;
+    static thread_local std::shared_ptr<StdioMock> stdioMock;
     static thread_local bool mockable;
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
-#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_C_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_STDIO_MOCK_H
