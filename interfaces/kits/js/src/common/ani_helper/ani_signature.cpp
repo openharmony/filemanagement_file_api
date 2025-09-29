@@ -67,7 +67,7 @@ const Type BuiltInTypes::ArrayBuffer::classType = Builder::BuildClass("escompat.
 const string BuiltInTypes::ArrayBuffer::classDesc = BuiltInTypes::ArrayBuffer::classType.Descriptor();
 const string BuiltInTypes::ArrayBuffer::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
 // BuiltInTypes::BigInt
-const Type BuiltInTypes::BigInt::classType = Builder::BuildClass("escompat.BigInt");
+const Type BuiltInTypes::BigInt::classType = Builder::BuildClass("std.core.BigInt");
 const string BuiltInTypes::BigInt::classDesc = BuiltInTypes::BigInt::classType.Descriptor();
 const string BuiltInTypes::BigInt::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
 // BuiltInTypes::BusinessError
