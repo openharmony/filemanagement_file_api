@@ -160,7 +160,7 @@ int GetCurrentUserId()
     return userId;
 }
 
-sptr<OHOS::AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
+sptr<OHOS::AppExecFwk::IBundleMgr> GetBundleMgrProxy()
 {
     sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
         OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -174,12 +174,12 @@ sptr<OHOS::AppExecFwk::BundleMgrProxy> GetBundleMgrProxy()
         LOGE("Fail to get bundle manager proxy");
         return nullptr;
     }
-    return iface_cast<OHOS::AppExecFwk::BundleMgrProxy>(remoteObject);
+    return iface_cast<OHOS::AppExecFwk::IBundleMgr>(remoteObject);
 }
 
 std::string GetSelfBundleName()
 {
-    sptr<OHOS::AppExecFwk::BundleMgrProxy> bundleMgrProxy = GetBundleMgrProxy();
+    sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgrProxy();
     if (!bundleMgrProxy) {
         LOGE("BundleMgrProxy is nullptr");
         return "";
