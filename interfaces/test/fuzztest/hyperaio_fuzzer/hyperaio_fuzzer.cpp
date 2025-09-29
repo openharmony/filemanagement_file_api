@@ -121,7 +121,7 @@ bool HyperaioStartReadReqsFuzzTest(FuzzData &fuzzData, size_t size)
     uint32_t batchSize = fuzzData.GetData<uint32_t>();
     batchSize = batchSize % URING_QUEUE_SIZE;
     if (batchSize == 0) {
-        batchSize ++;
+        batchSize++;
     }
     char *buf;
     size_t buffSize = 1024;
