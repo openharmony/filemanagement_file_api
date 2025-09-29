@@ -145,11 +145,11 @@ int32_t HyperAio::CheckParameter(uint32_t reqNum)
     }
     if (!initialized_.load()) {
         HILOGE("HyperAio is not initialized");
-        return -EPERM;
+        return -EINVAL;
     }
     if (destroyed_.load()) {
         HILOGE("HyperAio is destroyed");
-        return -EPERM;
+        return -EINVAL;
     }
     if (!ValidateReqNum(reqNum)) {
         HILOGE("reqNum is out of range: %{public}u", reqNum);
