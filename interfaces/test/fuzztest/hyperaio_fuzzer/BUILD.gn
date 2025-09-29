@@ -1,0 +1,62 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/features.gni")
+import("//build/test.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
+
+ohos_fuzztest("HyperaioFuzzTest") {
+  module_out_path = "file_api/file_api"
+  fuzz_config_file = "${file_api_path}/interfaces/test/fuzztest/hyperaio_fuzzer"
+  file_api_feature_hyperaio = true
+
+  include_dirs = [
+    "${file_api_path}/interfaces/test/fuzztest/fuzz_common",
+    "${file_api_path}/interfaces/kits/hyperaio/include",
+  ]
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+  sources =
+      [ "${file_api_path}/interfaces/test/fuzztest/hyperaio_fuzzer/hyperaio_fuzzer.cpp" ]
+  defines = []
+  deps = [
+    "${file_api_path}/interfaces/kits/hyperaio:HyperAio",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "access_token:libaccesstoken_sdk",
+    "hitrace:hitrace_meter",
+    "hilog:libhilog",
+  ]
+  if (file_api_feature_hyperaio) {
+    external_deps += [ "liburing:liburing" ]
+  }
+
+  if (file_api_feature_hyperaio) {
+    defines += [ "HYPERAIO_USE_LIBURING" ]
+  }
+}
+
+group("fuzztest") {
+  testonly = true
+  deps = [ ":HyperaioFuzzTest" ]
+}
