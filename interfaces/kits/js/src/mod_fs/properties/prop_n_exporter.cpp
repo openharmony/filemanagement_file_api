@@ -331,7 +331,6 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
 {
-    FileFsTrace traceUnlink("Unlink");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of Arguments Unmatched");
@@ -353,7 +352,6 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
             HILOGE("Failed to request heap memory.");
             return NError(ENOMEM);
         }
-        FileFsTrace traceUvUnlink("uv_fs_unlink");
         int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
             HILOGD("Failed to unlink with path ret %{public}d", ret);
@@ -380,6 +378,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
 
 napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceUnlinkSync("UnlinkSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE)) {
         HILOGE("Number of arguments unmatched");
@@ -401,7 +400,9 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    FileFsTrace traceUvUnlink("uv_fs_unlink");
     int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.get(), nullptr);
+    traceUvUnlink.End();
     if (ret < 0) {
         HILOGD("Failed to unlink with path ret %{public}d", ret);
         NError(ret).ThrowErr(env);
@@ -790,6 +791,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
     }
     FileFsTrace traceUvWrite("uv_fs_write");
     int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
+    traceUvWrite.End();
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);
         NError(ret).ThrowErr(env);

@@ -132,7 +132,7 @@ FsResult<size_t> FsStream::Write(const ArrayBuffer &buf, const optional<WriteOpt
     }
 
     if (offset >= 0) {
-        FileFsTrace traceFseek("Fseek");
+        FileFsTrace traceFseek("fseek");
         int ret = fseek(fp.get(), static_cast<long>(offset), SEEK_SET);
         traceFseek.End();
         if (ret < 0) {
@@ -141,7 +141,7 @@ FsResult<size_t> FsStream::Write(const ArrayBuffer &buf, const optional<WriteOpt
         }
     }
 
-    FileFsTrace traceFwrite("Fwrite");
+    FileFsTrace traceFwrite("fwrite");
     size_t writeLen = fwrite(buf.buf, 1, retLen, fp.get());
     traceFwrite.End();
     if ((writeLen == 0) && (writeLen != retLen)) {
@@ -169,7 +169,7 @@ FsResult<size_t> FsStream::Write(const string &buf, const optional<WriteOptions>
     }
 
     if (offset >= 0) {
-        FileFsTrace traceFseek("Fseek");
+        FileFsTrace traceFseek("fseek");
         int ret = fseek(fp.get(), static_cast<long>(offset), SEEK_SET);
         traceFseek.End();
         if (ret < 0) {
@@ -178,7 +178,7 @@ FsResult<size_t> FsStream::Write(const string &buf, const optional<WriteOptions>
         }
     }
 
-    FileFsTrace traceFwrite("Fwrite");
+    FileFsTrace traceFwrite("fwrite");
     size_t writeLen = fwrite(buf.c_str(), 1, retLen, fp.get());
     traceFwrite.End();
     if ((writeLen == 0) && (writeLen != retLen)) {
@@ -228,7 +228,7 @@ FsResult<void> FsStream::Flush()
         return FsResult<void>::Error(EIO);
     }
 
-    FileFsTrace traceFflush("Fflush");
+    FileFsTrace traceFflush("fflush");
     int ret = fflush(fp.get());
     traceFflush.End();
     if (ret < 0) {

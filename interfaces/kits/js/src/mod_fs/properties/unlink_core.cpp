@@ -37,7 +37,9 @@ FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
         return FsResult<void>::Error(ENOMEM);
     }
 
+    FileFsTrace traceUvUnlink("uv_fs_unlink");
     int ret = uv_fs_unlink(nullptr, unlinkReq.get(), src.c_str(), nullptr);
+    traceUvUnlink.End();
     if (ret < 0) {
         HILOGD("Failed to unlink with path, ret is %{public}d", ret);
         if (FileApiDebug::isLogEnabled) {

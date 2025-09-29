@@ -57,9 +57,7 @@ static int MkdirCore(const string &path)
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-
-    int ret = uv_fs_mkdir(nullptr, mkdirReq.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
-    return ret;
+    return uv_fs_mkdir(nullptr, mkdirReq.get(), path.c_str(), DIR_DEFAULT_PERM, nullptr);
 }
 
 static int32_t MkdirExec(const string &path, bool recursion, bool hasOption)
