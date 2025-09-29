@@ -30,8 +30,8 @@ const Type BasicTypes::doubleType = Builder::BuildDouble();
 // BoxedTypes::Boolean
 const Type BoxedTypes::Boolean::classType = Builder::BuildClass("std.core.Boolean");
 const string BoxedTypes::Boolean::classDesc = BoxedTypes::Double::classType.Descriptor();
-const string BoxedTypes::Boolean::unboxedDesc = "unboxed";
-const string BoxedTypes::Boolean::unboxedSig = Builder::BuildSignatureDescriptor({}, BasicTypes::booleanType);
+const string BoxedTypes::Boolean::booleanUnboxedDesc = "toBoolean";
+const string BoxedTypes::Boolean::booleanUnboxedSig = Builder::BuildSignatureDescriptor({}, BasicTypes::booleanType);
 // BoxedTypes::Int
 const Type BoxedTypes::Int::classType = Builder::BuildClass("std.core.Int");
 const string BoxedTypes::Int::classDesc = BoxedTypes::Int::classType.Descriptor();
