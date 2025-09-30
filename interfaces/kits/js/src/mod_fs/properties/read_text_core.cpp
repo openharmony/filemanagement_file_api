@@ -120,7 +120,7 @@ FsResult<tuple<string, int64_t>> ReadTextCore::DoReadText(const std::string &pat
     sfd.SetFD(fd);
 
     struct stat statbf;
-    FileFsTrace traceFstat("Fstat");
+    FileFsTrace traceFstat("fstat");
     if ((!sfd) || (fstat(sfd.GetFD(), &statbf) < 0)) {
         HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
         return FsResult<tuple<string, int64_t>>::Error(errno);

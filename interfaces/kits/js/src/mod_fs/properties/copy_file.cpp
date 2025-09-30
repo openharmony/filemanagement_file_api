@@ -36,7 +36,7 @@ using namespace OHOS::FileManagement::LibN;
 
 static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
 {
-    FileFsTrace trace("IsAllPath");
+    FileFsTrace traceIsAllPath("IsAllPath");
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     filesystem::path srcPath(string(srcFile.path.get()));
     filesystem::path dstPath(string(destFile.path.get()));
@@ -212,6 +212,7 @@ static tuple<bool, FileInfo> ParseJsOperand(napi_env env, NVal pathOrFdFromJsArg
 
 napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
 {
+    FileFsTrace traceCopyFileSync("CopyFileSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
