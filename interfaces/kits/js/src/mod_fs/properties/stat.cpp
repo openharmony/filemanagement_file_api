@@ -17,6 +17,7 @@
 #include <memory>
 #include <tuple>
 #include <unistd.h>
+#include <securec.h>
 
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
@@ -41,8 +42,12 @@ static tuple<bool, FileInfo> ParseJsFileByPath(napi_env env, std::unique_ptr<cha
             AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
             string realPath = fileUri.GetRealPath();
             auto pathPtr = std::make_unique<char[]>(realPath.length() + 1);
-            copy(realPath.begin(), realPath.end(), pathPtr.get());
-            pathPtr[realPath.length()] = '\0';
+            auto ret = strncpy_s(pathPtr.get(), realPath.length() + 1, realPath.c_str());
+            if (ret != EOK) {
+                HILOGE("failed to copy file path");
+                NError(ENOMEM).ThrowErr(env);
+                return { false, FileInfo { false, {}, {} } };
+            }
             return { true, FileInfo { true, move(pathPtr), {} } };
         }
         HILOGE("Failed to stat file by invalid uri");
