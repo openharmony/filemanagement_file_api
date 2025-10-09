@@ -28,7 +28,7 @@ using namespace std;
 using namespace OHOS::FileManagement::LibN;
 const std::string SCHEME_FILE = "file";
 
-static tuple<bool, string> ParsePath(const string &pathStr)
+static tuple<bool, string> ParsePath(napi_env env, const string &pathStr)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (pathStr.find("://") != string::npos) {
