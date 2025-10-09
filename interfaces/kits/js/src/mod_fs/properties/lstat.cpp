@@ -63,7 +63,7 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     string pathStr(pathPtr.get());
-    string path = ParsePath(pathStr);
+    string path = ParsePath(env, pathStr);
     if (path.empty()) {
         return nullptr;
     }
@@ -120,7 +120,7 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
     }
 
     string pathStr(tmp.get());
-    string path = ParsePath(pathStr);
+    string path = ParsePath(env, pathStr);
     if (path.empty()) {
         return nullptr;
     }
