@@ -42,7 +42,7 @@ static tuple<bool, FileInfo> ParseJsFileByPath(napi_env env, std::unique_ptr<cha
             AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
             string realPath = fileUri.GetRealPath();
             auto pathPtr = std::make_unique<char[]>(realPath.length() + 1);
-            size_t length = path.length() + 1;
+            size_t length = realPath.length() + 1;
             auto ret = strncpy_s(pathPtr.get(), length, realPath.c_str(), length - 1);
             if (ret != EOK) {
                 HILOGE("failed to copy file path");
