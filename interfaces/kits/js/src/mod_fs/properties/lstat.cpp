@@ -64,7 +64,7 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
     }
     string pathStr(pathPtr.get());
     auto [succ, path]  = ParsePath(pathStr);
-     if (!succ) {
+    if (!succ) {
         return nullptr;
     }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> lstat_req = {
