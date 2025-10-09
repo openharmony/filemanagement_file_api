@@ -41,11 +41,11 @@ tuple<bool, bool> ParseBooleanParam(ani_env *env, ani_object obj, string tag)
     if (isUndefined) {
         return { true, false };
     }
-    auto unboxedDesc = BoxedTypes::Boolean::unboxedDesc.c_str();
-    auto unboxedSig = BoxedTypes::Boolean::unboxedSig.c_str();
+    auto booleanUnboxedDesc = BoxedTypes::Boolean::booleanUnboxedDesc.c_str();
+    auto booleanUnboxedSig = BoxedTypes::Boolean::booleanUnboxedSig.c_str();
     ani_boolean boolRef_res;
     if (ANI_OK != env->Object_CallMethodByName_Boolean(
-        static_cast<ani_object>(boolRef), unboxedDesc, unboxedSig, &boolRef_res)) {
+        static_cast<ani_object>(boolRef), booleanUnboxedDesc, booleanUnboxedSig, &boolRef_res)) {
         return { false, false };
     }
     return { true, static_cast<bool>(boolRef_res) };

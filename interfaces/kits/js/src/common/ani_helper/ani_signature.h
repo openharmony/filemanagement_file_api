@@ -48,8 +48,8 @@ namespace BoxedTypes {
 struct Boolean : public BaseType {
     static const Type classType;
     static const string classDesc;
-    static const string unboxedDesc;
-    static const string unboxedSig;
+    static const string booleanUnboxedDesc;
+    static const string booleanUnboxedSig;
 };
 
 struct Int : public BaseType {
