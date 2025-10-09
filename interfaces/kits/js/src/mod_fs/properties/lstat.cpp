@@ -41,7 +41,7 @@ static tuple<bool, string> ParsePath(napi_env env, const string &pathStr)
         }
         HILOGE("Failed to lstat file by invalid uri");
         NError(EINVAL).ThrowErr(env);
-        return { false, pathStr };
+        return { false, "" };
     }
 #endif
     return { true, pathStr };
