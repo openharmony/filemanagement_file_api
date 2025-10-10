@@ -17,7 +17,6 @@
 #include <memory>
 #include <tuple>
 #include <unistd.h>
-#include <securec.h>
 
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
@@ -25,6 +24,7 @@
 #include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "securec.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;

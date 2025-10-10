@@ -15,13 +15,12 @@
 
 #include "lstat.h"
 
-#include "securec.h"
-
 #include <fcntl.h>
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
 #include "libn_mock.h"
+#include "securec.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS {
