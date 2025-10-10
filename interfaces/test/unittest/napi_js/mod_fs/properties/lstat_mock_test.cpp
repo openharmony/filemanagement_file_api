@@ -121,7 +121,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_002, testing::ext::TestSize.Level1)
     const char *testUri = "/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
-        tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
         true,
         [&]() {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
