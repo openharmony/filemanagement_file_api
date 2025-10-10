@@ -161,7 +161,6 @@ napi_value ConnectDfs::Async(napi_env env, napi_callback_info info)
         connectDfsCB = nullptr;
         return nullptr;
     }
-
     status = napi_create_async_work(env, nullptr, NVal::CreateUTF8String(env, "ResourceName").val_,
         cbExec, cbCompl, static_cast<void *>(connectDfsCB), &connectDfsCB->cbBase.asyncWork);
     if (status != napi_ok) {
@@ -170,7 +169,6 @@ napi_value ConnectDfs::Async(napi_env env, napi_callback_info info)
         connectDfsCB = nullptr;
         return nullptr;
     }
-
     status = napi_queue_async_work(env, connectDfsCB->cbBase.asyncWork);
     if (status != napi_ok) {
         HILOGE("INNER BUG. Failed to queue async work for %{public}d", status);
@@ -225,10 +223,18 @@ napi_value WrapInt32(napi_env &env, int32_t num, const std::string &paramName)
 {
     HILOGI("WrapInt32 called");
     napi_value jsObject = nullptr;
-    napi_create_object(env, &jsObject);
+    napi_status status = napi_create_object(env, &jsObject);
+    if (status != napi_ok) {
+        HILOGE("Failed to create object at initializing PolicyType");
+        return nullptr;
+    }
     napi_value jsValue = nullptr;
     HILOGD("WrapInt32 called. %{public}s = %{public}d", paramName.c_str(), num);
-    napi_create_int32(env, num, &jsValue);
+    status = napi_create_int32(env, num, &jsValue);
+    if (status != napi_ok) {
+        HILOGE("napi_create_int32 faild.");
+        return nullptr;
+    }
     napi_set_named_property(env, jsObject, paramName.c_str(), jsValue);
 
     return jsObject;
@@ -239,8 +245,10 @@ napi_value WrapString(napi_env &env, const std::string &param, const std::string
     HILOGI("WrapString called");
     napi_value jsValue = nullptr;
     HILOGD("WrapString called. %{public}s = %{public}s", paramName.c_str(), param.c_str());
-    napi_create_string_utf8(env, param.c_str(), NAPI_AUTO_LENGTH, &jsValue);
-
+    if (napi_create_string_utf8(env, param.c_str(), NAPI_AUTO_LENGTH, &jsValue) != napi_ok) {
+        HILOGE("create napi string failed");
+        return nullptr;
+    }
     return jsValue;
 }
 
@@ -253,7 +261,6 @@ void UvWorkAfterOnStaus(ConnectDfsCB *connectDfsCB)
         return;
     }
     HILOGI("UvWorkAfterOnStaus, status = %{public}d", connectDfsCB->status);
-
     napi_value result[NARG_CNT::TWO] = {nullptr};
     result[NARG_POS::FIRST] = WrapString(connectDfsCB->cbBase.cbInfo.env, connectDfsCB->networkId.c_str(), "networkId");
     result[NARG_POS::SECOND] = WrapInt32(connectDfsCB->cbBase.cbInfo.env, connectDfsCB->status, "status");
@@ -264,7 +271,11 @@ void UvWorkAfterOnStaus(ConnectDfsCB *connectDfsCB)
         napi_value callResult = nullptr;
         napi_get_reference_value(connectDfsCB->cbBase.cbInfo.env,
             connectDfsCB->cbBase.cbInfo.callback, &callback);
-        napi_call_function(connectDfsCB->cbBase.cbInfo.env, undefined, callback, NARG_CNT::TWO, result, &callResult);
+        if (napi_call_function(connectDfsCB->cbBase.cbInfo.env, undefined, callback,
+            NARG_CNT::TWO, result, &callResult) != napi_ok) {
+            HILOGE("napi call function failed");
+            return;
+        }
         if (connectDfsCB->cbBase.cbInfo.callback != nullptr) {
             napi_delete_reference(connectDfsCB->cbBase.cbInfo.env, connectDfsCB->cbBase.cbInfo.callback);
         }
@@ -272,14 +283,20 @@ void UvWorkAfterOnStaus(ConnectDfsCB *connectDfsCB)
         napi_value res[NARG_CNT::TWO] = { nullptr };
         napi_get_undefined(connectDfsCB->cbBase.cbInfo.env, &res[NARG_POS::SECOND]);
         if (connectDfsCB->status == ERRNO_NOERR) {
-            napi_resolve_deferred(connectDfsCB->cbBase.cbInfo.env,
+            napi_status status = napi_resolve_deferred(connectDfsCB->cbBase.cbInfo.env,
                 connectDfsCB->cbBase.deferred, res[NARG_POS::SECOND]);
+            if (status != napi_ok) {
+                HILOGE("Internal BUG, cannot resolve promise for %{public}d", status);
+            }
         } else {
             res[NARG_POS::FIRST] = NError(connectDfsCB->status).GetNapiErr(connectDfsCB->cbBase.cbInfo.env);
-            napi_reject_deferred(connectDfsCB->cbBase.cbInfo.env, connectDfsCB->cbBase.deferred, res[NARG_POS::FIRST]);
+            napi_status status = napi_reject_deferred(connectDfsCB->cbBase.cbInfo.env,
+                connectDfsCB->cbBase.deferred, res[NARG_POS::FIRST]);
+            if (status != napi_ok) {
+                HILOGE("Internal BUG, cannot reject promise for %{public}d", status);
+            }
         }
     }
-
     napi_close_handle_scope(connectDfsCB->cbBase.cbInfo.env, scope);
     delete connectDfsCB;
     connectDfsCB = nullptr;
