@@ -29,7 +29,7 @@ using namespace std;
 using namespace OHOS::FileManagement::LibN;
 const std::string SCHEME_FILE = "file";
 
-static tuple<bool, string> ParsePath(napi_env env, const string &pathStr)
+static tuple<bool, string> ParsePath(const string &pathStr)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (pathStr.find("://") != string::npos) {
@@ -62,7 +62,7 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     string pathStr(pathPtr.get());
-    auto [succ, path] = ParsePath(env, pathStr);
+    auto [succ, path] = ParsePath(pathStr);
     if (!succ) {
         HILOGE("Failed to lstat file by invalid uri");
         NError(EINVAL).ThrowErr(env);
@@ -123,7 +123,7 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
     string pathStr(tmp.get());
     bool succ;
     std::string path;
-    std::tie(succ, path) = ParsePath(env, pathStr);
+    std::tie(succ, path) = ParsePath(pathStr);
     if (!succ) {
         HILOGE("Failed to lstat file by invalid uri");
         NError(EINVAL).ThrowErr(env);
