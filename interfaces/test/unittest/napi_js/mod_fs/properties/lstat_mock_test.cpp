@@ -148,7 +148,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: LstatMockTest_Sync_003
- * @tc.desc: Test function of Lstat::Sync interface with unsupported URI path for FAILURE when unsupported URI is provided.
+ * @tc.desc: Test function of Lstat::Sync interface with unsupported URI path for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -260,7 +260,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Async_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: LstatMockTest_Async_003
- * @tc.desc: Test function of Lstat::Async interface with unsupported URI path for FAILURE when unsupported URI is provided.
+ * @tc.desc: Test function of Lstat::Async interface with unsupported URI path for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
