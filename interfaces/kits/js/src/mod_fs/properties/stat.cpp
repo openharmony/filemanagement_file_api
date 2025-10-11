@@ -42,10 +42,9 @@ static tuple<bool, FileInfo> ParseJsFileByPath(napi_env env, std::unique_ptr<cha
             AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
             string realPath = fileUri.GetRealPath();
             auto pathPtr = std::make_unique<char[]>(realPath.length() + 1);
-            size_t length = realPath.length() + 1;
-            auto ret = strncpy_s(pathPtr.get(), length, realPath.c_str(), length - 1);
+            auto ret = strncpy_s(pathPtr.get(), realPath.length() + 1, realPath.c_str(), realPath.length());
             if (ret != EOK) {
-                HILOGE("failed to copy file path");
+                HILOGE("failed to copy file path, ret: %{public}d", ret);
                 NError(ENOMEM).ThrowErr(env);
                 return { false, FileInfo { false, {}, {} } };
             }

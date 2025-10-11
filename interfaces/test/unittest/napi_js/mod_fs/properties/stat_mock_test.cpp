@@ -66,7 +66,7 @@ void StatMockTest::TearDown(void)
 
 /**
  * @tc.name: StatMockTest_Sync_001
- * @tc.desc: Test Stat() interface with URI parameter for success cases.
+ * @tc.desc: Test function of Stat::Sync interface with URI parameter for FAILURE when uv_fs_stat fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -108,7 +108,7 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: StatMockTest_Sync_002
- * @tc.desc: Test Stat() interface with sandbox path for success cases.
+ * @tc.desc: Test function of Stat::Sync interface with sandbox path for FAILURE when uv_fs_stat fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -149,7 +149,7 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: StatMockTest_Sync_003
- * @tc.desc: Test Stat() interface with unsupported URI path to verify failure handling.
+ * @tc.desc: Test function of Stat::Sync interface with unsupported URI path for FAILURE when unsupported URI is provided.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
