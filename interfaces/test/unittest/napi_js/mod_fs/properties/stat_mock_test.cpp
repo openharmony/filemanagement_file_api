@@ -17,10 +17,10 @@
 
 #include <fcntl.h>
 #include <gtest/gtest.h>
+#include <securec.h>
 #include <sys/prctl.h>
 
 #include "libn_mock.h"
-#include "securec.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS {
@@ -83,9 +83,10 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_001, testing::ext::TestSize.Level1)
     auto uvMock = UvFsMock::GetMock();
     tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
         true,
-        [&]() {
+        [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
-            strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
         1
@@ -124,9 +125,10 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_002, testing::ext::TestSize.Level1)
     auto uvMock = UvFsMock::GetMock();
     tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
         true,
-        [&]() {
+        [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
-            strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
+            auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
+            EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
         1
@@ -161,12 +163,12 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_003, testing::ext::TestSize.Level1)
     NVal myOp(env, val);
     const char *testUri = "datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
-    auto uvMock = UvFsMock::GetMock();
     tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
         true,
-        [&]() {
+        [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
-            strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
         1
@@ -177,7 +179,6 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_003, testing::ext::TestSize.Level1)
 
     auto stat = Stat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "StatMockTest-end StatMockTest_Sync_003";

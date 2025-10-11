@@ -17,10 +17,10 @@
 
 #include <fcntl.h>
 #include <gtest/gtest.h>
+#include <securec.h>
 #include <sys/prctl.h>
 
 #include "libn_mock.h"
-#include "securec.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS {
@@ -83,9 +83,10 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_001, testing::ext::TestSize.Level1)
     auto uvMock = UvFsMock::GetMock();
     tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
         true,
-        [&]() {
+        [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
-            strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
         1
@@ -121,11 +122,12 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_002, testing::ext::TestSize.Level1)
     const char *testUri = "/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
-    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
+        tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
         true,
-        [&]() {
+        [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
-            strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
         1
@@ -163,9 +165,10 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_003, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
         true,
-        [&]() {
+        [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
-            strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
         1
@@ -179,6 +182,118 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_003, testing::ext::TestSize.Level1)
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_003";
+}
+
+/**
+ * @tc.name: LstatMockTest_Async_001
+ * @tc.desc: Test Lstat() interface with URI parameter for success cases.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatMockTest, LstatMockTest_Async_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatMockTest-begin LstatMockTest_Async_001";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    napi_value val = reinterpret_cast<napi_value>(0x1000);
+    NVal myOp(env, val);
+    const char *testUri = "file://com.example.statsupporturi/data/storage/el2/base/files/test.txt";
+    auto libnMock = LibnMock::GetMock();
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
+        true,
+        [&]() -> unique_ptr<char[]> {
+            auto ptr = make_unique<char[]>(strlen(testUri) + 1);
+            auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            EXPECT_EQ(ret, EOK);
+            return ptr;
+        }(),
+        1
+    };
+
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
+
+    auto stat = Lstat::Async(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(stat, nullptr);
+
+    GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Async_001";
+}
+
+/**
+ * @tc.name: LstatMockTest_Async_002
+ * @tc.desc: Test Stat() interface with sandbox path for success cases.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatMockTest, LstatMockTest_Async_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatMockTest-begin LstatMockTest_Async_002";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    napi_value val = reinterpret_cast<napi_value>(0x1000);
+    NVal myOp(env, val);
+    const char *testUri = "/data/storage/el2/base/files/test.txt";
+    auto libnMock = LibnMock::GetMock();
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
+        true,
+        [&]() -> unique_ptr<char[]> {
+            auto ptr = make_unique<char[]>(strlen(testUri) + 1);
+            auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            EXPECT_EQ(ret, EOK);
+            return ptr;
+        }(),
+        1
+    };
+
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
+
+    auto stat = Lstat::Async(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(stat, nullptr);
+    
+    GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Async_002";
+}
+
+/**
+ * @tc.name: LstatMockTest_Async_003
+ * @tc.desc: Test Stat() interface with sandbox path for success cases.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatMockTest, LstatMockTest_Async_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatMockTest-begin LstatMockTest_Async_003";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    napi_value val = reinterpret_cast<napi_value>(0x1000);
+    NVal myOp(env, val);
+
+    const char *testUri = "datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt";
+    auto libnMock = LibnMock::GetMock();
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
+        true,
+        [&]() -> unique_ptr<char[]> {
+            auto ptr = make_unique<char[]>(strlen(testUri) + 1);
+            auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
+            EXPECT_EQ(ret, EOK);
+            return ptr;
+        }(),
+        1
+    };
+
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
+
+    auto stat = Lstat::Async(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(stat, nullptr);
+
+    GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Async_003";
 }
 
 } // namespace Test

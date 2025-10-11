@@ -15,6 +15,7 @@
 #include "lstat.h"
 
 #include <memory>
+#include <securec.h>
 #include <tuple>
 
 #include "class_stat/stat_entity.h"
