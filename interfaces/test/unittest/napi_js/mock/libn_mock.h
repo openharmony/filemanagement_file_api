@@ -42,6 +42,9 @@ public:
     virtual napi_status napi_unwrap(napi_env env, napi_value js_object, void **result) = 0;
     virtual napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result) = 0;
     virtual napi_status napi_create_array(napi_env env, napi_value *result) = 0;
+    virtual napi_status napi_delete_reference(napi_env env, napi_ref ref) = 0;
+    virtual napi_status napi_get_reference_value(napi_env env, napi_ref ref, napi_value *result) = 0;
+    virtual napi_status napi_typeof(napi_env env, napi_value value, napi_valuetype *result) = 0;
 
     // n_error
     virtual void ThrowErr(napi_env env) = 0;
@@ -79,6 +82,9 @@ public:
     MOCK_METHOD(napi_status, napi_unwrap, (napi_env, napi_value, void **), (override));
     MOCK_METHOD(napi_status, napi_remove_wrap, (napi_env, napi_value, void **), (override));
     MOCK_METHOD(napi_status, napi_create_array, (napi_env, napi_value *), (override));
+    MOCK_METHOD(napi_status, napi_delete_reference, (napi_env, napi_ref), (override));
+    MOCK_METHOD(napi_status, napi_get_reference_value, (napi_env, napi_ref, napi_value *), (override));
+    MOCK_METHOD(napi_status, napi_typeof, (napi_env, napi_value, napi_valuetype *), (override));
 
     MOCK_METHOD(void, ThrowErr, (napi_env), (override));
     MOCK_METHOD(void, ThrowErr, (napi_env, int), (override));

@@ -59,7 +59,7 @@ napi_status napi_unwrap(napi_env env, napi_value js_object, void **result)
         return LibnMock::GetMock()->napi_unwrap(env, js_object, result);
     }
 
-    static napi_status (*realNapi)(napi_env, napi_value, void **) = []() {
+    static napi_status (*realNapiUnwrap)(napi_env, napi_value, void **) = []() {
         auto func = (napi_status(*)(napi_env, napi_value, void **))dlsym(RTLD_NEXT, "napi_unwrap");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real napi_unwrap: " << dlerror();
@@ -67,11 +67,11 @@ napi_status napi_unwrap(napi_env env, napi_value js_object, void **result)
         return func;
     }();
 
-    if (!realNapi) {
+    if (!realNapiUnwrap) {
         return napi_ok;
     }
 
-    return realNapi(env, js_object, result);
+    return realNapiUnwrap(env, js_object, result);
 }
 
 napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result)
@@ -80,7 +80,7 @@ napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result)
         return LibnMock::GetMock()->napi_remove_wrap(env, js_object, result);
     }
 
-    static napi_status (*realNapi)(napi_env, napi_value, void **) = []() {
+    static napi_status (*realNapiRemoveWrap)(napi_env, napi_value, void **) = []() {
         auto func = (napi_status(*)(napi_env, napi_value, void **))dlsym(RTLD_NEXT, "napi_remove_wrap");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real napi_remove_wrap: " << dlerror();
@@ -88,11 +88,11 @@ napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result)
         return func;
     }();
 
-    if (!realNapi) {
+    if (!realNapiRemoveWrap) {
         return napi_ok;
     }
 
-    return realNapi(env, js_object, result);
+    return realNapiRemoveWrap(env, js_object, result);
 }
 
 napi_status napi_create_array(napi_env env, napi_value *result)
@@ -114,6 +114,69 @@ napi_status napi_create_array(napi_env env, napi_value *result)
     }
 
     return realNapiCreateArray(env, result);
+}
+
+napi_status napi_delete_reference(napi_env env, napi_ref ref)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_delete_reference(env, ref);
+    }
+
+    static napi_status (*realNapiDeleteReference)(napi_env, napi_ref) = []() {
+        auto func = (napi_status(*)(napi_env, napi_ref))dlsym(RTLD_NEXT, "napi_delete_reference");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_delete_reference: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realNapiDeleteReference) {
+        return napi_ok;
+    }
+
+    return realNapiDeleteReference(env, ref);
+}
+
+napi_status napi_get_reference_value(napi_env env, napi_ref ref, napi_value *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_get_reference_value(env, ref, result);
+    }
+
+    static napi_status (*realNapiGetReferenceValue)(napi_env, napi_ref, napi_value *) = []() {
+        auto func = (napi_status(*)(napi_env, napi_ref, napi_value *))dlsym(RTLD_NEXT, "napi_get_reference_value");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_get_reference_value: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realNapiGetReferenceValue) {
+        return napi_ok;
+    }
+
+    return realNapiGetReferenceValue(env, ref, result);
+}
+
+napi_status napi_typeof(napi_env env, napi_value value, napi_valuetype *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_typeof(env, value, result);
+    }
+
+    static napi_status (*realNapTypeof)(napi_env, napi_value, napi_valuetype *) = []() {
+        auto func = (napi_status(*)(napi_env, napi_value, napi_valuetype *))dlsym(RTLD_NEXT, "napi_typeof");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_typeof: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realNapTypeof) {
+        return napi_ok;
+    }
+
+    return realNapTypeof(env, value, result);
 }
 
 } // extern "C"
@@ -313,7 +376,7 @@ void NError::ThrowErrAddData(napi_env env, int errCode, napi_value data)
         return LibnMock::GetMock()->ThrowErrAddData(env, errCode, data);
     }
 
-    static void (*realThrowErr)(napi_env, int, napi_value) = []() {
+    static void (*realThrowErrAddData)(napi_env, int, napi_value) = []() {
         auto func = (void (*)(napi_env, int, napi_value))dlsym(RTLD_NEXT, "ThrowErrAddData");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ThrowErrAddData: " << dlerror();
@@ -321,11 +384,11 @@ void NError::ThrowErrAddData(napi_env env, int errCode, napi_value data)
         return func;
     }();
 
-    if (!realThrowErr) {
+    if (!realThrowErrAddData) {
         return;
     }
 
-    return realThrowErr(env, errCode, data);
+    return realThrowErrAddData(env, errCode, data);
 }
 
 std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8String() const

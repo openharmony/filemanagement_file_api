@@ -145,12 +145,15 @@ ohos_unittest("ani_file_fs_mock_test") {
   ]
 
   sources = [
-    "${file_api_path}/interfaces/test/unittest/common_mock/c_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/dfs_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/eventfd_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/inotify_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/poll_mock.cpp",
-    "${file_api_path}/interfaces/test/unittest/common_mock/system_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/stdio_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/sys_file_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/sys_xattr_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/unistd_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/uv_err_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/uv_fs_mock.cpp",
     "mod_fs/class_file/fs_file_mock_test.cpp",
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
