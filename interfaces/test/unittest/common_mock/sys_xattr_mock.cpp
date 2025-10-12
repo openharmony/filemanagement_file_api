@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "system_mock.h"
+#include "sys_xattr_mock.h"
 
 #include <dlfcn.h>
 
@@ -22,29 +22,29 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 
-thread_local std::shared_ptr<SystemMock> SystemMock::systemMock = nullptr;
-thread_local bool SystemMock::mockable = false;
+thread_local std::shared_ptr<SysXattrMock> SysXattrMock::xattrMock = nullptr;
+thread_local bool SysXattrMock::mockable = false;
 
-std::shared_ptr<SystemMock> SystemMock::GetMock()
+std::shared_ptr<SysXattrMock> SysXattrMock::GetMock()
 {
-    if (systemMock == nullptr) {
-        systemMock = std::make_shared<SystemMock>();
+    if (xattrMock == nullptr) {
+        xattrMock = std::make_shared<SysXattrMock>();
     }
-    return systemMock;
+    return xattrMock;
 }
 
-void SystemMock::EnableMock()
+void SysXattrMock::EnableMock()
 {
     mockable = true;
 }
 
-void SystemMock::DisableMock()
+void SysXattrMock::DisableMock()
 {
-    systemMock = nullptr;
+    xattrMock = nullptr;
     mockable = false;
 }
 
-bool SystemMock::IsMockable()
+bool SysXattrMock::IsMockable()
 {
     return mockable;
 }
@@ -60,8 +60,8 @@ using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
 int setxattr(const char *path, const char *name, const void *value, size_t size, int flags)
 {
-    if (SystemMock::IsMockable()) {
-        return SystemMock::GetMock()->setxattr(path, name, value, size, flags);
+    if (SysXattrMock::IsMockable()) {
+        return SysXattrMock::GetMock()->setxattr(path, name, value, size, flags);
     }
 
     static int (*realSetxattr)(const char *, const char *, const void *, size_t, int) = []() {
@@ -81,8 +81,8 @@ int setxattr(const char *path, const char *name, const void *value, size_t size,
 
 ssize_t getxattr(const char *path, const char *name, void *value, size_t size)
 {
-    if (SystemMock::IsMockable()) {
-        return SystemMock::GetMock()->getxattr(path, name, value, size);
+    if (SysXattrMock::IsMockable()) {
+        return SysXattrMock::GetMock()->getxattr(path, name, value, size);
     }
 
     static ssize_t (*realGetxattr)(const char *, const char *, void *, size_t) = []() {
@@ -102,8 +102,8 @@ ssize_t getxattr(const char *path, const char *name, void *value, size_t size)
 
 ssize_t fgetxattr(int filedes, const char *name, void *value, size_t size)
 {
-    if (SystemMock::IsMockable()) {
-        return SystemMock::GetMock()->fgetxattr(filedes, name, value, size);
+    if (SysXattrMock::IsMockable()) {
+        return SysXattrMock::GetMock()->fgetxattr(filedes, name, value, size);
     }
 
     static ssize_t (*realFgetxattr)(int, const char *, void *, size_t) = []() {
@@ -121,25 +121,5 @@ ssize_t fgetxattr(int filedes, const char *name, void *value, size_t size)
     return realFgetxattr(filedes, name, value, size);
 }
 
-int flock(int fd, int operation)
-{
-    if (SystemMock::IsMockable()) {
-        return SystemMock::GetMock()->flock(fd, operation);
-    }
-
-    static int (*realFlock)(int, int) = []() {
-        auto func = (int (*)(int, int))dlsym(RTLD_NEXT, "flock");
-        if (!func) {
-            GTEST_LOG_(ERROR) << "Failed to resolve real flock: " << dlerror();
-        }
-        return func;
-    }();
-
-    if (!realFlock) {
-        return -1;
-    }
-
-    return realFlock(fd, operation);
-}
 } // extern "C"
 #endif

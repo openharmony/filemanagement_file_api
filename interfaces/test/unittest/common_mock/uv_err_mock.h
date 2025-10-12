@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,35 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYS_FILE_MOCK_H
-#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYS_FILE_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_UV_ERR_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_UV_ERR_MOCK_H
 
-#include <sys/file.h>
+#include "uv.h"
 
 #include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 
-class ISysFile {
+class IUvErr {
 public:
-    virtual ~ISysFile() = default;
-    virtual int flock(int fd, int operation) = 0;
+    virtual ~IUvErr() = default;
+    virtual const char *uv_err_name(int err) = 0;
 };
 
-class SysFileMock : public ISysFile {
+class UvErrMock : public IUvErr {
 public:
-    MOCK_METHOD(int, flock, (int fd, int operation), (override));
+    MOCK_METHOD(const char *, uv_err_name, (int err), (override));
 
 public:
-    static std::shared_ptr<SysFileMock> GetMock();
+    static std::shared_ptr<UvErrMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<SysFileMock> fileMock;
+    static thread_local std::shared_ptr<UvErrMock> uvErrMock;
     static thread_local bool mockable;
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
-#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYS_FILE_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_UV_ERR_MOCK_H

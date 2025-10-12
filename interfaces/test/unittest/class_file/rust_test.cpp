@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
 #include <fcntl.h>
 #include <string>
 #include <unistd.h>
+
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 #include "rust_file.h"
 
@@ -27,19 +28,41 @@ namespace ModuleFileIO {
 using namespace std;
 class RustTest : public testing::Test {
 public:
-    static void SetUpTestCase(void) {};
-    static void TearDownTestCase() {};
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 };
+
+void RustTest::SetUpTestCase(void)
+{
+    GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "RustTest");
+}
+
+void RustTest::TearDownTestCase(void)
+{
+    GTEST_LOG_(INFO) << "TearDownTestCase";
+}
+
+void RustTest::SetUp(void)
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void RustTest::TearDown(void)
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
+
 /**
-* @tc.name: RustTest_ReaderIterator_0001
-* @tc.desc: Test function of ReaderIterator() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGDNF
-*/
+ * @tc.name: RustTest_ReaderIterator_0001
+ * @tc.desc: Test function of ReaderIterator() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGDNF
+ */
 HWTEST_F(RustTest, RustTest_ReaderIterator_0001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_ReaderIterator_0001";
@@ -52,17 +75,17 @@ HWTEST_F(RustTest, RustTest_ReaderIterator_0001, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: RustTest_ReaderIterator_0002
-* @tc.desc: Test function of ReaderIterator() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGDNF
-*/
+ * @tc.name: RustTest_ReaderIterator_0002
+ * @tc.desc: Test function of ReaderIterator() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGDNF
+ */
 HWTEST_F(RustTest, RustTest_ReaderIterator_0002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_ReaderIterator_0002";
-    
+
     char filePath[] = "/data/test/rust_false.txt";
     void *iter = ReaderIterator(filePath);
     ASSERT_TRUE(errno == 2);
@@ -72,17 +95,17 @@ HWTEST_F(RustTest, RustTest_ReaderIterator_0002, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: RustTest_ReaderIterator_0003
-* @tc.desc: Test function of ReaderIterator() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGDNF
-*/
+ * @tc.name: RustTest_ReaderIterator_0003
+ * @tc.desc: Test function of ReaderIterator() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGDNF
+ */
 HWTEST_F(RustTest, RustTest_ReaderIterator_0003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_ReaderIterator_0003";
-    
+
     void *iter = ReaderIterator(nullptr);
     ASSERT_TRUE(errno = 22);
     EXPECT_TRUE(iter == nullptr);
@@ -91,13 +114,13 @@ HWTEST_F(RustTest, RustTest_ReaderIterator_0003, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: RustTest_NextLine_0001
-* @tc.desc: Test function of NextLine() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNF
-*/
+ * @tc.name: RustTest_NextLine_0001
+ * @tc.desc: Test function of NextLine() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNF
+ */
 HWTEST_F(RustTest, RustTest_NextLine_0001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_NextLine_0001";
@@ -115,13 +138,13 @@ HWTEST_F(RustTest, RustTest_NextLine_0001, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_NextLine_0002
-* @tc.desc: Test function of NextLine() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNF
-*/
+ * @tc.name: RustTest_NextLine_0002
+ * @tc.desc: Test function of NextLine() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNF
+ */
 HWTEST_F(RustTest, RustTest_NextLine_0002, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_NextLine_0002";
@@ -136,13 +159,13 @@ HWTEST_F(RustTest, RustTest_NextLine_0002, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_NextLine_0003
-* @tc.desc: Test function of NextLine() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGDNF
-*/
+ * @tc.name: RustTest_NextLine_0003
+ * @tc.desc: Test function of NextLine() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGDNF
+ */
 HWTEST_F(RustTest, RustTest_NextLine_0003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_NextLine_0003";
@@ -155,13 +178,13 @@ HWTEST_F(RustTest, RustTest_NextLine_0003, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: RustTest_Lseek_0001
-* @tc.desc: Test function of Lseek() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGCS3
-*/
+ * @tc.name: RustTest_Lseek_0001
+ * @tc.desc: Test function of Lseek() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGCS3
+ */
 HWTEST_F(RustTest, RustTest_Lseek_0001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0001";
@@ -178,13 +201,13 @@ HWTEST_F(RustTest, RustTest_Lseek_0001, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Lseek_0002
-* @tc.desc: Test function of Lseek() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGCS3
-*/
+ * @tc.name: RustTest_Lseek_0002
+ * @tc.desc: Test function of Lseek() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGCS3
+ */
 HWTEST_F(RustTest, RustTest_Lseek_0002, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0002";
@@ -204,13 +227,13 @@ HWTEST_F(RustTest, RustTest_Lseek_0002, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Lseek_0003
-* @tc.desc: Test function of Lseek() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGCS3
-*/
+ * @tc.name: RustTest_Lseek_0003
+ * @tc.desc: Test function of Lseek() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGCS3
+ */
 HWTEST_F(RustTest, RustTest_Lseek_0003, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0003";
@@ -227,13 +250,13 @@ HWTEST_F(RustTest, RustTest_Lseek_0003, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Lseek_0004
-* @tc.desc: Test function of Lseek() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGCS3
-*/
+ * @tc.name: RustTest_Lseek_0004
+ * @tc.desc: Test function of Lseek() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGCS3
+ */
 HWTEST_F(RustTest, RustTest_Lseek_0004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0004";
@@ -250,13 +273,13 @@ HWTEST_F(RustTest, RustTest_Lseek_0004, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: RustTest_Lseek_0005
-* @tc.desc: Test function of Lseek() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGCS3
-*/
+ * @tc.name: RustTest_Lseek_0005
+ * @tc.desc: Test function of Lseek() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGCS3
+ */
 HWTEST_F(RustTest, RustTest_Lseek_0005, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0005";
@@ -276,13 +299,13 @@ HWTEST_F(RustTest, RustTest_Lseek_0005, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Lseek_0006
-* @tc.desc: Test function of Lseek() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGCS3
-*/
+ * @tc.name: RustTest_Lseek_0006
+ * @tc.desc: Test function of Lseek() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGCS3
+ */
 HWTEST_F(RustTest, RustTest_Lseek_0006, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0006";
@@ -299,13 +322,13 @@ HWTEST_F(RustTest, RustTest_Lseek_0006, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Lseek_0007
-* @tc.desc: Test function of Lseek() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGCS3
-*/
+ * @tc.name: RustTest_Lseek_0007
+ * @tc.desc: Test function of Lseek() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGCS3
+ */
 HWTEST_F(RustTest, RustTest_Lseek_0007, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Lseek_0007";
@@ -318,13 +341,13 @@ HWTEST_F(RustTest, RustTest_Lseek_0007, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Mkdirs_0001
-* @tc.desc: Test function of Mkdirs() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNJ
-*/
+ * @tc.name: RustTest_Mkdirs_0001
+ * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNJ
+ */
 HWTEST_F(RustTest, RustTest_Mkdirs_0001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0001";
@@ -343,13 +366,13 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0001, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Mkdirs_0002
-* @tc.desc: Test function of Mkdirs() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNJ
-*/
+ * @tc.name: RustTest_Mkdirs_0002
+ * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNJ
+ */
 HWTEST_F(RustTest, RustTest_Mkdirs_0002, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0002";
@@ -368,13 +391,13 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0002, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Mkdirs_0003
-* @tc.desc: Test function of Mkdirs() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNJ
-*/
+ * @tc.name: RustTest_Mkdirs_0003
+ * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNJ
+ */
 HWTEST_F(RustTest, RustTest_Mkdirs_0003, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0003";
@@ -389,13 +412,13 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0003, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Mkdirs_0004
-* @tc.desc: Test function of Mkdirs() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNJ
-*/
+ * @tc.name: RustTest_Mkdirs_0004
+ * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNJ
+ */
 HWTEST_F(RustTest, RustTest_Mkdirs_0004, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0004";
@@ -408,13 +431,13 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0004, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Mkdirs_0005
-* @tc.desc: Test function of Mkdirs() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNJ
-*/
+ * @tc.name: RustTest_Mkdirs_0005
+ * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNJ
+ */
 HWTEST_F(RustTest, RustTest_Mkdirs_0005, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0005";
@@ -428,13 +451,13 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0005, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Mkdirs_0006
-* @tc.desc: Test function of Mkdirs() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNJ
-*/
+ * @tc.name: RustTest_Mkdirs_0006
+ * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNJ
+ */
 HWTEST_F(RustTest, RustTest_Mkdirs_0006, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0006";
@@ -448,13 +471,13 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0006, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Mkdirs_0007
-* @tc.desc: Test function of Mkdirs() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNJ
-*/
+ * @tc.name: RustTest_Mkdirs_0007
+ * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNJ
+ */
 HWTEST_F(RustTest, RustTest_Mkdirs_0007, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0007";
@@ -468,13 +491,13 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0007, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_Mkdirs_0008
-* @tc.desc: Test function of Mkdirs() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNJ
-*/
+ * @tc.name: RustTest_Mkdirs_0008
+ * @tc.desc: Test function of Mkdirs() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNJ
+ */
 HWTEST_F(RustTest, RustTest_Mkdirs_0008, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_Mkdirs_0008";
@@ -488,13 +511,13 @@ HWTEST_F(RustTest, RustTest_Mkdirs_0008, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_GetParent_0001
-* @tc.desc: Test function of GetParent() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 0
-* @tc.require: AR000IGDNL
-*/
+ * @tc.name: RustTest_GetParent_0001
+ * @tc.desc: Test function of GetParent() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 0
+ * @tc.require: AR000IGDNL
+ */
 HWTEST_F(RustTest, RustTest_GetParent_0001, testing::ext::TestSize.Level0)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_GetParent_0001";
@@ -512,13 +535,13 @@ HWTEST_F(RustTest, RustTest_GetParent_0001, testing::ext::TestSize.Level0)
 }
 
 /**
-* @tc.name: RustTest_GetParent_0002
-* @tc.desc: Test function of GetParent() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGDNL
-*/
+ * @tc.name: RustTest_GetParent_0002
+ * @tc.desc: Test function of GetParent() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGDNL
+ */
 HWTEST_F(RustTest, RustTest_GetParent_0002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_GetParent_0002";
@@ -531,13 +554,13 @@ HWTEST_F(RustTest, RustTest_GetParent_0002, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: RustTest_GetParent_0003
-* @tc.desc: Test function of GetParent() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGDNL
-*/
+ * @tc.name: RustTest_GetParent_0003
+ * @tc.desc: Test function of GetParent() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGDNL
+ */
 HWTEST_F(RustTest, RustTest_GetParent_0003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_GetParent_0003";
@@ -550,17 +573,17 @@ HWTEST_F(RustTest, RustTest_GetParent_0003, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: RustTest_StrFree_0001
-* @tc.desc: Test function of StrFree() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGDNF
-*/
+ * @tc.name: RustTest_StrFree_0001
+ * @tc.desc: Test function of StrFree() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGDNF
+ */
 HWTEST_F(RustTest, RustTest_StrFree_0001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_StrFree_0001";
-    
+
     const char fileStr[] = "/data/test/rust_test.txt";
     int fd = open(fileStr, O_RDWR);
     Str *str1 = GetParent(fd);
@@ -573,13 +596,13 @@ HWTEST_F(RustTest, RustTest_StrFree_0001, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: RustTest_StrFree_0002
-* @tc.desc: Test function of StrFree() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGDNF
-*/
+ * @tc.name: RustTest_StrFree_0002
+ * @tc.desc: Test function of StrFree() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGDNF
+ */
 HWTEST_F(RustTest, RustTest_StrFree_0002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_StrFree_0002";
@@ -592,13 +615,13 @@ HWTEST_F(RustTest, RustTest_StrFree_0002, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: RustTest_CutFileName_0000
-* @tc.desc: Test function of CutFileName() interface for SUCCESS.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-* @tc.require: AR000IGDNF
-*/
+ * @tc.name: RustTest_CutFileName_0000
+ * @tc.desc: Test function of CutFileName() interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ * @tc.require: AR000IGDNF
+ */
 HWTEST_F(RustTest, RustTest_CutFileName_0000, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_CutFileName_0000";
@@ -618,6 +641,6 @@ HWTEST_F(RustTest, RustTest_CutFileName_0000, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "RustTest-end RustTest_CutFileName_0000";
 }
 
-}
-}
-}
+} // namespace ModuleFileIO
+} // namespace FileManagement
+} // namespace OHOS

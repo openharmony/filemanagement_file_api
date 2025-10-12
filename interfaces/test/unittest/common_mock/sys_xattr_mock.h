@@ -13,43 +13,40 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYSTEM_MOCK_H
-#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYSTEM_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYS_XATTR_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYS_XATTR_MOCK_H
 
 #include <sys/xattr.h>
-#include <sys/file.h>
 
 #include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 
-class ISystem {
+class ISysXattr {
 public:
-    virtual ~ISystem() = default;
+    virtual ~ISysXattr() = default;
     virtual int setxattr(const char *path, const char *name, const void *value, size_t size, int flags) = 0;
     virtual ssize_t getxattr(const char *path, const char *name, void *value, size_t size) = 0;
     virtual ssize_t fgetxattr(int filedes, const char *name, void *value, size_t size) = 0;
-    virtual int flock(int fd, int operation) = 0;
 };
 
-class SystemMock : public ISystem {
+class SysXattrMock : public ISysXattr {
 public:
     MOCK_METHOD(
         int, setxattr, (const char *path, const char *name, const void *value, size_t size, int flags), (override));
     MOCK_METHOD(ssize_t, getxattr, (const char *path, const char *name, void *value, size_t size), (override));
     MOCK_METHOD(ssize_t, fgetxattr, (int filedes, const char *name, void *value, size_t size), (override));
-    MOCK_METHOD(int, flock, (int fd, int operation), (override));
 
 public:
-    static std::shared_ptr<SystemMock> GetMock();
+    static std::shared_ptr<SysXattrMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<SystemMock> systemMock;
+    static thread_local std::shared_ptr<SysXattrMock> xattrMock;
     static thread_local bool mockable;
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
-#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYSTEM_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_SYS_XATTR_MOCK_H
