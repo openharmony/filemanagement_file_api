@@ -15,6 +15,7 @@
 #include "stat.h"
 
 #include <memory>
+#include <securec.h>
 #include <tuple>
 #include <unistd.h>
 
@@ -28,12 +29,40 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+const std::string SCHEME_FILE = "file";
+
+static tuple<bool, FileInfo> ParseJsFileByPath(napi_env env, std::unique_ptr<char[]> path)
+{
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    string pathStr(path.get());
+    if (pathStr.find("://") != string::npos) {
+        Uri uri(pathStr);
+        string uriType = uri.GetScheme();
+        if (uriType == SCHEME_FILE) {
+            AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
+            string realPath = fileUri.GetRealPath();
+            auto pathPtr = std::make_unique<char[]>(realPath.length() + 1);
+            auto ret = strncpy_s(pathPtr.get(), realPath.length() + 1, realPath.c_str(), realPath.length());
+            if (ret != EOK) {
+                HILOGE("failed to copy file path, ret: %{public}d", ret);
+                NError(ENOMEM).ThrowErr(env);
+                return { false, FileInfo { false, {}, {} } };
+            }
+            return { true, FileInfo { true, move(pathPtr), {} } };
+        }
+        HILOGE("Failed to stat file by invalid uri");
+        NError(EINVAL).ThrowErr(env);
+        return { false, FileInfo { false, {}, {} } };
+    }
+#endif
+    return { true, FileInfo { true, move(path), {} } };
+}
 
 static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJsArg)
 {
     auto [isPath, path, ignore] = NVal(env, pathOrFdFromJsArg).ToUTF8StringPath();
     if (isPath) {
-        return { true, FileInfo { true, move(path), {} } };
+        return ParseJsFileByPath(env, std::move(path));
     }
     auto [isFd, fd] = NVal(env, pathOrFdFromJsArg).ToInt32();
     if (isFd) {

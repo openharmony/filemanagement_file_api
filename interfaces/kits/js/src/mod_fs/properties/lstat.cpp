@@ -15,6 +15,7 @@
 #include "lstat.h"
 
 #include <memory>
+#include <securec.h>
 #include <tuple>
 
 #include "class_stat/stat_entity.h"
@@ -26,6 +27,24 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
+const std::string SCHEME_FILE = "file";
+
+static tuple<bool, string> ParsePath(const string &pathStr)
+{
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    if (pathStr.find("://") != string::npos) {
+        Uri uri(pathStr);
+        string uriType = uri.GetScheme();
+        if (uriType == SCHEME_FILE) {
+            AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
+            string realPath = fileUri.GetRealPath();
+            return { true, realPath };
+        }
+        return { false, "" };
+    }
+#endif
+    return { true, pathStr };
+}
 
 napi_value Lstat::Sync(napi_env env, napi_callback_info info)
 {
@@ -42,7 +61,13 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
+    string pathStr(pathPtr.get());
+    auto [succ, path] = ParsePath(pathStr);
+    if (!succ) {
+        HILOGE("Failed to lstat file by invalid uri");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> lstat_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!lstat_req) {
@@ -50,7 +75,7 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    int ret = uv_fs_lstat(nullptr, lstat_req.get(), pathPtr.get(), nullptr);
+    int ret = uv_fs_lstat(nullptr, lstat_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to get stat of file, ret: %{public}d", ret);
         NError(ret).ThrowErr(env);
@@ -95,7 +120,15 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    string path = tmp.get();
+    string pathStr(tmp.get());
+    bool succ;
+    std::string path;
+    std::tie(succ, path) = ParsePath(pathStr);
+    if (!succ) {
+        HILOGE("Failed to lstat file by invalid uri");
+        NError(EINVAL).ThrowErr(env);
+        return nullptr;
+    }
     auto arg = CreateSharedPtr<StatEntity>();
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
