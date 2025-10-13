@@ -25,6 +25,9 @@ ohos_unittest("ani_file_environment_test") {
   testonly = true
 
   module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
@@ -50,11 +53,12 @@ ohos_unittest("ani_file_environment_test") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
+    "c_utils:utils",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "libuv:uv",
     "openssl:libcrypto_shared",
     "os_account:os_account_innerkits",
@@ -63,6 +67,8 @@ ohos_unittest("ani_file_environment_test") {
   ]
 
   defines = [ "private=public" ]
+
+  use_exceptions = true
 }
 
 ani_file_fs_core = [
@@ -124,6 +130,8 @@ ohos_unittest("ani_file_fs_mock_test") {
   testonly = true
 
   module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
 
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/common",
@@ -211,16 +219,16 @@ ohos_unittest("ani_file_fs_mock_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "libuv:uv",
+    "samgr:samgr_proxy",
   ]
 
   libs = [ "dl" ]
 
-  defines = [
-    "ENABLE_DISTRIBUTED_FILE_MOCK",
-    "private=public",
-  ]
+  defines = [ "private=public" ]
+
+  use_exceptions = true
 }
 
 ohos_unittest("ani_file_fs_test") {
@@ -304,11 +312,14 @@ ohos_unittest("ani_file_fs_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "libuv:uv",
+    "samgr:samgr_proxy",
   ]
 
   defines = [ "private=public" ]
+
+  use_exceptions = true
 }
 
 ani_file_hash_core = [
@@ -344,6 +355,7 @@ ohos_unittest("ani_file_hash_test") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "c_utils:utils",
     "googletest:gmock_main",
     "googletest:gtest_main",
@@ -353,6 +365,8 @@ ohos_unittest("ani_file_hash_test") {
   ]
 
   defines = [ "private=public" ]
+
+  use_exceptions = true
 }
 
 ani_file_securitylabel_core = [
@@ -381,12 +395,17 @@ ohos_unittest("ani_file_securitylabel_test") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "c_utils:utils",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "libuv:uv",
   ]
+
+  defines = [ "private=public" ]
+
+  use_exceptions = true
 }
 
 ani_file_statvfs_core = [
@@ -415,10 +434,15 @@ ohos_unittest("ani_file_statvfs_test") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "c_utils:utils",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "libuv:uv",
   ]
+
+  defines = [ "private=public" ]
+
+  use_exceptions = true
 }
