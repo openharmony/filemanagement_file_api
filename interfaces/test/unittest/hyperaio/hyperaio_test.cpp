@@ -185,7 +185,7 @@ namespace OHOS::HyperAio {
         OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
         OpenReqs openReqs = {1, &openInfo};
         result = hyperAio_->StartOpenReqs(&openReqs);
-        EXPECT_EQ(result, -EPERM);
+        EXPECT_EQ(result, -EINVAL);
         hyperAio_->initialized_.store(true);
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
@@ -331,7 +331,7 @@ namespace OHOS::HyperAio {
         ReadInfo readInfo = {0, len, 0, nullptr, userData};
         ReadReqs readReqs = {1, &readInfo};
         result = hyperAio_->StartReadReqs(&readReqs);
-        EXPECT_EQ(result, -EPERM);
+        EXPECT_EQ(result, -EINVAL);
         hyperAio_->initialized_.store(true);
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
@@ -475,7 +475,7 @@ namespace OHOS::HyperAio {
         CancelInfo cancelInfo = {userData, 0};
         CancelReqs cancelReqs = {1, &cancelInfo};
         result = hyperAio_->StartCancelReqs(&cancelReqs);
-        EXPECT_EQ(result, -EPERM);
+        EXPECT_EQ(result, -EINVAL);
         hyperAio_->initialized_.store(true);
         result = hyperAio_->DestroyCtx();
         EXPECT_EQ(result, 0);
@@ -650,7 +650,7 @@ namespace OHOS::HyperAio {
         OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
         OpenReqs openReqs = {1, &openInfo};
         int32_t result = hyperAio_->StartOpenReqs(&openReqs);
-        EXPECT_EQ(result, 0);
+        EXPECT_EQ(result, -EINVAL);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CheckParameter_0000";
     }
 

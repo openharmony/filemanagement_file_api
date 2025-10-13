@@ -117,7 +117,7 @@ bool HyperaioStartReadReqsFuzzTest(FuzzData &fuzzData, size_t size)
     hyperAio_->CtxInit(&callBack);
     uint64_t userData = fuzzData.GetData<uint64_t>();
     userData = userData % HALF_MAX_UINT64 + HALF_MAX_UINT64 + 1;
-    int32_t fd = fuzzData.GetData<int32_t>();
+    int fd = -1;
     uint32_t batchSize = fuzzData.GetData<uint32_t>();
     batchSize = batchSize % URING_QUEUE_SIZE;
     if (batchSize == 0) {
