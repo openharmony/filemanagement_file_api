@@ -33,7 +33,7 @@ const std::string SCHEME_FILE = "file";
 
 static tuple<bool, FileInfo> ParseJsFileByPath(napi_env env, std::unique_ptr<char[]> path)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     string pathStr(path.get());
     if (pathStr.find("://") != string::npos) {
         Uri uri(pathStr);
