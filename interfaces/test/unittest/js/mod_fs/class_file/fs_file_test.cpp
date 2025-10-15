@@ -275,4 +275,52 @@ HWTEST_F(FsFileTest, FsFileTest_GetPath_012, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_GetPath_012";
 }
 
+/**
+ * @tc.name: FsFileTest_TryLock_013
+ * @tc.desc: Test function of TryLock() interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_TryLock_013, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_TryLock_013";
+
+    std::unique_ptr<FsFile> fsFile;
+    fileEntity = std::make_unique<FileEntity>();
+    fileEntity->fd_ = nullptr;
+    fileEntity->path_ = "/data/test/file_test.txt";
+    fileEntity->uri_ = "";
+    fsFile = std::make_unique<FsFile>(std::move(fileEntity));
+
+    auto result = fsFile->TryLock(false);
+    EXPECT_EQ(result.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_TryLock_013";
+}
+
+/**
+ * @tc.name: FsFileTest_UnLock_014
+ * @tc.desc: Test function of UnLock() interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_UnLock_014, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_UnLock_014";
+
+    std::unique_ptr<FsFile> fsFile;
+    fileEntity = std::make_unique<FileEntity>();
+    fileEntity->fd_ = nullptr;
+    fileEntity->path_ = "/data/test/file_test.txt";
+    fileEntity->uri_ = "";
+    fsFile = std::make_unique<FsFile>(std::move(fileEntity));
+
+    auto result = fsFile->UnLock();
+    EXPECT_EQ(result.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_UnLock_014";
+}
+
 }
