@@ -1344,8 +1344,8 @@ export class RandomAccessFileInner implements RandomAccessFile {
   constructor(ptr: long) {
     if (this.nativePtr === 0) {
       this.nativePtr = ptr;
+      this.registerCleaner(this.nativePtr);
     }
-  this.registerCleaner(this.nativePtr)
   }
 
   registerCleaner(ptr: long): void {
@@ -1493,8 +1493,8 @@ export class FileInner implements File {
   constructor(ptr: long) {
     if (this.nativePtr === 0) {
       this.nativePtr = ptr;
+      this.registerCleaner(this.nativePtr);
     }
-    this.registerCleaner(this.nativePtr)
   }
   registerCleaner(ptr: long): void {
       this.cleaner = new Cleaner(ptr, "File");
@@ -1556,7 +1556,6 @@ export enum LocationType {
   CLOUD = 2
 }
 
-
 export class ReaderIteratorResultInner implements ReaderIteratorResult {
   done: boolean = false;
   value: string = "";
@@ -1578,8 +1577,8 @@ export class ReaderIteratorInner implements ReaderIterator {
   constructor(ptr: long) {
     if (this.nativePtr === 0) {
       this.nativePtr = ptr;
+      this.registerCleaner(this.nativePtr);
     }
-  this.registerCleaner(this.nativePtr)
   }
   registerCleaner(ptr: long): void {
       this.cleaner = new Cleaner(ptr, "ReaderIterator");
@@ -1635,8 +1634,8 @@ export class StatInner implements Stat {
   constructor(stat: long) {
     if (this.nativeStat === 0) {
       this.nativeStat = stat;
+      this.registerCleaner(this.nativeStat)
     }
-  this.registerCleaner(this.nativeStat)
   }
   registerCleaner(ptr: long): void {
       this.cleaner = new Cleaner(ptr, "Stat");
@@ -1680,8 +1679,8 @@ export class StreamInner implements Stream {
   constructor(ptr: long) {
     if (this.nativePtr === 0) {
       this.nativePtr = ptr;
+      this.registerCleaner(this.nativePtr)
     }
-  this.registerCleaner(this.nativePtr)
   }
   registerCleaner(ptr: long): void {
       this.cleaner = new Cleaner(ptr, "Stream");
@@ -2003,9 +2002,8 @@ export class AtomicFile {
   bindNativePtr(ptr: long): void {
       if (this.nativePtr === 0) {
           this.nativePtr = ptr;
+          this.registerCleaner(this.nativePtr)
       }
-      this.registerCleaner(this.nativePtr)
-
   }
 
   native constructor(path: string);

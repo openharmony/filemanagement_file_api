@@ -117,9 +117,8 @@ export class HashStreamImpl extends stream.Transform {
   bindNativePtr(ptr: long): void {
       if (this.nativePtr === 0) {
           this.nativePtr = ptr;
+          this.registerCleaner(this.nativePtr)
       }
-      this.registerCleaner(this.nativePtr)
-
   }
 
   native constructor(alg: string);
