@@ -154,6 +154,11 @@ FsResult<void> FsFile::TryLock(bool exclusive) const
         return FsResult<void>::Error(EINVAL);
     }
 
+    if (!fileEntity->fd_) {
+        HILOGE("File has been closed in TryLock possibly");
+        return FsResult<void>::Error(EINVAL);
+    }
+
     int ret = 0;
     auto mode = static_cast<uint32_t>(exclusive ? LOCK_EX : LOCK_SH);
     FileFsTrace traceFlock("Flock");
@@ -172,6 +177,11 @@ FsResult<void> FsFile::UnLock() const
     FileFsTrace traceUnLock("UnLock");
     if (!fileEntity) {
         HILOGE("Failed to get file entity");
+        return FsResult<void>::Error(EINVAL);
+    }
+
+    if (!fileEntity->fd_) {
+        HILOGE("File has been closed in UnLock possibly");
         return FsResult<void>::Error(EINVAL);
     }
 
