@@ -34,6 +34,6 @@ ohos_unittest("remote_uri_test") {
     "c_utils:utils",
     "c_utils:utilsbase",
     "googletest:gtest_main",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
   ]
 }
