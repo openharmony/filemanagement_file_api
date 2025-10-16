@@ -284,6 +284,7 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/stat_core_test.cpp",
     "mod_fs/properties/trans_listener_test.cpp",
     "mod_fs/properties/truncate_core_test.cpp",
+    "mod_fs/properties/unlink_core_test.cpp",
     "mod_fs/properties/utimes_core_test.cpp",
     "mod_fs/properties/write_core_test.cpp",
     "mod_fs/properties/xattr_core_test.cpp",
