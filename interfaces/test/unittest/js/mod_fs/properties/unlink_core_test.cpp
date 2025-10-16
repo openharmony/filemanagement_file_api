@@ -86,14 +86,14 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_002, testing::ext::TestSize.Lev
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
     auto result = mkdir(g_dirPath.c_str(), mode);
     if (result < 0) {
-        GTEST_LOG_(INFO) << "UnlinkCoreTest_DoUnlink_002 mkdir failed";
+        GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_002 mkdir failed! ret: " << result;
     }
 
     auto res = UnlinkCore::DoUnlink(g_dirPath);
 
     result = rmdir(g_dirPath.c_str());
     if (result < 0) {
-        GTEST_LOG_(INFO) << "UnlinkCoreTest_DoUnlink_002 rmdir failed";
+        GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_002 rmdir failed! ret: " << result;
     }
 
     EXPECT_EQ(res.IsSuccess(), false);
@@ -120,7 +120,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_003, testing::ext::TestSize.Lev
 
 /**
  * @tc.name: UnlinkCoreTest_DoUnlink_004
- * @tc.desc: Test function of UnlinkCore::DoUnlink interface for Failed.
+ * @tc.desc: Test function of UnlinkCore::DoUnlink interface for Successed.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -130,7 +130,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_004, testing::ext::TestSize.Lev
     GTEST_LOG_(INFO) << "UnlinkCoreTest-begin UnlinkCoreTest_DoUnlink_004";
     auto file = open(g_filePath.c_str(), O_CREAT | O_RDWR);
     if (file < 0) {
-        GTEST_LOG_(INFO) << "UnlinkCoreTest_DoUnlink_004 create failed";
+        GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_004 create failed! ret: " << file;
         EXPECT_GT(file, 0);
     }
     close(file);
