@@ -36,7 +36,7 @@ export default namespace hash {
   export function hash(path: string, algorithm: string): Promise<string> {
     return new Promise<string>((resolve: (result: string) => void, reject: (e: BusinessError<void>) => void) => {
       let promise = taskpool.execute(HashImpl.hashSync, path, algorithm);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         let res = ret as string;
         resolve(res);
       }).catch((e: Error): void => {
@@ -47,7 +47,7 @@ export default namespace hash {
 
   export function hash(path: string, algorithm: string, callback: AsyncCallback<string, void>): void {
     let promise = taskpool.execute(HashImpl.hashSync, path, algorithm);
-    promise.then((ret: NullishType) => {
+    promise.then((ret: Any) => {
       let e = new BusinessError<void>();
       e.code = 0;
       let res = ret as string;
