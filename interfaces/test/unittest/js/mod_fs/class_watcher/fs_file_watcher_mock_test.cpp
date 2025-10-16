@@ -157,15 +157,19 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_TryInitNotify_003, testing
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     // Set mock behaviors
     auto inotifyMock = InotifyMock::GetMock();
+    auto eventfdMock = EventfdMock::GetMock();
     EXPECT_CALL(*inotifyMock, inotify_init())
         .Times(1)
         .WillOnce(testing::SetErrnoAndReturn(EIO, UNINITIALIZED_NOTIFYFD));
+    EXPECT_CALL(*eventfdMock, eventfd(testing::_, testing::_)).Times(0);
     // Do testing
     bool result = watcher.TryInitNotify();
     // Verify results
     testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
+    testing::Mock::VerifyAndClearExpectations(eventfdMock.get());
     EXPECT_FALSE(result);
-    EXPECT_EQ(watcher.notifyFd_, UNINITIALIZED_NOTIFYFD);
+    EXPECT_EQ(watcher.notifyFd_, UNINITIALIZED_EVENTFD);
+    EXPECT_EQ(watcher.eventFd_, UNINITIALIZED_EVENTFD);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_TryInitNotify_003";
 }
 
@@ -184,17 +188,20 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_TryInitNotify_004, testing
     // Set mock behaviors
     auto inotifyMock = InotifyMock::GetMock();
     auto eventfdMock = EventfdMock::GetMock();
+    auto unistdMock = UnistdMock::GetMock();
     EXPECT_CALL(*inotifyMock, inotify_init()).Times(1).WillOnce(testing::Return(INITIALIZED_NOTIFYFD));
     EXPECT_CALL(*eventfdMock, eventfd(testing::_, testing::_))
         .Times(1)
         .WillOnce(testing::SetErrnoAndReturn(EIO, UNINITIALIZED_EVENTFD));
+    EXPECT_CALL(*unistdMock, close(testing::_)).Times(1).WillOnce(testing::Return(0));
     // Do testing
     bool result = watcher.TryInitNotify();
     // Verify results
     testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     testing::Mock::VerifyAndClearExpectations(eventfdMock.get());
+    testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     EXPECT_FALSE(result);
-    EXPECT_EQ(watcher.notifyFd_, INITIALIZED_NOTIFYFD);
+    EXPECT_EQ(watcher.notifyFd_, UNINITIALIZED_EVENTFD);
     EXPECT_EQ(watcher.eventFd_, UNINITIALIZED_EVENTFD);
     GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_TryInitNotify_004";
 }

@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
+#include "n_class.h"
+
 #include <string>
 #include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
-#include "n_class.h"
 #include "napi_mock.h"
 
 namespace OHOS {
@@ -30,30 +32,34 @@ using namespace std;
 
 class NClassTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void) {}
-    static void TearDownTestSuite(void) {}
-
-    void SetUp() override
-    {
-        mock_ = std::make_unique<NapiMock>();
-        scopedMock_ = std::make_unique<ScopedNapiMock>(mock_.get());
-    }
-
-    void TearDown() override
-    {
-        scopedMock_.reset();
-        mock_.reset();
-    }
-
-    NapiMock &GetMock()
-    {
-        return *mock_;
-    }
-
-private:
-    std::unique_ptr<NapiMock> mock_;
-    std::unique_ptr<ScopedNapiMock> scopedMock_;
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
 };
+
+void NClassTest::SetUpTestCase()
+{
+    GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "NClassTest");
+    NapiMock::EnableMock();
+}
+
+void NClassTest::TearDownTestCase()
+{
+    NapiMock::DisableMock();
+    GTEST_LOG_(INFO) << "TearDownTestCase";
+}
+
+void NClassTest::SetUp()
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void NClassTest::TearDown()
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
 
 /**
  * @tc.name: NClassTest_DefineClass_001
@@ -73,7 +79,8 @@ HWTEST_F(NClassTest, NClassTest_DefineClass_001, testing::ext::TestSize.Level1)
 
     // Set mock behaviors
     napi_value expectedClass = reinterpret_cast<napi_value>(0x1234);
-    EXPECT_CALL(GetMock(), napi_define_class(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_define_class(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
                                testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<7>(expectedClass), testing::Return(napi_ok)));
 
@@ -81,6 +88,7 @@ HWTEST_F(NClassTest, NClassTest_DefineClass_001, testing::ext::TestSize.Level1)
     auto [succ, classValue] = NClass::DefineClass(env, className, callback, std::move(props));
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_TRUE(succ);
     EXPECT_EQ(classValue, expectedClass);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_DefineClass_001";
@@ -97,19 +105,22 @@ HWTEST_F(NClassTest, NClassTest_DefineClass_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NClassTest-begin NClassTest_DefineClass_002";
     // Prepare test parameters
-    napi_env env = reinterpret_cast<napi_env>(0x1000); // 分配内存给env，保证创建一个非空的env。
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
     string className = "NClassTest_DefineClass_002";
     napi_callback callback = reinterpret_cast<napi_callback>(0x1122);
     vector<napi_property_descriptor> props = {};
 
     // Set mock behaviors
-    EXPECT_CALL(GetMock(), napi_define_class(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
-                               testing::_, testing::_)).WillOnce(testing::Return(napi_generic_failure));
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_define_class(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
+                               testing::_, testing::_))
+        .WillOnce(testing::Return(napi_generic_failure));
 
     // Do testing
     auto [succ, classValue] = NClass::DefineClass(env, className, callback, std::move(props));
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_FALSE(succ);
     EXPECT_EQ(classValue, nullptr);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_DefineClass_002";
@@ -130,18 +141,20 @@ HWTEST_F(NClassTest, NClassTest_SaveClass_001, testing::ext::TestSize.Level1)
     string className = "NClassTest_SaveClass_001";
 
     // Set mock behaviors
-    napi_value classValue = reinterpret_cast<napi_value>(0x1234); // 分配内存给value，保证创建一个非空的value。
-    napi_ref mockReference = reinterpret_cast<napi_ref>(0x2345); // 分配内存给ref，保证创建一个非空的ref。
-    EXPECT_CALL(GetMock(), napi_create_reference(testing::_, testing::_, testing::_, testing::_))
+    napi_value classValue = reinterpret_cast<napi_value>(0x1234);
+    napi_ref mockReference = reinterpret_cast<napi_ref>(0x2345);
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_create_reference(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<3>(mockReference), testing::Return(napi_ok)));
 
-    EXPECT_CALL(GetMock(), napi_add_env_cleanup_hook(testing::_, testing::_, testing::_))
+    EXPECT_CALL(*napiMock, napi_add_env_cleanup_hook(testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_ok));
 
     // Do testing
     bool succ = NClass::SaveClass(env, className, classValue);
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_TRUE(succ);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_SaveClass_001";
 }
@@ -162,13 +175,15 @@ HWTEST_F(NClassTest, NClassTest_SaveClass_002, testing::ext::TestSize.Level1)
     napi_value classValue = reinterpret_cast<napi_value>(0x1234);
 
     // Set mock behaviors
-    EXPECT_CALL(GetMock(), napi_create_reference(testing::_, testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_create_reference(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_generic_failure));
 
     // Do testing
     bool succ = NClass::SaveClass(env, className, classValue);
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_FALSE(succ);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_SaveClass_002";
 }
@@ -187,10 +202,14 @@ HWTEST_F(NClassTest, NClassTest_CleanClass_001, testing::ext::TestSize.Level1)
     napi_env env = reinterpret_cast<napi_env>(0x1000);
 
     // Set mock behaviors
-    EXPECT_CALL(GetMock(), napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_ok));
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_ok));
 
     // Do testing
     NClass::CleanClass(env);
+
+    // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_CleanClass_001";
 }
 
@@ -212,14 +231,15 @@ HWTEST_F(NClassTest, NClassTest_InstantiateClass_001, testing::ext::TestSize.Lev
     // Set mock behaviors
     napi_value classValue = reinterpret_cast<napi_value>(0x1234);
     napi_ref mockReference = reinterpret_cast<napi_ref>(0x2345);
-    EXPECT_CALL(GetMock(), napi_create_reference(testing::_, testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_create_reference(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<3>(mockReference), testing::Return(napi_ok)));
 
-    EXPECT_CALL(GetMock(), napi_get_reference_value(testing::_, testing::_, testing::_))
+    EXPECT_CALL(*napiMock, napi_get_reference_value(testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_ok));
 
     napi_value expectedInstance = reinterpret_cast<napi_value>(0x3456);
-    EXPECT_CALL(GetMock(), napi_new_instance(testing::_, testing::_, testing::_, testing::_, testing::_))
+    EXPECT_CALL(*napiMock, napi_new_instance(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<4>(expectedInstance), testing::Return(napi_ok)));
 
     // Prepare instance
@@ -230,6 +250,7 @@ HWTEST_F(NClassTest, NClassTest_InstantiateClass_001, testing::ext::TestSize.Lev
     auto instance = NClass::InstantiateClass(env, className, emptyArgs);
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_EQ(instance, expectedInstance);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_InstantiateClass_001";
 }
@@ -275,10 +296,11 @@ HWTEST_F(NClassTest, NClassTest_InstantiateClass_003, testing::ext::TestSize.Lev
     // Set mock behaviors
     napi_value classValue = reinterpret_cast<napi_value>(0x1234);
     napi_ref mockReference = reinterpret_cast<napi_ref>(0x2345);
-    EXPECT_CALL(GetMock(), napi_create_reference(testing::_, testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_create_reference(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<3>(mockReference), testing::Return(napi_ok)));
 
-    EXPECT_CALL(GetMock(), napi_get_reference_value(testing::_, testing::_, testing::_))
+    EXPECT_CALL(*napiMock, napi_get_reference_value(testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_invalid_arg));
 
     // Prepare instance
@@ -289,6 +311,7 @@ HWTEST_F(NClassTest, NClassTest_InstantiateClass_003, testing::ext::TestSize.Lev
     auto instance = NClass::InstantiateClass(env, className, emptyArgs);
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_EQ(instance, nullptr);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_InstantiateClass_003";
 }
@@ -311,13 +334,14 @@ HWTEST_F(NClassTest, NClassTest_InstantiateClass_004, testing::ext::TestSize.Lev
     // Set mock behaviors
     napi_value classValue = reinterpret_cast<napi_value>(0x1234);
     napi_ref mockReference = reinterpret_cast<napi_ref>(0x2345);
-    EXPECT_CALL(GetMock(), napi_create_reference(testing::_, testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_create_reference(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<3>(mockReference), testing::Return(napi_ok)));
 
-    EXPECT_CALL(GetMock(), napi_get_reference_value(testing::_, testing::_, testing::_))
+    EXPECT_CALL(*napiMock, napi_get_reference_value(testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_ok));
 
-    EXPECT_CALL(GetMock(), napi_new_instance(testing::_, testing::_, testing::_, testing::_, testing::_))
+    EXPECT_CALL(*napiMock, napi_new_instance(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_generic_failure));
 
     // Prepare instance
@@ -328,6 +352,7 @@ HWTEST_F(NClassTest, NClassTest_InstantiateClass_004, testing::ext::TestSize.Lev
     auto instance = NClass::InstantiateClass(env, className, emptyArgs);
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_EQ(instance, nullptr);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_InstantiateClass_004";
 }
@@ -348,13 +373,15 @@ HWTEST_F(NClassTest, NClassTest_GetEntityOf_001, testing::ext::TestSize.Level1)
     void *expectedEntity = reinterpret_cast<void *>(0x23456);
 
     // Set mock behaviors
-    EXPECT_CALL(GetMock(), napi_unwrap(testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(expectedEntity), testing::Return(napi_ok)));
 
     // Do testing
     auto entity = NClass::GetEntityOf<string>(env, object);
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_EQ(entity, expectedEntity);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_GetEntityOf_001";
 }
@@ -416,13 +443,15 @@ HWTEST_F(NClassTest, NClassTest_GetEntityOf_004, testing::ext::TestSize.Level1)
     napi_value object = reinterpret_cast<napi_value>(0x1234);
 
     // Set mock behaviors
-    EXPECT_CALL(GetMock(), napi_unwrap(testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_generic_failure));
 
     // Do testing
     auto entity = NClass::GetEntityOf<string>(env, object);
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_EQ(entity, nullptr);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_GetEntityOf_004";
 }
@@ -443,13 +472,15 @@ HWTEST_F(NClassTest, NClassTest_SetEntityFor_001, testing::ext::TestSize.Level1)
     string entity = "NClassTest_SetEntityFor_001";
 
     // Set mock behaviors
-    EXPECT_CALL(GetMock(), napi_wrap(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_wrap(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_ok));
 
     // Do testing
     bool result = NClass::SetEntityFor<string>(env, object, make_unique<string>(entity));
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_SetEntityFor_001";
 }
@@ -470,13 +501,15 @@ HWTEST_F(NClassTest, NClassTest_SetEntityFor_002, testing::ext::TestSize.Level1)
     string entity = "NClassTest_SetEntityFor_001";
 
     // Set mock behaviors
-    EXPECT_CALL(GetMock(), napi_wrap(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_wrap(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_generic_failure));
 
     // Do testing
     bool result = NClass::SetEntityFor<string>(env, object, make_unique<string>(entity));
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_FALSE(result);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_SetEntityFor_002";
 }
@@ -497,13 +530,15 @@ HWTEST_F(NClassTest, NClassTest_RemoveEntityOfFinal_001, testing::ext::TestSize.
     void *expectedEntity = reinterpret_cast<void *>(0x23456);
 
     // Set mock behaviors
-    EXPECT_CALL(GetMock(), napi_remove_wrap(testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_remove_wrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(expectedEntity), testing::Return(napi_ok)));
 
     // Do testing
     auto entity = NClass::RemoveEntityOfFinal<string>(env, object);
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_EQ(entity, expectedEntity);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_RemoveEntityOfFinal_001";
 }
@@ -565,13 +600,15 @@ HWTEST_F(NClassTest, NClassTest_RemoveEntityOfFinal_004, testing::ext::TestSize.
     napi_value object = reinterpret_cast<napi_value>(0x1234);
 
     // Set mock behaviors
-    EXPECT_CALL(GetMock(), napi_remove_wrap(testing::_, testing::_, testing::_))
+    auto napiMock = NapiMock::GetMock();
+    EXPECT_CALL(*napiMock, napi_remove_wrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(napi_generic_failure));
 
     // Do testing
     auto entity = NClass::RemoveEntityOfFinal<string>(env, object);
 
     // Verify results
+    testing::Mock::VerifyAndClearExpectations(napiMock.get());
     EXPECT_EQ(entity, nullptr);
     GTEST_LOG_(INFO) << "NClassTest-end NClassTest_RemoveEntityOfFinal_004";
 }
