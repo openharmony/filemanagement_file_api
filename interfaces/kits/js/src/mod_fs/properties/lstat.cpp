@@ -31,7 +31,7 @@ const std::string SCHEME_FILE = "file";
 
 static tuple<bool, string> ParsePath(const string &pathStr)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     if (pathStr.find("://") != string::npos) {
         Uri uri(pathStr);
         string uriType = uri.GetScheme();
