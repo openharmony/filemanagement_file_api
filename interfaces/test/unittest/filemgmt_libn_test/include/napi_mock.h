@@ -16,9 +16,9 @@
 #ifndef INTERFACES_TEST_UNITTEST_FILEMGMT_LIBN_TEST_INCLUDE_NAPI_MOCK_H
 #define INTERFACES_TEST_UNITTEST_FILEMGMT_LIBN_TEST_INCLUDE_NAPI_MOCK_H
 
-#pragma once
-#include <gmock/gmock.h>
 #include "n_napi.h"
+
+#include <gmock/gmock.h>
 
 namespace OHOS {
 namespace FileManagement {
@@ -73,37 +73,20 @@ public:
 
     MOCK_METHOD(napi_status, napi_wrap,
         (napi_env env, napi_value js_object, void *native_object, napi_finalize finalize_cb, void *finalize_hint,
-            napi_ref *result), (override));
+            napi_ref *result),
+        (override));
 
     MOCK_METHOD(napi_status, napi_remove_wrap, (napi_env env, napi_value js_object, void **result), (override));
-};
 
-NapiMock &GetNapiMock();
-void SetNapiMock(NapiMock *mock);
-void ResetNapiMock();
-
-class ScopedNapiMock {
 public:
-    explicit ScopedNapiMock(NapiMock *mock) : mock_(mock)
-    {
-        SetNapiMock(mock_);
-    }
-
-    ~ScopedNapiMock()
-    {
-        ResetNapiMock();
-    }
-
-    NapiMock &GetMock()
-    {
-        return *mock_;
-    }
-
-    ScopedNapiMock(const ScopedNapiMock &) = delete;
-    ScopedNapiMock &operator=(const ScopedNapiMock &) = delete;
+    static std::shared_ptr<NapiMock> GetMock();
+    static void EnableMock();
+    static void DisableMock();
+    static bool IsMockable();
 
 private:
-    NapiMock *mock_;
+    static thread_local std::shared_ptr<NapiMock> napiMock;
+    static thread_local bool mockable;
 };
 
 } // namespace Test

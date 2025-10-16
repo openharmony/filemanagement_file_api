@@ -41,6 +41,4 @@ ohos_unittest("filemgmt_libn_test") {
     "ipc:ipc_single",
     "napi:ace_napi",
   ]
-
-  defines = [ "ENABLE_NAPI_MOCK" ]
 }

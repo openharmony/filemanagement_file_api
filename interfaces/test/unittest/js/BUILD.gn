@@ -25,6 +25,9 @@ ohos_unittest("ani_file_environment_test") {
   testonly = true
 
   module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
@@ -64,6 +67,8 @@ ohos_unittest("ani_file_environment_test") {
   ]
 
   defines = [ "private=public" ]
+
+  use_exceptions = true
 }
 
 ani_file_fs_core = [
@@ -124,6 +129,8 @@ ohos_unittest("ani_file_fs_mock_test") {
   testonly = true
 
   module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
 
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/common",
@@ -212,14 +219,12 @@ ohos_unittest("ani_file_fs_mock_test") {
     "hisysevent:libhisysevent",
     "ipc:ipc_single",
     "libuv:uv",
+    "samgr:samgr_proxy",
   ]
 
   libs = [ "dl" ]
 
-  defines = [
-    "ENABLE_DISTRIBUTED_FILE_MOCK",
-    "private=public",
-  ]
+  defines = [ "private=public" ]
 
   use_exceptions = true
 }
@@ -229,6 +234,8 @@ ohos_unittest("ani_file_fs_test") {
   testonly = true
 
   module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
 
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/common",
@@ -304,6 +311,7 @@ ohos_unittest("ani_file_fs_test") {
     "hisysevent:libhisysevent",
     "ipc:ipc_single",
     "libuv:uv",
+    "samgr:samgr_proxy",
   ]
 
   defines = [ "private=public" ]
@@ -349,6 +357,8 @@ ohos_unittest("ani_file_hash_test") {
     "openssl:libcrypto_shared",
   ]
 
+  defines = [ "private=public" ]
+
   use_exceptions = true
 }
 
@@ -385,6 +395,8 @@ ohos_unittest("ani_file_securitylabel_test") {
     "hilog:libhilog",
     "libuv:uv",
   ]
+
+  defines = [ "private=public" ]
 
   use_exceptions = true
 }
@@ -424,6 +436,8 @@ ohos_unittest("ani_file_statvfs_test") {
     "hilog:libhilog",
     "libuv:uv",
   ]
+
+  defines = [ "private=public" ]
 
   use_exceptions = true
 }

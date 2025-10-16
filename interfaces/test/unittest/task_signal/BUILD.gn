@@ -40,8 +40,5 @@ ohos_unittest("task_signal_test") {
     "ipc:ipc_napi",
   ]
 
-  defines = [
-    "ENABLE_DISTRIBUTED_FILE_MOCK",
-    "private=public",
-  ]
+  defines = [ "private=public" ]
 }
