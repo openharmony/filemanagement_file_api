@@ -79,4 +79,112 @@ HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_001, testing::ext::TestSiz
     GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_001";
 }
 
+/**
+ * @tc.name: LstatCoreMockTest_DoLstat_002
+ * @tc.desc: Test function of LstatCore::DoLstat interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_002";
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = LstatCore::DoLstat("file://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_002";
+}
+
+/**
+ * @tc.name: LstatCoreMockTest_DoLstat_003
+ * @tc.desc: Test function of LstatCore::DoLstat interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_003";
+
+    auto uvMock = UvFsMock::GetMock();
+
+    auto res = LstatCore::DoLstat("datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_003";
+}
+/**
+ * @tc.name: LstatCoreMockTest_DoLstat_004
+ * @tc.desc: Test function of LstatCore::DoLstat interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_004, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_004";
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = LstatCore::DoLstat("/data/storage/el2/base/files/test.txt");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_004";
+}
+
+/**
+ * @tc.name: LstatCoreMockTest_DoLstat_005
+ * @tc.desc: Test function of LstatCore::DoLstat interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_005, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_005";
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = LstatCore::DoLstat("file://docs/storage/Users/currentUser/Download/DocumentViewPicker1.txt");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_005";
+}
+
+/**
+ * @tc.name: LstatCoreMockTest_DoLstat_006
+ * @tc.desc: Test function of LstatCore::DoLstat interface for FALSE.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_006";
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = LstatCore::DoLstat("file://media/Photo/1/IMG_1609518878_000/IMG_202112_003259.jpg");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_006";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

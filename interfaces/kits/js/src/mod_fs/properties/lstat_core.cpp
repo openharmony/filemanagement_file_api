@@ -20,15 +20,39 @@
 
 #include <securec.h>
 
+#include "file_uri.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "stat_instantiator.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
+const std::string SCHEME_FILE = "file";
+
+static tuple<bool, string> ParsePath(const string &pathStr)
+{
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    if (pathStr.find("://") != string::npos) {
+        Uri uri(pathStr);
+        string uriType = uri.GetScheme();
+        if (uriType == SCHEME_FILE) {
+            AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
+            string realPath = fileUri.GetRealPath();
+            return { true, realPath };
+        }
+        return { false, "" };
+    }
+#endif
+    return { true, pathStr };
+}
 
 FsResult<FsStat *> LstatCore::DoLstat(const string &path)
 {
+    auto [succ, resolvedPath] = ParsePath(path);
+    if (!succ) {
+        HILOGE("Failed to lstat file by invalid uri");
+        return FsResult<FsStat *>::Error(EINVAL);
+    }
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> lstat_req = { new (std::nothrow) uv_fs_t,
         FsUtils::FsReqCleanup };
     if (!lstat_req) {

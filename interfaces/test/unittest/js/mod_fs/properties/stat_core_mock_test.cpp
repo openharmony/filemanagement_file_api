@@ -180,4 +180,111 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_004, testing::ext::TestSize.L
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_004";
 }
 
+/**
+ * @tc.name: StatCoreMockTest_DoStat_005
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE when is path.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_005, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_005";
+
+    FileInfo fileinfo;
+    fileinfo.fdg = nullptr;
+    auto succ = SetPathForFileInfo(fileinfo, "file://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+    ASSERT_TRUE(succ);
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_005";
+}
+
+/**
+ * @tc.name: StatCoreMockTest_DoStat_006
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE when is path.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_006";
+
+    FileInfo fileinfo;
+    fileinfo.fdg = nullptr;
+    auto succ = SetPathForFileInfo(fileinfo, "datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+    ASSERT_TRUE(succ);
+
+    auto uvMock = UvFsMock::GetMock();
+
+    auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_006";
+}
+
+/**
+ * @tc.name: StatCoreMockTest_DoStat_007
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE when is path.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_007, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_007";
+
+    FileInfo fileinfo;
+    fileinfo.fdg = nullptr;
+    auto succ = SetPathForFileInfo(fileinfo, "file://docs/storage/Users/currentUser/Download/DocumentViewPicker1.txt");
+    ASSERT_TRUE(succ);
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_007";
+}
+
+/**
+ * @tc.name: StatCoreMockTest_DoStat_008
+ * @tc.desc: Test function of StatCore::DoStat interface for FALSE when is path.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_008, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_007";
+
+    FileInfo fileinfo;
+    fileinfo.fdg = nullptr;
+    auto succ = SetPathForFileInfo(fileinfo, "file://media/Photo/1/IMG_1609518878_000/IMG_202112_003259.jpg");
+    ASSERT_TRUE(succ);
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_008";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
