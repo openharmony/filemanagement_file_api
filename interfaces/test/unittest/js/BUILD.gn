@@ -283,6 +283,7 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/read_core_test.cpp",
     "mod_fs/properties/read_lines_core_test.cpp",
     "mod_fs/properties/read_text_core_test.cpp",
+    "mod_fs/properties/rename_core_test.cpp",
     "mod_fs/properties/rmdir_core_test.cpp",
     "mod_fs/properties/stat_core_test.cpp",
     "mod_fs/properties/trans_listener_test.cpp",
