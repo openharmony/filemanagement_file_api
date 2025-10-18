@@ -55,7 +55,7 @@ void RenameCoreTest::TearDown(void)
 
 /**
  * @tc.name: RenameCoreTest_DoRename_001
- * @tc.desc: Test function of RenameCore::DoRename interface for FALSE.
+ * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -74,11 +74,20 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_001, testing::ext::TestSize.Lev
 
     auto res = RenameCore::DoRename(src, dest);
 
-    EXPECT_EQ(res.IsSuccess(), true);
-
     auto result = remove(dest.c_str());
     if (result < 0) {
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_001 remove file failed! ret: " << result << ", errno: " << errno;
+    }
+
+    EXPECT_EQ(res.IsSuccess(), true);
+
+    bool srcFileExists = (access(src.c_str(), F_OK) == 0);
+    if (srcFileExists) {
+        GTEST_LOG_(WARNING) << "RenameCoreTest_DoRename_001: Source file still exists after rename operation";
+        int removeResult = remove(src.c_str());
+        if (removeResult < 0) {
+            GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_001 remove file failed! errno: " << errno;
+        }
     }
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_001";
@@ -128,7 +137,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_002, testing::ext::TestSize.Lev
 
 /**
  * @tc.name: RenameCoreTest_DoRename_003
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -194,6 +203,15 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_004, testing::ext::TestSize.Lev
 
     EXPECT_EQ(res.IsSuccess(), true);
 
+    bool srcDirExists = (access(src.c_str(), F_OK) == 0);
+    if (srcDirExists) {
+        GTEST_LOG_(WARNING) << "RenameCoreTest_DoRename_004: Source dir still exists after rename operation";
+        int removeResult = rmdir(src.c_str());
+        if (removeResult < 0) {
+            GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_004 rmdir failed! errno: " << errno;
+        }
+    }
+
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_004";
 }
 
@@ -233,7 +251,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_005, testing::ext::TestSize.Lev
 
 /**
  * @tc.name: RenameCoreTest_DoRename_006
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -273,7 +291,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_006, testing::ext::TestSize.Lev
 
 /**
  * @tc.name: RenameCoreTest_DoRename_007
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
