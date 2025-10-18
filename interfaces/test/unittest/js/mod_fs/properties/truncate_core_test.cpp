@@ -16,6 +16,7 @@
 #include "truncate_core.h"
 
 #include <gtest/gtest.h>
+#include <securec.h>
 
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -88,6 +89,352 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_002, testing::ext::TestSi
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_002";
+}
+
+/**
+ * @tc.name: TruncateCoreTest_DoTruncate_003
+ * @tc.desc: Test function of TruncateCore::DoTruncate interface for SUCCESS with valid fd and default length (0).
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_003";
+    
+    string filePath =  "/data/storage/el2/TruncateCoreTestFile.txt";
+    string fileContent =  "Hello, this is a test file content for truncate testing!";
+
+    int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_003 create failed! errno: " << errno;
+        EXPECT_GT(fd, 0);
+    }
+    
+    ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
+    
+    FileInfo fileInfo;
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
+
+    auto res = TruncateCore::DoTruncate(fileInfo);
+    EXPECT_EQ(res.IsSuccess(), true);
+
+    struct stat st;
+    int statResult = fstat(fd, &st);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 0);
+
+    close(fd);
+    auto result = remove(filePath.c_str());
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_003 remove file failed! errno: " << errno;
+    }
+
+    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_003";
+}
+
+/**
+ * @tc.name: TruncateCoreTest_DoTruncate_004
+ * @tc.desc: Test function of TruncateCore::DoTruncate interface for SUCCESS with valid fd and specific length.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_004, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_004";
+    
+    string filePath =  "/data/storage/el2/TruncateCoreTestFile.txt";
+    string fileContent =  "Hello, this is a test file content for truncate testing!";
+    
+    int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 create failed! errno: " << errno;
+        EXPECT_GT(fd, 0);
+    }
+    
+    ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
+    
+    FileInfo fileInfo;
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
+    std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(10));
+
+    auto res = TruncateCore::DoTruncate(fileInfo, len);
+    EXPECT_EQ(res.IsSuccess(), true);
+
+    struct stat st;
+    int statResult = fstat(fd, &st);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 10);
+
+    close(fd);
+    auto result = remove(filePath.c_str());
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
+    }
+
+    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_004";
+}
+
+/**
+ * @tc.name: TruncateCoreTest_DoTruncate_005
+ * @tc.desc: Test function of TruncateCore::DoTruncate interface for SUCCESS - extend file with larger length.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_005, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_005";
+    
+    string filePath =  "/data/storage/el2/TruncateCoreTestFile.txt";
+    string fileContent =  "Hello, this is a test file content for truncate testing!";
+
+    int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_005 create failed! errno: " << errno;
+        EXPECT_GT(fd, 0);
+    }
+    
+    ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
+    
+    FileInfo fileInfo;
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
+    std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(100));
+
+    auto res = TruncateCore::DoTruncate(fileInfo, len);
+    EXPECT_EQ(res.IsSuccess(), true);
+
+    struct stat st;
+    int statResult = fstat(fd, &st);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 100);
+
+    close(fd);
+    auto result = remove(filePath.c_str());
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_005 remove file failed! errno: " << errno;
+    }
+
+    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_005";
+}
+
+/**
+ * @tc.name: TruncateCoreTest_DoTruncate_006
+ * @tc.desc: Test function of TruncateCore::DoTruncate interface for SUCCESS with file path.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_006";
+    
+    string filePath =  "/data/storage/el2/TruncateCoreTestFile.txt";
+    string fileContent =  "Hello, this is a test file content for truncate testing!";
+
+    int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_006 create failed! errno: " << errno;
+        EXPECT_GT(fd, 0);
+    }
+    
+    ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
+    close(fd);
+
+    FileInfo fileInfo;
+    size_t pathLen = filePath.length() + 1;
+    fileInfo.isPath = true;
+    fileInfo.path = std::make_unique<char[]>(pathLen);
+    auto result = strcpy_s(fileInfo.path.get(), pathLen, filePath.c_str());
+    if (result != 0) {
+        GTEST_LOG_(ERROR) << "strcpy_s failed with error: " << result;
+        EXPECT_EQ(result, 0);
+    }
+
+    auto res = TruncateCore::DoTruncate(fileInfo);
+    EXPECT_EQ(res.IsSuccess(), true);
+
+    struct stat st;
+    int statResult = stat(filePath.c_str(), &st);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 0);
+
+    result = remove(filePath.c_str());
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_006 remove file failed! errno: " << errno;
+    }
+
+    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_006";
+}
+
+/**
+ * @tc.name: TruncateCoreTest_DoTruncate_007
+ * @tc.desc: Test function of TruncateCore::DoTruncate interface for SUCCESS with file path and specific length.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_007";
+    
+    string filePath =  "/data/storage/el2/TruncateCoreTestFile.txt";
+    string fileContent =  "Hello, this is a test file content for truncate testing!";
+
+    int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_007 create failed! errno: " << errno;
+        EXPECT_GT(fd, 0);
+    }
+
+    ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
+    close(fd);
+
+    FileInfo fileInfo;
+    size_t pathLen = filePath.length() + 1;
+    fileInfo.isPath = true;
+    fileInfo.path = std::make_unique<char[]>(pathLen);
+    auto result = strcpy_s(fileInfo.path.get(), pathLen, filePath.c_str());
+    if (result != 0) {
+        GTEST_LOG_(ERROR) << "strcpy_s failed with error: " << result;
+        EXPECT_EQ(result, 0);
+    }
+    std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(15));
+
+    auto res = TruncateCore::DoTruncate(fileInfo, len);
+    EXPECT_EQ(res.IsSuccess(), true);
+
+    struct stat st;
+    int statResult = stat(filePath.c_str(), &st);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 15);
+
+    result = remove(filePath.c_str());
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
+    }
+
+    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_007";
+}
+
+/**
+ * @tc.name: TruncateCoreTest_DoTruncate_008
+ * @tc.desc: Test function of TruncateCore::DoTruncate interface for FAILURE with non-existent file path.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_008, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_008";
+    
+    string nonExistentPath = "/data/storage/el2/NonExistentTruncateTestFile.txt";
+
+    auto result = remove(nonExistentPath.c_str());
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
+    }
+
+    FileInfo fileInfo;
+    size_t pathLen = nonExistentPath.length() + 1;
+    fileInfo.isPath = true;
+    fileInfo.path = std::make_unique<char[]>(pathLen);
+    result = strcpy_s(fileInfo.path.get(), pathLen, nonExistentPath.c_str());
+    if (result != 0) {
+        GTEST_LOG_(ERROR) << "strcpy_s failed with error: " << result;
+        EXPECT_EQ(result, 0);
+    }
+
+    auto res = TruncateCore::DoTruncate(fileInfo);
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_008";
+}
+
+/**
+ * @tc.name: TruncateCoreTest_DoTruncate_009
+ * @tc.desc: Test function of TruncateCore::DoTruncate interface for FAILURE with directory path.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_009, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_009";
+    
+    string dirPath = "/data/storage/el2/TruncateTestDir";
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+
+    auto result = mkdir(dirPath.c_str(), mode);
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_009 mkdir failed! errno: " << errno;
+    }
+
+    FileInfo fileInfo;
+    size_t pathLen = dirPath.length() + 1;
+    fileInfo.isPath = true;
+    fileInfo.path = std::make_unique<char[]>(pathLen);
+    result = strcpy_s(fileInfo.path.get(), pathLen, dirPath.c_str());
+    if (result != 0) {
+        GTEST_LOG_(ERROR) << "strcpy_s failed with error: " << result;
+        EXPECT_EQ(result, 0);
+    }
+
+    auto res = TruncateCore::DoTruncate(fileInfo);
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    result = rmdir(dirPath.c_str());
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_009 rmdir failed! errno: " << errno;
+    }
+
+    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_009";
+}
+
+/**
+ * @tc.name: TruncateCoreTest_DoTruncate_010
+ * @tc.desc: Test function of TruncateCore::DoTruncate interface for FAILURE with read-only file.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "TruncateCoreTest-begin TruncateCoreTest_DoTruncate_010";
+    
+    string filePath =  "/data/storage/el2/TruncateCoreTestFile.txt";
+    string fileContent =  "Hello, this is a test file content for truncate testing!";
+
+    int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0444);
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 create failed! errno: " << errno;
+        EXPECT_GT(fd, 0);
+    }
+    
+    ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
+    close(fd);
+
+    chmod(filePath.c_str(), 0444);
+
+    FileInfo fileInfo;
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(open(filePath.c_str(), O_RDONLY));
+
+    auto res = TruncateCore::DoTruncate(fileInfo);
+    EXPECT_EQ(res.IsSuccess(), false);
+
+    auto result = remove(filePath.c_str());
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
+    }
+
+    GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
