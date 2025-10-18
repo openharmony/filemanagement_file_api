@@ -81,8 +81,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_001, testing::ext::TestSize.Lev
 
     EXPECT_EQ(res.IsSuccess(), true);
 
-    struct stat fileStat;
-    bool srcFileExists = (stat(src.c_str(), &fileStat) == 0);
+    bool srcFileExists = (access(src.c_str(), F_OK) == 0);
     if (srcFileExists) {
         GTEST_LOG_(WARNING) << "RenameCoreTest_DoRename_001: Source file still exists after rename operation";
         int removeResult = remove(src.c_str());
@@ -138,7 +137,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_002, testing::ext::TestSize.Lev
 
 /**
  * @tc.name: RenameCoreTest_DoRename_003
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -204,8 +203,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_004, testing::ext::TestSize.Lev
 
     EXPECT_EQ(res.IsSuccess(), true);
 
-    struct stat dirStat;
-    bool srcDirExists = (stat(src.c_str(), &dirStat) == 0);
+    bool srcDirExists = (access(src.c_str(), F_OK) == 0);
     if (srcDirExists) {
         GTEST_LOG_(WARNING) << "RenameCoreTest_DoRename_004: Source dir still exists after rename operation";
         int removeResult = rmdir(src.c_str());
@@ -253,7 +251,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_005, testing::ext::TestSize.Lev
 
 /**
  * @tc.name: RenameCoreTest_DoRename_006
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -293,7 +291,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_006, testing::ext::TestSize.Lev
 
 /**
  * @tc.name: RenameCoreTest_DoRename_007
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
