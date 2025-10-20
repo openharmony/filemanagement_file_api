@@ -111,7 +111,6 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_003, testing::ext::TestSi
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
-    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
     
     FileInfo fileInfo;
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
@@ -127,6 +126,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_003, testing::ext::TestSi
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_003 remove file failed! errno: " << errno;
     }
 
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
     EXPECT_EQ(res.IsSuccess(), true);
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 0);
@@ -155,7 +155,6 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_004, testing::ext::TestSi
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
-    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
     
     FileInfo fileInfo;
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
@@ -172,6 +171,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_004, testing::ext::TestSi
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
     }
 
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
     EXPECT_EQ(res.IsSuccess(), true);
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 10);
@@ -201,7 +201,6 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_005, testing::ext::TestSi
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
-    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
     
     FileInfo fileInfo;
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
@@ -218,6 +217,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_005, testing::ext::TestSi
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_005 remove file failed! errno: " << errno;
     }
 
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
     EXPECT_EQ(res.IsSuccess(), true);
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 100);
@@ -246,7 +246,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSi
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
-    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
+
     close(fd);
 
     FileInfo fileInfo;
@@ -269,6 +269,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSi
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_006 remove file failed! errno: " << errno;
     }
 
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
     EXPECT_EQ(res.IsSuccess(), true);
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 0);
@@ -297,7 +298,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSi
     }
 
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
-    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
+
     close(fd);
 
     FileInfo fileInfo;
@@ -321,6 +322,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSi
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
     }
 
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
     EXPECT_EQ(res.IsSuccess(), true);
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 15);
@@ -424,7 +426,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
-    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
+
     close(fd);
 
     chmod(filePath.c_str(), 0444);
@@ -439,6 +441,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
     }
 
+    EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
     EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
