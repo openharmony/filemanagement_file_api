@@ -111,7 +111,10 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_003, testing::ext::TestSi
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
-    
+    if (written != static_cast<ssize_t>(fileContent.length())) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 write failed,! errno: " << errno;
+    }
+
     FileInfo fileInfo;
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
 
@@ -155,7 +158,10 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_004, testing::ext::TestSi
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
-    
+    if (written != static_cast<ssize_t>(fileContent.length())) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 write failed,! errno: " << errno;
+    }
+
     FileInfo fileInfo;
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
     std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(10));
@@ -201,7 +207,10 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_005, testing::ext::TestSi
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
-    
+    if (written != static_cast<ssize_t>(fileContent.length())) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 write failed,! errno: " << errno;
+    }
+
     FileInfo fileInfo;
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
     std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(100));
@@ -246,6 +255,9 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSi
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
+    if (written != static_cast<ssize_t>(fileContent.length())) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 write failed,! errno: " << errno;
+    }
 
     close(fd);
 
@@ -298,6 +310,9 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSi
     }
 
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
+    if (written != static_cast<ssize_t>(fileContent.length())) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 write failed,! errno: " << errno;
+    }
 
     close(fd);
 
@@ -418,27 +433,43 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
     
     string filePath =  "/data/storage/el2/TruncateCoreTestFile.txt";
     string fileContent =  "Hello, this is a test file content for truncate testing!";
+    bool cleanupNeeded = true;
 
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0444);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 create failed! errno: " << errno;
         EXPECT_GT(fd, 0);
+        cleanupNeeded = false;
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
+    if (written != static_cast<ssize_t>(fileContent.length())) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 write failed,! errno: " << errno;
+    }
 
     close(fd);
 
-    chmod(filePath.c_str(), 0444);
+    if (chmod(filePath.c_str(), 0444) != 0) {
+        GTEST_LOG_(ERROR) << "Failed to set file permissions: " << errno;
+    }
 
     FileInfo fileInfo;
-    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(open(filePath.c_str(), O_RDONLY));
+    int readFd = open(filePath.c_str(), O_RDONLY);
+    if (readFd < 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 failed to open file for reading: " << errno;
+    }
+    fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(readFd);
 
     auto res = TruncateCore::DoTruncate(fileInfo);
 
-    auto result = remove(filePath.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
+    fileInfo.fdg.reset();
+
+    if (cleanupNeeded) {
+        chmod(filePath.c_str(), 0644);
+        auto result = remove(filePath.c_str());
+        if (result < 0) {
+            GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 remove file failed! errno: " << errno;
+        }
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
