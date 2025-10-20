@@ -174,7 +174,7 @@ static int HandleLocalCheck(const string &path, int mode)
             return 0;
         }
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("Path is %{public}s, the attributea value of the file is %{public}c", path.c_str(), val[0]);
+            HILOGD("Path is %{private}s, the attributea value of the file is %{public}c", path.c_str(), val[0]);
         }
         return ENOENT;
     }
@@ -198,7 +198,7 @@ static int HandleLocalCheck(const string &path, int mode)
 static int AccessCore(const string &path, int mode, int flag = DEFAULT_FLAG)
 {
     if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s, mode is %{public}d", path.c_str(), mode);
+        HILOGD("Path is %{private}s, mode is %{public}d", path.c_str(), mode);
     }
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {
@@ -407,7 +407,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
         HILOGD("Failed to unlink with path ret %{public}d", ret);
         NError(ret).ThrowErr(env);
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("Path is %{public}s", path.get());
+            HILOGD("Path is %{private}s", path.get());
         }
         return nullptr;
     }
@@ -540,7 +540,7 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
     if (err) {
         err.ThrowErr(env);
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("Path is %{public}s, recursion is %{public}d", path.get(), recursion);
+            HILOGD("Path is %{private}s, recursion is %{public}d", path.get(), recursion);
         }
         return nullptr;
     }

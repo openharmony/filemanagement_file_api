@@ -236,8 +236,8 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
     }
 
     if (FileApiDebug::isLogEnabled) {
-        HILOGD("Src isPath is %{public}d, Src is %{public}s, Dest isPath is %{public}d, Dest is %{public}s", src.isPath,
-            src.path.get(), dest.isPath, dest.path.get());
+        HILOGD("Src isPath is %{public}d, Src is %{private}s, Dest isPath is %{public}d, Dest is %{private}s",
+            src.isPath, src.path.get(), dest.isPath, dest.path.get());
     }
     if (src.isPath && dest.isPath) {
         auto err = IsAllPath(src, dest);

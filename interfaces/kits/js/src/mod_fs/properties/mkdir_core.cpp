@@ -107,7 +107,7 @@ FsResult<void> MkdirCore::DoMkdir(const std::string &path, std::optional<bool> r
     auto err = MkdirExec(path, mkdirRecursion, hasOption);
     if (err) {
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("Path is %{public}s, mkdirRecursion is %{public}d", path.c_str(), mkdirRecursion);
+            HILOGD("Path is %{private}s, mkdirRecursion is %{public}d", path.c_str(), mkdirRecursion);
         }
         return FsResult<void>::Error(err);
     }

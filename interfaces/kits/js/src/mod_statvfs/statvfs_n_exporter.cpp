@@ -53,7 +53,7 @@ napi_value GetFreeSizeSync(napi_env env, napi_callback_info info)
     if (ret != 0) {
         NError(errno).ThrowErr(env);
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("Path is %{public}s", path.get());
+            HILOGD("Path is %{private}s", path.get());
         }
         return nullptr;
     }

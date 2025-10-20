@@ -43,7 +43,7 @@ FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
     if (ret < 0) {
         HILOGD("Failed to unlink with path, ret is %{public}d", ret);
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("Src is %{public}s", src.c_str());
+            HILOGD("Src is %{private}s", src.c_str());
         }
         return FsResult<void>::Error(ret);
     }
