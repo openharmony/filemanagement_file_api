@@ -69,7 +69,7 @@ void TransListenerCoreTest::TearDownTestCase(void)
     rmdir(g_path.c_str());
     auto res = RmdirentCore::DoRmdirent(g_distPath);
     if (!res.IsSuccess()) {
-        GTEST_LOG_(INFO) << "TearDownTestCase Rmdir failed";
+        GTEST_LOG_(INFO) << "TearDownTestCase Rmdir failed errno = " << errno;
         EXPECT_TRUE(false);
     }
     GTEST_LOG_(INFO) << "TearDownTestCase";
