@@ -117,18 +117,19 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_003, testing::ext::TestSi
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(fd);
 
     auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), true);
 
     struct stat st;
     int statResult = fstat(fd, &st);
-    EXPECT_EQ(statResult, 0);
-    EXPECT_EQ(st.st_size, 0);
-
     close(fd);
+
     auto result = remove(filePath.c_str());
     if (result < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_003 remove file failed! errno: " << errno;
     }
+
+    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 0);
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_003";
 }
@@ -161,18 +162,20 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_004, testing::ext::TestSi
     std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(10));
 
     auto res = TruncateCore::DoTruncate(fileInfo, len);
-    EXPECT_EQ(res.IsSuccess(), true);
 
     struct stat st;
     int statResult = fstat(fd, &st);
-    EXPECT_EQ(statResult, 0);
-    EXPECT_EQ(st.st_size, 10);
-
     close(fd);
+
     auto result = remove(filePath.c_str());
     if (result < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
     }
+
+    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 10);
+    
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_004";
 }
@@ -205,18 +208,19 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_005, testing::ext::TestSi
     std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(100));
 
     auto res = TruncateCore::DoTruncate(fileInfo, len);
-    EXPECT_EQ(res.IsSuccess(), true);
 
     struct stat st;
     int statResult = fstat(fd, &st);
-    EXPECT_EQ(statResult, 0);
-    EXPECT_EQ(st.st_size, 100);
-
     close(fd);
+
     auto result = remove(filePath.c_str());
     if (result < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_005 remove file failed! errno: " << errno;
     }
+
+    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 100);
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_005";
 }
@@ -256,17 +260,18 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSi
     }
 
     auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), true);
 
     struct stat st;
     int statResult = stat(filePath.c_str(), &st);
-    EXPECT_EQ(statResult, 0);
-    EXPECT_EQ(st.st_size, 0);
 
     result = remove(filePath.c_str());
     if (result < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_006 remove file failed! errno: " << errno;
     }
+
+    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 0);
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_006";
 }
@@ -307,17 +312,18 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSi
     std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(15));
 
     auto res = TruncateCore::DoTruncate(fileInfo, len);
-    EXPECT_EQ(res.IsSuccess(), true);
 
     struct stat st;
     int statResult = stat(filePath.c_str(), &st);
-    EXPECT_EQ(statResult, 0);
-    EXPECT_EQ(st.st_size, 15);
 
     result = remove(filePath.c_str());
     if (result < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
     }
+
+    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_EQ(statResult, 0);
+    EXPECT_EQ(st.st_size, 15);
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_007";
 }
@@ -386,12 +392,13 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_009, testing::ext::TestSi
     }
 
     auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), false);
 
     result = rmdir(dirPath.c_str());
     if (result < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_009 rmdir failed! errno: " << errno;
     }
+
+    EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_009";
 }
@@ -426,12 +433,13 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(open(filePath.c_str(), O_RDONLY));
 
     auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), false);
 
     auto result = remove(filePath.c_str());
     if (result < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
     }
+
+    EXPECT_EQ(res.IsSuccess(), false);
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
 }
