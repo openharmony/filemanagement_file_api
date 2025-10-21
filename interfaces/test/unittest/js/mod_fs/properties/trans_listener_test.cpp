@@ -67,15 +67,17 @@ void TransListenerCoreTest::SetUpTestCase(void)
 
 void TransListenerCoreTest::TearDownTestCase(void)
 {
-    auto result = rmdir(g_path.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "TearDownTestCase Rmdir failed! ret: " << result << ", errno: " << errno;
+    error_code ec;
+    bool success = filesystem::remove_all(g_path, ec);
+        if (!success || ec) {
+        GTEST_LOG_(ERROR) << "TearDownTestCase remove g_path failed error = " << ec.message();
+        EXPECT_TRUE(false);
     }
 
-    error_code ec;
-    bool success = filesystem::remove_all(g_distPath, ec);
+    ec.clear();
+    success = filesystem::remove_all(g_distPath, ec);
     if (!success || ec) {
-        GTEST_LOG_(ERROR) << "TearDownTestCase Rmdir failed error = " << ec.message();
+        GTEST_LOG_(ERROR) << "TearDownTestCase remove g_distPath failed error = " << ec.message();
         EXPECT_TRUE(false);
     }
     GTEST_LOG_(INFO) << "TearDownTestCase";
