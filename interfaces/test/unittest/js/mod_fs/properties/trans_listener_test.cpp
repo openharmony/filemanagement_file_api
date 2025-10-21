@@ -16,9 +16,13 @@
 #include "trans_listener_core.h"
 
 #include <fcntl.h>
+#include <filesystem>
 #include <gtest/gtest.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "copy_core.h"
+#include "rmdir_core.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -26,6 +30,7 @@ using namespace testing::ext;
 using namespace std;
 
 string g_path = "/data/test/TransListenerCoreTest.txt";
+string g_distPath = "/data/storage/el2/distributedfiles/";
 const string FILE_MANAGER_AUTHORITY = "docs";
 const string MEDIA_AUTHORITY = "media";
 
@@ -45,6 +50,14 @@ public:
 void TransListenerCoreTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+    if (access(g_distPath.c_str(), F_OK)) {
+        if (mkdir(g_distPath.c_str(), mode) < 0) {
+            GTEST_LOG_(INFO) << "SetUpTestCase Mkdir failed errno = " << errno;
+            EXPECT_TRUE(false);
+        }
+    }
+
     int32_t fd = open(g_path.c_str(), O_CREAT | O_RDWR, 0644);
     if (fd < 0) {
         EXPECT_TRUE(false);
@@ -54,7 +67,19 @@ void TransListenerCoreTest::SetUpTestCase(void)
 
 void TransListenerCoreTest::TearDownTestCase(void)
 {
-    rmdir(g_path.c_str());
+    error_code ec;
+    bool success = filesystem::remove_all(g_path, ec);
+        if (!success || ec) {
+        GTEST_LOG_(ERROR) << "TearDownTestCase remove g_path failed error = " << ec.message();
+        EXPECT_TRUE(false);
+    }
+
+    ec.clear();
+    success = filesystem::remove_all(g_distPath, ec);
+    if (!success || ec) {
+        GTEST_LOG_(ERROR) << "TearDownTestCase remove g_distPath failed error = " << ec.message();
+        EXPECT_TRUE(false);
+    }
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -233,7 +258,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_PrepareCopySession_002, te
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
 
     int result = TransListenerCore::PrepareCopySession(srcUri, "destUri", nullptr, info, disSandboxPath);
-    EXPECT_EQ(result, ENOENT);
+    EXPECT_EQ(result, EIO);
 
     GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_PrepareCopySession_002";
 }
@@ -257,7 +282,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_PrepareCopySession_003, te
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
 
     int result = TransListenerCore::PrepareCopySession(srcUri, "destUri", nullptr, info, disSandboxPath);
-    EXPECT_EQ(result, ENOENT);
+    EXPECT_EQ(result, EIO);
 
     GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_PrepareCopySession_003";
 }
@@ -281,7 +306,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_PrepareCopySession_004, te
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
 
     int result = TransListenerCore::PrepareCopySession(srcUri, "destUri", nullptr, info, disSandboxPath);
-    EXPECT_EQ(result, ENOENT);
+    EXPECT_EQ(result, EIO);
 
     GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_PrepareCopySession_004";
 }
@@ -310,7 +335,7 @@ HWTEST_F(TransListenerCoreTest, TransListenerCoreTest_PrepareCopySession_005, te
     string srcUri = "http://translistener.preparecopysession?networkid=AD125AD1CF";
 
     int result = TransListenerCore::PrepareCopySession(srcUri, "destUri", nullptr, info, disSandboxPath);
-    EXPECT_EQ(result, ENOENT);
+    EXPECT_EQ(result, EIO);
 
     GTEST_LOG_(INFO) << "TransListenerCoreTest-end TransListenerCoreTest_PrepareCopySession_005";
 }
