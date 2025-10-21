@@ -481,13 +481,11 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
     
     string filePath =  "/data/storage/el2/TruncateCoreTestFile.txt";
     string fileContent =  "Hello, this is a test file content for truncate testing!";
-    bool cleanupNeeded = true;
 
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0444);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 create failed! errno: " << errno;
         EXPECT_GT(fd, 0);
-        cleanupNeeded = false;
         GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
         return;
     }
@@ -496,11 +494,9 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
     if (written != static_cast<ssize_t>(fileContent.length())) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 write failed! errno: " << errno;
         close(fd);
-        if (cleanupNeeded) {
-            auto result = remove(filePath.c_str());
-            if (result != 0) {
-                GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 remove file failed! errno: " << errno;
-            }
+        auto result = remove(filePath.c_str());
+        if (result != 0) {
+            GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 remove file failed! errno: " << errno;
         }
         GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
         return;
@@ -508,20 +504,14 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
 
     close(fd);
 
-    if (chmod(filePath.c_str(), 0444) != 0) {
-        GTEST_LOG_(ERROR) << "Failed to set file permissions: " << errno;
-    }
-
     FileInfo fileInfo;
     int readFd = open(filePath.c_str(), O_RDONLY);
     if (readFd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 failed to open file for reading: " << errno;
-        if (cleanupNeeded) {
-            chmod(filePath.c_str(), 0644);
-            auto result = remove(filePath.c_str());
-            if (result != 0) {
-                GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 remove file failed! errno: " << errno;
-            }
+        chmod(filePath.c_str(), 0644);
+        auto result = remove(filePath.c_str());
+        if (result != 0) {
+            GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 remove file failed! errno: " << errno;
         }
         GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
         return;
@@ -530,14 +520,12 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
 
     auto res = TruncateCore::DoTruncate(fileInfo);
 
-    fileInfo.fdg.reset();
+    close(readFd);
 
-    if (cleanupNeeded) {
-        chmod(filePath.c_str(), 0644);
-        auto result = remove(filePath.c_str());
-        if (result != 0) {
-            GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 remove file failed! errno: " << errno;
-        }
+    chmod(filePath.c_str(), 0644);
+    auto result = remove(filePath.c_str());
+    if (result != 0) {
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 remove file failed! errno: " << errno;
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
