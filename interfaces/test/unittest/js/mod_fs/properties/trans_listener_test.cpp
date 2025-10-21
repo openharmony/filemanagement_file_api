@@ -16,6 +16,7 @@
 #include "trans_listener_core.h"
 
 #include <fcntl.h>
+#include <filesystem>
 #include <gtest/gtest.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -66,10 +67,15 @@ void TransListenerCoreTest::SetUpTestCase(void)
 
 void TransListenerCoreTest::TearDownTestCase(void)
 {
-    rmdir(g_path.c_str());
-    auto res = RmdirentCore::DoRmdirent(g_distPath);
-    if (!res.IsSuccess()) {
-        GTEST_LOG_(INFO) << "TearDownTestCase Rmdir failed errno = " << errno;
+    auto result = rmdir(g_path.c_str());
+    if (result < 0) {
+        GTEST_LOG_(ERROR) << "TearDownTestCase Rmdir failed! ret: " << result << ", errno: " << errno;
+    }
+
+    error_code ec;
+    bool success = filesystem::remove_all(g_distPath, ec);
+    if (!success || ec) {
+        GTEST_LOG_(ERROR) << "TearDownTestCase Rmdir failed error = " << ec.message();
         EXPECT_TRUE(false);
     }
     GTEST_LOG_(INFO) << "TearDownTestCase";
