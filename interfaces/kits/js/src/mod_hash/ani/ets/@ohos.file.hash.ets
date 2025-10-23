@@ -111,9 +111,11 @@ export class HashStreamImpl extends stream.Transform {
       this.cleaner = new Cleaner(ptr, "HashStream");
       destroyRegister.register(this, this.cleaner!, this);
   }
+
   unregisterCleaner(): void {
       destroyRegister.unregister(this);
   }
+
   bindNativePtr(ptr: long): void {
       if (this.nativePtr === 0) {
           this.nativePtr = ptr;

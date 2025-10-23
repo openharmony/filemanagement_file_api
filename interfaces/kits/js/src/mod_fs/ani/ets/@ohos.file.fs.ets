@@ -1352,6 +1352,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
       this.cleaner = new Cleaner(ptr, "RandomAccessFile");
       destroyRegister.register(this, this.cleaner!, this);
   }
+
   unregisterCleaner(): void {
       destroyRegister.unregister(this);
   }
@@ -1496,10 +1497,12 @@ export class FileInner implements File {
       this.registerCleaner(this.nativePtr);
     }
   }
+
   registerCleaner(ptr: long): void {
       this.cleaner = new Cleaner(ptr, "File");
       destroyRegister.register(this, this.cleaner!, this);
   }
+
   unregisterCleaner(): void {
       destroyRegister.unregister(this);
   }
@@ -1580,10 +1583,12 @@ export class ReaderIteratorInner implements ReaderIterator {
       this.registerCleaner(this.nativePtr);
     }
   }
+
   registerCleaner(ptr: long): void {
       this.cleaner = new Cleaner(ptr, "ReaderIterator");
       destroyRegister.register(this, this.cleaner!, this);
   }
+
   unregisterCleaner(): void {
       destroyRegister.unregister(this);
   }
@@ -1637,10 +1642,12 @@ export class StatInner implements Stat {
       this.registerCleaner(this.nativeStat)
     }
   }
+
   registerCleaner(ptr: long): void {
       this.cleaner = new Cleaner(ptr, "Stat");
       destroyRegister.register(this, this.cleaner!, this);
   }
+
   unregisterCleaner(): void {
       destroyRegister.unregister(this);
   }
@@ -1682,10 +1689,12 @@ export class StreamInner implements Stream {
       this.registerCleaner(this.nativePtr)
     }
   }
+
   registerCleaner(ptr: long): void {
       this.cleaner = new Cleaner(ptr, "Stream");
       destroyRegister.register(this, this.cleaner!, this);
   }
+
   unregisterCleaner(): void {
       destroyRegister.unregister(this);
   }
@@ -1996,9 +2005,11 @@ export class AtomicFile {
       this.cleaner = new Cleaner(ptr, "AtomicFile");
       destroyRegister.register(this, this.cleaner!, this);
   }
+
   unregisterCleaner(): void {
       destroyRegister.unregister(this);
   }
+
   bindNativePtr(ptr: long): void {
       if (this.nativePtr === 0) {
           this.nativePtr = ptr;

@@ -97,8 +97,8 @@ ani_string HashStreamAni::Digest(ani_env *env, [[maybe_unused]] ani_object objec
 void CallBindNativePtr(ani_env *env, ani_object obj, HsHashStream *hsHashStream)
 {
     auto bindNativePtrSig = HASH::HashStreamImpl::bindNativePtrSig.c_str();
-    ani_long longValue = reinterpret_cast<ani_long>(hsHashStream);
-    ani_status ret = env->Object_CallMethodByName_Void(obj, "bindNativePtr", bindNativePtrSig, longValue);
+    ani_long hashStreamPtr = reinterpret_cast<ani_long>(hsHashStream);
+    ani_status ret = env->Object_CallMethodByName_Void(obj, "bindNativePtr", bindNativePtrSig, hashStreamPtr);
     if (ret != ANI_OK) {
         HILOGE("Object_CallMethodByName_Void failed. ret = %{public}d", static_cast<int32_t>(ret));
         return;
