@@ -56,6 +56,8 @@ struct Int : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string toIntDesc;
+    static const string toIntSig;
 };
 
 struct Long : public BaseType {
@@ -128,6 +130,12 @@ struct FileInner : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string getFdDesc;
+    static const string getFdSig;
+    static const string getPathDesc;
+    static const string getPathSig;
+    static const string getNameDesc;
+    static const string getNameSig;
 };
 
 struct ProgressInner : public BaseType {
@@ -158,6 +166,12 @@ struct StatInner : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string getIno;
+    static const string getInoSig;
+    static const string getMode;
+    static const string getModeSig;
+    static const string getUid;
+    static const string getUidSig;
 };
 
 struct StreamInner : public BaseType {

@@ -32,6 +32,10 @@ public:
     static ani_boolean IsFile(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_boolean IsSocket(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_boolean IsSymbolicLink(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_object GetIno(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetMode(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetUid(ani_env *env, [[maybe_unused]] ani_object object);
+
 };
 } // namespace ANI
 } // namespace ModuleFileIO

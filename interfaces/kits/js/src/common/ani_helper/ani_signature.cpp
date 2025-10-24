@@ -36,6 +36,8 @@ const string BoxedTypes::Boolean::booleanUnboxedSig = Builder::BuildSignatureDes
 const Type BoxedTypes::Int::classType = Builder::BuildClass("std.core.Int");
 const string BoxedTypes::Int::classDesc = BoxedTypes::Int::classType.Descriptor();
 const string BoxedTypes::Int::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
+const string BoxedTypes::Int::toIntDesc = "toInt";
+const string BoxedTypes::Int::toIntSig = Builder::BuildSignatureDescriptor({}, BasicTypes::intType);
 // BoxedTypes::Long
 const Type BoxedTypes::Long::classType = Builder::BuildClass("std.core.Long");
 const string BoxedTypes::Long::classDesc = BoxedTypes::Long::classType.Descriptor();
@@ -82,6 +84,12 @@ const string FS::ConflictFilesInner::ctorSig =
 const Type FS::FileInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.FileInner");
 const string FS::FileInner::classDesc = FS::FileInner::classType.Descriptor();
 const string FS::FileInner::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
+const string FS::FileInner::getFdDesc = Builder::BuildGetterName("fd");
+const string FS::FileInner::getFdSig = Builder::BuildSignatureDescriptor({}, BasicTypes::intType);
+const string FS::FileInner::getPathDesc = Builder::BuildGetterName("getPath");
+const string FS::FileInner::getPathSig = Builder::BuildSignatureDescriptor({}, BuiltInTypes::stringType);
+const string FS::FileInner::getNameDesc = Builder::BuildGetterName("getName");
+const string FS::FileInner::getNameSig = Builder::BuildSignatureDescriptor({}, BuiltInTypes::stringType);
 // FS::ProgressInner
 const Type FS::ProgressInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ProgressInner");
 const string FS::ProgressInner::classDesc = FS::ProgressInner::classType.Descriptor();
@@ -105,6 +113,12 @@ const string FS::ReaderIteratorResultInner::ctorSig =
 const Type FS::StatInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.StatInner");
 const string FS::StatInner::classDesc = FS::StatInner::classType.Descriptor();
 const string FS::StatInner::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
+const string FS::StatInner::getIno = Builder::BuildGetterName("ino");
+const string FS::StatInner::getInoSig = Builder::BuildSignatureDescriptor({}, BuiltInTypes::BigInt::classType);
+const string FS::StatInner::getMode = Builder::BuildGetterName("mode");
+const string FS::StatInner::getModeSig = Builder::BuildSignatureDescriptor({}, BoxedTypes::Int::classType);
+const string FS::StatInner::getUid = Builder::BuildGetterName("uid");
+const string FS::StatInner::getUidSig = Builder::BuildSignatureDescriptor({}, BoxedTypes::Int::classType);
 // FS::StreamInner
 const Type FS::StreamInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.StreamInner");
 const string FS::StreamInner::classDesc = FS::StreamInner::classType.Descriptor();

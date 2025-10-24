@@ -19,6 +19,7 @@
 #include <cstring>
 #include <optional>
 
+#include "ani_cache.h"
 #include "ani_signature.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -58,8 +59,17 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::ToOptionalInt32(ani_env 
         return { true, std::nullopt };
     }
 
+    AniCache &aniCache = AniCache::GetInstance();
+    ani_method toIntAniMethod;
+    ani_status ret;
+    tie(ret, toIntAniMethod) =
+        aniCache.GetMethod(env, Boxed::Int::classDesc, Boxed::Int::toIntDesc, Boxed::Int::toIntSig);
+    if (ret != ANI_OK) {
+        return { false, {} };
+    }
+
     ani_int intValue;
-    if (ANI_OK == env->Object_CallMethodByName_Int(value, "toInt", nullptr, &intValue)) {
+    if (ANI_OK == env->Object_CallMethodByName_Int(value, toIntAniMethod, &intValue)) {
         return { true, std::make_optional(intValue) };
     }
 
@@ -311,6 +321,28 @@ std::tuple<bool, ani_array> TypeConverter::ToAniStringList(
         }
     }
     return { true, result };
+}
+
+std::tuple<bool, ani_object> TypeConverter::ToAniBigInt(ani_env *env, int64_t value)
+{
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, BuiltInTypes::BigInt::classDesc);
+    if (ret != ANI_OK) {
+        return {false, nullptr};
+    }
+
+    ani_method ctor;
+    tie(ret, ctor) = aniCache.GetMethod(env, BuiltInTypes::BigInt::classDesc, BuiltInTypes::BigInt::ctorDesc, BuiltInTypes::BigInt::ctorSig);
+    if (ret != ANI_OK) {
+        return {false, nullptr};
+    }
+
+    ani_object object;
+    if ((ret = env->Object_New(cls, ctor, &object, value)) != ANI_OK) {
+        HILOGE("New Object Fail, err: %{public}d", ret);
+        return {false, nullptr};
+    }
+    return {true, object};
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

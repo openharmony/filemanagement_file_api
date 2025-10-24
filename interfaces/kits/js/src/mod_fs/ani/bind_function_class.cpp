@@ -105,6 +105,12 @@ static ani_status BindFileMethods(ani_env *env)
         ani_native_function { "lockSync", nullptr, reinterpret_cast<void *>(FileAni::LockSync) },
         ani_native_function { "tryLock", nullptr, reinterpret_cast<void *>(FileAni::TryLock) },
         ani_native_function { "unlock", nullptr, reinterpret_cast<void *>(FileAni::UnLock) },
+        ani_native_function { FS::FileInner::getFdDest.c_str(), FS::FileInner::getFdSig.c_str(),
+            reinterpret_cast<void *>(FileAni::GetFd) },
+        ani_native_function { FS::FileInner::getPathDest.c_str(), FS::FileInner::getPathSig.c_str(),
+            reinterpret_cast<void *>(FileAni::GetPath) },
+        ani_native_function { FS::FileInner::getNameDest.c_str(), FS::FileInner::getNameSig.c_str(),
+            reinterpret_cast<void *>(FileAni::GetName) },
     };
 
     return BindClass(env, classDesc, methods);
@@ -133,6 +139,12 @@ static ani_status BindStatClassMethods(ani_env *env)
         ani_native_function { "isFile", nullptr, reinterpret_cast<void *>(StatAni::IsFile) },
         ani_native_function { "isSocket", nullptr, reinterpret_cast<void *>(StatAni::IsSocket) },
         ani_native_function { "isSymbolicLink", nullptr, reinterpret_cast<void *>(StatAni::IsSymbolicLink) },
+        ani_native_function { FS::StatInner::getIno.c_str(), FS::StatInner::getInoSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetIno) },
+        ani_native_function { FS::StatInner::getMode.c_str(), FS::StatInner::getModeSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetMode) },
+        ani_native_function { FS::StatInner::getUid.c_str(), FS::StatInner::getModeSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetUid) },
     };
 
     return BindClass(env, classDesc, methods);

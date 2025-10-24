@@ -141,6 +141,66 @@ ani_boolean StatAni::IsSymbolicLink(ani_env *env, [[maybe_unused]] ani_object ob
     auto ret = fsStat->IsSymbolicLink();
     return ani_boolean(ret);
 }
+
+ani_object StatAni::GetIno(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto ino = fsStat->GetIno();
+
+    // AniCache& aniCache = AniCache::GetInstance();
+    // auto [succ, cls] = aniCache.GetClass(env, BuiltInTypes::BigInt::classDesc);
+    // if (succ != ANI_OK) {
+    //     return nullptr;
+    // }
+
+    // ani_method ctor;
+    // tie(succ, ctor) = aniCache.GetMethod(env, BuiltInTypes::BigInt::classDesc, BuiltInTypes::BigInt::ctorDesc, BuiltInTypes::BigInt::ctorSig);
+    // if (succ != ANI_OK) {
+    //     return nullptr;
+    // }
+
+    // ani_object inoObject;
+
+    // if ((succ = env->Object_New(cls, ctor, &inoObject, ino)) != ANI_OK) {
+    //     HILOGE("New Object Fail, err: %{public}d", succ);
+    //     return nullptr;
+    // }
+
+    auto [ret, inoObject] = TypeConverter::ToAniBigInt(env, ino);
+    return inoObject;
+}
+
+ani_long StatAni::GetMode(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    HILOGE("GetMode!!!");
+
+    auto mode = fsStat->GetMode();
+    return mode;
+}
+
+ani_long StatAni::GetUid(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    auto uid = fsStat->GetUid();
+    return uid;
+}
+
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement

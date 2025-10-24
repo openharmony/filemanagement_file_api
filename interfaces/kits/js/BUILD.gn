@@ -690,6 +690,7 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties/copy_listener/ani",
   ]
   sources = [
+    "src/common/ani_helper/ani_cache.cpp",
     "src/common/ani_helper/ani_signature.cpp",
     "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",

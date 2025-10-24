@@ -1490,9 +1490,9 @@ export class RandomAccessFileInner implements RandomAccessFile {
 }
 
 export interface File {
-  fd: int;
-  path: String;
-  name: String;
+  get fd(): int;
+  get path(): String;
+  get name(): String;
 
   getParent(): String;
   lock(exclusive?: boolean): Promise<void>;
@@ -1503,9 +1503,9 @@ export interface File {
 }
 
 export class FileInner implements File {
-  fd: int = -1;
-  path: String = "";
-  name: String = "";
+  native get fd(): int;
+  native get path(): String;
+  native get name(): String;
 
   private nativePtr: long = 0;
   private cleaner: Cleaner | null = null;
@@ -1613,9 +1613,13 @@ export class ReaderIteratorInner implements ReaderIterator {
 }
 
 export interface Stat {
-  ino: bigint;
-  mode: long;
-  uid: long;
+  // ino: bigint;
+  get ino(): bigint;
+  // mode: long;
+  get mode(): long;
+  // uid: long;
+  get uid(): long;
+
   gid: long;
   size: long;
   atime: long;
@@ -1636,9 +1640,13 @@ export interface Stat {
 }
 
 export class StatInner implements Stat {
-  ino: bigint = 0n;
-  mode: long;
-  uid: long;
+  // ino: bigint = 0n;
+  native get ino(): bigint;
+  // mode: long;
+  native get mode(): long;
+  // uid: long;
+  native get uid(): long;
+
   gid: long;
   size: long;
   atime: long;

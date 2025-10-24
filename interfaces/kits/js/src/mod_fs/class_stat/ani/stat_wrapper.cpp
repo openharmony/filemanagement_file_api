@@ -23,6 +23,7 @@
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
+#include "ani_cache.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -114,7 +115,7 @@ static ani_status SetProperties(ani_env *env, ani_object &statObject, FsStat *fs
     ani_status ret;
 
     vector<pair<string_view, int64_t>> numProperties = {
-        { "mode", fsStat->GetMode() },
+        // { "mode", fsStat->GetMode() },
         { "uid", fsStat->GetUid() },
         { "gid", fsStat->GetGid() },
         { "size", fsStat->GetSize() },
@@ -133,7 +134,7 @@ static ani_status SetProperties(ani_env *env, ani_object &statObject, FsStat *fs
     }
 
     vector<pair<string_view, int64_t>> bigIntProperties = {
-        { "ino", fsStat->GetIno() },
+        // { "ino", fsStat->GetIno() },
         { "atimeNs", fsStat->GetAtimeNs() },
         { "mtimeNs", fsStat->GetMtimeNs() },
         { "ctimeNs", fsStat->GetCtimeNs() },
