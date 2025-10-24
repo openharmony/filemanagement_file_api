@@ -63,7 +63,7 @@ const string BuiltInTypes::Array::objectGetterSig =
 const string BuiltInTypes::Array::objectSetterSig =
     Builder::BuildSignatureDescriptor({ BasicTypes::intType, BuiltInTypes::objectType });
 // BuiltInTypes::ArrayBuffer
-const Type BuiltInTypes::ArrayBuffer::classType = Builder::BuildClass("escompat.ArrayBuffer");
+const Type BuiltInTypes::ArrayBuffer::classType = Builder::BuildClass("std.core.ArrayBuffer");
 const string BuiltInTypes::ArrayBuffer::classDesc = BuiltInTypes::ArrayBuffer::classType.Descriptor();
 const string BuiltInTypes::ArrayBuffer::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
 // BuiltInTypes::BigInt
