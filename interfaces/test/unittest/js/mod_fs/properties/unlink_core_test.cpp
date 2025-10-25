@@ -87,6 +87,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_002, TestSize.Level1)
     auto result = mkdir(g_dirPath.c_str(), mode);
     if (result < 0) {
         GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_002 mkdir failed! ret: " << result << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
 
     auto res = UnlinkCore::DoUnlink(g_dirPath);
@@ -131,7 +132,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_004, TestSize.Level1)
     auto file = open(g_filePath.c_str(), O_CREAT | O_RDWR);
     if (file < 0) {
         GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_004 create failed! ret: " << file << ", errno: " << errno;
-        EXPECT_GT(file, 0);
+        ASSERT_TRUE(false);
     }
     close(file);
 

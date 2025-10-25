@@ -107,9 +107,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_003, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_003 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_003";
-        return;
+        ASSERT_TRUE(false);
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -120,8 +118,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_003, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_003 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_003";
-        return;
+        ASSERT_TRUE(false);
     }
 
     FileInfo fileInfo;
@@ -163,9 +160,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_004, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_004";
-        return;
+        ASSERT_TRUE(false);
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -176,8 +171,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_004, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_004";
-        return;
+        ASSERT_TRUE(false);
     }
 
     FileInfo fileInfo;
@@ -221,9 +215,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_005, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_005 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_005";
-        return;
+        ASSERT_TRUE(false);
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -234,8 +226,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_005, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_005 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_005";
-        return;
+        ASSERT_TRUE(false);
     }
 
     FileInfo fileInfo;
@@ -278,9 +269,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_006 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_006";
-        return;
+        ASSERT_TRUE(false);
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -291,8 +280,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_006 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_006";
-        return;
+        ASSERT_TRUE(false);
     }
 
     close(fd);
@@ -304,7 +292,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSi
     auto result = strcpy_s(fileInfo.path.get(), pathLen, filePath.c_str());
     if (result != 0) {
         GTEST_LOG_(ERROR) << "strcpy_s failed with error: " << result;
-        EXPECT_EQ(result, 0);
+        ASSERT_TRUE(false);
     }
 
     auto res = TruncateCore::DoTruncate(fileInfo);
@@ -342,9 +330,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_007 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_007";
-        return;
+        ASSERT_TRUE(false);
     }
 
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -355,8 +341,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_007 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_007";
-        return;
+        ASSERT_TRUE(false);
     }
 
     close(fd);
@@ -368,7 +353,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSi
     auto result = strcpy_s(fileInfo.path.get(), pathLen, filePath.c_str());
     if (result != 0) {
         GTEST_LOG_(ERROR) << "strcpy_s failed with error: " << result;
-        EXPECT_EQ(result, 0);
+        ASSERT_TRUE(false);
     }
     std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(15));
 
@@ -379,7 +364,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSi
 
     result = remove(filePath.c_str());
     if (result != 0) {
-        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_004 remove file failed! errno: " << errno;
+        GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_007 remove file failed! errno: " << errno;
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
@@ -418,7 +403,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_008, testing::ext::TestSi
     auto result = strcpy_s(fileInfo.path.get(), pathLen, nonExistentPath.c_str());
     if (result != 0) {
         GTEST_LOG_(ERROR) << "strcpy_s failed with error: " << result;
-        EXPECT_EQ(result, 0);
+        ASSERT_TRUE(false);
     }
 
     auto res = TruncateCore::DoTruncate(fileInfo);
@@ -444,6 +429,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_009, testing::ext::TestSi
     auto result = mkdir(dirPath.c_str(), mode);
     if (result < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_009 mkdir failed! errno: " << errno;
+        ASSERT_TRUE(false);
     }
 
     FileInfo fileInfo;
@@ -453,7 +439,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_009, testing::ext::TestSi
     result = strcpy_s(fileInfo.path.get(), pathLen, dirPath.c_str());
     if (result != 0) {
         GTEST_LOG_(ERROR) << "strcpy_s failed with error: " << result;
-        EXPECT_EQ(result, 0);
+        ASSERT_TRUE(false);
     }
 
     auto res = TruncateCore::DoTruncate(fileInfo);
@@ -482,12 +468,10 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
     string filePath =  "/data/storage/el2/TruncateCoreTestFile.txt";
     string fileContent =  "Hello, this is a test file content for truncate testing!";
 
-    int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0444);
+    int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0644);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
-        return;
+        ASSERT_TRUE(false);
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -498,8 +482,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
-        return;
+        ASSERT_TRUE(false);
     }
 
     close(fd);
@@ -513,8 +496,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_010 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
-        return;
+        ASSERT_TRUE(false);
     }
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(readFd);
 
@@ -551,9 +533,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_011, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0644);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_011 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_011";
-        return;
+        ASSERT_TRUE(false);
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -564,8 +544,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_011, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_011 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_011";
-        return;
+        ASSERT_TRUE(false);
     }
     
     FileInfo fileInfo;
@@ -602,9 +581,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_012, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0644);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_012 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_012";
-        return;
+        ASSERT_TRUE(false);
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -615,8 +592,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_012, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_012 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_012";
-        return;
+        ASSERT_TRUE(false);
     }
     close(fd);
 
@@ -688,9 +664,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_014, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0644);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_014 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_014";
-        return;
+        ASSERT_TRUE(false);
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -701,8 +675,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_014, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_014 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_014";
-        return;
+        ASSERT_TRUE(false);
     }
     
     FileInfo fileInfo;
@@ -776,9 +749,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_016, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0644);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_016 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_016";
-        return;
+        ASSERT_TRUE(false);
     }
     
     ssize_t written = write(fd, fileContent.c_str(), fileContent.length());
@@ -789,8 +760,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_016, testing::ext::TestSi
         if (result != 0) {
             GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_016 remove file failed! errno: " << errno;
         }
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_016";
-        return;
+        ASSERT_TRUE(false);
     }
     
     FileInfo fileInfo;
@@ -832,9 +802,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_017, testing::ext::TestSi
     int fd = open(filePath.c_str(), O_CREAT | O_RDWR, 0644);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_017 create failed! errno: " << errno;
-        EXPECT_GT(fd, 0);
-        GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_017";
-        return;
+        ASSERT_TRUE(false);
     }
 
     FileInfo fileInfo;
