@@ -603,7 +603,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_012, testing::ext::TestSi
     auto strcpyResult = strcpy_s(fileInfo.path.get(), pathLen, filePath.c_str());
     if (strcpyResult != 0) {
         GTEST_LOG_(ERROR) << "strcpy_s failed with error: " << strcpyResult;
-        EXPECT_EQ(strcpyResult, 0);
+        ASSERT_TRUE(false);
     }
     std::optional<int64_t> len = std::make_optional(static_cast<int64_t>(0));
 
