@@ -29,7 +29,7 @@ using namespace std;
 using namespace OHOS::FileManagement::LibN;
 const std::string SCHEME_FILE = "file";
 
-static tuple<bool, string> ParsePath(const string &pathStr)
+static string ParsePath(const string &pathStr)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     if (pathStr.find("://") != string::npos) {
@@ -38,12 +38,11 @@ static tuple<bool, string> ParsePath(const string &pathStr)
         if (uriType == SCHEME_FILE) {
             AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
             string realPath = fileUri.GetRealPath();
-            return { true, realPath };
+            return realPath;
         }
-        return { false, "" };
     }
 #endif
-    return { true, pathStr };
+    return pathStr;
 }
 
 napi_value Lstat::Sync(napi_env env, napi_callback_info info)
@@ -62,12 +61,7 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
     string pathStr(pathPtr.get());
-    auto [succ, path] = ParsePath(pathStr);
-    if (!succ) {
-        HILOGE("Failed to lstat file by invalid uri");
-        NError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
+    string path = ParsePath(pathStr);
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> lstat_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!lstat_req) {
@@ -121,14 +115,7 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
     }
 
     string pathStr(tmp.get());
-    bool succ;
-    std::string path;
-    std::tie(succ, path) = ParsePath(pathStr);
-    if (!succ) {
-        HILOGE("Failed to lstat file by invalid uri");
-        NError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
+    string path = ParsePath(pathStr);
     auto arg = CreateSharedPtr<StatEntity>();
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
