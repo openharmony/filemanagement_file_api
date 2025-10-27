@@ -68,7 +68,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_001, TestSize.Level1)
     GTEST_LOG_(INFO) << "UnlinkCoreTest-begin UnlinkCoreTest_DoUnlink_001";
 
     auto res = UnlinkCore::DoUnlink(g_dirPath);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_001";
 }
@@ -97,7 +97,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_002, TestSize.Level1)
         GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_002 rmdir failed! ret: " << result << ", errno: " << errno;
     }
 
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_002";
 }
@@ -114,7 +114,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_003, TestSize.Level1)
     GTEST_LOG_(INFO) << "UnlinkCoreTest-begin UnlinkCoreTest_DoUnlink_003";
 
     auto res = UnlinkCore::DoUnlink(g_filePath);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_003";
 }
@@ -137,7 +137,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_004, TestSize.Level1)
     close(file);
 
     auto res = UnlinkCore::DoUnlink(g_filePath);
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_004";
 }
@@ -154,7 +154,7 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_005, TestSize.Level1)
     GTEST_LOG_(INFO) << "UnlinkCoreTest-begin UnlinkCoreTest_DoUnlink_005";
 
     auto res = UnlinkCore::DoUnlink("hello world");
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_005";
 }

@@ -79,7 +79,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_001, testing::ext::TestSize.Lev
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_001 remove file failed! ret: " << result << ", errno: " << errno;
     }
 
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     bool srcFileExists = (access(src.c_str(), F_OK) == 0);
     if (srcFileExists) {
@@ -130,7 +130,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_002, testing::ext::TestSize.Lev
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_002 remove file failed! ret: " << result << ", errno: " << errno;
     }
 
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_002";
 }
@@ -172,7 +172,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_003, testing::ext::TestSize.Lev
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_003 rmdir failed! ret: " << result << ", errno: " << errno;
     }
 
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_003";
 }
@@ -203,7 +203,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_004, testing::ext::TestSize.Lev
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_004 rmdir failed! ret: " << result << ", errno: " << errno;
     }
 
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     bool srcDirExists = (access(src.c_str(), F_OK) == 0);
     if (srcDirExists) {
@@ -248,7 +248,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_005, testing::ext::TestSize.Lev
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_005 rmdir failed! ret: " << result << ", errno: " << errno;
     }
 
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_004";
 }
@@ -289,7 +289,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_006, testing::ext::TestSize.Lev
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_006 remove file failed! ret: " << result << ", errno: " << errno;
     }
 
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_006";
 }
@@ -309,7 +309,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_007, testing::ext::TestSize.Lev
 
     auto res = RenameCore::DoRename(src, dest);
 
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_007";
 }
