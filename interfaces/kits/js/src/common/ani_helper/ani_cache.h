@@ -28,6 +28,7 @@ public:
     tuple<ani_status, ani_enum> GetEnum(ani_env *env, const string &name);
     tuple<ani_status, ani_method> GetMethod(ani_env *env, const string &clazzName, const string &methodName, const string& methodSignature);
     tuple<ani_status, ani_method> GetStaticMethod(ani_env *env, const string &clazzName, const string &methodName, const string& methodSignature);
+    tuple<ani_status, ani_field> GetField(ani_env *env, const string &clazzName, const string &FieldName);
     tuple<ani_status, ani_enum_item> GetEnumIndex(ani_env *env, const string &enumName, int index);
     AniCache(const AniCache&) = delete;
     AniCache& operator=(const AniCache&) = delete;
@@ -35,6 +36,7 @@ private:
     AniCache() noexcept;
     map<string, ani_ref> clazzMap;
     map<string, map<string, map<string, ani_method> *> *> methodMap;
+    map<string, map<string, ani_field> *> fieldMap;
     map<string, map<string, ani_ref> *> filedMap;
     map<string, map<int, ani_enum_item>*> enumItemMap;
 };

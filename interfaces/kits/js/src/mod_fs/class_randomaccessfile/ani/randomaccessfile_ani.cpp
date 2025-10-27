@@ -57,18 +57,24 @@ static tuple<bool, optional<ReadOptions>> ToReadOptions(ani_env *env, ani_object
         return { true, nullopt };
     }
 
-    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, "offset");
+    // auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, "offset");
+    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, FS::ReadTextOptions::ClassDesc,
+        FS::ReadTextOptions::getOffsetDesc); 
     if (!succOffset) {
         HILOGE("Illegal option.offset parameter");
         return { false, nullopt };
     }
+    HILOGE("offset:  %{public}" PRIu64, offset.value());
     options.offset = offset;
 
-    auto [succLength, length] = AniHelper::ParseInt64Option(env, obj, "length");
+    // auto [succLength, length] = AniHelper::ParseInt64Option(env, obj, "length");
+    auto [succLength, length] =AniHelper::ParseInt64Option(env, obj, FS::ReadTextOptions::ClassDesc,
+        FS::ReadTextOptions::getLengthDesc);
     if (!succLength) {
         HILOGE("Illegal option.length parameter");
         return { false, nullopt };
     }
+    HILOGE("length:  %{public}" PRIu64, length.value());
     options.length = length;
     return { true, make_optional<ReadOptions>(move(options)) };
 }

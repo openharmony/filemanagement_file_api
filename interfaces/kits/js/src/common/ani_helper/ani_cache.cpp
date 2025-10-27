@@ -129,6 +129,13 @@ tuple<ani_status, ani_method> AniCache::GetMethod(ani_env *env, const string &cl
 
     return { ANI_OK, ctor };
 }
+
+tuple<ani_status, ani_field> AniCache::GetField(ani_env *env, const string &clazzName, const string &FieldName)
+{
+    ani_field field;
+    return { ANI_OK, field };
+}
+
 tuple<ani_status, ani_method> AniCache::GetStaticMethod(ani_env *env, const string &clazzName,
     const string &methodName, const string& methodSignature)
 {

@@ -123,7 +123,7 @@ void FileAni::UnLock(ani_env *env, [[maybe_unused]] ani_object object)
     }
 }
 
-ani_int GetFd(ani_env *env,[[maybe_unused]] ani_object object)
+ani_int FileAni::GetFd(ani_env *env,[[maybe_unused]] ani_object object)
 {
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {
@@ -135,7 +135,7 @@ ani_int GetFd(ani_env *env,[[maybe_unused]] ani_object object)
     auto res = fsFile->GetFD();
     if (!res.IsSuccess()) {
         HILOGE("GetFd failed");
-        const auto &err = ret.GetError();
+        const auto &err = res.GetError();
         ErrorHandler::Throw(env, err);
         return -1;
     }
@@ -143,7 +143,7 @@ ani_int GetFd(ani_env *env,[[maybe_unused]] ani_object object)
     return res.GetData().value();
 }
 
-ani_string GetPath(ani_env *env,[[maybe_unused]] ani_object object)
+ani_string FileAni::GetPath(ani_env *env,[[maybe_unused]] ani_object object)
 {
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {
@@ -155,7 +155,7 @@ ani_string GetPath(ani_env *env,[[maybe_unused]] ani_object object)
     auto res = fsFile->GetPath();
     if (!res.IsSuccess()) {
         HILOGE("GetPath failed");
-        const auto &err = ret.GetError();
+        const auto &err = res.GetError();
         ErrorHandler::Throw(env, err);
         return nullptr;
     }
@@ -170,7 +170,7 @@ ani_string GetPath(ani_env *env,[[maybe_unused]] ani_object object)
     return result;
 }
 
-ani_string GetName(ani_env *env,[[maybe_unused]] ani_object object)
+ani_string FileAni::GetName(ani_env *env,[[maybe_unused]] ani_object object)
 {
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {
@@ -182,7 +182,7 @@ ani_string GetName(ani_env *env,[[maybe_unused]] ani_object object)
     auto res = fsFile->GetName();
     if (!res.IsSuccess()) {
         HILOGE("GetName failed");
-        const auto &err = ret.GetError();
+        const auto &err = res.GetError();
         ErrorHandler::Throw(env, err);
         return nullptr;
     }

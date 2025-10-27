@@ -15,6 +15,7 @@
 
 #include "file_wrapper.h"
 
+#include "ani_cache.h"
 #include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"

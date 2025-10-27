@@ -35,6 +35,15 @@ public:
     static ani_object GetIno(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_long GetMode(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_long GetUid(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetGid(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetSize(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetAtime(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetMtime(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetCtime(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_object GetAtimeNs(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_object GetMtimeNs(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_object GetCtimeNs(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_enum_item GetLocation(ani_env *env, [[maybe_unused]] ani_object object);
 
 };
 } // namespace ANI

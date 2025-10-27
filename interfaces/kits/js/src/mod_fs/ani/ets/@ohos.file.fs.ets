@@ -1620,15 +1620,32 @@ export interface Stat {
   // uid: long;
   get uid(): long;
 
-  gid: long;
-  size: long;
-  atime: long;
-  mtime: long;
-  ctime: long;
-  atimeNs: bigint;
-  mtimeNs: bigint;
-  ctimeNs: bigint;
-  location: LocationType;
+  // gid: long;
+  get gid(): long;
+
+  // size: long;
+  get size(): long;
+
+  // atime: long;
+  get atime(): long;
+
+  // mtime: long;
+  get mtime(): long;
+
+  // ctime: long;
+  get ctime(): long;
+  
+  // atimeNs: bigint;
+  get atimeNs(): bigint;
+
+  // mtimeNs: bigint;
+  get mtimeNs(): bigint;
+
+  // ctimeNs: bigint;
+  get ctimeNs(): bigint;
+
+  // location: LocationType;
+  get location(): LocationType
 
   isBlockDevice(): boolean;
   isCharacterDevice(): boolean;
@@ -1647,15 +1664,32 @@ export class StatInner implements Stat {
   // uid: long;
   native get uid(): long;
 
-  gid: long;
-  size: long;
-  atime: long;
-  mtime: long;
-  ctime: long;
-  atimeNs: bigint = 0n;
-  mtimeNs: bigint = 0n;
-  ctimeNs: bigint = 0n;
-  location: LocationType = LocationType.LOCAL;
+  // gid: long;
+  native get gid(): long;
+
+  // size: long;
+  native get size(): long;
+
+  // atime: long;
+  native get atime(): long;
+
+  // mtime: long;
+  native get mtime(): long;
+
+  // ctime: long;
+  native get ctime(): long;
+
+  // atimeNs: bigint = 0n;
+  native get atimeNs(): bigint;
+
+  // mtimeNs: bigint = 0n;
+  native get mtimeNs(): bigint;
+
+  // ctimeNs: bigint = 0n;
+  native get ctimeNs(): bigint;
+
+  // location: LocationType = LocationType.LOCAL;
+  native get location(): LocationType
 
   private nativeStat: long = 0;
   private cleaner: Cleaner | null = null;

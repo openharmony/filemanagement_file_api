@@ -33,131 +33,131 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-static ani_status SetBigIntProperty(ani_env *env, ani_object &statObject, const char *name, int64_t value)
-{
-    ani_object object = {};
-    auto classDesc = BuiltInTypes::BigInt::classDesc.c_str();
-    ani_class cls;
-    ani_status ret;
+// static ani_status SetBigIntProperty(ani_env *env, ani_object &statObject, const char *name, int64_t value)
+// {
+//     ani_object object = {};
+//     auto classDesc = BuiltInTypes::BigInt::classDesc.c_str();
+//     ani_class cls;
+//     ani_status ret;
 
-    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Not found %{public}s, err: %{public}d", classDesc, ret);
-        return ret;
-    }
+//     if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
+//         HILOGE("Not found %{public}s, err: %{public}d", classDesc, ret);
+//         return ret;
+//     }
 
-    auto ctorDesc = BuiltInTypes::BigInt::ctorDesc.c_str();
-    auto ctorSig = BuiltInTypes::BigInt::ctorSig.c_str();
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Not found ctor, err: %{public}d", ret);
-        return ret;
-    }
+//     auto ctorDesc = BuiltInTypes::BigInt::ctorDesc.c_str();
+//     auto ctorSig = BuiltInTypes::BigInt::ctorSig.c_str();
+//     ani_method ctor;
+//     if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+//         HILOGE("Not found ctor, err: %{public}d", ret);
+//         return ret;
+//     }
 
-    if ((ret = env->Object_New(cls, ctor, &object, value)) != ANI_OK) {
-        HILOGE("New BigIntProperty Fail, err: %{public}d", ret);
-        return ret;
-    }
+//     if ((ret = env->Object_New(cls, ctor, &object, value)) != ANI_OK) {
+//         HILOGE("New BigIntProperty Fail, err: %{public}d", ret);
+//         return ret;
+//     }
 
-    ret = AniHelper::SetPropertyValue(env, statObject, name, object);
-    if (ret != ANI_OK) {
-        HILOGE("SetPropertyValue Fail %{public}s, err: %{public}d", name, ret);
-        return ret;
-    }
+//     ret = AniHelper::SetPropertyValue(env, statObject, name, object);
+//     if (ret != ANI_OK) {
+//         HILOGE("SetPropertyValue Fail %{public}s, err: %{public}d", name, ret);
+//         return ret;
+//     }
 
-    return ANI_OK;
-}
+//     return ANI_OK;
+// }
 
-static ani_enum_item GetLocationEnumIndex(ani_env *env, const Location &value)
-{
-    ani_enum enumType;
-    auto classDesc = FS::LocationType::classDesc.c_str();
-    ani_status ret = env->FindEnum(classDesc, &enumType);
-    if (ret != ANI_OK) {
-        HILOGE("FindEnum %{public}s failed, err: %{public}d", classDesc, ret);
-        return nullptr;
-    }
+// static ani_enum_item GetLocationEnumIndex(ani_env *env, const Location &value)
+// {
+//     ani_enum enumType;
+//     auto classDesc = FS::LocationType::classDesc.c_str();
+//     ani_status ret = env->FindEnum(classDesc, &enumType);
+//     if (ret != ANI_OK) {
+//         HILOGE("FindEnum %{public}s failed, err: %{public}d", classDesc, ret);
+//         return nullptr;
+//     }
 
-    size_t valueAsSizeT = static_cast<size_t>(value);
-    if (valueAsSizeT < 1) {
-        HILOGE("Invalid Location value: %{private}zu", valueAsSizeT);
-        return nullptr;
-    }
+//     size_t valueAsSizeT = static_cast<size_t>(value);
+//     if (valueAsSizeT < 1) {
+//         HILOGE("Invalid Location value: %{private}zu", valueAsSizeT);
+//         return nullptr;
+//     }
 
-    size_t index = valueAsSizeT - 1;
+//     size_t index = valueAsSizeT - 1;
 
-    ani_enum_item enumItem;
-    ret = env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
-    if (ret != ANI_OK) {
-        HILOGE("Enum_GetEnumItemByIndex failed, index: %{public}zu, err: %{public}d", index, ret);
-        return nullptr;
-    }
-    return enumItem;
-}
+//     ani_enum_item enumItem;
+//     ret = env->Enum_GetEnumItemByIndex(enumType, index, &enumItem);
+//     if (ret != ANI_OK) {
+//         HILOGE("Enum_GetEnumItemByIndex failed, index: %{public}zu, err: %{public}d", index, ret);
+//         return nullptr;
+//     }
+//     return enumItem;
+// }
 
-static ani_status SetEnumLocation(ani_env *env, ani_object &object, const char *name, const Location &value)
-{
-    ani_enum_item location = GetLocationEnumIndex(env, value);
-    if (location == nullptr) {
-        return ANI_ERROR;
-    }
+// static ani_status SetEnumLocation(ani_env *env, ani_object &object, const char *name, const Location &value)
+// {
+//     ani_enum_item location = GetLocationEnumIndex(env, value);
+//     if (location == nullptr) {
+//         return ANI_ERROR;
+//     }
 
-    ani_status ret = AniHelper::SetPropertyValue(env, object, name, location);
-    if (ret != ANI_OK) {
-        HILOGE("SetPropertyValue Fail %{public}s, err: %{public}d", name, ret);
-        return ret;
-    }
+//     ani_status ret = AniHelper::SetPropertyValue(env, object, name, location);
+//     if (ret != ANI_OK) {
+//         HILOGE("SetPropertyValue Fail %{public}s, err: %{public}d", name, ret);
+//         return ret;
+//     }
 
-    return ANI_OK;
-}
+//     return ANI_OK;
+// }
 
-static ani_status SetProperties(ani_env *env, ani_object &statObject, FsStat *fsStat)
-{
-    ani_status ret;
+// static ani_status SetProperties(ani_env *env, ani_object &statObject, FsStat *fsStat)
+// {
+//     ani_status ret;
 
-    vector<pair<string_view, int64_t>> numProperties = {
-        // { "mode", fsStat->GetMode() },
-        { "uid", fsStat->GetUid() },
-        { "gid", fsStat->GetGid() },
-        { "size", fsStat->GetSize() },
-        { "atime", fsStat->GetAtime() },
-        { "mtime", fsStat->GetMtime() },
-        { "ctime", fsStat->GetCtime() },
-    };
-    for (auto iter : numProperties) {
-        auto key = iter.first.data();
-        auto value = iter.second;
-        ret = AniHelper::SetPropertyValue(env, statObject, key, value);
-        if (ret != ANI_OK) {
-            HILOGE("SetPropertyValue Fail %{public}s, err: %{public}d", key, ret);
-            return ret;
-        }
-    }
+//     vector<pair<string_view, int64_t>> numProperties = {
+//         // { "mode", fsStat->GetMode() },
+//         // { "uid", fsStat->GetUid() },
+//         // { "gid", fsStat->GetGid() },
+//         // { "size", fsStat->GetSize() },
+//         // { "atime", fsStat->GetAtime() },
+//         { "mtime", fsStat->GetMtime() },
+//         { "ctime", fsStat->GetCtime() },
+//     };
+//     for (auto iter : numProperties) {
+//         auto key = iter.first.data();
+//         auto value = iter.second;
+//         ret = AniHelper::SetPropertyValue(env, statObject, key, value);
+//         if (ret != ANI_OK) {
+//             HILOGE("SetPropertyValue Fail %{public}s, err: %{public}d", key, ret);
+//             return ret;
+//         }
+//     }
 
-    vector<pair<string_view, int64_t>> bigIntProperties = {
-        // { "ino", fsStat->GetIno() },
-        { "atimeNs", fsStat->GetAtimeNs() },
-        { "mtimeNs", fsStat->GetMtimeNs() },
-        { "ctimeNs", fsStat->GetCtimeNs() },
-    };
-    for (auto iter : bigIntProperties) {
-        auto key = iter.first.data();
-        auto value = iter.second;
-        ret = SetBigIntProperty(env, statObject, key, value);
-        if (ret != ANI_OK) {
-            HILOGE("SetBigIntProperty Fail %{public}s, err: %{public}d", key, ret);
-            return ret;
-        }
-    }
+//     vector<pair<string_view, int64_t>> bigIntProperties = {
+//         // { "ino", fsStat->GetIno() },
+//         { "atimeNs", fsStat->GetAtimeNs() },
+//         { "mtimeNs", fsStat->GetMtimeNs() },
+//         { "ctimeNs", fsStat->GetCtimeNs() },
+//     };
+//     for (auto iter : bigIntProperties) {
+//         auto key = iter.first.data();
+//         auto value = iter.second;
+//         ret = SetBigIntProperty(env, statObject, key, value);
+//         if (ret != ANI_OK) {
+//             HILOGE("SetBigIntProperty Fail %{public}s, err: %{public}d", key, ret);
+//             return ret;
+//         }
+//     }
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    if ((ret = SetEnumLocation(env, statObject, "location", static_cast<Location>(fsStat->GetLocation()))) != ANI_OK) {
-        HILOGE("SetEnumLocation Fail, err: %{public}d", ret);
-        return ret;
-    }
-#endif
+// #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+//     if ((ret = SetEnumLocation(env, statObject, "location", static_cast<Location>(fsStat->GetLocation()))) != ANI_OK) {
+//         HILOGE("SetEnumLocation Fail, err: %{public}d", ret);
+//         return ret;
+//     }
+// #endif
 
-    return ANI_OK;
-}
+//     return ANI_OK;
+// }
 
 ani_object StatWrapper::Wrap(ani_env *env, FsStat *fsStat)
 {
@@ -188,10 +188,10 @@ ani_object StatWrapper::Wrap(ani_env *env, FsStat *fsStat)
         return nullptr;
     }
 
-    if ((ret = SetProperties(env, statObject, fsStat)) != ANI_OK) {
-        HILOGE("SetProperties Fail, err: %{public}d", ret);
-        return nullptr;
-    }
+    // if ((ret = SetProperties(env, statObject, fsStat)) != ANI_OK) {
+    //     HILOGE("SetProperties Fail, err: %{public}d", ret);
+    //     return nullptr;
+    // }
 
     return statObject;
 }

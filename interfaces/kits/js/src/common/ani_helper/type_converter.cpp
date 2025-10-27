@@ -63,13 +63,13 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::ToOptionalInt32(ani_env 
     ani_method toIntAniMethod;
     ani_status ret;
     tie(ret, toIntAniMethod) =
-        aniCache.GetMethod(env, Boxed::Int::classDesc, Boxed::Int::toIntDesc, Boxed::Int::toIntSig);
+        aniCache.GetMethod(env, BoxedTypes::Int::classDesc, BoxedTypes::Int::toIntDesc, BoxedTypes::Int::toIntSig);
     if (ret != ANI_OK) {
         return { false, {} };
     }
 
     ani_int intValue;
-    if (ANI_OK == env->Object_CallMethodByName_Int(value, toIntAniMethod, &intValue)) {
+    if (ANI_OK == env->Object_CallMethod_Int(value, toIntAniMethod, &intValue)) {
         return { true, std::make_optional(intValue) };
     }
 
@@ -344,5 +344,23 @@ std::tuple<bool, ani_object> TypeConverter::ToAniBigInt(ani_env *env, int64_t va
     }
     return {true, object};
 }
+
+// static std::tuple<bool, int32_t> ObjectFiledToInt32(ani_env *env, const ani_object &value, const string& classDest,
+//     const string& methodName)
+// {
+//     AniCache& aniCache = AniCache::GetInstance();
+//     auto [ret, cls] = aniCache.GetClass(env, classDest);
+//     if (ret != ANI_OK) {
+//         return {false, -1};
+//     }
+
+//     ani_method method{};
+//     tie(ret, method) = aniCache.GetMethod(env, classDest, methodName, BoxedTypes::Int::toIntSig);
+//     if (ANI_OK != ret) {
+//         return {false, -1};
+//     }
+//     if ((ret = env->Object_CallMethod_Int(value, method)))
+//     return {true, -1};
+// }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI
