@@ -65,7 +65,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_001, testing::ext::TestSi
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(-1);
 
     auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_001";
 }
@@ -85,7 +85,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_002, testing::ext::TestSi
     fileInfo.fdg = std::make_unique<DistributedFS::FDGuard>(1);
 
     auto res = TruncateCore::DoTruncate(fileInfo, len);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_002";
 }
@@ -136,7 +136,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_003, testing::ext::TestSi
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 0);
 
@@ -190,7 +190,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_004, testing::ext::TestSi
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 10);
     
@@ -245,7 +245,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_005, testing::ext::TestSi
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 100);
 
@@ -306,7 +306,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_006, testing::ext::TestSi
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 0);
 
@@ -368,7 +368,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_007, testing::ext::TestSi
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 15);
 
@@ -407,7 +407,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_008, testing::ext::TestSi
     }
 
     auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_008";
 }
@@ -449,7 +449,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_009, testing::ext::TestSi
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_009 rmdir failed! errno: " << errno;
     }
 
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_009";
 }
@@ -511,7 +511,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_010, testing::ext::TestSi
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_010";
 }
@@ -559,7 +559,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_011, testing::ext::TestSi
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_011";
 }
@@ -618,7 +618,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_012, testing::ext::TestSi
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 0);
 
@@ -642,7 +642,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_013, testing::ext::TestSi
     fileInfo.path.get()[0] = '\0';
 
     auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_013";
 }
@@ -727,7 +727,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_015, testing::ext::TestSi
     fileInfo.path = nullptr;
 
     auto res = TruncateCore::DoTruncate(fileInfo);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "TruncateCoreTest-end TruncateCoreTest_DoTruncate_015";
 }
@@ -779,7 +779,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_016, testing::ext::TestSi
     }
 
     EXPECT_EQ(written, static_cast<ssize_t>(fileContent.length()));
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, fileContent.length());
 
@@ -820,7 +820,7 @@ HWTEST_F(TruncateCoreTest, TruncateCoreTest_DoTruncate_017, testing::ext::TestSi
         GTEST_LOG_(ERROR) << "TruncateCoreTest_DoTruncate_017 remove file failed! errno: " << errno;
     }
 
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
     EXPECT_EQ(statResult, 0);
     EXPECT_EQ(st.st_size, 100);
 
