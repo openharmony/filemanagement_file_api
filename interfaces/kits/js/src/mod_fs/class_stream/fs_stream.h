@@ -24,22 +24,13 @@
 
 #include "filemgmt_libfs.h"
 #include "fs_utils.h"
+#include "read_options.h"
+#include "write_options.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
-
-struct WriteOptions {
-    optional<size_t> length = nullopt;
-    optional<int64_t> offset = nullopt;
-    optional<std::string> encoding = nullopt;
-};
-
-struct ReadOptions {
-    optional<int64_t> length = nullopt;
-    optional<int64_t> offset = nullopt;
-};
 
 class FsStream final {
 public:

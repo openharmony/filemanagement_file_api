@@ -45,19 +45,15 @@ ani_object ReaderIteratorResultAni::Wrap(ani_env *env, const ReaderIteratorResul
         return nullptr;
     }
 
-    ani_object obj;
-    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
+    auto [succ, value] = TypeConverter::ToAniString(env, result.value);
+    if (!succ) {
+        HILOGE("Convert value to ani string failed!");
+        return nullptr;
+    }
+
+    ani_object obj {};
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, result.done, value)) {
         HILOGE("New %s obj Failed!", classDesc);
-        return nullptr;
-    }
-
-    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "done", result.done)) {
-        HILOGE("Set 'done' field value failed!");
-        return nullptr;
-    }
-
-    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "value", result.value)) {
-        HILOGE("Set 'value' field value failed!");
         return nullptr;
     }
 

@@ -37,6 +37,18 @@ const string READ_STREAM_CLASS = "ReadStream";
 const string WRITE_STREAM_CLASS = "WriteStream";
 const string TEMP_FILE_SUFFIX = "_XXXXXX";
 
+void CallBindNativePtr(ani_env *env, ani_object obj, FsAtomicFile *fsAtomicFile)
+{
+    auto bindNativePtrSig = FS::AtomicFile::bindNativePtrSig.c_str();
+    auto ptr = FS::AtomicFile::bindNativePtr.c_str();
+    ani_long fsAtomicFilePtr = reinterpret_cast<ani_long>(fsAtomicFile);
+    ani_status ret = env->Object_CallMethodByName_Void(obj, ptr, bindNativePtrSig, fsAtomicFilePtr);
+    if (ret != ANI_OK) {
+        HILOGE("Object_CallMethodByName_Void failed. ret = %{public}d", ret);
+        return;
+    }
+}
+
 void AtomicFileAni::Constructor(ani_env *env, ani_object obj, ani_string pathObj)
 {
     auto [succ, filePath] = TypeConverter::ToUTF8String(env, pathObj);
@@ -59,6 +71,7 @@ void AtomicFileAni::Constructor(ani_env *env, ani_object obj, ani_string pathObj
         ErrorHandler::Throw(env, EIO);
         return;
     }
+    CallBindNativePtr(env, obj, ret.GetData().value());
 }
 
 static FsAtomicFile *Unwrap(ani_env *env, ani_object object)

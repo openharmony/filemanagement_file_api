@@ -229,6 +229,13 @@ struct AtomicFile : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string bindNativePtr;
+    static const string bindNativePtrSig;
+};
+
+struct CleanerImpl : public BaseType {
+    static const Type classType;
+    static const string classDesc;
 };
 
 } // namespace FS
@@ -268,6 +275,12 @@ struct HashStreamImpl : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string bindNativePtrSig;
+};
+
+struct CleanerImpl : public BaseType {
+    static const Type classType;
+    static const string classDesc;
 };
 
 } // namespace HASH
