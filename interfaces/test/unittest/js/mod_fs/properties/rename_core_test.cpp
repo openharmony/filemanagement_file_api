@@ -108,14 +108,14 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_002, testing::ext::TestSize.Lev
     auto file = open(src.c_str(), O_CREAT | O_RDWR);
     if (file < 0) {
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_002 create failed! ret: " << file << ", errno: " << errno;
-        EXPECT_GT(file, 0);
+        ASSERT_TRUE(false);
     }
     close(file);
 
-    auto fileDest = open(src.c_str(), O_CREAT | O_RDWR);
+    auto fileDest = open(dest.c_str(), O_CREAT | O_RDWR);
     if (fileDest < 0) {
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_002 create failed! ret: " << fileDest << ", errno: " << errno;
-        EXPECT_GT(fileDest, 0);
+        ASSERT_TRUE(false);
     }
     close(fileDest);
 
@@ -151,13 +151,14 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_003, testing::ext::TestSize.Lev
     auto file = open(src.c_str(), O_CREAT | O_RDWR);
     if (file < 0) {
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_003 create failed! ret: " << file << ", errno: " << errno;
-        EXPECT_GT(file, 0);
+        ASSERT_TRUE(false);
     }
     close(file);
 
     auto result = mkdir(dest.c_str(), mode);
     if (result < 0) {
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_003 mkdir failed! ret: " << result << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
 
     auto res = RenameCore::DoRename(src, dest);
@@ -192,6 +193,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_004, testing::ext::TestSize.Lev
     auto result = mkdir(src.c_str(), mode);
     if (result < 0) {
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_004 mkdir failed! ret: " << result << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
 
     auto res = RenameCore::DoRename(src, dest);
@@ -231,17 +233,19 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_005, testing::ext::TestSize.Lev
     auto result = mkdir(src.c_str(), mode);
     if (result < 0) {
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_005 mkdir failed! ret: " << result << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     result = mkdir(dest.c_str(), mode);
     if (result < 0) {
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_005 mkdir failed! ret: " << result << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
 
     auto res = RenameCore::DoRename(src, dest);
 
     result = rmdir(dest.c_str());
     if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_004 rmdir failed! ret: " << result << ", errno: " << errno;
+        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_005 rmdir failed! ret: " << result << ", errno: " << errno;
     }
 
     EXPECT_EQ(res.IsSuccess(), true);
@@ -265,11 +269,12 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_006, testing::ext::TestSize.Lev
     auto result = mkdir(src.c_str(), mode);
     if (result < 0) {
         GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_006 mkdir failed! ret: " << result << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     auto file = open(dest.c_str(), O_CREAT | O_RDWR);
     if (file < 0) {
-        GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_006 create failed! ret: " << file << ", errno: " << errno;
-        EXPECT_GT(file, 0);
+        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_006 create failed! ret: " << file << ", errno: " << errno;
+        ASSERT_TRUE(false);
     }
     close(file);
 
