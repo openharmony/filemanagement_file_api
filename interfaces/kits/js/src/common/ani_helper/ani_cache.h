@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 
+#ifndef INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ANI_CACHE_H
+#define INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ANI_CACHE_H
+
 #pragma once
 
-#include<ani.h>
-#include<string>
-#include<map>
+#include <ani.h>
+#include <map>
+#include <mutex>
+#include <string>
 
 namespace OHOS::FileManagement::ModuleFileIO::ANI {
 using namespace std;
@@ -26,19 +30,17 @@ public:
     static AniCache& GetInstance();
     tuple<ani_status, ani_class> GetClass(ani_env *env, const string &name);
     tuple<ani_status, ani_enum> GetEnum(ani_env *env, const string &name);
-    tuple<ani_status, ani_method> GetMethod(ani_env *env, const string &clazzName, const string &methodName, const string& methodSignature);
-    tuple<ani_status, ani_method> GetStaticMethod(ani_env *env, const string &clazzName, const string &methodName, const string& methodSignature);
-    tuple<ani_status, ani_field> GetField(ani_env *env, const string &clazzName, const string &FieldName);
+    tuple<ani_status, ani_method> GetMethod(ani_env *env, const string &clazzName, const string &methodName,
+        const string& methodSignature);
     tuple<ani_status, ani_enum_item> GetEnumIndex(ani_env *env, const string &enumName, int index);
     AniCache(const AniCache&) = delete;
     AniCache& operator=(const AniCache&) = delete;
 private:
     AniCache() noexcept;
     map<string, ani_ref> clazzMap;
-    map<string, map<string, map<string, ani_method> *> *> methodMap;
-    map<string, map<string, ani_field> *> fieldMap;
-    map<string, map<string, ani_ref> *> filedMap;
-    map<string, map<int, ani_enum_item>*> enumItemMap;
+    std::mutex exClassMapLock;
 };
 
 } // OHOS::FileManagement::ModuleFileIO::ANI
+
+#endif // INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ANI_CACHE_H

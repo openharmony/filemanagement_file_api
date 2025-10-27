@@ -1337,8 +1337,8 @@ export enum AccessFlagType {
 }
 
 export interface RandomAccessFile {
-  fd: int;
-  filePointer: long;
+  get fd(): int;
+  get filePointer(): long;
 
   setFilePointer(filePointer: long): void;
   close(): void;
@@ -1355,8 +1355,8 @@ export interface RandomAccessFile {
 }
 
 export class RandomAccessFileInner implements RandomAccessFile {
-  fd: int = -1;
-  filePointer: long = -1;
+  native get fd(): int;
+  native get filePointer(): long;
 
   private nativePtr: long = 0;
   private cleaner: Cleaner | null = null;
@@ -1376,18 +1376,12 @@ export class RandomAccessFileInner implements RandomAccessFile {
       destroyRegister.unregister(this);
   }
 
-  setFilePointer(filePointer: long): void {
-    this.setFilePointer0(filePointer);
-    this.filePointer = filePointer;
-  }
-
-  native setFilePointer0(filePointer: long): void;
+  native setFilePointer(filePointer: long): void;
 
   native close(): void;
 
   writeSync(buffer: ArrayBuffer | string, options?: WriteOptions): long {
     let length = options ? this.writeSync0(buffer, options) : this.writeSync0(buffer);
-    this.filePointer += (options?.offset?? 0) + length;
     return length;
   }
 
@@ -1437,7 +1431,6 @@ export class RandomAccessFileInner implements RandomAccessFile {
 
   readSync(buffer: ArrayBuffer, options?: ReadOptions): long {
     const length = options ? this.readSync0(buffer, options) : this.readSync0(buffer);
-    this.filePointer += (options?.offset?? 0) + length;
     return length;
   }
 
@@ -1613,38 +1606,17 @@ export class ReaderIteratorInner implements ReaderIterator {
 }
 
 export interface Stat {
-  // ino: bigint;
   get ino(): bigint;
-  // mode: long;
   get mode(): long;
-  // uid: long;
   get uid(): long;
-
-  // gid: long;
   get gid(): long;
-
-  // size: long;
   get size(): long;
-
-  // atime: long;
   get atime(): long;
-
-  // mtime: long;
   get mtime(): long;
-
-  // ctime: long;
   get ctime(): long;
-  
-  // atimeNs: bigint;
   get atimeNs(): bigint;
-
-  // mtimeNs: bigint;
   get mtimeNs(): bigint;
-
-  // ctimeNs: bigint;
   get ctimeNs(): bigint;
-
-  // location: LocationType;
   get location(): LocationType
 
   isBlockDevice(): boolean;
@@ -1657,38 +1629,17 @@ export interface Stat {
 }
 
 export class StatInner implements Stat {
-  // ino: bigint = 0n;
   native get ino(): bigint;
-  // mode: long;
   native get mode(): long;
-  // uid: long;
   native get uid(): long;
-
-  // gid: long;
   native get gid(): long;
-
-  // size: long;
   native get size(): long;
-
-  // atime: long;
   native get atime(): long;
-
-  // mtime: long;
   native get mtime(): long;
-
-  // ctime: long;
   native get ctime(): long;
-
-  // atimeNs: bigint = 0n;
   native get atimeNs(): bigint;
-
-  // mtimeNs: bigint = 0n;
   native get mtimeNs(): bigint;
-
-  // ctimeNs: bigint = 0n;
   native get ctimeNs(): bigint;
-
-  // location: LocationType = LocationType.LOCAL;
   native get location(): LocationType
 
   private nativeStat: long = 0;

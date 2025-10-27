@@ -88,8 +88,17 @@ std::tuple<bool, std::optional<int64_t>> TypeConverter::ToOptionalInt64(ani_env 
         return { true, std::nullopt };
     }
 
+    AniCache &aniCache = AniCache::GetInstance();
+    ani_method toLongAniMethod;
+    ani_status ret;
+    tie(ret, toLongAniMethod) =
+        aniCache.GetMethod(env, BoxedTypes::Long::classDesc, BoxedTypes::Long::toLongDesc, BoxedTypes::Long::toLongSig);
+    if (ret != ANI_OK) {
+        return { false, {} };
+    }
+
     ani_long longValue;
-    if (ANI_OK == env->Object_CallMethodByName_Long(value, "toLong", nullptr, &longValue)) {
+    if (ANI_OK == env->Object_CallMethod_Long(value, toLongAniMethod, &longValue)) {
         return { true, std::make_optional(longValue) };
     }
 
@@ -108,8 +117,17 @@ tuple<bool, optional<double>> TypeConverter::ToOptionalDouble(ani_env *env, cons
         return { true, nullopt };
     }
 
+    AniCache &aniCache = AniCache::GetInstance();
+    ani_method toDoubleAniMethod;
+    ani_status ret;
+    tie(ret, toDoubleAniMethod) = aniCache.GetMethod(env, BoxedTypes::Double::classDesc,
+        BoxedTypes::Double::toDoubleDesc, BoxedTypes::Double::toDoubleSig);
+    if (ret != ANI_OK) {
+        return { false, {} };
+    }
+
     ani_double doubleValue;
-    if (ANI_OK == env->Object_CallMethodByName_Double(value, "toDouble", nullptr, &doubleValue)) {
+    if (ANI_OK == env->Object_CallMethod_Double(value, toDoubleAniMethod, &doubleValue)) {
         return { true, make_optional<double>(doubleValue) };
     }
 
@@ -175,14 +193,24 @@ std::tuple<bool, std::optional<int32_t>> TypeConverter::EnumToInt32(ani_env *env
 static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrFd)
 {
     ani_boolean isFd = false;
+    AniCache &aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, BoxedTypes::Int::classDesc);
+    if (ret != ANI_OK) {
+        return { false, {} };
+    }
 
-    auto classDesc = BoxedTypes::Int::classDesc.c_str();
-    ani_class cls;
-    env->FindClass(classDesc, &cls);
     env->Object_InstanceOf(pathOrFd, cls, &isFd);
     if (isFd) {
+        ani_method toIntAniMethod;
+        ani_status ret;
+        tie(ret, toIntAniMethod) =
+            aniCache.GetMethod(env, BoxedTypes::Int::classDesc, BoxedTypes::Int::toIntDesc, BoxedTypes::Int::toIntSig);
+        if (ret != ANI_OK) {
+            return { false, {} };
+        }
+
         ani_int fd;
-        if (ANI_OK != env->Object_CallMethodByName_Int(pathOrFd, "toInt", nullptr, &fd)) {
+        if (ANI_OK != env->Object_CallMethod_Int(pathOrFd, toIntAniMethod, &fd)) {
             HILOGE("Parse file path failed");
             return { false, 0 };
         }
@@ -199,11 +227,13 @@ std::tuple<bool, FileInfo> TypeConverter::ToFileInfo(ani_env *env, const ani_obj
         return { false, FileInfo { false, {}, {} } };
     }
 
-    auto stringClassDesc = BuiltInTypes::String::classDesc.c_str();
-    ani_class stringClass;
-    env->FindClass(stringClassDesc, &stringClass);
-
     ani_boolean isPath = false;
+    AniCache &aniCache = AniCache::GetInstance();
+    auto [ret, stringClass] = aniCache.GetClass(env, BuiltInTypes::String::classDesc);
+    if (ret != ANI_OK) {
+        return { false, FileInfo { false, {}, {} } };
+    }
+
     env->Object_InstanceOf(pathOrFd, stringClass, &isPath);
     if (isPath) {
         auto [succ, path] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(pathOrFd));
@@ -255,18 +285,16 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
         return { false, nullptr };
     }
 
-    auto classDesc = BuiltInTypes::ArrayBuffer::classDesc.c_str();
-    ani_status ret;
-    ani_class cls;
-    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Not found %{private}s, err: %{public}d", classDesc, ret);
+    AniCache &aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, BuiltInTypes::ArrayBuffer::classDesc);
+    if (ret != ANI_OK) {
         return { false, nullptr };
     }
 
-    auto ctorDesc = BuiltInTypes::ArrayBuffer::ctorDesc.c_str();
-    auto ctorSig = BuiltInTypes::ArrayBuffer::ctorSig.c_str();
     ani_method ctor;
-    if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
+    tie(ret, ctor) = aniCache.GetMethod(env, BuiltInTypes::ArrayBuffer::classDesc,
+        BuiltInTypes::ArrayBuffer::ctorDesc, BuiltInTypes::ArrayBuffer::ctorSig);
+    if (ret != ANI_OK) {
         HILOGE("Not found ctor, err: %{public}d", ret);
         return { false, nullptr };
     }
@@ -332,7 +360,8 @@ std::tuple<bool, ani_object> TypeConverter::ToAniBigInt(ani_env *env, int64_t va
     }
 
     ani_method ctor;
-    tie(ret, ctor) = aniCache.GetMethod(env, BuiltInTypes::BigInt::classDesc, BuiltInTypes::BigInt::ctorDesc, BuiltInTypes::BigInt::ctorSig);
+    tie(ret, ctor) = aniCache.GetMethod(env, BuiltInTypes::BigInt::classDesc, BuiltInTypes::BigInt::ctorDesc,
+        BuiltInTypes::BigInt::ctorSig);
     if (ret != ANI_OK) {
         return {false, nullptr};
     }
@@ -344,23 +373,5 @@ std::tuple<bool, ani_object> TypeConverter::ToAniBigInt(ani_env *env, int64_t va
     }
     return {true, object};
 }
-
-// static std::tuple<bool, int32_t> ObjectFiledToInt32(ani_env *env, const ani_object &value, const string& classDest,
-//     const string& methodName)
-// {
-//     AniCache& aniCache = AniCache::GetInstance();
-//     auto [ret, cls] = aniCache.GetClass(env, classDest);
-//     if (ret != ANI_OK) {
-//         return {false, -1};
-//     }
-
-//     ani_method method{};
-//     tie(ret, method) = aniCache.GetMethod(env, classDest, methodName, BoxedTypes::Int::toIntSig);
-//     if (ANI_OK != ret) {
-//         return {false, -1};
-//     }
-//     if ((ret = env->Object_CallMethod_Int(value, method)))
-//     return {true, -1};
-// }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

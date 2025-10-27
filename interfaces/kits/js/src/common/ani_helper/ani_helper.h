@@ -113,9 +113,10 @@ public:
         auto result = make_optional<int64_t>(static_cast<int64_t>(value));
         return { true, move(result) };
     }
-    
+
     static tuple<bool, optional<int64_t>> ParseInt64Option(ani_env *env, ani_object obj, const string &className,
-            const string &propertyName) {
+            const string &propertyName)
+    {
         auto &aniCache = AniCache::GetInstance();
         auto [ret, method] =
             aniCache.GetMethod(env, className, propertyName, BoxedTypes::Long::getOptionSig);
@@ -133,15 +134,13 @@ public:
             return { true, nullopt };
         }
         ani_long value{};
-        tie(ret, method) = aniCache.GetMethod(env, BoxedTypes::Long::classDesc,
-                                                BoxedTypes::Long::toLongDesc,
-                                                BoxedTypes::Long::toLongSig);
+        tie(ret, method) = aniCache.GetMethod(env, BoxedTypes::Long::classDesc, BoxedTypes::Long::toLongDesc,
+            BoxedTypes::Long::toLongSig);
         if (ANI_OK != ret) {
             return { false, nullopt };
         }
 
-        ret = env->Object_CallMethod_Long(static_cast<ani_object>(property), method,
-                                            &value);
+        ret = env->Object_CallMethod_Long(static_cast<ani_object>(property), method, &value);
         if (ANI_OK != ret) {
             HILOGE("Failed to Object_CallMethod_Long ret: %{public}d", ret);
             return { false, nullopt };

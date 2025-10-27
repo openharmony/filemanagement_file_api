@@ -31,8 +31,6 @@ class TypeConverter {
 public:
     static std::tuple<bool, std::string> ToUTF8String(ani_env *env, const ani_string &path);
     static std::tuple<bool, std::optional<int32_t>> ToOptionalInt32(ani_env *env, const ani_object &value);
-    // static std::tuple<bool, int32_t> ObjectFiledToInt32(ani_env *env, const ani_object &value, const string& classDest,
-    //         const string& filedName, const string& methodSig);
     static std::tuple<bool, std::optional<int64_t>> ToOptionalInt64(ani_env *env, const ani_object &value);
     static std::tuple<bool, std::optional<double>> ToOptionalDouble(ani_env *env, const ani_object &value);
     static std::tuple<bool, ani_arraybuffer> ToAniArrayBuffer(ani_env *env, void *buffer, size_t length);

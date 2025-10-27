@@ -123,7 +123,7 @@ void FileAni::UnLock(ani_env *env, [[maybe_unused]] ani_object object)
     }
 }
 
-ani_int FileAni::GetFd(ani_env *env,[[maybe_unused]] ani_object object)
+ani_int FileAni::GetFd(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {
@@ -143,7 +143,7 @@ ani_int FileAni::GetFd(ani_env *env,[[maybe_unused]] ani_object object)
     return res.GetData().value();
 }
 
-ani_string FileAni::GetPath(ani_env *env,[[maybe_unused]] ani_object object)
+ani_string FileAni::GetPath(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {
@@ -170,7 +170,7 @@ ani_string FileAni::GetPath(ani_env *env,[[maybe_unused]] ani_object object)
     return result;
 }
 
-ani_string FileAni::GetName(ani_env *env,[[maybe_unused]] ani_object object)
+ani_string FileAni::GetName(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto fsFile = FileWrapper::Unwrap(env, object);
     if (fsFile == nullptr) {

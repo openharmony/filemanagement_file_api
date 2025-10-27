@@ -43,8 +43,9 @@ public:
     static ani_object GetAtimeNs(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_object GetMtimeNs(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_object GetCtimeNs(ani_env *env, [[maybe_unused]] ani_object object);
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     static ani_enum_item GetLocation(ani_env *env, [[maybe_unused]] ani_object object);
-
+#endif
 };
 } // namespace ANI
 } // namespace ModuleFileIO

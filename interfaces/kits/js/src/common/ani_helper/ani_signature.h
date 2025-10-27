@@ -72,6 +72,8 @@ struct Long : public BaseType {
 struct Double : public BaseType {
     static const Type classType;
     static const string classDesc;
+    static const string toDoubleDesc;
+    static const string toDoubleSig;
 };
 
 } // namespace BoxedTypes
@@ -151,6 +153,10 @@ struct RandomAccessFileInner : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string getFdDesc;
+    static const string getFdSig;
+    static const string getFPDesc;
+    static const string getFPSig;
 };
 
 struct ReaderIteratorInner : public BaseType {
@@ -263,7 +269,7 @@ struct CleanerImpl : public BaseType {
 
 struct ReadTextOptions : public BaseType {
     static const Type classType;
-    static const string ClassDesc;
+    static const string classDesc;
     static const string getOffsetDesc;
     static const string getOffsetSig;
     static const string getLengthDesc;

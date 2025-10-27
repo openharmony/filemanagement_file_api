@@ -59,7 +59,7 @@ ani_object StreamWrapper::Wrap(ani_env *env, const FsStream *stream)
 
     ani_method ctor;
     tie(ret, ctor) = aniCache.GetMethod(env, FS::StreamInner::classDesc, FS::StreamInner::ctorDesc,
-            FS::StreamInner::ctorSig);
+        FS::StreamInner::ctorSig);
     if (ANI_OK != ret) {
         return nullptr;
     }

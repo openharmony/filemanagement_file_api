@@ -152,26 +152,6 @@ ani_object StatAni::GetIno(ani_env *env, [[maybe_unused]] ani_object object)
     }
 
     auto ino = fsStat->GetIno();
-
-    // AniCache& aniCache = AniCache::GetInstance();
-    // auto [succ, cls] = aniCache.GetClass(env, BuiltInTypes::BigInt::classDesc);
-    // if (succ != ANI_OK) {
-    //     return nullptr;
-    // }
-
-    // ani_method ctor;
-    // tie(succ, ctor) = aniCache.GetMethod(env, BuiltInTypes::BigInt::classDesc, BuiltInTypes::BigInt::ctorDesc, BuiltInTypes::BigInt::ctorSig);
-    // if (succ != ANI_OK) {
-    //     return nullptr;
-    // }
-
-    // ani_object inoObject;
-
-    // if ((succ = env->Object_New(cls, ctor, &inoObject, ino)) != ANI_OK) {
-    //     HILOGE("New Object Fail, err: %{public}d", succ);
-    //     return nullptr;
-    // }
-
     auto [ret, inoObject] = TypeConverter::ToAniBigInt(env, ino);
     if (!ret) {
         HILOGE("Ino converte to BigInt failed.");
@@ -188,9 +168,6 @@ ani_long StatAni::GetMode(ani_env *env, [[maybe_unused]] ani_object object)
         ErrorHandler::Throw(env, UNKNOWN_ERR);
         return -1;
     }
-
-    HILOGE("GetMode!!!");
-
     auto mode = fsStat->GetMode();
     return mode;
 }
@@ -322,7 +299,6 @@ ani_object StatAni::GetCtimeNs(ani_env *env, [[maybe_unused]] ani_object object)
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-
 ani_enum_item StatAni::GetLocation(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto fsStat = StatWrapper::Unwrap(env, object);
@@ -345,7 +321,6 @@ ani_enum_item StatAni::GetLocation(ani_env *env, [[maybe_unused]] ani_object obj
     }
     return aniEnumLocaltion;
 }
-
 #endif
 
 } // namespace ANI

@@ -48,6 +48,8 @@ const string BoxedTypes::Long::getOptionSig = Builder::BuildSignatureDescriptor(
 // BoxedTypes::Double
 const Type BoxedTypes::Double::classType = Builder::BuildClass("std.core.Double");
 const string BoxedTypes::Double::classDesc = BoxedTypes::Double::classType.Descriptor();
+const string BoxedTypes::Double::toDoubleDesc = "toDouble";
+const string BoxedTypes::Double::toDoubleSig = Builder::BuildSignatureDescriptor({}, BasicTypes::doubleType);
 // BaseType
 const string BaseType::ctorDesc = Builder::BuildConstructorName();
 const string BaseType::ctorSig0 = Builder::BuildSignatureDescriptor({});
@@ -105,6 +107,10 @@ const string FS::ProgressInner::ctorSig =
 const Type FS::RandomAccessFileInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.RandomAccessFileInner");
 const string FS::RandomAccessFileInner::classDesc = FS::RandomAccessFileInner::classType.Descriptor();
 const string FS::RandomAccessFileInner::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
+const string FS::RandomAccessFileInner::getFdDesc = Builder::BuildGetterName("fd");
+const string FS::RandomAccessFileInner::getFdSig = Builder::BuildSignatureDescriptor({}, BasicTypes::intType);
+const string FS::RandomAccessFileInner::getFPDesc = Builder::BuildGetterName("filePointer");
+const string FS::RandomAccessFileInner::getFPSig = Builder::BuildSignatureDescriptor({}, BasicTypes::longType);
 // FS::ReaderIteratorInner
 const Type FS::ReaderIteratorInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ReaderIteratorInner");
 const string FS::ReaderIteratorInner::classDesc = FS::ReaderIteratorInner::classType.Descriptor();
@@ -185,15 +191,15 @@ const string FS::ReadStreamOptionsInner::classDesc = FS::ReadStreamOptionsInner:
 const Type FS::WriteStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.WriteStreamOptionsInner");
 const string FS::WriteStreamOptionsInner::classDesc = FS::WriteStreamOptionsInner::classType.Descriptor();
 // FS::ReadTextOptions
-const Type FS::ReadTextOptions::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ReadTextOptions");
-const string FS::ReadTextOptions::ClassDesc = FS::ReadTextOptions::classType.Descriptor();
+const Type FS::ReadTextOptions::classType = Builder::BuildClass("@ohos.file.fs.ReadTextOptions");
+const string FS::ReadTextOptions::classDesc = FS::ReadTextOptions::classType.Descriptor();
 const string FS::ReadTextOptions::getOffsetDesc = Builder::BuildGetterName("offset");
 const string FS::ReadTextOptions::getOffsetSig = Builder::BuildSignatureDescriptor({}, BasicTypes::longType);
 const string FS::ReadTextOptions::getLengthDesc = Builder::BuildGetterName("length");
 const string FS::ReadTextOptions::getLengthSig = Builder::BuildSignatureDescriptor({}, BasicTypes::longType);
 const string FS::ReadTextOptions::getEncodingDesc = Builder::BuildGetterName("encoding");
-const string FS::ReadTextOptions::getEncodingSig = Builder::BuildSignatureDescriptor({}, BuiltInTypes::String::classType);
-
+const string FS::ReadTextOptions::getEncodingSig =
+    Builder::BuildSignatureDescriptor({}, BuiltInTypes::String::classType);
 // Impl::EnvironmentImpl
 const Type Impl::EnvironmentImpl::classType = Builder::BuildClass("@ohos.file.environment.EnvironmentImpl");
 const string Impl::EnvironmentImpl::classDesc = Impl::EnvironmentImpl::classType.Descriptor();

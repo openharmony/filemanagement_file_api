@@ -15,7 +15,7 @@
 
 #include "ani_cache.h"
 
-#include<tuple>
+#include <tuple>
 
 #include "filemgmt_libhilog.h"
 
@@ -26,15 +26,17 @@ AniCache::AniCache() noexcept
 {
     HILOGI("create AniCache");
 }
+
 AniCache& AniCache::GetInstance()
 {
     static AniCache instance;
     return instance;
 }
+
 tuple<ani_status, ani_class> AniCache::GetClass(ani_env *env, const string &name)
 {
-    // todo 加锁操作
-    if (clazzMap.count(name)) {
+    lock_guard<mutex> lock(exClassMapLock);
+    if (clazzMap.find(name) != clazzMap.end()) {
         return {ANI_OK, static_cast<ani_class>(clazzMap[name])};
     }
 
@@ -61,8 +63,8 @@ tuple<ani_status, ani_class> AniCache::GetClass(ani_env *env, const string &name
 
 tuple<ani_status, ani_enum> AniCache::GetEnum(ani_env *env, const string &name)
 {
-    // todo 加锁
-    if (clazzMap.count(name)) {
+    lock_guard<mutex> lock(exClassMapLock);
+    if (clazzMap.find(name) != clazzMap.end()) {
         return { ANI_OK, static_cast<ani_enum>(clazzMap[name]) };
     }
 
@@ -90,12 +92,6 @@ tuple<ani_status, ani_enum> AniCache::GetEnum(ani_env *env, const string &name)
 tuple<ani_status, ani_method> AniCache::GetMethod(ani_env *env, const string &clazzName, const string &methodName,
     const string& methodSignature)
 {
-    if (methodMap.count(clazzName) && (methodMap[clazzName])->count(methodName) &&
-        (methodMap[clazzName])->at(methodName)->count(methodSignature) &&
-        (methodMap[clazzName])->at(methodName)->at(methodSignature)) {
-            return { ANI_OK, (methodMap[clazzName])->at(methodName)->at(methodSignature) };
-        }
-
     auto [ret, cls] = GetClass(env, clazzName);
     if (ret != ANI_OK) {
         return { ret, nullptr };
@@ -108,46 +104,11 @@ tuple<ani_status, ani_method> AniCache::GetMethod(ani_env *env, const string &cl
             ret);
         return { ret, nullptr };
     }
-    // 存放缓存
-    map<string,map<string, ani_method> *> *aniMethod = nullptr;
-    if (methodMap.count(clazzName)) {
-        aniMethod = methodMap[clazzName];
-    } else {
-        aniMethod = new map<string, map<string, ani_method> *>();
-        methodMap[clazzName] = aniMethod;
-    }
-
-    map<string, ani_method> *aniMethodSignature = nullptr;
-    if (aniMethod->count(methodName)) {
-        aniMethodSignature = aniMethod->at(methodName);
-    } else {
-        // 
-        aniMethodSignature = new map<string, ani_method>();
-        (*aniMethod)[methodName] = aniMethodSignature;
-    }
-    (*aniMethodSignature)[methodSignature] = ctor;
-
     return { ANI_OK, ctor };
 }
 
-tuple<ani_status, ani_field> AniCache::GetField(ani_env *env, const string &clazzName, const string &FieldName)
-{
-    ani_field field;
-    return { ANI_OK, field };
-}
-
-tuple<ani_status, ani_method> AniCache::GetStaticMethod(ani_env *env, const string &clazzName,
-    const string &methodName, const string& methodSignature)
-{
-    ani_method method;
-    return { ANI_OK, method };
-}
 tuple<ani_status, ani_enum_item> AniCache::GetEnumIndex(ani_env *env, const string &enumName, int index)
 {
-    if (enumItemMap.count(enumName) && (enumItemMap[enumName])->count(index) && (enumItemMap[enumName])->at(index)) {
-        return { ANI_OK, (enumItemMap[enumName])->at(index)};
-    }
-
     auto [ret, enumType] = GetEnum(env, enumName);
     if (ret != ANI_OK) {
         return { ret, nullptr };
@@ -159,15 +120,6 @@ tuple<ani_status, ani_enum_item> AniCache::GetEnumIndex(ani_env *env, const stri
         HILOGE("Enum_GetEnumItemByIndex failed, index: %{public}d, err: %{public}d", index, ret);
         return { ret, nullptr };
     }
-    map<int, ani_enum_item> *enumMap = nullptr;
-    if (enumItemMap.count(enumName)) {
-        enumMap = enumItemMap[enumName];
-    } else {
-        enumMap = new map<int, ani_enum_item>();
-        enumItemMap[enumName] = enumMap;
-    }
-
-    (*enumMap)[index] = enumItem;
     return { ANI_OK, enumItem };
 }
 

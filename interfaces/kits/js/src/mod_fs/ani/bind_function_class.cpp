@@ -72,13 +72,17 @@ static ani_status BindRafFileMethods(ani_env *env)
 
     std::array methods = {
         ani_native_function {
-            "setFilePointer0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::SetFilePointer) },
+            "setFilePointer", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::SetFilePointer) },
         ani_native_function { "close", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::Close) },
         ani_native_function { "writeSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::WriteSync) },
         ani_native_function { "readSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::ReadSync) },
         ani_native_function { "getReadStream", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::GetReadStream) },
         ani_native_function {
             "getWriteStream", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::GetWriteStream) },
+        ani_native_function { FS::RandomAccessFileInner::getFdDesc.c_str(), FS::RandomAccessFileInner::getFdSig.c_str(),
+            reinterpret_cast<void *>(RandomAccessFileAni::GetFd) },
+        ani_native_function { FS::RandomAccessFileInner::getFPDesc.c_str(), FS::RandomAccessFileInner::getFPSig.c_str(),
+            reinterpret_cast<void *>(RandomAccessFileAni::GetFilePointer) },
     };
 
     return BindClass(env, classDesc, methods);
@@ -161,8 +165,10 @@ static ani_status BindStatClassMethods(ani_env *env)
             reinterpret_cast<void *>(StatAni::GetMtimeNs) },
         ani_native_function { FS::StatInner::getCtimeNs.c_str(), FS::StatInner::getCtimeNsSig.c_str(),
             reinterpret_cast<void *>(StatAni::GetCtimeNs) },
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
         ani_native_function { FS::StatInner::getLocation.c_str(), FS::StatInner::getLocationSig.c_str(),
             reinterpret_cast<void *>(StatAni::GetLocation) },
+#endif
     };
 
     return BindClass(env, classDesc, methods);
