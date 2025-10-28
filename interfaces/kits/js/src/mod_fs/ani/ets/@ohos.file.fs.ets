@@ -1310,9 +1310,7 @@ export class TaskSignal {
       this.onCancelResolve = resolve;
       try {
         this.onCancelNative();
-      } catch (e: BusinessError<void>) {
-        reject(e);
-      } catch (e: Error) {
+      } catch (e) {
         reject(e as BusinessError);
       }
     });
