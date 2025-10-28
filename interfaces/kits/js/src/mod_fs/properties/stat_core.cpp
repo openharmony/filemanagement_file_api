@@ -69,8 +69,6 @@ static tuple<bool, FileInfo> ProcessPath(FileInfo &fileInfo)
             }
             return { true, FileInfo { true, std::move(pathPtr), {} } };
         }
-        HILOGE("Failed to stat file by invalid uri");
-        return { false, FileInfo { false, {}, {} } };
     }
 #endif
     return { true, FileInfo { true, std::move(path), {} } };
