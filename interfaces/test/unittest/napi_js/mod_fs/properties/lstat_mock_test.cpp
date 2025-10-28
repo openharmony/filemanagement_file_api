@@ -163,6 +163,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_003, testing::ext::TestSize.Level1)
 
     const char *testUri = "datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
     tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
         true,
         [&]() -> unique_ptr<char[]> {
@@ -176,9 +177,12 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_003, testing::ext::TestSize.Level1)
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
+    EXPECT_CALL(*uvMock, uv_fs_lstat(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(-1));
 
     auto stat = Lstat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_003";
