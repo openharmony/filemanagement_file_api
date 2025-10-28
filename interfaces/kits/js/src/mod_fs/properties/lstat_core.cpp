@@ -29,7 +29,7 @@ namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 const std::string SCHEME_FILE = "file";
 
-static tuple<bool, string> ParsePath(const string &pathStr)
+static string ParsePath(const string &pathStr)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     if (pathStr.find("://") != string::npos) {
