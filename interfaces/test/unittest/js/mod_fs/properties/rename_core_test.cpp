@@ -250,7 +250,7 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_005, testing::ext::TestSize.Lev
 
     EXPECT_TRUE(res.IsSuccess());
 
-    GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_004";
+    GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_005";
 }
 
 /**
