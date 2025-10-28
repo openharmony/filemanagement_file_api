@@ -49,7 +49,7 @@ static tuple<bool, int32_t> IsFd(FileInfo &fileInfo)
     return make_tuple(true, fdg->GetFD());
 }
 
-static tuple<bool, FileInfo> ProcessPath(FileInfo &fileInfo)
+static tuple<bool, FileInfo> ParsePath(FileInfo &fileInfo)
 {
     auto &path = fileInfo.path;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
@@ -62,7 +62,7 @@ static tuple<bool, FileInfo> ProcessPath(FileInfo &fileInfo)
             std::string realPath = fileUri.GetRealPath();
             auto pathPtr = std::make_unique<char[]>(realPath.length() + 1);
             size_t length = realPath.length() + 1;
-            auto ret = strncpy_s(pathPtr.get(), length, realPath.c_str(), length - 1);
+            auto ret = strncpy_s(pathPtr.get(), length, realPath.c_str(), realPath.length());
             if (ret != EOK) {
                 HILOGE("failed to copy file path");
                 return { false, FileInfo { false, {}, {} } };
@@ -78,7 +78,7 @@ static tuple<bool, FileInfo> ValidFileInfo(FileInfo &fileInfo)
 {
     auto isPath = IsPath(fileInfo);
     if (isPath) {
-        return ProcessPath(fileInfo);
+        return ParsePath(fileInfo);
     }
     auto [isFd, fd] = IsFd(fileInfo);
     if (isFd) {

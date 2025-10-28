@@ -63,7 +63,7 @@ FsResult<FsStat *> LstatCore::DoLstat(const string &path)
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     size_t length = pathStr.length() + 1;
     auto chars = std::make_unique<char[]>(length);
-    ret = strncpy_s(chars.get(), length, pathStr.c_str(), length - 1);
+    ret = strncpy_s(chars.get(), length, pathStr.c_str(), pathStr.length());
     if (ret != EOK) {
         HILOGE("Copy file path failed!");
         return FsResult<FsStat *>::Error(ret);
