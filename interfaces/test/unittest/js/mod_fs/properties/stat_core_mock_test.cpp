@@ -220,7 +220,8 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_006, testing::ext::TestSize.L
 
     FileInfo fileinfo;
     fileinfo.fdg = nullptr;
-    auto succ = SetPathForFileInfo(fileinfo, "datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+    auto succ = SetPathForFileInfo(fileinfo,
+        "datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
     ASSERT_TRUE(succ) << "SetPathForFileInfo failed for test case StatCoreMockTest_DoStat_006";
 
     auto uvMock = UvFsMock::GetMock();
