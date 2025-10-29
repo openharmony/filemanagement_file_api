@@ -122,6 +122,80 @@ void FileAni::UnLock(ani_env *env, [[maybe_unused]] ani_object object)
         return;
     }
 }
+
+ani_int FileAni::GetFd(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsFile = FileWrapper::Unwrap(env, object);
+    if (fsFile == nullptr) {
+        HILOGE("Cannot unwrap fsfile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    auto res = fsFile->GetFD();
+    if (!res.IsSuccess()) {
+        HILOGE("GetFd failed");
+        const auto &err = res.GetError();
+        ErrorHandler::Throw(env, err);
+        return -1;
+    }
+
+    return res.GetData().value();
+}
+
+ani_string FileAni::GetPath(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsFile = FileWrapper::Unwrap(env, object);
+    if (fsFile == nullptr) {
+        HILOGE("Cannot unwrap fsfile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto res = fsFile->GetPath();
+    if (!res.IsSuccess()) {
+        HILOGE("GetPath failed");
+        const auto &err = res.GetError();
+        ErrorHandler::Throw(env, err);
+        return nullptr;
+    }
+
+    auto [succ, result] = TypeConverter::ToAniString(env, res.GetData().value());
+    if (!succ) {
+        HILOGE("ToAniString failed");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    return result;
+}
+
+ani_string FileAni::GetName(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsFile = FileWrapper::Unwrap(env, object);
+    if (fsFile == nullptr) {
+        HILOGE("Cannot unwrap fsfile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto res = fsFile->GetName();
+    if (!res.IsSuccess()) {
+        HILOGE("GetName failed");
+        const auto &err = res.GetError();
+        ErrorHandler::Throw(env, err);
+        return nullptr;
+    }
+
+    auto [succ, result] = TypeConverter::ToAniString(env, res.GetData().value());
+    if (!succ) {
+        HILOGE("ToAniString failed");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    return result;
+}
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement

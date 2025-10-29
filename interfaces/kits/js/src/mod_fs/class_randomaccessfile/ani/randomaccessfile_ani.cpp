@@ -57,14 +57,16 @@ static tuple<bool, optional<ReadOptions>> ToReadOptions(ani_env *env, ani_object
         return { true, nullopt };
     }
 
-    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, "offset");
+    auto [succOffset, offset] = AniHelper::ParseInt64Option(env, obj, FS::ReadTextOptions::classDesc,
+        FS::ReadTextOptions::getOffsetDesc);
     if (!succOffset) {
         HILOGE("Illegal option.offset parameter");
         return { false, nullopt };
     }
     options.offset = offset;
 
-    auto [succLength, length] = AniHelper::ParseInt64Option(env, obj, "length");
+    auto [succLength, length] =AniHelper::ParseInt64Option(env, obj, FS::ReadTextOptions::classDesc,
+        FS::ReadTextOptions::getLengthDesc);
     if (!succLength) {
         HILOGE("Illegal option.length parameter");
         return { false, nullopt };
@@ -107,11 +109,10 @@ static tuple<bool, optional<WriteOptions>> ToWriteOptions(ani_env *env, ani_obje
 
 static tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object &buf)
 {
-    ani_class cls;
-    ani_status ret;
-    auto classDesc = BuiltInTypes::String::classDesc.c_str();
-    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Cannot find class %{public}s, err: %{public}d", classDesc, ret);
+    auto& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, BuiltInTypes::String::classDesc);
+    if (ANI_OK != ret) {
+        HILOGE("Cannot find class %{public}s", BuiltInTypes::String::classDesc.c_str());
         return { false, {} };
     }
 
@@ -126,11 +127,10 @@ static tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object 
 
 static tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_object &buf)
 {
-    ani_class cls;
-    ani_status ret;
-    auto classDesc = BuiltInTypes::ArrayBuffer::classDesc.c_str();
-    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Cannot find class %{public}s, err: %{public}d", classDesc, ret);
+    auto& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, BuiltInTypes::ArrayBuffer::classDesc);
+    if (ANI_OK != ret) {
+        HILOGE("Cannot find class %{public}s", BuiltInTypes::ArrayBuffer::classDesc.c_str());
         return { false, {} };
     }
 
@@ -142,6 +142,46 @@ static tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_obj
 
     auto result = static_cast<ani_arraybuffer>(buf);
     return { true, move(result) };
+}
+
+ani_int RandomAccessFileAni::GetFd(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto rafFile = Unwrap(env, object);
+    if (rafFile == nullptr) {
+        HILOGE("Cannot unwrap rafFile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    auto res = rafFile->GetFD();
+    if (!res.IsSuccess()) {
+        HILOGE("GetFD failed!");
+        const auto &err = res.GetError();
+        ErrorHandler::Throw(env, err);
+        return -1;
+    }
+
+    return res.GetData().value();
+}
+
+ani_long RandomAccessFileAni::GetFilePointer(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto rafFile = Unwrap(env, object);
+    if (rafFile == nullptr) {
+        HILOGE("Cannot unwrap rafFile!");
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    auto res = rafFile->GetFPointer();
+    if (!res.IsSuccess()) {
+        HILOGE("GetFPointer failed!");
+        const auto &err = res.GetError();
+        ErrorHandler::Throw(env, err);
+        return -1;
+    }
+
+    return res.GetData().value();
 }
 
 void RandomAccessFileAni::SetFilePointer(ani_env *env, [[maybe_unused]] ani_object object, ani_long fp)

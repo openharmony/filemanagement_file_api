@@ -1337,8 +1337,8 @@ export enum AccessFlagType {
 }
 
 export interface RandomAccessFile {
-  fd: int;
-  filePointer: long;
+  get fd(): int;
+  get filePointer(): long;
 
   setFilePointer(filePointer: long): void;
   close(): void;
@@ -1355,8 +1355,8 @@ export interface RandomAccessFile {
 }
 
 export class RandomAccessFileInner implements RandomAccessFile {
-  fd: int = -1;
-  filePointer: long = -1;
+  native get fd(): int;
+  native get filePointer(): long;
 
   private nativePtr: long = 0;
   private cleaner: Cleaner | null = null;
@@ -1376,18 +1376,12 @@ export class RandomAccessFileInner implements RandomAccessFile {
       destroyRegister.unregister(this);
   }
 
-  setFilePointer(filePointer: long): void {
-    this.setFilePointer0(filePointer);
-    this.filePointer = filePointer;
-  }
-
-  native setFilePointer0(filePointer: long): void;
+  native setFilePointer(filePointer: long): void;
 
   native close(): void;
 
   writeSync(buffer: ArrayBuffer | string, options?: WriteOptions): long {
     let length = options ? this.writeSync0(buffer, options) : this.writeSync0(buffer);
-    this.filePointer += (options?.offset?? 0) + length;
     return length;
   }
 
@@ -1437,7 +1431,6 @@ export class RandomAccessFileInner implements RandomAccessFile {
 
   readSync(buffer: ArrayBuffer, options?: ReadOptions): long {
     const length = options ? this.readSync0(buffer, options) : this.readSync0(buffer);
-    this.filePointer += (options?.offset?? 0) + length;
     return length;
   }
 
@@ -1490,9 +1483,9 @@ export class RandomAccessFileInner implements RandomAccessFile {
 }
 
 export interface File {
-  fd: int;
-  path: String;
-  name: String;
+  get fd(): int;
+  get path(): String;
+  get name(): String;
 
   getParent(): String;
   lock(exclusive?: boolean): Promise<void>;
@@ -1503,9 +1496,9 @@ export interface File {
 }
 
 export class FileInner implements File {
-  fd: int = -1;
-  path: String = "";
-  name: String = "";
+  native get fd(): int;
+  native get path(): String;
+  native get name(): String;
 
   private nativePtr: long = 0;
   private cleaner: Cleaner | null = null;
@@ -1613,18 +1606,18 @@ export class ReaderIteratorInner implements ReaderIterator {
 }
 
 export interface Stat {
-  ino: bigint;
-  mode: long;
-  uid: long;
-  gid: long;
-  size: long;
-  atime: long;
-  mtime: long;
-  ctime: long;
-  atimeNs: bigint;
-  mtimeNs: bigint;
-  ctimeNs: bigint;
-  location: LocationType;
+  get ino(): bigint;
+  get mode(): long;
+  get uid(): long;
+  get gid(): long;
+  get size(): long;
+  get atime(): long;
+  get mtime(): long;
+  get ctime(): long;
+  get atimeNs(): bigint;
+  get mtimeNs(): bigint;
+  get ctimeNs(): bigint;
+  get location(): LocationType
 
   isBlockDevice(): boolean;
   isCharacterDevice(): boolean;
@@ -1636,18 +1629,18 @@ export interface Stat {
 }
 
 export class StatInner implements Stat {
-  ino: bigint = 0n;
-  mode: long;
-  uid: long;
-  gid: long;
-  size: long;
-  atime: long;
-  mtime: long;
-  ctime: long;
-  atimeNs: bigint = 0n;
-  mtimeNs: bigint = 0n;
-  ctimeNs: bigint = 0n;
-  location: LocationType = LocationType.LOCAL;
+  native get ino(): bigint;
+  native get mode(): long;
+  native get uid(): long;
+  native get gid(): long;
+  native get size(): long;
+  native get atime(): long;
+  native get mtime(): long;
+  native get ctime(): long;
+  native get atimeNs(): bigint;
+  native get mtimeNs(): bigint;
+  native get ctimeNs(): bigint;
+  native get location(): LocationType
 
   private nativeStat: long = 0;
   private cleaner: Cleaner | null = null;

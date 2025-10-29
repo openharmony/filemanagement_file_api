@@ -32,6 +32,20 @@ public:
     static ani_boolean IsFile(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_boolean IsSocket(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_boolean IsSymbolicLink(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_object GetIno(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetMode(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetUid(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetGid(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetSize(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetAtime(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetMtime(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetCtime(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_object GetAtimeNs(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_object GetMtimeNs(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_object GetCtimeNs(ani_env *env, [[maybe_unused]] ani_object object);
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    static ani_enum_item GetLocation(ani_env *env, [[maybe_unused]] ani_object object);
+#endif
 };
 } // namespace ANI
 } // namespace ModuleFileIO

@@ -42,6 +42,7 @@ public:
     static std::tuple<bool, ArrayBuffer> ToArrayBuffer(ani_env *env, ani_arraybuffer &buffer);
     static std::tuple<bool, ani_array> ToAniStringList(
         ani_env *env, const std::string strList[], const uint32_t length);
+    static std::tuple<bool, ani_object> ToAniBigInt(ani_env *env, int64_t value);
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

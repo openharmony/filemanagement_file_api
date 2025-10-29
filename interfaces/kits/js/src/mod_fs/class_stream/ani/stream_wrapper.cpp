@@ -19,6 +19,7 @@
 
 #include "ani_helper.h"
 #include "ani_signature.h"
+#include "ani_cache.h"
 #include "filemgmt_libhilog.h"
 #include "type_converter.h"
 
@@ -49,23 +50,23 @@ ani_object StreamWrapper::Wrap(ani_env *env, const FsStream *stream)
         HILOGE("FsStream pointer is null!");
         return nullptr;
     }
+    auto& aniCache = AniCache::GetInstance();
     auto classDesc = FS::StreamInner::classDesc.c_str();
-    ani_class cls;
-    if (ANI_OK != env->FindClass(classDesc, &cls)) {
-        HILOGE("Cannot find class %s", classDesc);
+    auto [ret, cls] = aniCache.GetClass(env, FS::StreamInner::classDesc);
+    if (ANI_OK != ret) {
         return nullptr;
     }
-    auto ctorDesc = FS::StreamInner::ctorDesc.c_str();
-    auto ctorSig = FS::StreamInner::ctorSig.c_str();
+
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", classDesc);
+    tie(ret, ctor) = aniCache.GetMethod(env, FS::StreamInner::classDesc, FS::StreamInner::ctorDesc,
+        FS::StreamInner::ctorSig);
+    if (ANI_OK != ret) {
         return nullptr;
     }
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(stream));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", classDesc);
+        HILOGE("New %{public}s obj Failed!", classDesc);
         return nullptr;
     }
 
