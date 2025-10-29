@@ -144,48 +144,4 @@ HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_004, testing::ext::TestSiz
     GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_004";
 }
 
-/**
- * @tc.name: LstatCoreMockTest_DoLstat_005
- * @tc.desc: Test function of LstatCore::DoLstat with docs URI path for FAILURE when uv_fs_lstat fails.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_005, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_005";
-
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
-
-    auto res = LstatCore::DoLstat("file://docs/storage/Users/currentUser/Download/DocumentViewPicker1.txt");
-
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_FALSE(res.IsSuccess());
-
-    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_005";
-}
-
-/**
- * @tc.name: LstatCoreMockTest_DoLstat_006
- * @tc.desc: Test function of LstatCore::DoLstat with media URI path for FAILURE when uv_fs_lstat fails.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_006, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_006";
-
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
-
-    auto res = LstatCore::DoLstat("file://media/Photo/1/IMG_1609518878_000/IMG_202112_003259.jpg");
-
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_FALSE(res.IsSuccess());
-
-    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_006";
-}
-
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

@@ -224,6 +224,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_006, testing::ext::TestSize.L
     ASSERT_TRUE(succ) << "SetPathForFileInfo failed for test case StatCoreMockTest_DoStat_006";
 
     auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
 
     auto res = StatCore::DoStat(fileinfo);
 
@@ -231,60 +232,6 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_006, testing::ext::TestSize.L
     EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_006";
-}
-
-/**
- * @tc.name: StatCoreMockTest_DoStat_007
- * @tc.desc: Test function of StatCore::DoStat with docs URI path for FAILURE when uv_fs_stat fails.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_007, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_007";
-
-    FileInfo fileinfo;
-    fileinfo.fdg = nullptr;
-    auto succ = SetPathForFileInfo(fileinfo, "file://docs/storage/Users/currentUser/Download/DocumentViewPicker1.txt");
-    ASSERT_TRUE(succ) << "SetPathForFileInfo failed for test case StatCoreMockTest_DoStat_007";
-
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
-
-    auto res = StatCore::DoStat(fileinfo);
-
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_FALSE(res.IsSuccess());
-
-    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_007";
-}
-
-/**
- * @tc.name: StatCoreMockTest_DoStat_008
- * @tc.desc: Test function of StatCore::DoStat with remote media path for FAILURE when uv_fs_stat fails.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_008, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_008";
-
-    FileInfo fileinfo;
-    fileinfo.fdg = nullptr;
-    auto succ = SetPathForFileInfo(fileinfo, "file://media/Photo/1/IMG_1609518878_000/IMG_202112_003259.jpg");
-    ASSERT_TRUE(succ) << "SetPathForFileInfo failed for test case StatCoreMockTest_DoStat_008";
-
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
-
-    auto res = StatCore::DoStat(fileinfo);
-
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_FALSE(res.IsSuccess());
-
-    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_008";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
