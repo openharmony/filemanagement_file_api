@@ -23,7 +23,7 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 class StatCore final {
 public:
-    static FsResult<FsStat *> DoStat(const FileInfo &fileinfo);
+    static FsResult<FsStat *> DoStat(FileInfo &fileinfo);
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO

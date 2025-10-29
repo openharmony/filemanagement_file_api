@@ -20,31 +20,50 @@
 
 #include <securec.h>
 
+#include "file_uri.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "stat_instantiator.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
+const std::string SCHEME_FILE = "file";
+
+static string ParsePath(const string &pathStr)
+{
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    if (pathStr.find("://") != string::npos) {
+        Uri uri(pathStr);
+        string uriType = uri.GetScheme();
+        if (uriType == SCHEME_FILE) {
+            AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
+            string realPath = fileUri.GetRealPath();
+            return realPath;
+        }
+    }
+#endif
+    return pathStr;
+}
 
 FsResult<FsStat *> LstatCore::DoLstat(const string &path)
 {
+    string pathStr = ParsePath(path);
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> lstat_req = { new (std::nothrow) uv_fs_t,
         FsUtils::FsReqCleanup };
     if (!lstat_req) {
         HILOGE("Failed to request heap memory.");
         return FsResult<FsStat *>::Error(ENOMEM);
     }
-    int ret = uv_fs_lstat(nullptr, lstat_req.get(), path.c_str(), nullptr);
+    int ret = uv_fs_lstat(nullptr, lstat_req.get(), pathStr.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to get stat of file, ret: %{public}d", ret);
         return FsResult<FsStat *>::Error(ret);
     }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-    size_t length = path.length() + 1;
+    size_t length = pathStr.length() + 1;
     auto chars = std::make_unique<char[]>(length);
-    ret = strncpy_s(chars.get(), length, path.c_str(), length - 1);
+    ret = strncpy_s(chars.get(), length, pathStr.c_str(), pathStr.length());
     if (ret != EOK) {
         HILOGE("Copy file path failed!");
         return FsResult<FsStat *>::Error(ret);

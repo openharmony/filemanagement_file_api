@@ -89,7 +89,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_001, testing::ext::TestSize.L
     FileInfo fileinfo;
     fileinfo.fdg = nullptr;
     auto succ = SetPathForFileInfo(fileinfo, "StatCoreMockTest_DoStat_001");
-    ASSERT_TRUE(succ);
+    ASSERT_TRUE(succ) << "SetPathForFileInfo failed for test case StatCoreMockTest_DoStat_001";
 
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
@@ -97,7 +97,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_001, testing::ext::TestSize.L
     auto res = StatCore::DoStat(fileinfo);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_001";
 }
@@ -116,7 +116,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_002, testing::ext::TestSize.L
     FileInfo fileinfo;
     fileinfo.fdg = nullptr;
     auto succ = SetPathForFileInfo(fileinfo, "StatCoreMockTest_DoStat_002");
-    ASSERT_TRUE(succ);
+    ASSERT_TRUE(succ) << "SetPathForFileInfo failed for test case StatCoreMockTest_DoStat_002";
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
 
@@ -149,7 +149,7 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_003, testing::ext::TestSize.L
     auto res = StatCore::DoStat(fileinfo);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_003";
 }
@@ -175,9 +175,64 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_004, testing::ext::TestSize.L
     auto res = StatCore::DoStat(fileinfo);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_004";
+}
+
+/**
+ * @tc.name: StatCoreMockTest_DoStat_005
+ * @tc.desc: Test function of StatCore::DoStat with URI parameter for FAILURE when uv_fs_stat fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_005, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_005";
+
+    FileInfo fileinfo;
+    fileinfo.fdg = nullptr;
+    auto succ = SetPathForFileInfo(fileinfo, "file://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+    ASSERT_TRUE(succ) << "SetPathForFileInfo failed for test case StatCoreMockTest_DoStat_005";
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_005";
+}
+
+/**
+ * @tc.name: StatCoreMockTest_DoStat_006
+ * @tc.desc: Test function of StatCore::DoStat with remote URI path for FAILURE when uv_fs_stat fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_006";
+
+    FileInfo fileinfo;
+    fileinfo.fdg = nullptr;
+    auto succ = SetPathForFileInfo(fileinfo,
+        "datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+    ASSERT_TRUE(succ) << "SetPathForFileInfo failed for test case StatCoreMockTest_DoStat_006";
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_006";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

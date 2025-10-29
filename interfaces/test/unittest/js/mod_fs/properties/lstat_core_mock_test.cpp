@@ -59,7 +59,7 @@ void LstatCoreMockTest::TearDown(void)
 
 /**
  * @tc.name: LstatCoreMockTest_DoLstat_001
- * @tc.desc: Test function of LstatCore::DoLstat interface for FALSE.
+ * @tc.desc: Test function of LstatCore::DoLstat interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -74,9 +74,74 @@ HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_001, testing::ext::TestSiz
     auto res = LstatCore::DoLstat("/data/test/lstat.txt");
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_001";
+}
+
+/**
+ * @tc.name: LstatCoreMockTest_DoLstat_002
+ * @tc.desc: Test function of LstatCore::DoLstat with URI for FAILURE when uv_fs_lstat fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_002";
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = LstatCore::DoLstat("file://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_002";
+}
+
+/**
+ * @tc.name: LstatCoreMockTest_DoLstat_003
+ * @tc.desc: Test function of LstatCore::DoLstat with remote URI path for FAILURE when uv_fs_lstat fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_003";
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = LstatCore::DoLstat("datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_003";
+}
+/**
+ * @tc.name: LstatCoreMockTest_DoLstat_004
+ * @tc.desc: Test function of LstatCore::DoLstat with sandbox path for FAILURE when uv_fs_lstat fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_004, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_004";
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = LstatCore::DoLstat("/data/storage/el2/base/files/test.txt");
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_004";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

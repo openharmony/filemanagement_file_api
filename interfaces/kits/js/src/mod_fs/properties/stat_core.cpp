@@ -16,10 +16,12 @@
 #include "stat_core.h"
 
 #include <memory>
+#include <securec.h>
 #include <tuple>
 #include <unistd.h>
 
 #include "file_fs_trace.h"
+#include "file_uri.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "fs_stat_entity.h"
@@ -27,8 +29,9 @@
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
+const std::string SCHEME_FILE = "file";
 
-static bool IsPath(const FileInfo &fileInfo)
+static bool IsPath(FileInfo &fileInfo)
 {
     auto path = fileInfo.path.get();
     if (path == nullptr || strlen(path) == 0) {
@@ -37,7 +40,7 @@ static bool IsPath(const FileInfo &fileInfo)
     return true;
 }
 
-static tuple<bool, int32_t> IsFd(const FileInfo &fileInfo)
+static tuple<bool, int32_t> IsFd(FileInfo &fileInfo)
 {
     auto fdg = fileInfo.fdg.get();
     if (fdg == nullptr) {
@@ -46,12 +49,36 @@ static tuple<bool, int32_t> IsFd(const FileInfo &fileInfo)
     return make_tuple(true, fdg->GetFD());
 }
 
-static tuple<bool, FileInfo> ValidFileInfo(const FileInfo &fileInfo)
+static tuple<bool, FileInfo> ParsePath(FileInfo &fileInfo)
+{
+    auto &path = fileInfo.path;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    std::string pathStr(path.get());
+    if (pathStr.find("://") != std::string::npos) {
+        Uri uri(pathStr);
+        std::string uriType = uri.GetScheme();
+        if (uriType == SCHEME_FILE) {
+            AppFileService::ModuleFileUri::FileUri fileUri(pathStr);
+            std::string realPath = fileUri.GetRealPath();
+            auto pathPtr = std::make_unique<char[]>(realPath.length() + 1);
+            size_t length = realPath.length() + 1;
+            auto ret = strncpy_s(pathPtr.get(), length, realPath.c_str(), realPath.length());
+            if (ret != EOK) {
+                HILOGE("failed to copy file path");
+                return { false, FileInfo { false, {}, {} } };
+            }
+            return { true, FileInfo { true, std::move(pathPtr), {} } };
+        }
+    }
+#endif
+    return { true, FileInfo { true, std::move(path), {} } };
+}
+
+static tuple<bool, FileInfo> ValidFileInfo(FileInfo &fileInfo)
 {
     auto isPath = IsPath(fileInfo);
     if (isPath) {
-        auto &path = const_cast<std::unique_ptr<char[]> &>(fileInfo.path);
-        return { true, FileInfo { true, move(path), {} } };
+        return ParsePath(fileInfo);
     }
     auto [isFd, fd] = IsFd(fileInfo);
     if (isFd) {
@@ -70,7 +97,7 @@ static tuple<bool, FileInfo> ValidFileInfo(const FileInfo &fileInfo)
     return { false, FileInfo { false, {}, {} } };
 };
 
-static int32_t CheckFsStat(const FileInfo &fileInfo, uv_fs_t *req)
+static int32_t CheckFsStat(FileInfo &fileInfo, uv_fs_t *req)
 {
     FileFsTrace traceCheckFsStat("CheckFsStat");
     if (fileInfo.isPath) {
@@ -92,7 +119,7 @@ static int32_t CheckFsStat(const FileInfo &fileInfo, uv_fs_t *req)
     return ERRNO_NOERR;
 }
 
-FsResult<FsStat *> StatCore::DoStat(const FileInfo &fileinfo)
+FsResult<FsStat *> StatCore::DoStat(FileInfo &fileinfo)
 {
     FileFsTrace traceDoStat("DoStat");
     auto [succ, info] = ValidFileInfo(fileinfo);
