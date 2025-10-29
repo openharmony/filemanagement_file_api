@@ -50,9 +50,6 @@ static tuple<bool, FileInfo> ParseJsFileByPath(napi_env env, std::unique_ptr<cha
             }
             return { true, FileInfo { true, move(pathPtr), {} } };
         }
-        HILOGE("Failed to stat file by invalid uri");
-        NError(EINVAL).ThrowErr(env);
-        return { false, FileInfo { false, {}, {} } };
     }
 #endif
     return { true, FileInfo { true, move(path), {} } };
