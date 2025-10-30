@@ -312,4 +312,43 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_ReadNotifyEvent_003, testing::ext:
     GTEST_LOG_(INFO) << "WatcherEntityTest-end WatcherEntityTest_ReadNotifyEvent_003";
 }
 
+/**
+ * @tc.name: WatcherEntityTest_CloseNotifyFdLocked_001
+ * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for SUCCESS without close.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WatcherEntityTest-begin WatcherEntityTest_CloseNotifyFdLocked_001";
+
+    auto &watcher = FileWatcher::GetInstance();
+    watcher.run_ = false;
+    watcher.reading_ = false;
+    auto ret = watcher.CloseNotifyFdLocked();
+    EXPECT_EQ(ret, 0);
+
+    GTEST_LOG_(INFO) << "WatcherEntityTest-end WatcherEntityTest_CloseNotifyFdLocked_001";
+}
+
+/**
+ * @tc.name: WatcherEntityTest_CloseNotifyFdLocked_002
+ * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for SUCCESS without close.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WatcherEntityTest-begin WatcherEntityTest_CloseNotifyFdLocked_002";
+
+    auto &watcher = FileWatcher::GetInstance();
+    watcher.reading_ = true;
+    auto ret = watcher.CloseNotifyFdLocked();
+    EXPECT_EQ(ret, 0);
+
+    GTEST_LOG_(INFO) << "WatcherEntityTest-end WatcherEntityTest_CloseNotifyFdLocked_002";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

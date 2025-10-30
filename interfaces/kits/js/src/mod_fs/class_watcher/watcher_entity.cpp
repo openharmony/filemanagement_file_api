@@ -148,13 +148,11 @@ int FileWatcher::CloseNotifyFd()
 
 int FileWatcher::CloseNotifyFdLocked()
 {
-    {
-        lock_guard<mutex> lock(readMutex_);
-        closed_ = true;
-        if (reading_) {
-            HILOGE("close while reading");
-            return ERRNO_NOERR;
-        }
+    lock_guard<mutex> lock(readMutex_);
+    closed_ = true;
+    if (reading_) {
+        HILOGE("close while reading");
+        return ERRNO_NOERR;
     }
     return CloseNotifyFd();
 }
