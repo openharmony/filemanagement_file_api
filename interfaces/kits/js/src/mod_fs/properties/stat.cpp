@@ -191,8 +191,7 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
     NVal thisVar(env, funcArg.GetThisVar());
     NVal callbackVal(env, funcArg[SECOND]);
     return (funcArg.GetArgc() == NARG_CNT::ONE) ?
-        NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STAT_NAME, cbExec, cbCompl).val_ :
-        NAsyncWorkCallback(env, thisVar, callbackVal, "file_api_stat")
-            .Schedule(PROCEDURE_STAT_NAME, cbExec, cbCompl).val_;
+        NAsyncWorkPromise(env, thisVar).Schedule(PROC_STAT_NAME, cbExec, cbCompl).val_ :
+        NAsyncWorkCallback(env, thisVar, callbackVal, PROC_STAT_NAME).Schedule(PROC_STAT_NAME, cbExec, cbCompl).val_;
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

@@ -85,15 +85,14 @@ napi_value GetFrSize(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string PROCEDURE_NAME = "GetFrSize";
+    static const std::string PROCEDURE_NAME = "statfs.getFrSize";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getFrSize")
-        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_NAME).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBSizeSync(napi_env env, napi_callback_info info)
@@ -155,15 +154,14 @@ napi_value GetBSize(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string PROCEDURE_NAME = "GetBSize";
+    static const std::string PROCEDURE_NAME = "statfs.getBSize";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getBSize")
-        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_NAME).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBAvailSync(napi_env env, napi_callback_info info)
@@ -225,15 +223,14 @@ napi_value GetBAvail(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string PROCEDURE_NAME = "GetBAvail";
+    static const std::string PROCEDURE_NAME = "statfs.getBAvail";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getBAvail")
-        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_NAME).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBlocksSync(napi_env env, napi_callback_info info)
@@ -295,15 +292,14 @@ napi_value GetBlocks(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string PROCEDURE_NAME = "GetBlocks";
+    static const std::string PROCEDURE_NAME = "statfs.getBlocks";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getBlocks")
-        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_NAME).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBFreeSync(napi_env env, napi_callback_info info)
@@ -365,15 +361,14 @@ napi_value GetBFree(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string PROCEDURE_NAME = "GetBFree";
+    static const std::string PROCEDURE_NAME = "statfs.getBFree";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getBFree")
-        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_NAME).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetFreeBytesSync(napi_env env, napi_callback_info info)
@@ -438,15 +433,14 @@ napi_value GetFreeBytes(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string PROCEDURE_NAME = "GetFreeBytes";
+    static const std::string PROCEDURE_NAME = "statfs.getFreeBytes";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getFreeBytes")
-        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_NAME).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetTotalBytesSync(napi_env env, napi_callback_info info)
@@ -511,15 +505,14 @@ napi_value GetTotalBytes(napi_env env, napi_callback_info info)
         return { NVal::CreateInt64(env, *resultSize) };
     };
 
-    static const std::string PROCEDURE_NAME = "GetTotalBytes";
+    static const std::string PROCEDURE_NAME = "statfs.getTotalBytes";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getTotalBytes")
-        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_NAME).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 } // namespace ModuleStatfs
 } // namespace FileManagement

@@ -37,7 +37,7 @@ struct AsyncReadTextArg {
     ~AsyncReadTextArg() = default;
 };
 
-const std::string PROCEDURE_READTEXT_NAME = "FileIOReadText";
+const std::string PROCEDURE_READTEXT_NAME = "fs.readText";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

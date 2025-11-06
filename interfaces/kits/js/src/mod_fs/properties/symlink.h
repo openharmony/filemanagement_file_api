@@ -27,7 +27,7 @@ public:
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
 
-const std::string PROCEDURE_SYMLINK_NAME = "FileIOSymLink";
+const std::string PROCEDURE_SYMLINK_NAME = "fs.symlink";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

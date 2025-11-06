@@ -34,7 +34,7 @@ struct FileStruct {
     FileEntity *fileEntity;
 };
 
-const std::string PROCEDURE_CLOSE_NAME = "FileIOClose";
+const std::string PROCEDURE_CLOSE_NAME = "fs.close";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

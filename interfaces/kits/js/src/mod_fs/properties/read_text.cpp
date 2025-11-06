@@ -259,7 +259,7 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_READTEXT_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_readText")
+        return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_READTEXT_NAME)
             .Schedule(PROCEDURE_READTEXT_NAME, cbExec, cbComplete).val_;
     }
 }

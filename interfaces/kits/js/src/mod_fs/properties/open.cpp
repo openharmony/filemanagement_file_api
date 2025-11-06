@@ -53,7 +53,7 @@ using namespace OHOS::DistributedFS::ModuleRemoteUri;
 using namespace OHOS::AppExecFwk;
 #endif
 
-const std::string PROCEDURE_OPEN_NAME = "FileIOOpen";
+const std::string PROCEDURE_OPEN_NAME = "fs.open";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
 const std::string FILE_DATA_URI = "file://";
 const std::string PATH_SHARE = "/data/storage/el2/share";
@@ -381,7 +381,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::SECOND);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_open")
+        return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_OPEN_NAME)
             .Schedule(PROCEDURE_OPEN_NAME, cbExec, cbCompl).val_;
     }
 }

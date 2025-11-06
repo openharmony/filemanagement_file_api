@@ -24,6 +24,6 @@ public:
     static napi_value Async(napi_env env, napi_callback_info info);
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
-const std::string PROCEDURE_LSTAT_NAME = "FileIOLstat";
+const std::string PROCEDURE_LSTAT_NAME = "fs.lstat";
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LSTAT_H

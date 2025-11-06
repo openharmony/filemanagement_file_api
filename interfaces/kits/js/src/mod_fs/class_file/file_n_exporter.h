@@ -48,7 +48,7 @@ public:
     ~FileNExporter() override;
 };
 
-const std::string PROCEDURE_LOCK_NAME = "FileIOFileLock";
+const std::string PROCEDURE_LOCK_NAME = "fs.File.Lock";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

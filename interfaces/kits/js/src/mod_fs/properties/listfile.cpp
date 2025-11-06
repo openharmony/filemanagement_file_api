@@ -404,7 +404,7 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(LIST_FILE_PRODUCE_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_listfile")
+        return NAsyncWorkCallback(env, thisVar, cb, LIST_FILE_PRODUCE_NAME)
             .Schedule(LIST_FILE_PRODUCE_NAME, cbExec, cbCompl).val_;
     }
 }

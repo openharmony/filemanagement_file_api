@@ -50,8 +50,8 @@ public:
     RandomAccessFileNExporter(napi_env env, napi_value exports);
     ~RandomAccessFileNExporter() override;
 };
-const std::string readProcedureName = "FileIORandomAccessFileRead";
-const std::string writeProcedureName = "FileIORandomAccessFileWrite";
+const std::string readProcedureName = "fs.RandomAccessFile.read";
+const std::string writeProcedureName = "fs.RandomAccessFile.write";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

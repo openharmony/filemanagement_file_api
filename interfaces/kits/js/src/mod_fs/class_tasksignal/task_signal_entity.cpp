@@ -49,7 +49,7 @@ void TaskSignalEntity::OnCancel()
             HILOGE("Failed to close handle scope, ret: %{public}d", ret);
         }
     };
-    auto ret = napi_send_event(env, task, napi_eprio_immediate, "file_api_taskSignalEntity_onCancel");
+    auto ret = napi_send_event(env, task, napi_eprio_immediate, "fs.TaskSignal.onCancel");
     if (ret != 0) {
         HILOGE("Failed to call napi_send_event, ret: %{public}d", ret);
     }

@@ -51,7 +51,7 @@ struct ErrFiles {
     ~ErrFiles() = default;
 };
 
-const std::string PROCEDURE_MOVEDIR_NAME = "FileIOMoveDir";
+const std::string PROCEDURE_MOVEDIR_NAME = "fs.moveDir";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

@@ -113,7 +113,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_FDOPENSTREAM_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_fdopenStream")
+        return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_FDOPENSTREAM_NAME)
             .Schedule(PROCEDURE_FDOPENSTREAM_NAME, cbExec, cbCompl).val_;
     }
 }

@@ -130,15 +130,14 @@ napi_value GetStorageDataDir(napi_env env, napi_callback_info info)
         return NVal::CreateUTF8String(env, STORAGE_DATA_PATH);
     };
 
-    static const std::string PROCEDURE_NAME = "GetStorageDataDir";
+    static const std::string PROCEDURE_NAME = "Environment.getStorageDataDir";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ZERO) {
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::FIRST]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_environmentNExporter_getStorageDataDir")
-        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_NAME).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 int GetUserId()

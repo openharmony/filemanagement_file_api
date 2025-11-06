@@ -281,7 +281,7 @@ napi_value CreateRandomAccessFile::Async(napi_env env, napi_callback_info info)
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_createRandomaccesssfile")
+        return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_CREATERAT_NAME)
             .Schedule(PROCEDURE_CREATERAT_NAME, cbExec, cbCompl).val_;
     }
 }

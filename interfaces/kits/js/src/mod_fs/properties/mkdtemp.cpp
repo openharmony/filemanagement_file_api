@@ -116,7 +116,7 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_MKDTEMP_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_mkdtemp")
+        return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_MKDTEMP_NAME)
             .Schedule(PROCEDURE_MKDTEMP_NAME, cbExec, cbComplete).val_;
     }
 }

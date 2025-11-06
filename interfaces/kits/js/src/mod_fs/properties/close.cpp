@@ -163,7 +163,7 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_CLOSE_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_close")
+        return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_CLOSE_NAME)
             .Schedule(PROCEDURE_CLOSE_NAME, cbExec, cbComplete).val_;
     }
 }

@@ -51,7 +51,7 @@ using namespace AppFileService::ModuleFileUri;
 namespace fs = std::filesystem;
 const std::string FILE_PREFIX_NAME = "file://";
 const std::string NETWORK_PARA = "?networkid=";
-const string PROCEDURE_COPY_NAME = "FileFSCopy";
+const string PROCEDURE_COPY_NAME = "fs.copy";
 const std::string MEDIA = "media";
 constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(300);
 std::recursive_mutex Copy::mutex_;
@@ -234,7 +234,7 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
     auto task = [entry] () {
         ReceiveComplete(entry);
     };
-    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate, "file_api_copy_onFileReceive");
+    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate, "fs.copy.Progress");
     if (ret != 0) {
         HILOGE("Failed to call napi_send_event");
     }
@@ -429,7 +429,7 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH)]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_copy")
+        return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_COPY_NAME)
             .Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
     }
 }

@@ -26,7 +26,7 @@ public:
     static napi_value Async(napi_env env, napi_callback_info info);
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
-const std::string PROCEDURE_CREATERAT_NAME = "FileIOCreateRandomAccessFile";
+const std::string PROCEDURE_CREATERAT_NAME = "fs.createRandomAccessFile";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

@@ -176,7 +176,7 @@ void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::
     auto task = [callbackContext] () {
         WatcherCallbackComplete(callbackContext);
     };
-    auto ret = napi_send_event(env, task, napi_eprio_immediate, "file_api_watcherNExporter_watcherCallback");
+    auto ret = napi_send_event(env, task, napi_eprio_immediate, "fs.watcher");
     if (ret != 0) {
         HILOGE("Failed to call napi_send_event, ret: %{public}d", ret);
         delete callbackContext;
