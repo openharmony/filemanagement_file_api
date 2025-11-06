@@ -221,7 +221,8 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnti
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_randomaccessfileNExporter_calculateOffset").Schedule(readProcedureName, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_randomaccessfileNExporter_calculateOffset")
+            .Schedule(readProcedureName, cbExec, cbCompl).val_;
     }
 }
 
@@ -333,7 +334,8 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_randomaccessfileNExporter_writeExec").Schedule(writeProcedureName, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_randomaccessfileNExporter_writeExec")
+            .Schedule(writeProcedureName, cbExec, cbCompl).val_;
     }
 }
 

@@ -247,7 +247,8 @@ napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::FIRST);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_fileNExporter_lock").Schedule(PROCEDURE_LOCK_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_fileNExporter_lock")
+            .Schedule(PROCEDURE_LOCK_NAME, cbExec, cbCompl).val_;
     }
 }
 
