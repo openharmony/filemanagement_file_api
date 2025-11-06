@@ -660,7 +660,6 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     auto cbExec = [arg, buf, len, fd, offset]() -> NError {
         return ReadExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
-
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
@@ -735,7 +734,6 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
     auto cbExec = [arg, buf, len, fd = fd, offset]() -> NError {
         return WriteExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
-
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };

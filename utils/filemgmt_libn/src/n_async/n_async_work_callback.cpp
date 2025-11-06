@@ -45,7 +45,8 @@ NAsyncWorkCallback::NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb) : NA
     ctx_ = new(std::nothrow) NAsyncContextCallback(thisPtr, cb);
 }
 
-NAsyncWorkCallback::NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb, const std::string& taskName) : NAsyncWork(env), taskName_(taskName)
+NAsyncWorkCallback::NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb, const std::string& taskName)
+    : NAsyncWork(env), taskName_(taskName)
 {
     ctx_ = new(std::nothrow) NAsyncContextCallback(thisPtr, cb);
 }

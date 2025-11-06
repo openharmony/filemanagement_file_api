@@ -188,7 +188,6 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
         return CommonFunc::InstantiateStat(env, arg->stat_, true);
 #endif
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     NVal callbackVal(env, funcArg[SECOND]);
     return (funcArg.GetArgc() == NARG_CNT::ONE) ?

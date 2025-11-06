@@ -35,7 +35,6 @@ napi_value SetSecurityLabel(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     bool succ = false;
     std::unique_ptr<char []> path;
     std::unique_ptr<char []> dataLevel;

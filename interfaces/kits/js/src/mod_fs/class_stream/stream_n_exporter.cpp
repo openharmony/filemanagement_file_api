@@ -370,7 +370,6 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg, shared_ptr<FILE> fp)
             return NError(ERRNO_NOERR);
         }
     };
-
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };

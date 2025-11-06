@@ -319,7 +319,6 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
         rafEntity->filePointer = offset + writeLen;
         return NError(ERRNO_NOERR);
     };
-
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
