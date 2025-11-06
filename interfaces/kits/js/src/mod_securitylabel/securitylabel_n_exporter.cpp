@@ -69,13 +69,13 @@ napi_value SetSecurityLabel(napi_env env, napi_callback_info info)
         }
         return NVal::CreateUndefined(env);
     };
-    static const std::string PROC_NAME = "securityLabel.setSecurityLabel";
+    static const std::string procName = "securityLabel.setSecurityLabel";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == static_cast<size_t>(NARG_CNT::TWO)) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROC_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(procName, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[static_cast<int>(NARG_POS::THIRD)]);
-        return NAsyncWorkCallback(env, thisVar, cb, PROC_NAME).Schedule(PROC_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, procName).Schedule(procName, cbExec, cbComplete).val_;
     }
 }
 
@@ -150,14 +150,14 @@ napi_value GetSecurityLabel(napi_env env, napi_callback_info info)
         return { NVal::CreateUTF8String(env, *result) };
     };
 
-    static const std::string PROC_NAME = "securityLabel.getSecurityLabel";
+    static const std::string procName = "securityLabel.getSecurityLabel";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == static_cast<size_t>(NARG_CNT::ONE)) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROC_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(procName, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[static_cast<int>(NARG_POS::SECOND)]);
         if (cb.TypeIs(napi_function)) {
-            return NAsyncWorkCallback(env, thisVar, cb, PROC_NAME).Schedule(PROC_NAME, cbExec, cbComplete).val_;
+            return NAsyncWorkCallback(env, thisVar, cb, procName).Schedule(procName, cbExec, cbComplete).val_;
         }
     }
     return NVal::CreateUndefined(env).val_;

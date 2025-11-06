@@ -217,12 +217,11 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnti
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
         !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(readProcedureName, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(readProcName, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, readProcedureName)
-            .Schedule(readProcedureName, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, readProcName).Schedule(readProcName, cbExec, cbCompl).val_;
     }
 }
 
@@ -329,12 +328,11 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
         !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(writeProcedureName, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(writeProcName, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, writeProcedureName)
-            .Schedule(writeProcedureName, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, writeProcName).Schedule(writeProcName, cbExec, cbCompl).val_;
     }
 }
 

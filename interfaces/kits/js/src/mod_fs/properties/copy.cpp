@@ -234,7 +234,7 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
     auto task = [entry] () {
         ReceiveComplete(entry);
     };
-    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate, "fs.copy.Progress");
+    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate, "fs.copy.ProgressListener");
     if (ret != 0) {
         HILOGE("Failed to call napi_send_event");
     }
