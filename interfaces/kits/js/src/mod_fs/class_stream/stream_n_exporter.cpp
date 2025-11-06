@@ -305,8 +305,7 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, shared_ptr<FILE> fp
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, PROC_WRITE_NAME)
-            .Schedule(PROC_WRITE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROC_WRITE_NAME).Schedule(PROC_WRITE_NAME, cbExec, cbCompl).val_;
     }
 }
 
@@ -383,8 +382,7 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg, shared_ptr<FILE> fp)
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, PROC_READ_NAME)
-            .Schedule(PROC_READ_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROC_READ_NAME).Schedule(PROC_READ_NAME, cbExec, cbCompl).val_;
     }
 }
 
@@ -451,8 +449,7 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROC_CLOSE_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::FIRST]);
-        return NAsyncWorkCallback(env, thisVar, cb, PROC_CLOSE_NAME)
-            .Schedule(PROC_CLOSE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROC_CLOSE_NAME).Schedule(PROC_CLOSE_NAME, cbExec, cbCompl).val_;
     }
 }
 
