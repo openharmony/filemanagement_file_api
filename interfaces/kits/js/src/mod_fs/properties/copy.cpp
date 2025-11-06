@@ -429,7 +429,7 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH)]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_copy").Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO

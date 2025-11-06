@@ -106,7 +106,7 @@ napi_value GetFreeSize(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statvfsNExporter_getFreeSize").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetTotalSizeSync(napi_env env, napi_callback_info info)
@@ -182,7 +182,7 @@ napi_value GetTotalSize(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statvfsNExporter_getTotalSize").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 } // namespace ModuleStatfs
 } // namespace FileManagement

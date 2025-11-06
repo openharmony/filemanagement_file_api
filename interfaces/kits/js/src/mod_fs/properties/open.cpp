@@ -381,7 +381,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::SECOND);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_OPEN_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_open").Schedule(PROCEDURE_OPEN_NAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO

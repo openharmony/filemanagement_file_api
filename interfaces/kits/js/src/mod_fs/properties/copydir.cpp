@@ -344,7 +344,7 @@ napi_value CopyDir::Async(napi_env env, napi_callback_info info)
     } else {
         int cbIdex = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
         NVal cb(env, funcArg[cbIdex]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_COPYDIR_NAME, cbExec, cbComplCallback).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_copydir").Schedule(PROCEDURE_COPYDIR_NAME, cbExec, cbComplCallback).val_;
     }
 }
 

@@ -119,7 +119,7 @@ napi_value Rename::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_RENAME_NAME, cbExec, cbComplCallback).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_RENAME_NAME, cbExec, cbComplCallback).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_rename").Schedule(PROCEDURE_RENAME_NAME, cbExec, cbComplCallback).val_;
     }
 }
 } // namespace ModuleFileIO

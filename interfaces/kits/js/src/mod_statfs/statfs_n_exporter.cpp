@@ -92,7 +92,7 @@ napi_value GetFrSize(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getFrSize").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBSizeSync(napi_env env, napi_callback_info info)
@@ -161,7 +161,7 @@ napi_value GetBSize(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getBSize").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBAvailSync(napi_env env, napi_callback_info info)
@@ -230,7 +230,7 @@ napi_value GetBAvail(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getBAvail").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBlocksSync(napi_env env, napi_callback_info info)
@@ -299,7 +299,7 @@ napi_value GetBlocks(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getBlocks").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetBFreeSync(napi_env env, napi_callback_info info)
@@ -368,7 +368,7 @@ napi_value GetBFree(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getBFree").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetFreeBytesSync(napi_env env, napi_callback_info info)
@@ -440,7 +440,7 @@ napi_value GetFreeBytes(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getFreeBytes").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetTotalBytesSync(napi_env env, napi_callback_info info)
@@ -512,7 +512,7 @@ napi_value GetTotalBytes(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_statfsNExporter_getTotalBytes").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 } // namespace ModuleStatfs
 } // namespace FileManagement

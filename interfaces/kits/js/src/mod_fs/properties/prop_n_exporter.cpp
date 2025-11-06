@@ -325,7 +325,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_ACCESS_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_ACCESS_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_propNExporter_access").Schedule(PROCEDURE_ACCESS_NAME, cbExec, cbComplete).val_;
     }
 }
 
@@ -372,7 +372,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_UNLINK_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_UNLINK_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_propNExporter_unlink").Schedule(PROCEDURE_UNLINK_NAME, cbExec, cbCompl).val_;
     }
 }
 
@@ -504,7 +504,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_MKDIR_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[funcArg.GetArgc() - 1]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_MKDIR_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_propNExporter_mkdir").Schedule(PROCEDURE_MKDIR_NAME, cbExec, cbCompl).val_;
     }
 }
 
@@ -672,7 +672,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_READ_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_propNExporter_read").Schedule(PROCEDURE_READ_NAME, cbExec, cbCompl).val_;
     }
 }
 
@@ -747,7 +747,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_WRITE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_propNExporter_write").Schedule(PROCEDURE_WRITE_NAME, cbExec, cbCompl).val_;
     }
 }
 

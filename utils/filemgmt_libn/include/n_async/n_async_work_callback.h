@@ -24,6 +24,7 @@ namespace LibN {
 class NAsyncWorkCallback : public NAsyncWork {
 public:
     NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb);
+    NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb, const std::string& taskName);
     ~NAsyncWorkCallback();
     NVal Schedule(std::string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete) final;
     void ThreadSafeSchedule(NContextCBComplete cbComplete);
@@ -32,6 +33,7 @@ public:
 
 private:
     NAsyncContextCallback *ctx_ = nullptr;
+    std::string taskName_;
 };
 } // namespace LibN
 } // namespace FileManagement

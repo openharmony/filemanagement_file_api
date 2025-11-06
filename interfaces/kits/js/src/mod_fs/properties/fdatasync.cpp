@@ -105,7 +105,7 @@ napi_value Fdatasync::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_FDATASYNC_NAME, cbExec, cbComplCallback).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_FDATASYNC_NAME, cbExec, cbComplCallback).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_fdatasync").Schedule(PROCEDURE_FDATASYNC_NAME, cbExec, cbComplCallback).val_;
     }
 }
 } // OHOS::FileManagement::ModuleFileIO
