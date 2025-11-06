@@ -234,7 +234,7 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
     auto task = [entry] () {
         ReceiveComplete(entry);
     };
-    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate, "file_api_localCopy");
+    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate, "file_api_copy_onFileReceive");
     if (ret != 0) {
         HILOGE("Failed to call napi_send_event");
     }
@@ -429,7 +429,8 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH)]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_copy").Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_copy")
+            .Schedule(PROCEDURE_COPY_NAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO

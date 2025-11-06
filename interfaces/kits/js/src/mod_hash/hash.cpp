@@ -110,7 +110,8 @@ napi_value Hash::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_HASH_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_hash").Schedule(PROCEDURE_HASH_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_hash")
+            .Schedule(PROCEDURE_HASH_NAME, cbExec, cbComplete).val_;
     }
 }
 

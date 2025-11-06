@@ -76,7 +76,8 @@ napi_value SetSecurityLabel(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[static_cast<int>(NARG_POS::THIRD)]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_securitylableNExporter_setSecurityLabel").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_securitylableNExporter_setSecurityLabel")
+            .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
     }
 }
 
@@ -158,7 +159,8 @@ napi_value GetSecurityLabel(napi_env env, napi_callback_info info)
     } else {
         NVal cb(env, funcArg[static_cast<int>(NARG_POS::SECOND)]);
         if (cb.TypeIs(napi_function)) {
-            return NAsyncWorkCallback(env, thisVar, cb, "file_api_securitylableNExporter_getSecurityLabel").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+            return NAsyncWorkCallback(env, thisVar, cb, "file_api_securitylableNExporter_getSecurityLabel")
+                .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
         }
     }
     return NVal::CreateUndefined(env).val_;

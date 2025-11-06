@@ -164,7 +164,8 @@ napi_value Rmdirent::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_RMDIRENT_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_rmdirent").Schedule(PROCEDURE_RMDIRENT_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_rmdirent")
+            .Schedule(PROCEDURE_RMDIRENT_NAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO

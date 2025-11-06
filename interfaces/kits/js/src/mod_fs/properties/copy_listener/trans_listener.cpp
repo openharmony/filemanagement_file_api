@@ -301,7 +301,7 @@ int32_t TransListener::OnFileReceive(uint64_t totalBytes, uint64_t processedByte
     auto task = [entry] () {
         CallbackComplete(entry);
     };
-    auto retVal = napi_send_event(env, task, napi_eprio_immediate, "file_api_transCopy");
+    auto retVal = napi_send_event(env, task, napi_eprio_immediate, "file_api_transListener_onFileReceive");
     if (retVal != 0) {
         HILOGE("Failed to call napi_send_event");
         return ENOMEM;

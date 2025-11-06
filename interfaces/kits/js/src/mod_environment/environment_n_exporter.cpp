@@ -137,7 +137,8 @@ napi_value GetStorageDataDir(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::FIRST]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_environmentNExporter_getStorageDataDir").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_environmentNExporter_getStorageDataDir")
+        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 int GetUserId()
@@ -177,7 +178,8 @@ napi_value GetUserDataDir(napi_env env, napi_callback_info info)
     }
 
     NVal cb(env, funcArg[NARG_POS::FIRST]);
-    return NAsyncWorkCallback(env, thisVar, cb, "file_api_envNExporter_getUserDataDir").Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, "file_api_envNExporter_getUserDataDir")
+        .Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
 }
 
 napi_value GetUserDownloadDir(napi_env env, napi_callback_info info)

@@ -133,7 +133,8 @@ napi_value StreamNExporter::Flush(napi_env env, napi_callback_info cbInfo)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STREAM_FLUSH_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::FIRST]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_streamNExporter_flush").Schedule(PROCEDURE_STREAM_FLUSH_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_streamNExporter_flush")
+            .Schedule(PROCEDURE_STREAM_FLUSH_NAME, cbExec, cbCompl).val_;
     }
 }
 
@@ -305,7 +306,8 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, shared_ptr<FILE> fp
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_streamNExporter_writeExec").Schedule(PROCEDURE_STREAM_WRITE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_streamNExporter_writeExec")
+            .Schedule(PROCEDURE_STREAM_WRITE_NAME, cbExec, cbCompl).val_;
     }
 }
 
@@ -383,7 +385,8 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg, shared_ptr<FILE> fp)
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_streamNExporter_readExec").Schedule(PROCEDURE_STREAM_READ_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_streamNExporter_readExec")
+            .Schedule(PROCEDURE_STREAM_READ_NAME, cbExec, cbCompl).val_;
     }
 }
 
@@ -450,7 +453,8 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info cbInfo)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_STREAM_CLOSE_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::FIRST]);
-        return NAsyncWorkCallback(env, thisVar, cb, "file_api_streamNExporter_close").Schedule(PROCEDURE_STREAM_CLOSE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, "file_api_streamNExporter_close")
+            .Schedule(PROCEDURE_STREAM_CLOSE_NAME, cbExec, cbCompl).val_;
     }
 }
 
