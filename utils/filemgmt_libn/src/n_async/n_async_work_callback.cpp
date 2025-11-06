@@ -69,9 +69,9 @@ NAsyncWorkCallback::~NAsyncWorkCallback()
     auto task = [ctx] () {
         delete ctx;
     };
-    auto ret = napi_send_event(env_, task, napi_eprio_immediate);
+    auto ret = napi_send_event(env_, task, napi_eprio_immediate, "file_api");
     if (ret) {
-        HILOGE("Failed to call uv_queue_work %{public}d", status);
+        HILOGE("Failed to call napi_send_event%{public}d", status);
         return;
     }
     ptr.release();
@@ -225,7 +225,7 @@ void NAsyncWorkCallback::ThreadSafeSchedule(NContextCBComplete cbComplete)
         AfterWorkCallback(workArgsRaw->ptr->env_, napi_ok, workArgsRaw->ptr->ctx_, workArgsRaw->cb);
         delete workArgsRaw;
     };
-    auto ret = napi_send_event(env_, task, napi_eprio_immediate);
+    auto ret = napi_send_event(env_, task, napi_eprio_immediate, "file_api");
     if (ret) {
         HILOGE("Failed to call napi_send_event");
         workArgs.reset();

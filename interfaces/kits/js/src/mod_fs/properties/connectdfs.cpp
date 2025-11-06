@@ -324,7 +324,7 @@ void NAPIDfsListener::OnStatus(const std::string &networkId, int32_t status, con
     auto task = [connectDfsCB] () {
         UvWorkAfterOnStaus(connectDfsCB);
     };
-    auto rev = napi_send_event(env_, task, napi_eprio_immediate);
+    auto rev = napi_send_event(env_, task, napi_eprio_immediate, "file_api_connectdfs");
     if (rev != ERRNO_NOERR) {
         delete connectDfsCB;
         connectDfsCB = nullptr;

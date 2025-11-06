@@ -234,9 +234,9 @@ void Copy::OnFileReceive(std::shared_ptr<FileInfos> infos)
     auto task = [entry] () {
         ReceiveComplete(entry);
     };
-    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate);
+    auto ret = napi_send_event(infos->env, task, napi_eprio_immediate, "file_api_localCopy");
     if (ret != 0) {
-        HILOGE("failed to uv_queue_work");
+        HILOGE("Failed to call napi_send_event");
     }
 }
 
