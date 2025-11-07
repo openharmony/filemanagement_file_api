@@ -105,7 +105,7 @@ static int SendFileCore(FileInfo& srcFdg, FileInfo& destFdg, struct stat& statbf
     size_t size = static_cast<size_t>(statbf.st_size);
     while (size > 0) {
         int ret = uv_fs_sendfile(nullptr, sendfile_req.get(), destFdg.fdg->GetFD(), srcFdg.fdg->GetFD(),
-            offset, MAX_SIZE, nullptr);
+            offset, std::min(MAX_SIZE, size), nullptr);
         if (ret < 0) {
             LOGE("Failed to sendfile by ret : %{public}d", ret);
             return ret;
@@ -164,7 +164,7 @@ static int OpenCore(FileInfo& fileInfo, const int flags, const int mode)
 static int OpenFile(FileInfo& srcFile, FileInfo& destFile)
 {
     if (srcFile.isPath) {
-        auto openResult = OpenCore(srcFile, UV_FS_O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+        auto openResult = OpenCore(srcFile, UV_FS_O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (openResult) {
             return openResult;
         }
@@ -190,6 +190,9 @@ static int OpenFile(FileInfo& srcFile, FileInfo& destFile)
             LOGE("Failed to lseek destFile, errno: %{public}d", errno);
             return errno;
         }
+    }
+    if (statbf.st_size == 0) {
+        return OHOS::FileManagement::LibN::ERRNO_NOERR;
     }
     return SendFileCore(srcFile, destFile, statbf);
 }
