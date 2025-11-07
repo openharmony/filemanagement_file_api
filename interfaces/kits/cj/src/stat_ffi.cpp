@@ -114,6 +114,20 @@ bool FfiOHOSStatIsBlockDevice(int64_t id)
     return instance->IsBlockDevice();
 }
 
+FFI_EXPORT RetDataBool FfiOHOSStatIsBlockDeviceV2(int64_t id)
+{
+    LOGI("FS_TEST::FfiOHOSStatIsBlockDeviceV2");
+    auto instance = FFIData::GetData<StatImpl>(id);
+    RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
+    if (!instance) {
+        LOGE("StatImpl instance not exist %{public}" PRId64, id);
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = instance->IsBlockDevice();
+    return ret;
+}
+
 bool FfiOHOSStatIsCharacterDevice(int64_t id)
 {
     LOGI("FS_TEST:: FfiOHOSStatIsCharacterDevice");
@@ -123,6 +137,20 @@ bool FfiOHOSStatIsCharacterDevice(int64_t id)
         return ERR_INVALID_INSTANCE_CODE;
     }
     return instance->IsCharacterDevice();
+}
+
+FFI_EXPORT RetDataBool FfiOHOSStatIsCharacterDeviceV2(int64_t id)
+{
+    LOGI("FS_TEST::FfiOHOSStatIsCharacterDeviceV2");
+    auto instance = FFIData::GetData<StatImpl>(id);
+    RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
+    if (!instance) {
+        LOGE("StatImpl instance not exist %{public}" PRId64, id);
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = instance->IsCharacterDevice();
+    return ret;
 }
 
 bool FfiOHOSStatIsDirectory(int64_t id)
@@ -136,6 +164,20 @@ bool FfiOHOSStatIsDirectory(int64_t id)
     return instance->IsDirectory();
 }
 
+FFI_EXPORT RetDataBool FfiOHOSStatIsDirectoryV2(int64_t id)
+{
+    LOGI("FS_TEST::FfiOHOSStatIsDirectoryV2");
+    auto instance = FFIData::GetData<StatImpl>(id);
+    RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
+    if (!instance) {
+        LOGE("StatImpl instance not exist %{public}" PRId64, id);
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = instance->IsDirectory();
+    return ret;
+}
+
 bool FfiOHOSStatIsFIFO(int64_t id)
 {
     LOGI("FS_TEST:: FfiOHOSStatIsFIFO");
@@ -145,6 +187,20 @@ bool FfiOHOSStatIsFIFO(int64_t id)
         return ERR_INVALID_INSTANCE_CODE;
     }
     return instance->IsFIFO();
+}
+
+FFI_EXPORT RetDataBool FfiOHOSStatIsFIFOV2(int64_t id)
+{
+    LOGI("FS_TEST::FfiOHOSStatIsFIFOV2");
+    auto instance = FFIData::GetData<StatImpl>(id);
+    RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
+    if (!instance) {
+        LOGE("StatImpl instance not exist %{public}" PRId64, id);
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = instance->IsFIFO();
+    return ret;
 }
 
 bool FfiOHOSStatIsFile(int64_t id)
@@ -158,6 +214,20 @@ bool FfiOHOSStatIsFile(int64_t id)
     return instance->IsFile();
 }
 
+FFI_EXPORT RetDataBool FfiOHOSStatIsFileV2(int64_t id)
+{
+    LOGI("FS_TEST::FfiOHOSStatIsFileV2");
+    auto instance = FFIData::GetData<StatImpl>(id);
+    RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
+    if (!instance) {
+        LOGE("StatImpl instance not exist %{public}" PRId64, id);
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = instance->IsFile();
+    return ret;
+}
+
 bool FfiOHOSStatIsSocket(int64_t id)
 {
     LOGI("FS_TEST:: FfiOHOSStatIsSocket");
@@ -169,6 +239,20 @@ bool FfiOHOSStatIsSocket(int64_t id)
     return instance->IsSocket();
 }
 
+FFI_EXPORT RetDataBool FfiOHOSStatIsSocketV2(int64_t id)
+{
+    LOGI("FS_TEST::FfiOHOSStatIsSocketV2");
+    auto instance = FFIData::GetData<StatImpl>(id);
+    RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
+    if (!instance) {
+        LOGE("StatImpl instance not exist %{public}" PRId64, id);
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = instance->IsSocket();
+    return ret;
+}
+
 bool FfiOHOSStatIsSymbolicLink(int64_t id)
 {
     LOGI("FS_TEST:: FfiOHOSStatIsSymbolicLink");
@@ -178,6 +262,20 @@ bool FfiOHOSStatIsSymbolicLink(int64_t id)
         return ERR_INVALID_INSTANCE_CODE;
     }
     return instance->IsSymbolicLink();
+}
+
+FFI_EXPORT RetDataBool FfiOHOSStatIsSymbolicLinkV2(int64_t id)
+{
+    LOGI("FS_TEST::FfiOHOSStatIsSymbolicLinkV2");
+    auto instance = FFIData::GetData<StatImpl>(id);
+    RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
+    if (!instance) {
+        LOGE("StatImpl instance not exist %{public}" PRId64, id);
+        return ret;
+    }
+    ret.code = SUCCESS_CODE;
+    ret.data = instance->IsSymbolicLink();
+    return ret;
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
