@@ -46,7 +46,7 @@ static ani_object WrapCopyProgress(ani_env *env, uint64_t progressSize, uint64_t
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, aniProgressSize, aniTotalSize)) {
-        HILOGE("Create %{private}s object failed!", FS::ProgressInner::classDesc.c_str());
+        HILOGE("Create %{public}s object failed!", FS::ProgressInner::classDesc.c_str());
         return nullptr;
     }
     return obj;

@@ -51,7 +51,7 @@ ani_object WatchEventWrapper::Wrap(ani_env *env, const WatchEvent &evt)
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, fileName, evt.event, evt.cookie)) {
-        HILOGE("Create %s obj failed!", FS::WatchEventInner::classDesc.c_str());
+        HILOGE("Create %{public}s obj failed!", FS::WatchEventInner::classDesc.c_str());
         return nullptr;
     }
     return obj;

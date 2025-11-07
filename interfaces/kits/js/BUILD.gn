@@ -870,6 +870,7 @@ ohos_shared_library("ani_file_hash") {
     "src/mod_hash/class_hashstream/ani",
   ]
   sources = [
+    "src/common/ani_helper/ani_cache.cpp",
     "src/common/ani_helper/ani_signature.cpp",
     "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",
@@ -940,6 +941,7 @@ ohos_shared_library("ani_file_securitylabel") {
     "src/mod_securitylabel",
   ]
   sources = [
+    "src/common/ani_helper/ani_cache.cpp",
     "src/common/ani_helper/ani_signature.cpp",
     "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",
@@ -1005,6 +1007,7 @@ ohos_shared_library("ani_file_environment") {
     "src/mod_environment",
   ]
   sources = [
+    "src/common/ani_helper/ani_cache.cpp",
     "src/common/ani_helper/ani_signature.cpp",
     "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",
@@ -1069,6 +1072,7 @@ ohos_shared_library("ani_file_statvfs") {
     "src/mod_statvfs",
   ]
   sources = [
+    "src/common/ani_helper/ani_cache.cpp",
     "src/common/ani_helper/ani_signature.cpp",
     "src/common/ani_helper/error_handler.cpp",
     "src/common/ani_helper/type_converter.cpp",

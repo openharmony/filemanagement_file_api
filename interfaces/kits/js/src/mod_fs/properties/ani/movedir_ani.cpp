@@ -70,22 +70,6 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
     if (!errFiles.has_value()) {
         return { true, nullopt };
     }
-    // auto classDesc = BuiltInTypes::Array::classDesc.c_str();
-    // ani_class cls = nullptr;
-    // ani_status ret;
-
-    // if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-    //     HILOGE("Cannot find class %{private}s, err: %{private}d", classDesc, ret);
-    //     return { false, nullopt };
-    // }
-
-    // auto ctorDesc = BuiltInTypes::Array::ctorDesc.c_str();
-    // auto ctorSig = BuiltInTypes::Array::ctorSig.c_str();
-    // ani_method ctor;
-    // if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
-    //     HILOGE("Cannot find class %{private}s constructor method, err: %{private}d", classDesc, ret);
-    //     return { false, nullopt };
-    // }
 
     AniCache& aniCache = AniCache::GetInstance();
     auto [ret, cls] = aniCache.GetClass(env, BuiltInTypes::Array::classDesc);
