@@ -29,7 +29,7 @@ public:
     static napi_value Sync(napi_env env, napi_callback_info info);
 };
 
-const std::string PROCEDURE_READLINES_NAME = "FileIOReadLines";
+const std::string PROCEDURE_READLINES_NAME = "fs.readLines";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

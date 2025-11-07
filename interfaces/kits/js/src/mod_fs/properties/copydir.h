@@ -49,7 +49,7 @@ struct ConflictFiles {
     ~ConflictFiles() = default;
 };
 
-const std::string PROCEDURE_COPYDIR_NAME = "FileIOCopyDir";
+const std::string PROCEDURE_COPYDIR_NAME = "fs.copyDir";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

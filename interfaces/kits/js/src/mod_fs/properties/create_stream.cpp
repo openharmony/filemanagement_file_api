@@ -120,7 +120,8 @@ napi_value CreateStream::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_CREATESTREAM_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::THIRD]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_CREATESTREAM_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_CREATESTREAM_NAME)
+            .Schedule(PROCEDURE_CREATESTREAM_NAME, cbExec, cbCompl).val_;
     }
 }
 } // namespace ModuleFileIO

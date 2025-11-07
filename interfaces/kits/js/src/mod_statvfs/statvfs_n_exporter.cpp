@@ -99,14 +99,14 @@ napi_value GetFreeSize(napi_env env, napi_callback_info info)
         return NVal::CreateInt64(env, *resultSize);
     };
 
-    static const std::string PROCEDURE_NAME = "GetFreeSize";
+    static const std::string procName = "statfs.getFreeSize";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(procName, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, procName).Schedule(procName, cbExec, cbComplete).val_;
 }
 
 napi_value GetTotalSizeSync(napi_env env, napi_callback_info info)
@@ -175,14 +175,14 @@ napi_value GetTotalSize(napi_env env, napi_callback_info info)
         return { NVal::CreateInt64(env, *resultSize) };
     };
 
-    static const std::string PROCEDURE_NAME = "GetTotalSize";
+    static const std::string procName = "statfs.getTotalSize";
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(procName, cbExec, cbComplete).val_;
     }
 
     NVal cb(env, funcArg[NARG_POS::SECOND]);
-    return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_NAME, cbExec, cbComplete).val_;
+    return NAsyncWorkCallback(env, thisVar, cb, procName).Schedule(procName, cbExec, cbComplete).val_;
 }
 } // namespace ModuleStatfs
 } // namespace FileManagement

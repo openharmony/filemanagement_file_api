@@ -176,9 +176,9 @@ void WatcherNExporter::WatcherCallback(napi_env env, NRef &callback, const std::
     auto task = [callbackContext] () {
         WatcherCallbackComplete(callbackContext);
     };
-    auto ret = napi_send_event(env, task, napi_eprio_immediate);
+    auto ret = napi_send_event(env, task, napi_eprio_immediate, "fs.watcher");
     if (ret != 0) {
-        HILOGE("Failed to execute libuv work queue, ret: %{public}d", ret);
+        HILOGE("Failed to call napi_send_event, ret: %{public}d", ret);
         delete callbackContext;
     }
 }

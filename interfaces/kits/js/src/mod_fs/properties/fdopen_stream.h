@@ -31,7 +31,7 @@ struct AsyncFdopenStreamArg {
     std::shared_ptr<FILE> fp{ nullptr };
 };
 
-const std::string PROCEDURE_FDOPENSTREAM_NAME = "FileIOFdopenStream";
+const std::string PROCEDURE_FDOPENSTREAM_NAME = "fs.fdopenStream";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

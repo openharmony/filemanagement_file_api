@@ -31,7 +31,7 @@ struct AsyncCreateStreamArg {
     std::shared_ptr<FILE> fp{ nullptr };
 };
 
-const std::string PROCEDURE_CREATESTREAM_NAME = "FileIOCreateStream";
+const std::string PROCEDURE_CREATESTREAM_NAME = "fs.createStream";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

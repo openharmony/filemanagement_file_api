@@ -26,7 +26,7 @@ public:
     static napi_value Sync(napi_env env, napi_callback_info info);
     static napi_value Async(napi_env env, napi_callback_info info);
 };
-const std::string PROCEDURE_RENAME_NAME = "FileIORename";
+const std::string PROCEDURE_RENAME_NAME = "fs.rename";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

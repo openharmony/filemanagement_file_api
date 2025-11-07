@@ -322,10 +322,10 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
 
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_number)) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_ACCESS_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROC_ACCESS, cbExec, cbComplete).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_ACCESS_NAME, cbExec, cbComplete).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROC_ACCESS).Schedule(PROC_ACCESS, cbExec, cbComplete).val_;
     }
 }
 
@@ -369,10 +369,10 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
 
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_UNLINK_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROC_UNLINK, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[NARG_POS::SECOND]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_UNLINK_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROC_UNLINK).Schedule(PROC_UNLINK, cbExec, cbCompl).val_;
     }
 }
 
@@ -501,10 +501,10 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
         !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_MKDIR_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROC_MKDIR, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[funcArg.GetArgc() - 1]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_MKDIR_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROC_MKDIR).Schedule(PROC_MKDIR, cbExec, cbCompl).val_;
     }
 }
 
@@ -657,7 +657,6 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     auto cbExec = [arg, buf, len, fd, offset]() -> NError {
         return ReadExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
-
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
@@ -668,11 +667,11 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
         !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_READ_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROC_READ, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_READ_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROC_READ).Schedule(PROC_READ, cbExec, cbCompl).val_;
     }
 }
 
@@ -731,23 +730,21 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
     auto cbExec = [arg, buf, len, fd = fd, offset]() -> NError {
         return WriteExec(arg, static_cast<char *>(buf), len, fd, offset);
     };
-
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
-        } else {
-            return { NVal::CreateInt64(env, static_cast<int64_t>(arg->actLen)) };
         }
+        return { NVal::CreateInt64(env, static_cast<int64_t>(arg->actLen)) };
     };
 
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
         !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {
-        return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_WRITE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkPromise(env, thisVar).Schedule(PROC_WRITE, cbExec, cbCompl).val_;
     } else {
         int cbIdx = ((funcArg.GetArgc() == NARG_CNT::THREE) ? NARG_POS::THIRD : NARG_POS::FOURTH);
         NVal cb(env, funcArg[cbIdx]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_WRITE_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROC_WRITE).Schedule(PROC_WRITE, cbExec, cbCompl).val_;
     }
 }
 

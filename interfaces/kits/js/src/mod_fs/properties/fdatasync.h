@@ -24,6 +24,6 @@ public:
     static napi_value Sync(napi_env env, napi_callback_info info);
     static napi_value Async(napi_env env, napi_callback_info info);
 };
-const std::string PROCEDURE_FDATASYNC_NAME = "FileIOFdatasync";
+const std::string PROCEDURE_FDATASYNC_NAME = "fs.fdatasync";
 } // namespace OHOS::FileManagement::ModuleFileIO
 #endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_FDATASYNC_H

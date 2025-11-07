@@ -167,7 +167,8 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
         return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_READLINES_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
-        return NAsyncWorkCallback(env, thisVar, cb).Schedule(PROCEDURE_READLINES_NAME, cbExec, cbCompl).val_;
+        return NAsyncWorkCallback(env, thisVar, cb, PROCEDURE_READLINES_NAME)
+            .Schedule(PROCEDURE_READLINES_NAME, cbExec, cbCompl).val_;
     }
 }
 

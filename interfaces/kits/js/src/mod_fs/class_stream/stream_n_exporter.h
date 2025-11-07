@@ -71,10 +71,10 @@ struct AsyncWriteArg {
     ~AsyncWriteArg() = default;
 };
 
-const std::string PROCEDURE_STREAM_WRITE_NAME = "FileIOStreamWrite";
-const std::string PROCEDURE_STREAM_READ_NAME = "FileIOStreamRead";
-const std::string PROCEDURE_STREAM_CLOSE_NAME = "FileIOStreamClose";
-const std::string PROCEDURE_STREAM_FLUSH_NAME = "FileIOStreamFlush";
+const std::string PROC_WRITE_NAME = "fs.Stream.write";
+const std::string PROC_READ_NAME = "fs.Stream.read";
+const std::string PROC_CLOSE_NAME = "fs.Stream.close";
+const std::string PROC_FLUSH_NAME = "fs.Stream.flush";
 
 } // namespace ModuleFileIO
 } // namespace FileManagement

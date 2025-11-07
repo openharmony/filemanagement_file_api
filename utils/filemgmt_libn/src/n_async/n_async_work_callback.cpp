@@ -45,6 +45,12 @@ NAsyncWorkCallback::NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb) : NA
     ctx_ = new(std::nothrow) NAsyncContextCallback(thisPtr, cb);
 }
 
+NAsyncWorkCallback::NAsyncWorkCallback(napi_env env, NVal thisPtr, NVal cb, const std::string& taskName)
+    : NAsyncWork(env), taskName_(taskName)
+{
+    ctx_ = new(std::nothrow) NAsyncContextCallback(thisPtr, cb);
+}
+
 NAsyncWorkCallback::~NAsyncWorkCallback()
 {
     if (!ctx_) {
@@ -69,9 +75,11 @@ NAsyncWorkCallback::~NAsyncWorkCallback()
     auto task = [ctx] () {
         delete ctx;
     };
-    auto ret = napi_send_event(env_, task, napi_eprio_immediate);
+    auto ret = taskName_.empty()
+        ? napi_send_event(env_, task, napi_eprio_immediate)
+        : napi_send_event(env_, task, napi_eprio_immediate, taskName_.c_str());
     if (ret) {
-        HILOGE("Failed to call uv_queue_work %{public}d", status);
+        HILOGE("Failed to call napi_send_event%{public}d", status);
         return;
     }
     ptr.release();

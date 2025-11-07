@@ -73,11 +73,11 @@ public:
 };
 
 constexpr int DIR_DEFAULT_PERM = 0770;
-const std::string PROCEDURE_ACCESS_NAME = "FileIOAccess";
-const std::string PROCEDURE_UNLINK_NAME = "FileIOUnlink";
-const std::string PROCEDURE_MKDIR_NAME = "FileIOMkdir";
-const std::string PROCEDURE_READ_NAME = "FileIORead";
-const std::string PROCEDURE_WRITE_NAME = "FileIOWrite";
+const std::string PROC_ACCESS = "fs.access";
+const std::string PROC_UNLINK = "fs.unlink";
+const std::string PROC_MKDIR = "fs.mkdir";
+const std::string PROC_READ = "fs.read";
+const std::string PROC_WRITE = "fs.write";
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
