@@ -28,17 +28,16 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static ani_object WrapCopyProgress(ani_env *env, uint64_t progressSize, uint64_t totalSize)
 {
-    auto classDesc = FS::ProgressInner::classDesc.c_str();
-    ani_class cls;
-    if (ANI_OK != env->FindClass(classDesc, &cls)) {
-        HILOGE("Cannot find class %{private}s", classDesc);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, FS::ProgressInner::classDesc);
+    if (ret != ANI_OK) {
         return nullptr;
     }
-    auto ctorDesc = FS::ProgressInner::ctorDesc.c_str();
-    auto ctorSig = FS::ProgressInner::ctorSig.c_str();
+
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Cannot find constructor method for class %{private}s", classDesc);
+    tie(ret, ctor) = aniCache.GetMethod(env, FS::ProgressInner::classDesc, FS::ProgressInner::ctorDesc,
+        FS::ProgressInner::ctorSig);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
@@ -47,7 +46,7 @@ static ani_object WrapCopyProgress(ani_env *env, uint64_t progressSize, uint64_t
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, aniProgressSize, aniTotalSize)) {
-        HILOGE("Create %{private}s object failed!", classDesc);
+        HILOGE("Create %{public}s object failed!", FS::ProgressInner::classDesc.c_str());
         return nullptr;
     }
     return obj;

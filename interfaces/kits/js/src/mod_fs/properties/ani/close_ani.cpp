@@ -36,9 +36,12 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
 {
     int32_t result = -1;
-    auto intClassDesc = BoxedTypes::Int::classDesc.c_str();
-    ani_class intClass;
-    env->FindClass(intClassDesc, &intClass);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, intClass] = aniCache.GetClass(env, BoxedTypes::Int::classDesc);
+    if (ret != ANI_OK) {
+        return { false, result, nullptr };
+    }
+
     ani_boolean isInt;
     env->Object_InstanceOf(obj, intClass, &isInt);
     if (isInt) {

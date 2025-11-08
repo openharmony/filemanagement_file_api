@@ -86,17 +86,16 @@ private:
     static std::tuple<ani_status, ani_error> CreateErrorObj(ani_env *env, const char *className, int32_t code,
         const std::string &errMsg, const std::optional<ani_object> &errData = std::nullopt)
     {
-        ani_class cls;
-        if (ANI_OK != env->FindClass(className, &cls)) {
-            HILOGE("Cannot find class '%{private}s'", className);
+        AniCache& aniCache = AniCache::GetInstance();
+        auto [ret, cls] = aniCache.GetClass(env, className);
+        if (ret != ANI_OK) {
             return { ANI_NOT_FOUND, nullptr };
         }
 
-        auto ctorDesc = BaseType::ctorDesc.c_str();
-        auto ctorSig = BaseType::ctorSig0.c_str();
         ani_method ctor;
-        if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-            HILOGE("Cannot find constructor for class '%{private}s'", className);
+        tie(ret, ctor) = aniCache.GetMethod(env, className, BaseType::ctorDesc,
+            BaseType::ctorSig0);
+        if (ret != ANI_OK) {
             return { ANI_NOT_FOUND, nullptr };
         }
 

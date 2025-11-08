@@ -15,6 +15,7 @@
 
 #include "fs_watcher_wrapper.h"
 
+#include "ani_cache.h"
 #include "ani_signature.h"
 #include "filemgmt_libhilog.h"
 
@@ -46,25 +47,23 @@ ani_object FsWatcherWrapper::Wrap(ani_env *env, const FsWatcher *watcher)
         return nullptr;
     }
 
-    auto classDesc = FS::WatcherInner::classDesc.c_str();
-    ani_class cls;
-    if (ANI_OK != env->FindClass(classDesc, &cls)) {
-        HILOGE("Cannot find class %s", classDesc);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, FS::WatcherInner::classDesc);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
-    auto ctorDesc = FS::WatcherInner::ctorDesc.c_str();
-    auto ctorSig = FS::WatcherInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", classDesc);
+    tie(ret, ctor) = aniCache.GetMethod(env, FS::WatcherInner::classDesc, FS::WatcherInner::ctorDesc,
+        FS::WatcherInner::ctorSig);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<uintptr_t>(watcher));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", classDesc);
+        HILOGE("New %s obj Failed!", FS::WatcherInner::classDesc.c_str());
         return nullptr;
     }
     return obj;
