@@ -28,6 +28,7 @@ using namespace arkts::ani_signature;
 struct BasicTypes {
     static const Type undefinedType;
     static const Type nullType;
+    static const Type anyType;
     static const Type booleanType;
     static const Type byteType;
     static const Type charType;
@@ -100,8 +101,8 @@ struct Array : public BaseType {
     static const string ctorSig;
     static const string getterDesc;
     static const string setterDesc;
-    static const string objectGetterSig;
-    static const string objectSetterSig;
+    static const string anyGetterSig;
+    static const string anySetterSig;
 };
 
 struct ArrayBuffer : public BaseType {

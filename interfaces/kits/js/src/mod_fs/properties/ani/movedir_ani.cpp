@@ -92,7 +92,7 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
     }
 
     auto setterDesc = BuiltInTypes::Array::setterDesc.c_str();
-    auto setterSig = BuiltInTypes::Array::objectSetterSig.c_str();
+    auto setterSig = BuiltInTypes::Array::anySetterSig.c_str();
     ani_size index = 0;
     for (const auto &errFile : files) {
         auto [succ, fileObj] = ToConflictFiles(env, errFile);

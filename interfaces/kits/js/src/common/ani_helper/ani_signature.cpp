@@ -19,6 +19,7 @@ namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature {
 // BasicTypes
 const Type BasicTypes::undefinedType = Builder::BuildUndefined();
 const Type BasicTypes::nullType = Builder::BuildNull();
+const Type BasicTypes::anyType = Builder::BuildAny();
 const Type BasicTypes::booleanType = Builder::BuildBoolean();
 const Type BasicTypes::byteType = Builder::BuildByte();
 const Type BasicTypes::charType = Builder::BuildChar();
@@ -65,10 +66,10 @@ const string BuiltInTypes::Array::classDesc = BuiltInTypes::Array::classType.Des
 const string BuiltInTypes::Array::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
 const string BuiltInTypes::Array::getterDesc = "$_get";
 const string BuiltInTypes::Array::setterDesc = "$_set";
-const string BuiltInTypes::Array::objectGetterSig =
-    Builder::BuildSignatureDescriptor({ BasicTypes::intType }, BuiltInTypes::objectType);
-const string BuiltInTypes::Array::objectSetterSig =
-    Builder::BuildSignatureDescriptor({ BasicTypes::intType, BuiltInTypes::objectType });
+const string BuiltInTypes::Array::anyGetterSig =
+    Builder::BuildSignatureDescriptor({ BasicTypes::intType }, BasicTypes::anyType);
+const string BuiltInTypes::Array::anySetterSig =
+    Builder::BuildSignatureDescriptor({ BasicTypes::intType, BasicTypes::anyType });
 // BuiltInTypes::ArrayBuffer
 const Type BuiltInTypes::ArrayBuffer::classType = Builder::BuildClass("std.core.ArrayBuffer");
 const string BuiltInTypes::ArrayBuffer::classDesc = BuiltInTypes::ArrayBuffer::classType.Descriptor();
