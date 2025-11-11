@@ -135,7 +135,7 @@ tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object 
         return { false, nullopt };
     }
     auto getterDesc = BuiltInTypes::Array::getterDesc.c_str();
-    auto getterSig = BuiltInTypes::Array::objectGetterSig.c_str();
+    auto getterSig = BuiltInTypes::Array::anyGetterSig.c_str();
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(
