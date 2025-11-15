@@ -40,6 +40,7 @@ ohos_shared_library("cj_file_fs_ffi") {
     "../js/src/common/file_helper/fd_guard.cpp",
     "../js/src/mod_fs/class_file/file_n_exporter.cpp",
     "../js/src/mod_fs/class_stream/stream_n_exporter.cpp",
+    "../js/src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
     "../js/src/mod_fs/common_func.cpp",
     "src/copy.cpp",
     "src/copy_dir.cpp",
