@@ -37,6 +37,55 @@ namespace OHOS {
 namespace CJSystemapi {
 namespace FileFs {
 
+static void SaveClassStream(napi_env env)
+{
+    static auto jsExport = [env]() {
+        std::vector<napi_property_descriptor> props = {
+            FileManagement::LibN::NVal::DeclareNapiFunction("writeSync",
+                OHOS::FileManagement::ModuleFileIO::StreamNExporter::WriteSync),
+            FileManagement::LibN::NVal::DeclareNapiFunction("flush",
+                OHOS::FileManagement::ModuleFileIO::StreamNExporter::Flush),
+            FileManagement::LibN::NVal::DeclareNapiFunction("flushSync",
+                OHOS::FileManagement::ModuleFileIO::StreamNExporter::FlushSync),
+            FileManagement::LibN::NVal::DeclareNapiFunction("resdSync",
+                OHOS::FileManagement::ModuleFileIO::StreamNExporter::ReadSync),
+            FileManagement::LibN::NVal::DeclareNapiFunction("closeSync",
+                OHOS::FileManagement::ModuleFileIO::StreamNExporter::CloseSync),
+            FileManagement::LibN::NVal::DeclareNapiFunction("write",
+                OHOS::FileManagement::ModuleFileIO::StreamNExporter::Write),
+            FileManagement::LibN::NVal::DeclareNapiFunction("read",
+                OHOS::FileManagement::ModuleFileIO::StreamNExporter::Read),
+            FileManagement::LibN::NVal::DeclareNapiFunction("close",
+                OHOS::FileManagement::ModuleFileIO::StreamNExporter::Close),
+            FileManagement::LibN::NVal::DeclareNapiFunction("seek",
+                OHOS::FileManagement::ModuleFileIO::StreamNExporter::Seek),
+        };
+        bool succ = false;
+        napi_value cls = nullptr;
+        std::tie(succ, cls) = FileManagement::LibN::NClass::DefineClass(
+            env,
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::className_,
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Constructor,
+            move(props));
+        if (!succ) {
+            LOGE("INNER BUG. Failed to define Stream class");
+            return false;
+        }
+        succ = FileManagement::LibN::NClass::SaveClass(
+            env,
+            OHOS::FileManagement::ModuleFileIO::StreamNExporter::className_,
+            cls);
+        if (!succ) {
+            LOGE("INNER BUG. Failed to save Stream class");
+            return false;
+        }
+        return true;
+    }();
+    if (!jsExport) {
+        LOGD("[Stream]: Failed to export class");
+    }
+}
+
 static napi_value InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp)
 {
     napi_value objStream = FileManagement::LibN::NClass::InstantiateClass(
@@ -56,6 +105,57 @@ static napi_value InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype
 
     streamEntity->fp.swap(fp);
     return objStream;
+}
+
+static void SaveClassRandomAccessFile(napi_env env)
+{
+    static auto jsExport = [env]() {
+        std::vector<napi_property_descriptor> props = {
+            FileManagement::LibN::NVal::DeclareNapiFunction("read",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::Read),
+            FileManagement::LibN::NVal::DeclareNapiFunction("readSync",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::ReadSync),
+            FileManagement::LibN::NVal::DeclareNapiFunction("write",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::Write),
+            FileManagement::LibN::NVal::DeclareNapiFunction("writeSync",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::WriteSync),
+            FileManagement::LibN::NVal::DeclareNapiFunction("setFilePointer",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::SetFilePointerSync),
+            FileManagement::LibN::NVal::DeclareNapiFunction("close",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::CloseSync),
+            FileManagement::LibN::NVal::DeclareNapiFunction("getReadStream",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::GetReadStream),
+            FileManagement::LibN::NVal::DeclareNapiFunction("getWriteStream",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::GetWriteStream),
+            FileManagement::LibN::NVal::DeclareNapiFunction("fd",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::GetFD),
+            FileManagement::LibN::NVal::DeclareNapiFunction("filePointer",
+                OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::GetFPointer),
+        };
+        bool succ = false;
+        napi_value cls = nullptr;
+        std::tie(succ, cls) = FileManagement::LibN::NClass::DefineClass(
+            env,
+            OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::className_,
+            OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::Constructor,
+            move(props));
+        if (!succ) {
+            LOGE("INNER BUG. Failed to define RandomAccessFile class")
+            return false;
+        }
+        succ = FileManagement::LibN::NClass::SaveClass(
+            env,
+            OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::className_,
+            cls);
+        if (!succ) {
+            LOGE("INNER BUG. Failed to save RandomAccessFile class");
+            return false;
+        }
+        return true;
+    }();
+    if (!jsExport) {
+        LOGD("Failed to export RandomAccessFile class");
+    }
 }
 
 extern "C" {
@@ -95,41 +195,7 @@ napi_value FfiConvertStream2Napi(napi_env env, int64_t id)
         LOGE("[Stream]: instance not exist %{public}" PRId64, id);
         return undefined;
     }
-
-    std::vector<napi_property_descriptor> props = {
-        FileManagement::LibN::NVal::DeclareNapiFunction("writeSync",
-            OHOS::FileManagement::ModuleFileIO::StreamNExporter::WriteSync),
-        FileManagement::LibN::NVal::DeclareNapiFunction("flush",
-            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Flush),
-        FileManagement::LibN::NVal::DeclareNapiFunction("flushSync",
-            OHOS::FileManagement::ModuleFileIO::StreamNExporter::FlushSync),
-        FileManagement::LibN::NVal::DeclareNapiFunction("resdSync",
-            OHOS::FileManagement::ModuleFileIO::StreamNExporter::ReadSync),
-        FileManagement::LibN::NVal::DeclareNapiFunction("closeSync",
-            OHOS::FileManagement::ModuleFileIO::StreamNExporter::CloseSync),
-        FileManagement::LibN::NVal::DeclareNapiFunction("write",
-            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Write),
-        FileManagement::LibN::NVal::DeclareNapiFunction("read",
-            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Read),
-        FileManagement::LibN::NVal::DeclareNapiFunction("close",
-            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Close),
-        FileManagement::LibN::NVal::DeclareNapiFunction("seek",
-            OHOS::FileManagement::ModuleFileIO::StreamNExporter::Seek),
-    };
-
-    bool succ = false;
-    napi_value cls = nullptr;
-    std::tie(succ, cls) = FileManagement::LibN::NClass::DefineClass(
-        env,
-        OHOS::FileManagement::ModuleFileIO::StreamNExporter::className_,
-        OHOS::FileManagement::ModuleFileIO::StreamNExporter::Constructor,
-        move(props));
-
-    if (!succ) {
-        LOGE("INNER BUG. Failed to save class");
-        return undefined;
-    }
-
+    SaveClassStream(env);
     napi_value result = InstantiateStream(env, instance->GetRealFp());
     napi_valuetype type = napi_undefined;
     if (napi_typeof(env, result, &type) != napi_ok || type == napi_undefined) {
@@ -451,6 +517,7 @@ napi_value FfiConvertRandomAccessFile2Napi(napi_env env, int64_t id)
         return undefined;
     }
 
+    SaveClassRandomAccessFile(env);
     napi_value objRAF = FileManagement::LibN::NClass::InstantiateClass(
         env,
         OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::className_,
