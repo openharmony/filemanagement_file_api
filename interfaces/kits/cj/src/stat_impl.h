@@ -47,6 +47,9 @@ public:
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 
     explicit StatImpl(uv_stat_t stat) : real_(std::move(stat)) {}
+#ifdef WIN_PLATFORM
+    inline static const int S_IFSOCK = 0140000;
+#endif
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     RetDataI32 GetLocation();
 

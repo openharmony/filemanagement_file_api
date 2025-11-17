@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
+
 #include "stat_ffi.h"
 #include "stat_impl.h"
 #include "macro.h"

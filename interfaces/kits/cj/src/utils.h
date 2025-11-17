@@ -19,12 +19,16 @@
 #include "uv.h"
 #include "fd_guard.h"
 #include <string>
+#include <tuple>
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "iremote_broker.h"
 #endif
 
 namespace OHOS {
 namespace CJSystemapi {
+namespace FileFs {
+std::tuple<int, std::unique_ptr<char[]>, size_t, int64_t> GetReadArg(size_t bufLen, int64_t length, int64_t offset);
+}
 
 constexpr int RDONLY = UV_FS_O_RDONLY;
 constexpr int WRONLY = UV_FS_O_WRONLY;

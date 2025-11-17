@@ -16,18 +16,20 @@
 #include "ffi_remote_data.h"
 #include "cj_common_ffi.h"
 #include "uni_error.h"
-#include "uri.h"
 #include "open.h"
-#include "datashare_helper.h"
 #include "utils.h"
+#include "file_utils.h"
+#include "file_impl.h"
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include "uri.h"
+#include "datashare_helper.h"
 #include "iremote_stub.h"
 #include "file_uri.h"
 #include "want.h"
 #include "ability_manager_client.h"
 #include "remote_uri.h"
-#include "file_utils.h"
 #include "securec.h"
-#include "file_impl.h"
+#endif
 
 static const std::string PROCEDURE_OPEN_NAME = "FileIOOpen";
 static const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
@@ -41,14 +43,16 @@ static const std::string SCHEME_BROKER = "content";
 constexpr uint32_t MAX_WANT_FLAG = 4;
 
 namespace {
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 using Uri = OHOS::Uri;
+using namespace OHOS::DistributedFS::ModuleRemoteUri;
+#endif
 using namespace OHOS;
 using namespace DistributedFS;
 using namespace OHOS::CJSystemapi;
 using namespace OHOS::CJSystemapi::FileFs;
 using namespace OHOS::FileManagement;
 using namespace OHOS::FileManagement::ModuleFileIO;
-using namespace OHOS::DistributedFS::ModuleRemoteUri;
 using namespace std;
 
 static int OpenFileByPath(const std::string &path, unsigned int mode)
@@ -67,6 +71,7 @@ static int OpenFileByPath(const std::string &path, unsigned int mode)
     return ret;
 }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 static int OpenFileByDatashare(const std::string &path, int64_t flags)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = nullptr;
@@ -151,6 +156,7 @@ static std::tuple<int, std::string> OpenFileByUri(const std::string &path, uint3
     LOGE("Failed to open file by invalid uri");
     return { -EINVAL, path };
 }
+#endif
 
 FileEntity* InstantiateFile(int fd, const std::string& pathOrUri, bool isUri)
 {
@@ -237,6 +243,17 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Open(const char* path, int64_t
     return {SUCCESS_CODE, filePath};
 }
 
+int FileEntity::GetFD(int64_t id)
+{
+    auto fileEntity = FFIData::GetData<FileEntity>(id);
+    if (!fileEntity) {
+        LOGE("FileEntity instance not exist %{public}" PRId64, id);
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    return fileEntity->fd_.get()->GetFD();
+}
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 std::tuple<int32_t, sptr<FileEntity>> FileEntity::Dup(int32_t fd)
 {
     LOGI("FS_TEST::FileEntity::Dup start");
@@ -292,16 +309,6 @@ static tuple<int, unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*>> Real
         return { ret, move(realpath_req)};
     }
     return { ERRNO_NOERR, move(realpath_req) };
-}
-
-int FileEntity::GetFD(int64_t id)
-{
-    auto fileEntity = FFIData::GetData<FileEntity>(id);
-    if (!fileEntity) {
-        LOGE("FileEntity instance not exist %{public}" PRId64, id);
-        return ERR_INVALID_INSTANCE_CODE;
-    }
-    return fileEntity->fd_.get()->GetFD();
 }
 
 const char* FileEntity::GetPath(int64_t id)
@@ -430,7 +437,7 @@ RetDataCString FileEntity::GetParent()
     LOGI("FS_TEST::FileEntity::GetParent success");
     return ret;
 }
-
+#endif
 } // namespace FileFs
 } // namespace CJSystemapi
 } // namespace OHOS

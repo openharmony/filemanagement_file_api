@@ -21,18 +21,20 @@
 #include "napi/native_api.h"
 
 extern "C" {
-    FFI_EXPORT napi_value FfiConvertFile2Napi(napi_env env, int64_t id);
-    FFI_EXPORT int64_t FfiCreateFileFromNapi(napi_env env, napi_value objRAF);
     FFI_EXPORT RetDataI64 FfiOHOSFileFsOpen(const char* path, int64_t mode);
     FFI_EXPORT int32_t FfiOHOSFileFsClose(int64_t file);
     FFI_EXPORT int32_t FfiOHOSFileFsCloseByFd(int32_t file);
-    FFI_EXPORT RetDataI64 FfiOHOSFileFsDup(int32_t fd);
     FFI_EXPORT int32_t FfiOHOSFILEFsGetFD(int64_t id);
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    FFI_EXPORT napi_value FfiConvertFile2Napi(napi_env env, int64_t id);
+    FFI_EXPORT int64_t FfiCreateFileFromNapi(napi_env env, napi_value objRAF);
+    FFI_EXPORT RetDataI64 FfiOHOSFileFsDup(int32_t fd);
     FFI_EXPORT const char* FfiOHOSFILEFsGetPath(int64_t id);
     FFI_EXPORT const char* FfiOHOSFILEFsGetName(int64_t id);
     FFI_EXPORT RetCode FfiOHOSFILEFsTryLock(int64_t id, bool exclusive);
     FFI_EXPORT RetCode FfiOHOSFILEFsUnLock(int64_t id);
     FFI_EXPORT RetDataCString FfiOHOSFILEFsGetParent(int64_t id);
+#endif
 }
 
 #endif // OHOS_FILE_FFI_H

@@ -14,7 +14,7 @@
  */
 
 #include "file_fs_impl.h"
-
+#include "utils.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include <sys/xattr.h>
 
@@ -108,6 +108,7 @@ std::tuple<int, uv_stat_t*> GetUvStat(const FileInfo& fileInfo)
     return {SUCCESS_CODE, tempBuf};
 }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 std::tuple<bool, FileInfo, int> ParseRandomFile(std::string file)
 {
     LOGI("FS_TEST:: RandomAccessFileImpl::ParseRandomFile");
@@ -147,7 +148,6 @@ std::tuple<int32_t, bool> UvAccess(const std::string &path, int mode)
     return {SUCCESS_CODE, isAccess};
 }
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 bool IsCloudOrDistributedFilePath(const std::string &path)
 {
     return path.find(CLOUDDISK_FILE_PREFIX) == 0 || path.find(DISTRIBUTED_FILE_PREFIX) == 0;
@@ -276,6 +276,7 @@ std::tuple<int32_t, sptr<StatImpl>> FileFsImpl::Stat(std::string file)
     return {SUCCESS_CODE, nativeStat};
 }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 std::tuple<int32_t, sptr<StreamImpl>> FileFsImpl::CreateStream(std::string path, std::string mode)
 {
     std::unique_ptr<FILE, decltype(&fclose)> fp = { fopen(path.c_str(), mode.c_str()), fclose };
@@ -405,6 +406,7 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
     }
     return {SUCCESS_CODE, randomAccessFileImpl};
 }
+#endif
 
 int FileFsImpl::Mkdir(std::string path, bool recursion, bool isTwoArgs)
 {
@@ -514,6 +516,7 @@ int FileFsImpl::Unlink(std::string path)
     return SUCCESS_CODE;
 }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 static int RecurMoveDir(const string &srcPath, const string &destPath, const int mode,
     deque<struct ConflictFiles> &errfiles);
 
@@ -854,6 +857,7 @@ RetDataCArrConflictFiles FileFsImpl::MoveDir(string src, string dest, int32_t mo
     ret.data.head = DequeToCConflict(errfiles);
     return ret;
 }
+#endif
 
 static bool CheckReadArgs(int32_t fd, const char* buf, int64_t bufLen, size_t length, int64_t offset)
 {
@@ -1021,15 +1025,15 @@ RetDataI64 FileFsImpl::WriteCur(int32_t fd, void* buf, size_t length, std::strin
     return ret;
 }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 std::tuple<int32_t, bool> FileFsImpl::Access(std::string path, int32_t mode, int32_t flag)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {
         return HandleLocalCheck(path, mode);
     }
-#endif
     return UvAccess(path, mode);
 }
+#endif
 
 int FileFsImpl::Truncate(std::string file, int64_t len)
 {
@@ -1138,6 +1142,7 @@ int FileFsImpl::Close(sptr<OHOS::CJSystemapi::FileFs::FileEntity> file)
     return CloseCore(fileStruct);
 }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 static int GetFileSize(const string &path, int64_t &offset)
 {
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> stat_req = {
@@ -1341,6 +1346,7 @@ std::tuple<int32_t, sptr<WatcherImpl>> FileFsImpl::CreateWatcher(std::string pat
     }
     return {SUCCESS_CODE, watcherImpl};
 }
+#endif
 
 } // CJSystemapi
 } // namespace OHOS

@@ -35,48 +35,23 @@ ohos_shared_library("cj_file_fs_ffi") {
   ]
 
   sources = [
-    "../js/src/common/file_api_debug.cpp",
-    "../js/src/common/file_fs_trace.cpp",
     "../js/src/common/file_helper/fd_guard.cpp",
     "../js/src/mod_fs/class_file/file_n_exporter.cpp",
-    "../js/src/mod_fs/class_stream/stream_n_exporter.cpp",
-    "../js/src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
     "../js/src/mod_fs/common_func.cpp",
-    "src/copy.cpp",
-    "src/copy_dir.cpp",
-    "src/copy_file.cpp",
     "src/fdatasync.cpp",
     "src/file_ffi.cpp",
     "src/file_fs_ffi.cpp",
     "src/file_fs_impl.cpp",
     "src/file_impl.cpp",
     "src/fsync.cpp",
-    "src/list_file.cpp",
-    "src/lseek.cpp",
     "src/mkdtemp.cpp",
-    "src/move_file.cpp",
-    "src/randomAccessFile_impl.cpp",
-    "src/readerIterator_impl.cpp",
     "src/stat_ffi.cpp",
     "src/stat_impl.cpp",
-    "src/stream_ffi.cpp",
-    "src/stream_impl.cpp",
-    "src/symlink.cpp",
-    "src/task_signal_impl.cpp",
-    "src/translistener.cpp",
     "src/uni_error.cpp",
     "src/utils.cpp",
-    "src/watcher_impl.cpp",
-    "src/xattr.cpp",
-    "src/xattr_ffi.cpp",
   ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/js:build_kits_js",
-    "${file_api_path}/interfaces/kits/js:fs",
-    "${file_api_path}/interfaces/kits/native:remote_uri_native",
-    "${file_api_path}/interfaces/kits/native:task_signal_native",
-    "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
   ]
@@ -85,30 +60,17 @@ ohos_shared_library("cj_file_fs_ffi") {
   use_exceptions = true
   if (use_mingw_win) {
     defines = [ "WIN_PLATFORM" ]
-  }
-  if (use_mac) {
+    sources += [ "src/file_fs_mock.cpp" ]
+  } else if (use_mac) {
     defines = [ "IOS_PLATFORM" ]
+    sources += [ "src/file_fs_mock.cpp" ]
   }
 
   external_deps = [
-    "ability_base:zuri",
-    "ability_runtime:ability_manager",
-    "ability_runtime:abilitykit_native",
-    "access_token:libtokenid_sdk",
-    "app_file_service:fileuri_native",
-    "bounds_checking_function:libsec_shared",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "data_share:datashare_common",
-    "data_share:datashare_consumer",
-    "dfs_service:distributed_file_daemon_kit_inner",
     "hilog:libhilog",
-    "ipc:ipc_single",
     "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
-    "samgr:samgr_proxy",
   ]
 
   if (!use_mingw_win && !use_mac) {
@@ -132,8 +94,54 @@ ohos_shared_library("cj_file_fs_ffi") {
       cfi_cross_dso = true
       debug = false
     }
+
+    sources += [
+      "../js/src/common/file_api_debug.cpp",
+      "../js/src/common/file_fs_trace.cpp",
+      "../js/src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
+      "../js/src/mod_fs/class_stream/stream_n_exporter.cpp",
+      "src/copy.cpp",
+      "src/copy_dir.cpp",
+      "src/copy_file.cpp",
+      "src/list_file.cpp",
+      "src/lseek.cpp",
+      "src/move_file.cpp",
+      "src/randomAccessFile_impl.cpp",
+      "src/readerIterator_impl.cpp",
+      "src/stream_ffi.cpp",
+      "src/stream_impl.cpp",
+      "src/symlink.cpp",
+      "src/task_signal_impl.cpp",
+      "src/translistener.cpp",
+      "src/watcher_impl.cpp",
+      "src/xattr.cpp",
+      "src/xattr_ffi.cpp",
+    ]
+
+    deps += [
+      "${file_api_path}/interfaces/kits/js:build_kits_js",
+      "${file_api_path}/interfaces/kits/js:fs",
+      "${file_api_path}/interfaces/kits/native:remote_uri_native",
+      "${file_api_path}/interfaces/kits/native:task_signal_native",
+      "${file_api_path}/interfaces/kits/rust:rust_file",
+    ]
+
     external_deps += [
+      "ability_base:zuri",
+      "ability_runtime:ability_manager",
+      "ability_runtime:abilitykit_native",
+      "access_token:libtokenid_sdk",
+      "app_file_service:fileuri_native",
+      "bounds_checking_function:libsec_shared",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
+      "data_share:datashare_common",
+      "data_share:datashare_consumer",
+      "dfs_service:distributed_file_daemon_kit_inner",
       "hitrace:hitrace_meter",
+      "ipc:ipc_single",
+      "samgr:samgr_proxy",
     ]
   }
 

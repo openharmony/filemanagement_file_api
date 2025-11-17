@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
+
 #include "utils.h"
 #include "cj_common_ffi.h"
 #include "macro.h"
@@ -20,6 +22,41 @@
 
 namespace OHOS {
 namespace CJSystemapi {
+namespace FileFs {
+std::tuple<int, size_t> GetActualLen(size_t bufLen, size_t bufOff, int64_t offset, int64_t length)
+{
+    size_t retLen = bufLen - bufOff;
+
+    if (length == 0) {
+        return { SUCCESS_CODE, retLen };
+    }
+
+    if (length < 0 || static_cast<size_t>(length) > retLen) {
+        LOGE("Invalid option length, length: %{public}" PRId64 ", retLen: %{public}zu", length, retLen);
+        return { EINVAL, 0 };
+    }
+    retLen = static_cast<size_t>(length);
+    return { SUCCESS_CODE, retLen };
+}
+
+std::tuple<int, std::unique_ptr<char[]>, size_t, int64_t> GetReadArg(size_t bufLen, int64_t length, int64_t offset)
+{
+    std::unique_ptr<char[]> buf = std::make_unique<char[]>(bufLen);
+
+    auto [state, retLen] = GetActualLen(bufLen, 0, offset, length);
+    if (state != SUCCESS_CODE) {
+        LOGE("Failed to get actual length");
+        return { EINVAL, nullptr, 0, 0 };
+    }
+
+    if (offset < 0) {
+        LOGE("option.offset shall be positive number");
+        return { EINVAL, nullptr, 0, 0 };
+    }
+
+    return { SUCCESS_CODE, move(buf), retLen, offset };
+}
+}
 
 unsigned int CommonFunc::ConvertCjFlags(unsigned int &flags)
 {
