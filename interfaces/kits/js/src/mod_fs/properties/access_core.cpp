@@ -145,7 +145,7 @@ static int HandleLocalCheck(const string &path, int mode)
 static int Access(const string &path, int mode, int flag)
 {
     if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s, mode is %{public}d", path.c_str(), mode);
+        HILOGD("Path is %{private}s, mode is %{public}d", path.c_str(), mode);
     }
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     if (flag == LOCAL_FLAG && IsCloudOrDistributedFilePath(path)) {

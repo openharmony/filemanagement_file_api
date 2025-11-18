@@ -81,7 +81,7 @@ int FileWatcher::StartNotify(shared_ptr<WatcherInfoArg> arg)
 
     auto [isWatched, wd] = CheckEventWatched(arg->fileName, arg->events);
     if (FileApiDebug::isLogEnabled) {
-        HILOGD("Not find filename in map filename %{public}s, arg->filename %{public}d, isWatched %{public}d, "
+        HILOGD("Not find filename in map filename %{private}s, arg->filename %{private}d, isWatched %{public}d, "
             "wd %{public}d", arg->fileName.c_str(), arg->events, isWatched, wd);
     }
     if (isWatched && wd > 0) {
@@ -98,7 +98,7 @@ int FileWatcher::StartNotify(shared_ptr<WatcherInfoArg> arg)
     if (newWd < 0) {
         HILOGE("Failed to start notify errCode:%{public}d", errno);
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("Start intify_add_watch notifyFd_ %{public}d, filename %{public}s, arg->event %{public}d, "
+            HILOGD("Start intify_add_watch notifyFd_ %{public}d, filename %{private}s, arg->event %{public}d, "
                 "watchEvents %{public}d", notifyFd_, arg->fileName.c_str(), arg->events, watchEvents);
         }
         return errno;

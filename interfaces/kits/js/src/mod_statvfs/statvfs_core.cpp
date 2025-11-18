@@ -33,7 +33,7 @@ FsResult<int64_t> StatvfsCore::DoGetFreeSize(const string &path)
     int ret = statvfs(path.c_str(), &diskInfo);
     if (ret != 0) {
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("Path is %{public}s", path.c_str());
+            HILOGD("Path is %{private}s", path.c_str());
         }
         return FsResult<int64_t>::Error(errno);
     }

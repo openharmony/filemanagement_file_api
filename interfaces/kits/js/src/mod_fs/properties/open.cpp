@@ -194,7 +194,7 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, unsi
     AppFileService::ModuleFileUri::FileUri fileUri(uriStr);
     string realPath = fileUri.GetRealPath();
     if (FileApiDebug::isLogEnabled) {
-        HILOGD("UriStr is %{public}s, realPath is %{public}s", uriStr.c_str(), realPath.c_str());
+        HILOGD("UriStr is %{private}s, realPath is %{private}s", uriStr.c_str(), realPath.c_str());
     }
     if (bundleName == MEDIA) {
         string userId;

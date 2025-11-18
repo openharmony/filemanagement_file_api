@@ -74,7 +74,7 @@ static int OpenFile(const std::string& path)
 {
     FileFsTrace traceOpenFile("OpenFile");
     if (FileApiDebug::isLogEnabled) {
-        HILOGD("Path is %{public}s", path.c_str());
+        HILOGD("Path is %{private}s", path.c_str());
     }
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> openReq = {
         new uv_fs_t, FsUtils::FsReqCleanup

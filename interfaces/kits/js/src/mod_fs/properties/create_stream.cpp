@@ -69,7 +69,7 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
         HILOGE("Failed to fdopen file by path, errno is %{public}d", errno);
         NError(errno).ThrowErr(env);
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("StreamPath is %{public}s, StreamMode is %{public}s", argPath.c_str(), argMode.c_str());
+            HILOGD("StreamPath is %{private}s, StreamMode is %{public}s", argPath.c_str(), argMode.c_str());
         }
         return nullptr;
     }

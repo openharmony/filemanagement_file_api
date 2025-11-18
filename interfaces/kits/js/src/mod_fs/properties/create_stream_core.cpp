@@ -36,7 +36,7 @@ FsResult<FsStream *> CreateStreamCore::DoCreateStream(const std::string &path, c
     if (!file) {
         HILOGE("Failed to fdopen file by path, errno is %{public}d", errno);
         if (FileApiDebug::isLogEnabled) {
-            HILOGD("StreamPath is %{public}s, StreamMode is %{public}s", path.c_str(), mode.c_str());
+            HILOGD("StreamPath is %{private}s, StreamMode is %{public}s", path.c_str(), mode.c_str());
         }
         return FsResult<FsStream *>::Error(errno);
     }
