@@ -14,22 +14,23 @@
  */
 
 #include "file_fs_ffi.h"
-#include "copy.h"
-#include "copy_file.h"
 #include "fdatasync.h"
 #include "fsync.h"
+#include "macro.h"
+#include "mkdtemp.h"
+#include "symlink.h"
+#include "uni_error.h"
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+#include "copy.h"
+#include "copy_file.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "list_file.h"
 #include "lseek.h"
-#include "macro.h"
-#include "mkdtemp.h"
 #include "move_file.h"
-#include "symlink.h"
-#include "uni_error.h"
-
 #include "stream_n_exporter.h"
 #include "randomaccessfile_n_exporter.h"
+#endif
 
 using namespace OHOS::FFI;
 
@@ -37,6 +38,7 @@ namespace OHOS {
 namespace CJSystemapi {
 namespace FileFs {
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 static void SaveClassStream(napi_env env)
 {
     static auto jsExport = [env]() {
@@ -157,8 +159,173 @@ static void SaveClassRandomAccessFile(napi_env env)
         LOGD("Failed to export RandomAccessFile class");
     }
 }
+#endif
 
 extern "C" {
+RetDataI64 FfiOHOSFileFsStatByID(int32_t file)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsStatByID");
+    RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
+    auto [state, nativeStat] = FileFsImpl::Stat(file);
+    if (nativeStat == nullptr) {
+        LOGI("FS_TEST::FfiOHOSFileFsStatByID error");
+        ret.code = state;
+        ret.data = 0;
+        return ret;
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsStatByID success");
+    ret.code = state;
+    ret.data = nativeStat->GetID();
+    return ret;
+}
+
+RetDataI64 FfiOHOSFileFsStatByString(const char* file)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsStatByString");
+    RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
+    auto [state, nativeStat] = FileFsImpl::Stat(file);
+    if (nativeStat == nullptr) {
+        LOGI("FS_TEST::FfiOHOSFileFsStatByString error");
+        ret.code = state;
+        ret.data = 0;
+        return ret;
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsStatByString success");
+    ret.code = state;
+    ret.data = nativeStat->GetID();
+    return ret;
+}
+
+RetDataI64 FfiOHOSFileFsRead(int32_t fd, char* buffer, int64_t bufLen, size_t length, int64_t offset)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsRead");
+    auto ret = FileFsImpl::Read(fd, buffer, bufLen, length, offset);
+    if (ret.code != SUCCESS_CODE) {
+        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
+        return ret;
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsRead success");
+    return ret;
+}
+
+RetDataI64 FfiOHOSFileFsReadCur(int32_t fd, char* buffer, int64_t bufLen, size_t length)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsReadCur");
+    auto ret = FileFsImpl::ReadCur(fd, buffer, bufLen, length);
+    if (ret.code != SUCCESS_CODE) {
+        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
+        return ret;
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsReadCur success");
+    return ret;
+}
+
+RetDataI64 FfiOHOSFileFsWrite(int32_t fd, char* buffer, size_t length, int64_t offset, const char* encode)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsWrite");
+    auto ret = FileFsImpl::Write(fd, reinterpret_cast<void *>(buffer), length, offset, encode);
+    if (ret.code != SUCCESS_CODE) {
+        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
+        return ret;
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsWrite success");
+    return ret;
+}
+
+RetDataI64 FfiOHOSFileFsWriteCur(int32_t fd, char* buffer, size_t length, const char* encode)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsWriteCur");
+    auto ret = FileFsImpl::WriteCur(fd, reinterpret_cast<void *>(buffer), length, encode);
+    if (ret.code != SUCCESS_CODE) {
+        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
+        return ret;
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsWriteCur success");
+    return ret;
+}
+
+int32_t FfiOHOSFileFsMkdir(const char* path, bool recursion, bool isTwoArgs)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsMkdir");
+    auto code = FileFsImpl::Mkdir(path, recursion, isTwoArgs);
+    LOGI("FS_TEST::FfiOHOSFileFsMkdir success");
+    return code;
+}
+
+int32_t FfiOHOSFileFsRmdir(const char* path)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsRmdir");
+    auto code = FileFsImpl::Rmdir(path);
+    LOGI("FS_TEST::FfiOHOSFileFsRmdir success");
+    return code;
+}
+
+int32_t FfiOHOSFileFsRename(const char* oldFile, const char* newFile)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsRename");
+    auto code = FileFsImpl::Rename(oldFile, newFile);
+    LOGI("FS_TEST::FfiOHOSFileFsRename success");
+    return code;
+}
+
+int32_t FfiOHOSFileFsUnlink(const char* path)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsUnlink");
+    auto code = FileFsImpl::Unlink(path);
+    LOGI("FS_TEST::FfiOHOSFileFsUnlink success");
+    return code;
+}
+
+RetDataCString FfiOHOSFileFsMkdtemp(const char* prefix)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsMkdtemp start");
+    auto ret = MkdtempImpl::Mkdtemp(prefix);
+    if (ret.code != SUCCESS_CODE) {
+        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsMkdtemp end");
+    return ret;
+}
+
+int32_t FfiOHOSFileFsTruncateByString(const char* file, int64_t len)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsTruncateByString");
+    auto code = FileFsImpl::Truncate(file, len);
+    LOGI("FS_TEST::FfiOHOSFileFsTruncateByString success");
+    return code;
+}
+
+int32_t FfiOHOSFileFsTruncateByFd(int32_t file, int64_t len)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsTruncateByfd");
+    auto code = FileFsImpl::Truncate(file, len);
+    LOGI("FS_TEST::FfiOHOSFileFsTruncateByfd success");
+    return code;
+}
+
+int FfiOHOSFileFsFdatasync(int32_t fd)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsFdatasync start");
+    auto ret = FdatasyncImpl::Fdatasync(fd);
+    if (ret != SUCCESS_CODE) {
+        return OHOS::CJSystemapi::FileFs::GetErrorCode(ret);
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsFdatasync success");
+    return ret;
+}
+
+int FfiOHOSFileFsFsync(int32_t fd)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsFsync start");
+    auto ret = FsyncImpl::Fsync(fd);
+    if (ret != SUCCESS_CODE) {
+        return OHOS::CJSystemapi::FileFs::GetErrorCode(ret);
+    }
+    LOGI("FS_TEST::FfiOHOSFileFsFsync success");
+    return ret;
+}
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 int64_t FfiCreateStreamFromNapi(napi_env env, napi_value stream)
 {
     if (env == nullptr || stream == nullptr) {
@@ -258,40 +425,6 @@ void FfiOHOSFileFsCopy(const char* src, const char* dest, int64_t opt)
     CopyImpl::Copy(src, dest, instance);
 }
 
-RetDataI64 FfiOHOSFileFsStatByID(int32_t file)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsStatByID");
-    RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
-    auto [state, nativeStat] = FileFsImpl::Stat(file);
-    if (nativeStat == nullptr) {
-        LOGI("FS_TEST::FfiOHOSFileFsStatByID error");
-        ret.code = state;
-        ret.data = 0;
-        return ret;
-    }
-    LOGI("FS_TEST::FfiOHOSFileFsStatByID success");
-    ret.code = state;
-    ret.data = nativeStat->GetID();
-    return ret;
-}
-
-RetDataI64 FfiOHOSFileFsStatByString(const char* file)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsStatByString");
-    RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
-    auto [state, nativeStat] = FileFsImpl::Stat(file);
-    if (nativeStat == nullptr) {
-        LOGI("FS_TEST::FfiOHOSFileFsStatByString error");
-        ret.code = state;
-        ret.data = 0;
-        return ret;
-    }
-    LOGI("FS_TEST::FfiOHOSFileFsStatByString success");
-    ret.code = state;
-    ret.data = nativeStat->GetID();
-    return ret;
-}
-
 RetDataI64 FfiOHOSFileFsCreateStream(const char* path, const char* mode)
 {
     LOGI("FS_TEST::FfiOHOSFileFsCreateStream");
@@ -337,54 +470,6 @@ RetDataI64 FfiOHOSFileFsLstat(const char* path)
     }
     LOGI("FS_TEST::FfiOHOSFileFsLstat success");
     ret.data = nativeStat->GetID();
-    return ret;
-}
-
-RetDataI64 FfiOHOSFileFsRead(int32_t fd, char* buffer, int64_t bufLen, size_t length, int64_t offset)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsRead");
-    auto ret = FileFsImpl::Read(fd, buffer, bufLen, length, offset);
-    if (ret.code != SUCCESS_CODE) {
-        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
-        return ret;
-    }
-    LOGI("FS_TEST::FfiOHOSFileFsRead success");
-    return ret;
-}
-
-RetDataI64 FfiOHOSFileFsReadCur(int32_t fd, char* buffer, int64_t bufLen, size_t length)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsReadCur");
-    auto ret = FileFsImpl::ReadCur(fd, buffer, bufLen, length);
-    if (ret.code != SUCCESS_CODE) {
-        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
-        return ret;
-    }
-    LOGI("FS_TEST::FfiOHOSFileFsReadCur success");
-    return ret;
-}
-
-RetDataI64 FfiOHOSFileFsWrite(int32_t fd, char* buffer, size_t length, int64_t offset, const char* encode)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsWrite");
-    auto ret = FileFsImpl::Write(fd, reinterpret_cast<void *>(buffer), length, offset, encode);
-    if (ret.code != SUCCESS_CODE) {
-        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
-        return ret;
-    }
-    LOGI("FS_TEST::FfiOHOSFileFsWrite success");
-    return ret;
-}
-
-RetDataI64 FfiOHOSFileFsWriteCur(int32_t fd, char* buffer, size_t length, const char* encode)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsWriteCur");
-    auto ret = FileFsImpl::WriteCur(fd, reinterpret_cast<void *>(buffer), length, encode);
-    if (ret.code != SUCCESS_CODE) {
-        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
-        return ret;
-    }
-    LOGI("FS_TEST::FfiOHOSFileFsWriteCur success");
     return ret;
 }
 
@@ -583,22 +668,6 @@ int64_t FfiCreateRandomAccessFileFromNapi(napi_env env, napi_value objRAF)
 
     return native->GetID();
 }
-
-int32_t FfiOHOSFileFsMkdir(const char* path, bool recursion, bool isTwoArgs)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsMkdir");
-    auto code = FileFsImpl::Mkdir(path, recursion, isTwoArgs);
-    LOGI("FS_TEST::FfiOHOSFileFsMkdir success");
-    return code;
-}
-
-int32_t FfiOHOSFileFsRmdir(const char* path)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsRmdir");
-    auto code = FileFsImpl::Rmdir(path);
-    LOGI("FS_TEST::FfiOHOSFileFsRmdir success");
-    return code;
-}
  
 RetDataCArrConflictFiles FfiOHOSFileFsMoveDir(const char* src, const char* dest, int32_t mode)
 {
@@ -606,22 +675,6 @@ RetDataCArrConflictFiles FfiOHOSFileFsMoveDir(const char* src, const char* dest,
     auto ret = FileFsImpl::MoveDir(src, dest, mode);
     LOGI("FS_TEST::FfiOHOSFileFsMovedir success");
     return ret;
-}
- 
-int32_t FfiOHOSFileFsRename(const char* oldFile, const char* newFile)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsRename");
-    auto code = FileFsImpl::Rename(oldFile, newFile);
-    LOGI("FS_TEST::FfiOHOSFileFsRename success");
-    return code;
-}
-
-int32_t FfiOHOSFileFsUnlink(const char* path)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsUnlink");
-    auto code = FileFsImpl::Unlink(path);
-    LOGI("FS_TEST::FfiOHOSFileFsUnlink success");
-    return code;
 }
 
 RetDataCArrConflictFiles FfiOHOSFileFsCopyDir(const char* src, const char* dest, int mode)
@@ -690,17 +743,6 @@ int FfiOHOSFileFsMoveFile(const char* src, const char* dest, int mode)
     return ret;
 }
 
-RetDataCString FfiOHOSFileFsMkdtemp(const char* prefix)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsMkdtemp start");
-    auto ret = MkdtempImpl::Mkdtemp(prefix);
-    if (ret.code != SUCCESS_CODE) {
-        ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
-    }
-    LOGI("FS_TEST::FfiOHOSFileFsMkdtemp end");
-    return ret;
-}
-
 RetDataBool FfiOHOSFileFsAccess(const char* path)
 {
     LOGI("FS_TEST::FfiOHOSFileFsAccess");
@@ -731,22 +773,6 @@ RetDataBool FfiOHOSFileFsAccessExt(const char* path, int32_t mode, int32_t flag)
     LOGI("FS_TEST::FfiOHOSFileFsAccessExt success");
     ret.data = accessStatus;
     return ret;
-}
-
-int32_t FfiOHOSFileFsTruncateByString(const char* file, int64_t len)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsTruncateByString");
-    auto code = FileFsImpl::Truncate(file, len);
-    LOGI("FS_TEST::FfiOHOSFileFsTruncateByString success");
-    return code;
-}
-
-int32_t FfiOHOSFileFsTruncateByFd(int32_t file, int64_t len)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsTruncateByfd");
-    auto code = FileFsImpl::Truncate(file, len);
-    LOGI("FS_TEST::FfiOHOSFileFsTruncateByfd success");
-    return code;
 }
 
 RetDataI64 FfiOHOSFileFsReadLines(char* path, char* encoding)
@@ -802,28 +828,6 @@ RetDataI64 FfiOHOSFileFsLseek(int32_t fd, int64_t offset, int whence)
         ret.code = OHOS::CJSystemapi::FileFs::GetErrorCode(ret.code);
     }
     LOGI("FS_TEST::FfiOHOSFileFsLseek success");
-    return ret;
-}
-
-int FfiOHOSFileFsFdatasync(int32_t fd)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsFdatasync start");
-    auto ret = FdatasyncImpl::Fdatasync(fd);
-    if (ret != SUCCESS_CODE) {
-        return OHOS::CJSystemapi::FileFs::GetErrorCode(ret);
-    }
-    LOGI("FS_TEST::FfiOHOSFileFsFdatasync success");
-    return ret;
-}
-
-int FfiOHOSFileFsFsync(int32_t fd)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsFsync start");
-    auto ret = FsyncImpl::Fsync(fd);
-    if (ret != SUCCESS_CODE) {
-        return OHOS::CJSystemapi::FileFs::GetErrorCode(ret);
-    }
-    LOGI("FS_TEST::FfiOHOSFileFsFsync success");
     return ret;
 }
 
@@ -901,6 +905,7 @@ int32_t FfiOHOSFileFsWatcherStop(int64_t id)
     LOGI("FS_TEST::FfiOHOSFileFsWatcherStart success");
     return FileWatcherManager::GetInstance().StopNotify(instance->data_);
 }
+#endif
 }
 } // namespace FileFs
 } // namespace CJSystemapi

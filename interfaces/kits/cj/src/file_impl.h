@@ -35,34 +35,22 @@ public:
     std::unique_ptr<DistributedFS::FDGuard> fd_ = { nullptr };
     std::string path_;
     std::string uri_;
-    ~FileEntity() override
-    {
-        if (!fd_.get()) {
-            return;
-        }
-        int32_t fd = fd_.get()->GetFD();
-        int ret = flock(fd, LOCK_UN);
-        if (ret == 0) {
-            struct stat buf;
-            if (fstat(fd, &buf) == 0) {
-                LOGI("Unlock succeeded inode = %{public}" PRIu64, buf.st_ino);
-            } else {
-                LOGI("Failed to get inode number");
-            }
-        }
-    }
+#ifndef WIN_PLATFORM
+    virtual ~FileEntity() {};
+#endif
     FileEntity(std::unique_ptr<DistributedFS::FDGuard> fd, const std::string& path, const std::string& uri)
         : fd_(std::move(fd)), path_(path), uri_(uri) {}
     FileEntity() {};
     static std::tuple<int32_t, sptr<FileEntity>> Open(const char* path, int64_t mode);
-    static std::tuple<int32_t, sptr<FileEntity>> Dup(int32_t fd);
     static int GetFD(int64_t id);
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+    static std::tuple<int32_t, sptr<FileEntity>> Dup(int32_t fd);
     static const char* GetPath(int64_t id);
     static const char* GetName(int64_t id);
     int TryLock(int64_t id, bool exclusive);
     int UnLock(int64_t id);
     RetDataCString GetParent();
-
+#endif
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 
 private:

@@ -25,8 +25,6 @@ namespace OHOS {
 namespace CJSystemapi {
 namespace FileFs {
 
-std::tuple<int, std::unique_ptr<char[]>, size_t, int64_t> GetReadArg(size_t bufLen, int64_t length, int64_t offset);
-
 class StreamImpl : public OHOS::FFI::FFIData {
 public:
     explicit StreamImpl(std::unique_ptr<FILE, decltype(&fclose)> fp) : fp_(std::move(fp)) {}

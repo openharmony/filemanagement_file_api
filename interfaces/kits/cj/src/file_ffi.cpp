@@ -18,8 +18,10 @@
 #include "file_ffi.h"
 #include "macro.h"
 #include "uni_error.h"
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#endif
 #include "file_n_exporter.h"
 #include "file_entity.h"
 #include "n_class.h"
@@ -32,6 +34,63 @@ namespace CJSystemapi {
 namespace FileFs {
 
 extern "C" {
+FFI_EXPORT void FfiOHOSFileFsReleaseCString(char *str)
+{
+    LOGD("FS_TEST::FfiOHOSFileFsReleaseCString");
+    free(str);
+}
+
+RetDataI64 FfiOHOSFileFsOpen(const char* path, int64_t mode)
+{
+    LOGI("FS_TEST::FfiOHOSFILEOpen");
+    RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
+    auto [state, nativeStream] = FileEntity::Open(path, mode);
+    if (state != SUCCESS_CODE) {
+        LOGE("FS_TEST::FfiOHOSFILEOpen error");
+        ret.code = GetErrorCode(state);
+        ret.data = 0;
+        return ret;
+    }
+    LOGI("FS_TEST::FfiOHOSFILEOpen success");
+    ret.code = state;
+    ret.data = nativeStream->GetID();
+    return ret;
+}
+
+int FfiOHOSFileFsCloseByFd(int32_t file)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsClose");
+    int err = FileFsImpl::Close(file);
+    LOGI("FS_TEST::FfiOHOSFileFsClose success");
+    return err;
+}
+
+int FfiOHOSFileFsClose(int64_t file)
+{
+    LOGI("FS_TEST::FfiOHOSFileFsClose");
+    auto instance = FFIData::GetData<FileEntity>(file);
+    if (!instance) {
+        LOGE("Stream instance not exist %{public}" PRId64, file);
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    int err = FileFsImpl::Close(instance);
+    FFIData::Release(file);
+    LOGI("FS_TEST::FfiOHOSFileFsClose success");
+    return err;
+}
+
+int FfiOHOSFILEFsGetFD(int64_t id)
+{
+    LOGI("FS_TEST::FfiOHOSFILEGetFD");
+    auto instance = FFIData::GetData<FileEntity>(id);
+    if (!instance) {
+        LOGE("FileEntity instance not exist %{public}" PRId64, id);
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    return instance->GetFD(id);
+}
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 void RegisterAndSaveClass(napi_env env)
 {
     std::vector<napi_property_descriptor> props = {
@@ -144,45 +203,6 @@ int64_t FfiCreateFileFromNapi(napi_env env, napi_value objRAF)
     return native->GetID();
 }
 
-RetDataI64 FfiOHOSFileFsOpen(const char* path, int64_t mode)
-{
-    LOGI("FS_TEST::FfiOHOSFILEOpen");
-    RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
-    auto [state, nativeStream] = FileEntity::Open(path, mode);
-    if (state != SUCCESS_CODE) {
-        LOGE("FS_TEST::FfiOHOSFILEOpen error");
-        ret.code = GetErrorCode(state);
-        ret.data = 0;
-        return ret;
-    }
-    LOGI("FS_TEST::FfiOHOSFILEOpen success");
-    ret.code = state;
-    ret.data = nativeStream->GetID();
-    return ret;
-}
-
-int FfiOHOSFileFsCloseByFd(int32_t file)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsClose");
-    int err = FileFsImpl::Close(file);
-    LOGI("FS_TEST::FfiOHOSFileFsClose success");
-    return err;
-}
-
-int FfiOHOSFileFsClose(int64_t file)
-{
-    LOGI("FS_TEST::FfiOHOSFileFsClose");
-    auto instance = FFIData::GetData<FileEntity>(file);
-    if (!instance) {
-        LOGE("Stream instance not exist %{public}" PRId64, file);
-        return ERR_INVALID_INSTANCE_CODE;
-    }
-    int err = FileFsImpl::Close(instance);
-    FFIData::Release(file);
-    LOGI("FS_TEST::FfiOHOSFileFsClose success");
-    return err;
-}
-
 RetDataI64 FfiOHOSFileFsDup(int32_t fd)
 {
     LOGI("FS_TEST::FfiOHOSFileFsDup");
@@ -197,17 +217,6 @@ RetDataI64 FfiOHOSFileFsDup(int32_t fd)
     ret.code = state;
     ret.data = nativeFile->GetID();
     return ret;
-}
-
-int FfiOHOSFILEFsGetFD(int64_t id)
-{
-    LOGI("FS_TEST::FfiOHOSFILEGetFD");
-    auto instance = FFIData::GetData<FileEntity>(id);
-    if (!instance) {
-        LOGE("FileEntity instance not exist %{public}" PRId64, id);
-        return ERR_INVALID_INSTANCE_CODE;
-    }
-    return instance->GetFD(id);
 }
 
 const char* FfiOHOSFILEFsGetPath(int64_t id)
@@ -270,6 +279,7 @@ RetDataCString FfiOHOSFILEFsGetParent(int64_t id)
     LOGI("FS_TEST::FfiOHOSFILEFsGetParent end");
     return ret;
 }
+#endif
 }
 } // namespace FileFs
 } // namespace CJSystemapi

@@ -23,12 +23,6 @@ namespace CJSystemapi {
 namespace FileFs {
 extern "C" {
 
-FFI_EXPORT void FfiOHOSFileFsReleaseCString(char *str)
-{
-    LOGD("FS_TEST::FfiOHOSFileFsReleaseCString");
-    free(str);
-}
-
 FFI_EXPORT int32_t FfiOHOSFileFsSetXattr(const char *path, const char *key, const char *value)
 {
     LOGD("FS_TEST::FfiOHOSFileFsSetXattr");
