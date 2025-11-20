@@ -18,8 +18,8 @@
 
 #include <gmock/gmock.h>
 
-#include "n_napi.h"
 #include "filemgmt_libn.h"
+#include "n_napi.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace std::filesystem;
