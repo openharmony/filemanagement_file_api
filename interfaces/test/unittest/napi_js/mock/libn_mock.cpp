@@ -188,7 +188,8 @@ bool NFuncArg::InitArgs(std::function<bool()> argcChecker)
     }
 
     static bool (*realInitArgs)(std::function<bool()>) = []() {
-        auto func = (bool (*)(std::function<bool()>))dlsym(RTLD_NEXT, "InitArgs");
+        auto func = (bool (*)(std::function<bool()>))dlsym(
+            RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN8NFuncArg8InitArgsENSt3__h8functionIFbvEEE");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real InitArgs: " << dlerror();
         }
@@ -209,7 +210,7 @@ bool NFuncArg::InitArgs(size_t argc)
     }
 
     static bool (*realInitArgs)(size_t) = []() {
-        auto func = (bool (*)(size_t))dlsym(RTLD_NEXT, "InitArgs");
+        auto func = (bool (*)(size_t))dlsym(RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN8NFuncArg8InitArgsEj");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real InitArgs: " << dlerror();
         }
@@ -230,7 +231,7 @@ bool NFuncArg::InitArgs(size_t minArgc, size_t maxArgc)
     }
 
     static bool (*realInitArgs)(size_t, size_t) = []() {
-        auto func = (bool (*)(size_t, size_t))dlsym(RTLD_NEXT, "InitArgs");
+        auto func = (bool (*)(size_t, size_t))dlsym(RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN8NFuncArg8InitArgsEjj");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real InitArgs: " << dlerror();
         }
@@ -251,7 +252,7 @@ size_t NFuncArg::GetArgc() const
     }
 
     static size_t (*realGetArgc)() = []() {
-        auto func = (size_t(*)())dlsym(RTLD_NEXT, "GetArgc");
+        auto func = (size_t(*)())dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN8NFuncArg7GetArgcEv");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real GetArgc: " << dlerror();
         }
@@ -272,7 +273,7 @@ napi_value NFuncArg::GetThisVar() const
     }
 
     static napi_value (*realGetThisVar)() = []() {
-        auto func = (napi_value(*)())dlsym(RTLD_NEXT, "GetThisVar");
+        auto func = (napi_value(*)())dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN8NFuncArg10GetThisVarEv");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real GetThisVar: " << dlerror();
         }
@@ -293,7 +294,7 @@ napi_value NFuncArg::GetArg(size_t argPos) const
     }
 
     static napi_value (*realGetArg)(size_t) = []() {
-        auto func = (napi_value(*)(size_t))dlsym(RTLD_NEXT, "GetArg");
+        auto func = (napi_value(*)(size_t))dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN8NFuncArg6GetArgEj");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real GetArg: " << dlerror();
         }
@@ -314,7 +315,7 @@ void NError::ThrowErr(napi_env env)
     }
 
     static void (*realThrowErr)(napi_env) = []() {
-        auto func = (void (*)(napi_env))dlsym(RTLD_NEXT, "ThrowErr");
+        auto func = (void (*)(napi_env))dlsym(RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN6NError8ThrowErrEP10napi_env__");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ThrowErr: " << dlerror();
         }
@@ -335,7 +336,8 @@ void NError::ThrowErr(napi_env env, int errCode)
     }
 
     static void (*realThrowErr)(napi_env, int) = []() {
-        auto func = (void (*)(napi_env, int))dlsym(RTLD_NEXT, "ThrowErr");
+        auto func =
+            (void (*)(napi_env, int))dlsym(RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN6NError8ThrowErrEP10napi_env__i");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ThrowErr: " << dlerror();
         }
@@ -356,7 +358,9 @@ void NError::ThrowErr(napi_env env, std::string errMsg)
     }
 
     static void (*realThrowErr)(napi_env, std::string) = []() {
-        auto func = (void (*)(napi_env, std::string))dlsym(RTLD_NEXT, "ThrowErr");
+        auto func = (void (*)(napi_env, std::string))dlsym(RTLD_NEXT,
+            "_ZN4OHOS14FileManagement4LibN6NError8ThrowErrEP10napi_env__NSt3__h12basic_stringIcNS5_11char_"
+            "traitsIcEENS5_9allocatorIcEEEE");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ThrowErr: " << dlerror();
         }
@@ -377,7 +381,8 @@ void NError::ThrowErrAddData(napi_env env, int errCode, napi_value data)
     }
 
     static void (*realThrowErrAddData)(napi_env, int, napi_value) = []() {
-        auto func = (void (*)(napi_env, int, napi_value))dlsym(RTLD_NEXT, "ThrowErrAddData");
+        auto func = (void (*)(napi_env, int, napi_value))dlsym(
+            RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN6NError15ThrowErrAddDataEP10napi_env__iP12napi_value__");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ThrowErrAddData: " << dlerror();
         }
@@ -398,7 +403,8 @@ std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8String() const
     }
 
     static std::tuple<bool, std::unique_ptr<char[]>, size_t> (*realToUTF8String)() = []() {
-        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>(*)())dlsym(RTLD_NEXT, "ToUTF8String");
+        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>(*)())dlsym(
+            RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal12ToUTF8StringEv");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToUTF8String: " << dlerror();
         }
@@ -419,7 +425,9 @@ std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8String(std::string
     }
 
     static std::tuple<bool, std::unique_ptr<char[]>, size_t> (*realToUTF8String)(std::string) = []() {
-        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>(*)(std::string))dlsym(RTLD_NEXT, "ToUTF8String");
+        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>(*)(std::string))dlsym(RTLD_NEXT,
+            "_ZNK4OHOS14FileManagement4LibN4NVal12ToUTF8StringENSt3__h12basic_stringIcNS3_11char_"
+            "traitsIcEENS3_9allocatorIcEEEE");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToUTF8String: " << dlerror();
         }
@@ -440,7 +448,8 @@ std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8StringPath() const
     }
 
     static std::tuple<bool, std::unique_ptr<char[]>, size_t> (*realToUTF8StringPath)() = []() {
-        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>(*)())dlsym(RTLD_NEXT, "ToUTF8StringPath");
+        auto func = (std::tuple<bool, std::unique_ptr<char[]>, size_t>(*)())dlsym(
+            RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal16ToUTF8StringPathEv");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToUTF8StringPath: " << dlerror();
         }
@@ -461,7 +470,7 @@ std::tuple<bool, bool> NVal::ToBool() const
     }
 
     static std::tuple<bool, bool> (*realToBool)() = []() {
-        auto func = (std::tuple<bool, bool>(*)())dlsym(RTLD_NEXT, "ToBool");
+        auto func = (std::tuple<bool, bool>(*)())dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal6ToBoolEv");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToBool: " << dlerror();
         }
@@ -482,7 +491,7 @@ std::tuple<bool, bool> NVal::ToBool(bool defaultValue) const
     }
 
     static std::tuple<bool, bool> (*realToBool)(bool) = []() {
-        auto func = (std::tuple<bool, bool>(*)(bool))dlsym(RTLD_NEXT, "ToBool");
+        auto func = (std::tuple<bool, bool>(*)(bool))dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal6ToBoolEb");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToBool: " << dlerror();
         }
@@ -503,7 +512,7 @@ std::tuple<bool, int32_t> NVal::ToInt32() const
     }
 
     static std::tuple<bool, int32_t> (*realToInt32)() = []() {
-        auto func = (std::tuple<bool, int32_t>(*)())dlsym(RTLD_NEXT, "ToInt32");
+        auto func = (std::tuple<bool, int32_t>(*)())dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal7ToInt32Ev");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToInt32: " << dlerror();
         }
@@ -524,7 +533,8 @@ std::tuple<bool, int32_t> NVal::ToInt32(int32_t defaultValue) const
     }
 
     static std::tuple<bool, int32_t> (*realToInt32)(int32_t) = []() {
-        auto func = (std::tuple<bool, int32_t>(*)(int32_t))dlsym(RTLD_NEXT, "ToInt32");
+        auto func =
+            (std::tuple<bool, int32_t>(*)(int32_t))dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal7ToInt32Ei");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToInt32: " << dlerror();
         }
@@ -545,7 +555,7 @@ std::tuple<bool, int64_t> NVal::ToInt64() const
     }
 
     static std::tuple<bool, int64_t> (*realToInt64)() = []() {
-        auto func = (std::tuple<bool, int64_t>(*)())dlsym(RTLD_NEXT, "ToInt64");
+        auto func = (std::tuple<bool, int64_t>(*)())dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal7ToInt64Ev");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToInt64: " << dlerror();
         }
@@ -566,7 +576,8 @@ std::tuple<bool, int64_t> NVal::ToInt64(int64_t defaultValue) const
     }
 
     static std::tuple<bool, int64_t> (*realToInt64)(int64_t) = []() {
-        auto func = (std::tuple<bool, int64_t>(*)(int64_t))dlsym(RTLD_NEXT, "ToInt64");
+        auto func =
+            (std::tuple<bool, int64_t>(*)(int64_t))dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal7ToInt64Ex");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToInt64: " << dlerror();
         }
@@ -587,7 +598,7 @@ std::tuple<bool, double> NVal::ToDouble() const
     }
 
     static std::tuple<bool, double> (*realToDouble)() = []() {
-        auto func = (std::tuple<bool, double>(*)())dlsym(RTLD_NEXT, "ToDouble");
+        auto func = (std::tuple<bool, double>(*)())dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal8ToDoubleEv");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real ToDouble: " << dlerror();
         }
@@ -608,7 +619,9 @@ bool NVal::HasProp(std::string propName) const
     }
 
     static bool (*realHasProp)(std::string) = []() {
-        auto func = (bool (*)(std::string))dlsym(RTLD_NEXT, "HasProp");
+        auto func =
+            (bool (*)(std::string))dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal7HasPropENSt3__h12basic_"
+                                                    "stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real HasProp: " << dlerror();
         }
@@ -629,7 +642,8 @@ NVal NVal::GetProp(std::string propName) const
     }
 
     static NVal (*realGetProp)(std::string) = []() {
-        auto func = (NVal(*)(std::string))dlsym(RTLD_NEXT, "GetProp");
+        auto func = (NVal(*)(std::string))dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal7GetPropENSt3__h12basic_"
+                                                           "stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real GetProp: " << dlerror();
         }
@@ -653,7 +667,8 @@ bool NVal::TypeIs(napi_valuetype expType) const
     }
 
     static bool (*realTypeIs)(napi_valuetype) = []() {
-        auto func = (bool (*)(napi_valuetype))dlsym(RTLD_NEXT, "TypeIs");
+        auto func =
+            (bool (*)(napi_valuetype))dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal6TypeIsE14napi_valuetype");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real TypeIs: " << dlerror();
         }
@@ -674,7 +689,8 @@ NVal NVal::CreateUndefined(napi_env env)
     }
 
     static NVal (*realCreateUndefined)(napi_env) = []() {
-        auto func = (NVal(*)(napi_env))dlsym(RTLD_NEXT, "CreateUndefined");
+        auto func =
+            (NVal(*)(napi_env))dlsym(RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN4NVal15CreateUndefinedEP10napi_env__");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real CreateUndefined: " << dlerror();
         }
