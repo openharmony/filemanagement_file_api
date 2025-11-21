@@ -41,11 +41,11 @@ tuple<bool, bool> ParseBooleanParam(ani_env *env, ani_object obj, string tag)
     if (isUndefined) {
         return { true, false };
     }
-    auto unboxedDesc = BoxedTypes::Boolean::unboxedDesc.c_str();
-    auto unboxedSig = BoxedTypes::Boolean::unboxedSig.c_str();
+    auto booleanUnboxedDesc = BoxedTypes::Boolean::booleanUnboxedDesc.c_str();
+    auto booleanUnboxedSig = BoxedTypes::Boolean::booleanUnboxedSig.c_str();
     ani_boolean boolRef_res;
     if (ANI_OK != env->Object_CallMethodByName_Boolean(
-        static_cast<ani_object>(boolRef), unboxedDesc, unboxedSig, &boolRef_res)) {
+        static_cast<ani_object>(boolRef), booleanUnboxedDesc, booleanUnboxedSig, &boolRef_res)) {
         return { false, false };
     }
     return { true, static_cast<bool>(boolRef_res) };
@@ -141,10 +141,10 @@ tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object 
     }
     auto getterDesc = BuiltInTypes::Array::getterDesc.c_str();
     auto getterSig = BuiltInTypes::Array::objectGetterSig.c_str();
-    for (int idx = 0; idx < int(length); idx++) {
+    for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)idx)) {
+            static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)i)) {
             return { false, nullopt };
         }
         auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));

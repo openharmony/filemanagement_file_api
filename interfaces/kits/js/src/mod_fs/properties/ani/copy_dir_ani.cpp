@@ -33,19 +33,16 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 static tuple<bool, ani_object> ToConflictFiles(ani_env *env, const ConflictFiles &files)
 {
-    auto classDesc = FS::ConflictFilesInner::classDesc.c_str();
-    ani_class cls;
-    ani_status ret;
-    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Cannot find class %{public}s, err: %{public}d", classDesc, ret);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, FS::ConflictFilesInner::classDesc);
+    if (ret != ANI_OK) {
         return { false, nullptr };
     }
 
-    auto ctorDesc = FS::ConflictFilesInner::ctorDesc.c_str();
-    auto ctorSig = FS::ConflictFilesInner::ctorSig.c_str();
     ani_method ctor;
-    if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
-        HILOGE("Cannot find class %{public}s constructor method, err: %{public}d", classDesc, ret);
+    tie(ret, ctor) = aniCache.GetMethod(env, FS::ConflictFilesInner::classDesc, FS::ConflictFilesInner::ctorDesc,
+        FS::ConflictFilesInner::ctorSig);
+    if (ret != ANI_OK) {
         return { false, nullptr };
     }
 
@@ -76,20 +73,17 @@ static tuple<bool, optional<ani_object>> ToConflictFilesArray(
     if (!errFiles.has_value()) {
         return { true, nullopt };
     }
-    auto classDesc = BuiltInTypes::Array::classDesc.c_str();
-    ani_class cls = nullptr;
-    ani_status ret;
 
-    if ((ret = env->FindClass(classDesc, &cls)) != ANI_OK) {
-        HILOGE("Cannot find class %{public}s, err: %{public}d", classDesc, ret);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, BuiltInTypes::Array::classDesc);
+    if (ret != ANI_OK) {
         return { false, nullopt };
     }
 
-    auto ctorDesc = BuiltInTypes::Array::ctorDesc.c_str();
-    auto ctorSig = BuiltInTypes::Array::ctorSig.c_str();
     ani_method ctor;
-    if ((ret = env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) != ANI_OK) {
-        HILOGE("Cannot find class %{public}s constructor method, err: %{public}d", classDesc, ret);
+    tie(ret, ctor) = aniCache.GetMethod(env, BuiltInTypes::Array::classDesc, BuiltInTypes::Array::ctorDesc,
+        BuiltInTypes::Array::ctorSig);
+    if (ret != ANI_OK) {
         return { false, nullopt };
     }
 

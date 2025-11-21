@@ -18,6 +18,7 @@
 #include <optional>
 #include <string>
 
+#include "ani_cache.h"
 #include "ani_helper.h"
 #include "ani_signature.h"
 #include "error_handler.h"
@@ -93,9 +94,11 @@ static tuple<bool, optional<WriteOptions>> ToWriteOptions(ani_env *env, ani_obje
 
 static std::tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_object &buf)
 {
-    auto classDesc = BuiltInTypes::String::classDesc.c_str();
-    ani_class cls;
-    env->FindClass(classDesc, &cls);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, BuiltInTypes::String::classDesc);
+    if (ret != ANI_OK) {
+        return { false, {} };
+    }
 
     ani_boolean isString;
     env->Object_InstanceOf(buf, cls, &isString);
@@ -109,9 +112,11 @@ static std::tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_ob
 
 static std::tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const ani_object &buf)
 {
-    auto classDesc = BuiltInTypes::ArrayBuffer::classDesc.c_str();
-    ani_class cls;
-    env->FindClass(classDesc, &cls);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, BuiltInTypes::ArrayBuffer::classDesc);
+    if (ret != ANI_OK) {
+        return { false, {} };
+    }
 
     ani_boolean isArrayBuffer;
     env->Object_InstanceOf(buf, cls, &isArrayBuffer);

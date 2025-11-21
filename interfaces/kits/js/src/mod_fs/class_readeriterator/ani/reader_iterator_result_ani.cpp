@@ -30,18 +30,16 @@ using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 ani_object ReaderIteratorResultAni::Wrap(ani_env *env, const ReaderIteratorResult &result)
 {
-    auto classDesc = FS::ReaderIteratorResultInner::classDesc.c_str();
-    ani_class cls;
-    if (ANI_OK != env->FindClass(classDesc, &cls)) {
-        HILOGE("Cannot find class %s", classDesc);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, FS::ReaderIteratorResultInner::classDesc);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
-    auto ctorDesc = FS::ReaderIteratorResultInner::ctorDesc.c_str();
-    auto ctorSig = FS::ReaderIteratorResultInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", classDesc);
+    tie(ret, ctor) = aniCache.GetMethod(env, FS::ReaderIteratorResultInner::classDesc,
+        FS::ReaderIteratorResultInner::ctorDesc, FS::ReaderIteratorResultInner::ctorSig);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
@@ -53,10 +51,9 @@ ani_object ReaderIteratorResultAni::Wrap(ani_env *env, const ReaderIteratorResul
 
     ani_object obj {};
     if (ANI_OK != env->Object_New(cls, ctor, &obj, result.done, value)) {
-        HILOGE("New %s obj Failed!", classDesc);
+        HILOGE("New '%{public}s' obj Failed!", FS::ReaderIteratorResultInner::classDesc.c_str());
         return nullptr;
     }
-
     return obj;
 }
 

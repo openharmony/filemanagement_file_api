@@ -29,6 +29,9 @@ public:
     static void LockSync(ani_env *env, [[maybe_unused]] ani_object object, ani_object exclusive);
     static void TryLock(ani_env *env, [[maybe_unused]] ani_object object, ani_object exclusive);
     static void UnLock(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_int GetFd(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_string GetPath(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_string GetName(ani_env *env, [[maybe_unused]] ani_object object);
 };
 } // namespace ANI
 } // namespace ModuleFileIO

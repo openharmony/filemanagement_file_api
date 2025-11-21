@@ -15,6 +15,7 @@
 
 #include "file_wrapper.h"
 
+#include "ani_cache.h"
 #include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
@@ -42,47 +43,6 @@ FsFile *FileWrapper::Unwrap(ani_env *env, ani_object object)
     return file;
 }
 
-static bool SetFileProperties(ani_env *env, ani_class cls, ani_object obj, const FsFile *file)
-{
-    const auto &fdRet = file->GetFD();
-    if (!fdRet.IsSuccess()) {
-        HILOGE("GetFD Failed!");
-        return false;
-    }
-
-    ani_status ret;
-    const auto &fd = fdRet.GetData().value();
-    if ((ret = AniHelper::SetPropertyValue(env, obj, "fd", fd)) != ANI_OK) {
-        HILOGE("Set fd field value failed! ret: %{public}d", ret);
-        return false;
-    }
-
-    const auto &pathRet = file->GetPath();
-    if (!pathRet.IsSuccess()) {
-        HILOGE("GetPath Failed!");
-        return false;
-    }
-
-    const auto &path = pathRet.GetData().value();
-    if ((ret = AniHelper::SetPropertyValue(env, obj, "path", path)) != ANI_OK) {
-        HILOGE("Set path field value failed! ret: %{public}d", ret);
-        return false;
-    }
-
-    const auto &nameRet = file->GetName();
-    if (!pathRet.IsSuccess()) {
-        HILOGE("GetPath Failed!");
-        return false;
-    }
-
-    const auto &name = nameRet.GetData().value();
-    if ((ret= AniHelper::SetPropertyValue(env, obj, "name", name)) != ANI_OK) {
-        HILOGE("Set name field value failed! ret: %{public}d", ret);
-        return false;
-    }
-    return true;
-}
-
 ani_object FileWrapper::Wrap(ani_env *env, const FsFile *file)
 {
     if (file == nullptr) {
@@ -90,17 +50,17 @@ ani_object FileWrapper::Wrap(ani_env *env, const FsFile *file)
         return nullptr;
     }
 
-    auto classDesc = FS::FileInner::classDesc.c_str();
-    ani_class cls;
-    if (ANI_OK != env->FindClass(classDesc, &cls)) {
-        HILOGE("Cannot find class %s", classDesc);
+    AniCache &aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, FS::FileInner::classDesc);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
-    auto ctorDesc = FS::FileInner::ctorDesc.c_str();
-    auto ctorSig = FS::FileInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
+    auto classDesc = FS::FileInner::classDesc.c_str();
+    tie(ret, ctor) =
+        aniCache.GetMethod(env, FS::FileInner::classDesc, FS::FileInner::ctorDesc, FS::FileInner::ctorSig);
+    if (ret != ANI_OK) {
         HILOGE("Cannot find constructor method for class %s", classDesc);
         return nullptr;
     }
@@ -109,10 +69,6 @@ ani_object FileWrapper::Wrap(ani_env *env, const FsFile *file)
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
         HILOGE("New %s obj Failed!", classDesc);
-        return nullptr;
-    }
-
-    if (!SetFileProperties(env, cls, obj, file)) {
         return nullptr;
     }
 

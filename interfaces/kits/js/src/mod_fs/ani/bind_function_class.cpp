@@ -69,13 +69,17 @@ static ani_status BindRafFileMethods(ani_env *env)
 
     std::array methods = {
         ani_native_function {
-            "setFilePointer0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::SetFilePointer) },
+            "setFilePointer", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::SetFilePointer) },
         ani_native_function { "close", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::Close) },
         ani_native_function { "writeSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::WriteSync) },
         ani_native_function { "readSync0", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::ReadSync) },
         ani_native_function { "getReadStream", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::GetReadStream) },
         ani_native_function {
             "getWriteStream", nullptr, reinterpret_cast<void *>(RandomAccessFileAni::GetWriteStream) },
+        ani_native_function { FS::RandomAccessFileInner::getFdDesc.c_str(), FS::RandomAccessFileInner::getFdSig.c_str(),
+            reinterpret_cast<void *>(RandomAccessFileAni::GetFd) },
+        ani_native_function { FS::RandomAccessFileInner::getFPDesc.c_str(), FS::RandomAccessFileInner::getFPSig.c_str(),
+            reinterpret_cast<void *>(RandomAccessFileAni::GetFilePointer) },
     };
 
     return BindClass(env, classDesc, methods);
@@ -102,6 +106,12 @@ static ani_status BindFileMethods(ani_env *env)
         ani_native_function { "lockSync", nullptr, reinterpret_cast<void *>(FileAni::LockSync) },
         ani_native_function { "tryLock", nullptr, reinterpret_cast<void *>(FileAni::TryLock) },
         ani_native_function { "unlock", nullptr, reinterpret_cast<void *>(FileAni::UnLock) },
+        ani_native_function { FS::FileInner::getFdDesc.c_str(), FS::FileInner::getFdSig.c_str(),
+            reinterpret_cast<void *>(FileAni::GetFd) },
+        ani_native_function { FS::FileInner::getPathDesc.c_str(), FS::FileInner::getPathSig.c_str(),
+            reinterpret_cast<void *>(FileAni::GetPath) },
+        ani_native_function { FS::FileInner::getNameDesc.c_str(), FS::FileInner::getNameSig.c_str(),
+            reinterpret_cast<void *>(FileAni::GetName) },
     };
 
     return BindClass(env, classDesc, methods);
@@ -130,6 +140,32 @@ static ani_status BindStatClassMethods(ani_env *env)
         ani_native_function { "isFile", nullptr, reinterpret_cast<void *>(StatAni::IsFile) },
         ani_native_function { "isSocket", nullptr, reinterpret_cast<void *>(StatAni::IsSocket) },
         ani_native_function { "isSymbolicLink", nullptr, reinterpret_cast<void *>(StatAni::IsSymbolicLink) },
+        ani_native_function { FS::StatInner::getIno.c_str(), FS::StatInner::getInoSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetIno) },
+        ani_native_function { FS::StatInner::getMode.c_str(), FS::StatInner::getModeSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetMode) },
+        ani_native_function { FS::StatInner::getUid.c_str(), FS::StatInner::getUidSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetUid) },
+        ani_native_function { FS::StatInner::getGid.c_str(), FS::StatInner::getGidSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetGid) },
+        ani_native_function { FS::StatInner::getSize.c_str(), FS::StatInner::getSizeSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetSize) },
+        ani_native_function { FS::StatInner::getAtime.c_str(), FS::StatInner::getAtimeSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetAtime) },
+        ani_native_function { FS::StatInner::getMtime.c_str(), FS::StatInner::getMtimeSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetMtime) },
+        ani_native_function { FS::StatInner::getCtime.c_str(), FS::StatInner::getCtimeSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetCtime) },
+        ani_native_function { FS::StatInner::getAtimeNs.c_str(), FS::StatInner::getAtimeNsSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetAtimeNs) },
+        ani_native_function { FS::StatInner::getMtimeNs.c_str(), FS::StatInner::getMtimeNsSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetMtimeNs) },
+        ani_native_function { FS::StatInner::getCtimeNs.c_str(), FS::StatInner::getCtimeNsSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetCtimeNs) },
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+        ani_native_function { FS::StatInner::getLocation.c_str(), FS::StatInner::getLocationSig.c_str(),
+            reinterpret_cast<void *>(StatAni::GetLocation) },
+#endif
     };
 
     return BindClass(env, classDesc, methods);

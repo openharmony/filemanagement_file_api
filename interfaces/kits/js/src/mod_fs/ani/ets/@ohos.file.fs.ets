@@ -60,7 +60,7 @@ function access(path: string, mode?: AccessModeType): Promise<boolean> {
     let promise = taskpool.execute((path: string, mode?: AccessModeType): boolean => {
       return FileIoImpl.doAccessSync(path, mode);
     }, path, mode);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let result = ret as boolean;
       resolve(result);
     }).catch((e: Error): void => {
@@ -73,7 +73,7 @@ function access(path: string, callback: AsyncCallback<boolean>): void {
   let promise = taskpool.execute((path: string): boolean => {
     return FileIoImpl.doAccessSync(path);
   }, path);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let result = ret as boolean;
@@ -88,7 +88,7 @@ function access(path: string, mode: AccessModeType, flag: AccessFlagType): Promi
     let promise = taskpool.execute((path: string, mode: AccessModeType, flag: AccessFlagType): boolean => {
       return FileIoImpl.doAccessSync(path, mode, flag);
     }, path, mode, flag);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let result = ret as boolean;
       resolve(result);
     }).catch((e: Error): void => {
@@ -107,8 +107,8 @@ function accessSync(path: string, mode: AccessModeType, flag: AccessFlagType): b
 
 function close(file: int | File): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
-    let promise = taskpool.execute((file: int | File): undefined => FileIoImpl.closeSync(file), file);
-    promise.then((ret: NullishType): void => {
+    let promise = taskpool.execute((file: int | File) => FileIoImpl.closeSync(file), file);
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -117,8 +117,8 @@ function close(file: int | File): Promise<void> {
 }
 
 function close(file: int | File, callback: AsyncCallback<void>): void {
-  let promise = taskpool.execute((file: int | File): undefined => FileIoImpl.closeSync(file), file);
-  promise.then((ret: NullishType): void => {
+  let promise = taskpool.execute((file: int | File) => FileIoImpl.closeSync(file), file);
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -163,7 +163,7 @@ function getxattr(path: string, key: string): Promise<string> {
     let promise = taskpool.execute((path: string, key: string): string => {
       return FileIoImpl.getxattrSync(path, key);
     }, path, key);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let result = ret as string;
       resolve(result);
     }).catch((e: Error): void => {
@@ -185,7 +185,7 @@ function copyDir(src: string, dest: string, mode?: int): Promise<void> {
     reject: (e: BusinessError<Array<ConflictFiles>>) => void): void => {
     let promise = taskpool.execute((src: string, dest: string, mode?: int): undefined =>
       FileIoImpl.copyDirSync(src, dest, mode), src, dest, mode);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError<Array<ConflictFiles>>);
@@ -193,10 +193,25 @@ function copyDir(src: string, dest: string, mode?: int): Promise<void> {
   });
 }
 
-function copyDir(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
-  let promise = taskpool.execute((src: string, dest: string): undefined =>
+function copyDir(src: string, dest: string, callback: AsyncCallback<void, void>): void {
+  let promise = taskpool.execute((src: string, dest: string) =>
     FileIoImpl.copyDirSync(src, dest), src, dest);
-  promise.then((ret: NullishType): void => {
+  let res = new BusinessError<void>();
+  promise.then((ret: Any): void => {
+    res.code = 0;
+    callback(res, undefined);
+  }).catch((e: Error): void => {
+    let conflictErr = e as BusinessError<Array<ConflictFiles>>;
+    res.code = conflictErr.code;
+    res.message = conflictErr.message;
+    callback(res, undefined);
+  });
+}
+
+function copyDirWithConflictFiles(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+  let promise = taskpool.execute((src: string, dest: string) =>
+    FileIoImpl.copyDirSync(src, dest), src, dest);
+  promise.then((ret: Any): void => {
     let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
     e.data = new Array<ConflictFiles>(0);
@@ -206,10 +221,25 @@ function copyDir(src: string, dest: string, callback: AsyncCallback<void, Array<
   });
 }
 
-function copyDir(src: string, dest: string, mode: int, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
-  let promise = taskpool.execute((src: string, dest: string, mode: int): undefined =>
+function copyDir(src: string, dest: string, mode: int, callback: AsyncCallback<void, void>): void {
+  let promise = taskpool.execute((src: string, dest: string, mode: int) =>
     FileIoImpl.copyDirSync(src, dest, mode), src, dest, mode);
-  promise.then((ret: NullishType): void => {
+  let res = new BusinessError<void>();
+  promise.then((ret: Any): void => {
+    res.code = 0;
+    callback(res, undefined);
+  }).catch((e: Error): void => {
+    let conflictErr = e as BusinessError<Array<ConflictFiles>>;
+    res.code = conflictErr.code;
+    res.message = conflictErr.message;
+    callback(res, undefined);
+  });
+}
+
+function copyDirWithConflictFiles(src: string, dest: string, mode: int, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+  let promise = taskpool.execute((src: string, dest: string, mode: int) =>
+    FileIoImpl.copyDirSync(src, dest, mode), src, dest, mode);
+  promise.then((ret: Any): void => {
     let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
     e.data = new Array<ConflictFiles>(0);
@@ -217,27 +247,6 @@ function copyDir(src: string, dest: string, mode: int, callback: AsyncCallback<v
   }).catch((e: Error): void => {
     callback(e as BusinessError<Array<ConflictFiles>>, undefined);
   });
-}
-
-function copyDir(arg0: Object, arg1: Object, arg2: NullishType, arg3: NullishType): void {
-  let src = arg0 as string;
-  let dest = arg1 as string;
-  if (typeof arg2 === 'int' && typeof arg3 === 'function') {
-    let mode: int = 0;
-    try {
-      mode = arg2 as int;
-    } catch (error) {
-      mode = (arg2 as int) + 0;
-    }
-    let callback = arg3 as AsyncCallback<void, Array<ConflictFiles>>;
-    copyDir(src, dest, mode, callback);
-    return;
-  }
-  if (typeof arg2 === 'function') {
-    let callback = arg2 as AsyncCallback<void, Array<ConflictFiles>>;
-    copyDir(src, dest, callback);
-    return;
-  }
 }
 
 function mkdirSync(path: string): void {
@@ -250,8 +259,8 @@ function fdatasyncSync(fd: int): void {
 
 function fdatasync(fd: int): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
-    let promise = taskpool.execute((fd: int): undefined => FileIoImpl.fdatasyncSync(fd), fd);
-    promise.then((ret: NullishType): void => {
+    let promise = taskpool.execute((fd: int) => FileIoImpl.fdatasyncSync(fd), fd);
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError<void>);
@@ -260,8 +269,8 @@ function fdatasync(fd: int): Promise<void> {
 }
 
 function fdatasync(fd: int, callback: AsyncCallback<void>): void {
-  let promise = taskpool.execute((fd: int): undefined => FileIoImpl.fdatasyncSync(fd), fd);
-  promise.then((ret: NullishType): void => {
+  let promise = taskpool.execute((fd: int) => FileIoImpl.fdatasyncSync(fd), fd);
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -287,7 +296,7 @@ function mkdirSync2(path: string, recursion: boolean): undefined {
 function mkdir(path: string): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
     let promise = taskpool.execute((path: string): undefined => mkdirSync1(path), path);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError<void>);
@@ -297,7 +306,7 @@ function mkdir(path: string): Promise<void> {
 
 function mkdir(path: string, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((path: string): undefined => mkdirSync1(path), path);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -310,9 +319,9 @@ function mkdir(path: string, recursion: boolean): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
     let promise = taskpool.execute((path: string, recursion: boolean): undefined =>
       mkdirSync2(path, recursion), path, recursion);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
-    }).catch((e: NullishType): void => {
+    }).catch((e: Any): void => {
       reject(e as BusinessError<void>);
     });
   });
@@ -321,7 +330,7 @@ function mkdir(path: string, recursion: boolean): Promise<void> {
 function mkdir(path: string, recursion: boolean, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((path: string, recursion: boolean): undefined =>
     mkdirSync2(path, recursion), path, recursion);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -340,7 +349,7 @@ function moveDir(src: string, dest: string, mode?: int): Promise<void> {
     let promise = taskpool.execute((src: string, dest: string, mode?: int): undefined => {
       return FileIoImpl.movedirSync(src, dest, mode);
     }, src, dest, mode);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError<Array<ConflictFiles>>);
@@ -348,11 +357,27 @@ function moveDir(src: string, dest: string, mode?: int): Promise<void> {
   })
 }
 
-function moveDir(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
-  let promise = taskpool.execute((src: string, dest: string): undefined => {
-    return FileIoImpl.movedirSync(src, dest);
+function moveDir(src: string, dest: string, callback: AsyncCallback<void, void>): void {
+  let promise = taskpool.execute((src: string, dest: string) => {
+    FileIoImpl.movedirSync(src, dest);
   }, src, dest);
-  promise.then((ret: NullishType): void => {
+  let res = new BusinessError<void>();
+  promise.then((ret: Any): void => {
+    res.code = 0;
+    callback(res, undefined);
+  }).catch((e: Error): void => {
+    let conflictErr = e as BusinessError<Array<ConflictFiles>>;
+    res.code = conflictErr.code;
+    res.message = conflictErr.message;
+    callback(res, undefined);
+  });
+}
+
+function moveDirWithConflictFiles(src: string, dest: string, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+  let promise = taskpool.execute((src: string, dest: string) => {
+    FileIoImpl.movedirSync(src, dest);
+  }, src, dest);
+  promise.then((ret: Any): void => {
     let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
     e.data = new Array<ConflictFiles>(0);
@@ -362,11 +387,27 @@ function moveDir(src: string, dest: string, callback: AsyncCallback<void, Array<
   });
 }
 
-function moveDir(src: string, dest: string, mode: int, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
-  let promise = taskpool.execute((src: string, dest: string, mode: int): undefined => {
-    return FileIoImpl.movedirSync(src, dest, mode);
+function moveDir(src: string, dest: string, mode: int, callback: AsyncCallback<void, void>): void {
+  let promise = taskpool.execute((src: string, dest: string, mode: int) => {
+    FileIoImpl.movedirSync(src, dest, mode);
   }, src, dest, mode);
-  promise.then((ret: NullishType): void => {
+  let res = new BusinessError<void>();
+  promise.then((ret: Any): void => {
+    res.code = 0;
+    callback(res, undefined);
+  }).catch((e: Error): void => {
+    let conflictErr = e as BusinessError<Array<ConflictFiles>>;
+    res.code = conflictErr.code;
+    res.message = conflictErr.message;
+    callback(res, undefined);
+  });
+}
+
+function moveDirWithConflictFiles(src: string, dest: string, mode: int, callback: AsyncCallback<void, Array<ConflictFiles>>): void {
+  let promise = taskpool.execute((src: string, dest: string, mode: int) => {
+    FileIoImpl.movedirSync(src, dest, mode);
+  }, src, dest, mode);
+  promise.then((ret: Any): void => {
     let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
     e.data = new Array<ConflictFiles>(0);
@@ -374,27 +415,6 @@ function moveDir(src: string, dest: string, mode: int, callback: AsyncCallback<v
   }).catch((e: Error): void => {
     callback(e as BusinessError<Array<ConflictFiles>>, undefined);
   });
-}
-
-function moveDir(arg0: Object, arg1: Object, arg2: NullishType, arg3: NullishType): void {
-  let src = arg0 as string;
-  let dest = arg1 as string;
-  if (typeof arg2 === 'int' && typeof arg3 === 'function') {
-    let mode: int = 0;
-    try {
-      mode = arg2 as int;
-    } catch (error) {
-      mode = (arg2 as int) + 0;
-    }
-    let callback = arg3 as AsyncCallback<void, Array<ConflictFiles>>;
-    moveDir(src, dest, mode, callback);
-    return;
-  }
-  if (typeof arg2 === 'function') {
-    let callback = arg2 as AsyncCallback<void, Array<ConflictFiles>>;
-    moveDir(src, dest, callback);
-    return;
-  }
 }
 
 function mkdtempSync(prefix: string): string {
@@ -406,7 +426,7 @@ function mkdtemp(prefix: string): Promise<string> {
     let promise = taskpool.execute((prefix: string): string => {
       return FileIoImpl.mkdtempSync(prefix);
     }, prefix);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let result = ret as string;
       resolve(result);
     }).catch((e: Error): void => {
@@ -419,7 +439,7 @@ function mkdtemp(prefix: string, callback: AsyncCallback<string>): void {
   let promise = taskpool.execute((prefix: string): string => {
     return FileIoImpl.mkdtempSync(prefix);
   }, prefix);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let result = ret as string;
@@ -438,7 +458,7 @@ function moveFile(src: string, dest: string, mode?: int): Promise<void> {
     let promise = taskpool.execute((src: string, dest: string, mode?: int): undefined => {
       return FileIoImpl.moveFileSync(src, dest, mode);
     }, src, dest, mode);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -450,7 +470,7 @@ function moveFile(src: string, dest: string, mode: int, callback: AsyncCallback<
   let promise = taskpool.execute((src: string, dest: string, mode: int): undefined => {
     return FileIoImpl.moveFileSync(src, dest, mode);
   }, src, dest, mode);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -463,7 +483,7 @@ function moveFile(src: string, dest: string, callback: AsyncCallback<void>): voi
   let promise = taskpool.execute((src: string, dest: string): undefined => {
     return FileIoImpl.moveFileSync(src, dest);
   }, src, dest);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -481,7 +501,7 @@ function open(path: String, mode?: int): Promise<File> {
     let promise = taskpool.execute((path: String, mode?: int): File => {
       return FileIoImpl.openSync(path, mode);
     },path, mode);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let file = ret as File;
       resolve(file);
     }).catch((e: Error): void => {
@@ -494,7 +514,7 @@ function open(path: String, mode: int, callback: AsyncCallback<File, void>): voi
   let promise = taskpool.execute((path: String, mode: int): File => {
     return FileIoImpl.openSync(path, mode);
   }, path, mode);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let file = ret as File;
@@ -509,7 +529,7 @@ function open(path: String, callback: AsyncCallback<File, void>): void {
   let promise = taskpool.execute((path: String): File => {
     return FileIoImpl.openSync(path);
   }, path);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let file = ret as File;
@@ -529,7 +549,7 @@ function write(fd: int, buffer: string | ArrayBuffer, options?: WriteOptions): P
     let promise = taskpool.execute((fd: int, buffer: string | ArrayBuffer, options?: WriteOptions): long => {
       return FileIoImpl.writeSync(fd, buffer, options);
     }, fd, buffer, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let result = ret as long
       resolve(result);
     }).catch((e: Error): void => {
@@ -543,7 +563,7 @@ function write(fd: int, buffer: string | ArrayBuffer, options: WriteOptions,
   let promise = taskpool.execute((fd: int, buffer: string | ArrayBuffer, options: WriteOptions): long => {
     return FileIoImpl.writeSync(fd, buffer, options);
   }, fd, buffer, options);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let result = ret as long;
@@ -557,7 +577,7 @@ function write(fd: int, buffer: string | ArrayBuffer, callback: AsyncCallback<lo
   let promise = taskpool.execute((fd: int, buffer: string | ArrayBuffer): long => {
     return FileIoImpl.writeSync(fd, buffer);
   }, fd, buffer);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let result = ret as long;
@@ -576,7 +596,7 @@ function read(fd: int, buffer: ArrayBuffer, options?: ReadOptions): Promise<long
     let promise = taskpool.execute((fd: int, buffer: ArrayBuffer, options?: ReadOptions): long => {
       return FileIoImpl.readSync(fd, buffer, options)
     }, fd, buffer, options);
-    promise.then((ret: NullishType) => {
+    promise.then((ret: Any) => {
       let result = ret as long;
       resolve(result);
     }).catch((e: Error): void => {
@@ -589,7 +609,7 @@ function read(fd: int, buffer: ArrayBuffer, callback: AsyncCallback<long, void>)
   let promise = taskpool.execute((fd: int, buffer: ArrayBuffer): long => {
     return FileIoImpl.readSync(fd, buffer);
   }, fd, buffer);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let result = ret as long;
@@ -603,7 +623,7 @@ function read(fd: int, buffer: ArrayBuffer, options: ReadOptions, callback: Asyn
   let promise = taskpool.execute((fd: int, buffer: ArrayBuffer, options: ReadOptions): long => {
     return FileIoImpl.readSync(fd, buffer, options);
   }, fd, buffer, options);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let result = ret as long;
@@ -623,7 +643,7 @@ function readLines(filePath: string, options?: Options): Promise<ReaderIterator>
     let promise = taskpool.execute((filePath: string, options?: Options): ReaderIterator => {
       return FileIoImpl.readlinesSync(filePath, options);
     }, filePath, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let it = ret as ReaderIterator;
       resolve(it);
     }).catch((e: Error): void => {
@@ -636,7 +656,7 @@ function readLines(filePath: string, callback: AsyncCallback<ReaderIterator>): v
   let promise = taskpool.execute((filePath: string): ReaderIterator => {
     return FileIoImpl.readlinesSync(filePath);
   }, filePath);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let it = ret as ReaderIterator;
@@ -651,7 +671,7 @@ function readLines(filePath: string, options: Options, callback: AsyncCallback<R
   let promise = taskpool.execute((filePath: string, options: Options): ReaderIterator => {
     return FileIoImpl.readlinesSync(filePath, options);
   }, filePath, options);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let it = ret as ReaderIterator;
@@ -670,7 +690,7 @@ function rmdir(path: string): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void,
     reject: (e: BusinessError<void>) => void): void => {
     let promise = taskpool.execute((path: string): void => FileIoImpl.rmdirSync(path), path);
-    promise.then((ret: NullishType) => {
+    promise.then((ret: Any) => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -680,7 +700,7 @@ function rmdir(path: string): Promise<void> {
 
 function rmdir(path: string, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((path: string): void => FileIoImpl.rmdirSync(path), path);
-  promise.then((ret: NullishType) => {
+  promise.then((ret: Any) => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -698,7 +718,7 @@ function truncate(file: string | int, len?: long): Promise<void> {
     let promise = taskpool.execute((file: string | int, len?: long): undefined => {
       return FileIoImpl.truncateSync(file, len);
     }, file, len);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -710,7 +730,7 @@ function truncate(file: string | int, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((file: string | int): undefined => {
     return FileIoImpl.truncateSync(file);
   }, file);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -723,7 +743,7 @@ function truncate(file: string | int, len: long, callback: AsyncCallback<void>):
   let promise = taskpool.execute((file: string | int, len: long): undefined => {
     return FileIoImpl.truncateSync(file, len);
   }, file, len);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -739,8 +759,8 @@ function unlinkSync(path: string): void {
 function unlink(path: string): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void,
     reject: (e: BusinessError<void>) => void): void => {
-    let promise = taskpool.execute((path: string): undefined => unlinkSync(path), path);
-    promise.then((ret: NullishType): void => {
+    let promise = taskpool.execute((path: string) => unlinkSync(path), path);
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -749,8 +769,8 @@ function unlink(path: string): Promise<void> {
 }
 
 function unlink(path: string, callback: AsyncCallback<void>): void {
-  let promise = taskpool.execute((path: string): undefined => unlinkSync(path), path);
-  promise.then((ret: NullishType): void => {
+  let promise = taskpool.execute((path: string) => unlinkSync(path), path);
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -764,7 +784,7 @@ function readText(filePath: string, options?: ReadTextOptions): Promise<string> 
     let promise = taskpool.execute((filePath: string, options?: ReadTextOptions): string => {
       return FileIoImpl.readTextSync(filePath, options);
     }, filePath, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let r = ret as string;
       resolve(r);
     }).catch((e: Error): void => {
@@ -777,7 +797,7 @@ function readText(filePath: string, callback: AsyncCallback<string>): void {
   let promise = taskpool.execute((filePath: string): string => {
     return FileIoImpl.readTextSync(filePath);
   }, filePath);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let r = ret as string;
@@ -791,7 +811,7 @@ function readText(filePath: string, options: ReadTextOptions, callback: AsyncCal
   let promise = taskpool.execute((filePath: string, options: ReadTextOptions): string => {
     return FileIoImpl.readTextSync(filePath, options);
   }, filePath, options);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let r = ret as string;
@@ -810,7 +830,7 @@ function listFile(path: string, options?: ListFileOptions): Promise<string[]> {
     let promise = taskpool.execute((path: string, options?: ListFileOptions):  string[] => {
       return FileIoImpl.listFileSync(path, options);
     }, path, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let r = ret as string[];
       resolve(r);
     }).catch((e: Error): void => {
@@ -823,7 +843,7 @@ function listFile(path: string, callback: AsyncCallback<string[]>): void {
   let promise = taskpool.execute((path: string): string[] => {
     return FileIoImpl.listFileSync(path);
   }, path);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let r = ret as string[];
@@ -837,7 +857,7 @@ function listFile(path: string, options: ListFileOptions, callback: AsyncCallbac
   let promise = taskpool.execute((path: string, options: ListFileOptions): string[] => {
     return FileIoImpl.listFileSync(path, options);
   }, path, options);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let r = ret as string[];
@@ -864,7 +884,7 @@ function stat(file: string | int): Promise<Stat> {
     let promise = taskpool.execute((file: string | int): Stat => {
       return FileIoImpl.statSync(file);
     }, file);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let r = ret as Stat;
       resolve(r);
     }).catch((e: Error): void => {
@@ -877,7 +897,7 @@ function stat(file: string | int, callback: AsyncCallback<Stat, void>): void {
   let p = taskpool.execute((file: string | int): Stat => {
     return FileIoImpl.statSync(file);
   }, file);
-  p.then((ret: NullishType): void => {
+  p.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let r = ret as Stat;
@@ -896,7 +916,7 @@ function fsync(fd: int): Promise<void> {
     let promise = taskpool.execute((fd: int): undefined => {
       return FileIoImpl.fsyncSync(fd);
     }, fd);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -908,7 +928,7 @@ function fsync(fd: int, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((fd: int): undefined => {
     return FileIoImpl.fsyncSync(fd);
   }, fd);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -927,7 +947,7 @@ function symlink(target: string, srcPath: string): Promise<void> {
     let promise = taskpool.execute((target: string, srcPath: string): undefined => {
       return FileIoImpl.symlinkSync(target, srcPath);
     }, target, srcPath);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -943,7 +963,7 @@ function rename(oldPath: string, newPath: string): Promise<void> {
     let promise = taskpool.execute((oldPath: string, newPath: string): undefined => {
       return FileIoImpl.renameSync(oldPath, newPath);
     }, oldPath, newPath);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -955,7 +975,7 @@ function rename(oldPath: string, newPath: string, callback: AsyncCallback<void>)
   let promise = taskpool.execute((oldPath: string, newPath: string): undefined => {
     return FileIoImpl.renameSync(oldPath, newPath);
   }, oldPath, newPath);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -977,7 +997,7 @@ function createRandomAccessFile(file: string | File, mode?: int,
       options?: RandomAccessFileOptions): RandomAccessFile => {
       return FileIoImpl.createRandomAccessFileSync(file, mode, options);
     }, file, mode, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let raffile = ret as RandomAccessFileInner;
       resolve(raffile);
     }).catch((e: Error): void => {
@@ -991,7 +1011,7 @@ function fdopenStream(fd: int, mode: string): Promise<Stream> {
     let promise = taskpool.execute((fd: int, mode: string): Stream => {
       return FileIoImpl.fdopenStreamSync(fd, mode);
     }, fd, mode);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let stream = ret as Stream;
       resolve(stream);
     }).catch((e: Error): void => {
@@ -1008,7 +1028,7 @@ function setxattr(path: string, key: string, value: string): Promise<void> {
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
     let promise = taskpool.execute((path: string, key: string, value: string): undefined =>
       FileIoImpl.setxattrSync(path, key, value), path, key, value);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError<void>);
@@ -1020,7 +1040,7 @@ function createRandomAccessFile(file: string | File, callback: AsyncCallback<Ran
   let promise = taskpool.execute((file: string | File): RandomAccessFile => {
     return FileIoImpl.createRandomAccessFileSync(file);
   }, file);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let raffile = ret as RandomAccessFile;
@@ -1036,7 +1056,7 @@ function createRandomAccessFile(file: string | File, mode: int,
   let promise = taskpool.execute((file: string | File, mode: int): RandomAccessFile => {
     return FileIoImpl.createRandomAccessFileSync(file, mode);
   }, file, mode);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let raffile = ret as RandomAccessFile;
@@ -1051,7 +1071,7 @@ function fdopenStream(fd: int, mode: string, callback: AsyncCallback<Stream>): v
   let promise = taskpool.execute((fd: int, mode: string): Stream => {
     return FileIoImpl.fdopenStreamSync(fd, mode);
   }, fd, mode);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let stream = ret as Stream;
@@ -1071,7 +1091,7 @@ function createStream(path: string, mode: string): Promise<Stream> {
     let promise = taskpool.execute((path: string, mode: string): Stream => {
       return FileIoImpl.createStreamSync(path, mode);
     }, path, mode);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let stream = ret as Stream;
       resolve(stream);
     }).catch((e: Error): void => {
@@ -1084,7 +1104,7 @@ function createStream(path: string, mode: string, callback: AsyncCallback<Stream
   let promise = taskpool.execute((path: string, mode: string): Stream => {
     return FileIoImpl.createStreamSync(path, mode);
   }, path, mode);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     let stream = ret as Stream;
@@ -1115,7 +1135,7 @@ function symlink(target: string, srcPath: string, callback: AsyncCallback<void>)
   let promise = taskpool.execute((target: string, srcPath: string): undefined => {
     return FileIoImpl.symlinkSync(target, srcPath);
   }, target, srcPath);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -1137,7 +1157,7 @@ function lstat(path: string): Promise<Stat> {
     let promise = taskpool.execute((path: string): Stat => {
       return FileIoImpl.lstatSync(path);
     }, path);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       if (ret === null || ret === undefined) {
         let e = new BusinessError<void>();
         e.code = -1;
@@ -1156,7 +1176,7 @@ function lstat(path: string, callback: AsyncCallback<Stat, void>): void {
   let p = taskpool.execute((path: string): Stat => {
     return FileIoImpl.lstatSync(path);
   }, path);
-  p.then((ret: NullishType): void => {
+  p.then((ret: Any): void => {
     let e = new BusinessError<void>();
     if (ret === null || ret === undefined) {
       e.code = -1;
@@ -1175,7 +1195,7 @@ function copyFile(src: string | int, dest: string | int, mode?: int): Promise<vo
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
     let promise = taskpool.execute((src: string | int, dest: string | int, mode?: int): undefined =>
       FileIoImpl.copyFileSync(src, dest, mode), src, dest, mode);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -1187,7 +1207,7 @@ function copy(srcUri: string, destUri: string, options?: CopyOptions): Promise<v
   return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
     let promise = taskpool.execute((srcUri: string, destUri: string, options?: CopyOptions): undefined =>
       FileIoImpl.copySync(srcUri, destUri, options), srcUri, destUri, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       resolve(undefined);
     }).catch((e: Error): void => {
       reject(e as BusinessError);
@@ -1198,7 +1218,7 @@ function copy(srcUri: string, destUri: string, options?: CopyOptions): Promise<v
 function copyFile(src: string | int, dest: string | int, mode: int, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((src: string | int, dest: string | int, mode: int): undefined =>
     FileIoImpl.copyFileSync(src, dest, mode), src, dest, mode);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -1210,7 +1230,7 @@ function copyFile(src: string | int, dest: string | int, mode: int, callback: As
 function copy(srcUri: string, destUri: string, options: CopyOptions, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((srcUri: string, destUri: string, options: CopyOptions): undefined =>
     FileIoImpl.copySync(srcUri, destUri, options), srcUri, destUri, options);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -1222,7 +1242,7 @@ function copy(srcUri: string, destUri: string, options: CopyOptions, callback: A
 function copyFile(src: string | int, dest: string | int, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((src: string | int, dest: string | int): undefined =>
     FileIoImpl.copyFileSync(src, dest), src, dest);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -1234,7 +1254,7 @@ function copyFile(src: string | int, dest: string | int, callback: AsyncCallback
 function copy(srcUri: string, destUri: string, callback: AsyncCallback<void>): void {
   let promise = taskpool.execute((srcUri: string, destUri: string): undefined =>
     FileIoImpl.copySync(srcUri, destUri), srcUri, destUri);
-  promise.then((ret: NullishType): void => {
+  promise.then((ret: Any): void => {
     let e = new BusinessError<void>();
     e.code = 0;
     callback(e, undefined);
@@ -1290,9 +1310,7 @@ export class TaskSignal {
       this.onCancelResolve = resolve;
       try {
         this.onCancelNative();
-      } catch (e: BusinessError<void>) {
-        reject(e);
-      } catch (e: Error) {
+      } catch (e) {
         reject(e as BusinessError);
       }
     });
@@ -1317,8 +1335,8 @@ export enum AccessFlagType {
 }
 
 export interface RandomAccessFile {
-  fd: int;
-  filePointer: long;
+  get fd(): int;
+  get filePointer(): long;
 
   setFilePointer(filePointer: long): void;
   close(): void;
@@ -1335,8 +1353,8 @@ export interface RandomAccessFile {
 }
 
 export class RandomAccessFileInner implements RandomAccessFile {
-  fd: int = -1;
-  filePointer: long = -1;
+  native get fd(): int;
+  native get filePointer(): long;
 
   private nativePtr: long = 0;
   private cleaner: Cleaner | null = null;
@@ -1357,18 +1375,12 @@ export class RandomAccessFileInner implements RandomAccessFile {
       destroyRegister.unregister(this);
   }
 
-  setFilePointer(filePointer: long): void {
-    this.setFilePointer0(filePointer);
-    this.filePointer = filePointer;
-  }
-
-  native setFilePointer0(filePointer: long): void;
+  native setFilePointer(filePointer: long): void;
 
   native close(): void;
 
   writeSync(buffer: ArrayBuffer | string, options?: WriteOptions): long {
     let length = options ? this.writeSync0(buffer, options) : this.writeSync0(buffer);
-    this.filePointer += (options?.offset?? 0) + length;
     return length;
   }
 
@@ -1379,7 +1391,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
       let promise = taskpool.execute((buffer: ArrayBuffer | string, options?: WriteOptions): long => {
         return this.writeSync(buffer, options);
       }, buffer, options);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         let result = ret as long
         resolve(result);
       }).catch((e: Error): void => {
@@ -1392,7 +1404,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
     let promise = taskpool.execute((buffer: ArrayBuffer | string, options: WriteOptions): long => {
       return this.writeSync(buffer, options);
     }, buffer, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       let result = ret as long;
@@ -1406,7 +1418,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
     let promise = taskpool.execute((buffer: ArrayBuffer | string): long => {
       return this.writeSync(buffer);
     }, buffer);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       let result = ret as long;
@@ -1418,7 +1430,6 @@ export class RandomAccessFileInner implements RandomAccessFile {
 
   readSync(buffer: ArrayBuffer, options?: ReadOptions): long {
     const length = options ? this.readSync0(buffer, options) : this.readSync0(buffer);
-    this.filePointer += (options?.offset?? 0) + length;
     return length;
   }
 
@@ -1429,7 +1440,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
       let promise = taskpool.execute((buffer: ArrayBuffer, options?: ReadOptions): long => {
         return this.readSync(buffer, options);
       }, buffer, options);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         let result = ret as long;
         resolve(result);
       }).catch((e: Error): void => {
@@ -1442,7 +1453,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
     let promise = taskpool.execute((buffer: ArrayBuffer, options: ReadOptions): long => {
       return this.readSync(buffer, options);
     }, buffer, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       let result = ret as long;
@@ -1456,7 +1467,7 @@ export class RandomAccessFileInner implements RandomAccessFile {
     let promise = taskpool.execute((buffer: ArrayBuffer): long => {
       return this.readSync(buffer);
     }, buffer);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       let result = ret as long;
@@ -1471,9 +1482,9 @@ export class RandomAccessFileInner implements RandomAccessFile {
 }
 
 export interface File {
-  fd: int;
-  path: String;
-  name: String;
+  get fd(): int;
+  get path(): String;
+  get name(): String;
 
   getParent(): String;
   lock(exclusive?: boolean): Promise<void>;
@@ -1484,9 +1495,9 @@ export interface File {
 }
 
 export class FileInner implements File {
-  fd: int = -1;
-  path: String = "";
-  name: String = "";
+  native get fd(): int;
+  native get path(): String;
+  native get name(): String;
 
   private nativePtr: long = 0;
   private cleaner: Cleaner | null = null;
@@ -1515,7 +1526,7 @@ export class FileInner implements File {
       let promise = taskpool.execute((exclusive?: boolean): undefined => {
         return this.lockSync(exclusive);
       }, exclusive);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         resolve(undefined);
       }).catch((e: Error): void => {
         reject(e as BusinessError);
@@ -1527,7 +1538,7 @@ export class FileInner implements File {
     let promise = taskpool.execute((): undefined => {
       return this.lockSync();
     });
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
@@ -1540,7 +1551,7 @@ export class FileInner implements File {
     let promise = taskpool.execute((exclusive: boolean): undefined => {
       return this.lockSync(exclusive);
     }, exclusive);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
@@ -1597,18 +1608,18 @@ export class ReaderIteratorInner implements ReaderIterator {
 }
 
 export interface Stat {
-  ino: bigint;
-  mode: long;
-  uid: long;
-  gid: long;
-  size: long;
-  atime: long;
-  mtime: long;
-  ctime: long;
-  atimeNs: bigint;
-  mtimeNs: bigint;
-  ctimeNs: bigint;
-  location: LocationType;
+  get ino(): bigint;
+  get mode(): long;
+  get uid(): long;
+  get gid(): long;
+  get size(): long;
+  get atime(): long;
+  get mtime(): long;
+  get ctime(): long;
+  get atimeNs(): bigint;
+  get mtimeNs(): bigint;
+  get ctimeNs(): bigint;
+  get location(): LocationType
 
   isBlockDevice(): boolean;
   isCharacterDevice(): boolean;
@@ -1620,18 +1631,18 @@ export interface Stat {
 }
 
 export class StatInner implements Stat {
-  ino: bigint = 0n;
-  mode: long;
-  uid: long;
-  gid: long;
-  size: long;
-  atime: long;
-  mtime: long;
-  ctime: long;
-  atimeNs: bigint = 0n;
-  mtimeNs: bigint = 0n;
-  ctimeNs: bigint = 0n;
-  location: LocationType = LocationType.LOCAL;
+  native get ino(): bigint;
+  native get mode(): long;
+  native get uid(): long;
+  native get gid(): long;
+  native get size(): long;
+  native get atime(): long;
+  native get mtime(): long;
+  native get ctime(): long;
+  native get atimeNs(): bigint;
+  native get mtimeNs(): bigint;
+  native get ctimeNs(): bigint;
+  native get location(): LocationType
 
   private nativeStat: long = 0;
   private cleaner: Cleaner | null = null;
@@ -1701,8 +1712,8 @@ export class StreamInner implements Stream {
 
   close(): Promise<void> {
     return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
-      let promise = taskpool.execute((): undefined => this.closeSync());
-      promise.then((ret: NullishType): void => {
+      let promise = taskpool.execute(() => this.closeSync());
+      promise.then((ret: Any): void => {
         resolve(undefined);
       }).catch((e: Error): void => {
         reject(e as BusinessError);
@@ -1711,8 +1722,8 @@ export class StreamInner implements Stream {
   }
 
   close(callback: AsyncCallback<void>): void {
-    let promise = taskpool.execute((): undefined => this.closeSync());
-    promise.then((ret: NullishType): void => {
+    let promise = taskpool.execute(() => this.closeSync());
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
@@ -1725,8 +1736,8 @@ export class StreamInner implements Stream {
 
   flush(): Promise<void> {
     return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
-      let promise = taskpool.execute((): undefined => this.flushSync());
-      promise.then((ret: NullishType): void => {
+      let promise = taskpool.execute(() => this.flushSync());
+      promise.then((ret: Any): void => {
         resolve(undefined);
       }).catch((e: Error): void => {
         reject(e as BusinessError);
@@ -1735,8 +1746,8 @@ export class StreamInner implements Stream {
   }
 
   flush(callback: AsyncCallback<void>): void {
-    let promise = taskpool.execute((): undefined => this.flushSync());
-    promise.then((ret: NullishType): void => {
+    let promise = taskpool.execute(() => this.flushSync());
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
@@ -1752,7 +1763,7 @@ export class StreamInner implements Stream {
       let promise = taskpool.execute((buffer: ArrayBuffer | string, options?: WriteOptions): long => {
         return this.writeSync(buffer, options);
       }, buffer, options);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         let result = ret as long
         resolve(result);
       }).catch((e: Error): void => {
@@ -1765,7 +1776,7 @@ export class StreamInner implements Stream {
     let promise = taskpool.execute((buffer: ArrayBuffer | string): long => {
       return this.writeSync(buffer);
     }, buffer);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       let result = ret as long;
@@ -1779,7 +1790,7 @@ export class StreamInner implements Stream {
     let promise = taskpool.execute((buffer: ArrayBuffer | string, options: WriteOptions): long => {
       return this.writeSync(buffer, options);
     }, buffer, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       let result = ret as long;
@@ -1796,7 +1807,7 @@ export class StreamInner implements Stream {
       let promise = taskpool.execute((buffer: ArrayBuffer, options?: ReadOptions): long => {
         return this.readSync(buffer, options);
       }, buffer, options);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         let result = ret as long
         resolve(result);
       }).catch((e: Error): void => {
@@ -1809,7 +1820,7 @@ export class StreamInner implements Stream {
     let promise = taskpool.execute((buffer: ArrayBuffer): long => {
       return this.readSync(buffer);
     }, buffer);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       let result = ret as long;
@@ -1823,7 +1834,7 @@ export class StreamInner implements Stream {
     let promise = taskpool.execute((buffer: ArrayBuffer, options: ReadOptions): long => {
       return this.readSync(buffer, options);
     }, buffer, options);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       let result = ret as long;

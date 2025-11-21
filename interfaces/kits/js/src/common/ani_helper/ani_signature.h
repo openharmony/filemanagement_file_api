@@ -55,25 +55,32 @@ namespace BoxedTypes {
 struct Boolean : public BaseType {
     static const Type classType;
     static const string classDesc;
-    static const string unboxedDesc;
-    static const string unboxedSig;
+    static const string booleanUnboxedDesc;
+    static const string booleanUnboxedSig;
 };
 
 struct Int : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string toIntDesc;
+    static const string toIntSig;
 };
 
 struct Long : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string toLongDesc;
+    static const string toLongSig;
+    static const string getOptionSig;
 };
 
 struct Double : public BaseType {
     static const Type classType;
     static const string classDesc;
+    static const string toDoubleDesc;
+    static const string toDoubleSig;
 };
 
 } // namespace BoxedTypes
@@ -149,6 +156,12 @@ struct FileInner : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string getFdDesc;
+    static const string getFdSig;
+    static const string getPathDesc;
+    static const string getPathSig;
+    static const string getNameDesc;
+    static const string getNameSig;
 };
 
 struct ProgressInner : public BaseType {
@@ -161,6 +174,10 @@ struct RandomAccessFileInner : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string getFdDesc;
+    static const string getFdSig;
+    static const string getFPDesc;
+    static const string getFPSig;
 };
 
 struct ReaderIteratorInner : public BaseType {
@@ -179,6 +196,30 @@ struct StatInner : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string getIno;
+    static const string getInoSig;
+    static const string getMode;
+    static const string getModeSig;
+    static const string getUid;
+    static const string getUidSig;
+    static const string getGid;
+    static const string getGidSig;
+    static const string getSize;
+    static const string getSizeSig;
+    static const string getAtime;
+    static const string getAtimeSig;
+    static const string getMtime;
+    static const string getMtimeSig;
+    static const string getCtime;
+    static const string getCtimeSig;
+    static const string getAtimeNs;
+    static const string getAtimeNsSig;
+    static const string getMtimeNs;
+    static const string getMtimeNsSig;
+    static const string getCtimeNs;
+    static const string getCtimeNsSig;
+    static const string getLocation;
+    static const string getLocationSig;
 };
 
 struct StreamInner : public BaseType {
@@ -236,6 +277,17 @@ struct AtomicFile : public BaseType {
 struct CleanerImpl : public BaseType {
     static const Type classType;
     static const string classDesc;
+};
+
+struct ReadTextOptions : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string getOffsetDesc;
+    static const string getOffsetSig;
+    static const string getLengthDesc;
+    static const string getLengthSig;
+    static const string getEncodingDesc;
+    static const string getEncodingSig;
 };
 
 } // namespace FS
