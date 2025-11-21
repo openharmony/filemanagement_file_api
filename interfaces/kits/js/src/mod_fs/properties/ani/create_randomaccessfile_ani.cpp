@@ -37,49 +37,23 @@ static ani_object Wrap(ani_env *env, const FsRandomAccessFile *rafFile)
         return nullptr;
     }
 
-    auto classDesc = FS::RandomAccessFileInner::classDesc.c_str();
-    ani_class cls;
-    if (ANI_OK != env->FindClass(classDesc, &cls)) {
-        HILOGE("Cannot find class %s", classDesc);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, FS::RandomAccessFileInner::classDesc);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
-    auto ctorDesc = FS::RandomAccessFileInner::ctorDesc.c_str();
-    auto ctorSig = FS::RandomAccessFileInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", classDesc);
+    tie(ret, ctor) = aniCache.GetMethod(env, FS::RandomAccessFileInner::classDesc, FS::RandomAccessFileInner::ctorDesc,
+        FS::RandomAccessFileInner::ctorSig);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(rafFile));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", classDesc);
-        return nullptr;
-    }
-
-    const auto &fdRet = rafFile->GetFD();
-    if (!fdRet.IsSuccess()) {
-        HILOGE("GetFD Failed!");
-        return nullptr;
-    }
-
-    const auto &fd = fdRet.GetData().value();
-    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "fd", fd)) {
-        HILOGE("Set fd field value failed!");
-        return nullptr;
-    }
-
-    const auto &fpRet = rafFile->GetFPointer();
-    if (!fpRet.IsSuccess()) {
-        HILOGE("GetFPointer Failed!");
-        return nullptr;
-    }
-
-    const auto &fp = fpRet.GetData().value();
-    if (ANI_OK != AniHelper::SetPropertyValue(env, obj, "filePointer", fp)) {
-        HILOGE("Set fp field value failed!");
+        HILOGE("New %s obj Failed!", FS::RandomAccessFileInner::classDesc.c_str());
         return nullptr;
     }
     return obj;
@@ -87,24 +61,24 @@ static ani_object Wrap(ani_env *env, const FsRandomAccessFile *rafFile)
 
 static tuple<bool, bool> JudgeFile(ani_env *env, ani_object obj)
 {
-    auto stringTypeDesc = BuiltInTypes::String::classDesc.c_str();
-    ani_class stringClass;
-    if (ANI_OK != env->FindClass(stringTypeDesc, &stringClass)) {
-        HILOGE("Cannot find class %{public}s", stringTypeDesc);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, stringClass] = aniCache.GetClass(env, BuiltInTypes::String::classDesc);
+    if (ret != ANI_OK) {
         return { false, false };
     }
+
     ani_boolean isString = false;
     env->Object_InstanceOf(obj, stringClass, &isString);
     if (isString) {
         return { true, true };
     }
 
-    auto fileClassDesc = FS::FileInner::classDesc.c_str();
     ani_class fileClass;
-    if (ANI_OK != env->FindClass(fileClassDesc, &fileClass)) {
-        HILOGE("Cannot find class %{public}s", fileClassDesc);
+    tie(ret, fileClass) = aniCache.GetClass(env, FS::FileInner::classDesc);
+    if (ret != ANI_OK) {
         return { false, false };
     }
+
     ani_boolean isFile = false;
     env->Object_InstanceOf(obj, fileClass, &isFile);
     if (isFile) {

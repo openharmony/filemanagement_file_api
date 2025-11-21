@@ -19,7 +19,7 @@ namespace Environment {
   export function getStorageDataDir(): Promise<string> {
     return new Promise<string>((resolve: (result: string) => void, reject: (e: BusinessError<void>) => void): void => {
       let promise = taskpool.execute(EnvironmentImpl.getStorageDataDirSync);
-        promise.then((ret: NullishType): void => {
+        promise.then((ret: Any): void => {
             let result = ret as string;
             resolve(result);
         }).catch((e: Error): void => {
@@ -30,7 +30,7 @@ namespace Environment {
 
   export function getStorageDataDir(callback: AsyncCallback<string>): void {
     let promise = taskpool.execute(EnvironmentImpl.getStorageDataDirSync);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         let e = new BusinessError<void>();
         e.code = 0;
         let result = ret as string;
@@ -43,7 +43,7 @@ namespace Environment {
   export function getUserDataDir(): Promise<string> {
     return new Promise<string>((resolve: (result: string) => void, reject: (e: BusinessError<void>) => void): void => {
         let promise = taskpool.execute(EnvironmentImpl.getUserDataDirSync);
-        promise.then((ret: NullishType): void => {
+        promise.then((ret: Any): void => {
             let result = ret as string;
             resolve(result);
         }).catch((e: Error): void => {
@@ -54,7 +54,7 @@ namespace Environment {
 
   export function getUserDataDir(callback: AsyncCallback<string>): void {
     let promise = taskpool.execute(EnvironmentImpl.getUserDataDirSync);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         let e = new BusinessError<void>();
         e.code = 0;
         let result = ret as string;

@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <ani.h>
+#include "ani_cache.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -38,16 +39,43 @@ ANI_EXPORT ani_status BindClass(ani_env *env, const char *className, const std::
         return ANI_INVALID_ARGS;
     }
 
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        HILOGE("Cannot find class '%{private}s'", className);
-        return ANI_NOT_FOUND;
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, className);
+    if (ret != ANI_OK) {
+        return ret;
     }
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         HILOGE("Cannot bind native methods to '%{private}s'", className);
         return ANI_ERROR;
     };
+    return ANI_OK;
+}
+
+template <std::size_t N>
+ANI_EXPORT ani_status BindClassStaticMethods(ani_env *env, const char *className,
+                                             const std::array<ani_native_function, N> &methods)
+{
+    if (env == nullptr) {
+        HILOGE("Invalid parameter env");
+        return ANI_INVALID_ARGS;
+    }
+
+    if (className == nullptr) {
+        HILOGE("Invalid parameter className");
+        return ANI_INVALID_ARGS;
+    }
+
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, className);
+    if (ret != ANI_OK) {
+        return ret;
+    }
+
+    if (ANI_OK != env->Class_BindStaticNativeMethods(cls, methods.data(), methods.size())) {
+        HILOGE("Cannot bind static native methods to '%{public}s'", className);
+        return ANI_ERROR;
+    }
     return ANI_OK;
 }
 

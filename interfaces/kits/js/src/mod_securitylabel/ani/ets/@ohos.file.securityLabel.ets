@@ -21,7 +21,7 @@ namespace securityLabel {
   export function setSecurityLabel(path: string, type: DataLevel): Promise<void> {
     return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
       let promise = taskpool.execute((path: string, type: DataLevel): void => SecurityLabelImpl.setSecurityLabelSync(path, type), path, type);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         resolve(undefined);
       }).catch((e: Error): void => {
         reject(e as BusinessError);
@@ -31,7 +31,7 @@ namespace securityLabel {
 
   export function setSecurityLabel(path: string, type: DataLevel, callback: AsyncCallback<void>): void {
     let promise = taskpool.execute((path: string, type: DataLevel): void => SecurityLabelImpl.setSecurityLabelSync(path, type), path, type);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       callback(e, undefined);
@@ -47,7 +47,7 @@ namespace securityLabel {
   export function getSecurityLabel(path: string): Promise<string> {
     return new Promise<string>((resolve: (result: string) => void, reject: (e: BusinessError<void>) => void): void => {
       let promise = taskpool.execute((path: string): string => SecurityLabelImpl.getSecurityLabelSync(path), path);
-      promise.then((ret: NullishType): void => {
+      promise.then((ret: Any): void => {
         let r = ret as string;
         resolve(r);
       }).catch((e: Error): void => {
@@ -58,7 +58,7 @@ namespace securityLabel {
 
   export function getSecurityLabel(path: string, callback: AsyncCallback<string, void>): void {
     let promise = taskpool.execute((path: string): string => SecurityLabelImpl.getSecurityLabelSync(path), path);
-    promise.then((ret: NullishType): void => {
+    promise.then((ret: Any): void => {
       let e = new BusinessError<void>();
       e.code = 0;
       let r = ret as string;

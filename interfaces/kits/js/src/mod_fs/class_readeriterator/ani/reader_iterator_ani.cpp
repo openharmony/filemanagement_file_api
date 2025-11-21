@@ -36,25 +36,23 @@ ani_object ReaderIteratorAni::Wrap(ani_env *env, const FsReaderIterator *it)
         return nullptr;
     }
 
-    auto classDesc = FS::ReaderIteratorInner::classDesc.c_str();
-    ani_class cls;
-    if (ANI_OK != env->FindClass(classDesc, &cls)) {
-        HILOGE("Cannot find class %s", classDesc);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, FS::ReaderIteratorInner::classDesc);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
-    auto ctorDesc = FS::ReaderIteratorInner::ctorDesc.c_str();
-    auto ctorSig = FS::ReaderIteratorInner::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", classDesc);
+    tie(ret, ctor) = aniCache.GetMethod(env, FS::ReaderIteratorInner::classDesc, FS::ReaderIteratorInner::ctorDesc,
+        FS::ReaderIteratorInner::ctorSig);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(it));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", classDesc);
+        HILOGE("New %{public}s obj Failed!", FS::ReaderIteratorInner::classDesc.c_str());
         return nullptr;
     }
 

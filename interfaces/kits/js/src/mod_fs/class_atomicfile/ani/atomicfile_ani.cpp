@@ -137,24 +137,22 @@ ani_object AtomicFileAni::GetBaseFile(ani_env *env, [[maybe_unused]] ani_object 
 
 static ani_object CreateReadStream(ani_env *env, ani_string filePath)
 {
-    auto classDesc = FS::ReadStream::classDesc.c_str();
-    ani_class cls;
-    if (ANI_OK != env->FindClass(classDesc, &cls)) {
-        HILOGE("Cannot find class %s", classDesc);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, FS::ReadStream::classDesc);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
-    auto ctorDesc = FS::ReadStream::ctorDesc.c_str();
-    auto ctorSig = FS::ReadStream::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", classDesc);
+    tie(ret, ctor) = aniCache.GetMethod(env, FS::ReadStream::classDesc, FS::ReadStream::ctorDesc,
+        FS::ReadStream::ctorSig);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath)) {
-        HILOGE("New %s obj Failed", classDesc);
+        HILOGE("New %{public}s obj Failed", FS::ReadStream::classDesc.c_str());
         return nullptr;
     }
 
@@ -163,24 +161,22 @@ static ani_object CreateReadStream(ani_env *env, ani_string filePath)
 
 static ani_object CreateWriteStream(ani_env *env, ani_string filePath)
 {
-    auto classDesc = FS::WriteStream::classDesc.c_str();
-    ani_class cls;
-    if (ANI_OK != env->FindClass(classDesc, &cls)) {
-        HILOGE("Cannot find class %s", classDesc);
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, cls] = aniCache.GetClass(env, FS::WriteStream::classDesc);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
-    auto ctorDesc = FS::WriteStream::ctorDesc.c_str();
-    auto ctorSig = FS::WriteStream::ctorSig.c_str();
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, ctorDesc, ctorSig, &ctor)) {
-        HILOGE("Cannot find constructor method for class %s", classDesc);
+    tie(ret, ctor) = aniCache.GetMethod(env, FS::WriteStream::classDesc, FS::WriteStream::ctorDesc,
+        FS::WriteStream::ctorSig);
+    if (ret != ANI_OK) {
         return nullptr;
     }
 
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath)) {
-        HILOGE("New %s obj Failed", classDesc);
+        HILOGE("New %{public}s obj Failed", FS::WriteStream::classDesc.c_str());
         return nullptr;
     }
 

@@ -205,9 +205,9 @@ void FsFileWatcher::ReadNotifyEvent()
         }
     } while (len < 0);
 
-    while (len > 0 && index < len) {
+    while (len > 0 && index < static_cast<uint32_t>(len)) {
         // Incomplete data: remaining bytes less than event struct size
-        if ((len - index) < eventSize) {
+        if ((static_cast<uint32_t>(len) - index) < eventSize) {
             HILOGE(
                 "Out of bounds access, len:%{public}d, index: %{public}u, inotify: %{public}u", len, index, eventSize);
             break;
@@ -216,7 +216,7 @@ void FsFileWatcher::ReadNotifyEvent()
         event = reinterpret_cast<inotify_event *>(buf + index);
 
         // Incomplete data: remaining bytes less than (event struct size + event->len)
-        if (event->len > len - index - eventSize) {
+        if (event->len > static_cast<uint32_t>(len) - index - eventSize) {
             HILOGE("Out of bounds access, index: %{public}u, inotify: %{public}u, event :%{public}u, len: %{public}d",
                 index, eventSize, event->len, len);
             break;

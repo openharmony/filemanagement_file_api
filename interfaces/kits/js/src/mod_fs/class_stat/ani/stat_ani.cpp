@@ -15,6 +15,7 @@
 
 #include "stat_ani.h"
 
+#include "ani_cache.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "stat_core.h"
@@ -141,6 +142,182 @@ ani_boolean StatAni::IsSymbolicLink(ani_env *env, [[maybe_unused]] ani_object ob
     auto ret = fsStat->IsSymbolicLink();
     return ani_boolean(ret);
 }
+
+ani_object StatAni::GetIno(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto ino = fsStat->GetIno();
+    auto [ret, inoObject] = TypeConverter::ToAniBigInt(env, ino);
+    if (!ret) {
+        HILOGE("Ino converte to BigInt failed.");
+        ErrorHandler::Throw(env, EINVAL);
+        return nullptr;
+    }
+    return inoObject;
+}
+
+ani_long StatAni::GetMode(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    return fsStat->GetMode();
+}
+
+ani_long StatAni::GetUid(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    return fsStat->GetUid();
+}
+
+ani_long StatAni::GetGid(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    return fsStat->GetGid();
+}
+
+ani_long StatAni::GetSize(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    return fsStat->GetSize();
+}
+
+ani_long StatAni::GetAtime(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    return fsStat->GetAtime();
+}
+
+ani_long StatAni::GetMtime(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    return fsStat->GetMtime();
+}
+
+ani_long StatAni::GetCtime(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return -1;
+    }
+
+    return fsStat->GetCtime();
+}
+
+ani_object StatAni::GetAtimeNs(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto atimeNs = fsStat->GetAtimeNs();
+    auto [ret, atimeNsObject] = TypeConverter::ToAniBigInt(env, atimeNs);
+    if (!ret) {
+        HILOGE("atimeNs converte to BigInt failed.");
+        ErrorHandler::Throw(env, EINVAL);
+        return nullptr;
+    }
+    return atimeNsObject;
+}
+
+ani_object StatAni::GetMtimeNs(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto mtimeNs = fsStat->GetMtimeNs();
+    auto [ret, mtimeNsObject] = TypeConverter::ToAniBigInt(env, mtimeNs);
+    if (!ret) {
+        HILOGE("mtimeNs converte to BigInt failed.");
+        ErrorHandler::Throw(env, EINVAL);
+        return nullptr;
+    }
+    return mtimeNsObject;
+}
+
+ani_object StatAni::GetCtimeNs(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto ctimeNs = fsStat->GetCtimeNs();
+    auto [ret, ctimeNsObject] = TypeConverter::ToAniBigInt(env, ctimeNs);
+    if (!ret) {
+        HILOGE("ctimeNs converte to BigInt failed.");
+        ErrorHandler::Throw(env, EINVAL);
+        return nullptr;
+    }
+    return ctimeNsObject;
+}
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+ani_enum_item StatAni::GetLocation(ani_env *env, [[maybe_unused]] ani_object object)
+{
+    auto fsStat = StatWrapper::Unwrap(env, object);
+    if (fsStat == nullptr) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        return nullptr;
+    }
+
+    auto location = fsStat->GetLocation();
+
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [succ, aniEnumLocaltion] = aniCache.GetEnumIndex(env, FS::LocationType::classDesc, location - 1);
+    if (succ == ANI_OK) {
+        return aniEnumLocaltion;
+    }
+
+    tie (succ, aniEnumLocaltion) = aniCache.GetEnumIndex(env, FS::LocationType::classDesc, 0);
+    if (succ != ANI_OK) {
+        ErrorHandler::Throw(env, UNKNOWN_ERR);
+    }
+
+    return aniEnumLocaltion;
+}
+#endif
+
 } // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement

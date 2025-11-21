@@ -25,6 +25,8 @@ namespace ANI {
 
 class RandomAccessFileAni final {
 public:
+    static ani_int GetFd(ani_env *env, [[maybe_unused]] ani_object object);
+    static ani_long GetFilePointer(ani_env *env, [[maybe_unused]] ani_object object);
     static void SetFilePointer(ani_env *env, [[maybe_unused]] ani_object object, ani_long fp);
     static void Close(ani_env *env, [[maybe_unused]] ani_object object);
     static ani_long WriteSync(ani_env *env, [[maybe_unused]] ani_object object, ani_object buf, ani_object options);
