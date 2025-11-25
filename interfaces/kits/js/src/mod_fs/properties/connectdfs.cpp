@@ -274,7 +274,6 @@ void UvWorkAfterOnStaus(ConnectDfsCB *connectDfsCB)
         if (napi_call_function(connectDfsCB->cbBase.cbInfo.env, undefined, callback,
             NARG_CNT::TWO, result, &callResult) != napi_ok) {
             HILOGE("napi call function failed");
-            return;
         }
         if (connectDfsCB->cbBase.cbInfo.callback != nullptr) {
             napi_delete_reference(connectDfsCB->cbBase.cbInfo.env, connectDfsCB->cbBase.cbInfo.callback);
