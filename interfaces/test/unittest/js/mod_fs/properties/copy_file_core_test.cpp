@@ -16,6 +16,7 @@
 #include "copy_file_core.h"
 
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -24,28 +25,29 @@ using namespace std;
 
 class CopyFileCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void CopyFileCoreTest::SetUpTestCase(void)
+void CopyFileCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "CopyFileCoreTest");
 }
 
-void CopyFileCoreTest::TearDownTestCase(void)
+void CopyFileCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void CopyFileCoreTest::SetUp(void)
+void CopyFileCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void CopyFileCoreTest::TearDown(void)
+void CopyFileCoreTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
