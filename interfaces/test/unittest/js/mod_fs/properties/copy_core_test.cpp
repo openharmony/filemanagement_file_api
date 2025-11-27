@@ -18,6 +18,9 @@
 #include <fcntl.h>
 #include <filesystem>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -26,59 +29,44 @@ using namespace std;
 
 class CopyCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 
-    static const string testDir;
-    static const string srcDir;
-    static const string destDir;
-    static const string srcFile;
-    static const string destFile;
-
 private:
-    static constexpr mode_t permission0755 = 0755; // rwxr-xr-x
-    static constexpr mode_t permission0644 = 0644; // rw-r--r--
+    const string testDir = FileUtils::testRootDir + "/CopyCoreTest";
+    const string srcDir = testDir + "/srcDir";
+    const string destDir = testDir + "/destDir";
+    const string srcFile = srcDir + "/src.txt";
+    const string destFile = destDir + "/dest.txt";
 };
 
-const string CopyCoreTest::testDir = "/data/test";
-const string CopyCoreTest::srcDir = testDir + "/src";
-const string CopyCoreTest::destDir = testDir + "/dest";
-const string CopyCoreTest::srcFile = srcDir + "/src.txt";
-const string CopyCoreTest::destFile = destDir + "/dest.txt";
-
-void CopyCoreTest::SetUpTestCase(void)
+void CopyCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    mkdir(testDir.c_str(), permission0755);
-    mkdir(srcDir.c_str(), permission0755);
-    mkdir(destDir.c_str(), permission0755);
-    int32_t fd = open(srcFile.c_str(), O_CREAT | O_RDWR, permission0644);
-    if (fd < 0) {
-        EXPECT_TRUE(false);
-    }
-    close(fd);
+    prctl(PR_SET_NAME, "CopyCoreMockTest");
 }
 
-void CopyCoreTest::TearDownTestCase(void)
+void CopyCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    int ret = remove(srcFile.c_str());
-    EXPECT_TRUE(ret == 0);
-    rmdir(srcDir.c_str());
-    rmdir(destDir.c_str());
-    rmdir(testDir.c_str());
 }
 
-void CopyCoreTest::SetUp(void)
+void CopyCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    errno = 0;
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
+    ASSERT_TRUE(FileUtils::CreateDirectories(srcDir));
+    ASSERT_TRUE(FileUtils::CreateDirectories(destDir));
+    ASSERT_TRUE(FileUtils::CreateFile(srcFile));
 }
 
-void CopyCoreTest::TearDown(void)
+void CopyCoreTest::TearDown()
 {
     CopyCore::callbackMap_.clear();
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -96,9 +84,9 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsValidUri_001, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsValidUri_001";
 
-    string validUri = "file://data/test/file.txt";
+    string validUri = "file://" + srcDir + "/CopyCoreTest_IsValidUri_001.txt";
     auto res = CopyCore::IsValidUri(validUri);
-    EXPECT_EQ(res, true);
+    EXPECT_TRUE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsValidUri_001";
 }
@@ -114,9 +102,9 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsValidUri_002, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsValidUri_002";
 
-    string invalidUri = "invalid://data/test/file.txt";
+    string invalidUri = "invalid:/" + srcDir + "/CopyCoreTest_IsValidUri_002.txt";
     auto res = CopyCore::IsValidUri(invalidUri);
-    EXPECT_EQ(res, false);
+    EXPECT_FALSE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsValidUri_002";
 }
@@ -132,9 +120,9 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsRemoteUri_001, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsRemoteUri_001";
 
-    string remoteUri = "file://data/test/file.txt?networkid=123";
+    string remoteUri = "file://" + srcDir + "/CopyCoreTest_IsRemoteUri_001.txt?networkid=123";
     auto res = CopyCore::IsRemoteUri(remoteUri);
-    EXPECT_EQ(res, true);
+    EXPECT_TRUE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsRemoteUri_001";
 }
@@ -150,9 +138,9 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsRemoteUri_002, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsRemoteUri_002";
 
-    string localUri = "file://data/test/file.txt";
+    string localUri = "file://" + srcDir + "/CopyCoreTest_IsRemoteUri_002.txt";
     auto res = CopyCore::IsRemoteUri(localUri);
-    EXPECT_EQ(res, false);
+    EXPECT_FALSE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsRemoteUri_002";
 }
@@ -169,7 +157,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsDirectory_001, testing::ext::TestSize.Leve
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsDirectory_001";
 
     auto res = CopyCore::IsDirectory(srcDir);
-    EXPECT_EQ(res, true);
+    EXPECT_TRUE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsDirectory_001";
 }
@@ -186,7 +174,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsDirectory_002, testing::ext::TestSize.Leve
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsDirectory_002";
 
     auto res = CopyCore::IsDirectory(srcFile);
-    EXPECT_EQ(res, false);
+    EXPECT_FALSE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsDirectory_002";
 }
@@ -203,7 +191,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsFile_001, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsFile_001";
 
     auto res = CopyCore::IsFile(srcFile);
-    EXPECT_EQ(res, true);
+    EXPECT_TRUE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsFile_001";
 }
@@ -220,7 +208,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsFile_002, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsFile_002";
 
     auto res = CopyCore::IsFile(srcDir);
-    EXPECT_EQ(res, false);
+    EXPECT_FALSE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsFile_002";
 }
@@ -237,14 +225,14 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_IsMediaUri_001, testing::ext::TestSize.Level
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_IsMediaUri_001";
 
     auto res = CopyCore::IsMediaUri(srcFile);
-    EXPECT_EQ(res, false);
+    EXPECT_FALSE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_IsMediaUri_001";
 }
 
 /**
  * @tc.name: CopyCoreTest_GetFileSize_001
- * @tc.desc: Test function of CopyCore::GetFileSize interface for TRUE.
+ * @tc.desc: Test function of CopyCore::GetFileSize interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -262,7 +250,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_GetFileSize_001, testing::ext::TestSize.Leve
 
 /**
  * @tc.name: CopyCoreTest_GetFileSize_002
- * @tc.desc: Test function of CopyCore::GetFileSize interface for FALSE.
+ * @tc.desc: Test function of CopyCore::GetFileSize interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -271,7 +259,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_GetFileSize_002, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_GetFileSize_002";
 
-    string nonExistentFile = "/data/test/non_existent.txt";
+    string nonExistentFile = srcDir + "/non_existent.txt";
     auto [err, size] = CopyCore::GetFileSize(nonExistentFile);
     EXPECT_NE(err, ERRNO_NOERR);
     EXPECT_EQ(size, 0);
@@ -281,7 +269,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_GetFileSize_002, testing::ext::TestSize.Leve
 
 /**
  * @tc.name: CopyCoreTest_CheckOrCreatePath_001
- * @tc.desc: Test function of CopyCore::CheckOrCreatePath interface for TRUE.
+ * @tc.desc: Test function of CopyCore::CheckOrCreatePath interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -298,7 +286,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CheckOrCreatePath_001, testing::ext::TestSiz
 
 /**
  * @tc.name: CopyCoreTest_CheckOrCreatePath_002
- * @tc.desc: Test function of CopyCore::CheckOrCreatePath interface for TRUE.
+ * @tc.desc: Test function of CopyCore::CheckOrCreatePath interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -307,7 +295,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CheckOrCreatePath_002, testing::ext::TestSiz
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CheckOrCreatePath_002";
 
-    string newFile = destDir + "/new_file.txt";
+    string newFile = destDir + "/CopyCoreTest_CheckOrCreatePath_002.txt";
     auto res = CopyCore::CheckOrCreatePath(newFile);
     EXPECT_EQ(res, ERRNO_NOERR);
     EXPECT_TRUE(CopyCore::IsFile(newFile));
@@ -317,7 +305,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CheckOrCreatePath_002, testing::ext::TestSiz
 
 /**
  * @tc.name: CopyCoreTest_MakeDir_001
- * @tc.desc: Test function of CopyCore::MakeDir interface for TRUE.
+ * @tc.desc: Test function of CopyCore::MakeDir interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -326,18 +314,17 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_MakeDir_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_MakeDir_001";
 
-    string newDir = destDir + "/new_dir";
+    string newDir = destDir + "/CopyCoreTest_MakeDir_001";
     auto res = CopyCore::MakeDir(newDir);
     EXPECT_EQ(res, ERRNO_NOERR);
     EXPECT_TRUE(CopyCore::IsDirectory(newDir));
 
-    rmdir(newDir.c_str());
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_MakeDir_001";
 }
 
 /**
  * @tc.name: CopyCoreTest_MakeDir_002
- * @tc.desc: Test function of CopyCore::MakeDir interface for TRUE.
+ * @tc.desc: Test function of CopyCore::MakeDir interface for SUCCESS when path is already exits.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -354,7 +341,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_MakeDir_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CopyCoreTest_MakeDir_003
- * @tc.desc: Test function of CopyCore::MakeDir interface for FALSE.
+ * @tc.desc: Test function of CopyCore::MakeDir interface for FAILURE.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -363,8 +350,8 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_MakeDir_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_MakeDir_003";
 
-    string invalidPath = "/invalid/path/dir";
-    auto res = CopyCore::MakeDir(invalidPath);
+    auto path = srcDir + "/non_existent_dir/non_existent_subdir";
+    auto res = CopyCore::MakeDir(path);
     EXPECT_NE(res, ERRNO_NOERR);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_MakeDir_003";
@@ -381,10 +368,10 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ValidParams_001, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_ValidParams_001";
 
-    string srcFile = "invalid://data/test/src.txt";
+    string srcFile = "invalid:/" + srcDir + "/CopyCoreTest_ValidParams_001.txt";
 
     auto res = CopyCore::ValidParams(srcFile, destFile);
-    EXPECT_EQ(res, false);
+    EXPECT_FALSE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ValidParams_001";
 }
@@ -400,17 +387,17 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ValidParams_002, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_ValidParams_002";
 
-    string destFile = "invalid://data/test/dest.txt";
+    string destFile = "invalid:/" + destDir + "/CopyCoreTest_ValidParams_002.txt";
 
     auto res = CopyCore::ValidParams(srcFile, destFile);
-    EXPECT_EQ(res, false);
+    EXPECT_FALSE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ValidParams_002";
 }
 
 /**
  * @tc.name: CopyCoreTest_ValidParams_003
- * @tc.desc: Test function of CopyCore::ValidParams interface for FALSE.
+ * @tc.desc: Test function of CopyCore::ValidParams interface for TRUE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -419,18 +406,18 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ValidParams_003, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_ValidParams_003";
 
-    string src = "file://data/test/src.txt";
-    string dest = "file://data/test/dest.txt";
+    string src = "file://" + srcFile;
+    string dest = "file://" + destFile;
 
     auto res = CopyCore::ValidParams(src, dest);
-    EXPECT_EQ(res, true);
+    EXPECT_TRUE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ValidParams_003";
 }
 
 /**
  * @tc.name: CopyCoreTest_CreateFileInfos_001
- * @tc.desc: Test function of CopyCore::CreateFileInfos interface for TRUE.
+ * @tc.desc: Test function of CopyCore::CreateFileInfos interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -455,7 +442,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CreateFileInfos_001, testing::ext::TestSize.
 
 /**
  * @tc.name: CopyCoreTest_CopySubDir_001
- * @tc.desc: Test function of CopyCore::CopySubDir interface for TRUE.
+ * @tc.desc: Test function of CopyCore::CopySubDir interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -464,33 +451,25 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopySubDir_001, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopySubDir_001";
 
-    string subDir = srcDir + "/sub_dir";
-    mkdir(subDir.c_str(), permission0755);
-    string subFile = subDir + "/sub_file.txt";
-    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
-    if (fd < 0) {
-        EXPECT_TRUE(false);
-    }
-    close(fd);
+    string subDir = srcDir + "/CopyCoreTest_CopySubDir_001";
+    ASSERT_TRUE(FileUtils::CreateDirectories(subDir));
+    string subFile = subDir + "/CopyCoreTest_CopySubDir_001.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(subFile));
 
-    string destSubDir = destDir + "/sub_dir";
+    string destSubDir = destDir + "/CopyCoreTest_CopySubDir_001";
     auto infos = make_shared<FsFileInfos>();
     auto res = CopyCore::CopySubDir(subDir, destSubDir, infos);
-    string destSubFile = destSubDir + "/sub_file.txt";
+    string destSubFile = destSubDir + "/CopyCoreTest_CopySubDir_001.txt";
     EXPECT_EQ(res, ERRNO_NOERR);
     EXPECT_TRUE(CopyCore::IsDirectory(destSubDir));
     EXPECT_TRUE(CopyCore::IsFile(destSubFile));
 
-    remove(subFile.c_str());
-    rmdir(subDir.c_str());
-    remove(destSubFile.c_str());
-    rmdir(destSubDir.c_str());
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CopySubDir_001";
 }
 
 /**
  * @tc.name: CopyCoreTest_CopySubDir_002
- * @tc.desc: Test function of CopyCore::CopySubDir interface for TRUE.
+ * @tc.desc: Test function of CopyCore::CopySubDir interface for SUCCESS without notify.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -499,30 +478,22 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopySubDir_002, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopySubDir_002";
 
-    string subDir = srcDir + "/sub_dir";
-    mkdir(subDir.c_str(), permission0755);
-    string subFile = subDir + "/sub_file.txt";
-    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
-    if (fd < 0) {
-        EXPECT_TRUE(false);
-    }
-    close(fd);
+    string subDir = srcDir + "/CopyCoreTest_CopySubDir_002";
+    ASSERT_TRUE(FileUtils::CreateDirectories(subDir));
+    string subFile = subDir + "/CopyCoreTest_CopySubDir_002.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(subFile));
 
-    string destSubDir = destDir + "/sub_dir";
+    string destSubDir = destDir + "/CopyCoreTest_CopySubDir_002";
     auto infos = make_shared<FsFileInfos>();
-    infos->notifyFd = 1;
     auto res = CopyCore::CopySubDir(subDir, destSubDir, infos);
-    EXPECT_EQ(res, errno);
+    EXPECT_EQ(res, ERRNO_NOERR);
 
-    remove(subFile.c_str());
-    rmdir(subDir.c_str());
-    rmdir(destSubDir.c_str());
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CopySubDir_002";
 }
 
 /**
  * @tc.name: CopyCoreTest_RecurCopyDir_001
- * @tc.desc: Test function of CopyCore::RecurCopyDir interface for TRUE.
+ * @tc.desc: Test function of CopyCore::RecurCopyDir interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -531,33 +502,25 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_RecurCopyDir_001, testing::ext::TestSize.Lev
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_RecurCopyDir_001";
 
-    string subDir = srcDir + "/sub_dir";
-    mkdir(subDir.c_str(), permission0755);
-    string subFile = subDir + "/sub_file.txt";
-    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
-    if (fd < 0) {
-        EXPECT_TRUE(false);
-    }
-    close(fd);
+    string subDir = srcDir + "/CopyCoreTest_RecurCopyDir_001";
+    ASSERT_TRUE(FileUtils::CreateDirectories(subDir));
+    string subFile = subDir + "/CopyCoreTest_RecurCopyDir_001.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(subFile));
 
-    string destSubDir = destDir + "/sub_dir";
+    string destSubDir = destDir + "/CopyCoreTest_RecurCopyDir_001";
     auto infos = make_shared<FsFileInfos>();
     auto res = CopyCore::RecurCopyDir(srcDir, destDir, infos);
-    string destSubFile = destSubDir + "/sub_file.txt";
+    string destSubFile = destSubDir + "/CopyCoreTest_RecurCopyDir_001.txt";
     EXPECT_EQ(res, ERRNO_NOERR);
     EXPECT_TRUE(CopyCore::IsDirectory(destSubDir));
-    EXPECT_TRUE(CopyCore::IsFile(destSubDir + "/sub_file.txt"));
+    EXPECT_TRUE(CopyCore::IsFile(destSubDir + "/CopyCoreTest_RecurCopyDir_001.txt"));
 
-    remove(subFile.c_str());
-    rmdir(subDir.c_str());
-    remove(destSubFile.c_str());
-    rmdir(destSubDir.c_str());
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_RecurCopyDir_001";
 }
 
 /**
  * @tc.name: CopyCoreTest_CopyDirFunc_001
- * @tc.desc: Test function of CopyCore::CopyDirFunc interface for TRUE.
+ * @tc.desc: Test function of CopyCore::CopyDirFunc interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -566,35 +529,21 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopyDirFunc_001, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopyDirFunc_001";
 
-    string subDir = srcDir + "/sub_dir";
-    mkdir(subDir.c_str(), permission0755);
-    string subFile = subDir + "/sub_file.txt";
-    int fd = open(subFile.c_str(), O_CREAT | O_RDWR, permission0644);
-    if (fd < 0) {
-        EXPECT_TRUE(false);
-    }
-    close(fd);
+    string copiedDir = destDir + "/CopyCoreTest";
+    string copiedFile = copiedDir + "/src.txt";
 
-    string destSubDir = destDir + "/src/sub_dir";
-    string destSubFile = destSubDir + "/sub_file.txt";
-    string destSrcDir = destDir + "/src";
     auto infos = make_shared<FsFileInfos>();
     auto res = CopyCore::CopyDirFunc(srcDir, destDir, infos);
     EXPECT_EQ(res, ERRNO_NOERR);
-    EXPECT_EQ(CopyCore::IsDirectory(destSubDir), false);
-    EXPECT_EQ(CopyCore::IsFile(destSubDir + "/sub_file.txt"), false);
+    EXPECT_TRUE(CopyCore::IsDirectory(copiedDir));
+    EXPECT_TRUE(CopyCore::IsFile(copiedFile));
 
-    remove(subFile.c_str());
-    rmdir(subDir.c_str());
-    remove(destSubFile.c_str());
-    rmdir(destSubDir.c_str());
-    rmdir(destSrcDir.c_str());
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CopyDirFunc_001";
 }
 
 /**
  * @tc.name: CopyCoreTest_ExecLocal_001
- * @tc.desc: Test function of CopyCore::ExecLocal interface for TRUE.
+ * @tc.desc: Test function of CopyCore::ExecLocal interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -612,15 +561,13 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ExecLocal_001, testing::ext::TestSize.Level1
     auto res = CopyCore::ExecLocal(infos, callback);
     EXPECT_EQ(res, ERRNO_NOERR);
     EXPECT_TRUE(CopyCore::IsFile(destFile));
-    int ret = remove(destFile.c_str());
-    EXPECT_TRUE(ret == 0);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ExecLocal_001";
 }
 
 /**
  * @tc.name: CopyCoreTest_ExecLocal_002
- * @tc.desc: Test function of CopyCore::ExecLocal interface for FALSE.
+ * @tc.desc: Test function of CopyCore::ExecLocal interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -643,7 +590,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ExecLocal_002, testing::ext::TestSize.Level1
 
 /**
  * @tc.name: CopyCoreTest_RegisterListener_001
- * @tc.desc: Test function of CopyCore::RegisterListener interface for TRUE.
+ * @tc.desc: Test function of CopyCore::RegisterListener interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -696,7 +643,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_RegisterListener_002, testing::ext::TestSize
 
 /**
  * @tc.name: CopyCoreTest_UnregisterListener_001
- * @tc.desc: Test function of CopyCore::UnregisterListener interface for TRUE.
+ * @tc.desc: Test function of CopyCore::UnregisterListener interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -747,7 +694,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_UnregisterListener_002, testing::ext::TestSi
 
 /**
  * @tc.name: CopyCoreTest_DoCopy_001
- * @tc.desc: Test function of CopyCore::DoCopy interface for FALSE.
+ * @tc.desc: Test function of CopyCore::DoCopy interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -770,7 +717,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_DoCopy_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CopyCoreTest_DoCopy_002
- * @tc.desc: Test function of CopyCore::DoCopy interface for TRUE.
+ * @tc.desc: Test function of CopyCore::DoCopy interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -779,21 +726,19 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_DoCopy_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_DoCopy_002";
 
-    string src = "file:///data/test/src/src.txt";
-    string dest = "file:///data/test/dest/dest.txt";
+    string src = "file://" + srcFile;
+    string dest = "file://" + destFile;
     optional<CopyOptions> options;
 
     auto res = CopyCore::DoCopy(src, dest, options);
     EXPECT_TRUE(res.IsSuccess());
-    int ret = remove(destFile.c_str());
-    EXPECT_TRUE(ret == 0);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_DoCopy_002";
 }
 
 /**
  * @tc.name: CopyCoreTest_GetDirSize_001
- * @tc.desc: Test function of CopyCore::GetDirSize interface for TRUE.
+ * @tc.desc: Test function of CopyCore::GetDirSize interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -815,7 +760,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_GetDirSize_001, testing::ext::TestSize.Level
 
 /**
  * @tc.name: CopyCoreTest_GetUVEntry_001
- * @tc.desc: Test function of CopyCore::GetUVEntry interface for FALSE.
+ * @tc.desc: Test function of CopyCore::GetUVEntry interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -848,14 +793,14 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CheckFileValid_001, testing::ext::TestSize.L
     infos->destPath = destFile;
 
     auto res = CopyCore::CheckFileValid(srcFile, infos);
-    EXPECT_EQ(res, false);
+    EXPECT_FALSE(res);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CheckFileValid_001";
 }
 
 /**
  * @tc.name: CopyCoreTest_UpdateProgressSize_001
- * @tc.desc: Test function of CopyCore::UpdateProgressSize interface for TRUE.
+ * @tc.desc: Test function of CopyCore::UpdateProgressSize interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -875,7 +820,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_UpdateProgressSize_001, testing::ext::TestSi
 
 /**
  * @tc.name: CopyCoreTest_GetRegisteredListener_001
- * @tc.desc: Test function of CopyCore::GetRegisteredListener interface for FALSE.
+ * @tc.desc: Test function of CopyCore::GetRegisteredListener interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -897,7 +842,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_GetRegisteredListener_001, testing::ext::Tes
 
 /**
  * @tc.name: CopyCoreTest_SubscribeLocalListener_001
- * @tc.desc: Test function of CopyCore::SubscribeLocalListener interface for FALSE.
+ * @tc.desc: Test function of CopyCore::SubscribeLocalListener interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -913,6 +858,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_SubscribeLocalListener_001, testing::ext::Te
     auto callback = make_shared<FsCallbackObject>(nullptr);
 
     auto res = CopyCore::SubscribeLocalListener(infos, callback);
+    EXPECT_NE(res, ERRNO_NOERR);
     EXPECT_EQ(res, errno);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_SubscribeLocalListener_001";
@@ -920,7 +866,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_SubscribeLocalListener_001, testing::ext::Te
 
 /**
  * @tc.name: CopyCoreTest_GetRealPath_001
- * @tc.desc: Test function of CopyCore::GetRealPath interface for TRUE.
+ * @tc.desc: Test function of CopyCore::GetRealPath interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -929,17 +875,17 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_GetRealPath_001, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_GetRealPath_001";
 
-    string path = "./data/test/src/src.txt";
+    string path = "./data/unittest/CopyCoreTest/CopyCoreTest_GetRealPath_001";
 
     auto res = CopyCore::GetRealPath(path);
-    EXPECT_EQ(res, "data/test/src/src.txt");
+    EXPECT_EQ(res, "data/unittest/CopyCoreTest/CopyCoreTest_GetRealPath_001");
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_GetRealPath_001";
 }
 
 /**
  * @tc.name: CopyCoreTest_GetRealPath_002
- * @tc.desc: Test function of CopyCore::GetRealPath interface for TRUE.
+ * @tc.desc: Test function of CopyCore::GetRealPath interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -948,17 +894,17 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_GetRealPath_002, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_GetRealPath_002";
 
-    string path = "../data/test/src/src.txt";
+    string path = "/data/unittest/CopyCoreTest/../CopyCoreTest_GetRealPath_002";
 
     auto res = CopyCore::GetRealPath(path);
-    EXPECT_EQ(res, "data/test/src/src.txt");
+    EXPECT_EQ(res, "/data/unittest/CopyCoreTest_GetRealPath_002");
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_GetRealPath_002";
 }
 
 /**
  * @tc.name: CopyCoreTest_ExecCopy_001
- * @tc.desc: Test function of CopyCore::ExecCopy interface for FALSE.
+ * @tc.desc: Test function of CopyCore::ExecCopy interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -969,8 +915,8 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ExecCopy_001, testing::ext::TestSize.Level1)
 
     auto infos = make_shared<FsFileInfos>();
     infos->isFile = false;
-    infos->srcPath = "/data/test/src";
-    infos->destPath = "/data/test/dest";
+    infos->srcPath = srcDir;
+    infos->destPath = destDir;
 
     auto res = CopyCore::ExecCopy(infos);
     EXPECT_EQ(res, ERRNO_NOERR);
@@ -980,7 +926,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ExecCopy_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CopyCoreTest_CopyFile_001
- * @tc.desc: Test function of CopyCore::CopyFile interface for file copy FALSE.
+ * @tc.desc: Test function of CopyCore::CopyFile interface for FAILURE when coping datashare file.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -989,14 +935,15 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopyFile_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CopyCoreTest-begin CopyCoreTest_CopyFile_001";
 
-    string src = "datashare:///media/src_test.jpg";
-    string dest = "datashare:///media/dest_test.jpg";
+    string src = "datashare:///media/CopyCoreTest_CopyFile_001/src.jpg";
+    string dest = "datashare:///media/CopyCoreTest_CopyFile_001/dest.jpg";
     auto infos = make_shared<FsFileInfos>();
     infos->isFile = true;
     infos->srcPath = src;
     infos->destPath = dest;
 
     auto res = CopyCore::CopyFile(src, dest, infos);
+    EXPECT_EQ(res, ENOENT);
     EXPECT_EQ(res, errno);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CopyFile_001";
@@ -1004,7 +951,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopyFile_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CopyCoreTest_HandleProgress_001
- * @tc.desc: Test function of CopyCore::HandleProgress interface for FALSE.
+ * @tc.desc: Test function of CopyCore::HandleProgress interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -1015,8 +962,8 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_001, testing::ext::TestSize.L
 
     auto infos = make_shared<FsFileInfos>();
     infos->isFile = false;
-    infos->srcPath = "/data/test/src";
-    infos->destPath = "/data/test/dest";
+    infos->srcPath = srcFile;
+    infos->destPath = destFile;
 
     auto event = make_unique<inotify_event>();
     event->wd = EXPECTED_WD;
@@ -1033,7 +980,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_001, testing::ext::TestSize.L
 
 /**
  * @tc.name: CopyCoreTest_HandleProgress_002
- * @tc.desc: Test function of CopyCore::HandleProgress interface for FALSE.
+ * @tc.desc: Test function of CopyCore::HandleProgress interface for FAILURE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -1069,7 +1016,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_002, testing::ext::TestSize.L
 
 /**
  * @tc.name: CopyCoreTest_HandleProgress_003
- * @tc.desc: Test function of CopyCore::HandleProgress interface for FALSE.
+ * @tc.desc: Test function of CopyCore::HandleProgress interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -1105,7 +1052,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_HandleProgress_003, testing::ext::TestSize.L
 
 /**
  * @tc.name: CopyCoreTest_OnFileReceive_001
- * @tc.desc: Test function of CopyCore::OnFileReceive interface fails.
+ * @tc.desc: Test function of CopyCore::OnFileReceive interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

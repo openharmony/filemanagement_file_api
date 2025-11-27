@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
 #include "create_randomaccessfile_core.h"
+
+#include <fcntl.h>
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -24,29 +28,35 @@ using namespace std;
 
 class CreateRandomAccessFileCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/CreateRandomAccessFileCoreTest";
 };
 
-void CreateRandomAccessFileCoreTest::SetUpTestCase(void)
+void CreateRandomAccessFileCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "CreateRandomAccessFileCoreTest");
 }
 
-void CreateRandomAccessFileCoreTest::TearDownTestCase(void)
+void CreateRandomAccessFileCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void CreateRandomAccessFileCoreTest::SetUp(void)
+void CreateRandomAccessFileCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void CreateRandomAccessFileCoreTest::TearDown(void)
+void CreateRandomAccessFileCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -62,7 +72,7 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_001";
 
-    string path = "/test/path.txt";
+    string path = testDir + "/CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_001.txt";
     int32_t mode = -5;
     optional<RandomAccessFileOptions> options = nullopt;
 
@@ -84,7 +94,7 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_002";
 
-    string path = "/test/path.txt";
+    string path = testDir + "/CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_002.txt";
     int32_t mode = 0;
     RandomAccessFileOptions opts;
     opts.start = -1;
@@ -108,7 +118,7 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_003";
 
-    string path = "/test/path.txt";
+    string path = testDir + "/CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_003.txt";
     int32_t mode = 0;
     RandomAccessFileOptions opts;
     opts.start = 10;
@@ -177,11 +187,16 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_006";
 
-    int fd = 3;
+    string file = testDir + "/CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_006.txt";
+    int fd = open(file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    ASSERT_GT(fd, -1);
+
     optional<RandomAccessFileOptions> opts = nullopt;
 
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(fd, opts);
     EXPECT_EQ(res.IsSuccess(), true);
+
+    close(fd);
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_006";
 }

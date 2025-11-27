@@ -149,6 +149,7 @@ ohos_unittest("ani_file_fs_mock_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
     "${file_api_path}/interfaces/test/unittest/common_mock",
+    "${file_api_path}/interfaces/test/unittest/common_utils",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/mock",
   ]
@@ -164,6 +165,7 @@ ohos_unittest("ani_file_fs_mock_test") {
     "${file_api_path}/interfaces/test/unittest/common_mock/unistd_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/uv_err_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/uv_fs_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
     "mod_fs/class_file/fs_file_mock_test.cpp",
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_mock_test.cpp",
     "mod_fs/class_readeriterator/fs_reader_iterator_mock_test.cpp",
@@ -254,9 +256,11 @@ ohos_unittest("ani_file_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/common/obj",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
+    "${file_api_path}/interfaces/test/unittest/common_utils",
   ]
 
   sources = [
+    "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
     "mod_fs/class_atomicfile/fs_atomicfile_test.cpp",
     "mod_fs/class_file/fs_file_test.cpp",
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_test.cpp",
