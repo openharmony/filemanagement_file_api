@@ -100,10 +100,11 @@ void TaskSignal::SetFileInfoOfRemoteTask(const std::string &sessionName, const s
     filePath_ = filePath;
 }
 
-void TaskSignal::SetCopyTaskUri(const std::string &srcUri, const std::string &dstUri)
+void TaskSignal::SetCopyTaskUri(const std::string &srcUri, const std::string &dstUri, const std::string &srcPath)
 {
     srcUri_ = srcUri;
     dstUri_ = dstUri;
+    filePath_ = srcPath;
 }
 } // namespace ModuleTaskSignal
 } // namespace DistributedFS

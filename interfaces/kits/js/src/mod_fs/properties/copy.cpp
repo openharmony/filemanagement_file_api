@@ -378,7 +378,7 @@ int32_t Copy::ExecCopy(std::shared_ptr<FileInfos> infos, std::shared_ptr<JsCallb
     }
     if (infos->taskSignal != nullptr) {
         infos->taskSignal->MarkDfsTask();
-        infos->taskSignal->SetCopyTaskUri(infos->srcUri, infos->destUri);
+        infos->taskSignal->SetCopyTaskUri(infos->srcUri, infos->destUri, infos->srcPath);
     }
     LOGI("Copy begin");
     auto result = Storage::DistributedFile::FileCopyManager::GetInstance().Copy(infos->srcUri, infos->destUri,

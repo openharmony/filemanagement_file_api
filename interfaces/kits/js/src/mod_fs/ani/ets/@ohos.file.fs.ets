@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { BusinessError, AsyncCallback } from '@ohos.base';
+import { BusinessError, AsyncCallback, Callback } from '@ohos.base';
 import stream from '@ohos.util.stream';
 
 const UNKNOWN_ERR: int = 13900042
@@ -1314,6 +1314,14 @@ export class TaskSignal {
         reject(e as BusinessError);
       }
     });
+  }
+  onCancel(callback: Callback<string>): void {
+    this.onCancelResolve = callback;
+      try {
+        this.onCancelNative();
+      } catch (e: Error) {
+         console.error(`Failed to register cancel callback: ${e.message}`);
+      }
   }
 
 }

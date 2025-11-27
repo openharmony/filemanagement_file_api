@@ -37,7 +37,7 @@ public:
     void MarkRemoteTask();
     void SetFileInfoOfRemoteTask(const std::string &sessionName, const std::string &filePath);
     void MarkDfsTask();
-    void SetCopyTaskUri(const std::string &srcUri, const std::string &dstUri);
+    void SetCopyTaskUri(const std::string &srcUri, const std::string &dstUri, const std::string &srcPath);
     std::atomic_bool needCancel_{ false };
     std::atomic_bool remoteTask_{ false };
     std::atomic_bool dfsCopyTask_{ false };
