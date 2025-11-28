@@ -138,11 +138,19 @@ struct ConflictFilesInner : public BaseType {
     static const string ctorSig;
 };
 
+struct ReadStreamOptions : public BaseType {
+    static const Type classType;
+};
+
 struct ReadStreamOptionsInner : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorDesc;
     static const string ctorSig;
+};
+
+struct WriteStreamOptions : public BaseType {
+    static const Type classType;
 };
 
 struct WriteStreamOptionsInner : public BaseType {
@@ -258,12 +266,14 @@ struct ReadStream : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string ctorSig1;
 };
 
 struct WriteStream : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
+    static const string ctorSig1;
 };
 
 struct AtomicFile : public BaseType {

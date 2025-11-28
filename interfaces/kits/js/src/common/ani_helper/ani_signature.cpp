@@ -174,16 +174,34 @@ const Type FS::WatchEventInner::classType = Builder::BuildClass("@ohos.file.fs.W
 const string FS::WatchEventInner::classDesc = FS::WatchEventInner::classType.Descriptor();
 const string FS::WatchEventInner::ctorSig =
     Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::intType, BasicTypes::intType });
+// FS::ReadStreamOptions
+const Type FS::ReadStreamOptions::classType = Builder::BuildClass("@ohos.file.fs.ReadStreamOptions");
+// FS::WriteStreamOptions
+const Type FS::WriteStreamOptions::classType = Builder::BuildClass("@ohos.file.fs.WriteStreamOptions");
+// FS::ReadStreamOptionsInner
+const Type FS::ReadStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.ReadStreamOptionsInner");
+const string FS::ReadStreamOptionsInner::classDesc = FS::ReadStreamOptionsInner::classType.Descriptor();
+const string FS::ReadStreamOptionsInner::ctorSig = Builder::BuildSignatureDescriptor({});
+const string FS::ReadStreamOptionsInner::ctorDesc = Builder::BuildConstructorName();
+// FS::WriteStreamOptionsInner
+const Type FS::WriteStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.WriteStreamOptionsInner");
+const string FS::WriteStreamOptionsInner::classDesc = FS::WriteStreamOptionsInner::classType.Descriptor();
+const string FS::WriteStreamOptionsInner::ctorSig = Builder::BuildSignatureDescriptor({});
+const string FS::WriteStreamOptionsInner::ctorDesc = Builder::BuildConstructorName();
 // FS::ReadStream
 const Type FS::ReadStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.ReadStream");
 const string FS::ReadStream::classDesc = FS::ReadStream::classType.Descriptor();
 const string FS::ReadStream::ctorSig =
-    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::ReadStreamOptionsInner::classType });
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::ReadStreamOptions::classType });
+const string FS::ReadStream::ctorSig1 =
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 // FS::WriteStream
 const Type FS::WriteStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.WriteStream");
 const string FS::WriteStream::classDesc = FS::WriteStream::classType.Descriptor();
 const string FS::WriteStream::ctorSig =
-    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::WriteStreamOptionsInner::classType });
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::WriteStreamOptions::classType });
+const string FS::WriteStream::ctorSig1 =
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 // FS::AtomicFile
 const Type FS::AtomicFile::classType = Builder::BuildClass("@ohos.file.fs.fileIo.AtomicFile");
 const string FS::AtomicFile::classDesc = FS::AtomicFile::classType.Descriptor();
@@ -220,16 +238,6 @@ const Type HASH::HashStreamImpl::classType = Builder::BuildClass("@ohos.file.has
 const string HASH::HashStreamImpl::classDesc = HASH::HashStreamImpl::classType.Descriptor();
 const string HASH::HashStreamImpl::ctorSig = Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 const string HASH::HashStreamImpl::bindNativePtrSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
-// FS::ReadStreamOptionsInner
-const Type FS::ReadStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.ReadStreamOptionsInner");
-const string FS::ReadStreamOptionsInner::classDesc = FS::ReadStreamOptionsInner::classType.Descriptor();
-const string FS::ReadStreamOptionsInner::ctorSig = Builder::BuildSignatureDescriptor({});
-const string FS::ReadStreamOptionsInner::ctorDesc = Builder::BuildConstructorName();
-// FS::WriteStreamOptionsInner
-const Type FS::WriteStreamOptionsInner::classType = Builder::BuildClass("@ohos.file.fs.WriteStreamOptionsInner");
-const string FS::WriteStreamOptionsInner::classDesc = FS::WriteStreamOptionsInner::classType.Descriptor();
-const string FS::WriteStreamOptionsInner::ctorSig = Builder::BuildSignatureDescriptor({});
-const string FS::WriteStreamOptionsInner::ctorDesc = Builder::BuildConstructorName();
 // FS::CleanerImpl
 const Type FS::CleanerImpl::classType = Builder::BuildClass("@ohos.file.fs.Cleaner");
 const string FS::CleanerImpl::classDesc = FS::CleanerImpl::classType.Descriptor();
