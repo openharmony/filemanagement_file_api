@@ -145,7 +145,7 @@ static ani_object CreateReadStream(ani_env *env, ani_string filePath)
 
     ani_method ctor;
     tie(ret, ctor) = aniCache.GetMethod(env, FS::ReadStream::classDesc, FS::ReadStream::ctorDesc,
-        FS::ReadStream::ctorSig);
+        FS::ReadStream::ctorSig1);
     if (ret != ANI_OK) {
         return nullptr;
     }
@@ -169,7 +169,7 @@ static ani_object CreateWriteStream(ani_env *env, ani_string filePath)
 
     ani_method ctor;
     tie(ret, ctor) = aniCache.GetMethod(env, FS::WriteStream::classDesc, FS::WriteStream::ctorDesc,
-        FS::WriteStream::ctorSig);
+        FS::WriteStream::ctorSig1);
     if (ret != ANI_OK) {
         return nullptr;
     }
