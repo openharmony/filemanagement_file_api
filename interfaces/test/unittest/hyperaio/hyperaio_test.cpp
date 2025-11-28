@@ -81,7 +81,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_CtxInit_0001
-     * @tc.desc: Test function of CtxInit() interface for SUCCESS.
+     * @tc.desc: Test function of CtxInit() interface for FAILURE when callback is nullptr.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -133,7 +133,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_CtxInit_0004
-     * @tc.desc: Test function of CtxInit() interface for SUCCESS.
+     * @tc.desc: Test function of CtxInit() interface for FAILURE when init_flag is false.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -151,7 +151,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartOpenReqs_0000
-     * @tc.desc: Test function of StartOpenReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartOpenReqs() interface for FAILURE when OpenReqs is nullptr.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -170,7 +170,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartOpenReqs_0001
-     * @tc.desc: Test function of StartOpenReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartOpenReqs() interface for FAILURE when hyperAio is not initialized.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -253,7 +253,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartOpenReqs_0004
-     * @tc.desc: Test function of StartOpenReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartOpenReqs() interface for FAILURE when OpenReqs exceeds URING_QUEUE_SIZE.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -282,7 +282,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartOpenReqs_0005
-     * @tc.desc: Test function of StartOpenReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartOpenReqs() interface for FAILURE when OpenReqs is nullptr.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -298,7 +298,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartReadReqs_0000
-     * @tc.desc: Test function of StartReadReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartReadReqs() interface for FAILURE when ReadReqs is nullptr.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -316,7 +316,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartReadReqs_0001
-     * @tc.desc: Test function of StartReadReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartReadReqs() interface for FAILURE when hyperAio is not initialized.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -398,7 +398,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartReadReqs_0004
-     * @tc.desc: Test function of StartReadReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartReadReqs() interface for FAILURE when ReadReqs exceeds URING_QUEUE_SIZE.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -427,7 +427,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartReadReqs_0005
-     * @tc.desc: Test function of StartReadReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartReadReqs() interface for FAILURE when ReadReqs is nullptr.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -461,7 +461,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartCancelReqs_0001
-     * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartCancelReqs() interface for FAILURE when hyperAio is not initialized.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -539,7 +539,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartCancelReqs_0004
-     * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartCancelReqs() interface for FAILURE when CancelReqs exceeds URING_QUEUE_SIZE
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -565,7 +565,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_StartCancelReqs_0005
-     * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
+     * @tc.desc: Test function of StartCancelReqs() interface for FAILURE when CancelReqs is nullptr.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -637,7 +637,7 @@ namespace OHOS::HyperAio {
     
     /**
      * @tc.name: HyperAio_CheckParameter_0000
-     * @tc.desc: Test function of CheckParameter() interface for SUCCESS.
+     * @tc.desc: Test function of CheckParameter() interface for FAILURE when hyperAio is destroyed.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
@@ -655,8 +655,25 @@ namespace OHOS::HyperAio {
     }
 
     /**
+     * @tc.name: HyperAio_CheckParameter_0001
+     * @tc.desc: Test function of CheckParameter() interface for FAILURE when openReqs is zero.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     */
+    HWTEST_F(HyperAioTest, HyperAio_CheckParameter_0001, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CheckParameter_0001";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        OpenReqs openReqs = {0, nullptr};
+        int32_t result = hyperAio_->StartOpenReqs(&openReqs);
+        EXPECT_EQ(result, -EINVAL);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CheckParameter_0001";
+    }
+
+    /**
      * @tc.name: HyperAio_GetIoResult_0000
-     * @tc.desc: Test function of GetIoResult() interface for SUCCESS.
+     * @tc.desc: Test function of GetIoResult() interface for FAILURE when wait_flag is false.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
