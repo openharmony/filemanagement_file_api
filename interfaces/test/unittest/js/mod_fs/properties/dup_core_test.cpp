@@ -17,7 +17,11 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -26,35 +30,41 @@ using namespace std;
 
 class DupCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/DupCoreTest";
 };
 
-void DupCoreTest::SetUpTestCase(void)
+void DupCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "DupCoreTest");
 }
 
-void DupCoreTest::TearDownTestCase(void)
+void DupCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void DupCoreTest::SetUp(void)
+void DupCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void DupCoreTest::TearDown(void)
+void DupCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: DupCoreTest_DoDup_001
- * @tc.desc: Test function of DupCore::DoDup interface for FALSE.
+ * @tc.desc: Test function of DupCore::DoDup interface for FAILURE when fd is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -72,7 +82,7 @@ HWTEST_F(DupCoreTest, DupCoreTest_DoDup_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: DupCoreTest_DoDup_002
- * @tc.desc: Test function of DupCore::DoDup interface for FALSE.
+ * @tc.desc: Test function of DupCore::DoDup interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -80,13 +90,30 @@ HWTEST_F(DupCoreTest, DupCoreTest_DoDup_001, testing::ext::TestSize.Level1)
 HWTEST_F(DupCoreTest, DupCoreTest_DoDup_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NClassTest-begin DupCoreTest_DoDup_002";
-    int32_t fd = open("temp_file.txt", O_CREAT | O_RDWR, 0666);
-    ASSERT_NE(fd, -1);
-    close(fd);
+
+    string path = testDir + "/DupCoreTest_DoDup_002.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
+
+    int fd = open(path.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    ASSERT_GT(fd, -1);
 
     auto res = DupCore::DoDup(fd);
 
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_TRUE(res.IsSuccess());
+    close(fd);
+    if (res.IsSuccess()) {
+        auto *file = res.GetData().value();
+        ASSERT_NE(file, nullptr);
+        auto fdRes = file->GetFD();
+        EXPECT_TRUE(fdRes.IsSuccess());
+        if (fdRes.IsSuccess()) {
+            auto dupFd = fdRes.GetData().value();
+            close(dupFd);
+            EXPECT_NE(fd, dupFd);
+        }
+        delete file;
+        file = nullptr;
+    }
 
     GTEST_LOG_(INFO) << "NClassTest-end DupCoreTest_DoDup_002";
 }
