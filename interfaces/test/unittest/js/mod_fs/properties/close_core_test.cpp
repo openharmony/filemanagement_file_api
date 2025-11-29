@@ -13,122 +13,157 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "close_core.h"
-#include "open_core.h"
 
-#define FILE_PATH "/data/test/CloseCoreTest.txt"
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "open_core.h"
+#include "ut_file_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
+namespace Test {
 using namespace std;
 class CloseCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        int32_t fd = open(FILE_PATH, CREATE | O_RDWR, 0644);
-        if (fd < 0) {
-            GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
-            ASSERT_TRUE(false);
-        }
-        close(fd);
-    };
-    static void TearDownTestCase()
-    {
-        rmdir(FILE_PATH);
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/CloseCoreTest";
 };
 
+void CloseCoreTest::SetUpTestCase()
+{
+    GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "CloseCoreTest");
+}
+
+void CloseCoreTest::TearDownTestCase()
+{
+    GTEST_LOG_(INFO) << "TearDownTestCase";
+}
+
+void CloseCoreTest::SetUp()
+{
+    GTEST_LOG_(INFO) << "SetUp";
+    errno = 0; // Reset errno
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
+}
+
+void CloseCoreTest::TearDown()
+{
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
+    GTEST_LOG_(INFO) << "TearDown";
+}
+
 /**
- * @tc.name: DoCloseTestFd_0001
- * @tc.desc: Test function of DoClose() interface for invalid arguments.
+ * @tc.name: CloseCoreTest_DoClose_001
+ * @tc.desc: Test function of CloseCore::DoClose(fd) interface for FAILURE when fd is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CloseCoreTest, DoCloseTestFd_0001, testing::ext::TestSize.Level1)
+HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CloseCoreTest-begin DoCloseTestFd_0001";
+    GTEST_LOG_(INFO) << "CloseCoreTest-begin CloseCoreTest_DoClose_001";
     auto ret = CloseCore::DoClose(-1);
     EXPECT_FALSE(ret.IsSuccess());
 
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
 
-    GTEST_LOG_(INFO) << "CloseCoreTest-end DoCloseTestFd_0001";
+    GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_001";
 }
 
 /**
- * @tc.name: DoCloseTestFd_0002
- * @tc.desc: Test function of DoClose() interface for sucess.
+ * @tc.name: CloseCoreTest_DoClose_002
+ * @tc.desc: Test function of CloseCore::DoClose(fd) interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CloseCoreTest, DoCloseTestFd_0002, testing::ext::TestSize.Level1)
+HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CloseCoreTest-begin DoCloseTestFd_0002";
-    int32_t fd = open(FILE_PATH, O_RDWR);
-    if (fd < 0) {
-        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
+    GTEST_LOG_(INFO) << "CloseCoreTest-begin CloseCoreTest_DoClose_002";
+
+    auto path = testDir + "/CloseCoreTest_DoClose_002.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "CloseCoreTest_DoClose_002"));
+
+    int32_t fd1 = open(path.c_str(), O_RDWR);
+    if (fd1 < 0) {
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd1 << ", errno: " << errno;
         ASSERT_TRUE(false);
     }
 
-    auto ret = CloseCore::DoClose(fd);
+    auto ret = CloseCore::DoClose(fd1);
     EXPECT_TRUE(ret.IsSuccess());
 
-    int32_t fdEnd = open(FILE_PATH, O_RDWR);
-    if (fdEnd < 0) {
-        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fdEnd << ", errno: " << errno;
+    int32_t fd2 = open(path.c_str(), O_RDWR);
+    if (fd2 < 0) {
+        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd2 << ", errno: " << errno;
         ASSERT_TRUE(false);
     }
-    EXPECT_EQ(fdEnd, fd);
+    EXPECT_EQ(fd1, fd2);
 
-    ret = CloseCore::DoClose(fd);
+    ret = CloseCore::DoClose(fd2);
     EXPECT_TRUE(ret.IsSuccess());
 
-    GTEST_LOG_(INFO) << "CloseCoreTest-end DoCloseTestFd_0002";
+    GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_002";
 }
 
 /**
- * @tc.name: DoCloseTestFile_0001
- * @tc.desc: Test function of DoClose() interface for success.
+ * @tc.name: CloseCoreTest_DoClose_003
+ * @tc.desc: Test function of CloseCore::DoClose(file) interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CloseCoreTest, DoCloseTestFile_0001, testing::ext::TestSize.Level1)
+HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CloseCoreTest-begin DoCloseTestFile_0001";
-    auto fileRes = OpenCore::DoOpen(FILE_PATH);
+    GTEST_LOG_(INFO) << "CloseCoreTest-begin CloseCoreTest_DoClose_003";
+
+    auto path = testDir + "/CloseCoreTest_DoClose_003.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "CloseCoreTest_DoClose_003"));
+
+    auto fileRes = OpenCore::DoOpen(path);
     if (!fileRes.IsSuccess()) {
         ASSERT_TRUE(false);
     }
     FsFile *file = fileRes.GetData().value();
+    EXPECT_NE(file, nullptr);
+
     auto ret = CloseCore::DoClose(file);
     EXPECT_TRUE(ret.IsSuccess());
 
-    GTEST_LOG_(INFO) << "CloseCoreTest-end DoCloseTestFile_0001";
+    GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_003";
 }
 
 /**
- * @tc.name: DoCloseTestFile_0002
- * @tc.desc: Test function of DoClose() interface for failed get fd.
+ * @tc.name: CloseCoreTest_DoClose_004
+ * @tc.desc: Test function of CloseCore::DoClose(file) interface for FAILURE to get fd.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CloseCoreTest, DoCloseTestFile_0002, testing::ext::TestSize.Level1)
+HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CloseCoreTest-begin DoCloseTestFile_0002";
-    auto fileRes = OpenCore::DoOpen(FILE_PATH);
+    GTEST_LOG_(INFO) << "CloseCoreTest-begin CloseCoreTest_DoClose_004";
+
+    auto path = testDir + "/CloseCoreTest_DoClose_004.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "CloseCoreTest_DoClose_004"));
+
+    auto fileRes = OpenCore::DoOpen(path);
     if (!fileRes.IsSuccess()) {
         ASSERT_TRUE(false);
     }
     FsFile *file = fileRes.GetData().value();
+    EXPECT_NE(file, nullptr);
+
     auto ret = CloseCore::DoClose(file);
     EXPECT_TRUE(ret.IsSuccess());
 
@@ -137,9 +172,10 @@ HWTEST_F(CloseCoreTest, DoCloseTestFile_0002, testing::ext::TestSize.Level1)
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
 
-    GTEST_LOG_(INFO) << "CloseCoreTest-end DoCloseTestFile_0002";
+    GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_004";
 }
 
+} // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

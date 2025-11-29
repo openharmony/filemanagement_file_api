@@ -13,44 +13,68 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "create_stream_core.h"
 
-#define CREATE_STREAM_FILE_PATH "/data/test/CreateStreamCoreTest.txt"
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "ut_file_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
+namespace Test {
 using namespace std;
+
 class CreateStreamCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        int32_t fd = open(CREATE_STREAM_FILE_PATH, CREATE | O_RDWR, 0644);
-        if (fd < 0) {
-            GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
-            ASSERT_TRUE(false);
-        }
-        close(fd);
-    };
-    static void TearDownTestCase()
-    {
-        rmdir(CREATE_STREAM_FILE_PATH);
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/CreateStreamCoreTest";
 };
+
+void CreateStreamCoreTest::SetUpTestCase()
+{
+    GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "CreateStreamCoreTest");
+}
+
+void CreateStreamCoreTest::TearDownTestCase()
+{
+    GTEST_LOG_(INFO) << "TearDownTestCase";
+}
+
+void CreateStreamCoreTest::SetUp()
+{
+    GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
+}
+
+void CreateStreamCoreTest::TearDown()
+{
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
+    GTEST_LOG_(INFO) << "TearDown";
+}
+
 /**
- * @tc.name: DoCreateStreamTest_0001
- * @tc.desc: Test function of DoCreateStream() interface for success.
+ * @tc.name: CreateStreamCoreTest_DoCreateStream_001
+ * @tc.desc: Test function of CreateStreamCore::DoCreateStream interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CreateStreamCoreTest, DoCreateStreamTest_0001, testing::ext::TestSize.Level1)
+HWTEST_F(CreateStreamCoreTest, CreateStreamCoreTest_DoCreateStream_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CreateStreamCoreTest-begin DoCreateStreamTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(CREATE_STREAM_FILE_PATH, "r");
+    GTEST_LOG_(INFO) << "CreateStreamCoreTest-begin CreateStreamCoreTest_DoCreateStream_001";
+
+    string file = testDir + "/CreateStreamCoreTest_DoCreateStream_001.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(file, "content"));
+
+    auto ret = CreateStreamCore::DoCreateStream(file, "r");
     ASSERT_TRUE(ret.IsSuccess());
 
     auto stream = ret.GetData().value();
@@ -58,28 +82,32 @@ HWTEST_F(CreateStreamCoreTest, DoCreateStreamTest_0001, testing::ext::TestSize.L
     auto retClose = stream->Close();
     EXPECT_TRUE(retClose.IsSuccess());
 
-    GTEST_LOG_(INFO) << "CreateStreamCoreTest-end DoCreateStreamTest_0001";
+    GTEST_LOG_(INFO) << "CreateStreamCoreTest-end CreateStreamCoreTest_DoCreateStream_001";
 }
 
 /**
- * @tc.name: DoCreateStreamTest_0002
- * @tc.desc: Test function of DoCreateStream() interface for fail.
+ * @tc.name: CreateStreamCoreTest_DoCreateStream_002
+ * @tc.desc: Test function of CreateStreamCore::DoCreateStream interface for FAILURE when mode is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CreateStreamCoreTest, DoCreateStreamTest_0002, testing::ext::TestSize.Level1)
+HWTEST_F(CreateStreamCoreTest, CreateStreamCoreTest_DoCreateStream_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CreateStreamCoreTest-begin DoCreateStreamTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(CREATE_STREAM_FILE_PATH, "ssss");
+    GTEST_LOG_(INFO) << "CreateStreamCoreTest-begin CreateStreamCoreTest_DoCreateStream_002";
+
+    string file = testDir + "/CreateStreamCoreTest_DoCreateStream_002.txt";
+
+    auto ret = CreateStreamCore::DoCreateStream(file, "sss");
     EXPECT_FALSE(ret.IsSuccess());
 
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
 
-    GTEST_LOG_(INFO) << "CreateStreamCoreTest-end DoCreateStreamTest_0002";
+    GTEST_LOG_(INFO) << "CreateStreamCoreTest-end CreateStreamCoreTest_DoCreateStream_002";
 }
 
+} // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

@@ -28,32 +28,31 @@ using namespace std;
 
 class AccessCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    const string DISTRIBUTED_FILE_PREFIX = "/data/storage/el2/distributedfiles";
 };
 
-void AccessCoreMockTest::SetUpTestCase(void)
+void AccessCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "AccessCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void AccessCoreMockTest::TearDownTestCase(void)
+void AccessCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void AccessCoreMockTest::SetUp(void)
+void AccessCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void AccessCoreMockTest::TearDown(void)
+void AccessCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }

@@ -28,31 +28,31 @@ using namespace std;
 
 class CreateRandomAccessFileCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void CreateRandomAccessFileCoreMockTest::SetUpTestCase(void)
+void CreateRandomAccessFileCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "CreateRandomAccessFileCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void CreateRandomAccessFileCoreMockTest::TearDownTestCase(void)
+void CreateRandomAccessFileCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void CreateRandomAccessFileCoreMockTest::SetUp(void)
+void CreateRandomAccessFileCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void CreateRandomAccessFileCoreMockTest::TearDown(void)
+void CreateRandomAccessFileCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
@@ -69,7 +69,7 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_001";
 
-    string path = "/test/CreateRandomAccessFileCoreMockTest_path.txt";
+    string path = "fakePath/CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_001.txt";
     int32_t mode = 0;
     optional<RandomAccessFileOptions> options = nullopt;
 
@@ -96,7 +96,7 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
 {
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_002";
 
-    string path = "/test/CreateRandomAccessFileCoreMockTest_path.txt";
+    string path = "fakePath/CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_002.txt";
     int32_t mode = 0;
     RandomAccessFileOptions opts;
     opts.start = 0;

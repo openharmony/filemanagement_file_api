@@ -28,31 +28,31 @@ using namespace std;
 
 class LstatCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void LstatCoreMockTest::SetUpTestCase(void)
+void LstatCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "LstatCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void LstatCoreMockTest::TearDownTestCase(void)
+void LstatCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void LstatCoreMockTest::SetUp(void)
+void LstatCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void LstatCoreMockTest::TearDown(void)
+void LstatCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
@@ -71,7 +71,7 @@ HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_001, testing::ext::TestSiz
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
 
-    auto res = LstatCore::DoLstat("/data/test/lstat.txt");
+    auto res = LstatCore::DoLstat("fakePath/LstatCoreMockTest_DoLstat_001.txt");
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_FALSE(res.IsSuccess());
