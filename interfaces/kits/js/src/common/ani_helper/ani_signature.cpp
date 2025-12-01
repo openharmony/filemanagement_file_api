@@ -61,7 +61,7 @@ const string BuiltInTypes::Object::classDesc = BuiltInTypes::Object::classType.D
 const Type BuiltInTypes::String::classType = Builder::BuildClass("std.core.String");
 const string BuiltInTypes::String::classDesc = BuiltInTypes::String::classType.Descriptor();
 // BuiltInTypes::Array
-const Type BuiltInTypes::Array::classType = Builder::BuildClass("escompat.Array");
+const Type BuiltInTypes::Array::classType = Builder::BuildClass("std.core.Array");
 const string BuiltInTypes::Array::classDesc = BuiltInTypes::Array::classType.Descriptor();
 const string BuiltInTypes::Array::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
 const string BuiltInTypes::Array::getterDesc = "$_get";
