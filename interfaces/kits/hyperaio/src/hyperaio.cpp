@@ -191,7 +191,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         }
         struct OpenInfo *openInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(openInfo->userData));
-        io_uring_prep_openat(sqe, openInfo->dfd, static_cast<const char *>(openInfo->path), 
+        io_uring_prep_openat(sqe, openInfo->dfd, static_cast<const char *>(openInfo->path),
             openInfo->flags, openInfo->mode);
         HILOGD("[HyperAio] open flags = %{public}d, mode = %{public}u, userData = %{private}lu",
             openInfo->flags, openInfo->mode, openInfo->userData);
