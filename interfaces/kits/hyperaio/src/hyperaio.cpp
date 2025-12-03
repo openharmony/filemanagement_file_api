@@ -82,6 +82,7 @@ struct io_uring_sqe* GetSqeWithRetry(struct io_uring *ring)
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY));
     }
+    HILOGE("[HyperAio] get sqe failed");
     return nullptr;
 }
 
@@ -181,7 +182,6 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
-            HILOGE("[HyperAio] get sqe failed");
             for (; i < totalReqs; ++i) {
                 errorVec.push_back(req->reqs[i].userData);
             }
@@ -191,7 +191,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         }
         struct OpenInfo *openInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(openInfo->userData));
-        io_uring_prep_openat(sqe, openInfo->dfd, static_cast<const char *>(openInfo->path),
+        io_uring_prep_openat(sqe, openInfo->dfd, static_cast<const char *>(openInfo->path), 
             openInfo->flags, openInfo->mode);
         HILOGD("[HyperAio] open flags = %{public}d, mode = %{public}u, userData = %{private}lu",
             openInfo->flags, openInfo->mode, openInfo->userData);
@@ -234,7 +234,6 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
-            HILOGE("[HyperAio] get sqe failed");
             for (; i < totalReqs; ++i) {
                 errorVec.push_back(req->reqs[i].userData);
             }
@@ -286,7 +285,6 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
-            HILOGE("[HyperAio] get sqe failed");
             for (; i < totalReqs; ++i) {
                 errorVec.push_back(req->reqs[i].userData);
             }
