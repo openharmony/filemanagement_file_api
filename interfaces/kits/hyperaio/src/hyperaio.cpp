@@ -43,7 +43,7 @@ static bool HasAccessIouringPermission()
     const std::string permissionName = "ohos.permission.ALLOW_IOURING";
     int32_t res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenCaller, permissionName);
     if (res != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        HILOGE("[HyperAio]have no ALLOW_IOURING permission, res = %{public}d", res);
+        HILOGE("[HyperAio]have no ALLOW_IO_URING permission, res = %{public}d", res);
         return false;
     }
 

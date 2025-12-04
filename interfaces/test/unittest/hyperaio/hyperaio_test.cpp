@@ -753,7 +753,7 @@ namespace OHOS::HyperAio {
 
     /**
      * @tc.name: HyperAio_CheckParameter_0002
-     * @tc.desc: Test function of CheckParameter() interface for FAILURE when ctx is destroyed.
+     * @tc.desc: Test function of CheckParameter() interface for SUCCESS.
      * @tc.size: MEDIUM
      * @tc.type: FUNC
      * @tc.level Level 1
