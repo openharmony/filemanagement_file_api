@@ -43,7 +43,7 @@ static bool HasAccessIouringPermission()
     const std::string permissionName = "ohos.permission.ALLOW_IOURING";
     int32_t res = Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenCaller, permissionName);
     if (res != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        HILOGE("have no ALLOW_IOURING permission");
+        HILOGE("[HyperAio]have no ALLOW_IO_URING permission, res = %{public}d", res);
         return false;
     }
 
@@ -68,15 +68,21 @@ uint32_t HyperAio::SupportIouring()
 
 struct io_uring_sqe* GetSqeWithRetry(struct io_uring *ring)
 {
+    int ret = 0;
     struct io_uring_sqe *sqe;
     for (uint32_t i = 0; i < RETRIES; i++) {
         sqe = io_uring_get_sqe(ring);
         if (sqe != nullptr) {
             return sqe;
         }
-        io_uring_submit(ring);
+        
+        ret = io_uring_submit(ring);
+        if (ret < 0) {
+            HILOGE("[HyperAio] submit existing reqs failed , ret = %{public}d, times = %{public}d", ret, i);
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY));
     }
+    HILOGE("[HyperAio] get sqe failed");
     return nullptr;
 }
 
@@ -84,12 +90,12 @@ int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
 {
     HyperaioTrace trace("CtxInit");
     if (initialized_.load()) {
-        HILOGE("HyperAio has been initialized");
+        HILOGE("[HyperAio] HyperAio has been initialized");
         return EOK;
     }
 
     if (callBack == nullptr) {
-        HILOGE("callBack is null");
+        HILOGE("[HyperAio] callBack is null");
         return -EINVAL;
     }
 
@@ -99,7 +105,7 @@ int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
 
     int32_t ret = io_uring_queue_init(URING_QUEUE_SIZE, &pImpl_->uring_, 0);
     if (ret < 0) {
-        HILOGE("init io_uring failed, ret = %{public}d", ret);
+        HILOGE("[HyperAio] init io_uring failed, ret = %{public}d", ret);
         return ret;
     }
 
@@ -107,18 +113,18 @@ int32_t HyperAio::CtxInit(ProcessIoResultCallBack *callBack)
     stopThread_.store(false);
     harvestThread_ = std::thread(&HyperAio::HarvestRes, this);
     initialized_.store(true);
-    HILOGI("init hyperaio success");
+    HILOGI("[HyperAio] init hyperaio success");
     return EOK;
 }
 
 void HyperAio::HandleRequestError(std::vector<uint64_t> &errorVec, int32_t errorcode)
 {
     if (errorVec.empty()) {
-        HILOGE("errorVec is empty");
+        HILOGE("[HyperAio] errorVec is empty");
         return;
     }
     for (auto &userdata : errorVec) {
-        HILOGE("HandleRequestError: userData = %{private}lu", userdata);
+        HILOGE("[HyperAio] HandleRequestError: userData = %{private}lu", userdata);
         auto response = std::make_unique<IoResponse>(userdata, errorcode, 0);
         ioResultCallBack_(std::move(response));
     }
@@ -130,7 +136,7 @@ void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec)
     if (count > 0) {
         int32_t ret = io_uring_submit(&pImpl_->uring_);
         if (ret < 0) {
-            HILOGE("submit read reqs failed, ret = %{public}d", ret);
+            HILOGE("[HyperAio] submit remaining reqs failed, ret = %{public}d", ret);
             HandleRequestError(infoVec, ret);
         }
         readReqCount_ += count;
@@ -140,19 +146,19 @@ void HyperAio::HandleSqeError(uint32_t count, std::vector<uint64_t> &infoVec)
 int32_t HyperAio::CheckParameter(uint32_t reqNum)
 {
     if (pImpl_ == nullptr) {
-        HILOGE("pImpl is not initialized");
+        HILOGE("[HyperAio] pImpl is not initialized");
         return -EINVAL;
     }
     if (!initialized_.load()) {
-        HILOGE("HyperAio is not initialized");
+        HILOGE("[HyperAio] HyperAio is not initialized");
         return -EINVAL;
     }
     if (destroyed_.load()) {
-        HILOGE("HyperAio is destroyed");
+        HILOGE("[HyperAio] HyperAio is destroyed");
         return -EINVAL;
     }
     if (!ValidateReqNum(reqNum)) {
-        HILOGE("reqNum is out of range: %{public}u", reqNum);
+        HILOGE("[HyperAio] reqNum is out of range: %{public}u", reqNum);
         return -EINVAL;
     }
     return EOK;
@@ -161,7 +167,7 @@ int32_t HyperAio::CheckParameter(uint32_t reqNum)
 int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 {
     if (req == nullptr || req->reqs == nullptr) {
-        HILOGE("the request is empty");
+        HILOGE("[HyperAio] the request is empty");
         return -EINVAL;
     }
     int32_t ret = CheckParameter(req->reqNum);
@@ -176,7 +182,6 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
-            HILOGE("get sqe failed");
             for (; i < totalReqs; ++i) {
                 errorVec.push_back(req->reqs[i].userData);
             }
@@ -188,7 +193,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(openInfo->userData));
         io_uring_prep_openat(sqe, openInfo->dfd, static_cast<const char *>(openInfo->path),
             openInfo->flags, openInfo->mode);
-        HILOGD("open flags = %{public}d, mode = %{public}u, userData = %{private}lu",
+        HILOGD("[HyperAio] open flags = %{public}d, mode = %{public}u, userData = %{private}lu",
             openInfo->flags, openInfo->mode, openInfo->userData);
         HyperaioTrace trace("open flags:" + std::to_string(openInfo->flags) + "mode:" + std::to_string(openInfo->mode)
             + "userData:" + std::to_string(openInfo->userData));
@@ -197,9 +202,10 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
         if (count >= BATCH_SIZE || i == totalReqs - 1) {
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
-                HILOGE("submit open reqs failed, ret = %{public}d", ret);
+                HILOGE("[HyperAio] submit open reqs failed, ret = %{public}d", ret);
                 HandleRequestError(openInfoVec, -EBUSY);
             }
+            HILOGI("[HyperAio] submit open reqs success, num = %{public}d", count);
             openReqCount_ += count;
             std::unique_lock<std::mutex> lock(cqeMutex_);
             pendingCqeCount_ += count;
@@ -213,7 +219,7 @@ int32_t HyperAio::StartOpenReqs(OpenReqs *req)
 int32_t HyperAio::StartReadReqs(ReadReqs *req)
 {
     if (req == nullptr || req->reqs == nullptr) {
-        HILOGE("the request is empty");
+        HILOGE("[HyperAio] the request is empty");
         return -EINVAL;
     }
     int32_t ret = CheckParameter(req->reqNum);
@@ -228,7 +234,6 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
-            HILOGE("get sqe failed");
             for (; i < totalReqs; ++i) {
                 errorVec.push_back(req->reqs[i].userData);
             }
@@ -239,7 +244,7 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         struct ReadInfo *readInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(readInfo->userData));
         io_uring_prep_read(sqe, readInfo->fd, readInfo->buf, readInfo->len, readInfo->offset);
-        HILOGD("read len = %{public}u, offset = %{public}lu, userData = %{private}lu",
+        HILOGD("[HyperAio] read len = %{public}u, offset = %{public}lu, userData = %{private}lu",
             readInfo->len, readInfo->offset, readInfo->userData);
         HyperaioTrace trace("read len:" + std::to_string(readInfo->len) + "offset:" + std::to_string(readInfo->offset)
             + "userData:" + std::to_string(readInfo->userData));
@@ -248,9 +253,10 @@ int32_t HyperAio::StartReadReqs(ReadReqs *req)
         if (count >= BATCH_SIZE || i == totalReqs - 1) {
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
-                HILOGE("submit read reqs failed, ret = %{public}d", ret);
+                HILOGE("[HyperAio] submit read reqs failed, ret = %{public}d", ret);
                 HandleRequestError(readInfoVec, -EBUSY);
             }
+            HILOGI("[HyperAio] submit read reqs success, num = %{public}d", count);
             readReqCount_ += count;
             std::unique_lock<std::mutex> lock(cqeMutex_);
             pendingCqeCount_ += count;
@@ -279,7 +285,6 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
     for (uint32_t i = 0; i < totalReqs; i++) {
         struct io_uring_sqe *sqe = GetSqeWithRetry(&pImpl_->uring_);
         if (sqe == nullptr) {
-            HILOGE("get sqe failed");
             for (; i < totalReqs; ++i) {
                 errorVec.push_back(req->reqs[i].userData);
             }
@@ -290,7 +295,7 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         struct CancelInfo *cancelInfo = &req->reqs[i];
         io_uring_sqe_set_data(sqe, reinterpret_cast<void *>(cancelInfo->userData));
         io_uring_prep_cancel(sqe, reinterpret_cast<void *>(cancelInfo->targetUserData), 0);
-        HILOGD("cancel userData = %{private}lu,  targetUserData = %{private}lu",
+        HILOGD("[HyperAio] cancel userData = %{private}lu,  targetUserData = %{private}lu",
             cancelInfo->userData, cancelInfo->targetUserData);
         HyperaioTrace trace("cancel userData:" + std::to_string(cancelInfo->userData)
             + "targetUserData:" + std::to_string(cancelInfo->targetUserData));
@@ -299,9 +304,10 @@ int32_t HyperAio::StartCancelReqs(CancelReqs *req)
         if (count >= BATCH_SIZE || i == totalReqs - 1) {
             int32_t ret = io_uring_submit(&pImpl_->uring_);
             if (ret < 0) {
-                HILOGE("submit cancel reqs failed, ret = %{public}d", ret);
+                HILOGE("[HyperAio] submit cancel reqs failed, ret = %{public}d", ret);
                 HandleRequestError(cancelInfoVec, -EBUSY);
             }
+            HILOGI("[HyperAio] submit cancel reqs success, num = %{public}d", count);
             cancelReqCount_ += count;
             std::unique_lock<std::mutex> lock(cqeMutex_);
             pendingCqeCount_ += count;
@@ -318,12 +324,12 @@ void HyperAio::GetIoResult()
     int32_t ret = io_uring_wait_cqe(&pImpl_->uring_, &cqe);
     pendingCqeCount_--;
     if (ret < 0 || cqe == nullptr) {
-        HILOGI("wait cqe failed, ret = %{public}d", ret);
+        HILOGE("[HyperAio] wait cqe failed, ret = %{public}d", ret);
         return;
     }
     cqeCount_++;
     if (cqe->res < 0) {
-        HILOGI("cqe failed, cqe->res = %{public}d", cqe->res);
+        HILOGE("[HyperAio] cqe failed, cqe->res = %{public}d", cqe->res);
     }
     auto response = std::make_unique<IoResponse>(cqe->user_data, cqe->res, cqe->flags);
     HyperaioTrace trace("harvest: userdata " + std::to_string(cqe->user_data)
@@ -337,9 +343,10 @@ void HyperAio::GetIoResult()
 void HyperAio::HarvestRes()
 {
     if (pImpl_ == nullptr) {
-        HILOGI("pImpl is null");
+        HILOGE("[HyperAio] pImpl is null");
         return;
     }
+    HILOGI("[HyperAio] harvest thread started");
 
     while (true) {
         std::unique_lock<std::mutex> lock(cqeMutex_);
@@ -351,20 +358,21 @@ void HyperAio::HarvestRes()
             break;
         }
     }
-    HILOGI("exit harvest thread");
+    HILOGI("[HyperAio] exit harvest thread");
 }
 
 int32_t HyperAio::DestroyCtx()
 {
-    HILOGI("openReqCount = %{public}u, readReqCount = %{public}u, cancelReqCount = %{public}u, cqeCount = %{public}u",
+    HILOGI("[HyperAio] openReqCount = %{public}u, readReqCount = %{public}u, "
+        "cancelReqCount = %{public}u, cqeCount = %{public}u",
         openReqCount_.load(), readReqCount_.load(), cancelReqCount_.load(), cqeCount_.load());
     if (!initialized_.load()) {
-        HILOGI("not initialized");
+        HILOGE("[HyperAio] not initialized");
         return EOK;
     }
     destroyed_.store(true);
     if (harvestThread_.joinable()) {
-        HILOGI("start harvest thread join");
+        HILOGI("[HyperAio] start harvest thread join");
         {
             std::unique_lock<std::mutex> lock(cqeMutex_);
             stopThread_.store(true);
@@ -372,7 +380,7 @@ int32_t HyperAio::DestroyCtx()
         }
         harvestThread_.join();
         // This log is only printed after join() completes successfully
-        HILOGI("join success");
+        HILOGI("[HyperAio] join success");
     }
 
     if (pImpl_ != nullptr) {
@@ -380,7 +388,7 @@ int32_t HyperAio::DestroyCtx()
     }
 
     initialized_.store(false);
-    HILOGI("destroy hyperaio success");
+    HILOGI("[HyperAio] destroy hyperaio success");
     return EOK;
 }
 #else

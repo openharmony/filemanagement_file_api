@@ -296,6 +296,30 @@ namespace OHOS::HyperAio {
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0005";
     }
 
+     /**
+     * @tc.name: HyperAio_StartOpenReqs_0006
+     * @tc.desc: Test function of StartOpenReqs() interface for getting sqe success but submit failed.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartOpenReqs_0006, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartOpenReqs_0006";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
+        OpenReqs openReqs = {1, &openInfo};
+        submit_flag = false;
+        result = hyperAio_->StartOpenReqs(&openReqs);
+        EXPECT_EQ(result, 0);
+        submit_flag = true;
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartOpenReqs_0006";
+    }
+
     /**
      * @tc.name: HyperAio_StartReadReqs_0000
      * @tc.desc: Test function of StartReadReqs() interface for FAILURE when ReadReqs is nullptr.
@@ -442,6 +466,30 @@ namespace OHOS::HyperAio {
     }
 
     /**
+     * @tc.name: HyperAio_StartReadReqs_0006
+     * @tc.desc: Test function of StartReadReqs() interface for getting sqe success but submit failed.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartReadReqs_0006, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartReadReqs_0006";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        ReadInfo readInfo = {0, len, 0, nullptr, userData};
+        ReadReqs readReqs = {1, &readInfo};
+        submit_flag = false;
+        result = hyperAio_->StartReadReqs(&readReqs);
+        EXPECT_EQ(result, 0);
+        submit_flag = true;
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartReadReqs_0006";
+    }
+
+    /**
      * @tc.name: HyperAio_StartCancelReqs_0000
      * @tc.desc: Test function of StartCancelReqs() interface for SUCCESS.
      * @tc.size: MEDIUM
@@ -580,6 +628,30 @@ namespace OHOS::HyperAio {
     }
 
     /**
+     * @tc.name: HyperAio_StartCancelReqs_0006
+     * @tc.desc: Test function of StartCancelReqs() interface for getting sqe success but submit failed.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     */
+    HWTEST_F(HyperAioTest, HyperAio_StartCancelReqs_0006, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_StartCancelReqs_0006";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        CancelInfo cancelInfo = {userData, 0};
+        CancelReqs cancelReqs = {1, &cancelInfo};
+        submit_flag = false;
+        result = hyperAio_->StartCancelReqs(&cancelReqs);
+        EXPECT_EQ(result, 0);
+        submit_flag = true;
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_StartCancelReqs_0006";
+    }
+
+    /**
      * @tc.name: HyperAio_HarvestRes_0000
      * @tc.desc: Test function of HarvestRes() interface for SUCCESS.
      * @tc.size: MEDIUM
@@ -646,11 +718,15 @@ namespace OHOS::HyperAio {
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CheckParameter_0000";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
         hyperAio_->destroyed_.store(true);
         OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
         OpenReqs openReqs = {1, &openInfo};
-        int32_t result = hyperAio_->StartOpenReqs(&openReqs);
+        result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, -EINVAL);
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CheckParameter_0000";
     }
 
@@ -665,10 +741,36 @@ namespace OHOS::HyperAio {
     {
         GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CheckParameter_0001";
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
         OpenReqs openReqs = {0, nullptr};
-        int32_t result = hyperAio_->StartOpenReqs(&openReqs);
+        result = hyperAio_->StartOpenReqs(&openReqs);
         EXPECT_EQ(result, -EINVAL);
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CheckParameter_0001";
+    }
+
+    /**
+     * @tc.name: HyperAio_CheckParameter_0002
+     * @tc.desc: Test function of CheckParameter() interface for SUCCESS.
+     * @tc.size: MEDIUM
+     * @tc.type: FUNC
+     * @tc.level Level 1
+     */
+    HWTEST_F(HyperAioTest, HyperAio_CheckParameter_0002, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "HyperAioTest-begin HyperAio_CheckParameter_0002";
+        std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
+        int32_t result = hyperAio_->CtxInit(&callBack);
+        EXPECT_EQ(result, 0);
+        OpenInfo openInfo = {0, O_RDWR, 0, nullptr, userData};
+        OpenReqs openReqs = {1, &openInfo};
+        result = hyperAio_->StartOpenReqs(&openReqs);
+        EXPECT_EQ(result, 0);
+        result = hyperAio_->DestroyCtx();
+        EXPECT_EQ(result, 0);
+        GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_CheckParameter_0002";
     }
 
     /**
