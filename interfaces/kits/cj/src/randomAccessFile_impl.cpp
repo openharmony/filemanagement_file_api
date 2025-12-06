@@ -73,15 +73,27 @@ int32_t RandomAccessFileImpl::GetFd()
 }
 int64_t RandomAccessFileImpl::GetFPointer()
 {
+    if (entity_ == nullptr) {
+        LOGE("Failed to get entity.");
+        return 0;
+    }
     return entity_->filePointer;
 }
 void RandomAccessFileImpl::SetFilePointerSync(int64_t fp)
 {
+    if (entity_ == nullptr) {
+        LOGE("Failed to get entity.");
+        return;
+    }
     entity_->filePointer = fp;
     return;
 }
 void RandomAccessFileImpl::CloseSync()
 {
+    if (entity_ == nullptr) {
+        LOGE("Failed to get entity.");
+        return;
+    }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> close_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!close_req) {
@@ -97,6 +109,10 @@ void RandomAccessFileImpl::CloseSync()
 }
 std::tuple<int32_t, int64_t> RandomAccessFileImpl::WriteSync(char* buf, size_t len, int64_t offset)
 {
+    if (entity_ == nullptr) {
+        LOGE("Failed to get entity.");
+        return {EIO, 0};
+    }
     int64_t newOffset = CalculateOffset(offset, entity_->filePointer);
     int writeCode = DoWriteRAF(buf, len, entity_->fd.get()->GetFD(), newOffset);
     if (writeCode < 0) {
@@ -108,6 +124,10 @@ std::tuple<int32_t, int64_t> RandomAccessFileImpl::WriteSync(char* buf, size_t l
 }
 std::tuple<int32_t, int64_t> RandomAccessFileImpl::ReadSync(char* buf, size_t len, int64_t offset)
 {
+    if (entity_ == nullptr) {
+        LOGE("Failed to get entity.");
+        return {EIO, 0};
+    }
     int64_t newOffset = CalculateOffset(offset, entity_->filePointer);
     int readCode = DoReadRAF(buf, len, entity_->fd.get()->GetFD(), newOffset);
     if (readCode < 0) {
