@@ -65,7 +65,7 @@ const string BuiltInTypes::Object::classDesc = BuiltInTypes::Object::classType.D
 const Type BuiltInTypes::String::classType = Builder::BuildClass("std.core.String");
 const string BuiltInTypes::String::classDesc = BuiltInTypes::String::classType.Descriptor();
 // BuiltInTypes::Array
-const Type BuiltInTypes::Array::classType = Builder::BuildClass("escompat.Array");
+const Type BuiltInTypes::Array::classType = Builder::BuildClass("std.core.Array");
 const string BuiltInTypes::Array::classDesc = BuiltInTypes::Array::classType.Descriptor();
 const string BuiltInTypes::Array::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
 const string BuiltInTypes::Array::getterDesc = "$_get";
@@ -75,11 +75,11 @@ const string BuiltInTypes::Array::objectGetterSig =
 const string BuiltInTypes::Array::objectSetterSig =
     Builder::BuildSignatureDescriptor({ BasicTypes::intType, BuiltInTypes::objectType });
 // BuiltInTypes::ArrayBuffer
-const Type BuiltInTypes::ArrayBuffer::classType = Builder::BuildClass("escompat.ArrayBuffer");
+const Type BuiltInTypes::ArrayBuffer::classType = Builder::BuildClass("std.core.ArrayBuffer");
 const string BuiltInTypes::ArrayBuffer::classDesc = BuiltInTypes::ArrayBuffer::classType.Descriptor();
 const string BuiltInTypes::ArrayBuffer::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
 // BuiltInTypes::BigInt
-const Type BuiltInTypes::BigInt::classType = Builder::BuildClass("escompat.BigInt");
+const Type BuiltInTypes::BigInt::classType = Builder::BuildClass("std.core.BigInt");
 const string BuiltInTypes::BigInt::classDesc = BuiltInTypes::BigInt::classType.Descriptor();
 const string BuiltInTypes::BigInt::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
 // BuiltInTypes::BusinessError

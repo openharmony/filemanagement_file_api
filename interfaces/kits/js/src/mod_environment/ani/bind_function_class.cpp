@@ -41,7 +41,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function {
             "getUserHomeDirSync", nullptr, reinterpret_cast<void *>(EnvironmentAni::GetUserHomeDirSync) },
     };
-    return BindClass(env, classDesc, methods);
+    return BindClassStaticMethods(env, classDesc, methods);
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)

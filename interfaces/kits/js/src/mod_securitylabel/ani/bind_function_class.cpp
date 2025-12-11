@@ -30,7 +30,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function {
             "getSecurityLabelSync", nullptr, reinterpret_cast<void *>(SecurityLabelAni::GetSecurityLabelSync) },
     };
-    return BindClass(env, classDesc, methods);
+    return BindClassStaticMethods(env, classDesc, methods);
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
