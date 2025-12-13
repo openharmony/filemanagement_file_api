@@ -15,9 +15,6 @@
 
 #include "fdatasync_core.h"
 
-#include <filesystem>
-#include <fstream>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
@@ -31,31 +28,31 @@ using namespace std;
 
 class FDataSyncCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void FDataSyncCoreMockTest::SetUpTestCase(void)
+void FDataSyncCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "FDataSyncCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void FDataSyncCoreMockTest::TearDownTestCase(void)
+void FDataSyncCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void FDataSyncCoreMockTest::SetUp(void)
+void FDataSyncCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void FDataSyncCoreMockTest::TearDown(void)
+void FDataSyncCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }

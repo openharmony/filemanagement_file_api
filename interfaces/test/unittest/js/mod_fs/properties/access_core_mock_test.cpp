@@ -59,7 +59,7 @@ void AccessCoreMockTest::TearDown()
 
 /**
  * @tc.name: AccessCoreMockTest_DoAccess_001
- * @tc.desc: Test function of AccessCore::ValidAccessArgs interface for FALSE.
+ * @tc.desc: Test function of AccessCore::ValidAccessArgs interface for FAILURE when uv_fs_access fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -68,7 +68,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_001, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "NClassTest-begin AccessCoreMockTest_DoAccess_001";
 
-    std::string path = "TEST";
+    std::string path = "fakePath/AccessCoreMockTest_DoAccess_001.txt";
     std::optional<AccessModeType> mode;
 
     auto uvMock = UvFsMock::GetMock();
@@ -93,7 +93,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_002, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "NClassTest-begin AccessCoreMockTest_DoAccess_002";
 
-    std::string path = "TEST";
+    std::string path = "fakePath/AccessCoreMockTest_DoAccess_002.txt";
     std::optional<AccessModeType> mode;
 
     auto uvMock = UvFsMock::GetMock();

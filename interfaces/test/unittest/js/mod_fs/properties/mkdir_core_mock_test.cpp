@@ -15,13 +15,11 @@
 
 #include "mkdir_core.h"
 
-#include <filesystem>
-#include <fstream>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
+#include "ut_file_utils.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -31,164 +29,162 @@ using namespace std;
 
 class MkdirCoreMockTest : public testing::Test {
 public:
-    static filesystem::path tempFilePath;
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/MkdirCoreMockTest";
 };
 
-filesystem::path MkdirCoreMockTest::tempFilePath;
-
-void MkdirCoreMockTest::SetUpTestCase(void)
+void MkdirCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "MkdirCoreMockTest");
-    tempFilePath = filesystem::temp_directory_path() / "mkdir_test";
-    std::filesystem::create_directory(tempFilePath);
     UvFsMock::EnableMock();
 }
 
-void MkdirCoreMockTest::TearDownTestCase(void)
+void MkdirCoreMockTest::TearDownTestCase()
 {
-    filesystem::remove_all(tempFilePath);
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void MkdirCoreMockTest::SetUp(void)
+void MkdirCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void MkdirCoreMockTest::TearDown(void)
+void MkdirCoreMockTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
- * @tc.name: MkdirCoreMockTest_DoMkdir_0001
- * @tc.desc: Test function of DoMkdir() interface for SUCCESS.
+ * @tc.name: MkdirCoreMockTest_DoMkdir_001
+ * @tc.desc: Test function of MkdirCore::DoMkdir interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0001, testing::ext::TestSize.Level1)
+HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0001";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_001";
 
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_mkdir(_, _, _, _, _)).WillOnce(Return(0));
 
-    string path = tempFilePath.string() + "/test01";
+    string path = testDir + "/MkdirCoreMockTest_DoMkdir_001";
     auto ret = MkdirCore::DoMkdir(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_0001";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_001";
 }
 
 /**
- * @tc.name: MkdirCoreMockTest_DoMkdir_0002
- * @tc.desc: Test function of DoMkdir() interface for SUCCESS.
+ * @tc.name: MkdirCoreMockTest_DoMkdir_002
+ * @tc.desc: Test function of MkdirCore::DoMkdir interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0002, testing::ext::TestSize.Level1)
+HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0002";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_002";
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(-2)).WillOnce(Return(0));
+    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).Times(2).WillOnce(Return(-ENOENT)).WillOnce(Return(ERRNO_NOERR));
 
-    string path = tempFilePath.string() + "/test02/testDir";
+    string path = testDir + "/MkdirCoreMockTest_DoMkdir_002";
     auto ret = MkdirCore::DoMkdir(path, true);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), true);
 
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_0002";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_002";
 }
 
 /**
- * @tc.name: MkdirCoreMockTest_DoMkdir_0003
- * @tc.desc: Test function of DoMkdir() interface is FAILED for uv_fs_mkdir return 1.
+ * @tc.name: MkdirCoreMockTest_DoMkdir_003
+ * @tc.desc: Test function of MkdirCore::DoMkdir interface for FAILURE when uv_fs_mkdir fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0003, testing::ext::TestSize.Level1)
+HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0003";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_003";
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_mkdir(_, _, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_mkdir(_, _, _, _, _)).WillOnce(Return(EEXIST));
 
-    string path = tempFilePath.string() + "/test03";
+    string path = testDir + "/MkdirCoreMockTest_DoMkdir_003";
     auto ret = MkdirCore::DoMkdir(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), false);
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900015);
+    EXPECT_EQ(err.GetErrMsg(), "File exists");
 
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_0003";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_003";
 }
 
 /**
- * @tc.name: MkdirCoreMockTest_DoMkdir_0004
- * @tc.desc: Test function of DoMkdir() interface is FAILED for file exists.
+ * @tc.name: MkdirCoreMockTest_DoMkdir_004
+ * @tc.desc: Test function of MkdirCore::DoMkdir interface for FAILURE when file exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0004, testing::ext::TestSize.Level1)
+HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0004";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_004";
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(ERRNO_NOERR));
 
-    string path = "/";
+    string path = testDir + "/MkdirCoreMockTest_DoMkdir_004";
     auto ret = MkdirCore::DoMkdir(path, true);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), false);
     auto err = ret.GetError();
-    int errCode = err.GetErrNo();
-    EXPECT_EQ(errCode, 13900015);
-    auto msg = err.GetErrMsg();
-    EXPECT_EQ(msg, "File exists");
+    EXPECT_EQ(err.GetErrNo(), 13900015);
+    EXPECT_EQ(err.GetErrMsg(), "File exists");
 
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_0004";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_004";
 }
 
 /**
- * @tc.name: MkdirCoreMockTest_DoMkdir_0005
- * @tc.desc: Test function of DoMkdir() interface is FAILED for no such file or directory.
+ * @tc.name: MkdirCoreMockTest_DoMkdir_005
+ * @tc.desc: Test function of MkdirCore::DoMkdir interface for FAILURE when I/O error.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_0005, testing::ext::TestSize.Level1)
+HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_005, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_0005";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-begin MkdirCoreMockTest_DoMkdir_005";
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(2));
+    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(EIO));
 
-    string path = "";
+    string path = testDir + "/MkdirCoreMockTest_DoMkdir_005";
     auto ret = MkdirCore::DoMkdir(path, true);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(ret.IsSuccess(), false);
     auto err = ret.GetError();
-    int errCode = err.GetErrNo();
-    EXPECT_EQ(errCode, 13900002);
-    auto msg = err.GetErrMsg();
-    EXPECT_EQ(msg, "No such file or directory");
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
-    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_0005";
+    GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_005";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

@@ -29,13 +29,13 @@ using namespace std;
 
 class DupCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void DupCoreMockTest::SetUpTestCase(void)
+void DupCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "DupCoreMockTest");
@@ -43,19 +43,19 @@ void DupCoreMockTest::SetUpTestCase(void)
     UnistdMock::EnableMock();
 }
 
-void DupCoreMockTest::TearDownTestCase(void)
+void DupCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     UnistdMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void DupCoreMockTest::SetUp(void)
+void DupCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void DupCoreMockTest::TearDown(void)
+void DupCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }

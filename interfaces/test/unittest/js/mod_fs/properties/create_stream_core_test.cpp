@@ -103,6 +103,7 @@ HWTEST_F(CreateStreamCoreTest, CreateStreamCoreTest_DoCreateStream_002, testing:
 
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "CreateStreamCoreTest-end CreateStreamCoreTest_DoCreateStream_002";
 }
