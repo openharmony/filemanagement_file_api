@@ -76,6 +76,7 @@ HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_001, testing::ext::TestSize.Level1
 
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_001";
 }
@@ -171,6 +172,7 @@ HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_004, testing::ext::TestSize.Level1
     EXPECT_FALSE(ret.IsSuccess());
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_004";
 }

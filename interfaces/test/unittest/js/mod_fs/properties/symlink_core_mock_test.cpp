@@ -28,38 +28,38 @@ using namespace std;
 
 class SymlinkCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void SymlinkCoreMockTest::SetUpTestCase(void)
+void SymlinkCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "SymlinkCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void SymlinkCoreMockTest::TearDownTestCase(void)
+void SymlinkCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void SymlinkCoreMockTest::SetUp(void)
+void SymlinkCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void SymlinkCoreMockTest::TearDown(void)
+void SymlinkCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: SymlinkCoreMockTest_DoSymlink_001
- * @tc.desc: Test function of SymlinkCore::DoSymlink interface for FALSE.
+ * @tc.desc: Test function of SymlinkCore::DoSymlink interface for FAILURE when uv_fs_symlink fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -68,15 +68,19 @@ HWTEST_F(SymlinkCoreMockTest, SymlinkCoreMockTest_DoSymlink_001, testing::ext::T
 {
     GTEST_LOG_(INFO) << "SymlinkCore-begin SymlinkCoreMockTest_DoSymlink_001";
 
-    string target;
-    string srcPath;
+    string target = "fakePath/SymlinkCoreMockTest_DoSymlink_001.txt";
+    string linkPath = "fakePath/SymlinkCoreMockTest_DoSymlink_001_link.txt";
+
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_symlink(_, _, _, _, _, _)).WillOnce(Return(-1));
 
-    auto res = SymlinkCore::DoSymlink(target, srcPath);
+    auto res = SymlinkCore::DoSymlink(target, linkPath);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "SymlinkCore-end SymlinkCoreMockTest_DoSymlink_001";
 }
@@ -92,15 +96,16 @@ HWTEST_F(SymlinkCoreMockTest, SymlinkCoreMockTest_DoSymlink_002, testing::ext::T
 {
     GTEST_LOG_(INFO) << "SymlinkCore-begin SymlinkCoreMockTest_DoSymlink_002";
 
-    string target;
-    string srcPath;
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_symlink(_, _, _, _, _, _)).WillOnce(Return(1));
+    string target = "fakePath/SymlinkCoreMockTest_DoSymlink_002.txt";
+    string linkPath = "fakePath/SymlinkCoreMockTest_DoSymlink_002_link.txt";
 
-    auto res = SymlinkCore::DoSymlink(target, srcPath);
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_symlink(_, _, _, _, _, _)).WillOnce(Return(0));
+
+    auto res = SymlinkCore::DoSymlink(target, linkPath);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "SymlinkCore-end SymlinkCoreMockTest_DoSymlink_002";
 }

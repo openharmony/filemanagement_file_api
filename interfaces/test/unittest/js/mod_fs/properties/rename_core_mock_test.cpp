@@ -28,38 +28,38 @@ using namespace std;
 
 class RenameCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void RenameCoreMockTest::SetUpTestCase(void)
+void RenameCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "RenameCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void RenameCoreMockTest::TearDownTestCase(void)
+void RenameCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void RenameCoreMockTest::SetUp(void)
+void RenameCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void RenameCoreMockTest::TearDown(void)
+void RenameCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: RenameCoreMockTest_DoRename_001
- * @tc.desc: Test function of RenameCore::DoRename interface for FALSE.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE when uv_fs_rename fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -67,16 +67,20 @@ void RenameCoreMockTest::TearDown(void)
 HWTEST_F(RenameCoreMockTest, RenameCoreMockTest_DoRename_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenameCoreMockTest-begin RenameCoreMockTest_DoRename_001";
-    string src;
-    string dest;
+
+    string src = "fakePath/RenameCoreMockTest_DoRename_001_src.txt";
+    string dest = "fakePath/RenameCoreMockTest_DoRename_001_dest.txt";
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(-EIO));
 
     auto res = RenameCore::DoRename(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "RenameCoreMockTest-end RenameCoreMockTest_DoRename_001";
 }
@@ -91,16 +95,17 @@ HWTEST_F(RenameCoreMockTest, RenameCoreMockTest_DoRename_001, testing::ext::Test
 HWTEST_F(RenameCoreMockTest, RenameCoreMockTest_DoRename_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenameCoreMockTest-begin RenameCoreMockTest_DoRename_002";
-    string src;
-    string dest;
+
+    string src = "fakePath/RenameCoreMockTest_DoRename_002_src.txt";
+    string dest = "fakePath/RenameCoreMockTest_DoRename_002_dest.txt";
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_rename(_, _, _, _, _)).WillOnce(Return(0));
 
     auto res = RenameCore::DoRename(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "RenameCoreMockTest-end RenameCoreMockTest_DoRename_002";
 }

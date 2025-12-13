@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
 #include "lstat_core.h"
+
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -24,36 +27,35 @@ using namespace std;
 
 class LstatCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/LstatCoreTest";
 };
 
-void LstatCoreTest::SetUpTestCase(void)
+void LstatCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    int32_t fd = open("/data/test/lstat.txt", CREATE | O_RDWR, 0644);
-    if (fd < 0) {
-        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    close(fd);
+    prctl(PR_SET_NAME, "LstatCoreTest");
 }
 
-void LstatCoreTest::TearDownTestCase(void)
+void LstatCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    rmdir("/data/test/lstat.txt");
 }
 
-void LstatCoreTest::SetUp(void)
+void LstatCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void LstatCoreTest::TearDown(void)
+void LstatCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -68,10 +70,12 @@ HWTEST_F(LstatCoreTest, LstatCoreTest_DoLstat_001, testing::ext::TestSize.Level1
 {
     GTEST_LOG_(INFO) << "LstatCoreTest-begin LstatCoreTest_DoLstat_001";
 
-    auto res = LstatCore::DoLstat("/invalid/test/lstat.txt");
+    auto nonExistent = testDir + "/non_existent.txt";
+    auto res = LstatCore::DoLstat(nonExistent);
     EXPECT_EQ(res.IsSuccess(), false);
     auto err = res.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "LstatCoreTest-end LstatCoreTest_DoLstat_001";
 }
@@ -87,7 +91,9 @@ HWTEST_F(LstatCoreTest, LstatCoreTest_DoLstat_002, testing::ext::TestSize.Level1
 {
     GTEST_LOG_(INFO) << "LstatCoreTest-begin LstatCoreTest_DoLstat_002";
 
-    auto res = LstatCore::DoLstat("/data/test/lstat.txt");
+    auto path = testDir + "/LstatCoreTest_DoLstat_002.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
+    auto res = LstatCore::DoLstat(path);
     EXPECT_EQ(res.IsSuccess(), true);
 
     GTEST_LOG_(INFO) << "LstatCoreTest-end LstatCoreTest_DoLstat_002";

@@ -25,8 +25,11 @@ namespace fs = std::filesystem;
 class FileUtils {
 public:
     inline static const std::string testRootDir = "/data/unittest";
+    inline static const std::string defaultTempDir = fs::temp_directory_path(); // /data/local/tmp
 
 public:
+    static off_t GetFileSize(const int fd);
+    static off_t GetFileSize(const fs::path &path);
     static std::tuple<bool, std::string> ReadTextFileContent(const fs::path &path);
     static bool Exists(const fs::path &path);
     static bool CreateFile(const fs::path &path);
@@ -36,6 +39,8 @@ public:
     static bool RemoveAll(const fs::path &path);
 
 private:
+    static off_t DoGetFileSize(const int fd);
+    static off_t DoGetFileSize(const fs::path &path);
     static std::tuple<bool, std::string> DoReadTextFileContent(const fs::path &path);
     static bool DoExists(const fs::path &path);
     static bool DoCreateTextFile(const fs::path &path, const std::string &content);

@@ -15,13 +15,11 @@
 
 #include "read_lines_core.h"
 
-#include <filesystem>
-#include <fstream>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
+#include "ut_file_utils.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -32,44 +30,43 @@ using namespace std;
 class ReadLinesCoreMockTest : public testing::Test {
 public:
     static filesystem::path tempFilePath;
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/ReadLinesCoreMockTest";
 };
 
-filesystem::path ReadLinesCoreMockTest::tempFilePath;
-
-void ReadLinesCoreMockTest::SetUpTestCase(void)
+void ReadLinesCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "ReadLinesCoreMockTest");
-    tempFilePath = filesystem::temp_directory_path() / "read_lines_test_file.txt";
-    ofstream(tempFilePath) << "Test content\n123\n456";
-    ofstream(tempFilePath).close();
     UvFsMock::EnableMock();
 }
 
-void ReadLinesCoreMockTest::TearDownTestCase(void)
+void ReadLinesCoreMockTest::TearDownTestCase()
 {
-    filesystem::remove(tempFilePath);
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void ReadLinesCoreMockTest::SetUp(void)
+void ReadLinesCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void ReadLinesCoreMockTest::TearDown(void)
+void ReadLinesCoreMockTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: ReadLinesCoreMockTest_DoReadLines_001
- * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for SUCCESS.
+ * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for SUCCESS with encoding option.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -78,24 +75,25 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_001, testing::
 {
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-begin ReadLinesCoreMockTest_DoReadLines_001";
 
-    string path = tempFilePath.string();
+    string path = testDir + "/ReadLinesCoreMockTest_DoReadLines_001.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content line1\ncontent line2\n"));
     Options option;
     option.encoding = "utf-8";
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(0));
 
     auto res = ReadLinesCore::DoReadLines(path, option);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_001";
 }
 
 /**
  * @tc.name: ReadLinesCoreMockTest_DoReadLines_002
- * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for SUCCESS.
+ * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for SUCCESS without any options.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -104,22 +102,23 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_002, testing::
 {
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-begin ReadLinesCoreMockTest_DoReadLines_002";
 
-    string path = tempFilePath.string();
+    string path = testDir + "/ReadLinesCoreMockTest_DoReadLines_002.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(0));
 
     auto res = ReadLinesCore::DoReadLines(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_002";
 }
 
 /**
  * @tc.name: ReadLinesCoreMockTest_DoReadLines_003
- * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for FAILED.
+ * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for FAILURE when uv_fs_stat fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -128,17 +127,21 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_003, testing::
 {
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-begin ReadLinesCoreMockTest_DoReadLines_003";
 
-    string path = tempFilePath.string();
+    string path = testDir + "/ReadLinesCoreMockTest_DoReadLines_003.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
     Options option;
     option.encoding = "utf-8";
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-EIO));
 
     auto res = ReadLinesCore::DoReadLines(path, option);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_003";
 }

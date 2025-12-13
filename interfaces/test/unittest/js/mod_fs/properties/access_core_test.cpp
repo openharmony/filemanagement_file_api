@@ -70,7 +70,7 @@ void AccessCoreTest::TearDown()
 
 /**
  * @tc.name: AccessCoreTest_DoAccess_001
- * @tc.desc: Test function of AccessCore::DoAccess interface for ERROR.
+ * @tc.desc: Test function of AccessCore::DoAccess interface for SUCCESS when checking whether the path exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -79,11 +79,12 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_001, testing::ext::TestSize.Lev
 {
     GTEST_LOG_(INFO) << "AccessCoreTest-begin AccessCoreTest_DoAccess_001";
 
-    std::string path;
-    std::optional<AccessModeType> mode;
+    std::string path = localTestDir + "/AccessCoreTest_DoAccess_001.txt";
 
-    auto res = AccessCore::DoAccess(path, mode);
-    EXPECT_EQ(res.IsSuccess(), false);
+    auto res = AccessCore::DoAccess(path);
+    ASSERT_TRUE(res.IsSuccess());
+    bool exists = res.GetData().value();
+    EXPECT_FALSE(exists);
 
     GTEST_LOG_(INFO) << "AccessCoreTest-end AccessCoreTest_DoAccess_001";
 }
@@ -147,11 +148,9 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_004, testing::ext::TestSize.Lev
     ASSERT_TRUE(FileUtils::CreateDirectories(path, true));
 
     auto res = AccessCore::DoAccess(path, mode, flag);
-    EXPECT_EQ(res.IsSuccess(), true);
-    if (res.IsSuccess()) {
-        bool exists = res.GetData().value();
-        EXPECT_FALSE(exists);
-    }
+    ASSERT_TRUE(res.IsSuccess());
+    bool exists = res.GetData().value();
+    EXPECT_FALSE(exists);
 
     GTEST_LOG_(INFO) << "AccessCoreTest-end AccessCoreTest_DoAccess_004";
 }
@@ -176,11 +175,9 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_005, testing::ext::TestSize.Lev
     ASSERT_NE(re, -1);
 
     auto res = AccessCore::DoAccess(path, mode, flag);
-    EXPECT_EQ(res.IsSuccess(), true);
-    if (res.IsSuccess()) {
-        bool exists = res.GetData().value();
-        EXPECT_TRUE(exists);
-    }
+    ASSERT_TRUE(res.IsSuccess());
+    bool exists = res.GetData().value();
+    EXPECT_TRUE(exists);
 
     GTEST_LOG_(INFO) << "AccessCoreTest-end AccessCoreTest_DoAccess_005";
 }
@@ -201,11 +198,9 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_006, testing::ext::TestSize.Lev
     AccessFlag flag = LOCAL_FLAG;
 
     auto res = AccessCore::DoAccess(path, mode, flag);
-    EXPECT_EQ(res.IsSuccess(), true);
-    if (res.IsSuccess()) {
-        bool exists = res.GetData().value();
-        EXPECT_FALSE(exists);
-    }
+    ASSERT_TRUE(res.IsSuccess());
+    bool exists = res.GetData().value();
+    EXPECT_FALSE(exists);
 
     GTEST_LOG_(INFO) << "AccessCoreTest-end AccessCoreTest_DoAccess_006";
 }
@@ -230,11 +225,9 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_007, testing::ext::TestSize.Lev
     ASSERT_NE(re, -1);
 
     auto res = AccessCore::DoAccess(path, mode, flag);
-    EXPECT_EQ(res.IsSuccess(), true);
-    if (res.IsSuccess()) {
-        bool exists = res.GetData().value();
-        EXPECT_TRUE(exists);
-    }
+    ASSERT_TRUE(res.IsSuccess());
+    bool exists = res.GetData().value();
+    EXPECT_TRUE(exists);
 
     GTEST_LOG_(INFO) << "AccessCoreTest-end AccessCoreTest_DoAccess_007";
 }

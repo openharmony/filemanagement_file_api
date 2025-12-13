@@ -16,6 +16,7 @@
 #include "lseek_core.h"
 
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -24,28 +25,29 @@ using namespace std;
 
 class LseekCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void LseekCoreTest::SetUpTestCase(void)
+void LseekCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "LseekCoreTest");
 }
 
-void LseekCoreTest::TearDownTestCase(void)
+void LseekCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void LseekCoreTest::SetUp(void)
+void LseekCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void LseekCoreTest::TearDown(void)
+void LseekCoreTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }

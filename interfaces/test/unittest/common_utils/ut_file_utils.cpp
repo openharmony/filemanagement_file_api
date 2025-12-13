@@ -18,6 +18,7 @@
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
+#include <sys/stat.h>
 
 #ifdef INTERFACES_TEST_UNITTEST_COMMON_MOCK_UNISTD_MOCK_H
 #include "unistd_mock.h"
@@ -45,6 +46,70 @@ auto InvokeWithMockDisabled(Func func, Args &&...args)
     }
 #endif
     return result;
+}
+
+off_t FileUtils::GetFileSize(const int fd)
+{
+    return InvokeWithMockDisabled(
+        [](int f) {
+            return FileUtils::DoGetFileSize(f);
+        },
+        fd);
+}
+
+off_t FileUtils::DoGetFileSize(const int fd)
+{
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "Invalid fd: " << fd;
+        return -1;
+    }
+
+    struct stat st;
+    int ret = fstat(fd, &st);
+    if (ret != 0) {
+        GTEST_LOG_(ERROR) << "Get file stat by fd failed! ret: " << ret << ", errno: " << errno;
+        return -1;
+    }
+
+    if (!S_ISREG(st.st_mode)) {
+        GTEST_LOG_(ERROR) << "Is not a regular file!";
+        return -1;
+    }
+
+    return st.st_size;
+}
+
+off_t FileUtils::GetFileSize(const fs::path &path)
+{
+    return InvokeWithMockDisabled(
+        [](const fs::path &p) {
+            return FileUtils::DoGetFileSize(p);
+        },
+        path);
+}
+
+off_t FileUtils::DoGetFileSize(const fs::path &path)
+{
+    auto [succ, normalizedPath] = CheckAndNormalizePath(path);
+    if (!succ) {
+        GTEST_LOG_(ERROR) << "Failed to check and normalize path before creating!";
+        return -1;
+    }
+
+    std::error_code err;
+    if (!fs::exists(normalizedPath, err) || !fs::is_regular_file(normalizedPath, err) || err) {
+        GTEST_LOG_(ERROR) << "Non-existent or invalid file! Error: " << err.message() << ". Code: " << err.value();
+        return -1;
+    }
+
+    struct stat st;
+    int ret = stat(normalizedPath.c_str(), &st);
+    if (ret != 0) {
+        GTEST_LOG_(ERROR) << "Get file stat by path failed! ret: " << ret << ", errno: " << errno;
+        return -1;
+    }
+
+    return st.st_size;
 }
 
 std::tuple<bool, std::string> FileUtils::ReadTextFileContent(const fs::path &path)

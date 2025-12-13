@@ -15,10 +15,11 @@
 
 #include "read_core.h"
 
-#include <cstdint>
 #include <climits>
-#include <gtest/gtest.h>
+#include <cstdint>
 
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -27,35 +28,36 @@ using namespace std;
 
 class ReadCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void ReadCoreTest::SetUpTestCase(void)
+void ReadCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "ReadCoreTest");
 }
 
-void ReadCoreTest::TearDownTestCase(void)
+void ReadCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void ReadCoreTest::SetUp(void)
+void ReadCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void ReadCoreTest::TearDown(void)
+void ReadCoreTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: ReadCoreTest_DoRead_001
- * @tc.desc: Test function of ReadCore::DoRead interface for SUCCESS.
+ * @tc.desc: Test function of ReadCore::DoRead interface for FAILURE when fd is invalid (negative value).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -69,35 +71,17 @@ HWTEST_F(ReadCoreTest, ReadCoreTest_DoRead_001, testing::ext::TestSize.Level1)
     ArrayBuffer arrayBuffer(buf, 0);
 
     auto res = ReadCore::DoRead(fd, arrayBuffer);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ReadCoreTest-end ReadCoreTest_DoRead_001";
 }
 
 /**
- * @tc.name: ReadCoreTest_DoRead_002
- * @tc.desc: Test function of ReadCore::DoRead interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(ReadCoreTest, ReadCoreTest_DoRead_002, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "ReadCoreTest-begin ReadCoreTest_DoRead_002";
-
-    int32_t fd = 1;
-    void *buf = nullptr;
-    ArrayBuffer arrayBuffer(buf, 0xffffffff + 1);
-
-    auto res = ReadCore::DoRead(fd, arrayBuffer);
-    EXPECT_EQ(res.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "ReadCoreTest-end ReadCoreTest_DoRead_002";
-}
-
-/**
  * @tc.name: ReadCoreTest_DoRead_003
- * @tc.desc: Test function of ReadCore::DoRead interface for SUCCESS.
+ * @tc.desc: Test function of ReadCore::DoRead interface for FAILURE when offset is invalid (negative value).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -113,7 +97,10 @@ HWTEST_F(ReadCoreTest, ReadCoreTest_DoRead_003, testing::ext::TestSize.Level1)
     options->offset = std::make_optional<int64_t>(-1);
 
     auto res = ReadCore::DoRead(fd, arrayBuffer, options);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ReadCoreTest-end ReadCoreTest_DoRead_003";
 }

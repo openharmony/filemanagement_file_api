@@ -28,38 +28,38 @@ using namespace std;
 
 class UtimesCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void UtimesCoreMockTest::SetUpTestCase(void)
+void UtimesCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "UtimesCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void UtimesCoreMockTest::TearDownTestCase(void)
+void UtimesCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void UtimesCoreMockTest::SetUp(void)
+void UtimesCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void UtimesCoreMockTest::TearDown(void)
+void UtimesCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: UtimesCoreMockTest_DoUtimes_001
- * @tc.desc: Test function of UtimesCore::DoUtimes interface for Failed.
+ * @tc.desc: Test function of UtimesCore::DoUtimes interface for FAILURE when uv_fs_stat fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -68,22 +68,25 @@ HWTEST_F(UtimesCoreMockTest, UtimesCoreMockTest_DoUtimes_001, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "UtimesCoreMockTest-begin UtimesCoreMockTest_DoUtimes_001";
 
-    string path;
+    string path = "fakePath/UtimesCoreMockTest_DoUtimes_001.txt";
     double mtime = 1;
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-ENOENT));
 
     auto res = UtimesCore::DoUtimes(path, mtime);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "UtimesCoreMockTest-end UtimesCoreMockTest_DoUtimes_001";
 }
 
 /**
  * @tc.name: UtimesCoreMockTest_DoUtimes_002
- * @tc.desc: Test function of UtimesCore::DoUtimes interface for FALSE.
+ * @tc.desc: Test function of UtimesCore::DoUtimes interface for FAILURE when uv_fs_utime fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -92,16 +95,19 @@ HWTEST_F(UtimesCoreMockTest, UtimesCoreMockTest_DoUtimes_002, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "UtimesCoreMockTest-begin UtimesCoreMockTest_DoUtimes_002";
 
-    string path;
+    string path = "fakePath/UtimesCoreMockTest_DoUtimes_002.txt";
     double mtime = 1;
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
-    EXPECT_CALL(*uvMock, uv_fs_utime(_, _, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*uvMock, uv_fs_utime(_, _, _, _, _, _)).WillOnce(Return(-EIO));
 
     auto res = UtimesCore::DoUtimes(path, mtime);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "UtimesCoreMockTest-end UtimesCoreMockTest_DoUtimes_002";
 }
@@ -117,16 +123,16 @@ HWTEST_F(UtimesCoreMockTest, UtimesCoreMockTest_DoUtimes_003, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "UtimesCoreMockTest-begin UtimesCoreMockTest_DoUtimes_003";
 
-    string path;
+    string path = "fakePath/UtimesCoreMockTest_DoUtimes_003.txt";
     double mtime = 1;
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(1));
-    EXPECT_CALL(*uvMock, uv_fs_utime(_, _, _, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*uvMock, uv_fs_utime(_, _, _, _, _, _)).WillOnce(Return(0));
 
     auto res = UtimesCore::DoUtimes(path, mtime);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "UtimesCoreMockTest-end UtimesCoreMockTest_DoUtimes_003";
 }

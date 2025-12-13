@@ -28,31 +28,31 @@ using namespace std;
 
 class FsyncCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void FsyncCoreMockTest::SetUpTestCase(void)
+void FsyncCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "FsyncCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void FsyncCoreMockTest::TearDownTestCase(void)
+void FsyncCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void FsyncCoreMockTest::SetUp(void)
+void FsyncCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void FsyncCoreMockTest::TearDown(void)
+void FsyncCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
