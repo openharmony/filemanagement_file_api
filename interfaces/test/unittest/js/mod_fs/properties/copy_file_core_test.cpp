@@ -54,7 +54,7 @@ void CopyFileCoreTest::TearDown()
 
 /**
  * @tc.name: CopyFileCoreTest_DoCopyFile_001
- * @tc.desc: Test function of CopyFileCore::ValidMode interface for FALSE.
+ * @tc.desc: Test function of CopyFileCore::DoCopyFile interface for FAILURE when mode is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -65,7 +65,7 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_001, testing::ext::TestSi
 
     FileInfo src;
     FileInfo dest;
-    optional<int32_t> mode = std::make_optional(1);
+    optional<int32_t> mode = std::make_optional(1); // only support 0
 
     auto res = CopyFileCore::DoCopyFile(src, dest, mode);
     EXPECT_EQ(res.IsSuccess(), false);
@@ -75,7 +75,7 @@ HWTEST_F(CopyFileCoreTest, CopyFileCoreTest_DoCopyFile_001, testing::ext::TestSi
 
 /**
  * @tc.name: CopyFileCoreTest_DoCopyFile_002
- * @tc.desc: Test function of CopyFileCore::ValidMode interface for FALSE.
+ * @tc.desc: Test function of CopyFileCore::DoCopyFile interface for FAILURE when paths are all invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

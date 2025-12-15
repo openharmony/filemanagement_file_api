@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include <filesystem>
-#include <fstream>
-#include <gtest/gtest.h>
-
 #include "read_lines_core.h"
+
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -26,42 +27,41 @@ using namespace std;
 
 class ReadLinesCoreTest : public testing::Test {
 public:
-    static filesystem::path tempFilePath;
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/ReadLinesCoreTest";
 };
 
-filesystem::path ReadLinesCoreTest::tempFilePath;
-
-void ReadLinesCoreTest::SetUpTestCase(void)
+void ReadLinesCoreTest::SetUpTestCase()
 {
-    tempFilePath = filesystem::temp_directory_path() / "read_lines_test_file.txt";
-    ofstream(tempFilePath) << "Test content\n123\n456";
-    ofstream(tempFilePath).close();
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "ReadLinesCoreTest");
 }
 
-void ReadLinesCoreTest::TearDownTestCase(void)
+void ReadLinesCoreTest::TearDownTestCase()
 {
-    filesystem::remove(tempFilePath);
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void ReadLinesCoreTest::SetUp(void)
+void ReadLinesCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void ReadLinesCoreTest::TearDown(void)
+void ReadLinesCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: ReadLinesCoreTest_DoReadLines_001
- * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for FAILED.
+ * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for FAILURE when path is not exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -70,18 +70,23 @@ HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_001, testing::ext::Tes
 {
     GTEST_LOG_(INFO) << "ReadLinesCoreTest-begin ReadLinesCoreTest_DoReadLines_001";
 
-    string path = "ReadLinesCoreTest_DoReadLines_001";
+    string path = testDir + "/ReadLinesCoreTest_DoReadLines_001_non_existent.txt";
     Options option;
     option.encoding = "utf-8";
+
     auto res = ReadLinesCore::DoReadLines(path, option);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "ReadLinesCoreTest-end ReadLinesCoreTest_DoReadLines_001";
 }
 
 /**
  * @tc.name: ReadLinesCoreTest_DoReadLines_002
- * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for FAILED.
+ * @tc.desc: Test function of ReadLinesCore::DoReadLines interface for FAILURE when encoding is unsupported.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -90,11 +95,16 @@ HWTEST_F(ReadLinesCoreTest, ReadLinesCoreTest_DoReadLines_002, testing::ext::Tes
 {
     GTEST_LOG_(INFO) << "ReadLinesCoreTest-begin ReadLinesCoreTest_DoReadLines_002";
 
-    string path = "ReadLinesCoreTest_DoReadLines_002";
+    string path = testDir + "/ReadLinesCoreTest_DoReadLines_002.txt";
     Options option;
     option.encoding = "utf-16";
+
     auto res = ReadLinesCore::DoReadLines(path, option);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ReadLinesCoreTest-end ReadLinesCoreTest_DoReadLines_002";
 }

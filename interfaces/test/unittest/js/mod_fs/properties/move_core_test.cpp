@@ -15,9 +15,10 @@
 
 #include "move_core.h"
 
-#include <filesystem>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -26,35 +27,41 @@ using namespace std;
 
 class MoveCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/MoveCoreTest";
 };
 
-void MoveCoreTest::SetUpTestCase(void)
+void MoveCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "MoveCoreTest");
 }
 
-void MoveCoreTest::TearDownTestCase(void)
+void MoveCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void MoveCoreTest::SetUp(void)
+void MoveCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void MoveCoreTest::TearDown(void)
+void MoveCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: MoveCoreTest_DoMove_001
- * @tc.desc: Test function of MoveCore::DoMove interface for ERROR.
+ * @tc.desc: Test function of MoveCore::DoMove interface for FAILURE when src path and dest path are all empty.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -74,7 +81,7 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: MoveCoreTest_DoMove_002
- * @tc.desc: Test function of MoveCore::DoMove interface for ERROR.
+ * @tc.desc: Test function of MoveCore::DoMove interface for FAILURE when dest path is empty.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -83,7 +90,7 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MoveCoreTest-begin MoveCoreTest_DoMove_002";
 
-    std::string src = "/src.txt";
+    std::string src = testDir + "/MoveCoreTest_DoMove_002_src.txt";
     std::string dest = "";
 
     auto res = MoveCore::DoMove(src, dest);
@@ -94,7 +101,7 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: MoveCoreTest_DoMove_003
- * @tc.desc: Test function of MoveCore::DoMove interface for ERROR.
+ * @tc.desc: Test function of MoveCore::DoMove interface for FAILURE when mode is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -103,9 +110,9 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MoveCoreTest-begin MoveCoreTest_DoMove_003";
 
-    std::string src = "/src.txt";
-    std::string dest = "/dest.txt";
-    int mode = 3;
+    std::string src = testDir + "/MoveCoreTest_DoMove_003_src.txt";
+    std::string dest = testDir + "/MoveCoreTest_DoMove_003_dest.txt";
+    int mode = 3; // invalid mode
 
     auto res = MoveCore::DoMove(src, dest, mode);
     EXPECT_EQ(res.IsSuccess(), false);
@@ -115,7 +122,7 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_003, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: MoveCoreTest_DoMove_004
- * @tc.desc: Test function of MoveCore::DoMove interface for FALSE.
+ * @tc.desc: Test function of MoveCore::DoMove interface for FAILURE when src path is a directory (invalid src).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -124,23 +131,21 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MoveCoreTest-begin MoveCoreTest_DoMove_004";
 
-    std::string src = "dir";
-    std::string dest = "/dest.txt";
-    int mode = 3;
+    std::string src = testDir + "/MoveCoreTest_DoMove_004_src";
+    std::string dest = testDir + "/MoveCoreTest_DoMove_004_dest.txt";
+    int mode = MODE_FORCE_MOVE;
 
-    std::filesystem::path dirpath = "dir";
-    ASSERT_TRUE(std::filesystem::create_directories(dirpath));
+    ASSERT_TRUE(FileUtils::CreateDirectories(src));
 
     auto res = MoveCore::DoMove(src, dest, mode);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    std::filesystem::remove(dirpath);
     GTEST_LOG_(INFO) << "MoveCoreTest-end MoveCoreTest_DoMove_004";
 }
 
 /**
  * @tc.name: MoveCoreTest_DoMove_005
- * @tc.desc: Test function of MoveCore::DoMove interface for FALSE.
+ * @tc.desc: Test function of MoveCore::DoMove interface for FAILURE when dest path is a directory (invalid dest).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -149,17 +154,15 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MoveCoreTest-begin MoveCoreTest_DoMove_005";
 
-    std::string src = "/src.txt";
-    std::string dest = "dir";
-    int mode = 3;
+    std::string src = testDir + "/MoveCoreTest_DoMove_005_src.txt";
+    std::string dest = testDir + "/MoveCoreTest_DoMove_005_dest";
+    int mode = MODE_FORCE_MOVE;
 
-    std::filesystem::path dirpath = "dir";
-    ASSERT_TRUE(std::filesystem::create_directories(dirpath));
+    ASSERT_TRUE(FileUtils::CreateDirectories(dest));
 
     auto res = MoveCore::DoMove(src, dest, mode);
     EXPECT_EQ(res.IsSuccess(), false);
 
-    std::filesystem::remove(dirpath);
     GTEST_LOG_(INFO) << "MoveCoreTest-end MoveCoreTest_DoMove_005";
 }
 

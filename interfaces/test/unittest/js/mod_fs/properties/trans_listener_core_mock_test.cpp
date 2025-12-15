@@ -37,9 +37,8 @@ using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
-string g_path = "/data/test/TransListenerCoreMockTest.txt";
-const string FILE_MANAGER_AUTHORITY = "docs";
-const string MEDIA_AUTHORITY = "media";
+static const string FILE_MANAGER_AUTHORITY = "docs";
+static const string MEDIA_AUTHORITY = "media";
 
 class IProgressListenerTest : public IProgressListener {
 public:
@@ -48,48 +47,40 @@ public:
 
 class TransListenerCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void TransListenerCoreMockTest::SetUpTestCase(void)
+void TransListenerCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "TransListenerCoreMockTest");
-
-    int32_t fd = open(g_path.c_str(), O_CREAT | O_RDWR, 0644);
-    if (fd < 0) {
-        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    close(fd);
     UnistdMock::EnableMock();
     DfsMock::EnableMock();
 }
 
-void TransListenerCoreMockTest::TearDownTestCase(void)
+void TransListenerCoreMockTest::TearDownTestCase()
 {
     DfsMock::DisableMock();
     UnistdMock::DisableMock();
-    rmdir(g_path.c_str());
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void TransListenerCoreMockTest::SetUp(void)
+void TransListenerCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void TransListenerCoreMockTest::TearDown(void)
+void TransListenerCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: TransListenerCoreMockTest_PrepareCopySession_001
- * @tc.desc: Test function of TransListenerCore::PrepareCopySession interface for FALSE.
+ * @tc.desc: Test function of TransListenerCore::PrepareCopySession interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -118,7 +109,7 @@ HWTEST_F(TransListenerCoreMockTest, TransListenerCoreMockTest_PrepareCopySession
 
 /**
  * @tc.name: TransListenerCoreMockTest_CopyFileFromSoftBus_001
- * @tc.desc: Test function of TransListenerCore::CopyFileFromSoftBus interface for FALSE.
+ * @tc.desc: Test function of TransListenerCore::CopyFileFromSoftBus interface for FAILURE when PrepareSession fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

@@ -34,13 +34,13 @@ namespace Test {
 
 class WatcherCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void WatcherCoreMockTest::SetUpTestCase(void)
+void WatcherCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "WatcherCoreMockTest");
@@ -48,20 +48,20 @@ void WatcherCoreMockTest::SetUpTestCase(void)
     InotifyMock::EnableMock();
 }
 
-void WatcherCoreMockTest::TearDownTestCase(void)
+void WatcherCoreMockTest::TearDownTestCase()
 {
     EventfdMock::DisableMock();
     InotifyMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void WatcherCoreMockTest::SetUp(void)
+void WatcherCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
     errno = 0; // Reset errno
 }
 
-void WatcherCoreMockTest::TearDown(void)
+void WatcherCoreMockTest::TearDown()
 {
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.taskRunning_ = false;
@@ -85,7 +85,7 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_001, testing::
 {
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-begin WatcherCoreMockTest_DoCreateWatcher_001";
     // Prepare test parameters
-    std::string path = "/test/WatcherCoreMockTest_DoCreateWatcher_001";
+    std::string path = "fakePath/WatcherCoreMockTest_DoCreateWatcher_001";
     int32_t events = IN_CREATE;
     std::shared_ptr<MockWatcherCallback> callback = std::make_shared<MockWatcherCallback>();
     // Set mock behaviors
@@ -113,7 +113,7 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_002, testing::
 {
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-begin WatcherCoreMockTest_DoCreateWatcher_002";
     // Prepare test parameters
-    std::string path = "/test/WatcherCoreMockTest_DoCreateWatcher_002";
+    std::string path = "fakePath/WatcherCoreMockTest_DoCreateWatcher_002";
     int32_t events = IN_CREATE;
     std::shared_ptr<MockWatcherCallback> callback = std::make_shared<MockWatcherCallback>();
     // Set mock behaviors
@@ -124,6 +124,9 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_002, testing::
     // Verify results
     testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-end WatcherCoreMockTest_DoCreateWatcher_002";
 }
 
@@ -138,13 +141,16 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_003, testing::
 {
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-begin WatcherCoreMockTest_DoCreateWatcher_003";
     // Prepare test parameters
-    std::string path = "/test/WatcherCoreMockTest_DoCreateWatcher_003";
+    std::string path = "fakePath/WatcherCoreMockTest_DoCreateWatcher_003";
     int32_t events = -1;
     std::shared_ptr<MockWatcherCallback> callback = std::make_shared<MockWatcherCallback>();
     // Do testing
     auto result = WatcherCore::DoCreateWatcher(path, events, callback);
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-end WatcherCoreMockTest_DoCreateWatcher_003";
 }
 
@@ -159,13 +165,16 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_004, testing::
 {
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-begin WatcherCoreMockTest_DoCreateWatcher_004";
     // Prepare test parameters
-    std::string path = "/test/WatcherCoreMockTest_DoCreateWatcher_004";
+    std::string path = "fakePath/WatcherCoreMockTest_DoCreateWatcher_004";
     int32_t invalidEvents = ~IN_ALL_EVENTS;
     std::shared_ptr<MockWatcherCallback> callback = std::make_shared<MockWatcherCallback>();
     // Do testing
     auto result = WatcherCore::DoCreateWatcher(path, invalidEvents, callback);
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-end WatcherCoreMockTest_DoCreateWatcher_004";
 }
 
@@ -180,13 +189,16 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_005, testing::
 {
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-begin WatcherCoreMockTest_DoCreateWatcher_005";
     // Prepare test parameters
-    std::string path = "/test/WatcherCoreMockTest_DoCreateWatcher_005";
+    std::string path = "fakePath/WatcherCoreMockTest_DoCreateWatcher_005";
     int32_t events = IN_CREATE;
     std::shared_ptr<MockWatcherCallback> callback = nullptr;
     // Do testing
     auto result = WatcherCore::DoCreateWatcher(path, events, callback);
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-end WatcherCoreMockTest_DoCreateWatcher_005";
 }
 

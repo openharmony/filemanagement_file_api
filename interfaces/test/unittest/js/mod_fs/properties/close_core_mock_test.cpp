@@ -28,32 +28,32 @@ namespace Test {
 using namespace std;
 class CloseCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void CloseCoreMockTest::SetUpTestCase(void)
+void CloseCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "CloseCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void CloseCoreMockTest::TearDownTestCase(void)
+void CloseCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void CloseCoreMockTest::SetUp(void)
+void CloseCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
     errno = 0; // Reset errno
 }
 
-void CloseCoreMockTest::TearDown(void)
+void CloseCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }

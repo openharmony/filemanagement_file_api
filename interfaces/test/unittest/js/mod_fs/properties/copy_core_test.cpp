@@ -710,7 +710,8 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_DoCopy_001, testing::ext::TestSize.Level1)
     auto res = CopyCore::DoCopy(src, dest, options);
     EXPECT_FALSE(res.IsSuccess());
     auto err = res.GetError();
-    EXPECT_EQ(err.GetErrNo(), E_PARAMS);
+    EXPECT_EQ(err.GetErrNo(), E_PARAMS); // errno is 401
+    EXPECT_EQ(err.GetErrMsg(), "The input parameter is invalid");
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_DoCopy_001";
 }

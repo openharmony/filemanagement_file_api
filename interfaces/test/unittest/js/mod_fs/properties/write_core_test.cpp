@@ -16,6 +16,9 @@
 #include "write_core.h"
 
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -24,29 +27,35 @@ using namespace std;
 
 class WriteCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/WriteCoreTest";
 };
 
-void WriteCoreTest::SetUpTestCase(void)
+void WriteCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "WriteCoreTest");
 }
 
-void WriteCoreTest::TearDownTestCase(void)
+void WriteCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void WriteCoreTest::SetUp(void)
+void WriteCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void WriteCoreTest::TearDown(void)
+void WriteCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -60,11 +69,17 @@ void WriteCoreTest::TearDown(void)
 HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite_001";
+
     int32_t fd = -1;
     string buffer;
+
     auto res = WriteCore::DoWrite(fd, buffer);
 
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
     GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite_001";
 }
 
@@ -78,11 +93,16 @@ HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite_001, testing::ext::TestSize.Level1
 HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite_002";
+
     int32_t fd = -1;
     ArrayBuffer buffer(nullptr, 1);
 
     auto res = WriteCore::DoWrite(fd, buffer);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite_002";
 }
 
@@ -96,13 +116,19 @@ HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite_002, testing::ext::TestSize.Level1
 HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite_003";
+
     int32_t fd = 1;
     string buffer;
     std::optional<WriteOptions> options = std::make_optional<WriteOptions>(WriteOptions());
     options->offset = std::make_optional<int64_t>(-1);
 
     auto res = WriteCore::DoWrite(fd, buffer, options);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
     GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite_003";
 }
 
@@ -116,6 +142,7 @@ HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite_003, testing::ext::TestSize.Level1
 HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WriteCoreTest-begin WriteCoreTest_DoWrite_004";
+
     int32_t fd = 1;
     ArrayBuffer buffer(nullptr, 1);
 
@@ -123,7 +150,12 @@ HWTEST_F(WriteCoreTest, WriteCoreTest_DoWrite_004, testing::ext::TestSize.Level1
     options->length = std::make_optional<int64_t>(-1);
 
     auto res = WriteCore::DoWrite(fd, buffer, options);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
     GTEST_LOG_(INFO) << "WriteCoreTest-end WriteCoreTest_DoWrite_004";
 }
 

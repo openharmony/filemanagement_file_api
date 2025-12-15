@@ -16,7 +16,9 @@
 #include "utimes_core.h"
 
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -25,35 +27,41 @@ using namespace std;
 
 class UtimesCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/UtimesCoreTest";
 };
 
-void UtimesCoreTest::SetUpTestCase(void)
+void UtimesCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "UtimesCoreTest");
 }
 
-void UtimesCoreTest::TearDownTestCase(void)
+void UtimesCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void UtimesCoreTest::SetUp(void)
+void UtimesCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void UtimesCoreTest::TearDown(void)
+void UtimesCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: UtimesCoreTest_DoUtimes_001
- * @tc.desc: Test function of UtimesCore::DoUtimes interface for Failed.
+ * @tc.desc: Test function of UtimesCore::DoUtimes interface for FAILURE when mtime is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -62,10 +70,15 @@ HWTEST_F(UtimesCoreTest, UtimesCoreTest_DoUtimes_001, testing::ext::TestSize.Lev
 {
     GTEST_LOG_(INFO) << "UtimesCoreTest-begin UtimesCoreTest_DoUtimes_001";
 
-    string path;
+    string path = testDir + "/UtimesCoreTest_DoUtimes_001.txt";
     double mtime = -1;
+
     auto res = UtimesCore::DoUtimes(path, mtime);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "UtimesCoreTest-end UtimesCoreTest_DoUtimes_001";
 }

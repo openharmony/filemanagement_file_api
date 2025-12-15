@@ -109,6 +109,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_001, testing::ext::TestSi
 
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_001";
 }
@@ -135,6 +136,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_002, testing::ext::TestSi
 
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_002";
 }
@@ -157,6 +159,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_003, testing::ext::TestSi
 
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_003";
 }
@@ -297,6 +300,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_008, testing::ext::TestSi
 
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_008";
 }
@@ -321,6 +325,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_009, testing::ext::TestSi
 
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_009";
 }
@@ -345,6 +350,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_010, testing::ext::TestSi
 
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_010";
 }
@@ -432,6 +438,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_014, testing::ext::TestSi
 
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_014";
 }
@@ -463,6 +470,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_015, testing::ext::TestSi
 
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_015";
 }
@@ -489,6 +497,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_016, testing::ext::TestSi
 
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_016";
 }
