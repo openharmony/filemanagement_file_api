@@ -60,6 +60,7 @@ napi_value FdopenStream::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    CommonFunc::SetFdTag(fd, 0);
     FILE *file = fdopen(fd, mode.c_str());
     if (!file) {
         HILOGE("Failed to fdopen file by path");
@@ -84,6 +85,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    CommonFunc::SetFdTag(fd, 0);
 
     shared_ptr<AsyncFdopenStreamArg> arg = CreateSharedPtr<AsyncFdopenStreamArg>();
     if (arg == nullptr) {

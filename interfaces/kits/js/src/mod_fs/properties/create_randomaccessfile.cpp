@@ -163,6 +163,10 @@ static NVal InstantiateRandomAccessFile(napi_env env,
     rafEntity->filePointer = ops.fp;
     rafEntity->start = ops.start;
     rafEntity->end = ops.end;
+
+    uint64_t tag = reinterpret_cast<uint64_t>(rafEntity);
+    CommonFunc::SetFdTag(rafEntity->fd.get()->GetFD(), tag);
+
     return {env, objRAF};
 }
 

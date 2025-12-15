@@ -29,6 +29,7 @@ using namespace OHOS::FileManagement::LibN;
 const int BUF_SIZE = 1024;
 const string READ_STREAM_CLASS = "ReadStream";
 const string WRITE_STREAM_CLASS = "WriteStream";
+constexpr uint32_t PREFIX_ADDR = 0xabc00000;
 
 static tuple<bool, RandomAccessFileEntity*> GetRAFEntity(napi_env env, napi_value raf_entity)
 {
@@ -353,18 +354,35 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
     return WriteExec(env, funcArg, rafEntity);
 }
 
-static NError CloseFd(int fd)
+// static NError CloseFd(int fd)
+// {
+//     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
+//         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+//     if (!close_req) {
+//         HILOGE("Failed to request heap memory.");
+//         return NError(ENOMEM);
+//     }
+//     int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
+//     if (ret < 0) {
+//         HILOGE("Failed to close file with ret: %{public}d", ret);
+//         return NError(ret);
+//     }
+//     return NError(ERRNO_NOERR);
+// }
+
+static NError CloseFdWithTag(const int fd, const uint64_t fileTag)
 {
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
-        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!close_req) {
-        HILOGE("Failed to request heap memory.");
-        return NError(ENOMEM);
+    auto tag = CommonFunc::GetFdTag(fd);
+    if (tag <= 0 || tag != fileTag) {
+        tag = fileTag|PREFIX_ADDR;
+    } else {
+        tag = 0;
     }
-    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
+    CommonFunc::SetFdTag(fd, 0);
+    int ret = fdsan_close_with_tag(fd, tag);
     if (ret < 0) {
-        HILOGE("Failed to close file with ret: %{public}d", ret);
-        return NError(ret);
+        HILOGE("Failed to close file with errno: %{public}d", errno);
+        return NError(errno);
     }
     return NError(ERRNO_NOERR);
 }
@@ -383,7 +401,9 @@ napi_value RandomAccessFileNExporter::CloseSync(napi_env env, napi_callback_info
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
-    auto err = CloseFd(rafEntity->fd.get()->GetFD());
+
+    auto fileTag = reinterpret_cast<uint64_t>(rafEntity);
+    auto err = CloseFdWithTag(rafEntity->fd.get()->GetFD(), fileTag);
     if (err) {
         err.ThrowErr(env);
         return nullptr;
