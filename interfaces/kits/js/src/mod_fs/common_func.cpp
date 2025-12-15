@@ -20,7 +20,6 @@
 #include <sstream>
 #include <stdatomic.h>
 #include <sys/cdefs.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -55,61 +54,45 @@ const uint32_t API_VERSION_MOD = 1000;
 #endif
 
 #define ALIGN_SIZE 4096
-#define ALIGN(x,y) ((x)+(y)-1 & -(y))
+#define ALIGN(x, y) (((x) + (y) - 1) & -(y))
+#define FdSanOverflowEnd 2048
+#define FdSanTableOverflowSize (FdSanOverflowEnd - FdSanTableSize)
 
 static struct FdSanTable g_fd_table = {
-	.overflow = NULL,
+	.overflow = nullptr,
 };
-
-struct FdSanTable* __get_fdtable()
-{
-	return &g_fd_table;
-}
 
 static struct FdSanEntry* get_fs_fd_entry(size_t idx)
 {
-	struct FdSanEntry *entries = __get_fdtable()->entries;
+	struct FdSanEntry *entries = g_fd_table.entries;
 	if (idx < FdSanTableSize) {
 		return &entries[idx];
 	}
 	// Try to create the overflow table ourselves.
-	struct FdSanTableOverflow* local_overflow = atomic_load(&__get_fdtable()->overflow);
-	if (__predict_false(!local_overflow)) {
-		struct rlimit rlim = { .rlim_max = 32768 };
-		getrlimit(RLIMIT_NOFILE, &rlim);
-		rlim_t max = rlim.rlim_max;
+    struct FdSanTableOverflow* local_overflow = atomic_load(&g_fd_table.overflow);
+    if (__predict_false(!local_overflow)) {
+        size_t required_size = sizeof(struct FdSanTableOverflow) + FdSanTableOverflowSize * sizeof(struct FdSanEntry);
+        size_t aligned_size = ALIGN(required_size, ALIGN_SIZE);
+        
+        size_t aligned_count = (aligned_size - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
+        void* allocation = malloc(aligned_size);
+        if (allocation == nullptr) {
+            HILOGE("fdsan: malloc overflow table failed errno=%d", errno);
+            return nullptr;
+        }
+        struct FdSanTableOverflow* new_overflow = (struct FdSanTableOverflow*)(allocation);
+        new_overflow->len = aligned_count;
 
-		if (max == RLIM_INFINITY) {
-			max = 32768; // Max fd size
-		}
-
-		if (idx > max) {
-			return NULL;
-		}
-		size_t required_count = max - FdSanTableSize;
-		size_t required_size = sizeof(struct FdSanTableOverflow) + required_count * sizeof(struct FdSanEntry);
-		size_t aligned_size = ALIGN(required_size, ALIGN_SIZE);
-		size_t aligned_count = (aligned_size - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
-		void* allocation =
-				mmap(NULL, aligned_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-		if (allocation == MAP_FAILED) {
-			HILOGE("fdsan: mmap failed errno=%d", errno);
-		}
-
-		struct FdSanTableOverflow* new_overflow = (struct FdSanTableOverflow*)(allocation);
-		new_overflow->len = aligned_count;
-
-		if (atomic_compare_exchange_strong(&__get_fdtable()->overflow, &local_overflow, new_overflow)) {
-			local_overflow = new_overflow;
-		} else {
-			// Another thread had mmaped.
-			munmap(allocation, aligned_size);
-		}
-	}
+        if (atomic_compare_exchange_strong(&g_fd_table.overflow, &local_overflow, new_overflow)) {
+            local_overflow = new_overflow;
+        } else {
+            free(allocation);
+        }
+    }
 
 	size_t offset = idx - FdSanTableSize;
 	if (local_overflow->len <= offset) {
-		return NULL;
+		return nullptr;
 	}
 	return &local_overflow->entries[offset];
 }
@@ -117,7 +100,7 @@ static struct FdSanEntry* get_fs_fd_entry(size_t idx)
 static struct FdSanEntry* GetFdSanEntry(int fd)
 {
 	if (fd < 0) {
-		return NULL;
+		return nullptr;
 	}
 	return get_fs_fd_entry(fd);
 }

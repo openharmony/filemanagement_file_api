@@ -18,6 +18,7 @@
 #include <cstring>
 #include <tuple>
 #include <unistd.h>
+#include <cstdio>
 
 #include "common_func.h"
 #include "file_fs_trace.h"
@@ -44,23 +45,6 @@ static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
     }
     return fileEntity;
 }
-
-// static NError CloseFd(int fd)
-// {
-//     FileFsTrace traceCloseFd("CloseFd");
-//     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
-//         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-//     if (!close_req) {
-//         HILOGE("Failed to request heap memory.");
-//         return NError(ENOMEM);
-//     }
-//     int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
-//     if (ret < 0) {
-//         HILOGE("Failed to close file with ret: %{public}d", ret);
-//         return NError(ret);
-//     }
-//     return NError(ERRNO_NOERR);
-// }
 
 static NError CloseFdWithTag(const int fd, const bool isFd, const uint64_t fileTag)
 {
