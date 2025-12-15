@@ -15,9 +15,6 @@
 
 #include "unlink_core.h"
 
-#include <filesystem>
-#include <fstream>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
@@ -31,37 +28,31 @@ using namespace std;
 
 class UnlinkCoreMockTest : public testing::Test {
 public:
-    static filesystem::path tempFilePath;
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-filesystem::path UnlinkCoreMockTest::tempFilePath;
-
-void UnlinkCoreMockTest::SetUpTestCase(void)
+void UnlinkCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "UnlinkCoreMockTest");
-    tempFilePath = filesystem::temp_directory_path() / "unlink_test_file.txt";
-    ofstream(tempFilePath) << "Test content\n123\n456";
     UvFsMock::EnableMock();
 }
 
-void UnlinkCoreMockTest::TearDownTestCase(void)
+void UnlinkCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
-    filesystem::remove(tempFilePath);
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void UnlinkCoreMockTest::SetUp(void)
+void UnlinkCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void UnlinkCoreMockTest::TearDown(void)
+void UnlinkCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
@@ -77,21 +68,21 @@ HWTEST_F(UnlinkCoreMockTest, UnlinkCoreMockTest_DoUnlink_001, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "UnlinkCoreMockTest-begin UnlinkCoreMockTest_DoUnlink_001";
 
+    auto path = "fakePath/UnlinkCoreMockTest_DoUnlink_001.txt";
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(0));
 
-    string path = tempFilePath.string();
     auto res = UnlinkCore::DoUnlink(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "UnlinkCoreMockTest-end UnlinkCoreMockTest_DoUnlink_001";
 }
 
 /**
  * @tc.name: UnlinkCoreMockTest_DoUnlink_002
- * @tc.desc: Test function of UnlinkCore::DoUnlink interface for FAILED.
+ * @tc.desc: Test function of UnlinkCore::DoUnlink interface for FAILURE when uv_fs_unlink fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -100,14 +91,17 @@ HWTEST_F(UnlinkCoreMockTest, UnlinkCoreMockTest_DoUnlink_002, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "UnlinkCoreMockTest-begin UnlinkCoreMockTest_DoUnlink_002";
 
+    auto path = "fakePath/UnlinkCoreMockTest_DoUnlink_002.txt";
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(-ENOENT));
 
-    string path = tempFilePath.string();
     auto res = UnlinkCore::DoUnlink(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "UnlinkCoreMockTest-end UnlinkCoreMockTest_DoUnlink_002";
 }

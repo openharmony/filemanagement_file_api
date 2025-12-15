@@ -15,9 +15,6 @@
 
 #include "open_core.h"
 
-#include <filesystem>
-#include <fstream>
-
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
@@ -32,13 +29,13 @@ using namespace std;
 
 class OpenCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void OpenCoreMockTest::SetUpTestCase(void)
+void OpenCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "OpenCoreMockTest");
@@ -46,26 +43,26 @@ void OpenCoreMockTest::SetUpTestCase(void)
     UnistdMock::EnableMock();
 }
 
-void OpenCoreMockTest::TearDownTestCase(void)
+void OpenCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     UnistdMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void OpenCoreMockTest::SetUp(void)
+void OpenCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void OpenCoreMockTest::TearDown(void)
+void OpenCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: OpenCoreMockTest_DoOpen_001
- * @tc.desc: Test function of OpenCore::DoOpen interface for SUCCESS.
+ * @tc.desc: Test function of OpenCore::DoOpen interface for SUCCESS when path is local file.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -74,7 +71,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_001, testing::ext::TestSize.L
 {
     GTEST_LOG_(INFO) << "OpenCoreMockTest-begin OpenCoreMockTest_DoOpen_001";
 
-    string path = "/test/OpenCoreMockTest_DoOpen_001";
+    string path = "fakePath/OpenCoreMockTest_DoOpen_001.txt";
     int32_t mode = 0;
 
     auto uvMock = UvFsMock::GetMock();
@@ -90,7 +87,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_001, testing::ext::TestSize.L
 
 /**
  * @tc.name: OpenCoreMockTest_DoOpen_002
- * @tc.desc: Test function of OpenCore::DoOpen interface for SUCCESS.
+ * @tc.desc: Test function of OpenCore::DoOpen interface for SUCCESS when path is URL.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -99,7 +96,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_002, testing::ext::TestSize.L
 {
     GTEST_LOG_(INFO) << "OpenCoreMockTest-begin OpenCoreMockTest_DoOpen_002";
 
-    string path = "file://test/OpenCoreMockTest_DoOpen_002";
+    string path = "file://fakePath/OpenCoreMockTest_DoOpen_002.txt";
     int32_t mode = 0;
 
     auto uvMock = UvFsMock::GetMock();
@@ -119,7 +116,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_002, testing::ext::TestSize.L
 
 /**
  * @tc.name: OpenCoreMockTest_DoOpen_003
- * @tc.desc: Test function of OpenCore::DoOpen interface for FALSE.
+ * @tc.desc: Test function of OpenCore::DoOpen interface for FAILURE when path is URL and uv_fs_open fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -128,14 +125,13 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_003, testing::ext::TestSize.L
 {
     GTEST_LOG_(INFO) << "OpenCoreMockTest-begin OpenCoreMockTest_DoOpen_003";
 
-    string path = "file://test/OpenCoreMockTest_DoOpen_003";
+    string path = "file://fakePath/OpenCoreMockTest_DoOpen_003.txt";
     int32_t mode = 0;
 
     auto uvMock = UvFsMock::GetMock();
     auto unistdMock = UnistdMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).WillOnce(Return(-1));
-    EXPECT_CALL(*unistdMock, read(testing::_, testing::_, testing::_)).WillRepeatedly(testing::Return(1));
-    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).WillRepeatedly(testing::Return(0));
+    EXPECT_CALL(*unistdMock, access(testing::_, testing::_)).WillOnce(testing::Return(0));
 
     auto res = OpenCore::DoOpen(path, mode);
 
@@ -148,7 +144,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_003, testing::ext::TestSize.L
 
 /**
  * @tc.name: OpenCoreMockTest_DoOpen_004
- * @tc.desc: Test function of OpenCore::DoOpen interface for ERROR.
+ * @tc.desc: Test function of OpenCore::DoOpen interface for FAILURE when path is a local file and uv_fs_open fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -157,7 +153,7 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_004, testing::ext::TestSize.L
 {
     GTEST_LOG_(INFO) << "OpenCoreMockTest-begin OpenCoreMockTest_DoOpen_004";
 
-    string path = "/test/OpenCoreMockTest_DoOpen_004";
+    string path = "fakePath/OpenCoreMockTest_DoOpen_004";
     int32_t mode = 0;
 
     auto uvMock = UvFsMock::GetMock();

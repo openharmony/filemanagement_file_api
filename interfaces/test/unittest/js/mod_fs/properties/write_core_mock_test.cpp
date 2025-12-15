@@ -28,31 +28,31 @@ using namespace std;
 
 class WriteCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void WriteCoreMockTest::SetUpTestCase(void)
+void WriteCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "WriteCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void WriteCoreMockTest::TearDownTestCase(void)
+void WriteCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void WriteCoreMockTest::SetUp(void)
+void WriteCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void WriteCoreMockTest::TearDown(void)
+void WriteCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
@@ -71,7 +71,7 @@ HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_001, testing::ext::TestSiz
     int32_t fd = 1;
     string buffer;
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(0));
 
     auto res = WriteCore::DoWrite(fd, buffer);
 
@@ -95,12 +95,15 @@ HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_002, testing::ext::TestSiz
     int32_t fd = 1;
     string buffer;
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-EIO));
 
     auto res = WriteCore::DoWrite(fd, buffer);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite_002";
 }
@@ -119,7 +122,7 @@ HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_003, testing::ext::TestSiz
     int32_t fd = 1;
     ArrayBuffer buffer(nullptr, 1);
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(0));
 
     auto res = WriteCore::DoWrite(fd, buffer);
 
@@ -143,12 +146,15 @@ HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_004, testing::ext::TestSiz
     int32_t fd = 1;
     ArrayBuffer buffer(nullptr, 1);
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(-EIO));
 
     auto res = WriteCore::DoWrite(fd, buffer);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite_004";
 }

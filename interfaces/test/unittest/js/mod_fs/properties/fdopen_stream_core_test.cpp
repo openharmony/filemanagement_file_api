@@ -108,6 +108,7 @@ HWTEST_F(FdopenStreamCoreTest, FdopenStreamCoreTest_DoFdopenStream_002, testing:
 
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FdopenStreamCoreTest_DoFdopenStream_002";
 }
@@ -136,6 +137,7 @@ HWTEST_F(FdopenStreamCoreTest, FdopenStreamCoreTest_DoFdopenStream_003, testing:
 
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     close(fd);
 

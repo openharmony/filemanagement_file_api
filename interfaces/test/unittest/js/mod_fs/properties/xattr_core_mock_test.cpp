@@ -29,39 +29,39 @@ using namespace std;
 
 class XattrCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void XattrCoreMockTest::SetUpTestCase(void)
+void XattrCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "XattrCoreMockTest");
     SysXattrMock::EnableMock();
 }
 
-void XattrCoreMockTest::TearDownTestCase(void)
+void XattrCoreMockTest::TearDownTestCase()
 {
     SysXattrMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void XattrCoreMockTest::SetUp(void)
+void XattrCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
     errno = 0;
 }
 
-void XattrCoreMockTest::TearDown(void)
+void XattrCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: XattrCoreMockTest_DoSetXattr_001
- * @tc.desc: Test function of XattrCore::DoSetXattr interface for FAILED.
+ * @tc.desc: Test function of XattrCore::DoSetXattr interface for FAILURE when setxattr fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -75,9 +75,14 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_001, TestSize.Level1)
     string value = "test_value";
     auto xattrMock = SysXattrMock::GetMock();
     EXPECT_CALL(*xattrMock, setxattr(_, _, _, _, _)).WillOnce(SetErrnoAndReturn(EIO, -1));
+
     auto ret = XattrCore::DoSetXattr(path, key, value);
+
     testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoSetXattr_001";
 }
@@ -96,10 +101,11 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_002, TestSize.Level1)
     string path = "fakePath/XattrCoreMockTest_DoSetXattr_002";
     string key = "test_key";
     string value = "test_value";
-
     auto xattrMock = SysXattrMock::GetMock();
     EXPECT_CALL(*xattrMock, setxattr(_, _, _, _, _)).WillOnce(Return(0));
+
     auto ret = XattrCore::DoSetXattr(path, key, value);
+
     testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_TRUE(ret.IsSuccess());
 
@@ -108,7 +114,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoSetXattr_002, TestSize.Level1)
 
 /**
  * @tc.name: XattrCoreMockTest_DoGetXattr_001
- * @tc.desc: Test function of XattrCore::DoGetXattr interface for SUCCESS.
+ * @tc.desc: Test function of XattrCore::DoGetXattr interface for SUCCESS when the retrieved xattr is empty.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -119,10 +125,11 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_001, TestSize.Level1)
 
     string path = "fakePath/XattrCoreMockTest_DoGetXattr_001";
     string key = "test_key";
-
     auto xattrMock = SysXattrMock::GetMock();
-    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillRepeatedly(SetErrnoAndReturn(EIO, -1));
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).Times(1).WillOnce(Return(0));
+
     auto ret = XattrCore::DoGetXattr(path, key);
+
     testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_TRUE(ret.IsSuccess());
 
@@ -131,7 +138,7 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_001, TestSize.Level1)
 
 /**
  * @tc.name: XattrCoreMockTest_DoGetXattr_002
- * @tc.desc: Test function of XattrCore::DoGetXattr interface for FAILED.
+ * @tc.desc: Test function of XattrCore::DoGetXattr interface for FAILURE when getxattr fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -142,12 +149,16 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_002, TestSize.Level1)
 
     string path = "fakePath/XattrCoreMockTest_DoGetXattr_002";
     string key = "test_key";
-
     auto xattrMock = SysXattrMock::GetMock();
     EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(SetErrnoAndReturn(EIO, -1));
+
     auto ret = XattrCore::DoGetXattr(path, key);
+
     testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoGetXattr_002";
 }
@@ -165,10 +176,11 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_003, TestSize.Level1)
 
     string path = "fakePath/XattrCoreMockTest_DoGetXattr_003";
     string key = "test_key";
-
     auto xattrMock = SysXattrMock::GetMock();
     EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillOnce(Return(1)).WillOnce(Return(1));
+
     auto ret = XattrCore::DoGetXattr(path, key);
+
     testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_TRUE(ret.IsSuccess());
 

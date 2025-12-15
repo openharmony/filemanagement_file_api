@@ -31,38 +31,38 @@ using namespace std;
 
 class ReadCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
 };
 
-void ReadCoreMockTest::SetUpTestCase(void)
+void ReadCoreMockTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "ReadCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void ReadCoreMockTest::TearDownTestCase(void)
+void ReadCoreMockTest::TearDownTestCase()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void ReadCoreMockTest::SetUp(void)
+void ReadCoreMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void ReadCoreMockTest::TearDown(void)
+void ReadCoreMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: ReadCoreMockTest_DoRead_001
- * @tc.desc: Test function of ReadCore::DoRead interface for FALSE.
+ * @tc.desc: Test function of ReadCore::DoRead interface for FAILURE when uv_fs_read fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -81,7 +81,7 @@ HWTEST_F(ReadCoreMockTest, ReadCoreMockTest_DoRead_001, testing::ext::TestSize.L
     auto res = ReadCore::DoRead(fd, arrayBuffer);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "ReadCoreMockTest-end ReadCoreMockTest_DoRead_001";
 }
@@ -107,7 +107,7 @@ HWTEST_F(ReadCoreMockTest, ReadCoreMockTest_DoRead_002, testing::ext::TestSize.L
     auto res = ReadCore::DoRead(fd, arrayBuffer);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "ReadCoreMockTest-end ReadCoreMockTest_DoRead_002";
 }

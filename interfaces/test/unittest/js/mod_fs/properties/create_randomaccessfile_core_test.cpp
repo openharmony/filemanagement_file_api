@@ -149,6 +149,7 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
     EXPECT_EQ(res.IsSuccess(), false);
     auto err = res.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_004";
 }
