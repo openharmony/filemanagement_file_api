@@ -73,10 +73,8 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.L
 {
     GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_UnlinkSync_001";
     int envAddr = 0x1000;
-    int valueAddr = 0x1200;
     int callbackInfoAddr = 0x1122;
     napi_env env = reinterpret_cast<napi_env>(envAddr);
-    napi_value nv = reinterpret_cast<napi_value>(valueAddr);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(callbackInfoAddr);
 
     size_t strLen = 10;
@@ -86,7 +84,6 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.L
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
-    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(tp)));
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*libnMock, ThrowErr(_));
