@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
+#include "fdsan_mock.h"
 #include "libn_mock.h"
 #include "uv_fs_mock.h"
 
@@ -45,12 +46,14 @@ void CloseMockTest::SetUpTestCase(void)
     prctl(PR_SET_NAME, "CloseMockTest");
     LibnMock::EnableMock();
     UvFsMock::EnableMock();
+    FdsanMock::EnableMock();
 }
 
 void CloseMockTest::TearDownTestCase(void)
 {
     LibnMock::DisableMock();
     UvFsMock::DisableMock();
+    FdsanMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -81,10 +84,12 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
-    EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*fdsanMock, fdsan_get_owner_tag(testing::_)).WillOnce(testing::Return(0));
+    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(-1));
+
     EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = Close::Sync(env, info);

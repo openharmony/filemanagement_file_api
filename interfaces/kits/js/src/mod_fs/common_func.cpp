@@ -53,8 +53,8 @@ using namespace OHOS::FileManagement::LibN;
 const uint32_t API_VERSION_MOD = 1000;
 #endif
 
-constexpr uint32_t ALIGN_SIZE = 4096;
-uint32_t Align(size_t x, size_t y) {
+#define ALIGN_SIZE 4096
+size_t Align(size_t x, size_t y) {
     return ((x) + (y) - 1) & -(y);
 }
 #define FD_SAN_OVERFLOW_END 2048
@@ -76,10 +76,6 @@ static struct FdSanEntry* GetFsFdEntry(size_t idx)
         size_t requiredSize = sizeof(
             struct FdSanTableOverflow) + FD_SAN_TABLE_OVERFLOW_SIZE * sizeof(struct FdSanEntry);
         size_t alignedSize = Align(requiredSize, ALIGN_SIZE);
-        if (alignedSize == 0) {
-            HILOGE("fdsan: size is zero");
-            return nullptr;
-        }
         size_t alignedCount = (alignedSize - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
         void* allocation = malloc(alignedSize);
         if (allocation == nullptr) {
