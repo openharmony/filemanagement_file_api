@@ -16,49 +16,54 @@
 #include "unlink_core.h"
 
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
-static string g_dirPath = "/data/storage/el2/UninkCoreTestDir";
-static string g_filePath = "/data/storage/el2/UninkCoreTestFile.txt";
-
 class UnlinkCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/UnlinkCoreTest";
 };
 
-void UnlinkCoreTest::SetUpTestCase(void)
+void UnlinkCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "UnlinkCoreTest");
 }
 
-void UnlinkCoreTest::TearDownTestCase(void)
+void UnlinkCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void UnlinkCoreTest::SetUp(void)
+void UnlinkCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void UnlinkCoreTest::TearDown(void)
+void UnlinkCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: UnlinkCoreTest_DoUnlink_001
- * @tc.desc: Test function of UnlinkCore::DoUnlink interface for Failed.
+ * @tc.desc: Test function of UnlinkCore::DoUnlink interface for FAILURE when file is not exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -67,15 +72,21 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UnlinkCoreTest-begin UnlinkCoreTest_DoUnlink_001";
 
-    auto res = UnlinkCore::DoUnlink(g_dirPath);
+    auto path = testDir + "/UnlinkCoreTest_DoUnlink_001.txt";
+
+    auto res = UnlinkCore::DoUnlink(path);
+
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_001";
 }
 
 /**
  * @tc.name: UnlinkCoreTest_DoUnlink_002
- * @tc.desc: Test function of UnlinkCore::DoUnlink interface for Failed.
+ * @tc.desc: Test function of UnlinkCore::DoUnlink interface for FAILURE when path is a directory.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -83,28 +94,23 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_001, TestSize.Level1)
 HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UnlinkCoreTest-begin UnlinkCoreTest_DoUnlink_002";
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    auto result = mkdir(g_dirPath.c_str(), mode);
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_002 mkdir failed! ret: " << result << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
 
-    auto res = UnlinkCore::DoUnlink(g_dirPath);
+    auto path = testDir + "/UnlinkCoreTest_DoUnlink_002";
+    ASSERT_TRUE(FileUtils::CreateDirectories(path));
 
-    result = rmdir(g_dirPath.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_002 rmdir failed! ret: " << result << ", errno: " << errno;
-    }
+    auto res = UnlinkCore::DoUnlink(path);
 
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900019);
+    EXPECT_EQ(err.GetErrMsg(), "Is a directory");
 
     GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_002";
 }
 
 /**
  * @tc.name: UnlinkCoreTest_DoUnlink_003
- * @tc.desc: Test function of UnlinkCore::DoUnlink interface for Failed.
+ * @tc.desc: Test function of UnlinkCore::DoUnlink interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -113,50 +119,14 @@ HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UnlinkCoreTest-begin UnlinkCoreTest_DoUnlink_003";
 
-    auto res = UnlinkCore::DoUnlink(g_filePath);
-    EXPECT_FALSE(res.IsSuccess());
+    auto path = testDir + "/UnlinkCoreTest_DoUnlink_003.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
+
+    auto res = UnlinkCore::DoUnlink(path);
+    EXPECT_TRUE(res.IsSuccess());
+    EXPECT_FALSE(FileUtils::Exists(path));
 
     GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_003";
-}
-
-/**
- * @tc.name: UnlinkCoreTest_DoUnlink_004
- * @tc.desc: Test function of UnlinkCore::DoUnlink interface for Successed.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_004, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "UnlinkCoreTest-begin UnlinkCoreTest_DoUnlink_004";
-    auto file = open(g_filePath.c_str(), O_CREAT | O_RDWR);
-    if (file < 0) {
-        GTEST_LOG_(ERROR) << "UnlinkCoreTest_DoUnlink_004 create failed! ret: " << file << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    close(file);
-
-    auto res = UnlinkCore::DoUnlink(g_filePath);
-    EXPECT_TRUE(res.IsSuccess());
-
-    GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_004";
-}
-
-/**
- * @tc.name: UnlinkCoreTest_DoUnlink_005
- * @tc.desc: Test function of UnlinkCore::DoUnlink interface for Failed.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(UnlinkCoreTest, UnlinkCoreTest_DoUnlink_005, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "UnlinkCoreTest-begin UnlinkCoreTest_DoUnlink_005";
-
-    auto res = UnlinkCore::DoUnlink("hello world");
-    EXPECT_FALSE(res.IsSuccess());
-
-    GTEST_LOG_(INFO) << "UnlinkCoreTest-end UnlinkCoreTest_DoUnlink_005";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

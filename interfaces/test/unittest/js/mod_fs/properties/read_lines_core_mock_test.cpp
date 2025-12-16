@@ -29,7 +29,6 @@ using namespace std;
 
 class ReadLinesCoreMockTest : public testing::Test {
 public:
-    static filesystem::path tempFilePath;
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
