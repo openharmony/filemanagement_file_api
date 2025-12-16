@@ -62,20 +62,20 @@ constexpr unsigned int USR_SYNC = 04010000;
 const double NS = 1e9;
 const double MS = 1e3;
 
-#define FdSanTableSize 128
+#define FD_SAN_TABLE_SIZE 128
 
 struct FdSanEntry {
-	_Atomic(uint64_t) close_tag;
+    _Atomic(uint64_t) close_tag;
 };
 
 struct FdSanTableOverflow {
-	size_t len;
-	struct FdSanEntry entries[];
+    size_t len;
+    struct FdSanEntry entries[];
 };
 
 struct FdSanTable {
-	struct FdSanEntry entries[FdSanTableSize];
-	_Atomic(struct FdSanTableOverflow*) overflow;
+    struct FdSanEntry entries[FD_SAN_TABLE_SIZE];
+    _Atomic(struct FdSanTableOverflow*) overflow;
 };
 
 struct FileInfo {
