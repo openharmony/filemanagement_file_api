@@ -72,14 +72,12 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FdatasyncMockTest-begin FdatasyncMockTest_Sync_001";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
-    napi_value nv = reinterpret_cast<napi_value>(0x1200);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     tuple<bool, int32_t> tp = { true, 1 };
 
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
-    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(tp));
     EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(-1));
     EXPECT_CALL(*libnMock, ThrowErr(_));
