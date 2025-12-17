@@ -356,6 +356,7 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
 
 static NError CloseFdWithTag(const int fd, const uint64_t fileTag)
 {
+#ifdef __MUSL__
     auto tag = CommonFunc::GetFdTag(fd);
     if (tag <= 0 || tag != fileTag) {
         tag = fileTag|PREFIX_ADDR;
@@ -368,6 +369,19 @@ static NError CloseFdWithTag(const int fd, const uint64_t fileTag)
         HILOGE("Failed to close file with errno: %{public}d", errno);
         return NError(errno);
     }
+#else
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
+        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!close_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to close file with ret: %{public}d", ret);
+        return NError(ret);
+    }
+#endif
     return NError(ERRNO_NOERR);
 }
 

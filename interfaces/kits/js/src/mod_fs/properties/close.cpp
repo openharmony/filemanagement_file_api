@@ -48,6 +48,8 @@ static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
 
 static NError CloseFdWithTag(const int fd, const bool isFd, const uint64_t fileTag)
 {
+#ifdef __MUSL__
+    HILOGI("CloseFdWithTag, fd: %{public}d", fd);
     FileFsTrace traceCloseFdWithTag("CloseFdWithTag");
     if (isFd) {
         auto tag = fdsan_get_owner_tag(fd);
@@ -74,6 +76,20 @@ static NError CloseFdWithTag(const int fd, const bool isFd, const uint64_t fileT
             return NError(errno);
         }
     }
+#else
+    FileFsTrace traceCloseFd("CloseFd");
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
+        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!close_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to close file with ret: %{public}d", ret);
+        return NError(ret);
+    }
+#endif
     return NError(ERRNO_NOERR);
 }
 

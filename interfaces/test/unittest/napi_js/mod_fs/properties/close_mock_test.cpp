@@ -89,7 +89,6 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*fdsanMock, fdsan_get_owner_tag(testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(-1));
-
     EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = Close::Sync(env, info);

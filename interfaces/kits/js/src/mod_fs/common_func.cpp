@@ -53,46 +53,47 @@ using namespace OHOS::FileManagement::LibN;
 const uint32_t API_VERSION_MOD = 1000;
 #endif
 
-#define ALIGN_SIZE 4096
-size_t Align(size_t x, size_t y) {
-    return ((x) + (y) - 1) & -(y);
-}
-#define FD_SAN_OVERFLOW_END 2048
-#define FD_SAN_TABLE_OVERFLOW_SIZE (FD_SAN_OVERFLOW_END - FD_SAN_TABLE_SIZE)
+#define __predict_true(exp) __builtin_expect((exp) != 0, 1)
+#define __predict_false(exp) __builtin_expect((exp) != 0, 0)
 
-static struct FdSanTable g_fdTable = {
+
+#define ALIGN_SIZE 4096
+#define ALIGN(x, y) (((x) + (y) - 1) & -(y))
+#define FD_SAN_OVERFLOW_END 2048
+
+static struct FdSanTable g_fd_table = {
     .overflow = nullptr,
 };
 
 static struct FdSanEntry* GetFsFdEntry(size_t idx)
 {
-    struct FdSanEntry *entries = g_fdTable.entries;
+	struct FdSanEntry *entries = g_fd_table.entries;
     if (idx < FD_SAN_TABLE_SIZE) {
         return &entries[idx];
     }
 	// Try to create the overflow table ourselves.
-    struct FdSanTableOverflow* localOverflow = atomic_load(&g_fdTable.overflow);
+    struct FdSanTableOverflow* localOverflow = atomic_load(&g_fd_table.overflow);
     if (__predict_false(!localOverflow)) {
-        size_t requiredSize = sizeof(
-            struct FdSanTableOverflow) + FD_SAN_TABLE_OVERFLOW_SIZE * sizeof(struct FdSanEntry);
-        size_t alignedSize = Align(requiredSize, ALIGN_SIZE);
+        size_t overflowCount = FD_SAN_OVERFLOW_END - FD_SAN_TABLE_SIZE;
+        size_t requiredSize = sizeof(struct FdSanTableOverflow) + overflowCount * sizeof(struct FdSanEntry);
+        size_t alignedSize = ALIGN(requiredSize, ALIGN_SIZE);
+
         size_t alignedCount = (alignedSize - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
         void* allocation = malloc(alignedSize);
         if (allocation == nullptr) {
-            HILOGE("fdsan: malloc overflow table failed errno=%{public}d", errno);
-            return nullptr;
+            HILOGE("fdsan: malloc overflow table failed errno=%d", errno);
         }
         struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
-        newOverflow ->len = alignedCount;
+        newOverflow->len = alignedCount;
 
-        if (atomic_compare_exchange_strong(&g_fdTable.overflow, &localOverflow, newOverflow)) {
+        if (atomic_compare_exchange_strong(&g_fd_table.overflow, &localOverflow, newOverflow)) {
             localOverflow = newOverflow;
         } else {
             free(allocation);
         }
     }
 
-    size_t offset = idx - FD_SAN_TABLE_SIZE;
+	size_t offset = idx - FD_SAN_TABLE_SIZE;
     if (localOverflow->len <= offset) {
         return nullptr;
     }
