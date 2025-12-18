@@ -391,6 +391,29 @@ void NError::ThrowErrAddData(napi_env env, int errCode, napi_value data)
     return realThrowErrAddData(env, errCode, data);
 }
 
+void NError::ThrowErrWithMsg(napi_env env, const std::string &errMsg)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->ThrowErrWithMsg(env, errMsg);
+    }
+
+    static void (*realThrowErrWithMsg)(napi_env, std::string) = []() {
+        auto func = (void (*)(napi_env, std::string))dlsym(RTLD_NEXT,
+        "_ZN4OHOS14FileManagement4LibN6NError15ThrowErrWithMsgEP10napi_env__RKNSt3__h12basic_stringIcNS5_11char_"
+        "traitsIcEENS5_9allocatorIcEEEE");
+    if (!func) {
+        GTEST_LOG_(ERROR) << "Failed to resolve real ThrowErrWithMsg: " << dlerror();
+    }
+    return func;
+    }();
+
+    if (!realThrowErrWithMsg) {
+        return;
+    }
+
+    return realThrowErrWithMsg(env, errMsg);
+}
+
 std::tuple<bool, std::unique_ptr<char[]>, size_t> NVal::ToUTF8String() const
 {
     if (LibnMock::IsMockable()) {

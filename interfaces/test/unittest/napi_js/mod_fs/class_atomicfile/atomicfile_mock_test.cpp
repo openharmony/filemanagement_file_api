@@ -140,7 +140,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FailWrite_002, testing::ext::Tes
 
     EXPECT_CALL(*stdioMock, remove(testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*libnMock, napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_invalid_arg));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_, testing::A<std::string>()));
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_));
 
     auto res = AtomicFileNExporter::FailWrite(env, info);
 
@@ -224,7 +224,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FinishWrite_002, testing::ext::T
 
     EXPECT_CALL(*stdioMock, rename(testing::_, testing::_)).WillOnce(testing::Return(1));
     EXPECT_CALL(*libnMock, napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_ok));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_, testing::A<std::string>()));
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_));
 
     auto res = AtomicFileNExporter::FinishWrite(env, info);
 
@@ -267,7 +267,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FinishWrite_003, testing::ext::T
 
     EXPECT_CALL(*stdioMock, rename(testing::_, testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*libnMock, napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_invalid_arg));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_, testing::A<std::string>()));
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_));
 
     auto res = AtomicFileNExporter::FinishWrite(env, info);
 

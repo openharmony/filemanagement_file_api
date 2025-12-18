@@ -91,7 +91,7 @@ static tuple<bool, int64_t, int64_t> GetRafOptions(napi_env env, napi_value opti
     if (op.HasProp("start")) {
         auto [succ, start] = op.GetProp("start").ToInt64();
         if (!succ || start < 0) {
-            NError(EINVAL).ThrowErr(env, "Invalid option.start, positive integer is desired");
+            NError(EINVAL).ThrowErrWithMsg(env, "Invalid option.start, positive integer is desired");
             return {false, opStart, opEnd};
         }
         opStart = start;
@@ -99,7 +99,7 @@ static tuple<bool, int64_t, int64_t> GetRafOptions(napi_env env, napi_value opti
     if (op.HasProp("end")) {
         auto [succ, end] = op.GetProp("end").ToInt64();
         if (!succ || end < 0) {
-            NError(EINVAL).ThrowErr(env, "Invalid option.end, positive integer is desired");
+            NError(EINVAL).ThrowErrWithMsg(env, "Invalid option.end, positive integer is desired");
             return {false, opStart, opEnd};
         }
         opEnd = end;
