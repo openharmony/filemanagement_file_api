@@ -287,6 +287,27 @@ napi_value NFuncArg::GetThisVar() const
     return realGetThisVar();
 }
 
+napi_value NFuncArg::operator[](size_t argPos) const
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->GetArg(argPos);
+    }
+
+    static napi_value (*realGetArg)(size_t) = []() {
+        auto func = (napi_value(*)(size_t))dlsym(RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN8NFuncArg6GetArgEj");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real GetArg: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realGetArg) {
+        return nullptr;
+    }
+
+    return realGetArg(argPos);
+}
+
 napi_value NFuncArg::GetArg(size_t argPos) const
 {
     if (LibnMock::IsMockable()) {

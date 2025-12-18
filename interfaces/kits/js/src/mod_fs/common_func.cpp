@@ -20,6 +20,9 @@
 #include <sstream>
 #include <stdatomic.h>
 #include <sys/cdefs.h>
+#ifdef __MUSL__
+#include <sys/mman.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -54,11 +57,8 @@ const uint32_t API_VERSION_MOD = 1000;
 #endif
 
 #define ALIGN_SIZE 4096
+#define ALIGN(x, y) (((x) + (y) - 1) & -(y))
 #define FD_SAN_OVERFLOW_END 2048
-
-size_t Align(size_t x, size_t y) {
-    return ((x) + (y) - 1) & -(y);
-}
 
 static struct FdSanTable g_fdTable = {
     .overflow = nullptr,
@@ -75,21 +75,36 @@ static struct FdSanEntry* GetFsFdEntry(size_t idx)
     if (!localOverflow) {
         size_t overflowCount = FD_SAN_OVERFLOW_END - FD_SAN_TABLE_SIZE;
         size_t requiredSize = sizeof(struct FdSanTableOverflow) + overflowCount * sizeof(struct FdSanEntry);
-        size_t alignedSize = Align(requiredSize, ALIGN_SIZE);
+        size_t alignedSize = ALIGN(requiredSize, ALIGN_SIZE);
 
         size_t alignedCount = (alignedSize - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
+#ifdef __MUSL__
+        void* allocation =
+				mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+		if (allocation == MAP_FAILED) {
+			HILOGE("fdsan: mmap failed errno=%d", errno);
+		}
+		struct FdTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
+		newOverflow->len = alignedCount;
+		if (atomic_compare_exchange_strong(&g_fdTable.overflow, &localOverflow, newOverflow)) {
+			localOverflow = newOverflow;
+		} else {
+			// Another thread had mmaped.
+			munmap(allocation, alignedSize);
+		}
+#else
         void* allocation = malloc(alignedSize);
         if (allocation == nullptr) {
-            HILOGE("fdsan: malloc overflow table failed errno=%d", errno);
+            HILOGE("fdsan: malloc failed errno=%d", errno);
         }
         struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
         newOverflow->len = alignedCount;
-
         if (atomic_compare_exchange_strong(&g_fdTable.overflow, &localOverflow, newOverflow)) {
             localOverflow = newOverflow;
         } else {
             free(allocation);
         }
+#endif
     }
 
     size_t offset = idx - FD_SAN_TABLE_SIZE;
