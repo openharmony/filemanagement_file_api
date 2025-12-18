@@ -53,30 +53,29 @@ using namespace OHOS::FileManagement::LibN;
 const uint32_t API_VERSION_MOD = 1000;
 #endif
 
-#define __predict_true(exp) __builtin_expect((exp) != 0, 1)
-#define __predict_false(exp) __builtin_expect((exp) != 0, 0)
-
-
 #define ALIGN_SIZE 4096
-#define ALIGN(x, y) (((x) + (y) - 1) & -(y))
 #define FD_SAN_OVERFLOW_END 2048
 
-static struct FdSanTable g_fd_table = {
+size_t Align(size_t x, size_t y) {
+    return ((x) + (y) - 1) & -(y);
+}
+
+static struct FdSanTable g_fdTable = {
     .overflow = nullptr,
 };
 
 static struct FdSanEntry* GetFsFdEntry(size_t idx)
 {
-	struct FdSanEntry *entries = g_fd_table.entries;
+    struct FdSanEntry *entries = g_fdTable.entries;
     if (idx < FD_SAN_TABLE_SIZE) {
         return &entries[idx];
     }
 	// Try to create the overflow table ourselves.
-    struct FdSanTableOverflow* localOverflow = atomic_load(&g_fd_table.overflow);
-    if (__predict_false(!localOverflow)) {
+    struct FdSanTableOverflow* localOverflow = atomic_load(&g_fdTable.overflow);
+    if (!localOverflow) {
         size_t overflowCount = FD_SAN_OVERFLOW_END - FD_SAN_TABLE_SIZE;
         size_t requiredSize = sizeof(struct FdSanTableOverflow) + overflowCount * sizeof(struct FdSanEntry);
-        size_t alignedSize = ALIGN(requiredSize, ALIGN_SIZE);
+        size_t alignedSize = Align(requiredSize, ALIGN_SIZE);
 
         size_t alignedCount = (alignedSize - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
         void* allocation = malloc(alignedSize);
@@ -86,14 +85,14 @@ static struct FdSanEntry* GetFsFdEntry(size_t idx)
         struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
         newOverflow->len = alignedCount;
 
-        if (atomic_compare_exchange_strong(&g_fd_table.overflow, &localOverflow, newOverflow)) {
+        if (atomic_compare_exchange_strong(&g_fdTable.overflow, &localOverflow, newOverflow)) {
             localOverflow = newOverflow;
         } else {
             free(allocation);
         }
     }
 
-	size_t offset = idx - FD_SAN_TABLE_SIZE;
+    size_t offset = idx - FD_SAN_TABLE_SIZE;
     if (localOverflow->len <= offset) {
         return nullptr;
     }

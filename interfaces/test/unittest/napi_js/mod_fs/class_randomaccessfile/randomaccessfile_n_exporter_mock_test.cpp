@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
+#include "fdsan_mock.h"
 #include "libn_mock.h"
 #include "randomaccessfile_entity.h"
 #include "uv_fs_mock.h"
@@ -45,12 +46,14 @@ void RandomAccessFileNExporterMockTest::SetUpTestCase(void)
     prctl(PR_SET_NAME, "RandomAccessFileNExporterMockTest");
     UvFsMock::EnableMock();
     LibnMock::EnableMock();
+    FdsanMock::EnableMock();
 }
 
 void RandomAccessFileNExporterMockTest::TearDownTestCase(void)
 {
     UvFsMock::DisableMock();
     LibnMock::DisableMock();
+    FdsanMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -87,11 +90,12 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
-    EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*libnMock, napi_remove_wrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateUndefined(_)).WillOnce(Return(mockNval));
@@ -100,6 +104,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_NE(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_001";

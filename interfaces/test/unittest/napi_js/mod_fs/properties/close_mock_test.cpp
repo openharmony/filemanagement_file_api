@@ -95,6 +95,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_001";
