@@ -168,4 +168,62 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_004, testing::ext::TestSize.L
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_004";
 }
 
+/**
+ * @tc.name: StatCoreMockTest_DoStat_005
+ * @tc.desc: Test function of StatCore::DoStat with URI parameter for FAILURE when uv_fs_stat fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_005, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_005";
+
+    auto [succ, fileinfo] =
+        GenerateFileInfoFromPath("file://com.example.statsupporturi/fakePath/StatCoreMockTest_DoStat_005.txt");
+    ASSERT_TRUE(succ);
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-EIO));
+
+    auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_005";
+}
+
+/**
+ * @tc.name: StatCoreMockTest_DoStat_006
+ * @tc.desc: Test function of StatCore::DoStat with remote URI path for FAILURE when uv_fs_stat fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StatCoreMockTest-begin StatCoreMockTest_DoStat_006";
+
+    auto [succ, fileinfo] =
+        GenerateFileInfoFromPath("datashare://com.example.statsupporturi/fakePath/StatCoreMockTest_DoStat_006.txt");
+    ASSERT_TRUE(succ);
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_stat(_, _, _, _)).WillOnce(Return(-EIO));
+
+    auto res = StatCore::DoStat(fileinfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_006";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

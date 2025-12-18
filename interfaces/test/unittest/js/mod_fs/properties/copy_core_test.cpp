@@ -16,7 +16,6 @@
 #include "copy_core.h"
 
 #include <fcntl.h>
-#include <filesystem>
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 

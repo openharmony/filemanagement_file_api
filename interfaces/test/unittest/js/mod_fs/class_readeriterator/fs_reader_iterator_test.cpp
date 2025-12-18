@@ -15,9 +15,13 @@
 
 #include "fs_reader_iterator.h"
 
-#include <filesystem>
-#include <fstream>
+#include <memory>
+
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "rust_file.h"
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -26,43 +30,41 @@ using namespace std;
 
 class FsReaderIteratorTest : public testing::Test {
 public:
-    static std::filesystem::path tempFilePath;
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/FsReaderIteratorTest";
 };
 
-filesystem::path FsReaderIteratorTest::tempFilePath;
-
-void FsReaderIteratorTest::SetUpTestCase(void)
+void FsReaderIteratorTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
-    tempFilePath = std::filesystem::temp_directory_path() / "fs_reader_iterator_test_file.txt";
-    ofstream tempfile(tempFilePath);
-    tempfile << "Test content\n123\n456";
-    tempfile.close();
+    prctl(PR_SET_NAME, "FsReaderIteratorTest");
 }
 
-void FsReaderIteratorTest::TearDownTestCase(void)
+void FsReaderIteratorTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
-    filesystem::remove(tempFilePath);
 }
 
-void FsReaderIteratorTest::SetUp(void)
+void FsReaderIteratorTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void FsReaderIteratorTest::TearDown(void)
+void FsReaderIteratorTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: FsReaderIteratorTest_Constructor_001
- * @tc.desc: Test FsReaderIterator::Constructor for success case
+ * @tc.desc: Test function of FsReaderIterator::Constructor interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -70,11 +72,42 @@ void FsReaderIteratorTest::TearDown(void)
 HWTEST_F(FsReaderIteratorTest, FsReaderIteratorTest_Constructor_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsReaderIteratorTest-begin FsReaderIteratorTest_Constructor_001";
-    
+
     auto result = FsReaderIterator::Constructor();
     EXPECT_EQ(result.IsSuccess(), true);
-    
+
     GTEST_LOG_(INFO) << "FsReaderIteratorTest-end FsReaderIteratorTest_Constructor_001";
 }
 
+/**
+ * @tc.name: FsReaderIteratorTest_Next_001
+ * @tc.desc: Test function of FsReaderIterator::Next interface for SUCCESS.
+ * @tc.size: SMALL
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsReaderIteratorTest, FsReaderIteratorTest_Next_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsReaderIteratorTest-begin FsReaderIteratorTest_Next_001";
+
+    // Prepare test parameters
+    auto path = testDir + "/FsReaderIteratorTest_Next_001.txt";
+    auto content = "FsReaderIteratorTest_Next_001 Content";
+    ASSERT_TRUE(FileUtils::CreateFile(path, content));
+    // Prepare test condition
+    auto iterator = ::ReaderIterator(path.c_str());
+    ASSERT_NE(iterator, nullptr);
+    auto entity = std::make_unique<ReaderIteratorEntity>();
+    entity->iterator = iterator;
+    FsReaderIterator fsReaderIterator(std::move(entity));
+    // Do testing
+    auto nextResult = fsReaderIterator.Next();
+    // Verify results
+    ASSERT_TRUE(nextResult.IsSuccess());
+    EXPECT_TRUE(nextResult.GetData().value().done);
+    EXPECT_EQ(nextResult.GetData().value().value, content);
+
+    GTEST_LOG_(INFO) << "FsReaderIteratorTest-end FsReaderIteratorTest_Next_001";
 }
+
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

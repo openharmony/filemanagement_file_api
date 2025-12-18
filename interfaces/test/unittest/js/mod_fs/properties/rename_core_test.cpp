@@ -17,8 +17,11 @@
 
 #include <fcntl.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#include "ut_file_utils.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -27,35 +30,41 @@ using namespace std;
 
 class RenameCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/ReadTextCoreTest";
 };
 
-void RenameCoreTest::SetUpTestCase(void)
+void RenameCoreTest::SetUpTestCase()
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
+    prctl(PR_SET_NAME, "RenameCoreTest");
 }
 
-void RenameCoreTest::TearDownTestCase(void)
+void RenameCoreTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
-void RenameCoreTest::SetUp(void)
+void RenameCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void RenameCoreTest::TearDown(void)
+void RenameCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: RenameCoreTest_DoRename_001
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS when renaming a file.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -63,39 +72,23 @@ void RenameCoreTest::TearDown(void)
 HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenameCoreTest-begin RenameCoreTest_DoRename_001";
-    string src = "/data/storage/el2/RenameCoreTestFileSrc.txt";
-    string dest = "/data/storage/el2/RenameCoreTestFileDest.txt";
-    auto file = open(src.c_str(), O_CREAT | O_RDWR);
-    if (file < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_001 create failed! ret: " << file << ", errno: " << errno;
-        EXPECT_GT(file, 0);
-    }
-    close(file);
+
+    string src = testDir + "/RenameCoreTest_DoRename_001_src.txt";
+    string dest = testDir + "/RenameCoreTest_DoRename_001_dest.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(src, "content"));
 
     auto res = RenameCore::DoRename(src, dest);
 
-    auto result = remove(dest.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_001 remove file failed! ret: " << result << ", errno: " << errno;
-    }
-
     EXPECT_TRUE(res.IsSuccess());
-
-    bool srcFileExists = (access(src.c_str(), F_OK) == 0);
-    if (srcFileExists) {
-        GTEST_LOG_(WARNING) << "RenameCoreTest_DoRename_001: Source file still exists after rename operation";
-        int removeResult = remove(src.c_str());
-        if (removeResult < 0) {
-            GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_001 remove file failed! errno: " << errno;
-        }
-    }
+    EXPECT_FALSE(FileUtils::Exists(src));
+    EXPECT_EQ(FileUtils::ReadTextFileContent(dest), std::make_tuple(true, "content"));
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_001";
 }
 
 /**
  * @tc.name: RenameCoreTest_DoRename_002
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS when the dest file is already exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -103,41 +96,25 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_001, testing::ext::TestSize.Lev
 HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenameCoreTest-begin RenameCoreTest_DoRename_002";
-    string src = "/data/storage/el2/RenameCoreTestFileSrc.txt";
-    string dest = "/data/storage/el2/RenameCoreTestFileDest.txt";
-    auto file = open(src.c_str(), O_CREAT | O_RDWR);
-    if (file < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_002 create failed! ret: " << file << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    close(file);
 
-    auto fileDest = open(dest.c_str(), O_CREAT | O_RDWR);
-    if (fileDest < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_002 create failed! ret: " << fileDest << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    close(fileDest);
+    string src = testDir + "/RenameCoreTest_DoRename_002_src.txt";
+    string dest = testDir + "/RenameCoreTest_DoRename_002_dest.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(src, "src content"));
+    ASSERT_TRUE(FileUtils::CreateFile(dest, "dest content"));
 
     auto res = RenameCore::DoRename(src, dest);
 
-    auto result = remove(src.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_002 remove file failed! ret: " << result << ", errno: " << errno;
-    }
-    result = remove(dest.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_002 remove file failed! ret: " << result << ", errno: " << errno;
-    }
-
     EXPECT_TRUE(res.IsSuccess());
+    EXPECT_FALSE(FileUtils::Exists(src));
+    EXPECT_EQ(FileUtils::ReadTextFileContent(dest), std::make_tuple(true, "src content"));
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_002";
 }
 
 /**
  * @tc.name: RenameCoreTest_DoRename_003
- * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE when dest path is already exist, but is not
+ * file.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -145,41 +122,25 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_002, testing::ext::TestSize.Lev
 HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenameCoreTest-begin RenameCoreTest_DoRename_003";
-    string src = "/data/storage/el2/RenameCoreTestFileSrc.txt";
-    string dest = "/data/storage/el2/RenameCoreTestFileDest";
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    auto file = open(src.c_str(), O_CREAT | O_RDWR);
-    if (file < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_003 create failed! ret: " << file << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    close(file);
 
-    auto result = mkdir(dest.c_str(), mode);
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_003 mkdir failed! ret: " << result << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
+    string src = testDir + "/RenameCoreTest_DoRename_003_src.txt";
+    string dest = testDir + "/RenameCoreTest_DoRename_003_dest";
+    ASSERT_TRUE(FileUtils::CreateFile(src, "content"));
+    ASSERT_TRUE(FileUtils::CreateDirectories(dest));
 
     auto res = RenameCore::DoRename(src, dest);
 
-    result = remove(src.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_003 remove file failed! ret: " << result << ", errno: " << errno;
-    }
-    result = rmdir(dest.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_003 rmdir failed! ret: " << result << ", errno: " << errno;
-    }
-
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900019);
+    EXPECT_EQ(err.GetErrMsg(), "Is a directory");
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_003";
 }
 
 /**
  * @tc.name: RenameCoreTest_DoRename_004
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS when renaming a directory.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -187,39 +148,23 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_003, testing::ext::TestSize.Lev
 HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenameCoreTest-begin RenameCoreTest_DoRename_004";
-    string src = "/data/storage/el2/RenameCoreTestFileSrc";
-    string dest = "/data/storage/el2/RenameCoreTestFileDest";
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    auto result = mkdir(src.c_str(), mode);
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_004 mkdir failed! ret: " << result << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
+
+    string src = testDir + "/RenameCoreTest_DoRename_004_src";
+    string dest = testDir + "/RenameCoreTest_DoRename_004_dest";
+    ASSERT_TRUE(FileUtils::CreateDirectories(src));
 
     auto res = RenameCore::DoRename(src, dest);
 
-    result = rmdir(dest.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_004 rmdir failed! ret: " << result << ", errno: " << errno;
-    }
-
     EXPECT_TRUE(res.IsSuccess());
-
-    bool srcDirExists = (access(src.c_str(), F_OK) == 0);
-    if (srcDirExists) {
-        GTEST_LOG_(WARNING) << "RenameCoreTest_DoRename_004: Source dir still exists after rename operation";
-        int removeResult = rmdir(src.c_str());
-        if (removeResult < 0) {
-            GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_004 rmdir failed! errno: " << errno;
-        }
-    }
+    EXPECT_FALSE(FileUtils::Exists(src));
+    EXPECT_TRUE(FileUtils::Exists(dest));
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_004";
 }
 
 /**
  * @tc.name: RenameCoreTest_DoRename_005
- * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS.
+ * @tc.desc: Test function of RenameCore::DoRename interface for SUCCESS when the dest directory is already exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -227,35 +172,25 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_004, testing::ext::TestSize.Lev
 HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenameCoreTest-begin RenameCoreTest_DoRename_005";
-    string src = "/data/storage/el2/RenameCoreTestFileSrc";
-    string dest = "/data/storage/el2/RenameCoreTestFileDest";
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    auto result = mkdir(src.c_str(), mode);
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_005 mkdir failed! ret: " << result << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    result = mkdir(dest.c_str(), mode);
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_005 mkdir failed! ret: " << result << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
+
+    string src = testDir + "/RenameCoreTest_DoRename_005_src";
+    string dest = testDir + "/RenameCoreTest_DoRename_005_dest";
+    ASSERT_TRUE(FileUtils::CreateDirectories(src));
+    ASSERT_TRUE(FileUtils::CreateDirectories(dest));
 
     auto res = RenameCore::DoRename(src, dest);
 
-    result = rmdir(dest.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_005 rmdir failed! ret: " << result << ", errno: " << errno;
-    }
-
     EXPECT_TRUE(res.IsSuccess());
+    EXPECT_FALSE(FileUtils::Exists(src));
+    EXPECT_TRUE(FileUtils::Exists(dest));
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_005";
 }
 
 /**
  * @tc.name: RenameCoreTest_DoRename_006
- * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE when dest path is already exits, but is not a
+ * directory.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -263,40 +198,25 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_005, testing::ext::TestSize.Lev
 HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenameCoreTest-begin RenameCoreTest_DoRename_006";
-    string src = "/data/storage/el2/RenameCoreTestFileSrc";
-    string dest = "/data/storage/el2/RenameCoreTestFileDest.txt";
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    auto result = mkdir(src.c_str(), mode);
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_006 mkdir failed! ret: " << result << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    auto file = open(dest.c_str(), O_CREAT | O_RDWR);
-    if (file < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_006 create failed! ret: " << file << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    close(file);
+
+    string src = testDir + "/RenameCoreTest_DoRename_006_src";
+    string dest = testDir + "/RenameCoreTest_DoRename_006_dest.txt";
+    ASSERT_TRUE(FileUtils::CreateDirectories(src));
+    ASSERT_TRUE(FileUtils::CreateFile(dest, "content"));
 
     auto res = RenameCore::DoRename(src, dest);
 
-    result = rmdir(src.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_006 rmdir failed! ret: " << result << ", errno: " << errno;
-    }
-    result = remove(dest.c_str());
-    if (result < 0) {
-        GTEST_LOG_(ERROR) << "RenameCoreTest_DoRename_006 remove file failed! ret: " << result << ", errno: " << errno;
-    }
-
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900018);
+    EXPECT_EQ(err.GetErrMsg(), "Not a directory");
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_006";
 }
 
 /**
  * @tc.name: RenameCoreTest_DoRename_007
- * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE.
+ * @tc.desc: Test function of RenameCore::DoRename interface for FAILURE when src path is not exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -304,12 +224,16 @@ HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_006, testing::ext::TestSize.Lev
 HWTEST_F(RenameCoreTest, RenameCoreTest_DoRename_007, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenameCoreTest-begin RenameCoreTest_DoRename_007";
-    string src = "/data/storage/el2/RenameCoreTestFileSrc.txt";
-    string dest = "/data/storage/el2/RenameCoreTestFileDest.txt";
+
+    string src = testDir + "/RenameCoreTest_DoRename_007_src_not_existent.txt";
+    string dest = testDir + "/RenameCoreTest_DoRename_007_dest.txt";
 
     auto res = RenameCore::DoRename(src, dest);
 
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "RenameCoreTest-end RenameCoreTest_DoRename_007";
 }
