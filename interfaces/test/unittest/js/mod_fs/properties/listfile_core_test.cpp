@@ -16,7 +16,6 @@
 #include "listfile_core.h"
 
 #include <filesystem>
-#include <fstream>
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
