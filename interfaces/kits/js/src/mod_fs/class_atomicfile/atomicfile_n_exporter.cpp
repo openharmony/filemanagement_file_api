@@ -73,7 +73,8 @@ static napi_value CreateStream(napi_env env, napi_callback_info info, const std:
     napi_status status = napi_load_module(env, moduleName, &streamrw);
     if (status != napi_ok) {
         HILOGE("Failed to load module");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to load module");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_load_module failed, \
+            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception");
         return nullptr;
     }
 
@@ -81,7 +82,8 @@ static napi_value CreateStream(napi_env env, napi_callback_info info, const std:
     status = napi_get_named_property(env, streamrw, streamName.c_str(), &constructor);
     if (status != napi_ok) {
         HILOGE("Failed to get named property");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to get named property");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_get_named_property failed, \
+            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception 3.napi_object_expected");
         return nullptr;
     }
 
@@ -92,7 +94,8 @@ static napi_value CreateStream(napi_env env, napi_callback_info info, const std:
     status = napi_new_instance(env, constructor, argc, argv, &streamObj);
     if (status != napi_ok) {
         HILOGE("Failed to create napi new instance");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to create napi new instance");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_new_instance failed, \
+            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception 3.napi_function_expected");
         return nullptr;
     }
 
@@ -135,7 +138,7 @@ static NVal InstantiateFile(napi_env env, int fd, std::string path, bool isUri)
     if (!objFile) {
         close(fd);
         HILOGE("Failed to instantiate class");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to instantiate class");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to instantiate class");
         return NVal();
     }
 
@@ -143,7 +146,7 @@ static NVal InstantiateFile(napi_env env, int fd, std::string path, bool isUri)
     if (fileEntity == nullptr) {
         close(fd);
         HILOGE("Failed to get fileEntity");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to get fileEntity");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get fileEntity");
         return NVal();
     }
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
@@ -186,7 +189,7 @@ napi_value AtomicFileNExporter::GetBaseFile(napi_env env, napi_callback_info inf
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
-            NError(errcode).ThrowErr(env, "Failed to get atomicFile");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
             NError(errcode).ThrowErr(env);
         }
@@ -195,7 +198,7 @@ napi_value AtomicFileNExporter::GetBaseFile(napi_env env, napi_callback_info inf
 
     if (rafEntity->baseFileName.size() >= PATH_MAX) {
         HILOGE("Base file name is too long");
-        NError(UNKROWN_ERR).ThrowErr(env, "Base file name is too long");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Base file name is too long");
         return nullptr;
     }
 
@@ -221,7 +224,7 @@ napi_value AtomicFileNExporter::OpenRead(napi_env env, napi_callback_info info)
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
-            NError(errcode).ThrowErr(env, "Failed to get atomicFile");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
             NError(errcode).ThrowErr(env);
         }
@@ -273,7 +276,7 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
-            NError(errcode).ThrowErr(env, "Failed to get atomicFile");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
             NError(errcode).ThrowErr(env);
         }
@@ -299,7 +302,7 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
     auto [bufferData, readErrcode] = ReadFileToBuffer(env, file.get());
     if (readErrcode != 0) {
         if (readErrcode == UNKROWN_ERR) {
-            NError(readErrcode).ThrowErr(env, "Failed to read file to buffer");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to read file to buffer");
         } else {
             NError(readErrcode).ThrowErr(env);
         }
@@ -311,14 +314,16 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
     napi_status status = napi_create_external_arraybuffer(
         env, bufferData->buffer, bufferData->length, FinalizeCallback, bufferData.release(), &externalBuffer);
     if (status != napi_ok) {
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to create external arraybuffer");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_create_external_arraybuffer failed, \
+            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception");
         return nullptr;
     }
 
     napi_value outputArray = nullptr;
     status = napi_create_typedarray(env, napi_int8_array, length, externalBuffer, 0, &outputArray);
     if (status != napi_ok) {
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to create typedarray");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_create_typedarray failed, \
+            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception 3.mapi_arraybuffer_expected");
         return nullptr;
     }
 
@@ -330,7 +335,7 @@ napi_value AtomicFileNExporter::StartWrite(napi_env env, napi_callback_info info
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
-            NError(errcode).ThrowErr(env, "Failed to get atomicFile");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
             NError(errcode).ThrowErr(env);
         }
@@ -360,7 +365,8 @@ napi_value AtomicFileNExporter::StartWrite(napi_env env, napi_callback_info info
     napi_status status = napi_create_reference(env, writeStream, 1, &rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to create reference");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to create reference");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_create_reference failed, \
+            Possible reasons: napi_invalid_arg");
         return nullptr;
     }
     return writeStream;
@@ -371,7 +377,7 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
-            NError(errcode).ThrowErr(env, "Failed to get atomicFile");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
             NError(errcode).ThrowErr(env);
         }
@@ -382,7 +388,8 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
     napi_status status = napi_get_reference_value(env, rafEntity->writeStreamObj, &writeStream);
     if (status != napi_ok) {
         HILOGE("Failed to get reference value");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to get reference value");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_get_reference_value failed, \
+            Possible reasons: napi_invalid_arg");
         return nullptr;
     }
 
@@ -394,10 +401,11 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
         status = napi_delete_reference(env, rafEntity->writeStreamObj);
         if (status != napi_ok) {
             HILOGE("Failed to delete reference");
-            NError(UNKROWN_ERR).ThrowErr(env, "Failed to delete reference");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_delete_reference failed, \
+                Possible reasons: napi_invalid_arg");
             return nullptr;
         }
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to rename file");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to rename file");
         return nullptr;
     }
 
@@ -406,7 +414,8 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
     status = napi_delete_reference(env, rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to delete reference");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to delete reference");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_delete_reference failed, \
+            Possible reasons: napi_invalid_arg");
         return nullptr;
     }
     return nullptr;
@@ -417,7 +426,7 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
-            NError(errcode).ThrowErr(env, "Failed to get atomicFile");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
             NError(errcode).ThrowErr(env);
         }
@@ -428,7 +437,8 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
     napi_status status = napi_get_reference_value(env, rafEntity->writeStreamObj, &writeStream);
     if (status != napi_ok) {
         HILOGE("Failed to get reference value");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to get reference value");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_get_reference_value failed, \
+            Possible reasons: napi_invalid_arg");
         return nullptr;
     }
 
@@ -439,10 +449,11 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
         status = napi_delete_reference(env, rafEntity->writeStreamObj);
         if (status != napi_ok) {
             HILOGE("Failed to delete reference");
-            NError(UNKROWN_ERR).ThrowErr(env, "Failed to delete reference");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_delete_reference failed, \
+                Possible reasons: napi_invalid_arg");
             return nullptr;
         }
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to remove file");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to remove file");
         return nullptr;
     }
     std::string tmpNewFileName = rafEntity->baseFileName;
@@ -450,7 +461,8 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
     status = napi_delete_reference(env, rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to delete reference");
-        NError(UNKROWN_ERR).ThrowErr(env, "Failed to delete reference");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_delete_reference failed, \
+            Possible reasons: napi_invalid_arg");
     }
     return nullptr;
 }
@@ -460,7 +472,7 @@ napi_value AtomicFileNExporter::Delete(napi_env env, napi_callback_info info)
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
-            NError(errcode).ThrowErr(env, "Failed to get atomicFile");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
             NError(errcode).ThrowErr(env);
         }

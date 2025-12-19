@@ -51,6 +51,7 @@ public:
     virtual void ThrowErr(napi_env env, int errCode) = 0;
     virtual void ThrowErr(napi_env env, std::string errMsg) = 0;
     virtual void ThrowErrAddData(napi_env env, int errCode, napi_value data) = 0;
+    virtual void ThrowErrWithMsg(napi_env env, const std::string &errMsg) = 0;
 
     // n_val
     virtual std::tuple<bool, std::unique_ptr<char[]>, size_t> ToUTF8String() = 0;
@@ -90,6 +91,7 @@ public:
     MOCK_METHOD(void, ThrowErr, (napi_env, int), (override));
     MOCK_METHOD(void, ThrowErr, (napi_env, std::string), (override));
     MOCK_METHOD(void, ThrowErrAddData, (napi_env, int, napi_value), (override));
+    MOCK_METHOD(void, ThrowErrWithMsg, (napi_env, const std::string &errMsg), (override));
 
     MOCK_METHOD((std::tuple<bool, std::unique_ptr<char[]>, size_t>), ToUTF8String, (), (override));
     MOCK_METHOD((std::tuple<bool, std::unique_ptr<char[]>, size_t>), ToUTF8String, (std::string), (override));

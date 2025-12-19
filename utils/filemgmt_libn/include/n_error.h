@@ -473,6 +473,7 @@ public:
     void ThrowErr(napi_env env, int errCode);
     void ThrowErr(napi_env env, std::string errMsg);
     void ThrowErrAddData(napi_env env, int errCode, napi_value data);
+    void ThrowErrWithMsg(napi_env env, const std::string &errMsg);
 
 private:
     int errno_ = ERRNO_NOERR;
