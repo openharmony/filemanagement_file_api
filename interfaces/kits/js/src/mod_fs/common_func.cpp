@@ -57,7 +57,7 @@ const uint32_t API_VERSION_MOD = 1000;
 #endif
 
 #define ALIGN_SIZE 4096
-#define ALIGN(x, y) (((x) + (y) - 1) & -(y))
+#define FS_ALIGN(x, y) (((x) + (y) - 1) & -(y))
 #define FD_SAN_OVERFLOW_END 2048
 
 static struct FdSanTable g_fdTable = {
@@ -75,14 +75,15 @@ static struct FdSanEntry* GetFsFdEntry(size_t idx)
     if (!localOverflow) {
         size_t overflowCount = FD_SAN_OVERFLOW_END - FD_SAN_TABLE_SIZE;
         size_t requiredSize = sizeof(struct FdSanTableOverflow) + overflowCount * sizeof(struct FdSanEntry);
-        size_t alignedSize = ALIGN(requiredSize, ALIGN_SIZE);
+        size_t alignedSize = FS_ALIGN(requiredSize, ALIGN_SIZE);
 
         size_t alignedCount = (alignedSize - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
 #ifdef __MUSL__
         void* allocation =
                 mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (allocation == MAP_FAILED) {
-            HILOGE("fdsan: mmap failed errno=%d", errno);
+            HILOGE("fdsan: mmap failed idx=%{public}zu, errno=%{public}d", idx, errno);
+            return nullptr;
         }
         struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
         newOverflow->len = alignedCount;
@@ -95,7 +96,8 @@ static struct FdSanEntry* GetFsFdEntry(size_t idx)
 #else
         void* allocation = malloc(alignedSize);
         if (allocation == nullptr) {
-            HILOGE("fdsan: malloc failed errno=%d", errno);
+            HILOGE("fdsan: malloc failed idx=%{public}zu, errno=%{public}d", idx, errno);
+            return nullptr;
         }
         struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
         newOverflow->len = alignedCount;

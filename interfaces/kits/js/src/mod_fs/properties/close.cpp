@@ -15,10 +15,10 @@
 
 #include "close.h"
 
+#include <cstdio>
 #include <cstring>
 #include <tuple>
 #include <unistd.h>
-#include <cstdio>
 
 #include "common_func.h"
 #include "file_fs_trace.h"
@@ -29,8 +29,6 @@ namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
-
-constexpr uint32_t PREFIX_ADDR = 0xabc00000;
 
 static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
 {
@@ -46,14 +44,14 @@ static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
     return fileEntity;
 }
 
-static NError CloseFdWithTag(const int fd, const bool isFd, const uint64_t fileTag)
+static NError CloseFd(const int fd, const bool isFd, const uint64_t fileTag)
 {
+    FileFsTrace traceCloseFd("CloseFd");
 #ifdef __MUSL__
-    FileFsTrace traceCloseFdWithTag("CloseFdWithTag");
     if (isFd) {
         auto tag = fdsan_get_owner_tag(fd);
         if (tag != 0) {
-            HILOGE("Get fdsan owner tag, fd: %{public}d", fd);
+            HILOGI("Get fdsan owner tag, fd: %{public}d", fd);
         }
         CommonFunc::SetFdTag(fd, 0);
         int ret = fdsan_close_with_tag(fd, tag);
@@ -76,7 +74,6 @@ static NError CloseFdWithTag(const int fd, const bool isFd, const uint64_t fileT
         }
     }
 #else
-    FileFsTrace traceCloseFd("CloseFd");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!close_req) {
@@ -131,7 +128,7 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
     if (!fileStruct.isFd) {
         fd = fileStruct.fileEntity->fd_->GetFD();
     }
-    auto err = CloseFdWithTag(fd, fileStruct.isFd, fileTag);
+    auto err = CloseFd(fd, fileStruct.isFd, fileTag);
     if (err) {
         err.ThrowErr(env);
         return nullptr;
@@ -176,7 +173,7 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [fd, isFd = fileStruct.isFd, fileTag]() -> NError {
-        return CloseFdWithTag(fd, isFd, fileTag);
+        return CloseFd(fd, isFd, fileTag);
     };
 
     auto cbComplete = [](napi_env env, NError err) -> NVal {

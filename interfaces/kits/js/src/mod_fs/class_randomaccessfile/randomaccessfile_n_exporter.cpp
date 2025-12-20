@@ -29,7 +29,6 @@ using namespace OHOS::FileManagement::LibN;
 const int BUF_SIZE = 1024;
 const string READ_STREAM_CLASS = "ReadStream";
 const string WRITE_STREAM_CLASS = "WriteStream";
-constexpr uint32_t PREFIX_ADDR = 0xabc00000;
 
 static tuple<bool, RandomAccessFileEntity*> GetRAFEntity(napi_env env, napi_value raf_entity)
 {
@@ -354,7 +353,7 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
     return WriteExec(env, funcArg, rafEntity);
 }
 
-static NError CloseFdWithTag(const int fd, const uint64_t fileTag)
+static NError CloseFd(const int fd, const uint64_t fileTag)
 {
 #ifdef __MUSL__
     auto tag = CommonFunc::GetFdTag(fd);
@@ -400,8 +399,8 @@ napi_value RandomAccessFileNExporter::CloseSync(napi_env env, napi_callback_info
         return nullptr;
     }
 
-    auto fileTag = reinterpret_cast<uint64_t>(rafEntity);
-    auto err = CloseFdWithTag(rafEntity->fd.get()->GetFD(), fileTag);
+    uint64_t fileTag = static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(rafEntity));
+    auto err = CloseFd(rafEntity->fd.get()->GetFD(), fileTag);
     if (err) {
         err.ThrowErr(env);
         return nullptr;

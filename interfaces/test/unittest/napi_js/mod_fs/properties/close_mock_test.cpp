@@ -22,7 +22,6 @@
 
 #include "fdsan_mock.h"
 #include "libn_mock.h"
-#include "uv_fs_mock.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -45,14 +44,12 @@ void CloseMockTest::SetUpTestCase(void)
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "CloseMockTest");
     LibnMock::EnableMock();
-    UvFsMock::EnableMock();
     FdsanMock::EnableMock();
 }
 
 void CloseMockTest::TearDownTestCase(void)
 {
     LibnMock::DisableMock();
-    UvFsMock::DisableMock();
     FdsanMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
@@ -83,7 +80,6 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_001, testing::ext::TestSize.Level1)
     tuple<bool, int> isFd = { true, 1 };
 
     auto libnMock = LibnMock::GetMock();
-    auto uvMock = UvFsMock::GetMock();
     auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
@@ -95,7 +91,6 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_001, testing::ext::TestSize.Level1)
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_EQ(res, nullptr);
 
@@ -113,24 +108,25 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_002";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nVal = reinterpret_cast<napi_value>(0x1300);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    NVal mockNval = { env, nVal };
 
     tuple<bool, int> isFd = { true, 1 };
 
     auto libnMock = LibnMock::GetMock();
-    auto uvMock = UvFsMock::GetMock();
     auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*fdsanMock, fdsan_get_owner_tag(testing::_)).WillOnce(testing::Return(1));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(1));
+    EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
 
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
-    EXPECT_EQ(res, nullptr);
+    EXPECT_NE(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_002";
 }
@@ -159,7 +155,6 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_003, testing::ext::TestSize.Level1)
     entity.uri_ = fakeUri;
 
     auto libnMock = LibnMock::GetMock();
-    auto uvMock = UvFsMock::GetMock();
     auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nv));
@@ -173,7 +168,6 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_003, testing::ext::TestSize.Level1)
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_EQ(res, nullptr);
 
@@ -204,7 +198,6 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_004, testing::ext::TestSize.Level1)
     entity.uri_ = fakeUri;
 
     auto libnMock = LibnMock::GetMock();
-    auto uvMock = UvFsMock::GetMock();
     auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nv)).WillOnce(testing::Return(nv));
@@ -216,7 +209,6 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_004, testing::ext::TestSize.Level1)
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_EQ(res, nullptr);
 
@@ -224,58 +216,262 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_004, testing::ext::TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFdTag_001
- * @tc.desc: Test function of CommonFunc::GetFdTag interface if is fd for FAILURE when GetFdSanEntry fails.
+ * @tc.name: CloseMockTest_Sync_005
+ * @tc.desc: Test function of Close::Sync interface if no fd for FAILURE when ToInt32 fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CommonFuncTest, GetFdTag_001, testing::ext::TestSize.Level1)
+HWTEST_F(CloseMockTest, CloseMockTest_Sync_005, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CommonFuncTest-begin GetFdTag_001";
+    GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_005";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
-    uint64_t res = CommonFunc::GetFdTag(-1);
+    tuple<bool, int> isFd = { true, -1 };
 
-    EXPECT_EQ(res, 0);
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nv));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
-    GTEST_LOG_(INFO) << "CommonFuncTest-end GetFdTag_001";
+    auto res = Close::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_005";
 }
 
 /**
- * @tc.name: GetFdTag_002
- * @tc.desc: Test function of CommonFunc::GetFdTag interface if is fd for FAILURE when GetFdSanEntry fails.
+ * @tc.name: CloseMockTest_Sync_006
+ * @tc.desc: Test function of Close::Sync interface if no fd for FAILURE when GetArg fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CommonFuncTest, GetFdTag_002, testing::ext::TestSize.Level1)
+HWTEST_F(CloseMockTest, CloseMockTest_Sync_006, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CommonFuncTest-begin GetFdTag_002";
+    GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_006";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
-    uint64_t res = CommonFunc::GetFdTag(2049);
+    tuple<bool, int> isFd = { false, 1 };
 
-    EXPECT_EQ(res, 0);
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nullptr));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
-    GTEST_LOG_(INFO) << "CommonFuncTest-end GetFdTag_002";
+    auto res = Close::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_006";
 }
 
 /**
- * @tc.name: SetFdTag_001
- * @tc.desc: Test function of CommonFunc::SetFdTag interface if is fd for FAILURE when GetFdSanEntry fails.
+ * @tc.name: CloseMockTest_Sync_007
+ * @tc.desc: Test function of Close::Sync interface if is fd for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(CommonFuncTest, SetFdTag_001, testing::ext::TestSize.Level1)
+HWTEST_F(CloseMockTest, CloseMockTest_Sync_007, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "CommonFuncTest-begin SetFdTag_001";
+    GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_007";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_value nVal = reinterpret_cast<napi_value>(0x1300);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    NVal mockNval = { env, nVal };
 
-    CommonFunc::SetFdTag(-1, 0);
-    uint64_t res = CommonFunc::GetFdTag(-1);
+    tuple<bool, int> isFd = { false, 1 };
 
-    EXPECT_EQ(res, 0);
+    string filepath = "fakePath/CloseMockTest_Sync_007";
+    std::string fakeUri = "distributedfs://fake/CloseMockTest_Sync_007";
+    FileEntity entity;
+    entity.fd_ = std::make_unique<DistributedFS::FDGuard>(0x100);
+    entity.path_ = filepath;
+    entity.uri_ = fakeUri;
 
-    GTEST_LOG_(INFO) << "CommonFuncTest-end SetFdTag_001";
+    auto libnMock = LibnMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nv)).WillOnce(testing::Return(nv));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(1));
+    EXPECT_CALL(*libnMock, napi_remove_wrap(testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
+
+    auto res = Close::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    EXPECT_NE(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_007";
+}
+
+/**
+ * @tc.name: CloseMockTest_Sync_008
+ * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when GetArg fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CloseMockTest, CloseMockTest_Sync_008, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_008";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    tuple<bool, int> isFd = { false, 1 };
+
+    string filepath = "fakePath/CloseMockTest_Sync_008";
+    std::string fakeUri = "distributedfs://fake/CloseMockTest_Sync_008";
+    FileEntity entity;
+    entity.fd_ = std::make_unique<DistributedFS::FDGuard>(0x100);
+    entity.path_ = filepath;
+    entity.uri_ = fakeUri;
+
+    auto libnMock = LibnMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nv)).WillOnce(testing::Return(nullptr));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Close::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_008";
+}
+
+/**
+ * @tc.name: CloseMockTest_Sync_009
+ * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when fdsan_close_with_tag fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CloseMockTest, CloseMockTest_Sync_009, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_009";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    tuple<bool, int> isFd = { false, 1 };
+
+    string filepath = "fakePath/CloseMockTest_Sync_009";
+    std::string fakeUri = "distributedfs://fake/CloseMockTest_Sync_009";
+    FileEntity entity;
+    entity.fd_ = std::make_unique<DistributedFS::FDGuard>(0x100);
+    entity.path_ = filepath;
+    entity.uri_ = fakeUri;
+
+    auto libnMock = LibnMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nv)).WillOnce(testing::Return(nv));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(1));
+    EXPECT_CALL(*libnMock, napi_remove_wrap(testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)),
+        testing::Return(napi_invalid_arg)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Close::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_009";
+}
+
+/**
+ * @tc.name: CloseMockTest_Sync_0010
+ * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when fdsan_close_with_tag fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CloseMockTest, CloseMockTest_Sync_0010, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_0010";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    tuple<bool, int> isFd = { false, 1 };
+
+    string filepath = "fakePath/CloseMockTest_Sync_0010";
+    std::string fakeUri = "distributedfs://fake/CloseMockTest_Sync_0010";
+    FileEntity entity;
+    entity.fd_ = std::make_unique<DistributedFS::FDGuard>(0x100);
+    entity.path_ = filepath;
+    entity.uri_ = fakeUri;
+
+    auto libnMock = LibnMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nv));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)),
+        testing::Return(napi_invalid_arg)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Close::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_0010";
+}
+
+/**
+ * @tc.name: CloseMockTest_Sync_0011
+ * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when fdsan_close_with_tag fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CloseMockTest, CloseMockTest_Sync_0011, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_0011";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Close::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_0011";
 }
 
 } // namespace Test

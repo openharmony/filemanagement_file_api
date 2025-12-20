@@ -59,6 +59,8 @@ constexpr unsigned int USR_DIRECTORY = 0200000;
 constexpr unsigned int USR_NOFOLLOW = 0400000;
 constexpr unsigned int USR_SYNC = 04010000;
 
+constexpr uint64_t PREFIX_ADDR = 0xabc0000000000000;
+
 const double NS = 1e9;
 const double MS = 1e3;
 

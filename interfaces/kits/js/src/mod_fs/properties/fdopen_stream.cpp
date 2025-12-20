@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,13 +60,13 @@ napi_value FdopenStream::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    CommonFunc::SetFdTag(fd, 0);
     FILE *file = fdopen(fd, mode.c_str());
     if (!file) {
         HILOGE("Failed to fdopen file by path");
         NError(errno).ThrowErr(env);
         return nullptr;
     }
+    CommonFunc::SetFdTag(fd, 0);
     std::shared_ptr<FILE> fp(file, fclose);
     return CommonFunc::InstantiateStream(env, move(fp)).val_;
 }
@@ -85,7 +85,6 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    CommonFunc::SetFdTag(fd, 0);
 
     shared_ptr<AsyncFdopenStreamArg> arg = CreateSharedPtr<AsyncFdopenStreamArg>();
     if (arg == nullptr) {
@@ -99,6 +98,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
             HILOGE("Failed to fdopen file by path");
             return NError(errno);
         }
+        CommonFunc::SetFdTag(fd, 0);
         arg->fp = std::shared_ptr<FILE>(file, fclose);
         return NError(ERRNO_NOERR);
     };
