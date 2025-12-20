@@ -223,6 +223,61 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_004, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_004";
 }
 
+/**
+ * @tc.name: GetFdTag_001
+ * @tc.desc: Test function of CommonFunc::GetFdTag interface if is fd for FAILURE when GetFdSanEntry fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CommonFuncTest, GetFdTag_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CommonFuncTest-begin GetFdTag_001";
+
+    uint64_t res = CommonFunc::GetFdTag(-1);
+
+    EXPECT_EQ(res, 0);
+
+    GTEST_LOG_(INFO) << "CommonFuncTest-end GetFdTag_001";
+}
+
+/**
+ * @tc.name: GetFdTag_002
+ * @tc.desc: Test function of CommonFunc::GetFdTag interface if is fd for FAILURE when GetFdSanEntry fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CommonFuncTest, GetFdTag_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CommonFuncTest-begin GetFdTag_002";
+
+    uint64_t res = CommonFunc::GetFdTag(2049);
+
+    EXPECT_EQ(res, 0);
+
+    GTEST_LOG_(INFO) << "CommonFuncTest-end GetFdTag_002";
+}
+
+/**
+ * @tc.name: SetFdTag_001
+ * @tc.desc: Test function of CommonFunc::SetFdTag interface if is fd for FAILURE when GetFdSanEntry fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CommonFuncTest, SetFdTag_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CommonFuncTest-begin SetFdTag_001";
+
+    CommonFunc::SetFdTag(-1, 0);
+    uint64_t res = CommonFunc::GetFdTag(-1);
+
+    EXPECT_EQ(res, 0);
+
+    GTEST_LOG_(INFO) << "CommonFuncTest-end SetFdTag_001";
+}
+
 } // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement

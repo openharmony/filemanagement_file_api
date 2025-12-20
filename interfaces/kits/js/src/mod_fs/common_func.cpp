@@ -80,18 +80,18 @@ static struct FdSanEntry* GetFsFdEntry(size_t idx)
         size_t alignedCount = (alignedSize - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
 #ifdef __MUSL__
         void* allocation =
-				mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-		if (allocation == MAP_FAILED) {
-			HILOGE("fdsan: mmap failed errno=%d", errno);
-		}
-		struct FdTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
-		newOverflow->len = alignedCount;
-		if (atomic_compare_exchange_strong(&g_fdTable.overflow, &localOverflow, newOverflow)) {
-			localOverflow = newOverflow;
-		} else {
-			// Another thread had mmaped.
-			munmap(allocation, alignedSize);
-		}
+                mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (allocation == MAP_FAILED) {
+            HILOGE("fdsan: mmap failed errno=%d", errno);
+        }
+        struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
+        newOverflow->len = alignedCount;
+        if (atomic_compare_exchange_strong(&g_fdTable.overflow, &localOverflow, newOverflow)) {
+            localOverflow = newOverflow;
+        } else {
+            // Another thread had mmaped.
+            munmap(allocation, alignedSize);
+        }
 #else
         void* allocation = malloc(alignedSize);
         if (allocation == nullptr) {
