@@ -19,9 +19,9 @@
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
+#include "fdsan_mock.h"
 #include "libn_mock.h"
 #include "randomaccessfile_entity.h"
-#include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -43,14 +43,14 @@ void RandomAccessFileNExporterMockTest::SetUpTestCase(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestCase";
     prctl(PR_SET_NAME, "RandomAccessFileNExporterMockTest");
-    UvFsMock::EnableMock();
     LibnMock::EnableMock();
+    FdsanMock::EnableMock();
 }
 
 void RandomAccessFileNExporterMockTest::TearDownTestCase(void)
 {
-    UvFsMock::DisableMock();
     LibnMock::DisableMock();
+    FdsanMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestCase";
 }
 
@@ -86,23 +86,216 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     NVal mockNval = { env, nv };
 
     auto libnMock = LibnMock::GetMock();
-    auto uvMock = UvFsMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
-    EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*libnMock, napi_remove_wrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateUndefined(_)).WillOnce(Return(mockNval));
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_NE(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_001";
+}
+
+/**
+ * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_002
+ * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE
+ * when fdsan_close_with_tag fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_CloseSync_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-begin RandomAccessFileNExporterMockTest_CloseSync_002";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    NVal mockNval = { env, nv };
+
+    auto libnMock = LibnMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
+    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_))
+        .WillOnce(testing::SetErrnoAndReturn(EBADFD, -1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_002";
+}
+
+/**
+ * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_003
+ * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE
+ * when napi_unwrap fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_CloseSync_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-begin RandomAccessFileNExporterMockTest_CloseSync_003";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    NVal mockNval = { env, nv };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_invalid_arg)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_003";
+}
+
+/**
+ * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_004
+ * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE
+ * when InitArgs fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_CloseSync_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-begin RandomAccessFileNExporterMockTest_CloseSync_004";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_004";
+}
+
+/**
+ * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_005
+ * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE
+ * when GetThisVar fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_CloseSync_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-begin RandomAccessFileNExporterMockTest_CloseSync_005";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nullptr));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_005";
+}
+
+/**
+ * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_006
+ * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE
+ * when GetThisVar fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_CloseSync_006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-begin RandomAccessFileNExporterMockTest_CloseSync_006";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    auto libnMock = LibnMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv)).WillOnce(Return(nullptr));
+    EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
+    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(0));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_006";
+}
+
+/**
+ * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_007
+ * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE
+ * when napi_remove_wrap fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_CloseSync_007, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-begin RandomAccessFileNExporterMockTest_CloseSync_007";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+
+    auto libnMock = LibnMock::GetMock();
+    auto fdsanMock = FdsanMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
+    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(0));
+    EXPECT_CALL(*libnMock, napi_remove_wrap(_, _, _))
+        .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_invalid_arg)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_007";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

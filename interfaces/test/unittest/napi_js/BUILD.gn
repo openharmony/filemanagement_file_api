@@ -85,6 +85,7 @@ ohos_unittest("napi_file_fs_mock_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/watcher.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/xattr.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/eventfd_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/fdsan_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/inotify_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/poll_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/stdio_mock.cpp",
@@ -106,6 +107,7 @@ ohos_unittest("napi_file_fs_mock_test") {
     "mod_fs/properties/symlink_mock_test.cpp",
     "mod_fs/properties/truncate_mock_test.cpp",
     "mod_fs/properties/utimes_mock_test.cpp",
+    "mod_fs/common_func_test.cpp",
   ]
 
   deps = [

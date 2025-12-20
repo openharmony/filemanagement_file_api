@@ -59,8 +59,26 @@ constexpr unsigned int USR_DIRECTORY = 0200000;
 constexpr unsigned int USR_NOFOLLOW = 0400000;
 constexpr unsigned int USR_SYNC = 04010000;
 
+constexpr uint64_t PREFIX_ADDR = 0xabc0000000000000;
+
 const double NS = 1e9;
 const double MS = 1e3;
+
+#define FD_SAN_TABLE_SIZE 128
+
+struct FdSanEntry {
+    _Atomic(uint64_t) close_tag;
+};
+
+struct FdSanTableOverflow {
+    size_t len;
+    struct FdSanEntry entries[];
+};
+
+struct FdSanTable {
+    struct FdSanEntry entries[FD_SAN_TABLE_SIZE];
+    _Atomic(struct FdSanTableOverflow*) overflow;
+};
 
 struct FileInfo {
     bool isPath = false;
@@ -87,6 +105,8 @@ void InitWhenceType(napi_env env, napi_value exports);
 struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);
     static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf, bool async = false);
+    static uint64_t GetFdTag(int fd);
+    static void SetFdTag(int fd, uint64_t tag);
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf, std::shared_ptr<FileInfo> fileInfo,
                                       bool async = false);

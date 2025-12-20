@@ -164,6 +164,10 @@ static NVal InstantiateFile(napi_env env, int fd, std::string path, bool isUri)
         fileEntity->path_ = path;
         fileEntity->uri_ = "";
     }
+
+    uint64_t tag = static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(fileEntity));
+    CommonFunc::SetFdTag(fd, tag);
+
     return { env, objFile };
 }
 

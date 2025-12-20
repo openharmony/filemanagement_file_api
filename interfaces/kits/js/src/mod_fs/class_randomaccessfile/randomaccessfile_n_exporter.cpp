@@ -353,8 +353,22 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
     return WriteExec(env, funcArg, rafEntity);
 }
 
-static NError CloseFd(int fd)
+static NError CloseFd(const int fd, const uint64_t fileTag)
 {
+#ifdef __MUSL__
+    auto tag = CommonFunc::GetFdTag(fd);
+    if (tag <= 0 || tag != fileTag) {
+        tag = fileTag|PREFIX_ADDR;
+    } else {
+        tag = 0;
+    }
+    CommonFunc::SetFdTag(fd, 0);
+    int ret = fdsan_close_with_tag(fd, tag);
+    if (ret < 0) {
+        HILOGE("Failed to close file with errno: %{public}d", errno);
+        return NError(errno);
+    }
+#else
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!close_req) {
@@ -366,6 +380,7 @@ static NError CloseFd(int fd)
         HILOGE("Failed to close file with ret: %{public}d", ret);
         return NError(ret);
     }
+#endif
     return NError(ERRNO_NOERR);
 }
 
@@ -383,7 +398,9 @@ napi_value RandomAccessFileNExporter::CloseSync(napi_env env, napi_callback_info
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
-    auto err = CloseFd(rafEntity->fd.get()->GetFD());
+
+    uint64_t fileTag = static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(rafEntity));
+    auto err = CloseFd(rafEntity->fd.get()->GetFD(), fileTag);
     if (err) {
         err.ThrowErr(env);
         return nullptr;

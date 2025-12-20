@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "close.h"
 
+#include <cstdio>
 #include <cstring>
 #include <tuple>
 #include <unistd.h>
@@ -43,9 +44,36 @@ static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
     return fileEntity;
 }
 
-static NError CloseFd(int fd)
+static NError CloseFd(const int fd, const bool isFd, const uint64_t fileTag)
 {
     FileFsTrace traceCloseFd("CloseFd");
+#ifdef __MUSL__
+    if (isFd) {
+        auto tag = fdsan_get_owner_tag(fd);
+        if (tag != 0) {
+            HILOGI("Get fdsan owner tag, fd: %{public}d", fd);
+        }
+        CommonFunc::SetFdTag(fd, 0);
+        int ret = fdsan_close_with_tag(fd, tag);
+        if (ret < 0) {
+            HILOGE("Failed to close file with errno: %{public}d", errno);
+            return NError(errno);
+        }
+    } else {
+        auto tag = CommonFunc::GetFdTag(fd);
+        if (tag <= 0 || tag != fileTag) {
+            tag = fileTag|PREFIX_ADDR;
+        } else {
+            tag = 0;
+        }
+        CommonFunc::SetFdTag(fd, 0);
+        int ret = fdsan_close_with_tag(fd, tag);
+        if (ret < 0) {
+            HILOGE("Failed to close file with errno: %{public}d", errno);
+            return NError(errno);
+        }
+    }
+#else
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!close_req) {
@@ -57,6 +85,7 @@ static NError CloseFd(int fd)
         HILOGE("Failed to close file with ret: %{public}d", ret);
         return NError(ret);
     }
+#endif
     return NError(ERRNO_NOERR);
 }
 
@@ -94,25 +123,24 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    if (fileStruct.isFd) {
-        auto err = CloseFd(fileStruct.fd);
-        if (err) {
-            err.ThrowErr(env);
-            return nullptr;
-        }
-    } else {
-        auto err = CloseFd(fileStruct.fileEntity->fd_->GetFD());
-        if (err) {
-            err.ThrowErr(env);
-            return nullptr;
-        }
+    auto fileTag = reinterpret_cast<uint64_t>(fileStruct.fileEntity);
+    int fd = fileStruct.fd;
+    if (!fileStruct.isFd) {
+        fd = fileStruct.fileEntity->fd_->GetFD();
+    }
+    auto err = CloseFd(fd, fileStruct.isFd, fileTag);
+    if (err) {
+        err.ThrowErr(env);
+        return nullptr;
+    }
+
+    if (!fileStruct.isFd) {
         auto fp = NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg[NARG_POS::FIRST]);
         if (!fp) {
             NError(EINVAL).ThrowErr(env);
             return nullptr;
         }
     }
-
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -132,9 +160,11 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    auto fileTag = reinterpret_cast<uint64_t>(fileStruct.fileEntity);
+    int fd = fileStruct.fd;
+
     if (!fileStruct.isFd) {
-        fileStruct.fd = fileStruct.fileEntity->fd_->GetFD();
-        fileStruct.isFd = true;
+        fd = fileStruct.fileEntity->fd_->GetFD();
         auto fp = NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg[NARG_POS::FIRST]);
         if (!fp) {
             NError(EINVAL).ThrowErr(env);
@@ -142,11 +172,8 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
         }
     }
 
-    auto cbExec = [fileStruct = fileStruct]() -> NError {
-        if (fileStruct.isFd) {
-            return CloseFd(fileStruct.fd);
-        }
-        return NError(ERRNO_NOERR);
+    auto cbExec = [fd, isFd = fileStruct.isFd, fileTag]() -> NError {
+        return CloseFd(fd, isFd, fileTag);
     };
 
     auto cbComplete = [](napi_env env, NError err) -> NVal {
