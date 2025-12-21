@@ -13,7 +13,10 @@
 
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
+import("//build/ohos/taihe_idl/taihe.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
+
+taihe_generated_file_path = "$taihe_file_path/out/filemanagement/file_api/fs"
 
 file_common_src = [
   "src/common/file_helper/fd_guard.cpp",
@@ -635,16 +638,6 @@ group("build_kits_js") {
   ]
 }
 
-group("ani_file_api") {
-  deps = [
-    ":ani_file_environment",
-    ":ani_file_fs",
-    ":ani_file_hash",
-    ":ani_file_securitylabel",
-    ":ani_file_statvfs",
-  ]
-}
-
 config("ani_config") {
   include_dirs = [
     "./include",
@@ -670,7 +663,23 @@ config("ani_config") {
   ]
 }
 
-ohos_shared_library("ani_file_fs") {
+copy_taihe_idl("copy_taihe") {
+  sources = [
+    "src/mod_fs/taihe/idl/ohos.file.fs.taihe"
+  ]
+}
+
+ohos_taihe("run_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  deps = [ ":copy_taihe" ]
+  outputs = [
+    "$taihe_generated_file_path/src/ohos.file.fs.ani.cpp",
+    "$taihe_generated_file_path/src/ohos.file.fs.abi.c",
+  ]
+}
+
+taihe_shared_library("file_fs_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
   public_configs = [ ":ani_config" ]
   include_dirs = [
     "include/ipc",
@@ -694,11 +703,13 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/class_watcher",
     "src/mod_fs/class_watcher/ani",
     "src/mod_fs/common/obj",
+    "src/mod_fs/taihe/include",
     "src/mod_fs/properties",
     "src/mod_fs/properties/ani",
     "src/mod_fs/properties/copy_listener",
     "src/mod_fs/properties/copy_listener/ani",
   ]
+
   sources = [
     "src/common/ani_helper/ani_cache.cpp",
     "src/common/ani_helper/ani_signature.cpp",
@@ -707,7 +718,6 @@ ohos_shared_library("ani_file_fs") {
     "src/common/file_api_debug.cpp",
     "src/common/file_fs_trace.cpp",
     "src/common/file_helper/fd_guard.cpp",
-    "src/mod_fs/ani/bind_function_class.cpp",
     "src/mod_fs/ani/cleaner/cleaner_ani.cpp",
     "src/mod_fs/class_atomicfile/ani/atomicfile_ani.cpp",
     "src/mod_fs/class_atomicfile/fs_atomicfile.cpp",
@@ -805,7 +815,13 @@ ohos_shared_library("ani_file_fs") {
     "src/mod_fs/properties/watcher_core.cpp",
     "src/mod_fs/properties/write_core.cpp",
     "src/mod_fs/properties/xattr_core.cpp",
+    "src/mod_fs/taihe/src/ani_dfslistener.cpp",
+    "src/mod_fs/taihe/src/ani_constructor.cpp",
+    "src/mod_fs/taihe/src/ohos.file.fs.impl.cpp",
   ]
+
+  sources += get_target_outputs(":run_taihe")
+
   deps = [
     ":ohos_file_fs_abc_etc",
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
@@ -813,6 +829,7 @@ ohos_shared_library("ani_file_fs") {
     "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    ":run_taihe"
   ]
   use_exceptions = true
   external_deps = [
@@ -848,16 +865,16 @@ ohos_shared_library("ani_file_fs") {
     debug = false
   }
   shlib_type = "ani"
-  output_extension = "so"
   subsystem_name = "filemanagement"
   part_name = "file_api"
 }
 
 generate_static_abc("ohos_file_fs_abc") {
-  base_url = "./src/mod_fs/ani/ets"
-  files = [ "./src/mod_fs/ani/ets/@ohos.file.fs.ets" ]
+  base_url = "$taihe_generated_file_path"
+  files = [ "$taihe_generated_file_path/@ohos.file.fs.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/ohos_file_fs_abc.abc"
+  dependencies = [ ":run_taihe" ]
 }
 
 ohos_prebuilt_etc("ohos_file_fs_abc_etc") {
@@ -1161,4 +1178,15 @@ ohos_prebuilt_etc("ohos_file_statvfs_abc_etc") {
   subsystem_name = "filemanagement"
   part_name = "file_api"
   deps = [ ":ohos_file_statvfs_abc" ]
+}
+
+
+group("ani_file_api") {
+  deps = [
+    ":ani_file_environment",
+    ":file_fs_taihe",
+    ":ani_file_hash",
+    ":ani_file_securitylabel",
+    ":ani_file_statvfs",
+  ]
 }

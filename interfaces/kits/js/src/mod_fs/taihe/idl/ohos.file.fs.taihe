@@ -12,8 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { BusinessError, AsyncCallback, Callback } from '@ohos.base';
+
+@!namespace("@ohos.file.fs", "fileIo")
+
+@!sts_inject_into_module("""
 import stream from '@ohos.util.stream';
+import { BusinessError, AsyncCallback, Callback } from '@ohos.base';
 
 const UNKNOWN_ERR: int = 13900042
 const UNKNOWN_MSG: string = "Unknown error"
@@ -41,19 +45,205 @@ function CleanerCallback(cleaner: Cleaner): void {
 
 let destroyRegister = new FinalizationRegistry<Cleaner>(CleanerCallback)
 
-namespace fileIo {
-  export namespace OpenMode {
-    export const READ_ONLY = 0o0;
-    export const WRITE_ONLY = 0o1;
-    export const READ_WRITE = 0o2;
-    export const CREATE = 0o100;
-    export const TRUNC = 0o1000;
-    export const APPEND = 0o2000;
-    export const NONBLOCK = 0o4000;
-    export const DIR = 0o200000;
-    export const NOFOLLOW = 0o400000;
-    export const SYNC = 0o4010000;
+export interface ConflictFiles {
+  srcFile: string;
+  destFile: string;
+}
+
+class ConflictFilesInner implements ConflictFiles {
+  srcFile: string = "";
+  destFile: string = "";
+
+  constructor(src: string, dest: string) {
+    this.srcFile = src;
+    this.destFile = dest;
   }
+}
+
+export interface WatchEvent {
+  fileName: string;
+  event: int;
+  cookie: int;
+}
+
+class WatchEventInner implements WatchEvent {
+  fileName: string = '';
+  event: int;
+  cookie: int;
+
+  constructor(fileName: string, event: int, cookie: int) {
+    this.fileName = fileName;
+    this.event = event;
+    this.cookie = cookie;
+  }
+
+}
+
+export type WatchEventListener = (event: WatchEvent) => void;
+
+export interface Options {
+  encoding?: string;
+}
+
+export interface ReadOptions {
+  offset?: long;
+  length?: long;
+}
+
+export interface ReadTextOptions extends ReadOptions {
+  encoding?: string;
+}
+
+export interface WriteOptions extends Options {
+  offset?: long;
+  length?: long;
+}
+
+export interface RandomAccessFileOptions {
+  start?: long;
+  end?: long;
+}
+
+export interface ListFileOptions {
+  recursion?: boolean;
+  listNum?: long;
+  filter?: Filter;
+}
+
+export interface WriteStreamOptions {
+  mode?: int;
+  start?: long;
+}
+
+export interface ReadStreamOptions {
+  start?: long;
+  end?: long;
+}
+
+export class ReadStreamOptionsInner implements ReadStreamOptions {
+  constructor() {}
+  start?: long;
+  end?: long;
+}
+
+export class WriteStreamOptionsInner implements WriteStreamOptions {
+  constructor() {}
+  mode?: int;
+  start?: long;
+}
+
+export interface ReaderIteratorResult {
+  done: boolean;
+  value: string;
+}
+
+export interface Filter {
+  suffix?: Array<string>;
+  displayName?: Array<string>;
+  mimeType?: Array<string>;
+  fileSizeOver?: long;
+  lastModifiedAfter?: double;
+  excludeMedia?: boolean;
+}
+
+type TaskSignal = fileIo.TaskSignal;
+
+export class FileIoImpl {
+
+  static {
+    loadLibraryWithPermissionCheck("file_fs_taihe.z", "@ohos.file.fs");
+  }
+
+  static native doAccessSync(path: string, mode?: fileIo.AccessModeType, flag?: fileIo.AccessFlagType): boolean;
+
+  static native closeSync(file: int | fileIo.File): void;
+
+  static native copySync(srcUri: string, destUri: string, options?: fileIo.CopyOptions): void;
+
+  static native copyDirSync(src: string, dest: string, mode?: int): void;
+
+  static native copyFileSync(src: string | int, dest: string | int, mode?: int): void;
+
+  static native fdatasyncSync(fd: int): void;
+
+  static native getxattrSync(path: string, key: string): string;
+
+  static native createStreamSync(path: string, mode: string): fileIo.Stream;
+
+  static native createWatcherSync(path: string, events: int, listener: WatchEventListener): fileIo.Watcher;
+
+  static native fdopenStreamSync(fd: int, mode: string): fileIo.Stream;
+
+  static native dup(fd: int): fileIo.File;
+
+  static native listFileSync(path: string, options?: ListFileOptions): string[];
+
+  static native lstatSync(path: string): fileIo.Stat;
+
+  static native lseekSync(fd: int, offset: long, whence?: fileIo.WhenceType): long;
+
+  static native mkdirSync(path: string): void;
+
+  static native mkdirSync(path: string, recursion: boolean): void;
+
+  static native movedirSync(src: string, dest: string, mode?: int): void;
+
+  static native mkdtempSync(prefix: string): string;
+
+  static native moveFileSync(src: String, dest: String, mode?: int): void;
+
+  static native openSync(path: String, mode?: int): fileIo.File;
+
+  static native readlinesSync(filePath: string, options?: Options): fileIo.ReaderIterator;
+
+  static native readSync(fd: int, buffer: ArrayBuffer, options?: ReadOptions): long;
+
+  static native readTextSync(filePath: string, options?: ReadTextOptions): string;
+
+  static native rmdirSync(path: string): void;
+
+  static native setxattrSync(path: string, key: string, value: string): void;
+
+  static native statSync(file: string | int): fileIo.Stat;
+
+  static native truncateSync(file: string | int, len?: long): void;
+
+  static native unlinkSync(path: string): void;
+
+  static native writeSync(fd: int, buffer: string | ArrayBuffer, options?: WriteOptions): long;
+
+  static native fsyncSync(fd: int): void;
+
+  static native renameSync(oldPath: string, newPath: string): void;
+
+  static native createRandomAccessFileSync(file: string | fileIo.File, mode?: int,
+    options?: RandomAccessFileOptions): fileIo.RandomAccessFile;
+
+  static native symlinkSync(target: string, srcPath: string): void;
+
+  static native utimes(path: string, mtime: double): void;
+}
+""")
+
+@!sts_inject("""
+static { loadLibrary("file_fs_taihe.z"); }
+type  DfsListenerCallback = (networkId: string, status: int) => void;
+interface DfsListeners {
+  onStatus: DfsListenerCallback;
+}
+
+export namespace OpenMode {
+  export const READ_ONLY = 0o0;
+  export const WRITE_ONLY = 0o1;
+  export const READ_WRITE = 0o2;
+  export const CREATE = 0o100;
+  export const TRUNC = 0o1000;
+  export const APPEND = 0o2000;
+  export const NONBLOCK = 0o4000;
+  export const DIR = 0o200000;
+  export const NOFOLLOW = 0o400000;
+  export const SYNC = 0o4010000;
+}
 
 function access(path: string, mode?: AccessModeType): Promise<boolean> {
   return new Promise<boolean>((resolve: (result: boolean) => void, reject: (e: BusinessError<void>) => void) => {
@@ -129,29 +319,6 @@ function close(file: int | File, callback: AsyncCallback<void>): void {
 
 function closeSync(file: int | File): void {
   return FileIoImpl.closeSync(file)
-}
-
-function connectDfs(networkId: string, listeners: DfsListeners): Promise<void> {
-  return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
-    let promise = taskpool.execute((networkId: string, listeners: DfsListeners): void =>
-      FileIoImpl.connectDfs(networkId, listeners), networkId, listeners);
-    promise.then<void>((): void => {
-      resolve(undefined);
-    }).catch((e: Error): void => {
-      reject(e as BusinessError<void>);
-    });
-  });
-}
-
-function disconnectDfs(networkId: string): Promise<void> {
-  return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
-    let promise = taskpool.execute((networkId: string): void => FileIoImpl.disConnectDfs(networkId), networkId);
-    promise.then<void>((): void => {
-      resolve(undefined);
-    }).catch((e: Error): void => {
-      reject(e as BusinessError<void>);
-    });
-  });
 }
 
 function getxattrSync(path: string, key: string): string {
@@ -1272,10 +1439,6 @@ export interface Progress {
   totalSize: long;
 }
 
-export interface DfsListeners {
-  onStatus(networkId: string, status: number): void;
-}
-
 export class ProgressInner implements Progress {
   processedSize: long;
   totalSize: long;
@@ -1290,7 +1453,7 @@ export type ProgressListener = (progress: Progress) => void;
 
 export class TaskSignal {
   static {
-    loadLibrary("ani_file_fs");
+    loadLibrary("file_fs_taihe.z");
   }
   private nativeTaskSignal: long = 0;
   native constructor();
@@ -2012,7 +2175,7 @@ export class WriteStream extends stream.Writable {
 
 export class AtomicFile {
   static {
-    loadLibraryWithPermissionCheck("ani_file_fs", "@ohos.file.fs");
+    loadLibraryWithPermissionCheck("file_fs_taihe.z", "@ohos.file.fs");
   }
 
   private nativePtr: long = 0;
@@ -2098,190 +2261,10 @@ class WatcherInner implements Watcher {
 
   native stop(): void;
 }
+""")
 
-} // namespace fileIo
+@gen_promise("connectDfs")
+function ConnectDfsSync(networkId: String, listeners: @sts_type("DfsListeners") Opaque): void;
 
-export interface ConflictFiles {
-  srcFile: string;
-  destFile: string;
-}
-
-class ConflictFilesInner implements ConflictFiles {
-  srcFile: string = "";
-  destFile: string = "";
-
-  constructor(src: string, dest: string) {
-    this.srcFile = src;
-    this.destFile = dest;
-  }
-}
-
-export interface WatchEvent {
-  fileName: string;
-  event: int;
-  cookie: int;
-}
-
-class WatchEventInner implements WatchEvent {
-  fileName: string = '';
-  event: int;
-  cookie: int;
-
-  constructor(fileName: string, event: int, cookie: int) {
-    this.fileName = fileName;
-    this.event = event;
-    this.cookie = cookie;
-  }
-
-}
-
-export type WatchEventListener = (event: WatchEvent) => void;
-
-export interface Options {
-  encoding?: string;
-}
-
-export interface ReadOptions {
-  offset?: long;
-  length?: long;
-}
-
-export interface ReadTextOptions extends ReadOptions {
-  encoding?: string;
-}
-
-export interface WriteOptions extends Options {
-  offset?: long;
-  length?: long;
-}
-
-export interface RandomAccessFileOptions {
-  start?: long;
-  end?: long;
-}
-
-export interface ListFileOptions {
-  recursion?: boolean;
-  listNum?: long;
-  filter?: Filter;
-}
-
-export interface WriteStreamOptions {
-  mode?: int;
-  start?: long;
-}
-
-export interface ReadStreamOptions {
-  start?: long;
-  end?: long;
-}
-
-export class ReadStreamOptionsInner implements ReadStreamOptions {
-  constructor() {}
-  start?: long;
-  end?: long;
-}
-
-export class WriteStreamOptionsInner implements WriteStreamOptions {
-  constructor() {}
-  mode?: int;
-  start?: long;
-}
-
-export interface ReaderIteratorResult {
-  done: boolean;
-  value: string;
-}
-
-export interface Filter {
-  suffix?: Array<string>;
-  displayName?: Array<string>;
-  mimeType?: Array<string>;
-  fileSizeOver?: long;
-  lastModifiedAfter?: double;
-  excludeMedia?: boolean;
-}
-
-type TaskSignal = fileIo.TaskSignal;
-type DfsListeners = fileIo.DfsListeners;
-
-
-export class FileIoImpl {
-
-  static {
-    loadLibraryWithPermissionCheck("ani_file_fs", "@ohos.file.fs");
-  }
-
-  static native doAccessSync(path: string, mode?: fileIo.AccessModeType, flag?: fileIo.AccessFlagType): boolean;
-
-  static native closeSync(file: int | fileIo.File): void;
-
-  static native copySync(srcUri: string, destUri: string, options?: fileIo.CopyOptions): void;
-
-  static native connectDfs(networkId: string, listeners: DfsListeners): void;
-
-  static native copyDirSync(src: string, dest: string, mode?: int): void;
-
-  static native copyFileSync(src: string | int, dest: string | int, mode?: int): void;
-
-  static native disConnectDfs(networkId: string): void;
-
-  static native fdatasyncSync(fd: int): void;
-
-  static native getxattrSync(path: string, key: string): string;
-
-  static native createStreamSync(path: string, mode: string): fileIo.Stream;
-
-  static native createWatcherSync(path: string, events: int, listener: WatchEventListener): fileIo.Watcher;
-
-  static native fdopenStreamSync(fd: int, mode: string): fileIo.Stream;
-
-  static native dup(fd: int): fileIo.File;
-
-  static native listFileSync(path: string, options?: ListFileOptions): string[];
-
-  static native lstatSync(path: string): fileIo.Stat;
-
-  static native lseekSync(fd: int, offset: long, whence?: fileIo.WhenceType): long;
-
-  static native mkdirSync(path: string): void;
-
-  static native mkdirSync(path: string, recursion: boolean): void;
-
-  static native movedirSync(src: string, dest: string, mode?: int): void;
-
-  static native mkdtempSync(prefix: string): string;
-
-  static native moveFileSync(src: String, dest: String, mode?: int): void;
-
-  static native openSync(path: String, mode?: int): fileIo.File;
-
-  static native readlinesSync(filePath: string, options?: Options): fileIo.ReaderIterator;
-
-  static native readSync(fd: int, buffer: ArrayBuffer, options?: ReadOptions): long;
-
-  static native readTextSync(filePath: string, options?: ReadTextOptions): string;
-
-  static native rmdirSync(path: string): void;
-
-  static native setxattrSync(path: string, key: string, value: string): void;
-
-  static native statSync(file: string | int): fileIo.Stat;
-
-  static native truncateSync(file: string | int, len?: long): void;
-
-  static native unlinkSync(path: string): void;
-
-  static native writeSync(fd: int, buffer: string | ArrayBuffer, options?: WriteOptions): long;
-
-  static native fsyncSync(fd: int): void;
-
-  static native renameSync(oldPath: string, newPath: string): void;
-
-  static native createRandomAccessFileSync(file: string | fileIo.File, mode?: int,
-    options?: RandomAccessFileOptions): fileIo.RandomAccessFile;
-
-  static native symlinkSync(target: string, srcPath: string): void;
-
-  static native utimes(path: string, mtime: double): void;
-}
+@gen_promise("disconnectDfs")
+function DisconnectDfsSync(networkId: String): void;

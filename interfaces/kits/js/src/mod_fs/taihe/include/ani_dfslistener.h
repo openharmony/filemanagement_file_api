@@ -13,25 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_MKDIR_ANI_H
-#define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_MKDIR_ANI_H
+#ifndef FILEMANAGEMENT_FILE_API_ANI_DFS_LISTENER_H
+#define FILEMANAGEMENT_FILE_API_ANI_DFS_LISTENER_H
 
-#include <ani.h>
+#include "ani.h"
+#include "file_dfs_listener_stub.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-namespace ANI {
 
-class MkdirAni final {
+class AniDfsListener : public FileDfsListenerStub {
 public:
-    static void MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path);
-    static void MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_boolean recursion);
+    void OnStatus(const std::string &networkId, int32_t status, const std::string &path, int32_t type) override;
+    bool PrepareData(const ani_env* env, ani_object aniListeners);
+    ~AniDfsListener();
+private:
+    ani_ref listenerRef_ = nullptr;
+    ani_ref onStatusRef_ = nullptr;
+    ani_vm *vm_ = nullptr;
 };
-
-} // namespace ANI
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
 
-#endif // INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_ANI_MKDIR_ANI_H
+#endif // FILEMANAGEMENT_FILE_API_ANI_DFS_LISTENER_H
