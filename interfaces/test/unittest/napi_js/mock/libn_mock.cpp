@@ -397,8 +397,8 @@ void NError::ThrowErrWithMsg(napi_env env, const std::string &errMsg)
         return LibnMock::GetMock()->ThrowErrWithMsg(env, errMsg);
     }
 
-    static void (*realThrowErrWithMsg)(napi_env, std::string) = []() {
-        auto func = (void (*)(napi_env, std::string))dlsym(RTLD_NEXT,
+    static void (*realThrowErrWithMsg)(napi_env, const std::string&) = []() {
+        auto func = (void (*)(napi_env, const std::string&))dlsym(RTLD_NEXT,
         "_ZN4OHOS14FileManagement4LibN6NError15ThrowErrWithMsgEP10napi_env__RKNSt3__h12basic_stringIcNS5_11char_"
         "traitsIcEENS5_9allocatorIcEEEE");
     if (!func) {
