@@ -355,7 +355,7 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
 
 static NError CloseFd(const int fd, const uint64_t fileTag)
 {
-#ifdef __MUSL__
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     auto tag = CommonFunc::GetFdTag(fd);
     if (tag <= 0 || tag != fileTag) {
         tag = fileTag|PREFIX_ADDR;

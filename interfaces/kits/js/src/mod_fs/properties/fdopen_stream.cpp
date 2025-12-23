@@ -66,7 +66,11 @@ napi_value FdopenStream::Sync(napi_env env, napi_callback_info info)
         NError(errno).ThrowErr(env);
         return nullptr;
     }
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     CommonFunc::SetFdTag(fd, 0);
+#endif
+
     std::shared_ptr<FILE> fp(file, fclose);
     return CommonFunc::InstantiateStream(env, move(fp)).val_;
 }
@@ -98,7 +102,11 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
             HILOGE("Failed to fdopen file by path");
             return NError(errno);
         }
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
         CommonFunc::SetFdTag(fd, 0);
+#endif
+
         arg->fp = std::shared_ptr<FILE>(file, fclose);
         return NError(ERRNO_NOERR);
     };

@@ -105,8 +105,6 @@ void InitWhenceType(napi_env env, napi_value exports);
 struct CommonFunc {
     static unsigned int ConvertJsFlags(unsigned int &flags);
     static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf, bool async = false);
-    static uint64_t GetFdTag(int fd);
-    static void SetFdTag(int fd, uint64_t tag);
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     static LibN::NVal InstantiateStat(napi_env env, const uv_stat_t &buf, std::shared_ptr<FileInfo> fileInfo,
                                       bool async = false);
@@ -127,6 +125,8 @@ struct CommonFunc {
     static void fs_req_cleanup(uv_fs_t* req);
     static std::string GetModeFromFlags(unsigned int flags);
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    static uint64_t GetFdTag(int fd);
+    static void SetFdTag(int fd, uint64_t tag);
     static bool GetAndCheckUserId(Uri* uri, std::string &userId);
     static bool IsSystemApp();
     static uint32_t GetApiCompatibleVersion();

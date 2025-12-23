@@ -18,11 +18,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <sstream>
-#include <stdatomic.h>
 #include <sys/cdefs.h>
-#ifdef __MUSL__
-#include <sys/mman.h>
-#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -40,6 +36,9 @@
 #include "filemgmt_libn.h"
 #include "file_utils.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+#include <sys/mman.h>
+#include <stdatomic.h>
+
 #include "bundle_mgr_proxy.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -54,93 +53,10 @@ using namespace std;
 using namespace OHOS::FileManagement::LibN;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
 const uint32_t API_VERSION_MOD = 1000;
-#endif
-
 #define ALIGN_SIZE 4096
 #define FS_ALIGN(x, y) (((x) + (y) - 1) & -(y))
 #define FD_SAN_OVERFLOW_END 2048
-
-static struct FdSanTable g_fdTable = {
-    .overflow = nullptr,
-};
-
-static struct FdSanEntry* GetFsFdEntry(size_t idx)
-{
-    struct FdSanEntry *entries = g_fdTable.entries;
-    if (idx < FD_SAN_TABLE_SIZE) {
-        return &entries[idx];
-    }
-	// Try to create the overflow table ourselves.
-    struct FdSanTableOverflow* localOverflow = atomic_load(&g_fdTable.overflow);
-    if (!localOverflow) {
-        size_t overflowCount = FD_SAN_OVERFLOW_END - FD_SAN_TABLE_SIZE;
-        size_t requiredSize = sizeof(struct FdSanTableOverflow) + overflowCount * sizeof(struct FdSanEntry);
-        size_t alignedSize = FS_ALIGN(requiredSize, ALIGN_SIZE);
-
-        size_t alignedCount = (alignedSize - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
-#ifdef __MUSL__
-        void* allocation =
-                mmap(NULL, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (allocation == MAP_FAILED) {
-            HILOGE("fdsan: mmap failed idx=%{public}zu, errno=%{public}d", idx, errno);
-            return nullptr;
-        }
-        struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
-        newOverflow->len = alignedCount;
-        if (atomic_compare_exchange_strong(&g_fdTable.overflow, &localOverflow, newOverflow)) {
-            localOverflow = newOverflow;
-        } else {
-            // Another thread had mmaped.
-            munmap(allocation, alignedSize);
-        }
-#else
-        void* allocation = malloc(alignedSize);
-        if (allocation == nullptr) {
-            HILOGE("fdsan: malloc failed idx=%{public}zu, errno=%{public}d", idx, errno);
-            return nullptr;
-        }
-        struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
-        newOverflow->len = alignedCount;
-        if (atomic_compare_exchange_strong(&g_fdTable.overflow, &localOverflow, newOverflow)) {
-            localOverflow = newOverflow;
-        } else {
-            free(allocation);
-        }
 #endif
-    }
-
-    size_t offset = idx - FD_SAN_TABLE_SIZE;
-    if (localOverflow->len <= offset) {
-        return nullptr;
-    }
-    return &localOverflow->entries[offset];
-}
-
-static struct FdSanEntry* GetFdSanEntry(int fd)
-{
-    if (fd < 0) {
-        return nullptr;
-    }
-    return GetFsFdEntry(fd);
-}
-
-uint64_t CommonFunc::GetFdTag(int fd)
-{
-    struct FdSanEntry* fde = GetFdSanEntry(fd);
-    if (!fde) {
-        return 0;
-    }
-    return atomic_load(&fde->close_tag);
-}
-
-void CommonFunc::SetFdTag(int fd, uint64_t tag)
-{
-    struct FdSanEntry* fde = GetFdSanEntry(fd);
-    if (!fde) {
-        return;
-    }
-    atomic_store(&fde->close_tag, tag);
-}
 
 void InitAccessModeType(napi_env env, napi_value exports)
 {
@@ -406,8 +322,10 @@ NVal CommonFunc::InstantiateFile(napi_env env, int fd, const string &pathOrUri, 
         fileEntity->uri_ = "";
     }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     int64_t tag = reinterpret_cast<uint64_t>(fileEntity);
     SetFdTag(fd, tag);
+#endif
     return { env, objFile };
 }
 
@@ -463,6 +381,73 @@ string CommonFunc::GetModeFromFlags(unsigned int flags)
 }
 
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+static struct FdSanTable g_fdTable = {
+    .overflow = nullptr,
+};
+
+static struct FdSanEntry* GetFsFdEntry(size_t idx)
+{
+    struct FdSanEntry *entries = g_fdTable.entries;
+    if (idx < FD_SAN_TABLE_SIZE) {
+        return &entries[idx];
+    }
+	// Try to create the overflow table ourselves.
+    struct FdSanTableOverflow* localOverflow = atomic_load(&g_fdTable.overflow);
+    if (!localOverflow) {
+        size_t overflowCount = FD_SAN_OVERFLOW_END - FD_SAN_TABLE_SIZE;
+        size_t requiredSize = sizeof(struct FdSanTableOverflow) + overflowCount * sizeof(struct FdSanEntry);
+        size_t alignedSize = FS_ALIGN(requiredSize, ALIGN_SIZE);
+
+        size_t alignedCount = (alignedSize - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
+        void* allocation =
+                mmap(nullptr, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (allocation == MAP_FAILED) {
+            HILOGE("fdsan: mmap failed idx=%{public}zu, errno=%{public}d", idx, errno);
+            return nullptr;
+        }
+        struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
+        newOverflow->len = alignedCount;
+        if (atomic_compare_exchange_strong(&g_fdTable.overflow, &localOverflow, newOverflow)) {
+            localOverflow = newOverflow;
+        } else {
+            // Another thread had mmaped.
+            munmap(allocation, alignedSize);
+        }
+    }
+
+    size_t offset = idx - FD_SAN_TABLE_SIZE;
+    if (localOverflow->len <= offset) {
+        return nullptr;
+    }
+    return &localOverflow->entries[offset];
+}
+
+static struct FdSanEntry* GetFdSanEntry(int fd)
+{
+    if (fd < 0) {
+        return nullptr;
+    }
+    return GetFsFdEntry(fd);
+}
+
+uint64_t CommonFunc::GetFdTag(int fd)
+{
+    struct FdSanEntry* fde = GetFdSanEntry(fd);
+    if (!fde) {
+        return 0;
+    }
+    return atomic_load(&fde->close_tag);
+}
+
+void CommonFunc::SetFdTag(int fd, uint64_t tag)
+{
+    struct FdSanEntry* fde = GetFdSanEntry(fd);
+    if (!fde) {
+        return;
+    }
+    atomic_store(&fde->close_tag, tag);
+}
+
 bool IsNumeric(const string &str)
 {
     if (str.empty()) {
