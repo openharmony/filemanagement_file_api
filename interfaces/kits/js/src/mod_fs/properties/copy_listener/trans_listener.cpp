@@ -56,7 +56,8 @@ std::string TransListener::CreateDfsCopyPath()
 {
     std::random_device rd;
     std::string random = std::to_string(rd());
-    while (std::filesystem::exists(DISTRIBUTED_PATH + random)) {
+    std::error_code errCode;
+    while (std::filesystem::exists(DISTRIBUTED_PATH + random, errCode)) {
         random = std::to_string(rd());
     }
     return random;
@@ -198,7 +199,22 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
     const std::string &sandboxPath, const std::string &currentId)
 {
     std::error_code errCode;
-    if (std::filesystem::exists(sandboxPath) && std::filesystem::is_directory(sandboxPath)) {
+    std::error_code existErrCode;
+    std::error_code isdirErrCode;
+    bool isSandboxExist = std::filesystem::exists(sandboxPath, existErrCode);
+    bool isSandboxDir = std::filesystem::is_directory(sandboxPath, isdirErrCode);
+
+    if (existErrCode.value() != 0 || isdirErrCode.value() != 0) {
+        int errValue = existErrCode ? existErrCode.value() : isdirErrCode.value();
+        HILOGE("Copy dir failed: errCode: %{public}d", errValue);
+            RADAR_REPORT(RadarReporter::DFX_SET_DFS, RadarReporter::DFX_SET_BIZ_SCENE, RadarReporter::DFX_FAILED,
+                RadarReporter::BIZ_STATE, RadarReporter::DFX_END, RadarReporter::ERROR_CODE,
+                RadarReporter::COPY_TO_SANDBOX_ERROR, RadarReporter::CONCURRENT_ID, currentId,
+                RadarReporter::PACKAGE_NAME, to_string(errValue));
+        return EIO;
+    }
+
+    if (isSandboxExist && isSandboxDir) {
         HILOGI("Copy dir");
         std::filesystem::copy(disSandboxPath, sandboxPath,
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing, errCode);
