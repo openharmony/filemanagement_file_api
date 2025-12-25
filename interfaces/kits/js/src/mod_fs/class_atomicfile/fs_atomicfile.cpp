@@ -183,10 +183,10 @@ FsResult<void> FsAtomicFile::FinishWrite()
 
 FsResult<void> FsAtomicFile::FailWrite()
 {
-    std::error_code fsErrcode;
-    if (!fs::remove(entity->newFileName, fsErrcode)) {
-        HILOGW("Failed to remove file");
-        return FsResult<void>::Error(fsErrcode.value());
+    std::error_code errCode;
+    if (!fs::remove(entity->newFileName, errCode)) {
+        HILOGW("Failed to remove file, err:%{public}s", errCode.message().c_str());
+        return FsResult<void>::Error(errno);
     }
     std::string tmpNewFileName = entity->baseFileName;
     entity->newFileName = tmpNewFileName.append(TEMP_FILE_SUFFIX);

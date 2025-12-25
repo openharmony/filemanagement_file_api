@@ -152,6 +152,47 @@ HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FailWrite_002, testing::ext::Tes
 }
 
 /**
+ * @tc.name: AtomicfileMockTest_FailWrite_003
+ * @tc.desc: Test function of Atomicfile::FailWrite interface for FAILURE when remove fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FailWrite_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AtomicfileMockTest-begin AtomicfileMockTest_FailWrite_003";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    string filepath = "fakePath/AtomicfileMockTest_FailWrite_003";
+    AtomicFileEntity entity;
+    entity.baseFileName = filepath;
+    entity.newFileName = filepath.append(TEMP_FILE_SUFFIX);
+    std::tuple<AtomicFileEntity *, int32_t> tmp(&entity, 1);
+
+    auto libnMock = LibnMock::GetMock();
+    auto stdioMock = StdioMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(reinterpret_cast<napi_value>(&entity)));
+    EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, napi_get_reference_value(testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(napi_ok));
+    EXPECT_CALL(*libnMock, napi_typeof(testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(napi_undefined), testing::Return(napi_ok)));
+
+    EXPECT_CALL(*stdioMock, remove(testing::_)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
+    EXPECT_CALL(*libnMock, napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_ok));
+
+    auto res = AtomicFileNExporter::FailWrite(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(stdioMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "AtomicfileMockTest-end AtomicfileMockTest_FailWrite_003";
+}
+
+/**
  * @tc.name: AtomicfileMockTest_FinishWrite_001
  * @tc.desc: Test function of Atomicfile::FinishWrite interface for SUCCESS.
  * @tc.size: MEDIUM

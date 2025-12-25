@@ -444,16 +444,16 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
     }
 
     CallFunctionByName(env, writeStream, "closeSync");
-    std::error_code fsErrcode;
-    if (!fs::remove(rafEntity->newFileName, fsErrcode)) {
-        HILOGW("Failed to remove file");
+    std::error_code errCode;
+    if (!fs::remove(rafEntity->newFileName, errCode)) {
+        HILOGW("Failed to remove file, err:%{public}s", errCode.message().c_str());
         status = napi_delete_reference(env, rafEntity->writeStreamObj);
         if (status != napi_ok) {
             HILOGE("Failed to delete reference");
             NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
             return nullptr;
         }
-        NError(fsErrcode.value()).ThrowErrWithMsg(env, "Failed to remove file");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to remove file");
         return nullptr;
     }
     std::string tmpNewFileName = rafEntity->baseFileName;
