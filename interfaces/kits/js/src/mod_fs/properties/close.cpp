@@ -47,7 +47,7 @@ static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
 static NError CloseFd(const int fd, const bool isFd, const uint64_t fileTag)
 {
     FileFsTrace traceCloseFd("CloseFd");
-#ifdef __MUSL__
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     if (isFd) {
         auto tag = fdsan_get_owner_tag(fd);
         if (tag != 0) {
