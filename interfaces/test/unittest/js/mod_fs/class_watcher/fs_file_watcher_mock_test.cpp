@@ -37,15 +37,15 @@ namespace Test {
 
 class FsFileWatcherMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void FsFileWatcherMockTest::SetUpTestCase(void)
+void FsFileWatcherMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FsFileWatcherMockTest");
     EventfdMock::EnableMock();
     InotifyMock::EnableMock();
@@ -53,13 +53,13 @@ void FsFileWatcherMockTest::SetUpTestCase(void)
     UnistdMock::EnableMock();
 }
 
-void FsFileWatcherMockTest::TearDownTestCase(void)
+void FsFileWatcherMockTest::TearDownTestSuite(void)
 {
     EventfdMock::DisableMock();
     InotifyMock::DisableMock();
     PollMock::DisableMock();
     UnistdMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void FsFileWatcherMockTest::SetUp(void)

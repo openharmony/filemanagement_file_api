@@ -37,25 +37,25 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class RenameMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void RenameMockTest::SetUpTestCase(void)
+void RenameMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "RenameMockTest");
     LibnMock::EnableMock();
     UvFsMock::EnableMock();
 }
 
-void RenameMockTest::TearDownTestCase(void)
+void RenameMockTest::TearDownTestSuite(void)
 {
     LibnMock::DisableMock();
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void RenameMockTest::SetUp(void)

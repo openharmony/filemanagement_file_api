@@ -29,8 +29,8 @@ using namespace std;
 
 class CopyFileCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -40,17 +40,17 @@ private:
     const string destDir = testDir + "/destDir";
 };
 
-void CopyFileCoreMockTest::SetUpTestCase()
+void CopyFileCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "CopyFileCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void CopyFileCoreMockTest::TearDownTestCase()
+void CopyFileCoreMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void CopyFileCoreMockTest::SetUp()

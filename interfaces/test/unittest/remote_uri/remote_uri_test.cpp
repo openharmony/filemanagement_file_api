@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,31 @@ namespace {
 
     class RemoteUriTest : public testing::Test {
     public:
-        static void SetUpTestCase(void) {};
-        static void TearDownTestCase() {};
-        void SetUp() {};
-        void TearDown() {};
+        static void SetUpTestSuite();
+        static void TearDownTestSuite();
+        void SetUp();
+        void TearDown();
     };
+
+    void RemoteUriTest::SetUpTestSuite()
+    {
+        GTEST_LOG_(INFO) << "SetUpTestSuite";
+    }
+
+    void RemoteUriTest::TearDownTestSuite()
+    {
+        GTEST_LOG_(INFO) << "TearDownTestSuite";
+    }
+
+    void RemoteUriTest::SetUp()
+    {
+        GTEST_LOG_(INFO) << "SetUp";
+    }
+
+    void RemoteUriTest::TearDown()
+    {
+        GTEST_LOG_(INFO) << "TearDown";
+    }
 
     /**
      * @tc.name: Remote_uri_ConvertUri_0000

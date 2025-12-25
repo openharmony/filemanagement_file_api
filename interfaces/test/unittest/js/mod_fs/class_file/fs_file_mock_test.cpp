@@ -30,27 +30,27 @@ using namespace std;
 
 class FsFileMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
     std::unique_ptr<FileEntity> fileEntity;
     std::unique_ptr<FsFile> fsFile;
 };
 
-void FsFileMockTest::SetUpTestCase(void)
+void FsFileMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FsFileMockTest");
     SysFileMock::EnableMock();
     UvFsMock::EnableMock();
 }
 
-void FsFileMockTest::TearDownTestCase(void)
+void FsFileMockTest::TearDownTestSuite(void)
 {
     SysFileMock::DisableMock();
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void FsFileMockTest::SetUp(void)

@@ -30,8 +30,8 @@ static constexpr size_t MAX_XATTR_SIZE = 4096;
 
 class XattrCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -39,15 +39,15 @@ private:
     const string testDir = FileUtils::testRootDir + "/XattrCoreTest";
 };
 
-void XattrCoreTest::SetUpTestCase()
+void XattrCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "XattrCoreTest");
 }
 
-void XattrCoreTest::TearDownTestCase()
+void XattrCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void XattrCoreTest::SetUp()

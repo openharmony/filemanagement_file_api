@@ -27,8 +27,8 @@ using namespace std;
 
 class WriteCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -36,15 +36,15 @@ private:
     const string testDir = FileUtils::testRootDir + "/WriteCoreTest";
 };
 
-void WriteCoreTest::SetUpTestCase()
+void WriteCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "WriteCoreTest");
 }
 
-void WriteCoreTest::TearDownTestCase()
+void WriteCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void WriteCoreTest::SetUp()

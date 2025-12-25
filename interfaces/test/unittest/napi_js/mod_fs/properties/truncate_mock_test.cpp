@@ -37,25 +37,25 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class TruncateMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void TruncateMockTest::SetUpTestCase(void)
+void TruncateMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "TruncateMockTest");
     LibnMock::EnableMock();
     UvFsMock::EnableMock();
 }
 
-void TruncateMockTest::TearDownTestCase(void)
+void TruncateMockTest::TearDownTestSuite(void)
 {
     LibnMock::DisableMock();
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void TruncateMockTest::SetUp(void)

@@ -30,8 +30,8 @@ using namespace std;
 
 class MoveCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -39,17 +39,17 @@ private:
     const string testDir = FileUtils::testRootDir + "/MoveCoreMockTest";
 };
 
-void MoveCoreMockTest::SetUpTestCase()
+void MoveCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "MoveCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void MoveCoreMockTest::TearDownTestCase()
+void MoveCoreMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void MoveCoreMockTest::SetUp()

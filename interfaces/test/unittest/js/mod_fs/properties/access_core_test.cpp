@@ -33,8 +33,8 @@ static const string POSITION_BOTH = "3";
 
 class AccessCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -43,15 +43,15 @@ private:
     const string cloudTestDir = CLOUDDISK_FILE_PREFIX + "/AccessCoreTest";
 };
 
-void AccessCoreTest::SetUpTestCase()
+void AccessCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "AccessCoreTest");
 }
 
-void AccessCoreTest::TearDownTestCase()
+void AccessCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void AccessCoreTest::SetUp()

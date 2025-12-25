@@ -28,24 +28,24 @@ string g_deleteFile = "/data/test/FsAtomicfileDelTest.txt";
 
 class FsAtomicfileTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void FsAtomicfileTest::SetUpTestCase(void)
+void FsAtomicfileTest::SetUpTestSuite(void)
 {
     ofstream tempfile(g_filePath);
     tempfile << "hello world";
     tempfile.close();
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
 }
 
-void FsAtomicfileTest::TearDownTestCase(void)
+void FsAtomicfileTest::TearDownTestSuite(void)
 {
     filesystem::remove(g_filePath);
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void FsAtomicfileTest::SetUp(void)

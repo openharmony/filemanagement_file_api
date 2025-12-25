@@ -26,11 +26,32 @@ namespace OHOS::HyperAio {
 
     class HyperAioTest : public testing::Test {
     public:
-        static void SetUpTestCase(void) {};
-        static void TearDownTestCase() {};
-        void SetUp() {};
-        void TearDown() {};
+        static void SetUpTestSuite();
+        static void TearDownTestSuite();
+        void SetUp();
+        void TearDown();
     };
+
+    void HyperAioTest::SetUpTestSuite()
+    {
+        GTEST_LOG_(INFO) << "SetUpTestSuite";
+    }
+
+    void HyperAioTest::TearDownTestSuite()
+    {
+        GTEST_LOG_(INFO) << "TearDownTestSuite";
+    }
+
+    void HyperAioTest::SetUp()
+    {
+        GTEST_LOG_(INFO) << "SetUp";
+    }
+
+    void HyperAioTest::TearDown()
+    {
+        GTEST_LOG_(INFO) << "TearDown";
+    }
+
 #ifdef HYPERAIO_USE_LIBURING
     const uint64_t userData = 12345;
     const uint32_t len = 1024;

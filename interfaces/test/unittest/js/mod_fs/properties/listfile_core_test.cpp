@@ -30,8 +30,8 @@ namespace fs = std::filesystem;
 
 class ListFileCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -41,15 +41,15 @@ private:
     const string emptyDir = testDir + "/emptyDir";
 };
 
-void ListFileCoreTest::SetUpTestCase()
+void ListFileCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "ListFileCoreTest");
 }
 
-void ListFileCoreTest::TearDownTestCase()
+void ListFileCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void ListFileCoreTest::SetUp()

@@ -26,15 +26,15 @@ using namespace std;
 
 class StatvFsCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void StatvFsCoreTest::SetUpTestCase(void)
+void StatvFsCoreTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     int32_t fd = open("/data/test/statvfs_test.txt", O_CREAT | O_RDWR, 0644);
     if (fd < 0) {
         GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
@@ -43,9 +43,9 @@ void StatvFsCoreTest::SetUpTestCase(void)
     close(fd);
 }
 
-void StatvFsCoreTest::TearDownTestCase(void)
+void StatvFsCoreTest::TearDownTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
     rmdir("/data/test/statvfs_test.txt");
 }
 

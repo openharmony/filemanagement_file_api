@@ -32,15 +32,15 @@ static const string g_streamFilePath = "/data/test/FsStreamCoreTest.txt";
 
 class FsStreamMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void FsStreamMockTest::SetUpTestCase(void)
+void FsStreamMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FsStreamMockTest");
     StdioMock::EnableMock();
     int32_t fd = open(g_streamFilePath.c_str(), CREATE | O_RDWR, 0644);
@@ -51,11 +51,11 @@ void FsStreamMockTest::SetUpTestCase(void)
     close(fd);
 }
 
-void FsStreamMockTest::TearDownTestCase()
+void FsStreamMockTest::TearDownTestSuite()
 {
     StdioMock::DisableMock();
     rmdir(g_streamFilePath.c_str());
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void FsStreamMockTest::SetUp(void)

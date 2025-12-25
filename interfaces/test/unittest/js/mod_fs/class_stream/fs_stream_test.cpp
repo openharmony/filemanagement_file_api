@@ -26,21 +26,37 @@ static const string streamFilePath = "/data/test/FsStreamCoreTest.txt";
 
 class FsStreamTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        int32_t fd = open(streamFilePath.c_str(), CREATE | O_RDWR, 0644);
-        if (fd <= 0) {
-            ASSERT_TRUE(false);
-        }
-        close(fd);
-    };
-    static void TearDownTestCase()
-    {
-        rmdir(streamFilePath.c_str());
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp();
+    void TearDown();
 };
+
+void FsStreamTest::SetUpTestSuite()
+{
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
+    int32_t fd = open(streamFilePath.c_str(), CREATE | O_RDWR, 0644);
+    if (fd <= 0) {
+        ASSERT_TRUE(false);
+    }
+    close(fd);
+}
+
+void FsStreamTest::TearDownTestSuite()
+{
+    rmdir(streamFilePath.c_str());
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
+}
+
+void FsStreamTest::SetUp()
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void FsStreamTest::TearDown()
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
 
 /**
  * @tc.name: FsStreamCloseTest_0001

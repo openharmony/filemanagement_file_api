@@ -29,8 +29,8 @@ using namespace std;
 
 class ReadLinesCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -38,17 +38,17 @@ private:
     const string testDir = FileUtils::testRootDir + "/ReadLinesCoreMockTest";
 };
 
-void ReadLinesCoreMockTest::SetUpTestCase()
+void ReadLinesCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "ReadLinesCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void ReadLinesCoreMockTest::TearDownTestCase()
+void ReadLinesCoreMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void ReadLinesCoreMockTest::SetUp()

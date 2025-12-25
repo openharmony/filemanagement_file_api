@@ -28,8 +28,8 @@ using namespace std;
 
 class FdopenStreamCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -37,15 +37,15 @@ private:
     const string testDir = FileUtils::testRootDir + "/FdopenStreamCoreTest";
 };
 
-void FdopenStreamCoreTest::SetUpTestCase()
+void FdopenStreamCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FdopenStreamCoreTest");
 }
 
-void FdopenStreamCoreTest::TearDownTestCase()
+void FdopenStreamCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void FdopenStreamCoreTest::SetUp()

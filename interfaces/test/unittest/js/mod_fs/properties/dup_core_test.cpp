@@ -30,8 +30,8 @@ using namespace std;
 
 class DupCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -39,15 +39,15 @@ private:
     const string testDir = FileUtils::testRootDir + "/DupCoreTest";
 };
 
-void DupCoreTest::SetUpTestCase()
+void DupCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "DupCoreTest");
 }
 
-void DupCoreTest::TearDownTestCase()
+void DupCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void DupCoreTest::SetUp()

@@ -29,25 +29,25 @@ using namespace std;
 
 class FdatasyncMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void FdatasyncMockTest::SetUpTestCase(void)
+void FdatasyncMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FdatasyncMockTest");
     UvFsMock::EnableMock();
     LibnMock::EnableMock();
 }
 
-void FdatasyncMockTest::TearDownTestCase(void)
+void FdatasyncMockTest::TearDownTestSuite(void)
 {
     UvFsMock::DisableMock();
     LibnMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void FdatasyncMockTest::SetUp(void)
