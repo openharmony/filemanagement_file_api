@@ -164,8 +164,10 @@ static NVal InstantiateRandomAccessFile(napi_env env,
     rafEntity->start = ops.start;
     rafEntity->end = ops.end;
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     uint64_t tag = static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(rafEntity));
     CommonFunc::SetFdTag(rafEntity->fd.get()->GetFD(), tag);
+#endif
 
     return {env, objRAF};
 }
