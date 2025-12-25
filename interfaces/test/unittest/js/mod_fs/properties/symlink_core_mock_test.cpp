@@ -28,23 +28,23 @@ using namespace std;
 
 class SymlinkCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void SymlinkCoreMockTest::SetUpTestCase()
+void SymlinkCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "SymlinkCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void SymlinkCoreMockTest::TearDownTestCase()
+void SymlinkCoreMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void SymlinkCoreMockTest::SetUp()

@@ -25,21 +25,21 @@ using namespace std;
 
 class LseekCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void LseekCoreTest::SetUpTestCase()
+void LseekCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "LseekCoreTest");
 }
 
-void LseekCoreTest::TearDownTestCase()
+void LseekCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void LseekCoreTest::SetUp()

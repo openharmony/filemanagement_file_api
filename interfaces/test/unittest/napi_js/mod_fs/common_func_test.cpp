@@ -31,21 +31,21 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class CommonFuncTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void CommonFuncTest::SetUpTestCase(void)
+void CommonFuncTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "CommonFuncTest");
 }
 
-void CommonFuncTest::TearDownTestCase(void)
+void CommonFuncTest::TearDownTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void CommonFuncTest::SetUp(void)

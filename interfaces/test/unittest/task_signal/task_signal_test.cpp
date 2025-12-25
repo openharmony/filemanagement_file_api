@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,15 +31,35 @@ using namespace FileManagement;
 
 class TaskSignalTest : public testing::Test {
 public:
-    static void SetUpTestCase(void){};
-    static void TearDownTestCase(){};
-    void SetUp(){};
-    void TearDown(){};
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp();
+    void TearDown();
 
     static std::condition_variable taskListenerCv_;
     static std::mutex taskListenerCallbackLock_;
     static std::string canceledFilePath_;
 };
+
+void TaskSignalTest::SetUpTestSuite()
+{
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
+}
+
+void TaskSignalTest::TearDownTestSuite()
+{
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
+}
+
+void TaskSignalTest::SetUp()
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void TaskSignalTest::TearDown()
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
 
 std::condition_variable TaskSignalTest::taskListenerCv_;
 std::mutex TaskSignalTest::taskListenerCallbackLock_;

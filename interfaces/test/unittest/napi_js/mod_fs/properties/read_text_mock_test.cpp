@@ -37,23 +37,23 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class ReadTextMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void ReadTextMockTest::SetUpTestCase(void)
+void ReadTextMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "ReadTextMockTest");
     LibnMock::EnableMock();
 }
 
-void ReadTextMockTest::TearDownTestCase(void)
+void ReadTextMockTest::TearDownTestSuite(void)
 {
     LibnMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void ReadTextMockTest::SetUp(void)

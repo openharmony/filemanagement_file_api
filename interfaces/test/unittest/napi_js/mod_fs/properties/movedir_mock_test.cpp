@@ -42,25 +42,25 @@ namespace fs = std::filesystem;
 
 class MovedirMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
     static constexpr std::string_view MOVE_DIR_TEST_PATH = "/data/test/MovedirMockTest";
 };
 
-void MovedirMockTest::SetUpTestCase()
+void MovedirMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "MovedirMockTest");
     LibnMock::EnableMock();
 }
 
-void MovedirMockTest::TearDownTestCase()
+void MovedirMockTest::TearDownTestSuite()
 {
     LibnMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void MovedirMockTest::SetUp()

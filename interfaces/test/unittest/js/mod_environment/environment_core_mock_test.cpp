@@ -29,8 +29,8 @@ using namespace std;
 
 class EnvironmentCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
     static inline shared_ptr<Backup::AccessTokenKitMock> accessToken = nullptr;
@@ -38,9 +38,9 @@ public:
     static inline shared_ptr<Backup::IPCSkeletonMock> skeleton = nullptr;
 };
 
-void EnvironmentCoreTest::SetUpTestCase(void)
+void EnvironmentCoreTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     accessToken = std::make_shared<Backup::AccessTokenKitMock>();
     Backup::BAccessTokenKit::token = accessToken;
     paramMoc = std::make_shared<AppFileService::ParamMoc>();
@@ -49,9 +49,9 @@ void EnvironmentCoreTest::SetUpTestCase(void)
     Backup::IPCSkeletonMock::skeleton = skeleton;
 }
 
-void EnvironmentCoreTest::TearDownTestCase(void)
+void EnvironmentCoreTest::TearDownTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
     Backup::BAccessTokenKit::token = nullptr;
     accessToken = nullptr;
     AppFileService::IParamMoc::paramMoc = nullptr;

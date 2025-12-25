@@ -29,18 +29,34 @@ static const string g_validFilePath = "/data/test/validFilePath";
 
 class SecurityLabelCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        int32_t fd = open(g_filePath.c_str(), O_CREAT | O_RDWR, 0644);
-        close(fd);
-    };
-    static void TearDownTestCase()
-    {
-        rmdir(g_filePath.c_str());
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp();
+    void TearDown();
 };
+
+void SecurityLabelCoreTest::SetUpTestSuite()
+{
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
+    int32_t fd = open(g_filePath.c_str(), O_CREAT | O_RDWR, 0644);
+    close(fd);
+}
+
+void SecurityLabelCoreTest::TearDownTestSuite()
+{
+    rmdir(g_filePath.c_str());
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
+}
+
+void SecurityLabelCoreTest::SetUp()
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void SecurityLabelCoreTest::TearDown()
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
 
 /**
  * @tc.name: DoSetSecurityLabel_0001

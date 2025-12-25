@@ -26,18 +26,34 @@ using namespace std;
 static const string g_filePath = "/data/test/HashCoreTest.txt";
 class HashCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        int32_t fd = open(g_filePath.c_str(), O_CREAT | O_RDWR, 0644);
-        close(fd);
-    };
-    static void TearDownTestCase()
-    {
-        rmdir(g_filePath.c_str());
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp();
+    void TearDown();
 };
+
+void HashCoreTest::SetUpTestSuite()
+{
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
+    int32_t fd = open(g_filePath.c_str(), O_CREAT | O_RDWR, 0644);
+    close(fd);
+}
+
+void HashCoreTest::TearDownTestSuite()
+{
+    rmdir(g_filePath.c_str());
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
+}
+
+void HashCoreTest::SetUp()
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void HashCoreTest::TearDown()
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
 
 /**
  * @tc.name: DoHashTest_0001

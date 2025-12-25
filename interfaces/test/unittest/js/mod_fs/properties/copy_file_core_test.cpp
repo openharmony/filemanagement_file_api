@@ -25,21 +25,21 @@ using namespace std;
 
 class CopyFileCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void CopyFileCoreTest::SetUpTestCase()
+void CopyFileCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "CopyFileCoreTest");
 }
 
-void CopyFileCoreTest::TearDownTestCase()
+void CopyFileCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void CopyFileCoreTest::SetUp()

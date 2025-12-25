@@ -30,8 +30,8 @@ using namespace std;
 
 class RandomAccessFileNExporterMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 
@@ -39,19 +39,19 @@ protected:
     unique_ptr<RandomAccessFileEntity> rafEntity;
 };
 
-void RandomAccessFileNExporterMockTest::SetUpTestCase(void)
+void RandomAccessFileNExporterMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "RandomAccessFileNExporterMockTest");
     LibnMock::EnableMock();
     FdsanMock::EnableMock();
 }
 
-void RandomAccessFileNExporterMockTest::TearDownTestCase(void)
+void RandomAccessFileNExporterMockTest::TearDownTestSuite(void)
 {
     LibnMock::DisableMock();
     FdsanMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void RandomAccessFileNExporterMockTest::SetUp(void)

@@ -28,23 +28,23 @@ using namespace std;
 
 class AccessCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void AccessCoreMockTest::SetUpTestCase()
+void AccessCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "AccessCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void AccessCoreMockTest::TearDownTestCase()
+void AccessCoreMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void AccessCoreMockTest::SetUp()

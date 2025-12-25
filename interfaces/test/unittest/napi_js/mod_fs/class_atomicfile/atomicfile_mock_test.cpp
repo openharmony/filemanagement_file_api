@@ -34,25 +34,25 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class AtomicfileMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void AtomicfileMockTest::SetUpTestCase()
+void AtomicfileMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "AtomicfileMockTest");
     LibnMock::EnableMock();
     StdioMock::EnableMock();
 }
 
-void AtomicfileMockTest::TearDownTestCase()
+void AtomicfileMockTest::TearDownTestSuite()
 {
     LibnMock::DisableMock();
     StdioMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void AtomicfileMockTest::SetUp()

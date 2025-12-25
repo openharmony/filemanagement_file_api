@@ -29,23 +29,23 @@ using namespace std;
 
 class XattrCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void XattrCoreMockTest::SetUpTestCase()
+void XattrCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "XattrCoreMockTest");
     SysXattrMock::EnableMock();
 }
 
-void XattrCoreMockTest::TearDownTestCase()
+void XattrCoreMockTest::TearDownTestSuite()
 {
     SysXattrMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void XattrCoreMockTest::SetUp()

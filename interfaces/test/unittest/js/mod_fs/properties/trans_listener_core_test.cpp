@@ -38,8 +38,8 @@ public:
 
 class TransListenerCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -47,15 +47,15 @@ private:
     const string testDir = FileUtils::testRootDir + "/TransListenerCoreTest";
 };
 
-void TransListenerCoreTest::SetUpTestCase()
+void TransListenerCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "TransListenerCoreTest");
 }
 
-void TransListenerCoreTest::TearDownTestCase()
+void TransListenerCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void TransListenerCoreTest::SetUp()

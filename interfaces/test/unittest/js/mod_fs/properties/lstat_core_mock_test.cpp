@@ -28,23 +28,23 @@ using namespace std;
 
 class LstatCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void LstatCoreMockTest::SetUpTestCase()
+void LstatCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "LstatCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void LstatCoreMockTest::TearDownTestCase()
+void LstatCoreMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void LstatCoreMockTest::SetUp()

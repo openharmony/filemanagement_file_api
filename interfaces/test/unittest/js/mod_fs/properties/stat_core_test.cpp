@@ -25,21 +25,21 @@ using namespace std;
 
 class StatCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void StatCoreTest::SetUpTestCase()
+void StatCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "StatCoreTest");
 }
 
-void StatCoreTest::TearDownTestCase()
+void StatCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void StatCoreTest::SetUp()

@@ -28,23 +28,23 @@ using namespace std;
 
 class UnlinkCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void UnlinkCoreMockTest::SetUpTestCase()
+void UnlinkCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "UnlinkCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void UnlinkCoreMockTest::TearDownTestCase()
+void UnlinkCoreMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void UnlinkCoreMockTest::SetUp()

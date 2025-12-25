@@ -34,25 +34,25 @@ namespace Test {
 
 class WatcherCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void WatcherCoreMockTest::SetUpTestCase()
+void WatcherCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "WatcherCoreMockTest");
     EventfdMock::EnableMock();
     InotifyMock::EnableMock();
 }
 
-void WatcherCoreMockTest::TearDownTestCase()
+void WatcherCoreMockTest::TearDownTestSuite()
 {
     EventfdMock::DisableMock();
     InotifyMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void WatcherCoreMockTest::SetUp()

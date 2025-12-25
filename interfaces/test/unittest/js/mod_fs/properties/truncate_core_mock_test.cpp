@@ -29,23 +29,23 @@ using namespace std;
 
 class TruncateCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void TruncateCoreMockTest::SetUpTestCase()
+void TruncateCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "TruncateCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void TruncateCoreMockTest::TearDownTestCase()
+void TruncateCoreMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void TruncateCoreMockTest::SetUp()

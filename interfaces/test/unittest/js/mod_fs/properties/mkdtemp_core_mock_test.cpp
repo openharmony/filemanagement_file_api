@@ -29,8 +29,8 @@ using namespace std;
 
 class MkdtempCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -38,15 +38,15 @@ private:
     const string tempDir = FileUtils::defaultTempDir + "/MkdtempCoreMockTest";
 };
 
-void MkdtempCoreMockTest::SetUpTestCase()
+void MkdtempCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "MkdtempCoreMockTest");
 }
 
-void MkdtempCoreMockTest::TearDownTestCase()
+void MkdtempCoreMockTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void MkdtempCoreMockTest::SetUp()

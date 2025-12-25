@@ -27,8 +27,8 @@ using namespace std;
 
 class ReadLinesCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -36,15 +36,15 @@ private:
     const string testDir = FileUtils::testRootDir + "/ReadLinesCoreTest";
 };
 
-void ReadLinesCoreTest::SetUpTestCase()
+void ReadLinesCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "ReadLinesCoreTest");
 }
 
-void ReadLinesCoreTest::TearDownTestCase()
+void ReadLinesCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void ReadLinesCoreTest::SetUp()

@@ -25,22 +25,22 @@ using namespace std;
 
 class FsFileTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
     unique_ptr<FileEntity> fileEntity;
     unique_ptr<FsFile> fsFile;
 };
 
-void FsFileTest::SetUpTestCase(void)
+void FsFileTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
 }
 
-void FsFileTest::TearDownTestCase(void)
+void FsFileTest::TearDownTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void FsFileTest::SetUp(void)

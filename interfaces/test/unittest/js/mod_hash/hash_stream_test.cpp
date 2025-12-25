@@ -27,18 +27,34 @@ static const string g_filePath = "/data/test/HashStreamTest.txt";
 static const int BUFFER_SIZE = 4096;
 class HashStreamTest : public testing::Test {
 public:
-    static void SetUpTestCase(void)
-    {
-        int32_t fd = open(g_filePath.c_str(), O_CREAT | O_RDWR, 0644);
-        close(fd);
-    };
-    static void TearDownTestCase()
-    {
-        rmdir(g_filePath.c_str());
-    };
-    void SetUp() {};
-    void TearDown() {};
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp();
+    void TearDown();
 };
+
+void HashStreamTest::SetUpTestSuite()
+{
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
+    int32_t fd = open(g_filePath.c_str(), O_CREAT | O_RDWR, 0644);
+    close(fd);
+}
+
+void HashStreamTest::TearDownTestSuite()
+{
+    rmdir(g_filePath.c_str());
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
+}
+
+void HashStreamTest::SetUp()
+{
+    GTEST_LOG_(INFO) << "SetUp";
+}
+
+void HashStreamTest::TearDown()
+{
+    GTEST_LOG_(INFO) << "TearDown";
+}
 
 /**
  * @tc.name: GetHsEntityTest_0001
@@ -118,7 +134,7 @@ HWTEST_F(HashStreamTest, UpdateTest_0002, testing::ext::TestSize.Level1)
     HsHashStream stream(move(streamEntity));
 
     int buffer[BUFFER_SIZE];
-    ArrayBuffer arrayBuffer{ buffer, BUFFER_SIZE };
+    ArrayBuffer arrayBuffer { buffer, BUFFER_SIZE };
 
     auto ret = stream.Update(arrayBuffer);
     EXPECT_TRUE(ret.IsSuccess());
@@ -145,7 +161,7 @@ HWTEST_F(HashStreamTest, UpdateTest_0003, testing::ext::TestSize.Level1)
     HsHashStream stream(move(streamEntity));
 
     int buffer[BUFFER_SIZE];
-    ArrayBuffer arrayBuffer{ buffer, BUFFER_SIZE };
+    ArrayBuffer arrayBuffer { buffer, BUFFER_SIZE };
 
     auto ret = stream.Update(arrayBuffer);
     EXPECT_TRUE(ret.IsSuccess());
@@ -172,7 +188,7 @@ HWTEST_F(HashStreamTest, UpdateTest_0004, testing::ext::TestSize.Level1)
     HsHashStream stream(move(streamEntity));
 
     int buffer[BUFFER_SIZE];
-    ArrayBuffer arrayBuffer{ buffer, BUFFER_SIZE };
+    ArrayBuffer arrayBuffer { buffer, BUFFER_SIZE };
 
     auto ret = stream.Update(arrayBuffer);
     EXPECT_TRUE(ret.IsSuccess());

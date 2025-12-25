@@ -35,25 +35,25 @@ namespace Test {
 
 class FsWatcherMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void FsWatcherMockTest::SetUpTestCase(void)
+void FsWatcherMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FsWatcherMockTest");
     InotifyMock::EnableMock();
     UnistdMock::EnableMock();
 }
 
-void FsWatcherMockTest::TearDownTestCase(void)
+void FsWatcherMockTest::TearDownTestSuite(void)
 {
     InotifyMock::DisableMock();
     UnistdMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void FsWatcherMockTest::SetUp(void)

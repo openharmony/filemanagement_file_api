@@ -28,8 +28,8 @@ using namespace std;
 
 class CopyCoreTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -41,15 +41,15 @@ private:
     const string destFile = destDir + "/dest.txt";
 };
 
-void CopyCoreTest::SetUpTestCase()
+void CopyCoreTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "CopyCoreMockTest");
 }
 
-void CopyCoreTest::TearDownTestCase()
+void CopyCoreTest::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void CopyCoreTest::SetUp()

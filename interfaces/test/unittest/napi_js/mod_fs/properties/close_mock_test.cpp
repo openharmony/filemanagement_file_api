@@ -33,25 +33,25 @@ using namespace OHOS::FileManagement::ModuleFileIO;
 
 class CloseMockTest : public testing::Test {
 public:
-    static void SetUpTestCase(void);
-    static void TearDownTestCase(void);
+    static void SetUpTestSuite(void);
+    static void TearDownTestSuite(void);
     void SetUp();
     void TearDown();
 };
 
-void CloseMockTest::SetUpTestCase(void)
+void CloseMockTest::SetUpTestSuite(void)
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "CloseMockTest");
     LibnMock::EnableMock();
     FdsanMock::EnableMock();
 }
 
-void CloseMockTest::TearDownTestCase(void)
+void CloseMockTest::TearDownTestSuite(void)
 {
     LibnMock::DisableMock();
     FdsanMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void CloseMockTest::SetUp(void)

@@ -28,23 +28,23 @@ using namespace std;
 
 class UtimesCoreMockTest : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void UtimesCoreMockTest::SetUpTestCase()
+void UtimesCoreMockTest::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "SetUpTestCase";
+    GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "UtimesCoreMockTest");
     UvFsMock::EnableMock();
 }
 
-void UtimesCoreMockTest::TearDownTestCase()
+void UtimesCoreMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
-    GTEST_LOG_(INFO) << "TearDownTestCase";
+    GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
 void UtimesCoreMockTest::SetUp()
