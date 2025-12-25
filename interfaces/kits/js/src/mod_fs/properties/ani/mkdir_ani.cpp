@@ -25,7 +25,7 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-void MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
+void MkdirAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
 {
     auto [succ, pathStr] = TypeConverter::ToUTF8String(env, path);
     if (!succ) {
@@ -43,7 +43,7 @@ void MkdirkAni::MkdirSync0(ani_env *env, [[maybe_unused]] ani_class clazz, ani_s
     }
 }
 
-void MkdirkAni::MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_boolean recursion)
+void MkdirAni::MkdirSync1(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path, ani_boolean recursion)
 {
     auto [succ, pathStr] = ANI::TypeConverter::ToUTF8String(env, path);
     if (!succ) {

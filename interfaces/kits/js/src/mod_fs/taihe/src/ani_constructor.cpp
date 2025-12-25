@@ -13,7 +13,14 @@
  * limitations under the License.
  */
 
+#include "ohos.file.fs.ani.hpp"
+#if __has_include(<ani.h>)
 #include <ani.h>
+#elif __has_include(<ani/ani.h>)
+#include <ani/ani.h>
+#else
+#error "ani.h not found. Please ensure the Ani SDK is correctly installed."
+#endif
 #include <array>
 
 #include "access_ani.h"
@@ -249,8 +256,8 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "listFileSync", nullptr, reinterpret_cast<void *>(ListFileAni::ListFileSync) },
         ani_native_function { "lseekSync", nullptr, reinterpret_cast<void *>(LseekAni::LseekSync) },
         ani_native_function { "lstatSync", nullptr, reinterpret_cast<void *>(LstatAni::LstatSync) },
-        ani_native_function { "mkdirSync", mkdirCtorSig0.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync0) },
-        ani_native_function { "mkdirSync", mkdirCtorSig1.c_str(), reinterpret_cast<void *>(MkdirkAni::MkdirSync1) },
+        ani_native_function { "mkdirSync", mkdirCtorSig0.c_str(), reinterpret_cast<void *>(MkdirAni::MkdirSync0) },
+        ani_native_function { "mkdirSync", mkdirCtorSig1.c_str(), reinterpret_cast<void *>(MkdirAni::MkdirSync1) },
         ani_native_function { "mkdtempSync", nullptr, reinterpret_cast<void *>(MkdtempAni::MkdtempSync) },
         ani_native_function { "movedirSync", nullptr, reinterpret_cast<void *>(MoveDirAni::MoveDirSync) },
         ani_native_function { "moveFileSync", nullptr, reinterpret_cast<void *>(MoveAni::MoveFileSync) },
@@ -340,28 +347,20 @@ static ani_status DoBindMethods(ani_env *env)
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    if (vm == nullptr) {
-        HILOGE("Invalid parameter vm");
-        return ANI_INVALID_ARGS;
-    }
-
-    if (result == nullptr) {
-        HILOGE("Invalid parameter result");
-        return ANI_INVALID_ARGS;
-    }
-
     ani_env *env;
-    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
-    if (status != ANI_OK) {
-        HILOGE("Invalid ani version!");
-        return ANI_INVALID_VERSION;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        return ANI_ERROR;
     }
-
+    ani_status status = ANI_OK;
     status = DoBindMethods(env);
     if (status != ANI_OK) {
+        HILOGE("Failed to call DoBindMethods, res: %{public}d", static_cast<int>(status));
         return status;
     }
-
+    if (ANI_OK != ohos::file::fs::ANIRegister(env)) {
+        HILOGE("Failed to call ANIRegister, res: %{public}d", static_cast<int>(status));
+        status = ANI_ERROR;
+    }
     *result = ANI_VERSION_1;
-    return ANI_OK;
+    return status;
 }
