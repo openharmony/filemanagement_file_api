@@ -209,8 +209,8 @@ void NError::ThrowErrWithMsg(napi_env env, const std::string &errMsg)
     napi_get_and_clear_last_exception(env, &tmp);
     napi_status status = napi_throw(env, GenerateBusinessError(env, errno_, std::move(errMsg)));
     if (status != napi_ok) {
-        HILOGE("Failed to throw a BusinessError,error code is %{public}d, error message is %{public}s", 
-            errno_, errMsg_.c_str());
+        HILOGE("Failed to throw a BusinessError,error code is %{public}d, error message is %{public}s",
+            errno_, errMsg.c_str());
     }
 }
 } // namespace LibN

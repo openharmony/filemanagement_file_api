@@ -40,6 +40,7 @@ namespace {
 const std::string READ_STREAM_CLASS = "ReadStream";
 const std::string WRITE_STREAM_CLASS = "WriteStream";
 const std::string TEMP_FILE_SUFFIX = "_XXXXXX";
+const std::string NAPI_EMSG_PRE = "NAPI internal error, Possible reasons: ";
 
 struct BufferData {
     uint8_t* buffer = nullptr;
@@ -73,8 +74,8 @@ static napi_value CreateStream(napi_env env, napi_callback_info info, const std:
     napi_status status = napi_load_module(env, moduleName, &streamrw);
     if (status != napi_ok) {
         HILOGE("Failed to load module");
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_load_module failed, \
-            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE +
+            "1.napi_invalid_arg 2.napi_pending_exception");
         return nullptr;
     }
 
@@ -82,8 +83,8 @@ static napi_value CreateStream(napi_env env, napi_callback_info info, const std:
     status = napi_get_named_property(env, streamrw, streamName.c_str(), &constructor);
     if (status != napi_ok) {
         HILOGE("Failed to get named property");
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_get_named_property failed, \
-            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception 3.napi_object_expected");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE +
+            "1.napi_invalid_arg 2.napi_pending_exception 3.napi_object_expected");
         return nullptr;
     }
 
@@ -94,8 +95,8 @@ static napi_value CreateStream(napi_env env, napi_callback_info info, const std:
     status = napi_new_instance(env, constructor, argc, argv, &streamObj);
     if (status != napi_ok) {
         HILOGE("Failed to create napi new instance");
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_new_instance failed, \
-            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception 3.napi_function_expected");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE +
+            "1.napi_invalid_arg 2.napi_pending_exception 3.napi_function_expected");
         return nullptr;
     }
 
@@ -320,16 +321,15 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
     napi_status status = napi_create_external_arraybuffer(
         env, bufferData->buffer, bufferData->length, FinalizeCallback, bufferData.release(), &externalBuffer);
     if (status != napi_ok) {
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_create_external_arraybuffer failed, \
-            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "1.napi_invalid_arg 2.napi_pending_exception");
         return nullptr;
     }
 
     napi_value outputArray = nullptr;
     status = napi_create_typedarray(env, napi_int8_array, length, externalBuffer, 0, &outputArray);
     if (status != napi_ok) {
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_create_typedarray failed, \
-            Possible reasons: 1.napi_invalid_arg 2.napi_pending_exception 3.mapi_arraybuffer_expected");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE +
+            "1.napi_invalid_arg 2.napi_pending_exception 3.napi_arraybuffer_expected");
         return nullptr;
     }
 
@@ -371,8 +371,7 @@ napi_value AtomicFileNExporter::StartWrite(napi_env env, napi_callback_info info
     napi_status status = napi_create_reference(env, writeStream, 1, &rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to create reference");
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_create_reference failed, \
-            Possible reasons: napi_invalid_arg");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
         return nullptr;
     }
     return writeStream;
@@ -394,8 +393,7 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
     napi_status status = napi_get_reference_value(env, rafEntity->writeStreamObj, &writeStream);
     if (status != napi_ok) {
         HILOGE("Failed to get reference value");
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_get_reference_value failed, \
-            Possible reasons: napi_invalid_arg");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
         return nullptr;
     }
 
@@ -407,8 +405,7 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
         status = napi_delete_reference(env, rafEntity->writeStreamObj);
         if (status != napi_ok) {
             HILOGE("Failed to delete reference");
-            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_delete_reference failed, \
-                Possible reasons: napi_invalid_arg");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
             return nullptr;
         }
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to rename file");
@@ -420,8 +417,7 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
     status = napi_delete_reference(env, rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to delete reference");
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_delete_reference failed, \
-            Possible reasons: napi_invalid_arg");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
         return nullptr;
     }
     return nullptr;
@@ -443,8 +439,7 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
     napi_status status = napi_get_reference_value(env, rafEntity->writeStreamObj, &writeStream);
     if (status != napi_ok) {
         HILOGE("Failed to get reference value");
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_get_reference_value failed, \
-            Possible reasons: napi_invalid_arg");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
         return nullptr;
     }
 
@@ -455,8 +450,7 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
         status = napi_delete_reference(env, rafEntity->writeStreamObj);
         if (status != napi_ok) {
             HILOGE("Failed to delete reference");
-            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_delete_reference failed, \
-                Possible reasons: napi_invalid_arg");
+            NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
             return nullptr;
         }
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to remove file");
@@ -467,8 +461,7 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
     status = napi_delete_reference(env, rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to delete reference");
-        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "napi_delete_reference failed, \
-            Possible reasons: napi_invalid_arg");
+        NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
     }
     return nullptr;
 }
