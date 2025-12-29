@@ -363,7 +363,7 @@ static NError CloseFd(int fd)
     }
     int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
     if (ret < 0) {
-        HILOGE("Failed to close file with ret: %{public}d", ret);
+        HILOGE("Failed to uv_fs_close file with ret: %{public}d", ret);
         return NError(ret);
     }
     return NError(ERRNO_NOERR);
@@ -372,7 +372,7 @@ static NError CloseFd(int fd)
 static NError CloseFdWithFdsan(const int fd, const uint64_t fileTag)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
-    if (fd > FD_SAN_OVERFLOW_END) {
+    if (fd >= FD_SAN_OVERFLOW_END) {
         return CloseFd(fd);
     }
 

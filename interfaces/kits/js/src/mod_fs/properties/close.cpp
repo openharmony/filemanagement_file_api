@@ -64,21 +64,13 @@ static NError CloseFdWithFdsan(const int fd, const bool isFd, const uint64_t fil
 {
     FileFsTrace traceCloseFd("CloseFd");
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
-    if (fd > FD_SAN_OVERFLOW_END) {
+    if (fd >= FD_SAN_OVERFLOW_END) {
         return CloseFd(fd);
     }
 
     if (isFd) {
-        auto tag = fdsan_get_owner_tag(fd);
-        if (tag != 0) {
-            HILOGI("Get fdsan owner tag, fd: %{public}d", fd);
-        }
         CommonFunc::SetFdTag(fd, 0);
-        int ret = fdsan_close_with_tag(fd, tag);
-        if (ret < 0) {
-            HILOGE("Failed to close fd with errno: %{public}d", errno);
-            return NError(errno);
-        }
+        return CloseFd(fd);
     } else {
         auto tag = CommonFunc::GetFdTag(fd);
         if (tag <= 0 || tag != fileTag) {

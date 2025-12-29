@@ -20,8 +20,10 @@
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
+#include "common_func.h"
 #include "fdsan_mock.h"
 #include "libn_mock.h"
+#include "uv_fs_mock.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -45,12 +47,14 @@ void CloseMockTest::SetUpTestSuite(void)
     prctl(PR_SET_NAME, "CloseMockTest");
     LibnMock::EnableMock();
     FdsanMock::EnableMock();
+    UvFsMock::EnableMock();
 }
 
 void CloseMockTest::TearDownTestSuite(void)
 {
     LibnMock::DisableMock();
     FdsanMock::DisableMock();
+    UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
@@ -66,7 +70,7 @@ void CloseMockTest::TearDown(void)
 
 /**
  * @tc.name: CloseMockTest_Sync_001
- * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when fdsan_close_with_tag fails.
+ * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when uv_fs_close fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -80,18 +84,17 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_001, testing::ext::TestSize.Level1)
     tuple<bool, int> isFd = { true, 1 };
 
     auto libnMock = LibnMock::GetMock();
-    auto fdsanMock = FdsanMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*fdsanMock, fdsan_get_owner_tag(testing::_)).WillOnce(testing::Return(0));
-    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_))
-        .WillOnce(testing::SetErrnoAndReturn(EBADFD, -1));
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
+    EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
-    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_001";
@@ -115,17 +118,17 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_002, testing::ext::TestSize.Level1)
     tuple<bool, int> isFd = { true, 1 };
 
     auto libnMock = LibnMock::GetMock();
-    auto fdsanMock = FdsanMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*fdsanMock, fdsan_get_owner_tag(testing::_)).WillOnce(testing::Return(1));
-    EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
+    EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
 
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
-    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_NE(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_002";
@@ -472,6 +475,69 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0011, testing::ext::TestSize.Level1)
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_0011";
+}
+
+/**
+ * @tc.name: CloseMockTest_Sync_0012
+ * @tc.desc: Test function of Close::Sync interface for FAILURE when uv_fs_close fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CloseMockTest, CloseMockTest_Sync_0012, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_0012";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    tuple<bool, int> isFd = { true, FD_SAN_OVERFLOW_END };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
+    EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Close::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_0012";
+}
+
+/**
+ * @tc.name: CloseMockTest_Sync_0013
+ * @tc.desc: Test function of Close::Sync interface for SUCCESS when uv_fs_close fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CloseMockTest, CloseMockTest_Sync_0013, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_0013";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    tuple<bool, int> isFd = { true, FD_SAN_OVERFLOW_END };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
+    EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
+
+    auto res = Close::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_0013";
 }
 
 } // namespace Test
