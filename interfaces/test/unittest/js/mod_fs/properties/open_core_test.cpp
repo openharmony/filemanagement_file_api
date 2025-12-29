@@ -233,7 +233,7 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_008, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_008";
 
-    string path = "invalid2://fakePath/OpenCoreTest_DoOpen_008.txt";
+    string path = "internal://fakePath/OpenCoreTest_DoOpen_008.txt";
     int32_t mode = 0;
 
     auto res = OpenCore::DoOpen(path, mode);
