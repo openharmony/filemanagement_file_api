@@ -55,7 +55,6 @@ using namespace OHOS::FileManagement::LibN;
 const uint32_t API_VERSION_MOD = 1000;
 #define ALIGN_SIZE 4096
 #define FS_ALIGN(x, y) (((x) + (y) - 1) & -(y))
-#define FD_SAN_OVERFLOW_END 2048
 #endif
 
 void InitAccessModeType(napi_env env, napi_value exports)
@@ -387,6 +386,9 @@ static struct FdSanTable g_fdTable = {
 
 static struct FdSanEntry* GetFsFdEntry(size_t idx)
 {
+    if (idx >= FD_SAN_OVERFLOW_END) {
+        return nullptr;
+    }
     struct FdSanEntry *entries = g_fdTable.entries;
     if (idx < FD_SAN_TABLE_SIZE) {
         return &entries[idx];
