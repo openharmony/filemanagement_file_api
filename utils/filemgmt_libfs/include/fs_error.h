@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -417,6 +417,7 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
 class FsError {
 public:
     FsError(int errCode);
+    FsError(int errCode, const std::string &errMsg);
     int GetErrNo() const;
     const std::string &GetErrMsg() const;
     ~FsError() = default;

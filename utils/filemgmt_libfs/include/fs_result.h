@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,11 @@ public:
     static FsResult<T> Error(const int32_t code)
     {
         return FsResult(FsError(code), std::nullopt);
+    }
+
+    static FsResult<T> ErrorWithMsg(const int32_t code, const std::string &msg)
+    {
+        return FsResult(FsError(code, msg), std::nullopt);
     }
 
     bool IsSuccess() const
@@ -111,6 +116,11 @@ public:
     static FsResult<void> Success()
     {
         return FsResult(FsError(ERRNO_NOERR));
+    }
+
+    static FsResult<void> ErrorWithMsg(const int32_t code, const std::string &msg)
+    {
+        return FsResult(FsError(code, msg));
     }
 
     static FsResult<void> Error(const int32_t code)
