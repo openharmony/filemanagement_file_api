@@ -91,4 +91,64 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_001, TestSize.Level1)
     GTEST_LOG_(INFO) << "FdatasyncMockTest-end FdatasyncMockTest_Sync_001";
 }
 
+/**
+ * @tc.name: FdatasyncMockTest_Sync_002
+ * @tc.desc: Test function of Fdatasync::Sync interface for FAILURE when resGetFirstArg is false.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FdatasyncMockTest-begin FdatasyncMockTest_Sync_002";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+    tuple<bool, int32_t> tp = { false, 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(tp));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = Fdatasync::Sync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "FdatasyncMockTest-end FdatasyncMockTest_Sync_002";
+}
+
+/**
+ * @tc.name: FdatasyncMockTest_Sync_003
+ * @tc.desc: Test function of Fdatasync::Sync interface for FAILURE when InitArgs fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FdatasyncMockTest-begin FdatasyncMockTest_Sync_003";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = Fdatasync::Sync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "FdatasyncMockTest-end FdatasyncMockTest_Sync_003";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
