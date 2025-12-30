@@ -65,6 +65,7 @@ const double NS = 1e9;
 const double MS = 1e3;
 
 #define FD_SAN_TABLE_SIZE 128
+#define FD_SAN_OVERFLOW_END 2048
 
 struct FdSanEntry {
     _Atomic(uint64_t) close_tag;

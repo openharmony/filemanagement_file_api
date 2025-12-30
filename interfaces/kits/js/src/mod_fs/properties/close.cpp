@@ -44,21 +44,33 @@ static FileEntity *GetFileEntity(napi_env env, napi_value objFile)
     return fileEntity;
 }
 
-static NError CloseFd(const int fd, const bool isFd, const uint64_t fileTag)
+static NError CloseFd(int fd)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!close_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to uv_fs_close file with ret: %{public}d", ret);
+        return NError(ret);
+    }
+    return NError(ERRNO_NOERR);
+}
+
+static NError CloseFdWithFdsan(const int fd, const bool isFd, const uint64_t fileTag)
 {
     FileFsTrace traceCloseFd("CloseFd");
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    if (fd >= FD_SAN_OVERFLOW_END) {
+        return CloseFd(fd);
+    }
+
     if (isFd) {
-        auto tag = fdsan_get_owner_tag(fd);
-        if (tag != 0) {
-            HILOGI("Get fdsan owner tag, fd: %{public}d", fd);
-        }
         CommonFunc::SetFdTag(fd, 0);
-        int ret = fdsan_close_with_tag(fd, tag);
-        if (ret < 0) {
-            HILOGE("Failed to close file with errno: %{public}d", errno);
-            return NError(errno);
-        }
+        return CloseFd(fd);
     } else {
         auto tag = CommonFunc::GetFdTag(fd);
         if (tag <= 0 || tag != fileTag) {
@@ -73,20 +85,10 @@ static NError CloseFd(const int fd, const bool isFd, const uint64_t fileTag)
             return NError(errno);
         }
     }
-#else
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
-        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!close_req) {
-        HILOGE("Failed to request heap memory.");
-        return NError(ENOMEM);
-    }
-    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to close file with ret: %{public}d", ret);
-        return NError(ret);
-    }
-#endif
     return NError(ERRNO_NOERR);
+#else
+    return CloseFd(fd);
+#endif
 }
 
 static tuple<bool, FileStruct> ParseJsOperand(napi_env env, napi_value fdOrFileFromJsArg)
@@ -123,24 +125,26 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto fileTag = reinterpret_cast<uint64_t>(fileStruct.fileEntity);
-    int fd = fileStruct.fd;
-    if (!fileStruct.isFd) {
-        fd = fileStruct.fileEntity->fd_->GetFD();
-    }
-    auto err = CloseFd(fd, fileStruct.isFd, fileTag);
-    if (err) {
-        err.ThrowErr(env);
-        return nullptr;
-    }
-
-    if (!fileStruct.isFd) {
+    uint64_t fileTag = static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(fileStruct.fileEntity));
+    if (fileStruct.isFd) {
+        auto err = CloseFdWithFdsan(fileStruct.fd, fileStruct.isFd, fileTag);
+        if (err) {
+            err.ThrowErr(env);
+            return nullptr;
+        }
+    } else {
+        auto err = CloseFdWithFdsan(fileStruct.fileEntity->fd_->GetFD(), fileStruct.isFd, fileTag);
+        if (err) {
+            err.ThrowErr(env);
+            return nullptr;
+        }
         auto fp = NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg[NARG_POS::FIRST]);
         if (!fp) {
             NError(EINVAL).ThrowErr(env);
             return nullptr;
         }
     }
+
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -160,11 +164,10 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto fileTag = reinterpret_cast<uint64_t>(fileStruct.fileEntity);
-    int fd = fileStruct.fd;
+    uint64_t fileTag = static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(fileStruct.fileEntity));
 
     if (!fileStruct.isFd) {
-        fd = fileStruct.fileEntity->fd_->GetFD();
+        fileStruct.fd = fileStruct.fileEntity->fd_->GetFD();
         auto fp = NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg[NARG_POS::FIRST]);
         if (!fp) {
             NError(EINVAL).ThrowErr(env);
@@ -172,8 +175,8 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
         }
     }
 
-    auto cbExec = [fd, isFd = fileStruct.isFd, fileTag]() -> NError {
-        return CloseFd(fd, isFd, fileTag);
+    auto cbExec = [fileStruct = fileStruct, fileTag]() -> NError {
+        return CloseFdWithFdsan(fileStruct.fd, fileStruct.isFd, fileTag);
     };
 
     auto cbComplete = [](napi_env env, NError err) -> NVal {

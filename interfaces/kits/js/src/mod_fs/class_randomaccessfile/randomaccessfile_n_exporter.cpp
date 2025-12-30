@@ -353,9 +353,29 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
     return WriteExec(env, funcArg, rafEntity);
 }
 
-static NError CloseFd(const int fd, const uint64_t fileTag)
+static NError CloseFd(int fd)
+{
+    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
+        new uv_fs_t, CommonFunc::fs_req_cleanup };
+    if (!close_req) {
+        HILOGE("Failed to request heap memory.");
+        return NError(ENOMEM);
+    }
+    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
+    if (ret < 0) {
+        HILOGE("Failed to uv_fs_close file with ret: %{public}d", ret);
+        return NError(ret);
+    }
+    return NError(ERRNO_NOERR);
+}
+
+static NError CloseFdWithFdsan(const int fd, const uint64_t fileTag)
 {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    if (fd >= FD_SAN_OVERFLOW_END) {
+        return CloseFd(fd);
+    }
+
     auto tag = CommonFunc::GetFdTag(fd);
     if (tag <= 0 || tag != fileTag) {
         tag = fileTag|PREFIX_ADDR;
@@ -368,20 +388,10 @@ static NError CloseFd(const int fd, const uint64_t fileTag)
         HILOGE("Failed to close file with errno: %{public}d", errno);
         return NError(errno);
     }
-#else
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> close_req = {
-        new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
-    if (!close_req) {
-        HILOGE("Failed to request heap memory.");
-        return NError(ENOMEM);
-    }
-    int ret = uv_fs_close(nullptr, close_req.get(), fd, nullptr);
-    if (ret < 0) {
-        HILOGE("Failed to close file with ret: %{public}d", ret);
-        return NError(ret);
-    }
-#endif
     return NError(ERRNO_NOERR);
+#else
+    return CloseFd(fd);
+#endif
 }
 
 napi_value RandomAccessFileNExporter::CloseSync(napi_env env, napi_callback_info info)
@@ -400,7 +410,8 @@ napi_value RandomAccessFileNExporter::CloseSync(napi_env env, napi_callback_info
     }
 
     uint64_t fileTag = static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(rafEntity));
-    auto err = CloseFd(rafEntity->fd.get()->GetFD(), fileTag);
+
+    auto err = CloseFdWithFdsan(rafEntity->fd.get()->GetFD(), fileTag);
     if (err) {
         err.ThrowErr(env);
         return nullptr;
