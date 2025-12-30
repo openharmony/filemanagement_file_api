@@ -221,7 +221,6 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_007, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "OpenCoreTest-end OpenCoreTest_DoOpen_007";
 }
 
-
 /**
  * @tc.name: OpenCoreTest_DoOpen_008
  * @tc.desc: Test function of OpenCore::DoOpen interface for FAILURE when URL is invalid.
@@ -244,5 +243,4 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_008, testing::ext::TestSize.Level1)
 
     GTEST_LOG_(INFO) << "OpenCoreTest-end OpenCoreTest_DoOpen_008";
 }
-
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
