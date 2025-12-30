@@ -221,4 +221,26 @@ HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_007, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "OpenCoreTest-end OpenCoreTest_DoOpen_007";
 }
 
+/**
+ * @tc.name: OpenCoreTest_DoOpen_008
+ * @tc.desc: Test function of OpenCore::DoOpen interface for FAILURE when URL is invalid.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(OpenCoreTest, OpenCoreTest_DoOpen_008, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "OpenCoreTest-begin OpenCoreTest_DoOpen_008";
+
+    string path = "internal://fakePath/OpenCoreTest_DoOpen_008.txt";
+    int32_t mode = 0;
+
+    auto res = OpenCore::DoOpen(path, mode);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "OpenCoreTest-end OpenCoreTest_DoOpen_008";
+}
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
