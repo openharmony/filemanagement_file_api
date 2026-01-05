@@ -228,7 +228,7 @@ export class FileIoImpl {
 @!sts_inject("""
 static { loadLibrary("file_fs_taihe.z"); }
 type  DfsListenerCallback = (networkId: string, status: int) => void;
-interface DfsListeners {
+export interface DfsListeners {
   onStatus: DfsListenerCallback;
 }
 
