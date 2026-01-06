@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,7 +140,7 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_DoCopy_001, testing::ext::TestSize.L
     testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
 
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
     EXPECT_TRUE(FileUtils::Exists(destFile));
 
     GTEST_LOG_(INFO) << "CopyCoreMockTest-end CopyCoreMockTest_DoCopy_001";
@@ -516,12 +516,10 @@ HWTEST_F(CopyCoreMockTest, CopyCoreMockTest_CreateFileInfos_001, testing::ext::T
 
     auto [errCode, infos] = CopyCore::CreateFileInfos(srcFile, destFile, options);
     EXPECT_EQ(errCode, ERRNO_NOERR);
-    EXPECT_NE(infos, nullptr);
-    if (infos) {
-        EXPECT_TRUE(infos->hasListener);
-        EXPECT_NE(infos->listener, nullptr);
-        EXPECT_NE(infos->taskSignal, nullptr);
-    }
+    ASSERT_NE(infos, nullptr);
+    EXPECT_TRUE(infos->hasListener);
+    EXPECT_NE(infos->listener, nullptr);
+    EXPECT_NE(infos->taskSignal, nullptr);
 
     GTEST_LOG_(INFO) << "CopyCoreMockTest-end CopyCoreMockTest_CreateFileInfos_001";
 }

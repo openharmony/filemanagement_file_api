@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,12 +77,15 @@ HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_001, testing::ext::TestSiz
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
-        .WillOnce(testing::Return(UV_EBADF));
+        .WillOnce(testing::Return(-EBADF));
     // Do testing
     auto ret = CloseCore::DoClose(fd);
     // Verify results
-    EXPECT_FALSE(ret.IsSuccess());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900008);
+    EXPECT_EQ(err.GetErrMsg(), "Bad file descriptor");
 
     GTEST_LOG_(INFO) << "CloseCoreMockTest-end CloseCoreMockTest_DoClose_001";
 }

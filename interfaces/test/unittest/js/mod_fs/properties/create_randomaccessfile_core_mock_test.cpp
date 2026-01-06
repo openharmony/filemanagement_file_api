@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,10 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, mode, options);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_001";
 }
@@ -108,7 +111,11 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, mode, opts);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    ASSERT_TRUE(res.IsSuccess());
+    auto *raf = res.GetData().value();
+    ASSERT_NE(raf, nullptr);
+    delete raf;
+    raf = nullptr;
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_002";
 }

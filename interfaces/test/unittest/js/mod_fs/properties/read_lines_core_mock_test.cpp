@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,7 +85,11 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_001, testing::
     auto res = ReadLinesCore::DoReadLines(path, option);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_TRUE(res.IsSuccess());
+    ASSERT_TRUE(res.IsSuccess());
+    auto *iter = res.GetData().value();
+    ASSERT_NE(iter, nullptr);
+    delete iter;
+    iter = nullptr;
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_001";
 }
@@ -110,7 +114,11 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_002, testing::
     auto res = ReadLinesCore::DoReadLines(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_TRUE(res.IsSuccess());
+    ASSERT_TRUE(res.IsSuccess());
+    auto *iter = res.GetData().value();
+    ASSERT_NE(iter, nullptr);
+    delete iter;
+    iter = nullptr;
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_002";
 }

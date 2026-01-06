@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,6 +82,9 @@ HWTEST_F(ReadCoreMockTest, ReadCoreMockTest_DoRead_001, testing::ext::TestSize.L
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "ReadCoreMockTest-end ReadCoreMockTest_DoRead_001";
 }
@@ -98,16 +101,19 @@ HWTEST_F(ReadCoreMockTest, ReadCoreMockTest_DoRead_002, testing::ext::TestSize.L
     GTEST_LOG_(INFO) << "ReadCoreMockTest-begin ReadCoreMockTest_DoRead_002";
 
     int32_t fd = 1;
+    int64_t len = 10;
     void *buf = nullptr;
     ArrayBuffer arrayBuffer(buf, 0);
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(len));
 
     auto res = ReadCore::DoRead(fd, arrayBuffer);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_TRUE(res.IsSuccess());
+    ASSERT_TRUE(res.IsSuccess());
+    auto readLen = res.GetData().value();
+    EXPECT_EQ(readLen, len);
 
     GTEST_LOG_(INFO) << "ReadCoreMockTest-end ReadCoreMockTest_DoRead_002";
 }

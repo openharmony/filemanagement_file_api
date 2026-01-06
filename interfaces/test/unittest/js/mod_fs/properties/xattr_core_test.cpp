@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,13 +125,14 @@ HWTEST_F(XattrCoreTest, XattrCoreTest_DoGetXattr_001, testing::ext::TestSize.Lev
 {
     GTEST_LOG_(INFO) << "XattrCoreTest-begin XattrCoreTest_DoGetXattr_001";
 
-    auto path = testDir + "/XattrCoreTest_DoGetXattr_001_non_exitent.txt";
+    auto path = testDir + "/XattrCoreTest_DoGetXattr_001_non_existent.txt";
     string key = "test_key";
 
     auto ret = XattrCore::DoGetXattr(path, key);
 
     ASSERT_TRUE(ret.IsSuccess());
-    EXPECT_EQ(ret.GetData().value(), "");
+    auto attr = ret.GetData().value();
+    EXPECT_EQ(attr, "");
 
     GTEST_LOG_(INFO) << "XattrCoreTest-end XattrCoreTest_DoGetXattr_001";
 }

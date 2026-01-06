@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,9 @@ public:
     static void TearDownTestSuite();
     void SetUp();
     void TearDown();
+
+private:
+    const string sandboxTestDir = "/data/storage/el2/base/files/LstatCoreMockTest";
 };
 
 void LstatCoreMockTest::SetUpTestSuite()
@@ -59,7 +62,7 @@ void LstatCoreMockTest::TearDown()
 
 /**
  * @tc.name: LstatCoreMockTest_DoLstat_001
- * @tc.desc: Test function of LstatCore::DoLstat interface for FAILURE.
+ * @tc.desc: Test function of LstatCore::DoLstat interface for FAILURE with local path when uv_fs_lstat fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -75,13 +78,16 @@ HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_001, testing::ext::TestSiz
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_001";
 }
 
 /**
  * @tc.name: LstatCoreMockTest_DoLstat_002
- * @tc.desc: Test function of LstatCore::DoLstat with URI for FAILURE when uv_fs_lstat fails.
+ * @tc.desc: Test function of LstatCore::DoLstat with file URI for FAILURE when uv_fs_lstat fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -90,20 +96,24 @@ HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_002, testing::ext::TestSiz
 {
     GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_002";
 
+    auto uri = "file://com.example.statsupporturi" + sandboxTestDir + "/LstatCoreMockTest_DoLstat_002.txt";
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
 
-    auto res = LstatCore::DoLstat("file://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+    auto res = LstatCore::DoLstat(uri);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_002";
 }
 
 /**
  * @tc.name: LstatCoreMockTest_DoLstat_003
- * @tc.desc: Test function of LstatCore::DoLstat with remote URI path for FAILURE when uv_fs_lstat fails.
+ * @tc.desc: Test function of LstatCore::DoLstat with datashare URI path for FAILURE when uv_fs_lstat fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -112,13 +122,17 @@ HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_003, testing::ext::TestSiz
 {
     GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_003";
 
+    auto uri = "datashare://com.example.statsupporturi" + sandboxTestDir + "/LstatCoreMockTest_DoLstat_003.txt";
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
 
-    auto res = LstatCore::DoLstat("datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt");
+    auto res = LstatCore::DoLstat(uri);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_003";
 }
@@ -133,13 +147,17 @@ HWTEST_F(LstatCoreMockTest, LstatCoreMockTest_DoLstat_004, testing::ext::TestSiz
 {
     GTEST_LOG_(INFO) << "LstatCoreMockTest-begin LstatCoreMockTest_DoLstat_004";
 
+    auto path = sandboxTestDir + "/LstatCoreMockTest_DoLstat_004.txt";
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_lstat(_, _, _, _)).WillOnce(Return(-1));
 
-    auto res = LstatCore::DoLstat("/data/storage/el2/base/files/test.txt");
+    auto res = LstatCore::DoLstat(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "LstatCoreMockTest-end LstatCoreMockTest_DoLstat_004";
 }

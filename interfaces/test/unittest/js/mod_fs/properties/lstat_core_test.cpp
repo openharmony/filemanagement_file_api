@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,7 +72,7 @@ HWTEST_F(LstatCoreTest, LstatCoreTest_DoLstat_001, testing::ext::TestSize.Level1
 
     auto nonExistent = testDir + "/non_existent.txt";
     auto res = LstatCore::DoLstat(nonExistent);
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
     auto err = res.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900002);
     EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
@@ -93,8 +93,14 @@ HWTEST_F(LstatCoreTest, LstatCoreTest_DoLstat_002, testing::ext::TestSize.Level1
 
     auto path = testDir + "/LstatCoreTest_DoLstat_002.txt";
     ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
+
     auto res = LstatCore::DoLstat(path);
-    EXPECT_EQ(res.IsSuccess(), true);
+
+    ASSERT_TRUE(res.IsSuccess());
+    auto *stat = res.GetData().value();
+    ASSERT_NE(stat, nullptr);
+    delete stat;
+    stat = nullptr;
 
     GTEST_LOG_(INFO) << "LstatCoreTest-end LstatCoreTest_DoLstat_002";
 }

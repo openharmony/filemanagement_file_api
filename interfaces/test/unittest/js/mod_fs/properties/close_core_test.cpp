@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,9 +71,9 @@ void CloseCoreTest::TearDown()
 HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "CloseCoreTest-begin CloseCoreTest_DoClose_001";
+
     auto ret = CloseCore::DoClose(-1);
     EXPECT_FALSE(ret.IsSuccess());
-
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -132,14 +132,14 @@ HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_003, testing::ext::TestSize.Level1
     ASSERT_TRUE(FileUtils::CreateFile(path, "CloseCoreTest_DoClose_003"));
 
     auto fileRes = OpenCore::DoOpen(path);
-    if (!fileRes.IsSuccess()) {
-        ASSERT_TRUE(false);
-    }
+    ASSERT_TRUE(fileRes.IsSuccess());
     FsFile *file = fileRes.GetData().value();
-    EXPECT_NE(file, nullptr);
+    ASSERT_NE(file, nullptr);
 
     auto ret = CloseCore::DoClose(file);
     EXPECT_TRUE(ret.IsSuccess());
+    delete file;
+    file = nullptr;
 
     GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_003";
 }
@@ -159,11 +159,9 @@ HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_004, testing::ext::TestSize.Level1
     ASSERT_TRUE(FileUtils::CreateFile(path, "CloseCoreTest_DoClose_004"));
 
     auto fileRes = OpenCore::DoOpen(path);
-    if (!fileRes.IsSuccess()) {
-        ASSERT_TRUE(false);
-    }
+    ASSERT_TRUE(fileRes.IsSuccess());
     FsFile *file = fileRes.GetData().value();
-    EXPECT_NE(file, nullptr);
+    ASSERT_NE(file, nullptr);
 
     auto ret = CloseCore::DoClose(file);
     EXPECT_TRUE(ret.IsSuccess());
@@ -173,6 +171,8 @@ HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_004, testing::ext::TestSize.Level1
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+    delete file;
+    file = nullptr;
 
     GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_004";
 }

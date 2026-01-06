@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,7 +105,11 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_002, testing::ext::TestSize.Lev
     AccessFlag flag = DEFAULT_FLAG;
 
     auto res = AccessCore::DoAccess(path, mode, flag);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "AccessCoreTest-end AccessCoreTest_DoAccess_002";
 }
@@ -125,7 +129,11 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_003, testing::ext::TestSize.Lev
     std::optional<AccessModeType> mode = std::make_optional<AccessModeType>(AccessModeType::ERROR);
 
     auto res = AccessCore::DoAccess(path, mode);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "AccessCoreTest-end AccessCoreTest_DoAccess_003";
 }
@@ -148,6 +156,7 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_004, testing::ext::TestSize.Lev
     ASSERT_TRUE(FileUtils::CreateDirectories(path, true));
 
     auto res = AccessCore::DoAccess(path, mode, flag);
+
     ASSERT_TRUE(res.IsSuccess());
     bool exists = res.GetData().value();
     EXPECT_FALSE(exists);
@@ -175,6 +184,7 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_005, testing::ext::TestSize.Lev
     ASSERT_NE(re, -1);
 
     auto res = AccessCore::DoAccess(path, mode, flag);
+
     ASSERT_TRUE(res.IsSuccess());
     bool exists = res.GetData().value();
     EXPECT_TRUE(exists);
@@ -198,6 +208,7 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_006, testing::ext::TestSize.Lev
     AccessFlag flag = LOCAL_FLAG;
 
     auto res = AccessCore::DoAccess(path, mode, flag);
+
     ASSERT_TRUE(res.IsSuccess());
     bool exists = res.GetData().value();
     EXPECT_FALSE(exists);
@@ -225,6 +236,7 @@ HWTEST_F(AccessCoreTest, AccessCoreTest_DoAccess_007, testing::ext::TestSize.Lev
     ASSERT_NE(re, -1);
 
     auto res = AccessCore::DoAccess(path, mode, flag);
+
     ASSERT_TRUE(res.IsSuccess());
     bool exists = res.GetData().value();
     EXPECT_TRUE(exists);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,7 +62,8 @@ void CreateRandomAccessFileCoreTest::TearDown()
 
 /**
  * @tc.name: CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_001
- * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile to verify an invalid mode.
+ * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FAILURE when mode is
+ * invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -73,18 +74,23 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
     GTEST_LOG_(INFO) << "Test-begin CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_001";
 
     string path = testDir + "/CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_001.txt";
-    int32_t mode = -5;
+    int32_t mode = -1;
     optional<RandomAccessFileOptions> options = nullopt;
 
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, mode, options);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_001";
 }
 
 /**
  * @tc.name: CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_002
- * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FALSE.
+ * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FAILURE when start
+ * option is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -98,17 +104,22 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
     int32_t mode = 0;
     RandomAccessFileOptions opts;
     opts.start = -1;
-    opts.end = 100;
+    opts.end = 1;
 
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, mode, opts);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_002";
 }
 
 /**
  * @tc.name: CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_003
- * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FALSE.
+ * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FAILURE when end option
+ * is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -121,18 +132,23 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
     string path = testDir + "/CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_003.txt";
     int32_t mode = 0;
     RandomAccessFileOptions opts;
-    opts.start = 10;
+    opts.start = 0;
     opts.end = -1;
 
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, mode, opts);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_003";
 }
 
 /**'
  * @tc.name: CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_004
- * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FALSE.
+ * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FAILURE when fd is
+ * invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -146,7 +162,8 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
     optional<RandomAccessFileOptions> opts = nullopt;
 
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(fd, opts);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
     auto err = res.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -156,7 +173,8 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
 
 /**'
  * @tc.name: CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_005
- * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile to verify the path is invalid.
+ * @tc.desc: Test function of CreateRandomAccessFileCore::DoCreateRandomAccessFile interface for FAILURE when path is
+ * empty.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -171,7 +189,11 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
     optional<RandomAccessFileOptions> options = nullopt;
 
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(path, mode, options);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_005";
 }
@@ -195,9 +217,13 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
     optional<RandomAccessFileOptions> opts = nullopt;
 
     auto res = CreateRandomAccessFileCore::DoCreateRandomAccessFile(fd, opts);
-    EXPECT_EQ(res.IsSuccess(), true);
 
     close(fd);
+    ASSERT_TRUE(res.IsSuccess());
+    auto *raf = res.GetData().value();
+    ASSERT_NE(raf, nullptr);
+    delete raf;
+    raf = nullptr;
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_006";
 }

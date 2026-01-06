@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,12 +75,14 @@ HWTEST_F(CreateStreamCoreTest, CreateStreamCoreTest_DoCreateStream_001, testing:
     ASSERT_TRUE(FileUtils::CreateFile(file, "content"));
 
     auto ret = CreateStreamCore::DoCreateStream(file, "r");
-    ASSERT_TRUE(ret.IsSuccess());
 
-    auto stream = ret.GetData().value();
+    ASSERT_TRUE(ret.IsSuccess());
+    auto *stream = ret.GetData().value();
     ASSERT_NE(stream, nullptr);
     auto retClose = stream->Close();
     EXPECT_TRUE(retClose.IsSuccess());
+    delete stream;
+    stream = nullptr;
 
     GTEST_LOG_(INFO) << "CreateStreamCoreTest-end CreateStreamCoreTest_DoCreateStream_001";
 }
@@ -99,8 +101,8 @@ HWTEST_F(CreateStreamCoreTest, CreateStreamCoreTest_DoCreateStream_002, testing:
     string file = testDir + "/CreateStreamCoreTest_DoCreateStream_002.txt";
 
     auto ret = CreateStreamCore::DoCreateStream(file, "sss");
-    EXPECT_FALSE(ret.IsSuccess());
 
+    EXPECT_FALSE(ret.IsSuccess());
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");

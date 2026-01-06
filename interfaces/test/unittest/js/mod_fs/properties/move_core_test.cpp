@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,11 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_001, testing::ext::TestSize.Level1)
     std::string dest = "";
 
     auto res = MoveCore::DoMove(src, dest);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "MoveCoreTest-end MoveCoreTest_DoMove_001";
 }
@@ -94,7 +98,11 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_002, testing::ext::TestSize.Level1)
     std::string dest = "";
 
     auto res = MoveCore::DoMove(src, dest);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "MoveCoreTest-end MoveCoreTest_DoMove_002";
 }
@@ -115,7 +123,11 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_003, testing::ext::TestSize.Level1)
     int mode = 3; // invalid mode
 
     auto res = MoveCore::DoMove(src, dest, mode);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "MoveCoreTest-end MoveCoreTest_DoMove_003";
 }
@@ -138,7 +150,11 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_004, testing::ext::TestSize.Level1)
     ASSERT_TRUE(FileUtils::CreateDirectories(src));
 
     auto res = MoveCore::DoMove(src, dest, mode);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "MoveCoreTest-end MoveCoreTest_DoMove_004";
 }
@@ -161,7 +177,11 @@ HWTEST_F(MoveCoreTest, MoveCoreTest_DoMove_005, testing::ext::TestSize.Level1)
     ASSERT_TRUE(FileUtils::CreateDirectories(dest));
 
     auto res = MoveCore::DoMove(src, dest, mode);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "MoveCoreTest-end MoveCoreTest_DoMove_005";
 }
