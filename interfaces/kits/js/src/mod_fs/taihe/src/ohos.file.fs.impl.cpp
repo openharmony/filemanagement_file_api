@@ -55,7 +55,8 @@ void ConnectDfsSync(::taihe::string_view networkId, uintptr_t listeners)
         OpenP2PConnectionEx(std::string(networkId), aniDfsListeners);
     if (ret != OHOS::FileManagement::ModuleFileIO::ERRNO_NOERR) {
         HILOGE("ConnectDfsSync failed, ret: %{public}d", ret);
-        ::taihe::set_business_error(ret, ::taihe::string_view("ConnectDfsSync failed"));
+        OHOS::FileManagement::ModuleFileIO::FsError fsError(ret);
+        ::taihe::set_business_error(fsError.GetErrNo(), ::taihe::string_view(fsError.GetErrMsg()));
     }
 }
 
@@ -65,7 +66,8 @@ void DisconnectDfsSync(::taihe::string_view networkId)
         CloseP2PConnectionEx(std::string(networkId));
     if (ret != OHOS::FileManagement::ModuleFileIO::ERRNO_NOERR) {
         HILOGE("DisconnectDfsSync failed, ret: %{public}d", ret);
-        ::taihe::set_business_error(ret, ::taihe::string_view("DisconnectDfsSync failed"));
+        OHOS::FileManagement::ModuleFileIO::FsError fsError(ret);
+        ::taihe::set_business_error(fsError.GetErrNo(), ::taihe::string_view(fsError.GetErrMsg()));
     }
 }
 } // namespace
