@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -297,7 +297,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CheckOrCreatePath_002, testing::ext::TestSiz
     string newFile = destDir + "/CopyCoreTest_CheckOrCreatePath_002.txt";
     auto res = CopyCore::CheckOrCreatePath(newFile);
     EXPECT_EQ(res, ERRNO_NOERR);
-    EXPECT_TRUE(CopyCore::IsFile(newFile));
+    EXPECT_TRUE(FileUtils::IsFile(newFile));
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CheckOrCreatePath_002";
 }
@@ -316,7 +316,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_MakeDir_001, testing::ext::TestSize.Level1)
     string newDir = destDir + "/CopyCoreTest_MakeDir_001";
     auto res = CopyCore::MakeDir(newDir);
     EXPECT_EQ(res, ERRNO_NOERR);
-    EXPECT_TRUE(CopyCore::IsDirectory(newDir));
+    EXPECT_TRUE(FileUtils::IsDirectory(newDir));
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_MakeDir_001";
 }
@@ -429,12 +429,10 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CreateFileInfos_001, testing::ext::TestSize.
 
     auto [errCode, infos] = CopyCore::CreateFileInfos(srcFile, destFile, options);
     EXPECT_EQ(errCode, ERRNO_NOERR);
-    EXPECT_NE(infos, nullptr);
-    if (infos) {
-        EXPECT_FALSE(infos->hasListener);
-        EXPECT_EQ(infos->listener, nullptr);
-        EXPECT_EQ(infos->taskSignal, nullptr);
-    }
+    ASSERT_NE(infos, nullptr);
+    EXPECT_FALSE(infos->hasListener);
+    EXPECT_EQ(infos->listener, nullptr);
+    EXPECT_EQ(infos->taskSignal, nullptr);
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CreateFileInfos_001";
 }
@@ -460,8 +458,8 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopySubDir_001, testing::ext::TestSize.Level
     auto res = CopyCore::CopySubDir(subDir, destSubDir, infos);
     string destSubFile = destSubDir + "/CopyCoreTest_CopySubDir_001.txt";
     EXPECT_EQ(res, ERRNO_NOERR);
-    EXPECT_TRUE(CopyCore::IsDirectory(destSubDir));
-    EXPECT_TRUE(CopyCore::IsFile(destSubFile));
+    EXPECT_TRUE(FileUtils::IsDirectory(destSubDir));
+    EXPECT_TRUE(FileUtils::IsFile(destSubFile));
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CopySubDir_001";
 }
@@ -511,8 +509,8 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_RecurCopyDir_001, testing::ext::TestSize.Lev
     auto res = CopyCore::RecurCopyDir(srcDir, destDir, infos);
     string destSubFile = destSubDir + "/CopyCoreTest_RecurCopyDir_001.txt";
     EXPECT_EQ(res, ERRNO_NOERR);
-    EXPECT_TRUE(CopyCore::IsDirectory(destSubDir));
-    EXPECT_TRUE(CopyCore::IsFile(destSubDir + "/CopyCoreTest_RecurCopyDir_001.txt"));
+    EXPECT_TRUE(FileUtils::IsDirectory(destSubDir));
+    EXPECT_TRUE(FileUtils::IsFile(destSubDir + "/CopyCoreTest_RecurCopyDir_001.txt"));
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_RecurCopyDir_001";
 }
@@ -534,8 +532,8 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_CopyDirFunc_001, testing::ext::TestSize.Leve
     auto infos = make_shared<FsFileInfos>();
     auto res = CopyCore::CopyDirFunc(srcDir, destDir, infos);
     EXPECT_EQ(res, ERRNO_NOERR);
-    EXPECT_TRUE(CopyCore::IsDirectory(copiedDir));
-    EXPECT_TRUE(CopyCore::IsFile(copiedFile));
+    EXPECT_TRUE(FileUtils::IsDirectory(copiedDir));
+    EXPECT_TRUE(FileUtils::IsFile(copiedFile));
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_CopyDirFunc_001";
 }
@@ -559,7 +557,7 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_ExecLocal_001, testing::ext::TestSize.Level1
 
     auto res = CopyCore::ExecLocal(infos, callback);
     EXPECT_EQ(res, ERRNO_NOERR);
-    EXPECT_TRUE(CopyCore::IsFile(destFile));
+    EXPECT_TRUE(FileUtils::IsFile(destFile));
 
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_ExecLocal_001";
 }
@@ -1082,10 +1080,8 @@ HWTEST_F(CopyCoreTest, CopyCoreTest_OnFileReceive_002, testing::ext::TestSize.Le
     auto infos = make_shared<FsFileInfos>();
     auto callback = CopyCore::RegisterListener(infos);
     CopyCore::OnFileReceive(infos);
-    EXPECT_NE(callback, nullptr);
-    if (callback) {
-        EXPECT_EQ(callback->listener, nullptr);
-    }
+    ASSERT_NE(callback, nullptr);
+    EXPECT_EQ(callback->listener, nullptr);
     GTEST_LOG_(INFO) << "CopyCoreTest-end CopyCoreTest_OnFileReceive_002";
 }
 

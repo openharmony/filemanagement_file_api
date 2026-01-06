@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,14 +80,15 @@ HWTEST_F(FdopenStreamCoreTest, FdopenStreamCoreTest_DoFdopenStream_001, testing:
     }
 
     auto ret = FdopenStreamCore::DoFdopenStream(fd, "r");
-    ASSERT_TRUE(ret.IsSuccess());
 
-    auto stream = ret.GetData().value();
+    close(fd);
+    ASSERT_TRUE(ret.IsSuccess());
+    auto *stream = ret.GetData().value();
     ASSERT_NE(stream, nullptr);
     auto retClose = stream->Close();
     EXPECT_TRUE(retClose.IsSuccess());
-
-    close(fd);
+    delete stream;
+    stream = nullptr;
 
     GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FdopenStreamCoreTest_DoFdopenStream_001";
 }
@@ -104,8 +105,8 @@ HWTEST_F(FdopenStreamCoreTest, FdopenStreamCoreTest_DoFdopenStream_002, testing:
     GTEST_LOG_(INFO) << "FdopenStreamCoreTest-begin FdopenStreamCoreTest_DoFdopenStream_002";
 
     auto ret = FdopenStreamCore::DoFdopenStream(-1, "r");
-    EXPECT_FALSE(ret.IsSuccess());
 
+    EXPECT_FALSE(ret.IsSuccess());
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -133,12 +134,11 @@ HWTEST_F(FdopenStreamCoreTest, FdopenStreamCoreTest_DoFdopenStream_003, testing:
     }
 
     auto ret = FdopenStreamCore::DoFdopenStream(fd, "sssssss");
-    EXPECT_FALSE(ret.IsSuccess());
 
+    EXPECT_FALSE(ret.IsSuccess());
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
-
     close(fd);
 
     GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FdopenStreamCoreTest_DoFdopenStream_003";

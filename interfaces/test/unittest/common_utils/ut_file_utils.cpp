@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,52 @@ auto InvokeWithMockDisabled(Func func, Args &&...args)
     }
 #endif
     return result;
+}
+
+bool FileUtils::IsDirectory(const fs::path &path)
+{
+    return InvokeWithMockDisabled(&FileUtils::DoIsDirectory, path);
+}
+
+bool FileUtils::DoIsDirectory(const fs::path &path)
+{
+    auto [succ, normalizedPath] = CheckAndNormalizePath(path);
+    if (!succ) {
+        GTEST_LOG_(ERROR) << "Failed to check and normalize path before creating!";
+        return false;
+    }
+
+    std::error_code err;
+    auto status = fs::status(normalizedPath, err);
+    if (err) {
+        GTEST_LOG_(ERROR) << "Failed to get the path status! Error: " << err.message() << ". Code: " << err.value();
+        return false;
+    }
+
+    return status.type() == fs::file_type::directory;
+}
+
+bool FileUtils::IsFile(const fs::path &path)
+{
+    return InvokeWithMockDisabled(&FileUtils::DoIsFile, path);
+}
+
+bool FileUtils::DoIsFile(const fs::path &path)
+{
+    auto [succ, normalizedPath] = CheckAndNormalizePath(path);
+    if (!succ) {
+        GTEST_LOG_(ERROR) << "Failed to check and normalize path before creating!";
+        return false;
+    }
+
+    std::error_code err;
+    auto status = fs::status(normalizedPath, err);
+    if (err) {
+        GTEST_LOG_(ERROR) << "Failed to get the path status! Error: " << err.message() << ". Code: " << err.value();
+        return false;
+    }
+
+    return status.type() == fs::file_type::regular;
 }
 
 off_t FileUtils::GetFileSize(const int fd)

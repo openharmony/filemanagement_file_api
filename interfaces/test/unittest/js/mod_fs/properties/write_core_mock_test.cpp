@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,14 +69,16 @@ HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_001, testing::ext::TestSiz
     GTEST_LOG_(INFO) << "WriteCoreMockTest-begin WriteCoreMockTest_DoWrite_001";
 
     int32_t fd = 1;
-    string buffer;
+    string buffer = "content";
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(buffer.length()));
 
     auto res = WriteCore::DoWrite(fd, buffer);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_TRUE(res.IsSuccess());
+    ASSERT_TRUE(res.IsSuccess());
+    auto writeLen = res.GetData().value();
+    EXPECT_EQ(writeLen, buffer.length());
 
     GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite_001";
 }
@@ -120,14 +122,17 @@ HWTEST_F(WriteCoreMockTest, WriteCoreMockTest_DoWrite_003, testing::ext::TestSiz
     GTEST_LOG_(INFO) << "WriteCoreMockTest-begin WriteCoreMockTest_DoWrite_003";
 
     int32_t fd = 1;
+    int64_t len = 10;
     ArrayBuffer buffer(nullptr, 1);
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(len));
 
     auto res = WriteCore::DoWrite(fd, buffer);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_TRUE(res.IsSuccess());
+    ASSERT_TRUE(res.IsSuccess());
+    auto writeLen = res.GetData().value();
+    EXPECT_EQ(writeLen, len);
 
     GTEST_LOG_(INFO) << "WriteCoreMockTest-end WriteCoreMockTest_DoWrite_003";
 }

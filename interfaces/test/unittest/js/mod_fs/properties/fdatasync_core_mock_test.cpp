@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,21 +68,21 @@ HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_001, testing::
 {
     GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-begin FDataSyncCoreMockTest_DoFDataSync_001";
 
-    int fd = 3;
+    int fd = 1;
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(0));
 
     auto res = FDataSyncCore::DoFDataSync(fd);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-end FDataSyncCoreMockTest_DoFDataSync_001";
 }
 
 /**
  * @tc.name: FDataSyncCoreMockTest_DoFDataSync_002
- * @tc.desc: Test function of FDataSyncCore::DoFDataSync interface for FAILED.
+ * @tc.desc: Test function of FDataSyncCore::DoFDataSync interface for FAILURE when uv_fs_fdatasync fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -91,14 +91,17 @@ HWTEST_F(FDataSyncCoreMockTest, FDataSyncCoreMockTest_DoFDataSync_002, testing::
 {
     GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-begin FDataSyncCoreMockTest_DoFDataSync_002";
 
-    int fd = 3;
+    int fd = 1;
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(-EIO));
 
     auto res = FDataSyncCore::DoFDataSync(fd);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "FDataSyncCoreMockTest-end FDataSyncCoreMockTest_DoFDataSync_002";
 }

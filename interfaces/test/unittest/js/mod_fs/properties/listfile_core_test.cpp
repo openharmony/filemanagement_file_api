@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,6 +96,7 @@ void ListFileCoreTest::TearDown()
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_001";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     std::vector<std::string> suffixVector = { "txt" };
@@ -104,8 +105,8 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_001, testing::ext::TestSi
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    EXPECT_FALSE(result.IsSuccess());
 
+    EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -123,6 +124,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_001, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_002";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     std::vector<std::string> suffixVector = { ".tx@t" };
@@ -131,8 +133,8 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_002, testing::ext::TestSi
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    EXPECT_FALSE(result.IsSuccess());
 
+    EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -150,12 +152,13 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_002, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_003";
+
     FsListFileOptions opt;
     opt.listNum = -5;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    EXPECT_FALSE(result.IsSuccess());
 
+    EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -173,6 +176,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_003, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_004";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     std::vector<std::string> suffixVector = { ".txt" };
@@ -181,10 +185,9 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_004, testing::ext::TestSi
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
+
     ASSERT_TRUE(result.IsSuccess());
-
     auto files = result.GetData().value();
-
     EXPECT_EQ(files.size(), 2);
     // Sort manually by dictionary
     std::sort(files.begin(), files.end());
@@ -204,6 +207,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_004, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_005";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     std::vector<std::string> suffixVector = { ".abc" };
@@ -212,8 +216,8 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_005, testing::ext::TestSi
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    ASSERT_TRUE(result.IsSuccess());
 
+    ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
     EXPECT_EQ(files.size(), 1);
     EXPECT_EQ(files[0], "level1");
@@ -231,6 +235,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_005, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_006";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     std::vector<std::string> displayNameVector = { "text*.txt" };
@@ -239,8 +244,8 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_006, testing::ext::TestSi
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    ASSERT_TRUE(result.IsSuccess());
 
+    ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
     EXPECT_EQ(files.size(), 1);
     EXPECT_EQ(files[0], "text_1.txt");
@@ -258,14 +263,15 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_006, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_007, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_007";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     filter.SetFileSizeOver(500);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    ASSERT_TRUE(result.IsSuccess());
 
+    ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
     EXPECT_EQ(files.size(), 3);
     // Sort manually by dictionary
@@ -287,6 +293,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_007, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_008, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_008";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     std::vector<std::string> displayNameVector = {};
@@ -295,8 +302,8 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_008, testing::ext::TestSi
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    EXPECT_FALSE(result.IsSuccess());
 
+    EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -314,14 +321,15 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_008, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_009, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_009";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     filter.SetFileSizeOver(-1);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    EXPECT_FALSE(result.IsSuccess());
 
+    EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -339,14 +347,15 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_009, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_010, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_010";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     filter.SetLastModifiedAfter(-1);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    EXPECT_FALSE(result.IsSuccess());
 
+    EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -364,12 +373,13 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_010, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_011, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_011";
+
     FsListFileOptions opt;
     opt.recursion = true;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    ASSERT_TRUE(result.IsSuccess());
 
+    ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
     // Include 12 files, not include dir.
     EXPECT_EQ(files.size(), 12);
@@ -390,9 +400,10 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_011, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_012, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_012";
-    auto result = ListFileCore::DoListFile(emptyDir);
-    ASSERT_TRUE(result.IsSuccess());
 
+    auto result = ListFileCore::DoListFile(emptyDir);
+
+    ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
     EXPECT_TRUE(files.empty());
 
@@ -409,12 +420,13 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_012, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_013, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_013";
+
     FsListFileOptions opt;
     opt.listNum = 3;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    ASSERT_TRUE(result.IsSuccess());
 
+    ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
     EXPECT_EQ(files.size(), 3);
 
@@ -431,10 +443,11 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_013, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_014, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_014";
+
     auto path = dataDir + "/non_existent_dir";
     auto result = ListFileCore::DoListFile(path);
-    EXPECT_FALSE(result.IsSuccess());
 
+    EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900002);
     EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
@@ -452,6 +465,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_014, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_015, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_015";
+
     FsListFileOptions opt;
     FsFileFilter filter;
 
@@ -465,8 +479,8 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_015, testing::ext::TestSi
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    EXPECT_FALSE(result.IsSuccess());
 
+    EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -484,6 +498,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_015, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_016, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_016";
+
     FsListFileOptions opt;
     FsFileFilter filter;
     std::vector<std::string> suffixVector = {};
@@ -492,8 +507,8 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_016, testing::ext::TestSi
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    EXPECT_FALSE(result.IsSuccess());
 
+    EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
@@ -511,12 +526,13 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_016, testing::ext::TestSi
 HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_017, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_017";
+
     FsListFileOptions opt;
     opt.listNum = 0;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
-    ASSERT_TRUE(result.IsSuccess());
 
+    ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
     EXPECT_EQ(files.size(), 5);
 

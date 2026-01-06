@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,6 +105,9 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_002, testing::ext::TestSize.
     auto result = CopyDirCore::DoCopyDir(src, dest, optional<int32_t>(invalidMode));
 
     EXPECT_FALSE(result.fsResult.IsSuccess());
+    auto err = result.fsResult.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     EXPECT_FALSE(result.errFiles.has_value());
 
     GTEST_LOG_(INFO) << "CopyDirCoreTest-end CopyDirCoreTest_DoCopyDir_002";
@@ -127,6 +130,9 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_003, testing::ext::TestSize.
     auto result = CopyDirCore::DoCopyDir(src, dest, optional<int32_t>());
 
     EXPECT_FALSE(result.fsResult.IsSuccess());
+    auto err = result.fsResult.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     EXPECT_FALSE(result.errFiles.has_value());
 
     GTEST_LOG_(INFO) << "CopyDirCoreTest-end CopyDirCoreTest_DoCopyDir_003";
@@ -150,6 +156,9 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_004, testing::ext::TestSize.
     auto result = CopyDirCore::DoCopyDir(src, dest, optional<int32_t>());
 
     EXPECT_FALSE(result.fsResult.IsSuccess());
+    auto err = result.fsResult.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     EXPECT_FALSE(result.errFiles.has_value());
 
     GTEST_LOG_(INFO) << "CopyDirCoreTest-end CopyDirCoreTest_DoCopyDir_004";
@@ -172,6 +181,9 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_005, testing::ext::TestSize.
     auto result = CopyDirCore::DoCopyDir(src, dest, optional<int32_t>());
 
     EXPECT_FALSE(result.fsResult.IsSuccess());
+    auto err = result.fsResult.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     EXPECT_FALSE(result.errFiles.has_value());
 
     GTEST_LOG_(INFO) << "CopyDirCoreTest-end CopyDirCoreTest_DoCopyDir_005";
@@ -254,6 +266,9 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_008, testing::ext::TestSize.
     auto result = CopyDirCore::DoCopyDir(src, dest, optional<int32_t>(DIRMODE_FILE_COPY_THROW_ERR));
 
     EXPECT_FALSE(result.fsResult.IsSuccess());
+    auto err = result.fsResult.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900015);
+    EXPECT_EQ(err.GetErrMsg(), "File exists");
     EXPECT_TRUE(result.errFiles.has_value());
 
     GTEST_LOG_(INFO) << "CopyDirCoreTest-end CopyDirCoreTest_DoCopyDir_008";

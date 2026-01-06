@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_001, testing::ext::TestSiz
     auto ret = MkdirCore::DoMkdir(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(ret.IsSuccess(), true);
+    EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_001";
 }
@@ -104,7 +104,7 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_002, testing::ext::TestSiz
     auto ret = MkdirCore::DoMkdir(path, true);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(ret.IsSuccess(), true);
+    EXPECT_TRUE(ret.IsSuccess());
 
     GTEST_LOG_(INFO) << "MkdirCoreMockTest-end MkdirCoreMockTest_DoMkdir_002";
 }
@@ -127,7 +127,7 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_003, testing::ext::TestSiz
     auto ret = MkdirCore::DoMkdir(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(ret.IsSuccess(), false);
+    EXPECT_FALSE(ret.IsSuccess());
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900015);
     EXPECT_EQ(err.GetErrMsg(), "File exists");
@@ -153,7 +153,7 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_004, testing::ext::TestSiz
     auto ret = MkdirCore::DoMkdir(path, true);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(ret.IsSuccess(), false);
+    EXPECT_FALSE(ret.IsSuccess());
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900015);
     EXPECT_EQ(err.GetErrMsg(), "File exists");
@@ -179,7 +179,7 @@ HWTEST_F(MkdirCoreMockTest, MkdirCoreMockTest_DoMkdir_005, testing::ext::TestSiz
     auto ret = MkdirCore::DoMkdir(path, true);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(ret.IsSuccess(), false);
+    EXPECT_FALSE(ret.IsSuccess());
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900005);
     EXPECT_EQ(err.GetErrMsg(), "I/O error");

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ HWTEST_F(MkdtempCoreMockTest, MkdtempCoreMockTest_DoMkdtemp_001, testing::ext::T
 
     ASSERT_TRUE(ret.IsSuccess());
     auto tempPath = ret.GetData().value();
-    auto prefix = "/data/local/tmp/MkdtempCoreMockTest/MkdtempCoreMockTest_DoMkdtemp_001_";
+    auto prefix = tempDir + "/MkdtempCoreMockTest_DoMkdtemp_001_";
     EXPECT_NE(tempPath, path);
     EXPECT_EQ(tempPath.find(prefix, 0), 0);
 
@@ -107,7 +107,10 @@ HWTEST_F(MkdtempCoreMockTest, MkdtempCoreMockTest_DoMkdtemp_002, testing::ext::T
     auto ret = MkdtempCore::DoMkdtemp(path);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(ret.IsSuccess(), false);
+    EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "MkdtempCoreMockTest-end MkdtempCoreMockTest_DoMkdtemp_002";
 }

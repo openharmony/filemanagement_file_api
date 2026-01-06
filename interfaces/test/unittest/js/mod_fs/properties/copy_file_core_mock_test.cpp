@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,11 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_001, testing::ext
     optional<int32_t> mode = std::make_optional(1);
 
     auto res = CopyFileCore::DoCopyFile(src, dest, mode);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_001";
 }
@@ -110,7 +114,10 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_003, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_003";
 }
@@ -136,12 +143,15 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_005, testing::ext
     src.fdg = make_unique<DistributedFS::FDGuard>(fd);
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(-EIO));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_005";
 }
@@ -172,7 +182,7 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_006, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_006";
 }
@@ -208,14 +218,17 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_007, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_007";
 }
 
 /**
  * @tc.name: CopyFileCoreMockTest_DoCopyFile_008
- * @tc.desc: Test function of CopyFileCore::DoCopyFile interface for FAILURE when TruncateCore fails.
+ * @tc.desc: Test function of CopyFileCore::DoCopyFile interface for FAILURE when lseek destFile fails(EBADF).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -232,7 +245,7 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_008, testing::ext
     int fd = open(srcFile.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     ASSERT_GT(fd, -1);
     src.fdg = make_unique<DistributedFS::FDGuard>(fd);
-    dest.fdg = make_unique<DistributedFS::FDGuard>();
+    dest.fdg = make_unique<DistributedFS::FDGuard>(); // Default fd: -1
 
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_ftruncate(_, _, _, _, _)).Times(1).WillOnce(Return(0));
@@ -240,7 +253,10 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_008, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900008);
+    EXPECT_EQ(err.GetErrMsg(), "Bad file descriptor");
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_008";
 }
@@ -277,7 +293,7 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_009, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_009";
 }
@@ -307,12 +323,15 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_010, testing::ext
 
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_open(_, _, _, _, _, _)).Times(1).WillOnce(Return(0));
-    EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_sendfile(_, _, _, _, _, _, _)).Times(1).WillOnce(Return(-EIO));
 
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_010";
 }
@@ -348,7 +367,10 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_011, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_011";
 }
@@ -384,7 +406,7 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_012, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    EXPECT_TRUE(res.IsSuccess());
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_012";
 }
@@ -419,7 +441,10 @@ HWTEST_F(CopyFileCoreMockTest, CopyFileCoreMockTest_DoCopyFile_013, testing::ext
     auto res = CopyFileCore::DoCopyFile(src, dest);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "CopyFileCoreMockTest-end CopyFileCoreMockTest_DoCopyFile_013";
 }

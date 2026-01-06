@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,12 +72,15 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_001, testing::ext::Test
     std::optional<AccessModeType> mode;
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(-EIO));
 
     auto res = AccessCore::DoAccess(path, mode);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_001";
 }
@@ -102,7 +105,9 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_002, testing::ext::Test
     auto res = AccessCore::DoAccess(path, mode);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    ASSERT_TRUE(res.IsSuccess());
+    bool exists = res.GetData().value();
+    EXPECT_TRUE(exists);
 
     GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_002";
 }
@@ -118,17 +123,19 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_003, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "AccessCoreMockTest-begin AccessCoreMockTest_DoAccess_003";
 
-    std::string path = "TEST";
+    std::string path = "fakePath/AccessCoreMockTest_DoAccess_003.txt";
     AccessModeType mode = AccessModeType::EXIST;
     AccessFlag flag = DEFAULT_FLAG;
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_access(_, _, _, _, _)).WillOnce(Return(-ENOENT));
 
     auto res = AccessCore::DoAccess(path, mode, flag);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), false);
+    ASSERT_TRUE(res.IsSuccess());
+    bool exists = res.GetData().value();
+    EXPECT_FALSE(exists);
 
     GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_003";
 }
@@ -144,7 +151,7 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_004, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "AccessCoreMockTest-begin AccessCoreMockTest_DoAccess_004";
 
-    std::string path = "TEST";
+    std::string path = "fakePath/AccessCoreMockTest_DoAccess_004.txt";
     AccessModeType mode = AccessModeType::EXIST;
     AccessFlag flag = DEFAULT_FLAG;
 
@@ -154,7 +161,9 @@ HWTEST_F(AccessCoreMockTest, AccessCoreMockTest_DoAccess_004, testing::ext::Test
     auto res = AccessCore::DoAccess(path, mode, flag);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(res.IsSuccess(), true);
+    ASSERT_TRUE(res.IsSuccess());
+    bool exists = res.GetData().value();
+    EXPECT_TRUE(exists);
 
     GTEST_LOG_(INFO) << "AccessCoreMockTest-end AccessCoreMockTest_DoAccess_004";
 }

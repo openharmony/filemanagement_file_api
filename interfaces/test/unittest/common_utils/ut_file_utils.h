@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@ public:
     inline static const std::string defaultTempDir = fs::temp_directory_path(); // /data/local/tmp
 
 public:
+    static bool IsDirectory(const fs::path &path);
+    static bool IsFile(const fs::path &path);
     static off_t GetFileSize(const int fd);
     static off_t GetFileSize(const fs::path &path);
     static std::tuple<bool, std::string> ReadTextFileContent(const fs::path &path);
@@ -39,6 +41,8 @@ public:
     static bool RemoveAll(const fs::path &path);
 
 private:
+    static bool DoIsDirectory(const fs::path &path);
+    static bool DoIsFile(const fs::path &path);
     static off_t DoGetFileSize(const int fd);
     static off_t DoGetFileSize(const fs::path &path);
     static std::tuple<bool, std::string> DoReadTextFileContent(const fs::path &path);

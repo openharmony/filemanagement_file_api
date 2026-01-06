@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,7 +98,11 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_001, testing::
     // Verify results
     testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     testing::Mock::VerifyAndClearExpectations(eventfdMock.get());
-    EXPECT_TRUE(result.IsSuccess());
+    ASSERT_TRUE(result.IsSuccess());
+    auto *watcher = result.GetData().value();
+    ASSERT_NE(watcher, nullptr);
+    delete watcher;
+    watcher = nullptr;
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-end WatcherCoreMockTest_DoCreateWatcher_001";
 }
 

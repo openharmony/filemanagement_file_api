@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,7 +131,9 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_001, TestSize.Level1)
     auto ret = XattrCore::DoGetXattr(path, key);
 
     testing::Mock::VerifyAndClearExpectations(xattrMock.get());
-    EXPECT_TRUE(ret.IsSuccess());
+    ASSERT_TRUE(ret.IsSuccess());
+    auto attr = ret.GetData().value();
+    EXPECT_EQ(attr, "");
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoGetXattr_001";
 }
@@ -182,7 +184,9 @@ HWTEST_F(XattrCoreMockTest, XattrCoreMockTest_DoGetXattr_003, TestSize.Level1)
     auto ret = XattrCore::DoGetXattr(path, key);
 
     testing::Mock::VerifyAndClearExpectations(xattrMock.get());
-    EXPECT_TRUE(ret.IsSuccess());
+    ASSERT_TRUE(ret.IsSuccess());
+    auto attr = ret.GetData().value();
+    EXPECT_EQ(attr, "");
 
     GTEST_LOG_(INFO) << "XattrCoreMockTest-end XattrCoreMockTest_DoGetXattr_003";
 }

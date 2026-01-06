@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -291,6 +291,9 @@ HWTEST_F(MoveDirCoreTest, MoveDirCoreTest_DoMoveDir_008, testing::ext::TestSize.
     auto result = MoveDirCore::DoMoveDir(src, dest, optional<int32_t>(DIRMODE_FILE_REPLACE));
 
     EXPECT_FALSE(result.fsResult.IsSuccess());
+    auto err = result.fsResult.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900015);
+    EXPECT_EQ(err.GetErrMsg(), "File exists");
     EXPECT_TRUE(result.errFiles.has_value());
 
     GTEST_LOG_(INFO) << "MoveDirCoreTest-end MoveDirCoreTest_DoMoveDir_008";
@@ -354,6 +357,9 @@ HWTEST_F(MoveDirCoreTest, MoveDirCoreTest_DoMoveDir_010, testing::ext::TestSize.
     auto result = MoveDirCore::DoMoveDir(src, dest, optional<int32_t>(DIRMODE_FILE_REPLACE));
 
     EXPECT_FALSE(result.fsResult.IsSuccess());
+    auto err = result.fsResult.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900015);
+    EXPECT_EQ(err.GetErrMsg(), "File exists");
     EXPECT_TRUE(result.errFiles.has_value());
 
     GTEST_LOG_(INFO) << "MoveDirCoreTest-end MoveDirCoreTest_DoMoveDir_010";

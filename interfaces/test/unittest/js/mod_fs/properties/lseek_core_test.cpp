@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,7 +54,7 @@ void LseekCoreTest::TearDown()
 
 /**
  * @tc.name: LseekCoreTest_DoLseek_001
- * @tc.desc: Test function of LseekCore::DoLseek interface for FALSE.
+ * @tc.desc: Test function of LseekCore::DoLseek interface for FAILURE when fd is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -67,14 +67,18 @@ HWTEST_F(LseekCoreTest, LseekCoreTest_DoLseek_001, testing::ext::TestSize.Level1
     int64_t offset = 0;
 
     auto res = LseekCore::DoLseek(fd, offset);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "LseekCoreTest-end LseekCoreTest_DoLseek_001";
 }
 
 /**
  * @tc.name: LseekCoreTest_DoLseek_002
- * @tc.desc: Test function of LseekCore::DoLseek interface for FALSE.
+ * @tc.desc: Test function of LseekCore::DoLseek interface for FAILURE when pos is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -88,14 +92,18 @@ HWTEST_F(LseekCoreTest, LseekCoreTest_DoLseek_002, testing::ext::TestSize.Level1
     optional<SeekPos> pos = std::make_optional(static_cast<SeekPos>(-1));
 
     auto res = LseekCore::DoLseek(fd, offset, pos);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "LseekCoreTest-end LseekCoreTest_DoLseek_002";
 }
 
 /**
  * @tc.name: LseekCoreTest_DoLseek_003
- * @tc.desc: Test function of LseekCore::DoLseek interface for FALSE.
+ * @tc.desc: Test function of LseekCore::DoLseek interface for FAILURE when pos is current (illegal seek).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -109,7 +117,11 @@ HWTEST_F(LseekCoreTest, LseekCoreTest_DoLseek_003, testing::ext::TestSize.Level1
     optional<SeekPos> pos = std::make_optional(SeekPos::CURRENT);
 
     auto res = LseekCore::DoLseek(fd, offset, pos);
-    EXPECT_EQ(res.IsSuccess(), false);
+
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900026);
+    EXPECT_EQ(err.GetErrMsg(), "Illegal seek");
 
     GTEST_LOG_(INFO) << "LseekCoreTest-end LseekCoreTest_DoLseek_003";
 }
