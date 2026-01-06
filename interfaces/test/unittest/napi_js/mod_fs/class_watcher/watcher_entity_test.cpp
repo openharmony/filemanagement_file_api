@@ -385,7 +385,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_003, testing::
         });
     }
 
-    for (auto& t : threads) {
+    for (auto &t : threads) {
         t.join();
     }
 
@@ -425,7 +425,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_004, testing::
     auto unistdMock = UnistdMock::GetMock();
     EXPECT_CALL(*unistdMock, close(testing::_)).Times(0);
 
-    for (auto& t : threads) {
+    for (auto &t : threads) {
         t.join();
     }
 
@@ -468,7 +468,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_005, testing::
         });
     }
 
-    for (auto& t : threads) {
+    for (auto &t : threads) {
         t.join();
     }
 
@@ -503,7 +503,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_006, testing::
     WatcherCallback callback = nullptr;
     std::vector<std::thread> threads;
     threads.reserve(TOTAL_THREADS);
-    
+
     std::atomic<int> count(0);
     std::atomic<bool> started(false);
     for (int i = 0; i < TOTAL_THREADS; ++i) {
@@ -519,6 +519,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_006, testing::
             EXPECT_EQ(result, 0);
         });
     }
+
     UnistdMock::EnableMock();
     auto uniMock = UnistdMock::GetMock();
     auto pollMock = PollMock::GetMock();
@@ -530,7 +531,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_006, testing::
         });
     watcher.GetNotifyEvent(callback);
 
-    for (auto& t : threads) {
+    for (auto &t : threads) {
         t.join();
     }
 
