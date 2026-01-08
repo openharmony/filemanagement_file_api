@@ -97,10 +97,8 @@ HWTEST_F(LstatCoreTest, LstatCoreTest_DoLstat_002, testing::ext::TestSize.Level1
     auto res = LstatCore::DoLstat(path);
 
     ASSERT_TRUE(res.IsSuccess());
-    auto *stat = res.GetData().value();
+    std::unique_ptr<FsStat> stat(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(stat, nullptr);
-    delete stat;
-    stat = nullptr;
 
     GTEST_LOG_(INFO) << "LstatCoreTest-end LstatCoreTest_DoLstat_002";
 }

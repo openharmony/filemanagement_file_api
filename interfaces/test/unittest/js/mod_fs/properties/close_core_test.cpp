@@ -133,13 +133,11 @@ HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_003, testing::ext::TestSize.Level1
 
     auto fileRes = OpenCore::DoOpen(path);
     ASSERT_TRUE(fileRes.IsSuccess());
-    FsFile *file = fileRes.GetData().value();
+    std::unique_ptr<FsFile> file(fileRes.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(file, nullptr);
 
-    auto ret = CloseCore::DoClose(file);
+    auto ret = CloseCore::DoClose(file.get());
     EXPECT_TRUE(ret.IsSuccess());
-    delete file;
-    file = nullptr;
 
     GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_003";
 }
@@ -160,19 +158,17 @@ HWTEST_F(CloseCoreTest, CloseCoreTest_DoClose_004, testing::ext::TestSize.Level1
 
     auto fileRes = OpenCore::DoOpen(path);
     ASSERT_TRUE(fileRes.IsSuccess());
-    FsFile *file = fileRes.GetData().value();
+    std::unique_ptr<FsFile> file(fileRes.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(file, nullptr);
 
-    auto ret = CloseCore::DoClose(file);
+    auto ret = CloseCore::DoClose(file.get());
     EXPECT_TRUE(ret.IsSuccess());
 
-    ret = CloseCore::DoClose(file);
+    ret = CloseCore::DoClose(file.get());
     EXPECT_FALSE(ret.IsSuccess());
     auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900020);
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
-    delete file;
-    file = nullptr;
 
     GTEST_LOG_(INFO) << "CloseCoreTest-end CloseCoreTest_DoClose_004";
 }

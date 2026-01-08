@@ -112,10 +112,8 @@ HWTEST_F(CreateRandomAccessFileCoreMockTest, CreateRandomAccessFileCoreMockTest_
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     ASSERT_TRUE(res.IsSuccess());
-    auto *raf = res.GetData().value();
+    std::unique_ptr<FsRandomAccessFile> raf(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(raf, nullptr);
-    delete raf;
-    raf = nullptr;
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreMockTest_DoCreateRandomAccessFile_002";
 }

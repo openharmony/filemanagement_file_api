@@ -83,12 +83,10 @@ HWTEST_F(FdopenStreamCoreTest, FdopenStreamCoreTest_DoFdopenStream_001, testing:
 
     close(fd);
     ASSERT_TRUE(ret.IsSuccess());
-    auto *stream = ret.GetData().value();
+    std::unique_ptr<FsStream> stream(ret.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(stream, nullptr);
     auto retClose = stream->Close();
     EXPECT_TRUE(retClose.IsSuccess());
-    delete stream;
-    stream = nullptr;
 
     GTEST_LOG_(INFO) << "FdopenStreamCoreTest-end FdopenStreamCoreTest_DoFdopenStream_001";
 }

@@ -220,10 +220,8 @@ HWTEST_F(CreateRandomAccessFileCoreTest, CreateRandomAccessFileCoreTest_DoCreate
 
     close(fd);
     ASSERT_TRUE(res.IsSuccess());
-    auto *raf = res.GetData().value();
+    std::unique_ptr<FsRandomAccessFile> raf(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(raf, nullptr);
-    delete raf;
-    raf = nullptr;
 
     GTEST_LOG_(INFO) << "Test-end CreateRandomAccessFileCoreTest_DoCreateRandomAccessFile_006";
 }

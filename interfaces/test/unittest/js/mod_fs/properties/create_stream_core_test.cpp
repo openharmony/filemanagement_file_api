@@ -77,12 +77,10 @@ HWTEST_F(CreateStreamCoreTest, CreateStreamCoreTest_DoCreateStream_001, testing:
     auto ret = CreateStreamCore::DoCreateStream(file, "r");
 
     ASSERT_TRUE(ret.IsSuccess());
-    auto *stream = ret.GetData().value();
+    std::unique_ptr<FsStream> stream(ret.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(stream, nullptr);
     auto retClose = stream->Close();
     EXPECT_TRUE(retClose.IsSuccess());
-    delete stream;
-    stream = nullptr;
 
     GTEST_LOG_(INFO) << "CreateStreamCoreTest-end CreateStreamCoreTest_DoCreateStream_001";
 }

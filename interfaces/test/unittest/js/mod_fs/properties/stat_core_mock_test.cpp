@@ -109,10 +109,8 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_002, testing::ext::TestSize.L
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     ASSERT_TRUE(res.IsSuccess());
-    auto *stat = res.GetData().value();
+    std::unique_ptr<FsStat> stat(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(stat, nullptr);
-    delete stat;
-    stat = nullptr;
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_002";
 }
@@ -168,10 +166,8 @@ HWTEST_F(StatCoreMockTest, StatCoreMockTest_DoStat_004, testing::ext::TestSize.L
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     ASSERT_TRUE(res.IsSuccess());
-    auto *stat = res.GetData().value();
+    std::unique_ptr<FsStat> stat(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(stat, nullptr);
-    delete stat;
-    stat = nullptr;
 
     GTEST_LOG_(INFO) << "StatCoreMockTest-end StatCoreMockTest_DoStat_004";
 }

@@ -81,10 +81,8 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_001, testing::ext::TestSize.L
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     ASSERT_TRUE(res.IsSuccess());
-    auto *file = res.GetData().value();
+    std::unique_ptr<FsFile> file(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(file, nullptr);
-    delete file;
-    file = nullptr;
 
     GTEST_LOG_(INFO) << "OpenCoreMockTest-end OpenCoreMockTest_DoOpen_001";
 }
@@ -114,10 +112,8 @@ HWTEST_F(OpenCoreMockTest, OpenCoreMockTest_DoOpen_002, testing::ext::TestSize.L
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(unistdMock.get());
     ASSERT_TRUE(res.IsSuccess());
-    auto *file = res.GetData().value();
+    std::unique_ptr<FsFile> file(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(file, nullptr);
-    delete file;
-    file = nullptr;
 
     GTEST_LOG_(INFO) << "OpenCoreMockTest-end OpenCoreMockTest_DoOpen_002";
 }
