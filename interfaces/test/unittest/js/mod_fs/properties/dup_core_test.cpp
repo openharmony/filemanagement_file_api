@@ -104,17 +104,13 @@ HWTEST_F(DupCoreTest, DupCoreTest_DoDup_002, testing::ext::TestSize.Level1)
 
     close(fd);
     ASSERT_TRUE(res.IsSuccess());
-    auto *file = res.GetData().value();
+    std::unique_ptr<FsFile> file(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(file, nullptr);
     auto fdRes = file->GetFD();
-    EXPECT_TRUE(fdRes.IsSuccess());
-    if (fdRes.IsSuccess()) {
-        auto dupFd = fdRes.GetData().value();
-        close(dupFd);
-        EXPECT_NE(fd, dupFd);
-    }
-    delete file;
-    file = nullptr;
+    ASSERT_TRUE(fdRes.IsSuccess());
+    auto dupFd = fdRes.GetData().value();
+    close(dupFd);
+    EXPECT_NE(fd, dupFd);
 
     GTEST_LOG_(INFO) << "NClassTest-end DupCoreTest_DoDup_002";
 }

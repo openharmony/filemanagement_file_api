@@ -86,10 +86,8 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_001, testing::
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     ASSERT_TRUE(res.IsSuccess());
-    auto *iter = res.GetData().value();
+    std::unique_ptr<FsReaderIterator> iter(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(iter, nullptr);
-    delete iter;
-    iter = nullptr;
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_001";
 }
@@ -115,10 +113,8 @@ HWTEST_F(ReadLinesCoreMockTest, ReadLinesCoreMockTest_DoReadLines_002, testing::
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     ASSERT_TRUE(res.IsSuccess());
-    auto *iter = res.GetData().value();
+    std::unique_ptr<FsReaderIterator> iter(res.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(iter, nullptr);
-    delete iter;
-    iter = nullptr;
 
     GTEST_LOG_(INFO) << "ReadLinesCoreMockTest-end ReadLinesCoreMockTest_DoReadLines_002";
 }

@@ -99,10 +99,8 @@ HWTEST_F(WatcherCoreMockTest, WatcherCoreMockTest_DoCreateWatcher_001, testing::
     testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
     testing::Mock::VerifyAndClearExpectations(eventfdMock.get());
     ASSERT_TRUE(result.IsSuccess());
-    auto *watcher = result.GetData().value();
+    std::unique_ptr<FsWatcher> watcher(result.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(watcher, nullptr);
-    delete watcher;
-    watcher = nullptr;
     GTEST_LOG_(INFO) << "WatcherCoreMockTest-end WatcherCoreMockTest_DoCreateWatcher_001";
 }
 
