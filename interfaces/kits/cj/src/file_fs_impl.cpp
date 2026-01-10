@@ -830,14 +830,15 @@ static CConflictFiles* DequeToCConflict(std::deque<struct ConflictFiles> errfile
 
 RetDataCArrConflictFiles FileFsImpl::MoveDir(string src, string dest, int32_t mode)
 {
+    std::error_code errCode;
     RetDataCArrConflictFiles ret = { .code = EINVAL, .data = { .head = nullptr, .size = 0 } };
-    if (!filesystem::is_directory(filesystem::status(src))) {
-        HILOGE("Invalid src");
+    if (!filesystem::is_directory(filesystem::status(src, errCode))) {
+        HILOGE("Invalid src, errCode = %{public}d", errCode.value());
         ret.code = GetErrorCode(EINVAL);
         return ret;
     }
-    if (!filesystem::is_directory(filesystem::status(dest))) {
-        HILOGE("Invalid dest");
+    if (!filesystem::is_directory(filesystem::status(dest, errCode))) {
+        HILOGE("Invalid dest, errCode = %{public}d", errCode.value());
         ret.code = GetErrorCode(EINVAL);
         return ret;
     }
