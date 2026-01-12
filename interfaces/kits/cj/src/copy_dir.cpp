@@ -243,9 +243,10 @@ namespace CJSystemapi {
 RetDataCArrConflictFiles CopyDirImpl::CopyDir(const std::string& src, const std::string& dest, int mode)
 {
     LOGI("FS_TEST:: FileFsImpl::CopyDir start");
+    std::error_code errCode;
     RetDataCArrConflictFiles ret = { .code = EINVAL, .data = { .head = nullptr, .size = 0 } };
-    if (!std::filesystem::is_directory(std::filesystem::status(dest))) {
-        LOGE("Invalid dest");
+    if (!std::filesystem::is_directory(std::filesystem::status(dest, errCode))) {
+        LOGE("Invalid dest, errCode = %{public}d", errCode.value());
         return ret;
     }
     if (!AllowToCopy(src, dest)) {
