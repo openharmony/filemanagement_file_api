@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-
-#include "file_entity.h"
 #include "fs_randomaccessfile.h"
+
+#include <gtest/gtest.h>
+#include <sys/prctl.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -25,44 +25,36 @@ using namespace std;
 
 class FsRandomAccessFileTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void);
-    static void TearDownTestSuite(void);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
-protected:
-    unique_ptr<RandomAccessFileEntity> rafEntity;
-    unique_ptr<FsRandomAccessFile> raf;
 };
 
-void FsRandomAccessFileTest::SetUpTestSuite(void)
+void FsRandomAccessFileTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
+    prctl(PR_SET_NAME, "FsRandomAccessFileTest");
 }
 
-void FsRandomAccessFileTest::TearDownTestSuite(void)
+void FsRandomAccessFileTest::TearDownTestSuite()
 {
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
-void FsRandomAccessFileTest::SetUp(void)
+void FsRandomAccessFileTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
-    rafEntity = make_unique<RandomAccessFileEntity>();
-    const int fdValue = 3;
-    const bool isClosed = false;
-    rafEntity->fd = make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
-    rafEntity->filePointer = 0;
-    raf = make_unique<FsRandomAccessFile>(move(rafEntity));
 }
 
-void FsRandomAccessFileTest::TearDown(void)
+void FsRandomAccessFileTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: FsRandomAccessFileTest_Constructor_001
- * @tc.desc: Test function of Constructor() interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::Constructor interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -72,343 +64,444 @@ HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_Constructor_001, testing
     GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_Constructor_001";
 
     auto result = FsRandomAccessFile::Constructor();
-    EXPECT_EQ(result.IsSuccess(), true);
+    ASSERT_TRUE(result.IsSuccess());
+    std::unique_ptr<FsRandomAccessFile> raf(result.GetData().value()); // To smart ptr for auto memory release
+    ASSERT_NE(raf, nullptr);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_Constructor_001";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_GetFD_002
- * @tc.desc: Test function of GetFD() interface for SUCCESS.
+ * @tc.name: FsRandomAccessFileTest_GetFD_001
+ * @tc.desc: Test function of FsRandomAccessFile::GetFD interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
+ */
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFD_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_GetFD_001";
+
+    auto expectedFd = 10;
+    auto rafEntity = make_unique<RandomAccessFileEntity>();
+    rafEntity->fd = make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    FsRandomAccessFile raf(std::move(rafEntity));
+
+    auto result = raf.GetFD();
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto fd = result.GetData().value();
+    EXPECT_EQ(fd, expectedFd);
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_GetFD_001";
+}
+
+/**
+ * @tc.name: FsRandomAccessFileTest_GetFD_002
+ * @tc.desc: Test function of FsRandomAccessFile::GetFD interface for FAILURE when rafEntity is nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
  */
 HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFD_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_GetFD_002";
 
-    auto result = raf->GetFD();
-    EXPECT_EQ(result.IsSuccess(), true);
+    FsRandomAccessFile raf(nullptr);
+
+    auto result = raf.GetFD();
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_GetFD_002";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_GetFD_003
- * @tc.desc: Test function of GetFD() interface for is failed for FsRandomAccessFile is nullopt.
+ * @tc.name: FsRandomAccessFileTest_GetFPointer_001
+ * @tc.desc: Test function of FsRandomAccessFile::GetFPointer interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFD_003, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFPointer_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_GetFD_003";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_GetFPointer_001";
 
-    raf = make_unique<FsRandomAccessFile>(nullptr);
-    auto result = raf->GetFD();
-    EXPECT_EQ(result.IsSuccess(), false);
+    auto expectedFilePointer = 10;
+    auto rafEntity = make_unique<RandomAccessFileEntity>();
+    rafEntity->filePointer = expectedFilePointer;
+    FsRandomAccessFile raf(std::move(rafEntity));
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_GetFD_003";
-}
+    auto result = raf.GetFPointer();
 
-// GetFPointer
-/**
- * @tc.name: FsRandomAccessFileTest_GetFPointer_004
- * @tc.desc: Test function of GetFPointer() interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
+    ASSERT_TRUE(result.IsSuccess());
+    auto filePointer = result.GetData().value();
+    EXPECT_EQ(filePointer, expectedFilePointer);
 
- */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFPointer_004, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_GetFPointer_004";
-
-    raf->rafEntity->filePointer = 100;
-    auto result = raf->GetFPointer();
-    EXPECT_EQ(result.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_GetFPointer_004";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_GetFPointer_001";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_GetFPointer_005
- * @tc.desc: Test function of GetFPointer() interface for ERROR.
+ * @tc.name: FsRandomAccessFileTest_GetFPointer_002
+ * @tc.desc: Test function of FsRandomAccessFile::GetFPointer interface for FAILURE when rafEntity is nullptr.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFPointer_005, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_GetFPointer_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_GetFPointer_005";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_GetFPointer_002";
 
-    raf = make_unique<FsRandomAccessFile>(nullptr);
-    auto result = raf->GetFPointer();
-    EXPECT_EQ(result.IsSuccess(), false);
+    FsRandomAccessFile raf(nullptr);
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_GetFPointer_005";
+    auto result = raf.GetFPointer();
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_GetFPointer_002";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_SetFilePointerSync_006
- * @tc.desc: Test function of SetFilePointerSync() interface for SUCCESS.
+ * @tc.name: FsRandomAccessFileTest_SetFilePointerSync_001
+ * @tc.desc: Test function of FsRandomAccessFile::SetFilePointerSync interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_SetFilePointerSync_006, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_SetFilePointerSync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_SetFilePointerSync_006";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_SetFilePointerSync_001";
 
-    auto result = raf->SetFilePointerSync(50);
-    EXPECT_EQ(result.IsSuccess(), true);
-    EXPECT_EQ(raf->rafEntity->filePointer, 50);
+    auto expectedFilePointer = 10;
+    auto rafEntity = make_unique<RandomAccessFileEntity>();
+    FsRandomAccessFile raf(std::move(rafEntity));
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_SetFilePointerSync_006";
+    auto result = raf.SetFilePointerSync(expectedFilePointer);
+
+    ASSERT_TRUE(result.IsSuccess());
+    EXPECT_EQ(raf.rafEntity->filePointer, expectedFilePointer);
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_SetFilePointerSync_001";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_SetFilePointerSync_007
- * @tc.desc: Test function of SetFilePointerSync() interface for ERROR.
+ * @tc.name: FsRandomAccessFileTest_SetFilePointerSync_002
+ * @tc.desc: Test function of FsRandomAccessFile::SetFilePointerSync interface for FAILURE when rafEntity is nullptr.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_SetFilePointerSync_007, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_SetFilePointerSync_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_SetFilePointerSync_007";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_SetFilePointerSync_002";
 
-    raf = make_unique<FsRandomAccessFile>(nullptr);
-    auto result = raf->SetFilePointerSync(50);
-    EXPECT_EQ(result.IsSuccess(), false);
+    FsRandomAccessFile raf(nullptr);
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_SetFilePointerSync_007";
-}
+    auto result = raf.SetFilePointerSync(0);
 
-// ReadSync
-/**
- * @tc.name: FsRandomAccessFileTest_ReadSync_008
- * @tc.desc: Test function of ReadSync() interface for ERROR.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
 
- */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_ReadSync_008, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_ReadSync_008";
-
-    raf = make_unique<FsRandomAccessFile>(nullptr);
-    ArrayBuffer buffer(malloc(100), 100);
-
-    auto result = raf->ReadSync(buffer, nullopt);
-    EXPECT_EQ(result.IsSuccess(), false);
-    free(buffer.buf);
-
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_ReadSync_008";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_SetFilePointerSync_002";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_ReadSync_009
- * @tc.desc: Test function of ReadSync() interface for ERROR.
+ * @tc.name: FsRandomAccessFileTest_ReadSync_001
+ * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for FAILURE when rafEntity is nullptr.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_ReadSync_009, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_ReadSync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_ReadSync_009";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_ReadSync_001";
 
-    ArrayBuffer buffer(malloc(100), 100);
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
+    FsRandomAccessFile raf(nullptr);
+
+    auto result = raf.ReadSync(buffer, nullopt);
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_ReadSync_001";
+}
+
+/**
+ * @tc.name: FsRandomAccessFileTest_ReadSync_002
+ * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for FAILURE when offset < 0.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+ */
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_ReadSync_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_ReadSync_002";
+
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
     ReadOptions options;
-    options.offset = -5;
-    
-    auto result = raf->ReadSync(buffer, options);
-    EXPECT_EQ(result.IsSuccess(), false);
-    free(buffer.buf);
+    options.offset = -1;
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_ReadSync_009";
+    auto rafEntity = make_unique<RandomAccessFileEntity>();
+    FsRandomAccessFile raf(std::move(rafEntity));
+
+    auto result = raf.ReadSync(buffer, options);
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_ReadSync_002";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_ReadSync_010
- * @tc.desc: Test function of ReadSync() interface for ERROR.
+ * @tc.name: FsRandomAccessFileTest_ReadSync_003
+ * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for FAILURE when length < 0.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_ReadSync_010, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_ReadSync_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_ReadSync_010";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_ReadSync_003";
 
-    ArrayBuffer buffer(malloc(100), 100);
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
     ReadOptions options;
     options.length = -1;
-    
-    auto result = raf->ReadSync(buffer, options);
-    EXPECT_EQ(result.IsSuccess(), false);
-    free(buffer.buf);
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_ReadSync_010";
+    auto rafEntity = make_unique<RandomAccessFileEntity>();
+    FsRandomAccessFile raf(std::move(rafEntity));
+
+    auto result = raf.ReadSync(buffer, options);
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_ReadSync_003";
 }
 
-// WriteSync
 /**
- * @tc.name: FsRandomAccessFileTest_WriteSync_011
- * @tc.desc: Test function of WriteSync() interface for ERROR.
+ * @tc.name: FsRandomAccessFileTest_WriteSync_001
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(string) interface for FAILURE when rafEntity is nullptr.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_011, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_011";
-
-    raf = make_unique<FsRandomAccessFile>(nullptr);
-    string data = "test data";
-    auto result = raf->WriteSync(data, nullopt);
-    EXPECT_EQ(result.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_WriteSync_011";
-}
-
-/**
- * @tc.name: FsRandomAccessFileTest_WriteSync_012
- * @tc.desc: Test function of WriteSync() interface for ERROR.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
-
- */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_012, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_012";
-
-    raf = make_unique<FsRandomAccessFile>(nullptr);
-    ArrayBuffer buffer(malloc(100), 100);
-    auto result = raf->WriteSync(buffer, nullopt);
-    EXPECT_EQ(result.IsSuccess(), false);
-    free(buffer.buf);
-
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_WriteSync_012";
-}
-
-/**
- * @tc.name: FsRandomAccessFileTest_WriteSync_013
- * @tc.desc: Test function of WriteSync() interface for ERROR.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
-
- */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_013, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_013";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_WriteSync_001";
 
     string data = "test data";
-    WriteOptions options;
-    options.offset = -5;
+    FsRandomAccessFile raf(nullptr);
 
-    auto result = raf->WriteSync(data, options);
-    EXPECT_EQ(result.IsSuccess(), false);
+    auto result = raf.WriteSync(data, nullopt);
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_WriteSync_013";
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_WriteSync_001";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_WriteSync_014
- * @tc.desc: Test function of WriteSync() interface for ERROR.
+ * @tc.name: FsRandomAccessFileTest_WriteSync_002
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(ArrayBuffer) interface for FAILURE when rafEntity is
+ * nullptr.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_014, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_014";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_WriteSync_002";
 
-    ArrayBuffer buffer(malloc(100), 100);
-    WriteOptions options;
-    options.offset = -5;
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
+    FsRandomAccessFile raf(nullptr);
 
-    auto result = raf->WriteSync(buffer, options);
-    EXPECT_EQ(result.IsSuccess(), false);
-    free(buffer.buf);
+    auto result = raf.WriteSync(buffer, nullopt);
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_WriteSync_014";
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_WriteSync_002";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_WriteSync_015
- * @tc.desc: Test function of WriteSync() interface for ERROR.
+ * @tc.name: FsRandomAccessFileTest_WriteSync_003
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(string) interface for FAILURE when offset < 0.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_015, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_015";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_WriteSync_003";
 
     string data = "test data";
     WriteOptions options;
-    options.length = -5;
+    options.offset = -1;
 
-    auto result = raf->WriteSync(data, options);
-    EXPECT_EQ(result.IsSuccess(), false);
+    auto rafEntity = make_unique<RandomAccessFileEntity>();
+    FsRandomAccessFile raf(std::move(rafEntity));
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_WriteSync_015";
+    auto result = raf.WriteSync(data, options);
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_WriteSync_003";
 }
 
 /**
- * @tc.name: FsRandomAccessFileTest_WriteSync_016
- * @tc.desc: Test function of WriteSync() interface for ERROR.
+ * @tc.name: FsRandomAccessFileTest_WriteSync_004
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(ArrayBuffer) interface for FAILURE when offset < 0.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_016, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_WriteSync_016";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_WriteSync_004";
 
-    ArrayBuffer buffer(malloc(100), 100);
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
     WriteOptions options;
-    options.length = -5;
+    options.offset = -1;
 
-    auto result = raf->WriteSync(buffer, options);
-    EXPECT_EQ(result.IsSuccess(), false);
-    free(buffer.buf);
+    auto rafEntity = make_unique<RandomAccessFileEntity>();
+    FsRandomAccessFile raf(std::move(rafEntity));
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_WriteSync_016";
+    auto result = raf.WriteSync(buffer, options);
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_WriteSync_004";
 }
 
-// CloseSync
 /**
- * @tc.name: FsRandomAccessFileTest_CloseSync_017
- * @tc.desc: Test function of CloseSync() interface for ERROR.
+ * @tc.name: FsRandomAccessFileTest_WriteSync_005
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(string) interface for FAILURE when length < 0.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
 
  */
-HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_CloseSync_017, testing::ext::TestSize.Level1)
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_005, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileTest_CloseSync_017";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_WriteSync_005";
 
-    raf = make_unique<FsRandomAccessFile>(nullptr);
-    auto result = raf->CloseSync();
-    EXPECT_EQ(result.IsSuccess(), false);
+    string data = "test data";
+    WriteOptions options;
+    options.length = -1;
 
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileTest_CloseSync_017";
+    auto rafEntity = make_unique<RandomAccessFileEntity>();
+    FsRandomAccessFile raf(std::move(rafEntity));
+
+    auto result = raf.WriteSync(data, options);
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_WriteSync_005";
 }
 
+/**
+ * @tc.name: FsRandomAccessFileTest_WriteSync_006
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(ArrayBuffer) interface for FAILURE when length < 0.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+ */
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_WriteSync_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_WriteSync_006";
+
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
+    WriteOptions options;
+    options.length = -1;
+
+    auto rafEntity = make_unique<RandomAccessFileEntity>();
+    FsRandomAccessFile raf(std::move(rafEntity));
+
+    auto result = raf.WriteSync(buffer, options);
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_WriteSync_006";
 }
+
+/**
+ * @tc.name: FsRandomAccessFileTest_CloseSync_001
+ * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for FAILURE when rafEntity is nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+ */
+HWTEST_F(FsRandomAccessFileTest, FsRandomAccessFileTest_CloseSync_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-begin FsRandomAccessFileTest_CloseSync_001";
+
+    FsRandomAccessFile raf(nullptr);
+
+    auto result = raf.CloseSync();
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "FsRandomAccessFileTest-end FsRandomAccessFileTest_CloseSync_001";
+}
+
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
-#include "fs_err_code.h"
 #include "fs_file_watcher.h"
 #include "inotify_mock.h"
 #include "unistd_mock.h"
@@ -35,13 +34,13 @@ namespace Test {
 
 class FsWatcherMockTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void);
-    static void TearDownTestSuite(void);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void FsWatcherMockTest::SetUpTestSuite(void)
+void FsWatcherMockTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FsWatcherMockTest");
@@ -49,20 +48,20 @@ void FsWatcherMockTest::SetUpTestSuite(void)
     UnistdMock::EnableMock();
 }
 
-void FsWatcherMockTest::TearDownTestSuite(void)
+void FsWatcherMockTest::TearDownTestSuite()
 {
     InotifyMock::DisableMock();
     UnistdMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
-void FsWatcherMockTest::SetUp(void)
+void FsWatcherMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
     errno = 0; // Reset errno
 }
 
-void FsWatcherMockTest::TearDown(void)
+void FsWatcherMockTest::TearDown()
 {
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.taskRunning_ = false;
@@ -88,15 +87,11 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Constructor_001, testing::ext::TestSiz
     // Do testing
     auto result = FsWatcher::Constructor();
     // Verify results
-    EXPECT_TRUE(result.IsSuccess());
-    auto *watcher = result.GetData().value();
-    EXPECT_NE(watcher, nullptr);
-    if (watcher) {
-        auto *watcherEntity = watcher->GetWatchEntity();
-        EXPECT_NE(watcherEntity, nullptr);
-    }
-    delete watcher;
-    watcher = nullptr;
+    ASSERT_TRUE(result.IsSuccess());
+    std::unique_ptr<FsWatcher> watcher(result.GetData().value()); // To smart ptr for auto memory release
+
+    ASSERT_NE(watcher, nullptr);
+    EXPECT_NE(watcher->GetWatchEntity(), nullptr);
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Constructor_001";
 }
 
@@ -149,8 +144,9 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_002, testing::ext::TestSize.Leve
     auto result = fsWatcher.Start();
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
-    auto errCode = result.GetError().GetErrNo();
-    EXPECT_EQ(errCode, E_INVAL_CODE);
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Start_002";
 }
 
@@ -176,8 +172,9 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Start_003, testing::ext::TestSize.Leve
     auto result = fsWatcher.Start();
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
-    auto errCode = result.GetError().GetErrNo();
-    EXPECT_EQ(errCode, E_IO_CODE);
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Start_003";
 }
 
@@ -231,8 +228,9 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Stop_002, testing::ext::TestSize.Level
     auto result = fsWatcher.Stop();
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
-    auto errCode = result.GetError().GetErrNo();
-    EXPECT_EQ(errCode, E_INVAL_CODE);
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Stop_002";
 }
 
@@ -258,8 +256,9 @@ HWTEST_F(FsWatcherMockTest, FsWatcherTest_Stop_003, testing::ext::TestSize.Level
     auto result = fsWatcher.Stop();
     // Verify results
     EXPECT_FALSE(result.IsSuccess());
-    auto errCode = result.GetError().GetErrNo();
-    EXPECT_EQ(errCode, E_IO_CODE);
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
     GTEST_LOG_(INFO) << "FsWatcherMockTest-end FsWatcherTest_Stop_003";
 }
 

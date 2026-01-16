@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
-#include "file_entity.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -29,8 +28,8 @@ using namespace std;
 
 class FsRandomAccessFileMockTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void);
-    static void TearDownTestSuite(void);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 
@@ -39,38 +38,36 @@ protected:
     unique_ptr<FsRandomAccessFile> raf;
 };
 
-void FsRandomAccessFileMockTest::SetUpTestSuite(void)
+void FsRandomAccessFileMockTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FsRandomAccessFileMockTest");
     UvFsMock::EnableMock();
 }
 
-void FsRandomAccessFileMockTest::TearDownTestSuite(void)
+void FsRandomAccessFileMockTest::TearDownTestSuite()
 {
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
-void FsRandomAccessFileMockTest::SetUp(void)
+void FsRandomAccessFileMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
     rafEntity = make_unique<RandomAccessFileEntity>();
-    const int fdValue = 3;
-    const bool isClosed = false;
-    rafEntity->fd = make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
+    rafEntity->fd = make_unique<DistributedFS::FDGuard>(1, false);
     rafEntity->filePointer = 0;
-    raf = make_unique<FsRandomAccessFile>(move(rafEntity));
+    raf = make_unique<FsRandomAccessFile>(std::move(rafEntity));
 }
 
-void FsRandomAccessFileMockTest::TearDown(void)
+void FsRandomAccessFileMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_ReadSync_001
- * @tc.desc: Test function of ReadSync() interface for is failed for options is nullopt.
+ * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for FAILURE when nullopt and uv_fs_read fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -80,22 +77,26 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, Te
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_ReadSync_001";
 
-    ArrayBuffer buffer(malloc(100), 100);
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(-1));
 
     auto result = raf->ReadSync(buffer, std::nullopt);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
-    free(buffer.buf);
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_ReadSync_001";
 }
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_ReadSync_002
- * @tc.desc: Test function of ReadSync() interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -105,26 +106,33 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, Te
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_ReadSync_002";
 
-    ArrayBuffer buffer(malloc(100), 100);
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
     ReadOptions options;
-    options.offset = 10;
-    options.length = 10;
-    raf->rafEntity->filePointer = 20;
+    options.offset = 1;
+    options.length = 4;
+    auto filePointer = 20;
+    raf->rafEntity->filePointer = filePointer;
+    auto expectedLen = options.length.value();
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(expectedLen));
 
     auto result = raf->ReadSync(buffer, options);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
-    free(buffer.buf);
+    ASSERT_TRUE(result.IsSuccess());
+    auto readLen = result.GetData().value();
+    EXPECT_EQ(readLen, expectedLen);
+    auto newFilePointer = filePointer + options.offset.value() + expectedLen;
+    EXPECT_EQ(raf->rafEntity->filePointer, newFilePointer);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_ReadSync_002";
 }
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_WriteSync_003
- * @tc.desc: Test function of WriteSync() interface for is failed for options is nullopt.
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(string) interface for FAILURE when uv_fs_write fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -141,14 +149,17 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, T
     auto result = raf->WriteSync(data, std::nullopt);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_WriteSync_003";
 }
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_WriteSync_004
- * @tc.desc: Test function of WriteSync() interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(string) interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -163,20 +174,25 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, T
     options.length = 4;
     options.offset = 0;
 
+    auto expectedLen = options.length.value();
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(expectedLen));
 
     auto result = raf->WriteSync(data, options);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
+    ASSERT_TRUE(result.IsSuccess());
+    auto writeLen = result.GetData().value();
+    EXPECT_EQ(writeLen, expectedLen);
+    auto newFilePointer = options.offset.value() + expectedLen;
+    EXPECT_EQ(raf->rafEntity->filePointer, newFilePointer);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_WriteSync_004";
 }
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_WriteSync_005
- * @tc.desc: Test function of WriteSync() interface for is failed for uv_fs_write() return -1.
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(ArrayBuffer) interface for FAILURE when uv_fs_write fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -186,7 +202,9 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, T
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_005";
 
-    ArrayBuffer buffer(malloc(100), 100);
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
     WriteOptions options;
     options.length = 4;
     options.offset = 0;
@@ -197,15 +215,17 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, T
     auto result = raf->WriteSync(buffer, options);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
-    free(buffer.buf);
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_WriteSync_005";
 }
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_WriteSync_006
- * @tc.desc: Test function of WriteSync() interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(ArrayBuffer) interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -215,26 +235,32 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, T
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_006";
 
-    ArrayBuffer buffer(malloc(100), 100);
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
     WriteOptions options;
     options.length = 4;
     options.offset = 0;
 
+    auto expectedLen = options.length.value();
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*uvMock, uv_fs_write(_, _, _, _, _, _, _)).WillOnce(Return(expectedLen));
 
     auto result = raf->WriteSync(buffer, options);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
-    free(buffer.buf);
+    ASSERT_TRUE(result.IsSuccess());
+    auto writeLen = result.GetData().value();
+    EXPECT_EQ(writeLen, expectedLen);
+    auto newFilePointer = options.offset.value() + expectedLen;
+    EXPECT_EQ(raf->rafEntity->filePointer, newFilePointer);
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_WriteSync_006";
 }
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_CloseSync_007
- * @tc.desc: Test function of CloseSync() interface for is failed for uv_fs_write() return -1.
+ * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for FAILURE when uv_fs_close fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -250,14 +276,17 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, T
     auto result = raf->CloseSync();
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_007";
 }
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_CloseSync_008
- * @tc.desc: Test function of CloseSync() interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -273,7 +302,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, T
     auto result = raf->CloseSync();
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
+    EXPECT_TRUE(result.IsSuccess());
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_008";
 }
