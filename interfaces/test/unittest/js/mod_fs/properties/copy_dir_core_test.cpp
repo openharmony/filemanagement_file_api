@@ -298,9 +298,7 @@ HWTEST_F(CopyDirCoreTest, CopyDirCoreTest_DoCopyDir_009, testing::ext::TestSize.
     EXPECT_TRUE(result.fsResult.IsSuccess());
     EXPECT_FALSE(result.errFiles.has_value());
 
-    auto [succ, content] = FileUtils::ReadTextFileContent(destFile);
-    EXPECT_TRUE(succ);
-    EXPECT_EQ(content, "content");
+    EXPECT_EQ(FileUtils::ReadTextFileContent(destFile), std::make_tuple(true, "content"));
 
     GTEST_LOG_(INFO) << "CopyDirCoreTest-end CopyDirCoreTest_DoCopyDir_009";
 }

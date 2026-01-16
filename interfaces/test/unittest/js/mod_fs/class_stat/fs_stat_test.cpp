@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,10 @@
 #include "fs_stat.h"
 
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
+
+#include "ut_file_utils.h"
+#include "uv.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -24,35 +28,35 @@ using namespace std;
 
 class FsStatTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void);
-    static void TearDownTestSuite(void);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void FsStatTest::SetUpTestSuite(void)
+void FsStatTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
 }
 
-void FsStatTest::TearDownTestSuite(void)
+void FsStatTest::TearDownTestSuite()
 {
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
-void FsStatTest::SetUp(void)
+void FsStatTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
 }
 
-void FsStatTest::TearDown(void)
+void FsStatTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: FsStatTest_Constructor_001
- * @tc.desc: Test FsStat::Constructor for success case
+ * @tc.desc: Test function of FsStat::Constructor interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -60,17 +64,16 @@ void FsStatTest::TearDown(void)
 HWTEST_F(FsStatTest, FsStatTest_Constructor_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_Constructor_001";
-    
-    auto stat = FsStat::Constructor();
-    EXPECT_NE(stat, nullptr);
-    delete stat;
-    
+
+    std::unique_ptr<FsStat> fsStat(FsStat::Constructor()); // To smart ptr for auto memory release
+    ASSERT_NE(fsStat, nullptr);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_Constructor_001";
 }
 
 /**
  * @tc.name: FsStatTest_IsBlockDevice_001
- * @tc.desc: Test FsStat::IsBlockDevice for directory
+ * @tc.desc: Test function of FsStat::IsBlockDevice interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -78,21 +81,21 @@ HWTEST_F(FsStatTest, FsStatTest_Constructor_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_IsBlockDevice_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_IsBlockDevice_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mode = S_IFBLK;
-    EXPECT_TRUE(stat->IsBlockDevice());
-    EXPECT_FALSE(stat->IsFile());
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mode = S_IFBLK;
+
+    bool result = fsStat.IsBlockDevice();
+
+    EXPECT_TRUE(result);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_IsBlockDevice_001";
 }
 
 /**
  * @tc.name: FsStatTest_IsCharacterDevice_001
- * @tc.desc: Test FsStat::IsCharacterDevice for directory
+ * @tc.desc: Test function of FsStat::IsCharacterDevice interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -100,21 +103,21 @@ HWTEST_F(FsStatTest, FsStatTest_IsBlockDevice_001, testing::ext::TestSize.Level1
 HWTEST_F(FsStatTest, FsStatTest_IsCharacterDevice_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_IsCharacterDevice_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mode = S_IFCHR;
-    EXPECT_TRUE(stat->IsCharacterDevice());
-    EXPECT_FALSE(stat->IsFile());
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mode = S_IFCHR;
+
+    bool result = fsStat.IsCharacterDevice();
+
+    EXPECT_TRUE(result);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_IsCharacterDevice_001";
 }
 
 /**
  * @tc.name: FsStatTest_IsDirectory_001
- * @tc.desc: Test FsStat::IsDirectory for directory
+ * @tc.desc: Test function of FsStat::IsDirectory interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -122,21 +125,21 @@ HWTEST_F(FsStatTest, FsStatTest_IsCharacterDevice_001, testing::ext::TestSize.Le
 HWTEST_F(FsStatTest, FsStatTest_IsDirectory_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_IsDirectory_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mode = S_IFDIR | 0755;
-    EXPECT_TRUE(stat->IsDirectory());
-    EXPECT_FALSE(stat->IsFile());
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mode = S_IFDIR | 0755;
+
+    bool result = fsStat.IsDirectory();
+
+    EXPECT_TRUE(result);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_IsDirectory_001";
 }
 
 /**
  * @tc.name: FsStatTest_IsFIFO_001
- * @tc.desc: Test FsStat::IsFIFO for directory
+ * @tc.desc: Test function of FsStat::IsFIFO interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -144,21 +147,21 @@ HWTEST_F(FsStatTest, FsStatTest_IsDirectory_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_IsFIFO_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_IsFIFO_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mode = S_IFIFO;
-    EXPECT_TRUE(stat->IsFIFO());
-    EXPECT_FALSE(stat->IsFile());
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mode = S_IFIFO;
+
+    bool result = fsStat.IsFIFO();
+
+    EXPECT_TRUE(result);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_IsFIFO_001";
 }
 
 /**
  * @tc.name: FsStatTest_IsFile_001
- * @tc.desc: Test FsStat::IsFile for regular file
+ * @tc.desc: Test function of FsStat::IsFile interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -166,21 +169,21 @@ HWTEST_F(FsStatTest, FsStatTest_IsFIFO_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_IsFile_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_IsFile_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mode = S_IFREG | 0644;
-    EXPECT_TRUE(stat->IsFile());
-    EXPECT_FALSE(stat->IsDirectory());
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mode = S_IFREG | 0644;
+
+    bool result = fsStat.IsFile();
+
+    EXPECT_TRUE(result);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_IsFile_001";
 }
 
 /**
  * @tc.name: FsStatTest_IsSocket_001
- * @tc.desc: Test FsStat::IsSocket for symbolic link
+ * @tc.desc: Test function of FsStat::IsSocket interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -188,21 +191,21 @@ HWTEST_F(FsStatTest, FsStatTest_IsFile_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_IsSocket_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_IsSocket_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mode = S_IFSOCK;
-    EXPECT_TRUE(stat->IsSocket());
-    EXPECT_FALSE(stat->IsDirectory());
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mode = S_IFSOCK;
+
+    bool result = fsStat.IsSocket();
+
+    EXPECT_TRUE(result);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_IsSocket_001";
 }
 
 /**
  * @tc.name: FsStatTest_IsSymbolicLink_001
- * @tc.desc: Test FsStat::IsSymbolicLink for symbolic link
+ * @tc.desc: Test function of FsStat::IsSymbolicLink interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -210,21 +213,21 @@ HWTEST_F(FsStatTest, FsStatTest_IsSocket_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_IsSymbolicLink_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_IsSymbolicLink_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mode = S_IFLNK | 0777;
-    EXPECT_TRUE(stat->IsSymbolicLink());
-    EXPECT_FALSE(stat->IsDirectory());
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mode = S_IFLNK | 0777;
+
+    bool result = fsStat.IsSymbolicLink();
+
+    EXPECT_TRUE(result);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_IsSymbolicLink_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetIno_001
- * @tc.desc: Test FsStat::GetIno for valid inode number
+ * @tc.desc: Test function of FsStat::GetIno interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -232,20 +235,22 @@ HWTEST_F(FsStatTest, FsStatTest_IsSymbolicLink_001, testing::ext::TestSize.Level
 HWTEST_F(FsStatTest, FsStatTest_GetIno_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetIno_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_ino = 123456789;
-    EXPECT_EQ(stat->GetIno(), 123456789);
-    delete stat;
-    
+    auto ino = 10;
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_ino = ino;
+
+    auto result = fsStat.GetIno();
+
+    EXPECT_EQ(result, ino);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetIno_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetMode_001
- * @tc.desc: Test FsStat::GetMode for permission bits
+ * @tc.desc: Test function of FsStat::GetMode interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -253,20 +258,21 @@ HWTEST_F(FsStatTest, FsStatTest_GetIno_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_GetMode_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetMode_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mode = S_IFREG | 0755;
-    EXPECT_EQ(stat->GetMode(), 0755);
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mode = S_IFREG | 0755;
+
+    auto result = fsStat.GetMode();
+
+    EXPECT_EQ(result, 0755);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetMode_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetUid_001
- * @tc.desc: Test FsStat::GetUid for user ID
+ * @tc.desc: Test function of FsStat::GetUid interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -275,19 +281,21 @@ HWTEST_F(FsStatTest, FsStatTest_GetUid_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetUid_001";
 
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
+    auto uid = 1000;
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_uid = uid;
 
-    stat->entity->stat_.st_uid = 1000;
-    EXPECT_EQ(stat->GetUid(), 1000);
-    delete stat;
-    
+    auto result = fsStat.GetUid();
+
+    EXPECT_EQ(result, uid);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetUid_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetGid_001
- * @tc.desc: Test FsStat::GetGid for group ID
+ * @tc.desc: Test function of FsStat::GetGid interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -296,19 +304,21 @@ HWTEST_F(FsStatTest, FsStatTest_GetGid_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetGid_001";
 
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
+    auto gid = 1000;
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_gid = gid;
 
-    stat->entity->stat_.st_gid = 1000;
-    EXPECT_EQ(stat->GetGid(), 1000);
-    delete stat;
-    
+    auto result = fsStat.GetGid();
+
+    EXPECT_EQ(result, gid);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetGid_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetSize_001
- * @tc.desc: Test FsStat::GetSize for file size
+ * @tc.desc: Test function of FsStat::GetSize interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -317,19 +327,21 @@ HWTEST_F(FsStatTest, FsStatTest_GetSize_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetSize_001";
 
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
+    auto size = 10;
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_size = size;
 
-    stat->entity->stat_.st_size = 123456789;
-    EXPECT_EQ(stat->GetSize(), 123456789);
-    delete stat;
-    
+    auto result = fsStat.GetSize();
+
+    EXPECT_EQ(result, size);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetSize_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetAtime_001
- * @tc.desc: Test FsStat::GetAtime for access time in seconds
+ * @tc.desc: Test function of FsStat::GetAtime interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -337,22 +349,26 @@ HWTEST_F(FsStatTest, FsStatTest_GetSize_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_GetAtime_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetAtime_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_atim.tv_sec = 1630473600;
-    stat->entity->stat_.st_atim.tv_nsec = 500000000;
-    
-    EXPECT_EQ(stat->GetAtime(), 1630473600);
-    delete stat;
-    
+    uv_timespec64_t now;
+    int ret = uv_clock_gettime(UV_CLOCK_REALTIME, &now);
+    ASSERT_EQ(ret, 0);
+
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_atim.tv_sec = now.tv_sec;
+    fsStat.entity->stat_.st_atim.tv_nsec = now.tv_nsec;
+
+    auto result = fsStat.GetAtime();
+
+    EXPECT_EQ(result, now.tv_sec);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetAtime_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetMtime_001
- * @tc.desc: Test FsStat::GetMtime for modification time in seconds
+ * @tc.desc: Test function of FsStat::GetMtime interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -360,22 +376,26 @@ HWTEST_F(FsStatTest, FsStatTest_GetAtime_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_GetMtime_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetMtime_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mtim.tv_sec = 1630473601;
-    stat->entity->stat_.st_mtim.tv_nsec = 500000000;
-    
-    EXPECT_EQ(stat->GetMtime(), 1630473601);
-    delete stat;
-    
+    uv_timespec64_t now;
+    int ret = uv_clock_gettime(UV_CLOCK_REALTIME, &now);
+    ASSERT_EQ(ret, 0);
+
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mtim.tv_sec = now.tv_sec;
+    fsStat.entity->stat_.st_mtim.tv_nsec = now.tv_nsec;
+
+    auto result = fsStat.GetMtime();
+
+    EXPECT_EQ(result, now.tv_sec);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetMtime_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetCtime_001
- * @tc.desc: Test FsStat::GetCtime for change time in seconds
+ * @tc.desc: Test function of FsStat::GetCtime interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -383,22 +403,26 @@ HWTEST_F(FsStatTest, FsStatTest_GetMtime_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_GetCtime_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetCtime_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_ctim.tv_sec = 1630473602;
-    stat->entity->stat_.st_ctim.tv_nsec = 500000000;
+    uv_timespec64_t now;
+    int ret = uv_clock_gettime(UV_CLOCK_REALTIME, &now);
+    ASSERT_EQ(ret, 0);
 
-    EXPECT_EQ(stat->GetCtime(), 1630473602);
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_ctim.tv_sec = now.tv_sec;
+    fsStat.entity->stat_.st_ctim.tv_nsec = now.tv_nsec;
+
+    auto result = fsStat.GetCtime();
+
+    EXPECT_EQ(result, now.tv_sec);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetCtime_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetAtimeNs_001
- * @tc.desc: Test FsStat::GetAtimeNs for access time in nanoseconds
+ * @tc.desc: Test function of FsStat::GetAtimeNs interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -406,23 +430,27 @@ HWTEST_F(FsStatTest, FsStatTest_GetCtime_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_GetAtimeNs_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetAtimeNs_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_atim.tv_sec = 1630473600;
-    stat->entity->stat_.st_atim.tv_nsec = 500000000;
+    uv_timespec64_t now;
+    int ret = uv_clock_gettime(UV_CLOCK_REALTIME, &now);
+    ASSERT_EQ(ret, 0);
 
-    int64_t expected = 1630473600LL * 1000000000 + 500000000;
-    EXPECT_EQ(stat->GetAtimeNs(), expected);
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_atim.tv_sec = now.tv_sec;
+    fsStat.entity->stat_.st_atim.tv_nsec = now.tv_nsec;
+
+    auto result = fsStat.GetAtimeNs();
+
+    auto nowNs = static_cast<uint64_t>(now.tv_sec * SECOND_TO_NANOSECOND + now.tv_nsec);
+    EXPECT_EQ(result, nowNs);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetAtimeNs_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetMtimeNs_001
- * @tc.desc: Test FsStat::GetMtimeNs for modification time in nanoseconds
+ * @tc.desc: Test function of FsStat::GetMtimeNs interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -430,23 +458,27 @@ HWTEST_F(FsStatTest, FsStatTest_GetAtimeNs_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_GetMtimeNs_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetMtimeNs_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_mtim.tv_sec = 1630473601;
-    stat->entity->stat_.st_mtim.tv_nsec = 500000000;
+    uv_timespec64_t now;
+    int ret = uv_clock_gettime(UV_CLOCK_REALTIME, &now);
+    ASSERT_EQ(ret, 0);
 
-    int64_t expected = 1630473601LL * 1000000000 + 500000000;
-    EXPECT_EQ(stat->GetMtimeNs(), expected);
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_mtim.tv_sec = now.tv_sec;
+    fsStat.entity->stat_.st_mtim.tv_nsec = now.tv_nsec;
+
+    auto result = fsStat.GetMtimeNs();
+
+    auto nowNs = static_cast<uint64_t>(now.tv_sec * SECOND_TO_NANOSECOND + now.tv_nsec);
+    EXPECT_EQ(result, nowNs);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetMtimeNs_001";
 }
 
 /**
  * @tc.name: FsStatTest_GetCtimeNs_001
- * @tc.desc: Test FsStat::GetCtimeNs for change time in nanoseconds
+ * @tc.desc: Test function of FsStat::GetCtimeNs interface for SUCCESS.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -454,18 +486,22 @@ HWTEST_F(FsStatTest, FsStatTest_GetMtimeNs_001, testing::ext::TestSize.Level1)
 HWTEST_F(FsStatTest, FsStatTest_GetCtimeNs_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsStatTest-begin FsStatTest_GetCtimeNs_001";
-    
-    auto stat = FsStat::Constructor();
-    ASSERT_NE(stat, nullptr);
 
-    stat->entity->stat_.st_ctim.tv_sec = 1630473602;
-    stat->entity->stat_.st_ctim.tv_nsec = 500000000;
+    uv_timespec64_t now;
+    int ret = uv_clock_gettime(UV_CLOCK_REALTIME, &now);
+    ASSERT_EQ(ret, 0);
 
-    int64_t expected = 1630473602LL * 1000000000 + 500000000;
-    EXPECT_EQ(stat->GetCtimeNs(), expected);
-    delete stat;
-    
+    auto entity = std::make_unique<StatEntity>();
+    FsStat fsStat(std::move(entity));
+    fsStat.entity->stat_.st_ctim.tv_sec = now.tv_sec;
+    fsStat.entity->stat_.st_ctim.tv_nsec = now.tv_nsec;
+
+    auto result = fsStat.GetCtimeNs();
+
+    auto nowNs = static_cast<uint64_t>(now.tv_sec * SECOND_TO_NANOSECOND + now.tv_nsec);
+    EXPECT_EQ(result, nowNs);
+
     GTEST_LOG_(INFO) << "FsStatTest-end FsStatTest_GetCtimeNs_001";
 }
 
-}
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

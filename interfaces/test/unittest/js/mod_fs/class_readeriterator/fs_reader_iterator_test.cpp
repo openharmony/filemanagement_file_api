@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,11 @@ HWTEST_F(FsReaderIteratorTest, FsReaderIteratorTest_Constructor_001, testing::ex
     GTEST_LOG_(INFO) << "FsReaderIteratorTest-begin FsReaderIteratorTest_Constructor_001";
 
     auto result = FsReaderIterator::Constructor();
-    EXPECT_EQ(result.IsSuccess(), true);
+
+    ASSERT_TRUE(result.IsSuccess());
+    std::unique_ptr<FsReaderIterator> iter(result.GetData().value()); // To smart ptr for auto memory release
+    ASSERT_NE(iter, nullptr);
+    ASSERT_NE(iter->entity, nullptr);
 
     GTEST_LOG_(INFO) << "FsReaderIteratorTest-end FsReaderIteratorTest_Constructor_001";
 }

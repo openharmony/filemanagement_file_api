@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 #include <sys/inotify.h>
+#include <sys/prctl.h>
 
 #include "filemgmt_libhilog.h"
 
@@ -30,29 +31,30 @@ namespace Test {
 
 class WatcherDataCacheTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void);
-    static void TearDownTestSuite(void);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void WatcherDataCacheTest::SetUpTestSuite(void)
+void WatcherDataCacheTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
+    prctl(PR_SET_NAME, "WatcherDataCacheTest");
 }
 
-void WatcherDataCacheTest::TearDownTestSuite(void)
+void WatcherDataCacheTest::TearDownTestSuite()
 {
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
-void WatcherDataCacheTest::SetUp(void)
+void WatcherDataCacheTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
     errno = 0; // Reset errno
 }
 
-void WatcherDataCacheTest::TearDown(void)
+void WatcherDataCacheTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }

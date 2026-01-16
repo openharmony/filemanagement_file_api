@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,13 +37,13 @@ namespace Test {
 
 class FsFileWatcherMockTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void);
-    static void TearDownTestSuite(void);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
 };
 
-void FsFileWatcherMockTest::SetUpTestSuite(void)
+void FsFileWatcherMockTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FsFileWatcherMockTest");
@@ -53,7 +53,7 @@ void FsFileWatcherMockTest::SetUpTestSuite(void)
     UnistdMock::EnableMock();
 }
 
-void FsFileWatcherMockTest::TearDownTestSuite(void)
+void FsFileWatcherMockTest::TearDownTestSuite()
 {
     EventfdMock::DisableMock();
     InotifyMock::DisableMock();
@@ -62,13 +62,13 @@ void FsFileWatcherMockTest::TearDownTestSuite(void)
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
-void FsFileWatcherMockTest::SetUp(void)
+void FsFileWatcherMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
     errno = 0; // Reset errno
 }
 
-void FsFileWatcherMockTest::TearDown(void)
+void FsFileWatcherMockTest::TearDown()
 {
     FsFileWatcher &watcher = FsFileWatcher::GetInstance();
     watcher.taskRunning_ = false;
@@ -1226,11 +1226,7 @@ HWTEST_F(FsFileWatcherMockTest, FsFileWatcherMockTest_NotifyEvent_002, testing::
     event->len = len + 1;
     char *namePtr = reinterpret_cast<char *>(event + 1);
     int ret = memcpy_s(namePtr, len + 1, name, len + 1);
-    if (ret != 0) {
-        EXPECT_EQ(ret, 0);
-        GTEST_LOG_(INFO) << "FsFileWatcherMockTest-end FsFileWatcherMockTest_NotifyEvent_002";
-        return;
-    }
+    ASSERT_EQ(ret, 0);
     // Prepare test condition
     auto callback = std::make_shared<MockWatcherCallback>();
     auto info = std::make_shared<WatcherInfo>(callback);
