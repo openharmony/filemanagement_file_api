@@ -118,7 +118,8 @@ FsResult<int64_t> WriteCore::DoWrite(const int32_t fd, void *buf, const size_t l
 {
     FileFsTrace traceDoWrite("DoWrite");
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<unsigned int>(len));
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> writeReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> writeReq = { new (nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!writeReq) {
         return FsResult<int64_t>::Error(ENOMEM);
     }

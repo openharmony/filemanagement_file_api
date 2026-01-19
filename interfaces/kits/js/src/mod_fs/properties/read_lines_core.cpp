@@ -37,7 +37,8 @@ static int CheckOptionArg(Options option)
 
 static int GetFileSize(const string &path, int64_t &offset)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> readLinesReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> readLinesReq = { new (nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!readLinesReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;

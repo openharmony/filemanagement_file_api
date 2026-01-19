@@ -35,7 +35,11 @@ static tuple<bool, int64_t, bool, int64_t, unique_ptr<char[]>> ValidReadTextArg(
     int64_t offset = -1;
     int64_t len = 0;
     bool hasLen = false;
-    unique_ptr<char[]> encoding { new char[]{ "utf-8" } };
+    unique_ptr<char[]> encoding { new (nothrow) char[]{ "utf-8" } };
+    if (!encoding) {
+        HILOGE("Failed to request heap memory.");
+        return { false, offset, hasLen, len, nullptr };
+    }
 
     if (!options.has_value()) {
         return { true, offset, hasLen, len, move(encoding) };
@@ -77,7 +81,7 @@ static int OpenFile(const std::string& path)
         HILOGD("Path is %{private}s", path.c_str());
     }
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> openReq = {
-        new uv_fs_t, FsUtils::FsReqCleanup
+        new (nothrow) uv_fs_t, FsUtils::FsReqCleanup
     };
     if (openReq == nullptr) {
         HILOGE("Failed to request heap memory.");
@@ -93,7 +97,7 @@ static int ReadFromFile(int fd, int64_t offset, string& buffer)
     FileFsTrace traceReadFromFile("ReadFromFile");
     uv_buf_t readbuf = uv_buf_init(const_cast<char *>(buffer.c_str()), static_cast<unsigned int>(buffer.size()));
     std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> readReq = {
-        new uv_fs_t, FsUtils::FsReqCleanup };
+        new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (readReq == nullptr) {
         HILOGE("Failed to request heap memory.");
         return -ENOMEM;

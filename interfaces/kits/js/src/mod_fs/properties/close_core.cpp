@@ -29,7 +29,8 @@ using namespace std;
 static int32_t CloseFd(int fd)
 {
     FileFsTrace traceCloseFd("CloseFd");
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> closeReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> closeReq = { new (nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!closeReq) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;

@@ -149,7 +149,7 @@ FsResult<HsHashStream *> HsHashStream::Constructor(string alg)
             break;
     }
 
-    HsHashStream *hsStreamPtr = new HsHashStream(move(hsEntity));
+    HsHashStream *hsStreamPtr = new (nothrow) HsHashStream(move(hsEntity));
     if (hsStreamPtr == nullptr) {
         HILOGE("Failed to create HsHashStream object on heap.");
         return FsResult<HsHashStream *>::Error(ENOMEM);

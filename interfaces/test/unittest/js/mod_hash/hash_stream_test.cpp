@@ -289,6 +289,26 @@ HWTEST_F(HashStreamTest, DigestTest_0004, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "HashStreamTest-end DigestTest_0004";
 }
 
+/**
+ * @tc.name: Constructor_0001
+ * @tc.desc: Test function of Constructor() interface for create hashstream by sha256 rule.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(HashStreamTest, Constructor_0001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "HashStreamTest-begin Constructor_0001";
+    auto stream = HsHashStream::Constructor("sha256");
+
+    ASSERT_TRUE(stream.IsSuccess());
+
+    auto ret = stream.GetData().value();
+    EXPECT_NE(ret, nullptr);
+
+    GTEST_LOG_(INFO) << "HashStreamTest-end Constructor_0001";
+}
+
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

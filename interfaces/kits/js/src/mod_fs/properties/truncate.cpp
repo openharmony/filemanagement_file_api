@@ -102,7 +102,8 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
     }
     auto [succ, fileInfo] = ParseJsFile(env, funcArg[NARG_POS::FIRST]);
     if (!succ) {
-        NError(EINVAL).ThrowErr(env);
+        // The ParseJsFile function already includes the necessary exception throwing logic,
+        // so there is no need to re-throw exceptions (NError::ThrowErr) after calling it.
         return nullptr;
     }
     int64_t truncateLen = 0;
@@ -133,6 +134,8 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
     }
     auto [succ, fileInfo] = ParseJsFile(env, funcArg[NARG_POS::FIRST]);
     if (!succ) {
+        // The ParseJsFile function already includes the necessary exception throwing logic,
+        // so there is no need to re-throw exceptions (NError::ThrowErr) after calling it.
         return nullptr;
     }
     int64_t truncateLen = 0;
