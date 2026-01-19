@@ -30,8 +30,8 @@ using namespace std;
 FsResult<void> UnlinkCore::DoUnlink(const std::string &src)
 {
     FileFsTrace traceDoUnlink("DoUnlink");
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> unlinkReq = {
-        new uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup)*> unlinkReq = {
+        new (nothrow) uv_fs_t, FsUtils::FsReqCleanup };
     if (!unlinkReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);

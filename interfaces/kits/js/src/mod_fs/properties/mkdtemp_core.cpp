@@ -25,7 +25,8 @@ using namespace std;
 
 FsResult<string> MkdtempCore::DoMkdtemp(const string &path)
 {
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> mkdtempReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> mkdtempReq = { new (nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!mkdtempReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<string>::Error(ENOMEM);

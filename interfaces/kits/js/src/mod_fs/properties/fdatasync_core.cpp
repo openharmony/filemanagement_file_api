@@ -26,7 +26,8 @@ namespace OHOS::FileManagement::ModuleFileIO {
 
 FsResult<void> FDataSyncCore::DoFDataSync(const int32_t &fd)
 {
-    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> fDataSyncReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    std::unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> fDataSyncReq = { new (std::nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!fDataSyncReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<void>::Error(ENOMEM);

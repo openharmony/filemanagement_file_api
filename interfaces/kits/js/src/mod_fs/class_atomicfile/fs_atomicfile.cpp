@@ -229,7 +229,11 @@ FsResult<FsAtomicFile *> FsAtomicFile::Constructor(string path)
     atomicFileEntity->baseFileName = path;
     atomicFileEntity->newFileName = path.append(TEMP_FILE_SUFFIX);
 
-    auto file = new FsAtomicFile(move(atomicFileEntity));
+    auto file = new (std::nothrow) FsAtomicFile(move(atomicFileEntity));
+    if (file == nullptr) {
+        HILOGE("Failed to create FsAtomicFile");
+        return FsResult<FsAtomicFile *>::Error(ENOMEM);
+    }
 
     return FsResult<FsAtomicFile *>::Success(file);
 }

@@ -74,7 +74,8 @@ FsResult<int64_t> ReadCore::DoRead(const int32_t &fd, ArrayBuffer &arrayBuffer, 
     }
 
     uv_buf_t buffer = uv_buf_init(static_cast<char *>(buf), static_cast<uint32_t>(len));
-    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> readReq = { new uv_fs_t, FsUtils::FsReqCleanup };
+    unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> readReq = { new (nothrow) uv_fs_t,
+        FsUtils::FsReqCleanup };
     if (!readReq) {
         HILOGE("Failed to request heap memory.");
         return FsResult<int64_t>::Error(ENOMEM);
