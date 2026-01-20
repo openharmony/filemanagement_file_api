@@ -106,6 +106,7 @@ int FileWatcher::StartNotify(shared_ptr<WatcherInfoArg> arg)
     arg->wd = newWd;
     wdFileNameMap_[arg->fileName].first = newWd;
     wdFileNameMap_[arg->fileName].second = watchEvents;
+    HILOGI("File watcher started, notifyFd_: %{public}d, wd: %{public}d", notifyFd_, newWd);
     return ERRNO_NOERR;
 }
 
@@ -177,10 +178,7 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
         lock_guard<mutex> lock(readMutex_);
         if (!(closed_ && reading_)) {
             oldWd = inotify_rm_watch(notifyFd_, arg->wd);
-            HILOGE("rm watch failed, err: %{public}d", errno);
-            if (FileApiDebug::isLogEnabled) {
-                HILOGD("Stop inotify_rm_watch, notifyFd_ %{public}d, arg->wd %{public}d", notifyFd_, arg->wd);
-            }
+            HILOGI("File watcher stopped, notifyFd_: %{public}d, wd: %{public}d", notifyFd_, arg->wd);
         } else {
             HILOGE("rm watch fail");
         }
@@ -194,7 +192,6 @@ int FileWatcher::StopNotify(shared_ptr<WatcherInfoArg> arg)
             return rmErr;
         }
     }
-    HILOGI("inotify rm watch, fileNameMap erase");
     wdFileNameMap_.erase(arg->fileName);
     return CloseNotifyFdLocked();
 }
