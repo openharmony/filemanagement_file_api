@@ -12,14 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "file_impl.h"
 
+#include <unistd.h>
 #include "ffi_remote_data.h"
 #include "cj_common_ffi.h"
 #include "uni_error.h"
 #include "open.h"
 #include "utils.h"
 #include "file_utils.h"
-#include "file_impl.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "uri.h"
 #include "datashare_helper.h"
@@ -40,7 +41,9 @@ static const std::string MODE_R = "/r/";
 static const std::string DOCS = "docs";
 static const std::string DATASHARE = "datashare";
 static const std::string SCHEME_BROKER = "content";
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 constexpr uint32_t MAX_WANT_FLAG = 4;
+#endif
 
 namespace {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
