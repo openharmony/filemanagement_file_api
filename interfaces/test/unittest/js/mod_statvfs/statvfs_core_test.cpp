@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,53 +15,55 @@
 
 #include "statvfs_core.h"
 
-#include <fcntl.h>
 #include <gtest/gtest.h>
+#include <sys/prctl.h>
 #include <sys/statvfs.h>
 
-namespace OHOS::FileManagement::ModuleFileIO::Test {
+#include "ut_file_utils.h"
+
+namespace OHOS::FileManagement::ModuleStatvfs::Test {
 using namespace testing;
 using namespace testing::ext;
 using namespace std;
+using FileUtils = OHOS::FileManagement::ModuleFileIO::Test::FileUtils;
 
 class StatvFsCoreTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void);
-    static void TearDownTestSuite(void);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/StatvFsCoreTest";
 };
 
-void StatvFsCoreTest::SetUpTestSuite(void)
+void StatvFsCoreTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
-    int32_t fd = open("/data/test/statvfs_test.txt", O_CREAT | O_RDWR, 0644);
-    if (fd < 0) {
-        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    close(fd);
+    prctl(PR_SET_NAME, "StatvFsCoreTest");
 }
 
-void StatvFsCoreTest::TearDownTestSuite(void)
+void StatvFsCoreTest::TearDownTestSuite()
 {
     GTEST_LOG_(INFO) << "TearDownTestSuite";
-    rmdir("/data/test/statvfs_test.txt");
 }
 
-void StatvFsCoreTest::SetUp(void)
+void StatvFsCoreTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void StatvFsCoreTest::TearDown(void)
+void StatvFsCoreTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: StatvFsCoreTest_DoGetFreeSize_001
- * @tc.desc: Test function of DoGetFreeSize interface for SUCCESS.
+ * @tc.desc: Test function of StatvfsCore::DoGetFreeSize interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -70,19 +72,21 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetFreeSize_001, testing::ext::TestS
 {
     GTEST_LOG_(INFO) << "StatvFsCoreTest-begin StatvFsCoreTest_DoGetFreeSize_001";
 
-    struct statvfs diskInfo;
-    diskInfo.f_bsize = 2;
-    diskInfo.f_bfree = 1;
+    auto path = testDir + "/StatvFsCoreTest_DoGetFreeSize_001.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path));
 
-    auto result = ModuleStatvfs::StatvfsCore::DoGetFreeSize("/data/test/statvfs_test.txt");
-    EXPECT_EQ(result.IsSuccess(), true);
+    auto ret = StatvfsCore::DoGetFreeSize(path);
+
+    ASSERT_TRUE(ret.IsSuccess());
+    auto size = ret.GetData().value();
+    EXPECT_GT(size, 0);
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetFreeSize_001";
 }
 
 /**
  * @tc.name: StatvFsCoreTest_DoGetFreeSize_002
- * @tc.desc: Test function of DoGetFreeSize interface for FALSE.
+ * @tc.desc: Test function of StatvfsCore::DoGetFreeSize interface for FAILURE when file not exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -91,17 +95,21 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetFreeSize_002, testing::ext::TestS
 {
     GTEST_LOG_(INFO) << "StatvFsCoreTest-begin StatvFsCoreTest_DoGetFreeSize_002";
 
-    auto result = ModuleStatvfs::StatvfsCore::DoGetFreeSize("/test/path");
-    EXPECT_EQ(result.IsSuccess(), false);
-    auto err = result.GetError();
+    auto path = testDir + "/StatvFsCoreTest_DoGetFreeSize_002_non_existent.txt";
+
+    auto ret = StatvfsCore::DoGetFreeSize(path);
+
+    EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetFreeSize_002";
 }
 
 /**
  * @tc.name: StatvFsCoreTest_DoGetTotalSize_003
- * @tc.desc: Test function of DoGetTotalSize interface for SUCCESS.
+ * @tc.desc: Test function of StatvfsCore::DoGetTotalSize interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -110,19 +118,21 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_003, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "StatvFsCoreTest-begin StatvFsCoreTest_DoGetTotalSize_003";
 
-    struct statvfs diskInfo;
-    diskInfo.f_bsize = 2;
-    diskInfo.f_blocks = 1;
+    auto path = testDir + "/StatvFsCoreTest_DoGetTotalSize_003.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path));
 
-    auto result = ModuleStatvfs::StatvfsCore::DoGetTotalSize("/data/test/statvfs_test.txt");
-    EXPECT_EQ(result.IsSuccess(), true);
+    auto ret = StatvfsCore::DoGetTotalSize(path);
+
+    ASSERT_TRUE(ret.IsSuccess());
+    auto size = ret.GetData().value();
+    EXPECT_GT(size, 0);
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetTotalSize_003";
 }
 
 /**
  * @tc.name: StatvFsCoreTest_DoGetTotalSize_004
- * @tc.desc: Test function of DoGetTotalSize interface for FALSE.
+ * @tc.desc: Test function of StatvfsCore::DoGetTotalSize interface for FAILURE when file not exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -131,12 +141,16 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_004, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "StatvFsCoreTest-begin StatvFsCoreTest_DoGetTotalSize_004";
 
-    auto result = ModuleStatvfs::StatvfsCore::DoGetTotalSize("/test/path");
-    EXPECT_EQ(result.IsSuccess(), false);
-    auto err = result.GetError();
+    auto path = testDir + "/StatvFsCoreTest_DoGetTotalSize_004_non_existent.txt";
+
+    auto ret = StatvfsCore::DoGetTotalSize(path);
+
+    EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetTotalSize_004";
 }
 
-} // namespace OHOS::FileManagement::ModuleFileIO::Test
+} // namespace OHOS::FileManagement::ModuleStatvfs::Test

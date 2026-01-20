@@ -343,9 +343,10 @@ ohos_unittest("ani_file_hash_test") {
   resource_config_file = "../resource/ohos_test.xml"
 
   sources = [
+    "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
     "mod_hash/hash_core_test.cpp",
     "mod_hash/hash_stream_test.cpp",
-    ]
+  ]
   sources += ani_file_hash_core
 
   include_dirs = [
@@ -354,6 +355,7 @@ ohos_unittest("ani_file_hash_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs",
     "${file_api_path}/interfaces/kits/js/src/mod_hash",
     "${file_api_path}/interfaces/kits/js/src/mod_hash/class_hashstream",
+    "${file_api_path}/interfaces/test/unittest/common_utils",
   ]
 
   deps = [
@@ -387,13 +389,17 @@ ohos_unittest("ani_file_securitylabel_test") {
 
   resource_config_file = "../resource/ohos_test.xml"
 
-  sources = [ "mod_securitylabel/securitylabel_core_test.cpp" ]
+  sources = [
+    "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
+    "mod_securitylabel/securitylabel_core_test.cpp",
+  ]
   sources += ani_file_securitylabel_core
 
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_securitylabel",
+    "${file_api_path}/interfaces/test/unittest/common_utils",
   ]
 
   deps = [
@@ -428,13 +434,17 @@ ohos_unittest("ani_file_statvfs_test") {
 
   resource_config_file = "../resource/ohos_test.xml"
 
-  sources = [ "mod_statvfs/statvfs_core_test.cpp" ]
+  sources = [
+    "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
+    "mod_statvfs/statvfs_core_test.cpp",
+  ]
   sources += ani_file_statvfs_core
 
   include_dirs = [
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_statvfs",
+    "${file_api_path}/interfaces/test/unittest/common_utils",
   ]
 
   deps = [
