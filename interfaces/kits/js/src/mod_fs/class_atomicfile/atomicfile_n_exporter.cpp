@@ -444,9 +444,9 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
     }
 
     CallFunctionByName(env, writeStream, "closeSync");
-
-    if (!fs::remove(rafEntity->newFileName)) {
-        HILOGW("Failed to remove file");
+    std::error_code errCode;
+    if (!fs::remove(rafEntity->newFileName, errCode)) {
+        HILOGW("Failed to remove file, err:%{public}s", errCode.message().c_str());
         status = napi_delete_reference(env, rafEntity->writeStreamObj);
         if (status != napi_ok) {
             HILOGE("Failed to delete reference");

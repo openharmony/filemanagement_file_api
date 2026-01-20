@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,196 +21,230 @@
 
 #include "fs_utils.h"
 #include "stdio_mock.h"
+#include "ut_file_utils.h"
 
-namespace OHOS {
-namespace FileManagement {
-namespace ModuleFileIO {
-namespace Test {
+namespace OHOS::FileManagement::ModuleFileIO::Test {
+using namespace testing;
+using namespace testing::ext;
 using namespace std;
-
-static const string g_streamFilePath = "/data/test/FsStreamCoreTest.txt";
 
 class FsStreamMockTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void);
-    static void TearDownTestSuite(void);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
+
+private:
+    const string testDir = FileUtils::testRootDir + "/FsStreamMockTest";
 };
 
-void FsStreamMockTest::SetUpTestSuite(void)
+void FsStreamMockTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FsStreamMockTest");
     StdioMock::EnableMock();
-    int32_t fd = open(g_streamFilePath.c_str(), CREATE | O_RDWR, 0644);
-    if (fd < 0) {
-        GTEST_LOG_(ERROR) << "Open test file failed! ret: " << fd << ", errno: " << errno;
-        ASSERT_TRUE(false);
-    }
-    close(fd);
 }
 
 void FsStreamMockTest::TearDownTestSuite()
 {
     StdioMock::DisableMock();
-    rmdir(g_streamFilePath.c_str());
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
-void FsStreamMockTest::SetUp(void)
+void FsStreamMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void FsStreamMockTest::TearDown(void)
+void FsStreamMockTest::TearDown()
 {
+    ASSERT_TRUE(FileUtils::RemoveAll(testDir));
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
- * @tc.name: FsStreamSeekTest_0001
- * @tc.desc: Test function of Seek() interface for fail fseek.
+ * @tc.name: FsStreamMockTest_Seek_001
+ * @tc.desc: Test function of FsStream::Seek interface for FAILURE when fseek fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0001, testing::ext::TestSize.Level1)
+HWTEST_F(FsStreamMockTest, FsStreamMockTest_Seek_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamSeekTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "r+");
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamMockTest_Seek_001";
+
+    string path = testDir + "/FsStreamMockTest_Seek_001.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
+    auto ret = CreateStreamCore::DoCreateStream(path, "r+");
     ASSERT_TRUE(ret.IsSuccess());
-    auto result = ret.GetData().value();
+    std::unique_ptr<FsStream> stream(ret.GetData().value()); // To smart ptr for auto memory release
+    ASSERT_NE(stream, nullptr);
 
     auto stdioMock = StdioMock::GetMock();
-    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
-    auto retSk = result->Seek(1);
-    EXPECT_FALSE(retSk.IsSuccess());
+    auto seekRet = stream->Seek(1);
 
-    auto retCs = result->Close();
-    ASSERT_TRUE(retCs.IsSuccess());
+    testing::Mock::VerifyAndClearExpectations(stdioMock.get());
+    EXPECT_FALSE(seekRet.IsSuccess());
+    auto err = seekRet.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+    auto closeRet = stream->Close();
+    ASSERT_TRUE(closeRet.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamSeekTest_0001";
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamMockTest_Seek_001";
 }
 
 /**
- * @tc.name: FsStreamSeekTest_0002
- * @tc.desc: Test function of Seek() interface for fail ftell.
+ * @tc.name: FsStreamMockTest_Seek_002
+ * @tc.desc: Test function of FsStream::Seek interface for FAILURE when ftell fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsStreamMockTest, FsStreamSeekTest_0002, testing::ext::TestSize.Level1)
+HWTEST_F(FsStreamMockTest, FsStreamMockTest_Seek_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamSeekTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "r+");
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamMockTest_Seek_002";
+
+    string path = testDir + "/FsStreamMockTest_Seek_002.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
+    auto ret = CreateStreamCore::DoCreateStream(path, "r+");
     ASSERT_TRUE(ret.IsSuccess());
-    auto result = ret.GetData().value();
+    std::unique_ptr<FsStream> stream(ret.GetData().value()); // To smart ptr for auto memory release
+    ASSERT_NE(stream, nullptr);
 
     auto stdioMock = StdioMock::GetMock();
     EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
-    EXPECT_CALL(*stdioMock, ftell(testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*stdioMock, ftell(testing::_)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
-    auto retSk = result->Seek(1);
-    EXPECT_FALSE(retSk.IsSuccess());
+    auto seekRet = stream->Seek(1);
 
-    auto retCs = result->Close();
-    ASSERT_TRUE(retCs.IsSuccess());
+    testing::Mock::VerifyAndClearExpectations(stdioMock.get());
+    EXPECT_FALSE(seekRet.IsSuccess());
+    auto err = seekRet.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+    auto closeRet = stream->Close();
+    ASSERT_TRUE(closeRet.IsSuccess());
 
-    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamSeekTest_0002";
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamMockTest_Seek_002";
 }
 
 /**
- * @tc.name: FsStreamWriteTest_0001
- * @tc.desc: Test function of Write() interface for string fail fseek.
+ * @tc.name: FsStreamMockTest_Write_001
+ * @tc.desc: Test function of FsStream::Write(String) interface for FAILURE when fseek fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0001, testing::ext::TestSize.Level1)
+HWTEST_F(FsStreamMockTest, FsStreamMockTest_Write_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamWriteTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "w+");
-    ASSERT_TRUE(ret.IsSuccess());
-    auto result = ret.GetData().value();
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamMockTest_Write_001";
 
-    auto stdioMock = StdioMock::GetMock();
-    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
-
+    string path = testDir + "/FsStreamMockTest_Write_001.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
     WriteOptions opt;
-    opt.offset = 5;
-    auto retWr = result->Write("FsStreamWriteTest_0001", opt);
-    EXPECT_FALSE(retWr.IsSuccess());
+    opt.offset = 1;
+    auto ret = CreateStreamCore::DoCreateStream(path, "w+");
+    ASSERT_TRUE(ret.IsSuccess());
+    std::unique_ptr<FsStream> stream(ret.GetData().value()); // To smart ptr for auto memory release
+    ASSERT_NE(stream, nullptr);
 
-    auto retCs = result->Close();
-    ASSERT_TRUE(retCs.IsSuccess());
+    auto stdioMock = StdioMock::GetMock();
+    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
-    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamWriteTest_0001";
+    auto writeRet = stream->Write("FsStreamMockTest_Write_001", opt);
+
+    testing::Mock::VerifyAndClearExpectations(stdioMock.get());
+    EXPECT_FALSE(writeRet.IsSuccess());
+    auto err = writeRet.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+    auto closeRet = stream->Close();
+    ASSERT_TRUE(closeRet.IsSuccess());
+
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamMockTest_Write_001";
 }
 
 /**
- * @tc.name: FsStreamWriteTest_0002
- * @tc.desc: Test function of Write() interface for ArrayBuffer fail fseek.
+ * @tc.name: FsStreamMockTest_Write_002
+ * @tc.desc: Test function of FsStream::Write(ArrayBuffer) interface for FAILURE when fseek fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsStreamMockTest, FsStreamWriteTest_0002, testing::ext::TestSize.Level1)
+HWTEST_F(FsStreamMockTest, FsStreamMockTest_Write_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamWriteTest_0002";
-    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "w+");
-    ASSERT_TRUE(ret.IsSuccess());
-    auto result = ret.GetData().value();
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamMockTest_Write_002";
 
-    auto stdioMock = StdioMock::GetMock();
-    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
-
+    string path = testDir + "/FsStreamMockTest_Write_002.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
     WriteOptions opt;
-    opt.offset = 5;
-    string buf = "FsStreamWriteTest_0002";
-    auto retWr = result->Write(ArrayBuffer(static_cast<void *>(buf.data()), buf.length()), opt);
-    EXPECT_FALSE(retWr.IsSuccess());
+    opt.offset = 1;
+    auto ret = CreateStreamCore::DoCreateStream(path, "w+");
+    ASSERT_TRUE(ret.IsSuccess());
+    std::unique_ptr<FsStream> stream(ret.GetData().value()); // To smart ptr for auto memory release
+    ASSERT_NE(stream, nullptr);
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer data(buf, len);
 
-    auto retCs = result->Close();
-    ASSERT_TRUE(retCs.IsSuccess());
+    auto stdioMock = StdioMock::GetMock();
+    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
-    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamWriteTest_0002";
+    auto writeRet = stream->Write(data, opt);
+
+    testing::Mock::VerifyAndClearExpectations(stdioMock.get());
+    EXPECT_FALSE(writeRet.IsSuccess());
+    auto err = writeRet.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+    auto closeRet = stream->Close();
+    ASSERT_TRUE(closeRet.IsSuccess());
+
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamMockTest_Write_002";
 }
 
 /**
- * @tc.name: FsStreamReadTest_0001
- * @tc.desc: Test function of Read() interface for fail fseek.
+ * @tc.name: FsStreamMockTest_Read_001
+ * @tc.desc: TTest function of FsStream::Read interface for FAILURE when fseek fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsStreamMockTest, FsStreamReadTest_0001, testing::ext::TestSize.Level1)
+HWTEST_F(FsStreamMockTest, FsStreamMockTest_Read_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamReadTest_0001";
-    auto ret = CreateStreamCore::DoCreateStream(g_streamFilePath, "r+");
-    ASSERT_TRUE(ret.IsSuccess());
-    auto result = ret.GetData().value();
+    GTEST_LOG_(INFO) << "FsStreamMockTest-begin FsStreamMockTest_Read_001";
 
-    void *buffer = std::malloc(4096);
-    ArrayBuffer arrayBuffer(buffer, 4096);
-
-    auto stdioMock = StdioMock::GetMock();
-    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
-
+    string path = testDir + "/FsStreamMockTest_Read_001.txt";
+    ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
     ReadOptions opt;
-    opt.offset = 5;
-    auto retRd = result->Read(arrayBuffer, opt);
-    EXPECT_FALSE(retRd.IsSuccess());
+    opt.offset = 1;
+    auto ret = CreateStreamCore::DoCreateStream(path, "r+");
+    ASSERT_TRUE(ret.IsSuccess());
+    std::unique_ptr<FsStream> stream(ret.GetData().value()); // To smart ptr for auto memory release
+    ASSERT_NE(stream, nullptr);
+    const size_t len = 10;
+    char buf[len] = { 0 };
+    ArrayBuffer buffer(buf, len);
 
-    free(buffer);
-    auto retCs = result->Close();
-    ASSERT_TRUE(retCs.IsSuccess());
+    auto stdioMock = StdioMock::GetMock();
+    EXPECT_CALL(*stdioMock, fseek(testing::_, testing::_, testing::_)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
-    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamReadTest_0001";
+    auto readRet = stream->Read(buffer, opt);
+
+    testing::Mock::VerifyAndClearExpectations(stdioMock.get());
+    EXPECT_FALSE(readRet.IsSuccess());
+    auto err = readRet.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+    auto closeRet = stream->Close();
+    ASSERT_TRUE(closeRet.IsSuccess());
+
+    GTEST_LOG_(INFO) << "FsStreamMockTest-end FsStreamMockTest_Read_001";
 }
 
-} // namespace Test
-} // namespace ModuleFileIO
-} // namespace FileManagement
-} // namespace OHOS
+} // namespace OHOS::FileManagement::ModuleFileIO::Test

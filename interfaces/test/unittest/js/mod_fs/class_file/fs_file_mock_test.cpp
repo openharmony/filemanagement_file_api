@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 
 #include "file_entity.h"
 #include "sys_file_mock.h"
+#include "ut_file_utils.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -30,15 +31,16 @@ using namespace std;
 
 class FsFileMockTest : public testing::Test {
 public:
-    static void SetUpTestSuite(void);
-    static void TearDownTestSuite(void);
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp();
     void TearDown();
-    std::unique_ptr<FileEntity> fileEntity;
-    std::unique_ptr<FsFile> fsFile;
+
+private:
+    const string testDir = FileUtils::testRootDir + "/FsFileMockTest";
 };
 
-void FsFileMockTest::SetUpTestSuite(void)
+void FsFileMockTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "FsFileMockTest");
@@ -46,34 +48,27 @@ void FsFileMockTest::SetUpTestSuite(void)
     UvFsMock::EnableMock();
 }
 
-void FsFileMockTest::TearDownTestSuite(void)
+void FsFileMockTest::TearDownTestSuite()
 {
     SysFileMock::DisableMock();
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
-void FsFileMockTest::SetUp(void)
+void FsFileMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
-
-    fileEntity = std::make_unique<FileEntity>();
-    const int fdValue = 3;
-    const bool isClosed = false;
-    fileEntity->fd_ = std::make_unique<DistributedFS::FDGuard>(fdValue, isClosed);
-    fileEntity->path_ = "/data/test/file_test.txt";
-    fileEntity->uri_ = "";
-    fsFile = std::make_unique<FsFile>(std::move(fileEntity));
+    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
-void FsFileMockTest::TearDown(void)
+void FsFileMockTest::TearDown()
 {
     GTEST_LOG_(INFO) << "TearDown";
 }
 
 /**
  * @tc.name: FsFileMockTest_GetPath_001
- * @tc.desc: Test function of GetPath() interface for SUCCESS.
+ * @tc.desc: Test function of FsFile::GetPath interface for FAILURE when uv_fs_realpath fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -82,26 +77,28 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_001, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetPath_001";
 
-    uv_fs_t mock_req;
-    mock_req.ptr = const_cast<char *>("/data/test/file_test.txt");
+    auto entity = std::make_unique<FileEntity>();
+    entity->path_ = testDir + "/FsFileMockTest_GetPath_001.txt";
+    entity->uri_ = "";
+    FsFile fsFile(std::move(entity));
 
     auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
-        .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
-            *req = mock_req;
-            return 0;
-        }));
-    auto result = fsFile->GetPath();
+    EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
+
+    auto res = fsFile.GetPath();
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetPath_001";
 }
 
 /**
  * @tc.name: FsFileMockTest_GetPath_002
- * @tc.desc: Test function of GetPath() interface for ERROR.
+ * @tc.desc: Test function of FsFile::GetPath interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -110,320 +107,323 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_002, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetPath_002";
 
-    fsFile->fileEntity->path_ = "/invalid/path";
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
+    auto filepath = testDir + "/FsFileMockTest_GetPath_002.txt";
+    auto entity = std::make_unique<FileEntity>();
+    entity->path_ = filepath;
+    entity->uri_ = "";
+    FsFile fsFile(std::move(entity));
+    uv_fs_t mock_req = {0};
+    mock_req.ptr = static_cast<void*>(filepath.data());
 
-    auto result = fsFile->GetPath();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<1>(mock_req), testing::Return(0)));
+
+    auto res = fsFile.GetPath();
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
+    ASSERT_TRUE(res.IsSuccess());
+    auto path = res.GetData().value();
+    EXPECT_EQ(path, filepath);
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetPath_002";
 }
 
 /**
- * @tc.name: FsFileMockTest_GetName_003
- * @tc.desc: Test function of GetName() interface for ERROR.
+ * @tc.name: FsFileMockTest_GetName_001
+ * @tc.desc: Test function of FsFile::GetName interface for FAILURE when uv_fs_realpath fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_003, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_003";
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_001";
 
-    fsFile->fileEntity->path_ = "/invalid/path";
+    auto entity = std::make_unique<FileEntity>();
+    entity->path_ = testDir + "/FsFileMockTest_GetName_001.txt";
+    entity->uri_ = "";
+    FsFile fsFile(std::move(entity));
+
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
 
-    auto result = fsFile->GetName();
+    auto res = fsFile.GetName();
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_003";
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_001";
 }
 
 /**
- * @tc.name: FsFileMockTest_GetName_004
- * @tc.desc: Test function of GetName() interface for ERROR.
+ * @tc.name: FsFileMockTest_GetName_002
+ * @tc.desc: Test function of FsFile::GetName interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_004, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_004";
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_002";
 
-    fsFile->fileEntity->path_ = "file_test.txt";
+    auto filepath = testDir + "/FsFileMockTest_GetName_002.txt";
+    auto entity = std::make_unique<FileEntity>();
+    entity->path_ = filepath;
+    entity->uri_ = "";
+    FsFile fsFile(std::move(entity));
+    uv_fs_t mock_req = {0};
+    mock_req.ptr = static_cast<void*>(filepath.data());
+
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<1>(mock_req), testing::Return(0)));
+
+    auto res = fsFile.GetName();
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    ASSERT_TRUE(res.IsSuccess());
+    auto path = res.GetData().value();
+    EXPECT_EQ(path, "FsFileMockTest_GetName_002.txt");
+
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_002";
+}
+
+/**
+ * @tc.name: FsFileMockTest_GetParent_001
+ * @tc.desc: Test function of FsFile::GetParent interface for FAILURE when uv_fs_realpath fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_001";
+
+    auto entity = std::make_unique<FileEntity>();
+    entity->path_ = testDir + "/FsFileMockTest_GetParent_001.txt";
+    entity->uri_ = "";
+    FsFile fsFile(std::move(entity));
+
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
 
-    auto result = fsFile->GetName();
+    auto res = fsFile.GetParent();
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900001);
+    EXPECT_EQ(err.GetErrMsg(), "Operation not permitted");
 
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_004";
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetParent_001";
 }
 
 /**
- * @tc.name: FsFileMockTest_GetParent_005
- * @tc.desc: Test function of GetParent() interface for ERROR.
+ * @tc.name: FsFileMockTest_GetParent_002
+ * @tc.desc: Test function of FsFile::GetParent interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_005, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_005";
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_002";
 
-    fsFile->fileEntity->path_ = "/invalid/path";
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
-
-    auto result = fsFile->GetParent();
-
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetParent_005";
-}
-
-/**
- * @tc.name: FsFileMockTest_GetName_006
- * @tc.desc: Test function of GetName() interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_006, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_006";
-
-    uv_fs_t mock_req;
-    mock_req.ptr = const_cast<char *>("/file_test.txt");
+    auto filepath = testDir + "/FsFileMockTest_GetParent_002.txt";
+    auto entity = std::make_unique<FileEntity>();
+    entity->path_ = filepath;
+    entity->uri_ = "";
+    FsFile fsFile(std::move(entity));
+    uv_fs_t mock_req = {0};
+    mock_req.ptr = static_cast<void*>(filepath.data());
 
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
-        .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
-            *req = mock_req;
-            return 0;
-        }));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<1>(mock_req), testing::Return(0)));
 
-    auto result = fsFile->GetName();
+    auto res = fsFile.GetParent();
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
+    ASSERT_TRUE(res.IsSuccess());
+    auto path = res.GetData().value();
+    EXPECT_EQ(path, testDir);
 
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_006";
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetParent_002";
 }
 
 /**
- * @tc.name: FsFileMockTest_GetParent_007
- * @tc.desc: Test function of GetParent() interface for SUCCESS.
+ * @tc.name: FsFileMockTest_Lock_001
+ * @tc.desc: Test function of FsFile::GetParent interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_007, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_007";
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_001";
 
-    uv_fs_t mock_req;
-    mock_req.ptr = const_cast<char *>("/test/dir_test");
-
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
-        .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
-            *req = mock_req;
-            return 0;
-        }));
-
-    auto result = fsFile->GetParent();
-
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetParent_007";
-}
-
-/**
- * @tc.name: FsFileMockTest_GetName_008
- * @tc.desc: Test function of GetName() interface for FALSE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_008, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_008";
-
-    uv_fs_t mock_req;
-    mock_req.ptr = const_cast<char *>("file_test.txt");
-
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
-        .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
-            *req = mock_req;
-            return 0;
-        }));
-
-    auto result = fsFile->GetName();
-
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetName_008";
-}
-
-/**
- * @tc.name: FsFileMockTest_GetParent_009
- * @tc.desc: Test function of GetParent() interface for FALSE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_009, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_009";
-
-    uv_fs_t mock_req;
-    mock_req.ptr = const_cast<char *>("dir_test");
-
-    auto uvMock = UvFsMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _))
-        .WillOnce(Invoke([&](uv_loop_t *, uv_fs_t *req, const char *, uv_fs_cb) {
-            *req = mock_req;
-            return 0;
-        }));
-
-    auto result = fsFile->GetParent();
-
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
-
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetParent_009";
-}
-
-/**
- * @tc.name: FsFileMockTest_Lock_010
- * @tc.desc: Test function of Lock() interface for SUCCESS.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_010, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_010";
-    auto fileMock = SysFileMock::GetMock();
-    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(1));
-    auto result = fsFile->Lock(true);
-    testing::Mock::VerifyAndClearExpectations(fileMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
-
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_Lock_010";
-}
-
-/**
- * @tc.name: FsFileMockTest_Lock_011
- * @tc.desc: Test function of Lock() interface for FALSE.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_011, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_011";
+    auto entity = std::make_unique<FileEntity>();
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
+    entity->path_ = testDir + "/FsFileMockTest_Lock_001.txt";
+    FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
-    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(-1));
-    auto result = fsFile->Lock(false);
-    testing::Mock::VerifyAndClearExpectations(fileMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(0));
 
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_Lock_011";
+    auto res = fsFile.Lock(true);
+
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
+    EXPECT_TRUE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_Lock_001";
 }
 
 /**
- * @tc.name: FsFileMockTest_TryLock_012
- * @tc.desc: Test function of TryLock() interface for SUCCESS.
+ * @tc.name: FsFileMockTest_Lock_002
+ * @tc.desc: Test function of FsFile::Lock interface for FAILURE when flock fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_012, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_012";
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_002";
+
+    auto entity = std::make_unique<FileEntity>();
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
+    entity->path_ = testDir + "/FsFileMockTest_Lock_002.txt";
+    FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
-    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(1));
-    auto result = fsFile->TryLock(true);
-    testing::Mock::VerifyAndClearExpectations(fileMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_TryLock_012";
+    auto res = fsFile.Lock(false);
+
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_Lock_002";
 }
 
 /**
- * @tc.name: FsFileMockTest_TryLock_013
- * @tc.desc: Test function of TryLock() interface for FALSE.
+ * @tc.name: FsFileMockTest_TryLock_001
+ * @tc.desc: Test function of FsFile::TryLock interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_013, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_013";
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_001";
+
+    auto entity = std::make_unique<FileEntity>();
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
+    entity->path_ = testDir + "/FsFileMockTest_TryLock_001.txt";
+    FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
-    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(-1));
-    auto result = fsFile->TryLock(false);
-    testing::Mock::VerifyAndClearExpectations(fileMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(0));
 
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_TryLock_013";
+    auto res = fsFile.TryLock(true);
+
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
+    EXPECT_TRUE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_TryLock_001";
 }
 
 /**
- * @tc.name: FsFileMockTest_UnLock_014
- * @tc.desc: Test function of UnLock() interface for SUCCESS.
+ * @tc.name: FsFileMockTest_TryLock_002
+ * @tc.desc: Test function of FsFile::TryLock interface for FAILURE when flock fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_014, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_014";
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_002";
+
+    auto entity = std::make_unique<FileEntity>();
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
+    entity->path_ = testDir + "/FsFileMockTest_TryLock_002.txt";
+    FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
-    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(1));
-    auto result = fsFile->UnLock();
-    testing::Mock::VerifyAndClearExpectations(fileMock.get());
-    EXPECT_EQ(result.IsSuccess(), true);
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_UnLock_014";
+    auto res = fsFile.TryLock(false);
+
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_TryLock_002";
 }
 
 /**
- * @tc.name: FsFileMockTest_UnLock_015
- * @tc.desc: Test function of UnLock() interface for FALSE.
+ * @tc.name: FsFileMockTest_UnLock_001
+ * @tc.desc: Test function of FsFile::UnLock interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_015, testing::ext::TestSize.Level1)
+HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_015";
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_001";
+
+    auto entity = std::make_unique<FileEntity>();
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
+    entity->path_ = testDir + "/FsFileMockTest_UnLock_001.txt";
+    FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
-    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(-1));
-    auto result = fsFile->UnLock();
-    testing::Mock::VerifyAndClearExpectations(fileMock.get());
-    EXPECT_EQ(result.IsSuccess(), false);
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(Return(0));
 
-    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_UnLock_015";
+    auto res = fsFile.UnLock();
+
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
+    EXPECT_TRUE(res.IsSuccess());
+
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_UnLock_001";
+}
+
+/**
+ * @tc.name: FsFileMockTest_UnLock_002
+ * @tc.desc: Test function of FsFile::UnLock interface for FAILURE when flock fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_002";
+
+    auto entity = std::make_unique<FileEntity>();
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
+    entity->path_ = testDir + "/FsFileMockTest_UnLock_002.txt";
+    FsFile fsFile(std::move(entity));
+
+    auto fileMock = SysFileMock::GetMock();
+    EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
+
+    auto res = fsFile.UnLock();
+
+    testing::Mock::VerifyAndClearExpectations(fileMock.get());
+    EXPECT_FALSE(res.IsSuccess());
+    auto err = res.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_UnLock_002";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
