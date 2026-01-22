@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License") = 0;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,31 +16,32 @@
 #ifndef INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_IPC_SKELETON_MOCK_H
 #define INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_IPC_SKELETON_MOCK_H
 
-#include <gmock/gmock.h>
-
-#include "ipc_skeleton.h"
 #include "os_account_manager.h"
 
-using ErrCode = int;
+#include <gmock/gmock.h>
 
-namespace OHOS::FileManagement::Backup {
-class BIPCSkeleton : public RefBase {
+namespace OHOS::FileManagement::ModuleEnvironment::Test {
+
+class IOsAccountManagerMock {
 public:
-    virtual uint32_t GetCallingTokenID() = 0;
+    virtual ~IOsAccountManagerMock() = default;
     virtual ErrCode GetOsAccountShortName(std::string &shortName) = 0;
-
-public:
-    BIPCSkeleton() = default;
-    virtual ~BIPCSkeleton() = default;
-
-public:
-    static inline std::shared_ptr<BIPCSkeleton> skeleton = nullptr;
 };
 
-class IPCSkeletonMock : public BIPCSkeleton {
+class OsAccountManagerMock : public IOsAccountManagerMock {
 public:
-    MOCK_METHOD(uint32_t, GetCallingTokenID, ());
-    MOCK_METHOD(ErrCode, GetOsAccountShortName, (std::string & shortName));
+    MOCK_METHOD(ErrCode, GetOsAccountShortName, (std::string &), (override));
+
+public:
+    static std::shared_ptr<OsAccountManagerMock> GetMock();
+    static void EnableMock();
+    static void DisableMock();
+    static bool IsMockable();
+
+private:
+    static thread_local std::shared_ptr<OsAccountManagerMock> accountManagerMock;
+    static thread_local bool mockable;
 };
-} // namespace OHOS::FileManagement::Backup
+
+} // namespace OHOS::FileManagement::ModuleEnvironment::Test
 #endif // INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_IPC_SKELETON_MOCK_H

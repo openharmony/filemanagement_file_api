@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,7 +55,7 @@ bool DfsMock::IsMockable()
 } // namespace OHOS
 
 namespace OHOS::Storage::DistributedFile {
-using namespace OHOS::FileManagement::ModuleFileIO::Test;
+using DfsMock = OHOS::FileManagement::ModuleFileIO::Test::DfsMock;
 
 DistributedFileDaemonManager &DistributedFileDaemonManager::GetInstance()
 {
@@ -64,7 +64,7 @@ DistributedFileDaemonManager &DistributedFileDaemonManager::GetInstance()
     }
 
     static DistributedFileDaemonManager &(*realDfsGetInstance)() = []() {
-        auto func = (DistributedFileDaemonManager &(*)())
+        auto func = (DistributedFileDaemonManager & (*)())
             dlsym(RTLD_NEXT, "_ZN4OHOS7Storage15DistributedFile28DistributedFileDaemonManager11GetInstanceEv");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real DistributedFileDaemonManager::GetInstance: " << dlerror();

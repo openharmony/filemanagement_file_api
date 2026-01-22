@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ bool FdsanMock::IsMockable()
 
 #ifdef __cplusplus
 extern "C" {
-using namespace OHOS::FileManagement::ModuleFileIO::Test;
+using FdsanMock = OHOS::FileManagement::ModuleFileIO::Test::FdsanMock;
 
 uint64_t fdsan_get_owner_tag(int fd)
 {
@@ -59,7 +59,7 @@ uint64_t fdsan_get_owner_tag(int fd)
     }
 
     static uint64_t (*realFdsanGetOwnerTag)(int) = []() {
-        auto func = (uint64_t (*)(int))dlsym(RTLD_NEXT, "fdsan_get_owner_tag");
+        auto func = (uint64_t(*)(int))dlsym(RTLD_NEXT, "fdsan_get_owner_tag");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real fdsan_get_owner_tag: " << dlerror();
         }

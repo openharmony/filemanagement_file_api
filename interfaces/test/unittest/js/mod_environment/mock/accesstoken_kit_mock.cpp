@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,69 @@
 
 #include "accesstoken_kit_mock.h"
 
-namespace OHOS::Security::AccessToken {
+#include <dlfcn.h>
 
-bool TokenIdKit::IsSystemAppByFullTokenID(uint64_t tokenId)
+namespace OHOS {
+namespace FileManagement {
+namespace ModuleEnvironment {
+namespace Test {
+
+thread_local std::shared_ptr<AccessTokenKitMock> AccessTokenKitMock::accessTokenKitMock = nullptr;
+thread_local bool AccessTokenKitMock::mockable = false;
+
+std::shared_ptr<AccessTokenKitMock> AccessTokenKitMock::GetMock()
 {
-    return OHOS::FileManagement::Backup::BAccessTokenKit::token->IsSystemAppByFullTokenID(tokenId);
+    if (accessTokenKitMock == nullptr) {
+        accessTokenKitMock = std::make_shared<AccessTokenKitMock>();
+    }
+    return accessTokenKitMock;
 }
+
+void AccessTokenKitMock::EnableMock()
+{
+    mockable = true;
+}
+
+void AccessTokenKitMock::DisableMock()
+{
+    accessTokenKitMock = nullptr;
+    mockable = false;
+}
+
+bool AccessTokenKitMock::IsMockable()
+{
+    return mockable;
+}
+
+} // namespace Test
+} // namespace ModuleEnvironment
+} // namespace FileManagement
+} // namespace OHOS
+
+namespace OHOS::Security::AccessToken {
+using AccessTokenKitMock = OHOS::FileManagement::ModuleEnvironment::Test::AccessTokenKitMock;
 
 int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string &permissionName)
 {
-    return OHOS::FileManagement::Backup::BAccessTokenKit::token->VerifyAccessToken(tokenID, permissionName);
+    if (AccessTokenKitMock::IsMockable()) {
+        return AccessTokenKitMock::GetMock()->VerifyAccessToken(tokenID, permissionName);
+    }
+
+    static int (*realVerifyAccessToken)(AccessTokenID, const std::string &) = []() {
+        auto func = (int (*)(AccessTokenID, const std::string &))dlsym(RTLD_NEXT,
+            "_ZN4OHOS8Security11AccessToken14AccessTokenKit17VerifyAccessTokenEjRKNSt3__h12basic_"
+            "stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real AccessTokenKit::VerifyAccessToken: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realVerifyAccessToken) {
+        return -1;
+    }
+
+    return realVerifyAccessToken(tokenID, permissionName);
 }
+
 } // namespace OHOS::Security::AccessToken

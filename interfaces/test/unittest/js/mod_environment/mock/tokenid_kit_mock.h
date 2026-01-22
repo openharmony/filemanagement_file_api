@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,35 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_PARAMETER_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_PARAMETER_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_TOKENID_KIT_MOCK_H
+#define INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_TOKENID_KIT_MOCK_H
 
-#include "parameter.h"
+#include "tokenid_kit.h"
 
 #include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleEnvironment::Test {
 
-class IParameterMock {
+class ITokenIdKitMock {
 public:
-    virtual ~IParameterMock() = default;
-    virtual int GetParameter(const char *key, const char *def, char *value, uint32_t len) = 0;
+    virtual ~ITokenIdKitMock() = default;
+    virtual bool IsSystemAppByFullTokenID(uint64_t tokenId) = 0;
 };
 
-class ParameterMock : public IParameterMock {
+class TokenIdKitMock : public ITokenIdKitMock {
 public:
-    MOCK_METHOD(int, GetParameter, (const char *, const char *, char *, uint32_t), (override));
+    MOCK_METHOD(bool, IsSystemAppByFullTokenID, (uint64_t), (override));
 
 public:
-    static std::shared_ptr<ParameterMock> GetMock();
+    static std::shared_ptr<TokenIdKitMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<ParameterMock> parameterMock;
+    static thread_local std::shared_ptr<TokenIdKitMock> tokenIdKitMock;
     static thread_local bool mockable;
 };
 
 } // namespace OHOS::FileManagement::ModuleEnvironment::Test
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_PARAMETER_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_TOKENID_KIT_MOCK_H

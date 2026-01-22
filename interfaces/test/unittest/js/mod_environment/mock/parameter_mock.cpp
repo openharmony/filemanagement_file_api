@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,69 @@
 
 #include "parameter_mock.h"
 
-#include "parameter.h"
+#include <dlfcn.h>
 
-using namespace OHOS::AppFileService;
+namespace OHOS {
+namespace FileManagement {
+namespace ModuleEnvironment {
+namespace Test {
+
+thread_local std::shared_ptr<ParameterMock> ParameterMock::parameterMock = nullptr;
+thread_local bool ParameterMock::mockable = false;
+
+std::shared_ptr<ParameterMock> ParameterMock::GetMock()
+{
+    if (parameterMock == nullptr) {
+        parameterMock = std::make_shared<ParameterMock>();
+    }
+    return parameterMock;
+}
+
+void ParameterMock::EnableMock()
+{
+    mockable = true;
+}
+
+void ParameterMock::DisableMock()
+{
+    parameterMock = nullptr;
+    mockable = false;
+}
+
+bool ParameterMock::IsMockable()
+{
+    return mockable;
+}
+
+} // namespace Test
+} // namespace ModuleEnvironment
+} // namespace FileManagement
+} // namespace OHOS
+
+#ifdef __cplusplus
+extern "C" {
+using ParameterMock = OHOS::FileManagement::ModuleEnvironment::Test::ParameterMock;
+
 int GetParameter(const char *key, const char *def, char *value, uint32_t len)
 {
-    if (IParamMoc::paramMoc == nullptr) {
+    if (ParameterMock::IsMockable()) {
+        return ParameterMock::GetMock()->GetParameter(key, def, value, len);
+    }
+
+    static int (*realGetParameter)(const char *, const char *, char *, uint32_t) = []() {
+        auto func = (int (*)(const char *, const char *, char *, uint32_t))dlsym(RTLD_NEXT, "GetParameter");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real GetParameter: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realGetParameter) {
         return -1;
     }
-    return IParamMoc::paramMoc->GetParameter(key, def, value, len);
+
+    return realGetParameter(key, def, value, len);
 }
+
+} // extern "C"
+#endif

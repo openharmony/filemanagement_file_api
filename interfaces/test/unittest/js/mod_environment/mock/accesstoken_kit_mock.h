@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License") = 0;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,27 +16,33 @@
 #ifndef INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_ACCESSTOKEN_KIT_MOCK_H
 #define INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_ACCESSTOKEN_KIT_MOCK_H
 
+#include "accesstoken_kit.h"
+
 #include <gmock/gmock.h>
 
-#include "accesstoken_kit.h"
 #include "tokenid_kit.h"
 
-namespace OHOS::FileManagement::Backup {
-class BAccessTokenKit {
+namespace OHOS::FileManagement::ModuleEnvironment::Test {
+using AccessTokenID = OHOS::Security::AccessToken::AccessTokenID;
+class IAccessTokenKitMock {
 public:
-    virtual bool IsSystemAppByFullTokenID(uint64_t) = 0;
-    virtual int VerifyAccessToken(Security::AccessToken::AccessTokenID, const std::string &) = 0;
-
-    BAccessTokenKit() = default;
-    virtual ~BAccessTokenKit() = default;
-
-    static inline std::shared_ptr<BAccessTokenKit> token = nullptr;
+    virtual ~IAccessTokenKitMock() = default;
+    virtual int VerifyAccessToken(AccessTokenID tokenID, const std::string &permissionName) = 0;
 };
 
-class AccessTokenKitMock : public BAccessTokenKit {
+class AccessTokenKitMock : public IAccessTokenKitMock {
 public:
-    MOCK_METHOD(bool, IsSystemAppByFullTokenID, (uint64_t));
-    MOCK_METHOD(int, VerifyAccessToken, (Security::AccessToken::AccessTokenID, const std::string &));
+    MOCK_METHOD(int, VerifyAccessToken, (AccessTokenID, const std::string &));
+
+public:
+    static std::shared_ptr<AccessTokenKitMock> GetMock();
+    static void EnableMock();
+    static void DisableMock();
+    static bool IsMockable();
+
+private:
+    static thread_local std::shared_ptr<AccessTokenKitMock> accessTokenKitMock;
+    static thread_local bool mockable;
 };
-} // namespace OHOS::FileManagement::Backup
+} // namespace OHOS::FileManagement::ModuleEnvironment::Test
 #endif // INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_ACCESSTOKEN_KIT_MOCK_H
