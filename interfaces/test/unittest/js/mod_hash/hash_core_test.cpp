@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include <fcntl.h>
+#include "hash_core.h"
+
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
-#include <unistd.h>
-#include "hash_core.h"
+
 #include "ut_file_utils.h"
 
 namespace OHOS {
@@ -25,6 +25,11 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 using namespace std;
+namespace {
+const int MD5_HASH_LENGTH = 32;
+const int SHA1_HASH_LENGTH = 40;
+const int SHA256_HASH_LENGTH = 64;
+} // namespace
 
 class HashCoreTest : public testing::Test {
 public:
@@ -34,9 +39,6 @@ public:
     void TearDown();
 
 private:
-    const int MD5_HASH_LENGTH = 32;
-    const int SHA1_HASH_LENGTH = 40;
-    const int SHA256_HASH_LENGTH = 64;
     const string testDir = FileUtils::testRootDir + "/HashCoreTest";
 };
 

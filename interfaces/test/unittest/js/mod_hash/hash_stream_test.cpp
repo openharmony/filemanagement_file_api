@@ -13,30 +13,28 @@
  * limitations under the License.
  */
 
-#include <fcntl.h>
+#include "hs_hashstream.h"
+
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
-#include <unistd.h>
-#include "hs_hashstream.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace Test {
 using namespace std;
+namespace {
+const int MD5_HASH_LENGTH = 32;
+const int SHA1_HASH_LENGTH = 40;
+const int SHA256_HASH_LENGTH = 64;
+} // namespace
 
-static const string g_filePath = "/data/test/HashStreamTest.txt";
 class HashStreamTest : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void SetUp();
     void TearDown();
-
-private:
-    const int MD5_HASH_LENGTH = 32;
-    const int SHA1_HASH_LENGTH = 40;
-    const int SHA256_HASH_LENGTH = 64;
 };
 
 void HashStreamTest::SetUpTestSuite()

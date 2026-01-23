@@ -28,9 +28,6 @@ namespace Test {
 using namespace std;
 using FileUtils = OHOS::FileManagement::ModuleFileIO::Test::FileUtils;
 
-static const string g_filePath = "/data/test/SecurityLabelCoreTest.txt";
-static const string g_validFilePath = "/data/test/validFilePath";
-
 class SecurityLabelCoreTest : public testing::Test {
 public:
     static void SetUpTestSuite();

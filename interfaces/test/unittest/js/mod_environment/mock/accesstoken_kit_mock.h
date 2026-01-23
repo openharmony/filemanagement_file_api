@@ -20,10 +20,9 @@
 
 #include <gmock/gmock.h>
 
-#include "tokenid_kit.h"
-
 namespace OHOS::FileManagement::ModuleEnvironment::Test {
 using AccessTokenID = OHOS::Security::AccessToken::AccessTokenID;
+
 class IAccessTokenKitMock {
 public:
     virtual ~IAccessTokenKitMock() = default;
@@ -44,5 +43,6 @@ private:
     static thread_local std::shared_ptr<AccessTokenKitMock> accessTokenKitMock;
     static thread_local bool mockable;
 };
+
 } // namespace OHOS::FileManagement::ModuleEnvironment::Test
 #endif // INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_ACCESSTOKEN_KIT_MOCK_H

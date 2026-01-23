@@ -64,7 +64,7 @@ DistributedFileDaemonManager &DistributedFileDaemonManager::GetInstance()
     }
 
     static DistributedFileDaemonManager &(*realDfsGetInstance)() = []() {
-        auto func = (DistributedFileDaemonManager & (*)())
+        auto func = (DistributedFileDaemonManager &(*)())
             dlsym(RTLD_NEXT, "_ZN4OHOS7Storage15DistributedFile28DistributedFileDaemonManager11GetInstanceEv");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real DistributedFileDaemonManager::GetInstance: " << dlerror();

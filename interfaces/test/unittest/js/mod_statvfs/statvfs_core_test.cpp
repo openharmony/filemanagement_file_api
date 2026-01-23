@@ -108,17 +108,17 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetFreeSize_002, testing::ext::TestS
 }
 
 /**
- * @tc.name: StatvFsCoreTest_DoGetTotalSize_003
+ * @tc.name: StatvFsCoreTest_DoGetTotalSize_001
  * @tc.desc: Test function of StatvfsCore::DoGetTotalSize interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_003, testing::ext::TestSize.Level1)
+HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "StatvFsCoreTest-begin StatvFsCoreTest_DoGetTotalSize_003";
+    GTEST_LOG_(INFO) << "StatvFsCoreTest-begin StatvFsCoreTest_DoGetTotalSize_001";
 
-    auto path = testDir + "/StatvFsCoreTest_DoGetTotalSize_003.txt";
+    auto path = testDir + "/StatvFsCoreTest_DoGetTotalSize_001.txt";
     ASSERT_TRUE(FileUtils::CreateFile(path));
 
     auto ret = StatvfsCore::DoGetTotalSize(path);
@@ -127,21 +127,21 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_003, testing::ext::Test
     auto size = ret.GetData().value();
     EXPECT_GT(size, 0);
 
-    GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetTotalSize_003";
+    GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetTotalSize_001";
 }
 
 /**
- * @tc.name: StatvFsCoreTest_DoGetTotalSize_004
+ * @tc.name: StatvFsCoreTest_DoGetTotalSize_002
  * @tc.desc: Test function of StatvfsCore::DoGetTotalSize interface for FAILURE when file not exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_004, testing::ext::TestSize.Level1)
+HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "StatvFsCoreTest-begin StatvFsCoreTest_DoGetTotalSize_004";
+    GTEST_LOG_(INFO) << "StatvFsCoreTest-begin StatvFsCoreTest_DoGetTotalSize_002";
 
-    auto path = testDir + "/StatvFsCoreTest_DoGetTotalSize_004_non_existent.txt";
+    auto path = testDir + "/StatvFsCoreTest_DoGetTotalSize_002_non_existent.txt";
 
     auto ret = StatvfsCore::DoGetTotalSize(path);
 
@@ -150,7 +150,7 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_004, testing::ext::Test
     EXPECT_EQ(err.GetErrNo(), 13900002);
     EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
-    GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetTotalSize_004";
+    GTEST_LOG_(INFO) << "StatvFsCoreTest-end StatvFsCoreTest_DoGetTotalSize_002";
 }
 
 } // namespace OHOS::FileManagement::ModuleStatvfs::Test
