@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License") = 0;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,35 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_PARAMETER_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_PARAMETER_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_OS_ACCOUNT_MANAGER_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_OS_ACCOUNT_MANAGER_MOCK_H
 
-#include "parameter.h"
+#include "os_account_manager.h"
 
 #include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleEnvironment::Test {
 
-class IParameterMock {
+class IOsAccountManagerMock {
 public:
-    virtual ~IParameterMock() = default;
-    virtual int GetParameter(const char *key, const char *def, char *value, uint32_t len) = 0;
+    virtual ~IOsAccountManagerMock() = default;
+    virtual ErrCode GetOsAccountShortName(std::string &shortName) = 0;
 };
 
-class ParameterMock : public IParameterMock {
+class OsAccountManagerMock : public IOsAccountManagerMock {
 public:
-    MOCK_METHOD(int, GetParameter, (const char *, const char *, char *, uint32_t), (override));
+    MOCK_METHOD(ErrCode, GetOsAccountShortName, (std::string &), (override));
 
 public:
-    static std::shared_ptr<ParameterMock> GetMock();
+    static std::shared_ptr<OsAccountManagerMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<ParameterMock> parameterMock;
+    static thread_local std::shared_ptr<OsAccountManagerMock> accountManagerMock;
     static thread_local bool mockable;
 };
 
 } // namespace OHOS::FileManagement::ModuleEnvironment::Test
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_PARAMETER_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_OS_ACCOUNT_MANAGER_MOCK_H

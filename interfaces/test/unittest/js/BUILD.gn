@@ -32,17 +32,17 @@ ohos_unittest("ani_file_environment_test") {
     "${file_api_path}/interfaces/kits/js/src/common",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper",
     "${file_api_path}/interfaces/kits/js/src/mod_fs",
-    "${file_api_path}/interfaces/test/unittest/js/mod_environment/mock",
+    "${file_api_path}/interfaces/test/unittest/common_mock",
     "${src_path}/mod_environment",
     "${src_path}/mod_environment/ani",
   ]
 
   sources = [
+    "${file_api_path}/interfaces/test/unittest/common_mock/accesstoken_kit_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/os_account_manager_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/parameter_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/tokenid_kit_mock.cpp",
     "mod_environment/environment_core_mock_test.cpp",
-    "mod_environment/mock/accesstoken_kit_mock.cpp",
-    "mod_environment/mock/os_account_manager_mock.cpp",
-    "mod_environment/mock/parameter_mock.cpp",
-    "mod_environment/mock/tokenid_kit_mock.cpp",
   ]
   sources += ani_file_environment_core
 

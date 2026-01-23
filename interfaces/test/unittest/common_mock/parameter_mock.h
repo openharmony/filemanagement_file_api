@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License") = 0;
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,36 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_ACCESSTOKEN_KIT_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_ACCESSTOKEN_KIT_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_PARAMETER_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_PARAMETER_MOCK_H
 
-#include "accesstoken_kit.h"
+#include "parameter.h"
 
 #include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleEnvironment::Test {
-using AccessTokenID = OHOS::Security::AccessToken::AccessTokenID;
 
-class IAccessTokenKitMock {
+class IParameterMock {
 public:
-    virtual ~IAccessTokenKitMock() = default;
-    virtual int VerifyAccessToken(AccessTokenID tokenID, const std::string &permissionName) = 0;
+    virtual ~IParameterMock() = default;
+    virtual int GetParameter(const char *key, const char *def, char *value, uint32_t len) = 0;
 };
 
-class AccessTokenKitMock : public IAccessTokenKitMock {
+class ParameterMock : public IParameterMock {
 public:
-    MOCK_METHOD(int, VerifyAccessToken, (AccessTokenID, const std::string &));
+    MOCK_METHOD(int, GetParameter, (const char *, const char *, char *, uint32_t), (override));
 
 public:
-    static std::shared_ptr<AccessTokenKitMock> GetMock();
+    static std::shared_ptr<ParameterMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<AccessTokenKitMock> accessTokenKitMock;
+    static thread_local std::shared_ptr<ParameterMock> parameterMock;
     static thread_local bool mockable;
 };
 
 } // namespace OHOS::FileManagement::ModuleEnvironment::Test
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_ACCESSTOKEN_KIT_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_PARAMETER_MOCK_H

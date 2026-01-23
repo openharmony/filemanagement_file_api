@@ -13,35 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_OS_ACCOUNT_MANAGER_MOCK_H
-#define INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_OS_ACCOUNT_MANAGER_MOCK_H
+#ifndef INTERFACES_TEST_UNITTEST_COMMON_MOCK_ACCESSTOKEN_KIT_MOCK_H
+#define INTERFACES_TEST_UNITTEST_COMMON_MOCK_ACCESSTOKEN_KIT_MOCK_H
 
-#include "os_account_manager.h"
+#include "accesstoken_kit.h"
 
 #include <gmock/gmock.h>
 
 namespace OHOS::FileManagement::ModuleEnvironment::Test {
+using AccessTokenID = OHOS::Security::AccessToken::AccessTokenID;
 
-class IOsAccountManagerMock {
+class IAccessTokenKitMock {
 public:
-    virtual ~IOsAccountManagerMock() = default;
-    virtual ErrCode GetOsAccountShortName(std::string &shortName) = 0;
+    virtual ~IAccessTokenKitMock() = default;
+    virtual int VerifyAccessToken(AccessTokenID tokenID, const std::string &permissionName) = 0;
 };
 
-class OsAccountManagerMock : public IOsAccountManagerMock {
+class AccessTokenKitMock : public IAccessTokenKitMock {
 public:
-    MOCK_METHOD(ErrCode, GetOsAccountShortName, (std::string &), (override));
+    MOCK_METHOD(int, VerifyAccessToken, (AccessTokenID, const std::string &));
 
 public:
-    static std::shared_ptr<OsAccountManagerMock> GetMock();
+    static std::shared_ptr<AccessTokenKitMock> GetMock();
     static void EnableMock();
     static void DisableMock();
     static bool IsMockable();
 
 private:
-    static thread_local std::shared_ptr<OsAccountManagerMock> accountManagerMock;
+    static thread_local std::shared_ptr<AccessTokenKitMock> accessTokenKitMock;
     static thread_local bool mockable;
 };
 
 } // namespace OHOS::FileManagement::ModuleEnvironment::Test
-#endif // INTERFACES_TEST_UNITTEST_JS_MOD_ENVIRONMENT_MOCK_OS_ACCOUNT_MANAGER_MOCK_H
+#endif // INTERFACES_TEST_UNITTEST_COMMON_MOCK_ACCESSTOKEN_KIT_MOCK_H
