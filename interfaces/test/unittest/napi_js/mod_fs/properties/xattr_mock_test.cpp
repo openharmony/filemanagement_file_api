@@ -17,6 +17,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <securec.h>
 #include <sys/prctl.h>
 
 #include "libn_mock.h"
@@ -100,14 +101,14 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_002, TestSize.Level1)
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
 
-    const char *initStr = "hello world";
+    const char *initStr = "XattrMockTest_SetXattr_Sync_002";
     size_t strLen = strlen(initStr) + 1;
     auto strPtr = make_unique<char[]>(strLen);
     ASSERT_NE(strPtr, nullptr);
     auto ret = strncpy_s(strPtr.get(), strLen, initStr, strLen - 1);
     ASSERT_EQ(ret, EOK);
 
-    tuple<bool, std::unique_ptr<char[]>, size_t> toUtfPath = { false, move(strPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { false, move(strPtr), 1 };
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
@@ -137,7 +138,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_003, TestSize.Level1)
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
 
-    const char *initStr = "hello world";
+    const char *initStr = "XattrMockTest_SetXattr_Sync_003";
     size_t strLen = strlen(initStr) + 1;
     auto strPathPtr = make_unique<char[]>(strLen);
     ASSERT_NE(strPathPtr, nullptr);
@@ -149,8 +150,8 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_003, TestSize.Level1)
     ret = strncpy_s(strPtr.get(), strLen, initStr, strLen - 1);
     ASSERT_EQ(ret, EOK);
 
-    tuple<bool, std::unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
-    tuple<bool, std::unique_ptr<char[]>, size_t> toUtfRes = { false, move(strPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { false, move(strPtr), 1 };
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
@@ -182,7 +183,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_004, TestSize.Level1)
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
 
-    const char *initStr = "hello world";
+    const char *initStr = "XattrMockTest_SetXattr_Sync_004";
     size_t strLen = strlen(initStr) + 1;
 
     auto strPathPtr = make_unique<char[]>(strLen);
@@ -200,9 +201,9 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_004, TestSize.Level1)
     ret = strncpy_s(valPtr.get(), strLen, initStr, strLen - 1);
     ASSERT_EQ(ret, EOK);
 
-    tuple<bool, std::unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
-    tuple<bool, std::unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
-    tuple<bool, std::unique_ptr<char[]>, size_t> toValUtfRes = { false, move(valPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toValUtfRes = { false, move(valPtr), 1 };
 
 
     auto libnMock = LibnMock::GetMock();
@@ -235,7 +236,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_005, TestSize.Level1)
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
 
-    const char *initStr = "hello world";
+    const char *initStr = "XattrMockTest_SetXattr_Sync_005";
     size_t strLen = strlen(initStr) + 1;
 
     auto strPathPtr = make_unique<char[]>(strLen);
@@ -253,9 +254,9 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_005, TestSize.Level1)
     ret = strncpy_s(valPtr.get(), strLen, initStr, strLen - 1);
     ASSERT_EQ(ret, EOK);
 
-    tuple<bool, std::unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
-    tuple<bool, std::unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
-    tuple<bool, std::unique_ptr<char[]>, size_t> toValUtfRes = { true, move(valPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toValUtfRes = { true, move(valPtr), 1 };
 
 
     auto libnMock = LibnMock::GetMock();
@@ -270,6 +271,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_005, TestSize.Level1)
     auto res = Xattr::SetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_005";
@@ -310,9 +312,9 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_006, TestSize.Level1)
     ret = strncpy_s(valPtr.get(), strLen, initStr, strLen - 1);
     ASSERT_EQ(ret, EOK);
 
-    tuple<bool, std::unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
-    tuple<bool, std::unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
-    tuple<bool, std::unique_ptr<char[]>, size_t> toValUtfRes = { true, move(valPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toValUtfRes = { true, move(valPtr), 1 };
 
 
     auto libnMock = LibnMock::GetMock();
@@ -322,7 +324,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_006, TestSize.Level1)
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes))).WillOnce(Return(move(toValUtfRes)));
     EXPECT_CALL(*xattrMock, setxattr(_, _, _, _, _)).WillOnce(Return(0));
-   EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
 
     auto res = Xattr::SetSync(env, mInfo);
 
