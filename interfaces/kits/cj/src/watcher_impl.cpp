@@ -43,11 +43,13 @@ bool FileWatcherManager::InitNotify()
         LOGE("Failed to init notify errCode:%{public}d", errno);
         return false;
     }
+    fdsan_exchange_owner_tag(notifyFd_, 0, CJ_FILE_FDSAN_TAG);
     eventFd_ = eventfd(0, EFD_CLOEXEC);
     if (eventFd_ < 0) {
         LOGE("Failed to init eventfd errCode:%{public}d", errno);
         return false;
     }
+    fdsan_exchange_owner_tag(eventFd_, 0, CJ_FILE_FDSAN_TAG);
     return true;
 }
 
@@ -241,12 +243,12 @@ int FileWatcherManager::CloseNotifyFd()
 {
     int closeRet = SUCCESS_CODE;
     if (watcherInfoSet_.size() == 0) {
-        closeRet = close(notifyFd_);
+        closeRet = fdsan_close_with_tag(notifyFd_, CJ_FILE_FDSAN_TAG);
         if (closeRet != 0) {
             LOGE("Failed to stop notify close fd errCode:%{public}d", closeRet);
         }
         notifyFd_ = -1;
-        closeRet = close(eventFd_);
+        closeRet = fdsan_close_with_tag(eventFd_, CJ_FILE_FDSAN_TAG);
         if (closeRet != 0) {
             LOGE("Failed to close eventfd errCode:%{public}d", closeRet);
         }
