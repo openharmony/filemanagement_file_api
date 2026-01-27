@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,8 @@ public:
     virtual napi_status napi_delete_reference(napi_env env, napi_ref ref) = 0;
     virtual napi_status napi_get_reference_value(napi_env env, napi_ref ref, napi_value *result) = 0;
     virtual napi_status napi_typeof(napi_env env, napi_value value, napi_valuetype *result) = 0;
-    virtual napi_value InstantiateClass(napi_env env, const std::string &className, const std::vector<napi_value> &args) = 0;
+    virtual napi_value InstantiateClass(
+        napi_env env, const std::string &className, const std::vector<napi_value> &args) = 0;
 
     // n_error
     virtual void ThrowErr(napi_env env) = 0;
@@ -87,7 +88,8 @@ public:
     MOCK_METHOD(napi_status, napi_delete_reference, (napi_env, napi_ref), (override));
     MOCK_METHOD(napi_status, napi_get_reference_value, (napi_env, napi_ref, napi_value *), (override));
     MOCK_METHOD(napi_status, napi_typeof, (napi_env, napi_value, napi_valuetype *), (override));
-    MOCK_METHOD(napi_value, InstantiateClass, (napi_env, const std::string&, const std::vector<napi_value>&), (override));
+    MOCK_METHOD(
+        napi_value, InstantiateClass, (napi_env, const std::string&, const std::vector<napi_value>&), (override));
 
     MOCK_METHOD(void, ThrowErr, (napi_env), (override));
     MOCK_METHOD(void, ThrowErr, (napi_env, int), (override));

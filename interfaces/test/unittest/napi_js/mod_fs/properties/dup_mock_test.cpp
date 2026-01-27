@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,9 @@
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace std;
 
-class DupTest : public testing::Test {
+static const int INVALID_FD = 65536;
+
+class DupMockTest : public testing::Test {
 public:
     static void SetUpTestSuite(void);
     static void TearDownTestSuite(void);
@@ -37,18 +39,18 @@ public:
     void TearDown();
 };
 
-void DupTest::SetUpTestSuite(void)
+void DupMockTest::SetUpTestSuite(void)
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
-    prctl(PR_SET_NAME, "DupTest");
+    prctl(PR_SET_NAME, "DupMockTest");
 }
 
-void DupTest::TearDownTestSuite(void)
+void DupMockTest::TearDownTestSuite(void)
 {
     GTEST_LOG_(INFO) << "TearDownTestSuite";
 }
 
-void DupTest::SetUp(void)
+void DupMockTest::SetUp(void)
 {
     GTEST_LOG_(INFO) << "SetUp";
     LibnMock::EnableMock();
@@ -56,7 +58,7 @@ void DupTest::SetUp(void)
     errno = 0;
 }
 
-void DupTest::TearDown(void)
+void DupMockTest::TearDown(void)
 {
     LibnMock::DisableMock();
     UvFsMock::DisableMock();
@@ -64,15 +66,15 @@ void DupTest::TearDown(void)
 }
 
 /**
- * @tc.name: DupTest_Sync_001
- * @tc.desc: Test function of DupTest::Sync interface for FAILED with ARGS ERROR.
+ * @tc.name: DupMockTest_Sync_001
+ * @tc.desc: Test function of Dup::Sync interface for FAILED with ARGS ERROR.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(DupTest, DupTest_Sync_001, testing::ext::TestSize.Level1)
+HWTEST_F(DupMockTest, DupMockTest_Sync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DupTest-begin DupTest_Sync_001";
+    GTEST_LOG_(INFO) << "DupMockTest-begin DupMockTest_Sync_001";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
@@ -84,19 +86,19 @@ HWTEST_F(DupTest, DupTest_Sync_001, testing::ext::TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_EQ(res, nullptr);
 
-    GTEST_LOG_(INFO) << "DupTest-end DupTest_Sync_001";
+    GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_001";
 }
 
 /**
- * @tc.name: DupTest_Sync_002
- * @tc.desc: Test function of DupTest::Sync interface for FAILED with ToInt32 ERROR.
+ * @tc.name: DupMockTest_Sync_002
+ * @tc.desc: Test function of Dup::Sync interface for FAILED with ToInt32 ERROR.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(DupTest, DupTest_Sync_002, testing::ext::TestSize.Level1)
+HWTEST_F(DupMockTest, DupMockTest_Sync_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DupTest-begin DupTest_Sync_002";
+    GTEST_LOG_(INFO) << "DupMockTest-begin DupMockTest_Sync_002";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     tuple<bool, int> isFd = { false, 1 };
@@ -110,22 +112,22 @@ HWTEST_F(DupTest, DupTest_Sync_002, testing::ext::TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_EQ(res, nullptr);
 
-    GTEST_LOG_(INFO) << "DupTest-end DupTest_Sync_002";
+    GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_002";
 }
 
 /**
- * @tc.name: DupTest_Sync_003
- * @tc.desc: Test function of DupTest::Sync interface for FAILED with dup ERROR.
+ * @tc.name: DupMockTest_Sync_003
+ * @tc.desc: Test function of Dup::Sync interface for FAILED with dup ERROR.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(DupTest, DupTest_Sync_003, testing::ext::TestSize.Level1)
+HWTEST_F(DupMockTest, DupMockTest_Sync_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DupTest-begin DupTest_Sync_003";
+    GTEST_LOG_(INFO) << "DupMockTest-begin DupMockTest_Sync_003";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
-    tuple<bool, int> isFd = { true, 65536 };
+    tuple<bool, int> isFd = { true, INVALID_FD };
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
@@ -136,23 +138,23 @@ HWTEST_F(DupTest, DupTest_Sync_003, testing::ext::TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_EQ(res, nullptr);
 
-    GTEST_LOG_(INFO) << "DupTest-end DupTest_Sync_003";
+    GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_003";
 }
 
 /**
- * @tc.name: DupTest_Sync_004
- * @tc.desc: Test function of DupTest::Sync interface for FAILED with dup uv_fs_readlink.
+ * @tc.name: DupMockTest_Sync_004
+ * @tc.desc: Test function of Dup::Sync interface for FAILED with uv_fs_readlink ERROR.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(DupTest, DupTest_Sync_004, testing::ext::TestSize.Level1)
+HWTEST_F(DupMockTest, DupMockTest_Sync_004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DupTest-begin DupTest_Sync_004";
+    GTEST_LOG_(INFO) << "DupMockTest-begin DupMockTest_Sync_004";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
-    string filePath = "/data/test/DupTest_Sync_004.txt";
-    int srcFd = open(filePath.c_str(), O_CREAT|O_RDWR, 0644);
+    string filePath = "/data/test/DupMockTest_Sync_004.txt";
+    int srcFd = open(filePath.c_str(), O_CREAT | O_RDWR, 0644);
     EXPECT_GT(srcFd, -1);
     tuple<bool, int> isFd = { true, srcFd };
 
@@ -171,7 +173,7 @@ HWTEST_F(DupTest, DupTest_Sync_004, testing::ext::TestSize.Level1)
     EXPECT_TRUE(filesystem::remove(filePath));
     EXPECT_EQ(res, nullptr);
 
-    GTEST_LOG_(INFO) << "DupTest-end DupTest_Sync_004";
+    GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_004";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
