@@ -126,6 +126,7 @@ ohos_unittest("napi_file_fs_mock_test") {
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:extensionkit_native",
+    "ability_runtime:napi_common",
     "access_token:libtokenid_sdk",
     "app_file_service:fileuri_native",
     "bundle_framework:appexecfwk_base",
