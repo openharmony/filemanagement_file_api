@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,6 +95,126 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.L
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_UnlinkSync_001";
+}
+
+/**
+ * @tc.name: AccessTest_Sync_001
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILED with ARGS ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, AccessTest_Sync_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin AccessTest_Sync_001";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = PropNExporter::AccessSync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_001";
+}
+
+/**
+ * @tc.name: AccessTest_Sync_002
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILED with ToUTF8StringPath ERROR.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, AccessTest_Sync_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin AccessTest_Sync_002";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    size_t strLen = 10;
+    auto strPtr = make_unique<char[]>(strLen);
+    tuple<bool, unique_ptr<char[]>, size_t> isStr = { false, move(strPtr), strLen };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(isStr)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = PropNExporter::AccessSync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_002";
+}
+
+/**
+ * @tc.name: AccessTest_Sync_003
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILED with invalid mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, AccessTest_Sync_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin AccessTest_Sync_003";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    size_t strLen = 10;
+    auto strPtr = make_unique<char[]>(strLen);
+    tuple<bool, unique_ptr<char[]>, size_t> isStr = { true, move(strPtr), strLen };
+    tuple<bool, int> isMode = { true, -1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(isStr)));
+    EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO));
+    EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isMode));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = PropNExporter::AccessSync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_003";
+}
+
+/**
+ * @tc.name: AccessTest_Sync_004
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILED with invalid flag.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, AccessTest_Sync_004, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin AccessTest_Sync_004";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    size_t strLen = 10;
+    auto strPtr = make_unique<char[]>(strLen);
+    tuple<bool, unique_ptr<char[]>, size_t> isStr = { true, move(strPtr), strLen };
+    tuple<bool, int> isMode = { true, 0 };
+    tuple<bool, int> isFlag = { false, 0 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(isStr)));
+    EXPECT_CALL(*libnMock, GetArgc())
+        .WillOnce(testing::Return(NARG_CNT::THREE))
+        .WillOnce(testing::Return(NARG_CNT::THREE));
+    EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isMode));
+    EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(isFlag));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = PropNExporter::AccessSync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_004";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

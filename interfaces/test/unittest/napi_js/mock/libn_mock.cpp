@@ -329,6 +329,29 @@ napi_value NFuncArg::GetArg(size_t argPos) const
     return realGetArg(argPos);
 }
 
+napi_value NClass::InstantiateClass(napi_env env, const std::string &className, const std::vector<napi_value> &args)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->InstantiateClass(env, className, args);
+    }
+
+    static napi_value (*realInstantiateClass)(napi_env, const std::string &, const std::vector<napi_value> &) = []() {
+        auto func = (napi_value(*)(napi_env, const std::string &, const std::vector<napi_value> &))dlsym(RTLD_NEXT,
+            "_ZN4OHOS14FileManagement4LibN6NClass16InstantiateClassEP10napi_env__RKNSt3__h12basic_stringIcNS5_11char_"
+            "traitsIcEENS5_9allocatorIcEEEERKNS5_6vectorIP12napi_value__NS9_ISG_EEEE");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real InstantiateClass: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realInstantiateClass) {
+        return nullptr;
+    }
+
+    return realInstantiateClass(env, className, args);
+}
+
 void NError::ThrowErr(napi_env env)
 {
     if (LibnMock::IsMockable()) {
