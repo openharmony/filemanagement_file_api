@@ -51,6 +51,9 @@ constexpr int SOFTBUS_TRANS_FILE_NOT_FOUND = -426114934;
 constexpr int SOFTBUS_TRANS_FILE_EXISTED = -426114933;
 constexpr int DFS_CANCEL_SUCCESS = 204;
 
+constexpr uint64_t CJ_FDSAN_TAG = 0x2;
+constexpr uint64_t CJ_FILE_FDSAN_TAG = static_cast<uint64_t>(LOG_DOMAIN) << 32 | CJ_FDSAN_TAG;
+
 enum ErrCodeSuffixOfFileIO {
     E_PERM = 1,
     E_NOENT,

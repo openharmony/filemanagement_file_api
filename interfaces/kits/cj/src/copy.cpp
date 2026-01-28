@@ -209,8 +209,10 @@ void CopyImpl::CheckOrCreatePath(const std::string &destPath)
         auto file = open(destPath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (file < 0) {
             LOGE("Error opening file descriptor. errno = %{public}d", errno);
+            return;
         }
-        close(file);
+        fdsan_exchange_owner_tag(file, 0, CJ_FILE_FDSAN_TAG);
+        fdsan_close_with_tag(file, CJ_FILE_FDSAN_TAG);
     }
 }
 
@@ -665,11 +667,13 @@ int64_t CopyImpl::SubscribeLocalListener(std::shared_ptr<FileInfos>& infos, std:
         LOGE("Failed to init inotify, errno:%{public}d", errno);
         return errno;
     }
+    fdsan_exchange_owner_tag(infos->notifyFd, 0, CJ_FILE_FDSAN_TAG);
     infos->eventFd = eventfd(0, EFD_CLOEXEC);
     if (infos->eventFd < 0) {
         LOGE("Failed to init eventFd, errno:%{public}d", errno);
         return errno;
     }
+    fdsan_exchange_owner_tag(infos->eventFd, 0, CJ_FILE_FDSAN_TAG);
     callback->notifyFd = infos->notifyFd;
     callback->eventFd = infos->eventFd;
     int newWd = inotify_add_watch(infos->notifyFd, infos->destPath.c_str(), IN_MODIFY);
