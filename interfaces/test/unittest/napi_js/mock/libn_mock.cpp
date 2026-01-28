@@ -770,4 +770,26 @@ NVal NVal::CreateUndefined(napi_env env)
 
     return realCreateUndefined(env);
 }
+
+NVal NVal::CreateBool(napi_env env, bool val)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->CreateBool(env, val);
+    }
+
+    static NVal (*realCreateBool)(napi_env, bool) = []() {
+        auto func =
+            (NVal(*)(napi_env, bool))dlsym(RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN4NVal10CreateBoolEP10napi_env__b");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real CreateBool: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realCreateBool) {
+        return { nullptr, nullptr };
+    }
+
+    return realCreateBool(env, val);
+}
 #endif
