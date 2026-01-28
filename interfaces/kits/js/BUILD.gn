@@ -250,6 +250,7 @@ ohos_shared_library("fs") {
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
       "ability_runtime:extensionkit_native",
+      "ability_runtime:napi_common",
       "access_token:libtokenid_sdk",
       "app_file_service:fileuri_native",
       "bundle_framework:appexecfwk_base",
@@ -374,6 +375,7 @@ ohos_shared_library("file") {
   external_deps = [
     "ability_runtime:abilitykit_native",
     "ability_runtime:extensionkit_native",
+    "ability_runtime:napi_common",
     "bounds_checking_function:libsec_shared",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
