@@ -102,6 +102,7 @@ ohos_unittest("napi_file_fs_mock_test") {
     "mod_fs/class_stream/stream_n_exporter_mock_test.cpp",
     "mod_fs/class_watcher/watcher_entity_test.cpp",
     "mod_fs/properties/close_mock_test.cpp",
+    "mod_fs/properties/dup_mock_test.cpp",
     "mod_fs/properties/fdatasync_mock_test.cpp",
     "mod_fs/properties/lstat_mock_test.cpp",
     "mod_fs/properties/mkdtemp_mock_test.cpp",
