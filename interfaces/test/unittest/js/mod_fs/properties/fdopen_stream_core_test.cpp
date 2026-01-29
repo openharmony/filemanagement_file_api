@@ -81,7 +81,6 @@ HWTEST_F(FdopenStreamCoreTest, FdopenStreamCoreTest_DoFdopenStream_001, testing:
 
     auto ret = FdopenStreamCore::DoFdopenStream(fd, "r");
 
-    close(fd);
     ASSERT_TRUE(ret.IsSuccess());
     std::unique_ptr<FsStream> stream(ret.GetData().value()); // To smart ptr for auto memory release
     ASSERT_NE(stream, nullptr);
