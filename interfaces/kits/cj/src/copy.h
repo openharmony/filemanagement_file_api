@@ -69,7 +69,7 @@ struct CjCallbackObject {
     void CloseFd()
     {
         if (eventFd != -1) {
-            close(eventFd);
+            fdsan_close_with_tag(eventFd, FileFs::CJ_FILE_FDSAN_TAG);
             eventFd = -1;
         }
         if (notifyFd == -1) {
@@ -78,7 +78,7 @@ struct CjCallbackObject {
         for (auto item : wds) {
             inotify_rm_watch(notifyFd, item.first);
         }
-        close(notifyFd);
+        fdsan_close_with_tag(notifyFd, FileFs::CJ_FILE_FDSAN_TAG);
         notifyFd = -1;
     }
     ~CjCallbackObject()

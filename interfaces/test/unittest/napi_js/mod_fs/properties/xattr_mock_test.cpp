@@ -361,7 +361,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_007, TestSize.Level1)
     constexpr size_t MAX_XATTR_SIZE = 4096;
     auto keyPtr = make_unique<char[]>(MAX_XATTR_SIZE + 2);
     ASSERT_NE(keyPtr, nullptr);
-    memset(keyPtr.get(), 'a', MAX_XATTR_SIZE + 1);
+    memset_s(keyPtr.get(), MAX_XATTR_SIZE + 2, 'a', MAX_XATTR_SIZE + 1);
     keyPtr[MAX_XATTR_SIZE + 1] = '\0';
 
     auto valPtr = make_unique<char[]>(strLen);
@@ -419,7 +419,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_008, TestSize.Level1)
     constexpr size_t MAX_XATTR_SIZE = 4096;
     auto valPtr = make_unique<char[]>(MAX_XATTR_SIZE + 2);
     ASSERT_NE(valPtr, nullptr);
-    memset(valPtr.get(), 'a', MAX_XATTR_SIZE + 1);
+    memset_s(valPtr.get(), MAX_XATTR_SIZE + 2, 'a', MAX_XATTR_SIZE + 1);
     valPtr[MAX_XATTR_SIZE + 1] = '\0';
 
     tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
@@ -562,7 +562,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_004, TestSize.Level1)
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     NVal mockNval = { env, nVal };
 
-    const char *initStr = "hello world";
+    const char *initStr = "XattrMockTest_GetXattr_Sync_004";
     size_t strLen = strlen(initStr) + 1;
 
     auto strPathPtr = make_unique<char[]>(strLen);
@@ -611,7 +611,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_005, TestSize.Level1)
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
 
-    const char *initStr = "hello world";
+    const char *initStr = "XattrMockTest_GetXattr_Sync_005";
     size_t strLen = strlen(initStr) + 1;
 
     auto strPathPtr = make_unique<char[]>(strLen);
@@ -664,7 +664,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_006, TestSize.Level1)
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     NVal mockNval = { env, nVal };
 
-    const char *initStr = "hello world";
+    const char *initStr = "XattrMockTest_GetXattr_Sync_006";
     size_t strLen = strlen(initStr) + 1;
 
     auto strPathPtr = make_unique<char[]>(strLen);

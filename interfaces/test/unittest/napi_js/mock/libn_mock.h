@@ -72,6 +72,7 @@ public:
     virtual bool TypeIs(napi_valuetype expType) = 0;
     virtual NVal CreateUndefined(napi_env env) = 0;
     virtual NVal CreateUTF8String(napi_env env, std::string str) = 0;
+    virtual NVal CreateBool(napi_env env, bool val) = 0;
 };
 
 class LibnMock : public ILibnMock {
@@ -114,6 +115,7 @@ public:
     MOCK_METHOD(bool, TypeIs, (napi_valuetype), (override));
     MOCK_METHOD(NVal, CreateUndefined, (napi_env), (override));
     MOCK_METHOD(NVal, CreateUTF8String, (napi_env, std::string), (override));
+    MOCK_METHOD(NVal, CreateBool, (napi_env, bool), (override));
 
 public:
     static std::shared_ptr<LibnMock> GetMock();

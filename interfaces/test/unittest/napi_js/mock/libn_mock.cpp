@@ -779,7 +779,8 @@ NVal NVal::CreateUTF8String(napi_env env, std::string str)
 
     static NVal (*realCreateUTF8String)(napi_env, std::string) = []() {
         auto func = (NVal(*)(napi_env, std::string))dlsym(RTLD_NEXT,
-            "_ZN4OHOS14FileManagement4LibN4NVal15CreateUTF8StringENSt6__ndk116basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE10napi_env__");
+            "_ZN4OHOS14FileManagement4LibN4NVal15CreateUTF8StringENSt6__ndk116basic_stringIcNS2_11char_"
+            "traitsIcEENS2_9allocatorIcEEEE10napi_env__");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real CreateUTF8String: " << dlerror();
         }
@@ -813,5 +814,27 @@ NVal NVal::CreateUTF8String(napi_env env, const char *str, ssize_t len)
     }
 
     return realCreateUTF8String(env, str, len);
+}
+
+NVal NVal::CreateBool(napi_env env, bool val)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->CreateBool(env, val);
+    }
+
+    static NVal (*realCreateBool)(napi_env, bool) = []() {
+        auto func =
+            (NVal(*)(napi_env, bool))dlsym(RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN4NVal10CreateBoolEP10napi_env__b");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real CreateBool: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realCreateBool) {
+        return { nullptr, nullptr };
+    }
+
+    return realCreateBool(env, val);
 }
 #endif
