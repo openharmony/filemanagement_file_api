@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ bool UvFsMock::IsMockable()
 
 #ifdef __cplusplus
 extern "C" {
-using namespace OHOS::FileManagement::ModuleFileIO::Test;
+using UvFsMock = OHOS::FileManagement::ModuleFileIO::Test::UvFsMock;
 
 int uv_fs_read(
     uv_loop_t *loop, uv_fs_t *req, uv_file file, const uv_buf_t bufs[], unsigned int nbufs, int64_t off, uv_fs_cb cb)
