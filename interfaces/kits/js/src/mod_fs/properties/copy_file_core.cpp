@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -205,7 +205,11 @@ FsResult<void> CopyFileCore::DoCopyFile(FileInfo &src, FileInfo &dest,
     }
     if (src.isPath && dest.isPath) {
         auto err = IsAllPath(src, dest);
-        if (err) {
+        if (err == EOPNOTSUPP) {
+            return FsResult<void>::ErrorWithMsg(err, "Operation not supported: Failed to copy file. "
+                "Possible causes include a directory with the same name as the source file exists in the target path, "
+                "unsupported filesystem metadata operations or invalid source file type.");
+        } else if (err) {
             return FsResult<void>::Error(err);
         }
     } else {
