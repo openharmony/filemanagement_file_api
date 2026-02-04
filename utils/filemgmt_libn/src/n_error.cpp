@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,18 @@ NError::NError(int errCode)
         errno_ = errCodeTable.at(UNKROWN_ERR).first;
         errMsg_ = errCodeTable.at(UNKROWN_ERR).second + ", errno is " + to_string(abs(errCode));
     }
+}
+
+NError::NError(int errCode, const std::string &errMsg)
+{
+    int genericCode = ConvertUVCode2ErrCode(errCode);
+    auto it = errCodeTable.find(genericCode);
+    if (it != errCodeTable.end()) {
+        errno_ = it->second.first;
+    } else {
+        errno_ = errCodeTable.at(UNKROWN_ERR).first;
+    }
+    errMsg_ = errMsg;
 }
 
 NError::NError(std::function<std::tuple<uint32_t, std::string>()> errGen)
