@@ -71,6 +71,7 @@ public:
     virtual NVal GetProp(std::string propName) = 0;
     virtual bool TypeIs(napi_valuetype expType) = 0;
     virtual NVal CreateUndefined(napi_env env) = 0;
+    virtual NVal CreateUTF8String(napi_env env, std::string str) = 0;
     virtual NVal CreateBool(napi_env env, bool val) = 0;
 };
 
@@ -113,6 +114,7 @@ public:
     MOCK_METHOD(NVal, GetProp, (std::string), (override));
     MOCK_METHOD(bool, TypeIs, (napi_valuetype), (override));
     MOCK_METHOD(NVal, CreateUndefined, (napi_env), (override));
+    MOCK_METHOD(NVal, CreateUTF8String, (napi_env, std::string), (override));
     MOCK_METHOD(NVal, CreateBool, (napi_env, bool), (override));
 
 public:

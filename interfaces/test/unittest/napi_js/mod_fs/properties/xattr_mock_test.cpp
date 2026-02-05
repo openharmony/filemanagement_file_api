@@ -125,7 +125,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_002, TestSize.Level1)
 
 /**
  * @tc.name: XattrMockTest_SetXattr_Sync_003
- * @tc.desc: Test function of Fdatasync::Sync interface for FAILURE when ToUTF8String fails.
+ * @tc.desc: Test function of Xattr::SetSync interface for FAILURE when ToUTF8String fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -170,7 +170,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_003, TestSize.Level1)
 
 /**
  * @tc.name: XattrMockTest_SetXattr_Sync_004
- * @tc.desc: Test function of Fdatasync::Sync interface for FAILURE when ToUTF8StringPath fails.
+ * @tc.desc: Test function of Xattr::SetSync interface for FAILURE when ToUTF8StringPath fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -223,7 +223,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_004, TestSize.Level1)
 
 /**
  * @tc.name: XattrMockTest_SetXattr_Sync_005
- * @tc.desc: Test function of Fdatasync::Sync interface for FAILURE when setxattr fails.
+ * @tc.desc: Test function of Xattr::SetSync interface for FAILURE when setxattr fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -279,7 +279,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_005, TestSize.Level1)
 
 /**
  * @tc.name: XattrMockTest_SetXattr_Sync_006
- * @tc.desc: Test function of Fdatasync::Sync interface for SUCCESS.
+ * @tc.desc: Test function of Xattr::SetSync interface for SUCCESS.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -333,6 +333,372 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_006, TestSize.Level1)
     EXPECT_NE(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_006";
+}
+
+/**
+ * @tc.name: XattrMockTest_SetXattr_Sync_007
+ * @tc.desc: Test function of Xattr::SetSync interface for FAILURE when key is too long.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+*/
+HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_007, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_SetXattr_Sync_007";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    const char *initStr = "XattrMockTest_SetXattr_Sync_007";
+    size_t strLen = strlen(initStr) + 1;
+
+    auto strPathPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPathPtr, nullptr);
+    auto ret = strncpy_s(strPathPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    // Create a key that exceeds MAX_XATTR_SIZE
+    constexpr size_t MAX_XATTR_SIZE = 4096;
+    auto keyPtr = make_unique<char[]>(MAX_XATTR_SIZE + 2);
+    ASSERT_NE(keyPtr, nullptr);
+    memset_s(keyPtr.get(), MAX_XATTR_SIZE + 2, 'a', MAX_XATTR_SIZE + 1);
+    keyPtr[MAX_XATTR_SIZE + 1] = '\0';
+
+    auto valPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(valPtr, nullptr);
+    ret = strncpy_s(valPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(keyPtr), MAX_XATTR_SIZE + 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toValUtfRes = { true, move(valPtr), 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
+    EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes))).WillOnce(Return(move(toValUtfRes)));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = Xattr::SetSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_007";
+}
+
+/**
+ * @tc.name: XattrMockTest_SetXattr_Sync_008
+ * @tc.desc: Test function of Xattr::SetSync interface for FAILURE when value is too long.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+*/
+HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_008, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_SetXattr_Sync_008";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    const char *initStr = "XattrMockTest_SetXattr_Sync_008";
+    size_t strLen = strlen(initStr) + 1;
+
+    auto strPathPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPathPtr, nullptr);
+    auto ret = strncpy_s(strPathPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    auto keyPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(keyPtr, nullptr);
+    ret = strncpy_s(keyPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    // Create a value that exceeds MAX_XATTR_SIZE
+    constexpr size_t MAX_XATTR_SIZE = 4096;
+    auto valPtr = make_unique<char[]>(MAX_XATTR_SIZE + 2);
+    ASSERT_NE(valPtr, nullptr);
+    memset_s(valPtr.get(), MAX_XATTR_SIZE + 2, 'a', MAX_XATTR_SIZE + 1);
+    valPtr[MAX_XATTR_SIZE + 1] = '\0';
+
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(keyPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toValUtfRes = { true, move(valPtr), MAX_XATTR_SIZE + 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
+    EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes))).WillOnce(Return(move(toValUtfRes)));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = Xattr::SetSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_008";
+}
+
+/**
+ * @tc.name: XattrMockTest_GetXattr_Sync_001
+ * @tc.desc: Test function of Xattr::GetSync interface for FAILURE when InitArgs fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+*/
+HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_001";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = Xattr::GetSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_001";
+}
+
+/**
+ * @tc.name: XattrMockTest_GetXattr_Sync_002
+ * @tc.desc: Test function of Xattr::GetSync interface for FAILURE when ToUTF8StringPath fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+*/
+HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_002";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    const char *initStr = "XattrMockTest_GetXattr_Sync_002";
+    size_t strLen = strlen(initStr) + 1;
+    auto strPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPtr, nullptr);
+    auto ret = strncpy_s(strPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { false, move(strPtr), 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = Xattr::GetSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_002";
+}
+
+/**
+ * @tc.name: XattrMockTest_GetXattr_Sync_003
+ * @tc.desc: Test function of Xattr::GetSync interface for FAILURE when ToUTF8String fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+*/
+HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_003";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    const char *initStr = "XattrMockTest_GetXattr_Sync_003";
+    size_t strLen = strlen(initStr) + 1;
+
+    auto strPathPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPathPtr, nullptr);
+    auto ret = strncpy_s(strPathPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    auto strPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPtr, nullptr);
+    ret = strncpy_s(strPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { false, move(strPtr), 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
+    EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes)));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = Xattr::GetSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_003";
+}
+
+/**
+ * @tc.name: XattrMockTest_GetXattr_Sync_004
+ * @tc.desc: Test function of Xattr::GetSync interface for SUCCESS when xattr is empty.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+*/
+HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_004";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_value nVal = reinterpret_cast<napi_value>(0x1300);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+    NVal mockNval = { env, nVal };
+
+    const char *initStr = "XattrMockTest_GetXattr_Sync_004";
+    size_t strLen = strlen(initStr) + 1;
+
+    auto strPathPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPathPtr, nullptr);
+    auto ret = strncpy_s(strPathPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    auto strPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPtr, nullptr);
+    ret = strncpy_s(strPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
+    EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes)));
+    // getxattr returns 0 means empty xattr
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_)).WillOnce(testing::Return(mockNval));
+
+    auto res = Xattr::GetSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
+    EXPECT_NE(res, nullptr);
+
+    GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_004";
+}
+
+/**
+ * @tc.name: XattrMockTest_GetXattr_Sync_005
+ * @tc.desc: Test function of Xattr::GetSync interface for FAILURE when getxattr fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+*/
+HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_005";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+
+    const char *initStr = "XattrMockTest_GetXattr_Sync_005";
+    size_t strLen = strlen(initStr) + 1;
+
+    auto strPathPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPathPtr, nullptr);
+    auto ret = strncpy_s(strPathPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    auto strPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPtr, nullptr);
+    ret = strncpy_s(strPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
+    EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes)));
+    // First call returns size, second call fails
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _))
+        .WillOnce(Return(5))
+        .WillOnce(SetErrnoAndReturn(EIO, -1));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = Xattr::GetSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_005";
+}
+
+/**
+ * @tc.name: XattrMockTest_GetXattr_Sync_006
+ * @tc.desc: Test function of Xattr::GetSync interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+*/
+HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_006";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_value nVal = reinterpret_cast<napi_value>(0x1300);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+    NVal mockNval = { env, nVal };
+
+    const char *initStr = "XattrMockTest_GetXattr_Sync_006";
+    size_t strLen = strlen(initStr) + 1;
+
+    auto strPathPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPathPtr, nullptr);
+    auto ret = strncpy_s(strPathPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    auto strPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(strPtr, nullptr);
+    ret = strncpy_s(strPtr.get(), strLen, initStr, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfPath = { true, move(strPathPtr), 1 };
+    tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto xattrMock = SysXattrMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
+    EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes)));
+    // First call returns size, second call returns actual data
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _))
+        .WillOnce(Return(5))
+        .WillOnce(Return(5));
+    EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_)).WillOnce(testing::Return(mockNval));
+
+    auto res = Xattr::GetSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(xattrMock.get());
+    EXPECT_NE(res, nullptr);
+
+    GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_006";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
