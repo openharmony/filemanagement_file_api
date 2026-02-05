@@ -41,7 +41,7 @@ namespace FileFs {
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 static void SaveClassStream(napi_env env)
 {
-    static auto jsExport = [env]() {
+    [[maybe_unused]] static auto jsExport = [](napi_env env) {
         std::vector<napi_property_descriptor> props = {
             FileManagement::LibN::NVal::DeclareNapiFunction("writeSync",
                 OHOS::FileManagement::ModuleFileIO::StreamNExporter::WriteSync),
@@ -49,7 +49,7 @@ static void SaveClassStream(napi_env env)
                 OHOS::FileManagement::ModuleFileIO::StreamNExporter::Flush),
             FileManagement::LibN::NVal::DeclareNapiFunction("flushSync",
                 OHOS::FileManagement::ModuleFileIO::StreamNExporter::FlushSync),
-            FileManagement::LibN::NVal::DeclareNapiFunction("resdSync",
+            FileManagement::LibN::NVal::DeclareNapiFunction("readSync",
                 OHOS::FileManagement::ModuleFileIO::StreamNExporter::ReadSync),
             FileManagement::LibN::NVal::DeclareNapiFunction("closeSync",
                 OHOS::FileManagement::ModuleFileIO::StreamNExporter::CloseSync),
@@ -82,10 +82,7 @@ static void SaveClassStream(napi_env env)
             return false;
         }
         return true;
-    }();
-    if (!jsExport) {
-        LOGD("[Stream]: Failed to export class");
-    }
+    }(env);
 }
 
 static napi_value InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp)
@@ -111,7 +108,7 @@ static napi_value InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype
 
 static void SaveClassRandomAccessFile(napi_env env)
 {
-    static auto jsExport = [env]() {
+    [[maybe_unused]] static auto jsExport = [](napi_env env) {
         std::vector<napi_property_descriptor> props = {
             FileManagement::LibN::NVal::DeclareNapiFunction("read",
                 OHOS::FileManagement::ModuleFileIO::RandomAccessFileNExporter::Read),
@@ -154,10 +151,7 @@ static void SaveClassRandomAccessFile(napi_env env)
             return false;
         }
         return true;
-    }();
-    if (!jsExport) {
-        LOGD("Failed to export RandomAccessFile class");
-    }
+    }(env);
 }
 #endif
 
