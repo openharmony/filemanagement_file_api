@@ -193,15 +193,11 @@ const Type FS::ReadStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo
 const string FS::ReadStream::classDesc = FS::ReadStream::classType.Descriptor();
 const string FS::ReadStream::ctorSig =
     Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::ReadStreamOptions::classType });
-const string FS::ReadStream::ctorSig1 =
-    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 // FS::WriteStream
 const Type FS::WriteStream::classType = Builder::BuildClass("@ohos.file.fs.fileIo.WriteStream");
 const string FS::WriteStream::classDesc = FS::WriteStream::classType.Descriptor();
 const string FS::WriteStream::ctorSig =
     Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, FS::WriteStreamOptions::classType });
-const string FS::WriteStream::ctorSig1 =
-    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType });
 // FS::AtomicFile
 const Type FS::AtomicFile::classType = Builder::BuildClass("@ohos.file.fs.fileIo.AtomicFile");
 const string FS::AtomicFile::classDesc = FS::AtomicFile::classType.Descriptor();

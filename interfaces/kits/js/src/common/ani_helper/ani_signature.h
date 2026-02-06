@@ -266,14 +266,12 @@ struct ReadStream : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
-    static const string ctorSig1;
 };
 
 struct WriteStream : public BaseType {
     static const Type classType;
     static const string classDesc;
     static const string ctorSig;
-    static const string ctorSig1;
 };
 
 struct AtomicFile : public BaseType {
