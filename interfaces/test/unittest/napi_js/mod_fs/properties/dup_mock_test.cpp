@@ -176,4 +176,43 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_004, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_004";
 }
 
+/**
+    * @tc.name: DupTest_Sync_005
+    * @tc.desc: Test function of DupTest::Sync interface for SUCCEED.
+    * @tc.size: MEDIUM
+    * @tc.type: FUNC
+    * @tc.level Level 1
+    */
+    HWTEST_F(DupTest, DupTest_Sync_005, testing::ext::TestSize.Level1)
+    {
+        GTEST_LOG_(INFO) << "DupTest-begin DupTest_Sync_005";
+        napi_env env = reinterpret_cast<napi_env>(0x1000);
+        napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+        string filePath = "/data/test/DupTest_Sync_005.txt";
+        char uvArr[] = "DupTest_Sync_005";
+        char *uvPtr = uvArr;
+        int srcFd = open(filePath.c_str(), O_CREAT|O_RDWR, 0644);
+        EXPECT_GT(srcFd, -1);
+        tuple<bool, int> isFd = { true, srcFd };
+    
+        auto libnMock = LibnMock::GetMock();
+        auto uvFsMock = UvFsMock::GetMock();
+        EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+        EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+        EXPECT_CALL(*uvFsMock, uv_fs_readlink(testing::_, testing::_, testing::_, testing::_))
+            .WillOnce(testing::DoAll(testing::Invoke([uvPtr](uv_loop_t *lop, uv_fs_t *req, const char *path, uv_fs_cb cb) {
+                req->ptr = static_cast<void *>(uvPtr);
+            }), testing::Return(0)));
+        EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nullptr));
+        EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    
+        auto res = Dup::Sync(env, info);
+        close(srcFd);
+        testing::Mock::VerifyAndClearExpectations(libnMock.get());
+        testing::Mock::VerifyAndClearExpectations(uvFsMock.get());
+        EXPECT_TRUE(filesystem::remove(filePath));
+        EXPECT_EQ(res, nullptr);
+    
+        GTEST_LOG_(INFO) << "DupTest-end DupTest_Sync_005";
+    }
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

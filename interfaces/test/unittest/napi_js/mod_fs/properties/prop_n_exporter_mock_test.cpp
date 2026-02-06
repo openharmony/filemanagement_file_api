@@ -217,4 +217,99 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_004, testing::ext::TestSize.Leve
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_004";
 }
 
+/**
+ * @tc.name: AccessTest_Sync_005
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for SUCCEED with flag.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, AccessTest_Sync_005, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin AccessTest_Sync_005";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    napi_value val = reinterpret_cast<napi_value>(0x2000);
+    size_t strLen = 10;
+    auto strPtr = make_unique<char[]>(strLen);
+    string filePath = "/data/test/AccessTest_Sync_005.txt";
+    char uvArr[] = "AccessTest_Sync_005";
+    char *uvPtr = uvArr;
+    tuple<bool, unique_ptr<char[]>, size_t> isStr = { true, move(strPtr), strLen };
+    tuple<bool, int> isMode = { true, 0 };
+    tuple<bool, int> isFlag = { true, 0 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvFsMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(isStr)));
+    EXPECT_CALL(*libnMock, GetArgc())
+        .WillOnce(testing::Return(NARG_CNT::THREE))
+        .WillOnce(testing::Return(NARG_CNT::THREE));
+    EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isMode));
+    EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(isFlag));
+
+    // UvAccess
+    EXPECT_CALL(*uvFsMock, uv_fs_access(testing::_, testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::Invoke(
+            [uvPtr](uv_loop_t *lop, uv_fs_t *req, const char *path, int flags, uv_fs_cb cb) {
+            req->ptr = static_cast<void *>(uvPtr);
+        }), testing::Return(0)));
+    EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+
+    auto res = PropNExporter::AccessSync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvFsMock.get());
+    EXPECT_EQ(res, val);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_005";
+}
+
+/**
+ * @tc.name: AccessTest_Sync_006
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for SUCCEED with no flag.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, AccessTest_Sync_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin AccessTest_Sync_006";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    napi_value val = reinterpret_cast<napi_value>(0x2000);
+    size_t strLen = 10;
+    auto strPtr = make_unique<char[]>(strLen);
+    string filePath = "/data/test/AccessTest_Sync_006.txt";
+    char uvArr[] = "AccessTest_Sync_006";
+    char *uvPtr = uvArr;
+    tuple<bool, unique_ptr<char[]>, size_t> isStr = { true, move(strPtr), strLen };
+    tuple<bool, int> isMode = { true, 0 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvFsMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(isStr)));
+    EXPECT_CALL(*libnMock, GetArgc())
+        .WillOnce(testing::Return(NARG_CNT::TWO))
+        .WillOnce(testing::Return(NARG_CNT::TWO));
+    EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isMode));
+
+    // UvAccess
+    EXPECT_CALL(*uvFsMock, uv_fs_access(testing::_, testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::Invoke(
+            [uvPtr](uv_loop_t *lop, uv_fs_t *req, const char *path, int flags, uv_fs_cb cb) {
+            req->ptr = static_cast<void *>(uvPtr);
+        }), testing::Return(0)));
+    EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+
+    auto res = PropNExporter::AccessSync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvFsMock.get());
+    EXPECT_EQ(res, val);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_006";
+}
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
