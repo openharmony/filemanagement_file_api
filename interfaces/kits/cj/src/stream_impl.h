@@ -20,6 +20,7 @@
 #include "cj_common_ffi.h"
 #include "macro.h"
 #include "uni_error.h"
+#include "stream_entity.h"
 
 namespace OHOS {
 namespace CJSystemapi {
@@ -27,7 +28,7 @@ namespace FileFs {
 
 class StreamImpl : public OHOS::FFI::FFIData {
 public:
-    explicit StreamImpl(std::unique_ptr<FILE, decltype(&fclose)> fp) : fp_(std::move(fp)) {}
+    explicit StreamImpl(std::shared_ptr<FILE> fp) : fp_(fp) {}
 
     int Close();
 
@@ -43,10 +44,10 @@ public:
 
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 
-    std::unique_ptr<FILE, decltype(&fclose)> GetRealFp() { return std::move(fp_); }
+    std::shared_ptr<FILE> GetRealFp() { return fp_; }
 
 private:
-    std::unique_ptr<FILE, decltype(&fclose)> fp_;
+    std::shared_ptr<FILE> fp_;
 
     friend class OHOS::FFI::RuntimeType;
     friend class OHOS::FFI::TypeBase;
