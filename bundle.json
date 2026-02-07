@@ -185,8 +185,9 @@
           }
         ],
         "test": [
-          "//foundation/filemanagement/file_api/interfaces/test/unittest:file_api_unittest"
+          "//foundation/filemanagement/file_api/interfaces/test/unittest:file_api_unittest",
+          "//foundation/filemanagement/file_api/interfaces/test/fuzztest:file_api_fuzztest"
         ]
       }
     }
-  }
+}
