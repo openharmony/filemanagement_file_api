@@ -31,7 +31,7 @@ int StreamImpl::Close()
         LOGE("close false, fp is null");
         return GetErrorCode(EIO);
     }
-    fp_.reset();
+    fp_ = nullptr;
     return SUCCESS_CODE;
 }
 

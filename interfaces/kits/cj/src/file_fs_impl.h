@@ -47,10 +47,6 @@ constexpr int FILE_MATCH = 1;
 constexpr int DIRMODE_MIN = 0;
 constexpr int DIRMODE_MAX = 3;
 
-struct StreamEntity {
-    std::unique_ptr<FILE, decltype(&fclose)> fp = { nullptr, fclose };
-};
-
 enum ModeOfMoveDir {
     DIRMODE_DIRECTORY_THROW_ERR = 0,
     DIRMODE_FILE_THROW_ERR,
