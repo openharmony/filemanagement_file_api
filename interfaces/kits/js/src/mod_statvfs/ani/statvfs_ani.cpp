@@ -46,7 +46,7 @@ ani_long StatvfsAni::GetFreeSizeSync(ani_env *env, [[maybe_unused]] ani_class cl
         return 0;
     }
 
-    return static_cast<long>(ret.GetData().value());
+    return static_cast<ani_long>(ret.GetData().value());
 }
 
 ani_long StatvfsAni::GetTotalSizeSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_string path)
@@ -66,7 +66,7 @@ ani_long StatvfsAni::GetTotalSizeSync(ani_env *env, [[maybe_unused]] ani_class c
         return 0;
     }
 
-    return static_cast<long>(ret.GetData().value());
+    return static_cast<ani_long>(ret.GetData().value());
 }
 
 } // namespace ANI

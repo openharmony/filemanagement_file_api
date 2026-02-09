@@ -250,7 +250,7 @@ ani_long RandomAccessFileAni::WriteSync(
             ErrorHandler::Throw(env, ret.GetError());
             return -1;
         }
-        return static_cast<long>(ret.GetData().value());
+        return static_cast<ani_long>(ret.GetData().value());
     }
 
     auto [isArrayBuffer, arrayBuffer] = ParseArrayBuffer(env, buf);
@@ -267,7 +267,7 @@ ani_long RandomAccessFileAni::WriteSync(
             ErrorHandler::Throw(env, ret.GetError());
             return -1;
         }
-        return static_cast<long>(ret.GetData().value());
+        return static_cast<ani_long>(ret.GetData().value());
     }
     HILOGE("Unsupported buffer type!");
     ErrorHandler::Throw(env, EINVAL);
@@ -305,7 +305,7 @@ ani_long RandomAccessFileAni::ReadSync(
         ErrorHandler::Throw(env, err);
         return -1;
     }
-    return static_cast<long>(ret.GetData().value());
+    return static_cast<ani_long>(ret.GetData().value());
 }
 
 static ani_string GetFilePath(ani_env *env, const int fd)
