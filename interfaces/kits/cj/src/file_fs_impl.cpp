@@ -377,6 +377,10 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
 std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFileSync(sptr<FileEntity> entity,
     unsigned int mode)
 {
+    if (entity == nullptr || entity->fd_.get() == nullptr) {
+        HILOGE("Invalid File");
+        return { GetErrorCode(EINVAL), nullptr };
+    }
     auto fd = entity->fd_.get()->GetFD();
     FileInfo fileInfo;
     if (fd < 0) {
@@ -1139,6 +1143,9 @@ int FileFsImpl::Close(int32_t file)
 
 int FileFsImpl::Close(sptr<OHOS::CJSystemapi::FileFs::FileEntity> file)
 {
+    if (file == nullptr || file->fd_ == nullptr) {
+        return GetErrorCode(EINVAL);
+    }
     FileStruct fileStruct = FileStruct { false, -1, file };
     return CloseCore(fileStruct);
 }
