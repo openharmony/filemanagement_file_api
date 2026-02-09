@@ -43,7 +43,10 @@ tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
     }
 
     ani_boolean isInt;
-    env->Object_InstanceOf(obj, intClass, &isInt);
+    if (ANI_OK != env->Object_InstanceOf(obj, intClass, &isInt)) {
+        HILOGE("Failed to instance object");
+        return { false, result, nullptr };
+    }
     if (isInt) {
         ani_int fd;
         if (ANI_OK != env->Object_CallMethodByName_Int(obj, BasicTypesConverter::toInt.c_str(), nullptr, &fd)) {
