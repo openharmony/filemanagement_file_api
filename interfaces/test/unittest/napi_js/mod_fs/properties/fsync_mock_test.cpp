@@ -123,7 +123,6 @@ HWTEST_F(FsyncMockTest, FsyncMockTest_Sync_003, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "FsyncMockTest-begin FsyncMockTest_Sync_003";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
-    string filePath = "/data/test/FsyncMockTest_Sync_003.txt";
     char uvArr[] = "FsyncMockTest_Sync_003";
     char *uvPtr = uvArr;
     tuple<bool, int> isFd = { true, 0 };
@@ -159,7 +158,6 @@ HWTEST_F(FsyncMockTest, FsyncMockTest_Sync_004, testing::ext::TestSize.Level1)
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     napi_value val = reinterpret_cast<napi_value>(0x2000);
-    string filePath = "/data/test/FsyncMockTest_Sync_004.txt";
     char uvArr[] = "FsyncMockTest_Sync_004";
     char *uvPtr = uvArr;
     tuple<bool, int> isFd = { true, 0 };

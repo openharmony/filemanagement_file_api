@@ -232,7 +232,6 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_005, testing::ext::TestSize.Leve
     napi_value val = reinterpret_cast<napi_value>(0x2000);
     size_t strLen = 10;
     auto strPtr = make_unique<char[]>(strLen);
-    string filePath = "/data/test/AccessTest_Sync_005.txt";
     char uvArr[] = "AccessTest_Sync_005";
     char *uvPtr = uvArr;
     tuple<bool, unique_ptr<char[]>, size_t> isStr = { true, move(strPtr), strLen };
@@ -281,7 +280,6 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_006, testing::ext::TestSize.Leve
     napi_value val = reinterpret_cast<napi_value>(0x2000);
     size_t strLen = 10;
     auto strPtr = make_unique<char[]>(strLen);
-    string filePath = "/data/test/AccessTest_Sync_006.txt";
     char uvArr[] = "AccessTest_Sync_006";
     char *uvPtr = uvArr;
     tuple<bool, unique_ptr<char[]>, size_t> isStr = { true, move(strPtr), strLen };
