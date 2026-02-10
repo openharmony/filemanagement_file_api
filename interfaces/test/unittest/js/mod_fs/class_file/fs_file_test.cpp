@@ -130,6 +130,31 @@ HWTEST_F(FsFileTest, FsFileTest_GetFD_002, testing::ext::TestSize.Level1)
 }
 
 /**
+ * @tc.name: FsFileTest_GetFD_003
+ * @tc.desc: Test function of FsFile::GetFD interface for FAILURE when fileEntity->fd_ is nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_GetFD_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetFD_003";
+
+    auto fileEntity = make_unique<FileEntity>();
+    fileEntity->fd_ = nullptr;
+    FsFile file(std::move(fileEntity));
+
+    auto result = file.GetFD();
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_GetFD_003";
+}
+
+/**
  * @tc.name: FsFileTest_GetPath_001
  * @tc.desc: Test function of FsFile::GetPath interface for SUCCESS when path is uri.
  * @tc.size: MEDIUM
@@ -143,7 +168,9 @@ HWTEST_F(FsFileTest, FsFileTest_GetPath_001, testing::ext::TestSize.Level1)
     auto path = testDir + "/FsFileTest_GetPath_001.txt";
     ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
 
+    auto expectedFd = 10;
     auto fileEntity = make_unique<FileEntity>();
+    fileEntity->fd_ = make_unique<DistributedFS::FDGuard>(expectedFd, false);
     fileEntity->uri_ = "file://" + path;
 
     FsFile file(std::move(fileEntity));
@@ -181,6 +208,31 @@ HWTEST_F(FsFileTest, FsFileTest_GetPath_002, testing::ext::TestSize.Level1)
 }
 
 /**
+ * @tc.name: FsFileTest_GetPath_003
+ * @tc.desc: Test function of FsFile::GetPath interface for FAILURE when fileEntity->fd_ is nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_GetPath_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetPath_003";
+
+    auto fileEntity = make_unique<FileEntity>();
+    fileEntity->fd_ = nullptr;
+    FsFile file(std::move(fileEntity));
+
+    auto result = file.GetPath();
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_GetPath_003";
+}
+
+/**
  * @tc.name: FsFileTest_GetName_001
  * @tc.desc: Test function of FsFile::GetName interface for SUCCESS when path is uri.
  * @tc.size: MEDIUM
@@ -194,7 +246,9 @@ HWTEST_F(FsFileTest, FsFileTest_GetName_001, testing::ext::TestSize.Level1)
     auto path = testDir + "/FsFileTest_GetName_001.txt";
     ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
 
+    auto expectedFd = 10;
     auto fileEntity = make_unique<FileEntity>();
+    fileEntity->fd_ = make_unique<DistributedFS::FDGuard>(expectedFd, false);
     fileEntity->uri_ = "file://" + path;
 
     FsFile file(std::move(fileEntity));
@@ -232,6 +286,31 @@ HWTEST_F(FsFileTest, FsFileTest_GetName_002, testing::ext::TestSize.Level1)
 }
 
 /**
+ * @tc.name: FsFileTest_GetName_003
+ * @tc.desc: Test function of FsFile::GetName interface for FAILURE when fileEntity->fd_ is nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_GetName_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetName_003";
+
+    auto fileEntity = make_unique<FileEntity>();
+    fileEntity->fd_ = nullptr;
+    FsFile file(std::move(fileEntity));
+
+    auto result = file.GetName();
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_GetName_003";
+}
+
+/**
  * @tc.name: FsFileTest_GetParent_001
  * @tc.desc: Test function of FsFile::GetParent interface for SUCCESS when path is uri.
  * @tc.size: MEDIUM
@@ -245,7 +324,9 @@ HWTEST_F(FsFileTest, FsFileTest_GetParent_001, testing::ext::TestSize.Level1)
     auto path = testDir + "/FsFileTest_GetParent_001.txt";
     ASSERT_TRUE(FileUtils::CreateFile(path, "content"));
 
+    auto expectedFd = 10;
     auto fileEntity = make_unique<FileEntity>();
+    fileEntity->fd_ = make_unique<DistributedFS::FDGuard>(expectedFd, false);
     fileEntity->uri_ = "file://" + path;
 
     FsFile file(std::move(fileEntity));
@@ -283,6 +364,31 @@ HWTEST_F(FsFileTest, FsFileTest_GetParent_002, testing::ext::TestSize.Level1)
 }
 
 /**
+ * @tc.name: FsFileTest_GetParent_003
+ * @tc.desc: Test function of FsFile::GetParent interface for FAILURE when fileEntity->fd_ is nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_GetParent_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_GetParent_003";
+
+    auto fileEntity = make_unique<FileEntity>();
+    fileEntity->fd_ = nullptr;
+    FsFile file(std::move(fileEntity));
+
+    auto result = file.GetParent();
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_GetParent_003";
+}
+
+/**
  * @tc.name: FsFileTest_Lock_001
  * @tc.desc: Test function of FsFile::Lock interface for FAILURE when fileEntity is nullptr.
  * @tc.size: MEDIUM
@@ -303,6 +409,31 @@ HWTEST_F(FsFileTest, FsFileTest_Lock_001, testing::ext::TestSize.Level1)
     EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_Lock_001";
+}
+
+/**
+ * @tc.name: FsFileTest_Lock_002
+ * @tc.desc: Test function of FsFile::Lock interface for FAILURE when fileEntity->fd_ is nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileTest, FsFileTest_Lock_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileTest-begin FsFileTest_Lock_002";
+
+    auto fileEntity = make_unique<FileEntity>();
+    fileEntity->fd_ = nullptr;
+    FsFile file(std::move(fileEntity));
+
+    auto result = file.Lock(true);
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005);
+    EXPECT_EQ(err.GetErrMsg(), "I/O error");
+
+    GTEST_LOG_(INFO) << "FsFileTest-end FsFileTest_Lock_002";
 }
 
 /**

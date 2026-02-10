@@ -63,6 +63,7 @@ public:
     static FsResult<FsFile *> Constructor();
     FsResult<int32_t> GetFD() const;
     void RemoveEntity();
+    bool CheckFileEntityValid() const;
 
 private:
     unique_ptr<FileEntity> fileEntity;

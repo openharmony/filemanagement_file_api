@@ -112,6 +112,7 @@ ohos_unittest("napi_file_fs_mock_test") {
     "mod_fs/properties/mkdtemp_mock_test.cpp",
     "mod_fs/properties/movedir_mock_test.cpp",
     "mod_fs/properties/prop_n_exporter_mock_test.cpp",
+    "mod_fs/properties/read_lines_mock_test.cpp",
     "mod_fs/properties/read_text_mock_test.cpp",
     "mod_fs/properties/rename_mock_test.cpp",
     "mod_fs/properties/stat_mock_test.cpp",
