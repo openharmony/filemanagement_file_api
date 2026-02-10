@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,13 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
     error_code errCode;
     if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
         HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
-        return NError(errCode.value());
+        if (errCode.value() == EOPNOTSUPP) {
+            return NError(errCode.value(), "Operation not supported: Failed to copy file. "
+                "Possible causes include a directory with the same name as the source file exists in the target path, "
+                "unsupported filesystem metadata operations or invalid source file type.");
+        } else {
+            return NError(errCode.value());
+        }
     }
 #else
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> copyfile_req = {
