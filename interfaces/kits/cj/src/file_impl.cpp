@@ -249,7 +249,7 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Open(const char* path, int64_t
 int FileEntity::GetFD(int64_t id)
 {
     auto fileEntity = FFIData::GetData<FileEntity>(id);
-    if (!fileEntity) {
+    if (fileEntity == nullptr || fileEntity->fd_.get() == nullptr) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
         return ERR_INVALID_INSTANCE_CODE;
     }
@@ -371,7 +371,7 @@ const char* FileEntity::GetName(int64_t id)
 int FileEntity::TryLock(int64_t id, bool exclusive)
 {
     auto fileEntity = FFIData::GetData<FileEntity>(id);
-    if (!fileEntity) {
+    if (fileEntity == nullptr || fileEntity->fd_.get() == nullptr) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
         return ERR_INVALID_INSTANCE_CODE;
     }
@@ -388,7 +388,7 @@ int FileEntity::TryLock(int64_t id, bool exclusive)
 int FileEntity::UnLock(int64_t id)
 {
     auto fileEntity = FFIData::GetData<FileEntity>(id);
-    if (!fileEntity) {
+    if (fileEntity == nullptr || fileEntity->fd_.get() == nullptr) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
         return ERR_INVALID_INSTANCE_CODE;
     }

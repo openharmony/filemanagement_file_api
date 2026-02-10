@@ -90,8 +90,9 @@ void RandomAccessFileImpl::SetFilePointerSync(int64_t fp)
 }
 void RandomAccessFileImpl::CloseSync()
 {
-    if (entity_ == nullptr) {
+    if (entity_ == nullptr || entity_->fd.get() == nullptr) {
         LOGE("Failed to get entity.");
+        entity_ = nullptr;
         return;
     }
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> close_req = {
@@ -109,7 +110,7 @@ void RandomAccessFileImpl::CloseSync()
 }
 std::tuple<int32_t, int64_t> RandomAccessFileImpl::WriteSync(char* buf, size_t len, int64_t offset)
 {
-    if (entity_ == nullptr) {
+    if (entity_ == nullptr || entity_->fd.get() == nullptr) {
         LOGE("Failed to get entity.");
         return {EIO, 0};
     }
@@ -124,7 +125,7 @@ std::tuple<int32_t, int64_t> RandomAccessFileImpl::WriteSync(char* buf, size_t l
 }
 std::tuple<int32_t, int64_t> RandomAccessFileImpl::ReadSync(char* buf, size_t len, int64_t offset)
 {
-    if (entity_ == nullptr) {
+    if (entity_ == nullptr || entity_->fd.get() == nullptr) {
         LOGE("Failed to get entity.");
         return {EIO, 0};
     }

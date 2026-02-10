@@ -85,7 +85,7 @@ static void SaveClassStream(napi_env env)
     }(env);
 }
 
-static napi_value InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype(&fclose)> fp)
+static napi_value InstantiateStream(napi_env env, std::shared_ptr<FILE> fp)
 {
     napi_value objStream = FileManagement::LibN::NClass::InstantiateClass(
         env,
@@ -96,13 +96,14 @@ static napi_value InstantiateStream(napi_env env, std::unique_ptr<FILE, decltype
         return nullptr;
     }
 
-    auto streamEntity = FileManagement::LibN::NClass::GetEntityOf<StreamEntity>(env, objStream);
+    auto streamEntity =
+        FileManagement::LibN::NClass::GetEntityOf<FileManagement::ModuleFileIO::StreamEntity>(env, objStream);
     if (!streamEntity) {
         LOGE("[Stream]: Cannot instantiate stream because of void entity");
         return nullptr;
     }
 
-    streamEntity->fp.swap(fp);
+    streamEntity->fp = fp;
     return objStream;
 }
 
@@ -333,12 +334,13 @@ int64_t FfiCreateStreamFromNapi(napi_env env, napi_value stream)
         return ERR_INVALID_INSTANCE_CODE;
     }
 
-    auto streamEntity = FileManagement::LibN::NClass::GetEntityOf<StreamEntity>(env, stream);
+    auto streamEntity =
+        FileManagement::LibN::NClass::GetEntityOf<FileManagement::ModuleFileIO::StreamEntity>(env, stream);
     if (!streamEntity) {
         LOGE("[Stream]: Cannot instantiate stream because of void entity");
         return ERR_INVALID_INSTANCE_CODE;
     }
-    auto streamImpl = FFIData::Create<StreamImpl>(std::move(streamEntity->fp));
+    auto streamImpl = FFIData::Create<StreamImpl>(streamEntity->fp);
     if (streamImpl == nullptr) {
         LOGE("[Stream]: Create ffidata failed.");
         return ERR_INVALID_INSTANCE_CODE;
