@@ -21,7 +21,6 @@
 
 #include "file_entity.h"
 #include "sys_file_mock.h"
-#include "ut_file_utils.h"
 #include "uv_fs_mock.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
@@ -35,9 +34,6 @@ public:
     static void TearDownTestSuite();
     void SetUp();
     void TearDown();
-
-private:
-    const string testDir = FileUtils::testRootDir + "/FsFileMockTest";
 };
 
 void FsFileMockTest::SetUpTestSuite()
@@ -58,7 +54,6 @@ void FsFileMockTest::TearDownTestSuite()
 void FsFileMockTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp";
-    ASSERT_TRUE(FileUtils::CreateDirectories(testDir, true));
 }
 
 void FsFileMockTest::TearDown()
@@ -77,8 +72,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_001, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetPath_001";
 
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
-    entity->path_ = testDir + "/FsFileMockTest_GetPath_001.txt";
+    entity->fd_ = make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    entity->path_ = "fakePath/FsFileMockTest_GetPath_001.txt";
     entity->uri_ = "";
     FsFile fsFile(std::move(entity));
 
@@ -107,8 +104,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetPath_002, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetPath_002";
 
-    auto filepath = testDir + "/FsFileMockTest_GetPath_002.txt";
+    string filepath = "fakePath/FsFileMockTest_GetPath_002.txt";
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
+    entity->fd_ = make_unique<DistributedFS::FDGuard>(expectedFd, false);
     entity->path_ = filepath;
     entity->uri_ = "";
     FsFile fsFile(std::move(entity));
@@ -140,8 +139,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_001, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_001";
 
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
-    entity->path_ = testDir + "/FsFileMockTest_GetName_001.txt";
+    entity->fd_ = make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    entity->path_ = "fakePath/FsFileMockTest_GetName_001.txt";
     entity->uri_ = "";
     FsFile fsFile(std::move(entity));
 
@@ -170,8 +171,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetName_002, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetName_002";
 
-    auto filepath = testDir + "/FsFileMockTest_GetName_002.txt";
+    string filepath = "fakePath/FsFileMockTest_GetName_002.txt";
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
+    entity->fd_ = make_unique<DistributedFS::FDGuard>(expectedFd, false);
     entity->path_ = filepath;
     entity->uri_ = "";
     FsFile fsFile(std::move(entity));
@@ -203,8 +206,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_001, testing::ext::TestSize.Le
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_001";
 
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
-    entity->path_ = testDir + "/FsFileMockTest_GetParent_001.txt";
+    entity->fd_ = make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    entity->path_ = "fakePath/FsFileMockTest_GetParent_001.txt";
     entity->uri_ = "";
     FsFile fsFile(std::move(entity));
 
@@ -233,8 +238,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_002, testing::ext::TestSize.Le
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_GetParent_002";
 
-    auto filepath = testDir + "/FsFileMockTest_GetParent_002.txt";
+    string filepath = "fakePath/FsFileMockTest_GetParent_002.txt";
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
+    entity->fd_ = make_unique<DistributedFS::FDGuard>(expectedFd, false);
     entity->path_ = filepath;
     entity->uri_ = "";
     FsFile fsFile(std::move(entity));
@@ -250,7 +257,7 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_GetParent_002, testing::ext::TestSize.Le
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     ASSERT_TRUE(res.IsSuccess());
     auto path = res.GetData().value();
-    EXPECT_EQ(path, testDir);
+    EXPECT_EQ(path, "fakePath");
 
     GTEST_LOG_(INFO) << "FsFileMockTest-end FsFileMockTest_GetParent_002";
 }
@@ -266,9 +273,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_001";
 
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
-    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
-    entity->path_ = testDir + "/FsFileMockTest_Lock_001.txt";
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    entity->path_ = "fakePath/FsFileMockTest_Lock_001.txt";
     FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
@@ -293,9 +301,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_Lock_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_Lock_002";
 
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
-    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
-    entity->path_ = testDir + "/FsFileMockTest_Lock_002.txt";
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    entity->path_ = "fakePath/FsFileMockTest_Lock_002.txt";
     FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
@@ -323,9 +332,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_001, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_001";
 
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
-    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
-    entity->path_ = testDir + "/FsFileMockTest_TryLock_001.txt";
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    entity->path_ = "fakePath/FsFileMockTest_TryLock_001.txt";
     FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
@@ -350,9 +360,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_TryLock_002, testing::ext::TestSize.Leve
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_TryLock_002";
 
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
-    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
-    entity->path_ = testDir + "/FsFileMockTest_TryLock_002.txt";
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    entity->path_ = "fakePath/FsFileMockTest_TryLock_002.txt";
     FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
@@ -380,9 +391,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_001, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_001";
 
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
-    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
-    entity->path_ = testDir + "/FsFileMockTest_UnLock_001.txt";
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    entity->path_ = "fakePath/FsFileMockTest_UnLock_001.txt";
     FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();
@@ -407,9 +419,10 @@ HWTEST_F(FsFileMockTest, FsFileMockTest_UnLock_002, testing::ext::TestSize.Level
 {
     GTEST_LOG_(INFO) << "FsFileMockTest-begin FsFileMockTest_UnLock_002";
 
+    auto expectedFd = 10;
     auto entity = std::make_unique<FileEntity>();
-    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(1, false);
-    entity->path_ = testDir + "/FsFileMockTest_UnLock_002.txt";
+    entity->fd_ = std::make_unique<DistributedFS::FDGuard>(expectedFd, false);
+    entity->path_ = "fakePath/FsFileMockTest_UnLock_002.txt";
     FsFile fsFile(std::move(entity));
 
     auto fileMock = SysFileMock::GetMock();

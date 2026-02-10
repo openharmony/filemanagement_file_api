@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
+* Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -41,6 +41,20 @@ static tuple<int, unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *>> RealPa
     return { ret, move(realpathReq) };
 }
 
+bool FsFile::CheckFileEntityValid() const
+{
+    if (!fileEntity) {
+        HILOGE("Failed to get file entity");
+        return false;
+    }
+
+    if (!fileEntity->fd_) {
+        HILOGE("fileEntity fd is not exist");
+        return false;
+    }
+    return true;
+}
+
 void FsFile::RemoveEntity()
 {
     fileEntity = nullptr;
@@ -48,19 +62,19 @@ void FsFile::RemoveEntity()
 
 FsResult<int32_t> FsFile::GetFD() const
 {
-    if (!fileEntity) {
-        HILOGE("Failed to get file entity");
+    if (!CheckFileEntityValid()) {
         return FsResult<int32_t>::Error(EINVAL);
     }
+
     return FsResult<int32_t>::Success(fileEntity->fd_.get()->GetFD());
 }
 
 FsResult<string> FsFile::GetPath() const
 {
-    if (!fileEntity) {
-        HILOGE("Failed to get file entity");
+    if (!CheckFileEntityValid()) {
         return FsResult<string>::Error(EINVAL);
     }
+
     if (fileEntity->uri_.length() != 0) {
         AppFileService::ModuleFileUri::FileUri fileUri(fileEntity->uri_);
         return FsResult<string>::Success(fileUri.GetPath());
@@ -75,10 +89,10 @@ FsResult<string> FsFile::GetPath() const
 
 FsResult<string> FsFile::GetName() const
 {
-    if (!fileEntity) {
-        HILOGE("Failed to get file entity");
+    if (!CheckFileEntityValid()) {
         return FsResult<string>::Error(EINVAL);
     }
+
     if (fileEntity->uri_.length() != 0) {
         AppFileService::ModuleFileUri::FileUri fileUri(fileEntity->uri_);
         return FsResult<string>::Success(fileUri.GetName());
@@ -99,8 +113,7 @@ FsResult<string> FsFile::GetName() const
 
 FsResult<string> FsFile::GetParent() const
 {
-    if (!fileEntity) {
-        HILOGE("Failed to get file entity");
+    if (!CheckFileEntityValid()) {
         return FsResult<string>::Error(EINVAL);
     }
 
@@ -149,13 +162,7 @@ FsResult<void> FsFile::Lock(bool exclusive) const
 FsResult<void> FsFile::TryLock(bool exclusive) const
 {
     FileFsTrace traceTryLock("TryLock");
-    if (!fileEntity) {
-        HILOGE("Failed to get file entity");
-        return FsResult<void>::Error(EINVAL);
-    }
-
-    if (!fileEntity->fd_) {
-        HILOGE("File has been closed in TryLock possibly");
+    if (!CheckFileEntityValid()) {
         return FsResult<void>::Error(EINVAL);
     }
 
@@ -175,13 +182,7 @@ FsResult<void> FsFile::TryLock(bool exclusive) const
 FsResult<void> FsFile::UnLock() const
 {
     FileFsTrace traceUnLock("UnLock");
-    if (!fileEntity) {
-        HILOGE("Failed to get file entity");
-        return FsResult<void>::Error(EINVAL);
-    }
-
-    if (!fileEntity->fd_) {
-        HILOGE("File has been closed in UnLock possibly");
+    if (!CheckFileEntityValid()) {
         return FsResult<void>::Error(EINVAL);
     }
 
