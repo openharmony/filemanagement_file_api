@@ -147,7 +147,8 @@ enum ErrCodeSuffixOfStorageService {
     E_SET_EXT_BUNDLE_STATS,
     E_GET_EXT_BUNDLE_STATS,
     E_GET_ALL_EXT_BUNDLE_STATS,
-    E_STORAGE_RETRY
+    E_STORAGE_RETRY,
+    E_GET_SYSTEM_DATA_SIZE = 18
 };
 
 enum ErrCodeSuffixOfUserFileService {
@@ -403,6 +404,8 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         E_GET_ALL_EXT_BUNDLE_STATS, "get all ext bundle failed" } },
     { STORAGE_SERVICE_SYS_CAP_TAG + E_STORAGE_RETRY, { STORAGE_SERVICE_SYS_CAP_TAG + E_STORAGE_RETRY,
         "retry failed" } },
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_SYSTEM_DATA_SIZE, { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_SYSTEM_DATA_SIZE,
+        "Failed to query the system data size" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, "IPC error" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_URIS, { USER_FILE_SERVICE_SYS_CAP_TAG + E_URIS, "Invalid uri" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_GETINFO, { USER_FILE_SERVICE_SYS_CAP_TAG + E_GETINFO,
