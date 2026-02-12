@@ -206,9 +206,9 @@ FsResult<void> CopyFileCore::DoCopyFile(FileInfo &src, FileInfo &dest,
     if (src.isPath && dest.isPath) {
         auto err = IsAllPath(src, dest);
         if (err == EOPNOTSUPP) {
-            return FsResult<void>::ErrorWithMsg(err, "Operation not supported: Failed to copy file. "
-                "Possible causes include a directory with the same name as the source file exists in the target path, "
-                "unsupported filesystem metadata operations or invalid source file type.");
+            return FsResult<void>::ErrorWithMsg(err, "Unknown error. Possible causes: "
+                "1.A directory with the same name as the target file already exists in the target path. "
+                "2.Invalid source file type 3.Unsupported filesystem metadata operations.");
         } else if (err) {
             return FsResult<void>::Error(err);
         }
