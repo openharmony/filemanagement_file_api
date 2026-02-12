@@ -44,9 +44,9 @@ static NError IsAllPath(FileInfo& srcFile, FileInfo& destFile)
     if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
         HILOGE("Failed to copy file, error code: %{public}d", errCode.value());
         if (errCode.value() == EOPNOTSUPP) {
-            return NError(errCode.value(), "Operation not supported: Failed to copy file. "
-                "Possible causes include a directory with the same name as the source file exists in the target path, "
-                "unsupported filesystem metadata operations or invalid source file type.");
+            return NError(errCode.value(), "Unknown error. Possible causes: "
+                "1.A directory with the same name as the target file already exists in the target path. "
+                "2.Invalid source file type 3.Unsupported filesystem metadata operations.");
         } else {
             return NError(errCode.value());
         }
