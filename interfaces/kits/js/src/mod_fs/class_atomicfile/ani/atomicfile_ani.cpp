@@ -145,13 +145,19 @@ static ani_object CreateReadStream(ani_env *env, ani_string filePath)
 
     ani_method ctor;
     tie(ret, ctor) = aniCache.GetMethod(env, FS::ReadStream::classDesc, FS::ReadStream::ctorDesc,
-        FS::ReadStream::ctorSig1);
+        FS::ReadStream::ctorSig);
     if (ret != ANI_OK) {
         return nullptr;
     }
 
+    ani_ref undefinedArgument {};
+    if (ANI_OK != env->GetUndefined(&undefinedArgument)) {
+        HILOGE("GetUndefined Failed");
+        return nullptr;
+    }
+
     ani_object obj;
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath)) {
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, undefinedArgument)) {
         HILOGE("New %{public}s obj Failed", FS::ReadStream::classDesc.c_str());
         return nullptr;
     }
@@ -169,13 +175,19 @@ static ani_object CreateWriteStream(ani_env *env, ani_string filePath)
 
     ani_method ctor;
     tie(ret, ctor) = aniCache.GetMethod(env, FS::WriteStream::classDesc, FS::WriteStream::ctorDesc,
-        FS::WriteStream::ctorSig1);
+        FS::WriteStream::ctorSig);
     if (ret != ANI_OK) {
         return nullptr;
     }
 
+    ani_ref undefinedArgument {};
+    if (ANI_OK != env->GetUndefined(&undefinedArgument)) {
+        HILOGE("GetUndefined Failed");
+        return nullptr;
+    }
+
     ani_object obj;
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath)) {
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, filePath, undefinedArgument)) {
         HILOGE("New %{public}s obj Failed", FS::WriteStream::classDesc.c_str());
         return nullptr;
     }
