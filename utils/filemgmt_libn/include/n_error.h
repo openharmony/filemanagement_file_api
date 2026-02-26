@@ -41,6 +41,7 @@ constexpr int CANCEL_ERR = -3;
 constexpr int ERRNO_NOERR = 0;
 constexpr int ECONNECTIONFAIL = 45;
 constexpr int ECONNECTIONABORT = 46;
+constexpr int NO_ERR_MSG_ERR = -13999999;
 constexpr int STORAGE_SERVICE_SYS_CAP_TAG = 13600000;
 constexpr int FILEIO_SYS_CAP_TAG = 13900000;
 constexpr int USER_FILE_MANAGER_SYS_CAP_TAG = 14000000;

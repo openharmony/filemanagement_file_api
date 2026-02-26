@@ -56,7 +56,7 @@ static int ConvertUVCode2ErrCode(int errCode)
     if (uvCode2ErrCodeTable.find(uvCode) != uvCode2ErrCodeTable.end()) {
         return uvCode2ErrCodeTable.at(uvCode);
     }
-    return UNKROWN_ERR;
+    return NO_ERR_MSG_ERR;
 }
 
 NError::NError() {}
@@ -70,7 +70,8 @@ NError::NError(int errCode)
         errMsg_ = it->second.second;
     } else {
         errno_ = errCodeTable.at(UNKROWN_ERR).first;
-        errMsg_ = errCodeTable.at(UNKROWN_ERR).second + ", errno is " + to_string(abs(errCode));
+        errMsg_ = "Unknown error. Possible causes: " + string(strerror(abs(errCode))) +
+            " , Internal errno is " + to_string(abs(errCode));
     }
 }
 
