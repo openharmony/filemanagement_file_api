@@ -40,8 +40,7 @@ FsError::FsError(int errCode)
         errMsg_ = it->second.second;
     } else {
         errno_ = errCodeTable.at(UNKNOWN_ERR).first;
-        errMsg_ = "Unknown error. Possible causes: " + string(strerror(abs(errCode))) +
-            " , Internal errno is " + to_string(abs(errCode));
+        errMsg_ = errCodeTable.at(UNKNOWN_ERR).second + " Internal errno is " + to_string(abs(errCode));
     }
 }
 
