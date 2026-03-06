@@ -149,6 +149,8 @@ enum ErrCodeSuffixOfStorageService {
     E_GET_EXT_BUNDLE_STATS,
     E_GET_ALL_EXT_BUNDLE_STATS,
     E_STORAGE_RETRY,
+    E_GET_INODE = 16,
+    E_GET_BUNDLE_INODES = 17,
     E_GET_SYSTEM_DATA_SIZE = 18
 };
 
@@ -405,6 +407,10 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         E_GET_ALL_EXT_BUNDLE_STATS, "get all ext bundle failed" } },
     { STORAGE_SERVICE_SYS_CAP_TAG + E_STORAGE_RETRY, { STORAGE_SERVICE_SYS_CAP_TAG + E_STORAGE_RETRY,
         "retry failed" } },
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_INODE, { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_INODE,
+        "Failed to query the inode information of the data partition" } },
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_BUNDLE_INODES, { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_BUNDLE_INODES,
+        "Failed to query the inode information of the application" } },
     { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_SYSTEM_DATA_SIZE, { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_SYSTEM_DATA_SIZE,
         "Failed to query the system data size" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, "IPC error" } },
