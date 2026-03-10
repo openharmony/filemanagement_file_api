@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,11 @@ static bool ParseListenerFromOptionArg(ani_env *env, const ani_object &options, 
     }
 
     ani_vm *vm = nullptr;
-    env->GetVM(&vm);
+    if ((env->GetVM(&vm)) != ANI_OK) {
+        HILOGE("Failed to get vm.");
+        return false;
+    }
+
     auto listener = CreateSharedPtr<ProgressListenerAni>(vm, cbRef);
     if (listener == nullptr) {
         HILOGE("Failed to request heap memory.");

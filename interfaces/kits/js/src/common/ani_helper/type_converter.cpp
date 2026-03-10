@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,8 +199,8 @@ static std::tuple<bool, int32_t> ParseFd(ani_env *env, const ani_object &pathOrF
         return { false, {} };
     }
 
-    env->Object_InstanceOf(pathOrFd, cls, &isFd);
-    if (isFd) {
+    ret = env->Object_InstanceOf(pathOrFd, cls, &isFd);
+    if (ret == ANI_OK && isFd) {
         ani_method toIntAniMethod;
         ani_status ret;
         tie(ret, toIntAniMethod) =
@@ -234,8 +234,8 @@ std::tuple<bool, FileInfo> TypeConverter::ToFileInfo(ani_env *env, const ani_obj
         return { false, FileInfo { false, {}, {} } };
     }
 
-    env->Object_InstanceOf(pathOrFd, stringClass, &isPath);
-    if (isPath) {
+    ret = env->Object_InstanceOf(pathOrFd, stringClass, &isPath);
+    if (ret == ANI_OK && isPath) {
         auto [succ, path] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(pathOrFd));
         if (!succ) {
             HILOGE("Parse file path failed");
@@ -299,8 +299,14 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
         return { false, nullptr };
     }
 
+    ani_ref undefined;
+    if ((ret = env->GetUndefined(&undefined)) != ANI_OK) {
+        HILOGE("GetUndefined err: %{private}d", ret);
+        return { false, nullptr };
+    }
+
     ani_object obj;
-    if ((ret = env->Object_New(cls, ctor, &obj, length)) != ANI_OK) {
+    if ((ret = env->Object_New(cls, ctor, &obj, length, undefined)) != ANI_OK) {
         HILOGE("New Uint8Array err: %{private}d", ret);
         return { false, nullptr };
     }
@@ -332,9 +338,14 @@ std::tuple<bool, ani_array> TypeConverter::ToAniStringList(
         return { false, nullptr };
     }
 
-    ani_array result = nullptr;
     ani_ref undefined;
-    env->GetUndefined(&undefined);
+    auto ret = env->GetUndefined(&undefined);
+    if (ret != ANI_OK) {
+        HILOGE("GetUndefined err: %{private}d", ret);
+        return { false, nullptr };
+    }
+
+    ani_array result = nullptr;
     if (env->Array_New(length, undefined, &result) != ANI_OK) {
         return { false, result };
     }

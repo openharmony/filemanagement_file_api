@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,8 +68,8 @@ static tuple<bool, bool> JudgeFile(ani_env *env, ani_object obj)
     }
 
     ani_boolean isString = false;
-    env->Object_InstanceOf(obj, stringClass, &isString);
-    if (isString) {
+    ret = env->Object_InstanceOf(obj, stringClass, &isString);
+    if (ret == ANI_OK && isString) {
         return { true, true };
     }
 
@@ -80,8 +80,8 @@ static tuple<bool, bool> JudgeFile(ani_env *env, ani_object obj)
     }
 
     ani_boolean isFile = false;
-    env->Object_InstanceOf(obj, fileClass, &isFile);
-    if (isFile) {
+    ret = env->Object_InstanceOf(obj, fileClass, &isFile);
+    if (ret == ANI_OK && isFile) {
         return { true, false };
     }
     HILOGE("Invalid file type");
