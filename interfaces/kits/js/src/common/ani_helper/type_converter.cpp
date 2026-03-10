@@ -299,8 +299,14 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
         return { false, nullptr };
     }
 
+    ani_ref undefined;
+    if ((ret = env->GetUndefined(&undefined)) != ANI_OK) {
+        HILOGE("GetUndefined err: %{private}d", ret);
+        return { false, nullptr };
+    }
+
     ani_object obj;
-    if ((ret = env->Object_New(cls, ctor, &obj, length)) != ANI_OK) {
+    if ((ret = env->Object_New(cls, ctor, &obj, length, undefined)) != ANI_OK) {
         HILOGE("New Uint8Array err: %{private}d", ret);
         return { false, nullptr };
     }

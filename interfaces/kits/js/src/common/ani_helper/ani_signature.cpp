@@ -77,7 +77,8 @@ const string BuiltInTypes::Array::objectSetterSig =
 // BuiltInTypes::ArrayBuffer
 const Type BuiltInTypes::ArrayBuffer::classType = Builder::BuildClass("std.core.ArrayBuffer");
 const string BuiltInTypes::ArrayBuffer::classDesc = BuiltInTypes::ArrayBuffer::classType.Descriptor();
-const string BuiltInTypes::ArrayBuffer::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::intType });
+const string BuiltInTypes::ArrayBuffer::ctorSig =
+    Builder::BuildSignatureDescriptor({ BasicTypes::intType, BoxedTypes::Int::classType });
 // BuiltInTypes::BigInt
 const Type BuiltInTypes::BigInt::classType = Builder::BuildClass("std.core.BigInt");
 const string BuiltInTypes::BigInt::classDesc = BuiltInTypes::BigInt::classType.Descriptor();
