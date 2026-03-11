@@ -225,7 +225,7 @@ const char* FfiOHOSFILEFsGetPath(int64_t id)
     auto instance = FFIData::GetData<FileEntity>(id);
     if (!instance) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
-        return "error";
+        return strdup("error");
     }
     return instance->GetPath(id);
 }
@@ -236,7 +236,7 @@ const char* FfiOHOSFILEFsGetName(int64_t id)
     auto instance = FFIData::GetData<FileEntity>(id);
     if (!instance) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
-        return "error";
+        return strdup("error");
     }
     return instance->GetName(id);
 }
