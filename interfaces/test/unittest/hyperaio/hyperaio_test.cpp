@@ -74,9 +74,6 @@ namespace OHOS::HyperAio {
         std::unique_ptr<HyperAio> hyperAio_ = std::make_unique<HyperAio>();
         int32_t result = hyperAio_->SupportIouring();
         EXPECT_EQ((result & IOURING_APP_PERMISSION) == 0, true);
-        if ((result & IOURING_APP_PERMISSION) == 0) {
-            return;
-        }
         GTEST_LOG_(INFO) << "HyperAioTest-end HyperAio_SupportIouring_0000";
     }
 
