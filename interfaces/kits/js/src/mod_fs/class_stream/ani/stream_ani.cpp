@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,8 +101,8 @@ static std::tuple<bool, ani_string> ParseStringBuffer(ani_env *env, const ani_ob
     }
 
     ani_boolean isString;
-    env->Object_InstanceOf(buf, cls, &isString);
-    if (!isString) {
+    ret = env->Object_InstanceOf(buf, cls, &isString);
+    if (ret != ANI_OK || !isString) {
         HILOGE("Object_InstanceOf is failed");
         return { false, {} };
     }
@@ -119,8 +119,8 @@ static std::tuple<bool, ani_arraybuffer> ParseArrayBuffer(ani_env *env, const an
     }
 
     ani_boolean isArrayBuffer;
-    env->Object_InstanceOf(buf, cls, &isArrayBuffer);
-    if (!isArrayBuffer) {
+    ret = env->Object_InstanceOf(buf, cls, &isArrayBuffer);
+    if (ret != ANI_OK || !isArrayBuffer) {
         return { false, {} };
     }
     auto result = static_cast<ani_arraybuffer>(buf);

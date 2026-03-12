@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,8 +46,13 @@ ani_object WatcherAni::CreateWatcherSync(
         ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
+
     ani_vm *vm = nullptr;
-    env->GetVM(&vm);
+    if ((env->GetVM(&vm)) != ANI_OK) {
+        HILOGE("Failed to get vm.");
+        return nullptr;
+    }
+
     auto eventListener = CreateSharedPtr<WatchEventListener>(vm, cbRef);
     if (eventListener == nullptr) {
         HILOGE("Failed to request heap memory.");
