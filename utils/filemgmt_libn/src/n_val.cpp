@@ -19,6 +19,7 @@
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "napi/native_common.h"
 #include "n_error.h"
 
 namespace OHOS {
@@ -414,27 +415,27 @@ napi_property_descriptor NVal::DeclareNapiStaticProperty(const char *name, napi_
 
 napi_property_descriptor NVal::DeclareNapiFunction(const char *name, napi_callback func)
 {
-    return {(name), nullptr, (func), nullptr, nullptr, nullptr, napi_default, nullptr};
+    return DECLARE_NAPI_FUNCTION(name, func);
 }
 
 napi_property_descriptor NVal::DeclareNapiStaticFunction(const char *name, napi_callback func)
 {
-    return {(name), nullptr, (func), nullptr, nullptr, nullptr, napi_static, nullptr};
+    return DECLARE_NAPI_STATIC_FUNCTION(name, func);
 }
 
 napi_property_descriptor NVal::DeclareNapiGetter(const char *name, napi_callback getter)
 {
-    return {(name), nullptr, nullptr, (getter), nullptr, nullptr, napi_default, nullptr};
+    return DECLARE_NAPI_GETTER(name, getter);
 }
 
 napi_property_descriptor NVal::DeclareNapiSetter(const char *name, napi_callback setter)
 {
-    return {(name), nullptr, nullptr, nullptr, (setter), nullptr, napi_default, nullptr};
+    return DECLARE_NAPI_SETTER(name, setter);
 }
 
 napi_property_descriptor NVal::DeclareNapiGetterSetter(const char *name, napi_callback getter, napi_callback setter)
 {
-    return {(name), nullptr, nullptr, (getter), (setter), nullptr, napi_default, nullptr};
+    return DECLARE_NAPI_GETTER_SETTER(name, getter, setter);
 }
 } // namespace LibN
 } // namespace FileManagement
