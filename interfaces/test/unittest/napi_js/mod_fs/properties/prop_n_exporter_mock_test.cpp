@@ -98,6 +98,104 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.L
 }
 
 /**
+ * @tc.name: PropNExporterMockTest_UnlinkSync_002
+ * @tc.desc: Test function of PropNExporter::UnlinkSync interface for FAILURE when InitArgs fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_UnlinkSync_002";
+    int envAddr = 0x1000;
+    int callbackInfoAddr = 0x1122;
+    napi_env env = reinterpret_cast<napi_env>(envAddr);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(callbackInfoAddr);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = PropNExporter::UnlinkSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_UnlinkSync_002";
+}
+
+/**
+ * @tc.name: PropNExporterMockTest_UnlinkSync_003
+ * @tc.desc: Test function of PropNExporter::UnlinkSync interface for FAILURE when ToUTF8StringPath fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_UnlinkSync_003";
+    int envAddr = 0x1000;
+    int callbackInfoAddr = 0x1122;
+    napi_env env = reinterpret_cast<napi_env>(envAddr);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(callbackInfoAddr);
+
+    size_t strLen = 10;
+    auto strPtr = make_unique<char[]>(strLen);
+    tuple<bool, std::unique_ptr<char[]>, size_t> tp = { false, move(strPtr), strLen };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(tp)));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = PropNExporter::UnlinkSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_UnlinkSync_003";
+}
+
+/**
+ * @tc.name: PropNExporterMockTest_UnlinkSync_004
+ * @tc.desc: Test function of PropNExporter::UnlinkSync interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+
+*/
+HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_UnlinkSync_004";
+    int envAddr = 0x1000;
+    int callbackInfoAddr = 0x1122;
+    napi_env env = reinterpret_cast<napi_env>(envAddr);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(callbackInfoAddr);
+
+    size_t strLen = 10;
+    auto strPtr = make_unique<char[]>(strLen);
+    tuple<bool, std::unique_ptr<char[]>, size_t> tp = { true, move(strPtr), strLen };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(tp)));
+    EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(1));
+
+    auto res = PropNExporter::UnlinkSync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_UnlinkSync_004";
+}
+
+/**
  * @tc.name: AccessTest_Sync_001
  * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILED with ARGS ERROR.
  * @tc.size: MEDIUM

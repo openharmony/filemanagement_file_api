@@ -60,7 +60,7 @@ void LseekMockTest::TearDown(void)
 
 /**
  * @tc.name: LseekMockTest_Sync_001
- * @tc.desc: Test function of Lseek::Sync interface for FAILED with ARGS ERROR.
+ * @tc.desc: Test function of Lseek::Sync interface for FAILURE when InitArgs fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -84,7 +84,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: LseekMockTest_Sync_002
- * @tc.desc: Test function of Lseek::Sync interface for FAILED with Analyze args ERROR.
+ * @tc.desc: Test function of Lseek::Sync interface for FAILURE when ToInt32 fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -106,5 +106,33 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_002, testing::ext::TestSize.Level1)
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_002";
+}
+
+/**
+ * @tc.name: LseekMockTest_Sync_003
+ * @tc.desc: Test function of Lseek::Sync interface for FAILURE when ToInt64 fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(LseekMockTest, LseekMockTest_Sync_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LseekMockTest-begin LseekMockTest_Sync_003";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    tuple<bool, int> isFd = { true, 3 };
+    tuple<bool, int> isOffset = { false, 0 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, ToInt64()).WillOnce(testing::Return(isOffset));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Lseek::Sync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_003";
 }
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
