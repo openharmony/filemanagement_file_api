@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,6 +110,191 @@ HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_001, testing::ext::TestSize.Level1)
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "UtimesMockTest-end UtimesMockTest_Sync_001";
+}
+
+/**
+ * @tc.name: UtimesMockTest_Sync_002
+ * @tc.desc: Test function of Utimes::Sync interface for FAILURE when uv_fs_utime fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UtimesMockTest-begin UtimesMockTest_Sync_002";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Utimes::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "UtimesMockTest-end UtimesMockTest_Sync_002";
+}
+
+/**
+ * @tc.name: UtimesMockTest_Sync_003
+ * @tc.desc: Test function of Utimes::Sync interface for FAILURE when ToUTF8StringPath fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UtimesMockTest-begin UtimesMockTest_Sync_003";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    const char *initSrc = "hello world";
+    size_t strLen = strlen(initSrc) + 1;
+    auto srcPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(srcPtr, nullptr);
+    auto ret = strncpy_s(srcPtr.get(), strLen, initSrc, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, std::unique_ptr<char[]>, size_t> srcRes = { false, move(srcPtr), 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Utimes::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "UtimesMockTest-end UtimesMockTest_Sync_003";
+}
+
+/**
+ * @tc.name: UtimesMockTest_Sync_004
+ * @tc.desc: Test function of Utimes::Sync interface for FAILURE when ToDouble fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_004, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UtimesMockTest-begin UtimesMockTest_Sync_004";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    const char *initSrc = "hello world";
+    size_t strLen = strlen(initSrc) + 1;
+    auto srcPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(srcPtr, nullptr);
+    auto ret = strncpy_s(srcPtr.get(), strLen, initSrc, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, std::unique_ptr<char[]>, size_t> srcRes = { true, move(srcPtr), 1 };
+    tuple<bool, double> mtimeRes = { false, 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
+    EXPECT_CALL(*libnMock, ToDouble()).WillOnce(testing::Return(move(mtimeRes)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Utimes::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "UtimesMockTest-end UtimesMockTest_Sync_004";
+}
+
+/**
+ * @tc.name: UtimesMockTest_Sync_005
+ * @tc.desc: Test function of Utimes::Sync interface for FAILURE when uv_fs_stat fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_005, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UtimesMockTest-begin UtimesMockTest_Sync_005";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    const char *initSrc = "hello world";
+    size_t strLen = strlen(initSrc) + 1;
+    auto srcPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(srcPtr, nullptr);
+    auto ret = strncpy_s(srcPtr.get(), strLen, initSrc, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, std::unique_ptr<char[]>, size_t> srcRes = { true, move(srcPtr), 1 };
+    tuple<bool, double> mtimeRes = { true, 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
+    EXPECT_CALL(*libnMock, ToDouble()).WillOnce(testing::Return(move(mtimeRes)));
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_)).Times(1);
+    EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Utimes::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "UtimesMockTest-end UtimesMockTest_Sync_005";
+}
+
+/**
+ * @tc.name: UtimesMockTest_Sync_006
+ * @tc.desc: Test function of Utimes::Sync interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UtimesMockTest-begin UtimesMockTest_Sync_006";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    const char *initSrc = "hello world";
+    size_t strLen = strlen(initSrc) + 1;
+    auto srcPtr = make_unique<char[]>(strLen);
+    ASSERT_NE(srcPtr, nullptr);
+    auto ret = strncpy_s(srcPtr.get(), strLen, initSrc, strLen - 1);
+    ASSERT_EQ(ret, EOK);
+
+    tuple<bool, std::unique_ptr<char[]>, size_t> srcRes = { true, move(srcPtr), 1 };
+    tuple<bool, double> mtimeRes = { true, 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
+    EXPECT_CALL(*libnMock, ToDouble()).WillOnce(testing::Return(move(mtimeRes)));
+    EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_)).Times(2);
+    EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(1));
+    EXPECT_CALL(*uvMock, uv_fs_utime(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(1));
+
+    auto res = Utimes::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "UtimesMockTest-end UtimesMockTest_Sync_006";
 }
 
 } // namespace Test
