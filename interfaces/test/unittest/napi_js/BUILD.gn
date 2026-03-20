@@ -119,6 +119,7 @@ ohos_unittest("napi_file_fs_mock_test") {
     "mod_fs/properties/symlink_mock_test.cpp",
     "mod_fs/properties/truncate_mock_test.cpp",
     "mod_fs/properties/utimes_mock_test.cpp",
+    "mod_fs/properties/watcher_mock_test.cpp",
     "mod_fs/properties/xattr_mock_test.cpp",
     "mod_fs/common_func_test.cpp",
   ]
