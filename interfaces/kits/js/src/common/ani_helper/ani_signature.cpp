@@ -71,9 +71,9 @@ const string BuiltInTypes::Array::ctorSig = Builder::BuildSignatureDescriptor({ 
 const string BuiltInTypes::Array::getterDesc = "$_get";
 const string BuiltInTypes::Array::setterDesc = "$_set";
 const string BuiltInTypes::Array::objectGetterSig =
-    Builder::BuildSignatureDescriptor({ BasicTypes::intType }, BuiltInTypes::objectType);
+    Builder::BuildSignatureDescriptor({ BasicTypes::intType }, Builder::BuildAny());
 const string BuiltInTypes::Array::objectSetterSig =
-    Builder::BuildSignatureDescriptor({ BasicTypes::intType, BuiltInTypes::objectType });
+    Builder::BuildSignatureDescriptor({ BasicTypes::intType, Builder::BuildAny() });
 // BuiltInTypes::ArrayBuffer
 const Type BuiltInTypes::ArrayBuffer::classType = Builder::BuildClass("std.core.ArrayBuffer");
 const string BuiltInTypes::ArrayBuffer::classDesc = BuiltInTypes::ArrayBuffer::classType.Descriptor();
