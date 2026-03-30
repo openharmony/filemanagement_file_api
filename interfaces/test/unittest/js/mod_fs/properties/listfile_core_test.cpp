@@ -20,6 +20,7 @@
 #include <sys/prctl.h>
 
 #include "ut_file_utils.h"
+#include "i_file_filter.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -27,6 +28,26 @@ namespace ModuleFileIO {
 namespace Test {
 using namespace std;
 namespace fs = std::filesystem;
+
+struct FunctionTag {};
+
+class TestFileFilter : public IFileFilter {
+public:
+    explicit TestFileFilter(bool returnValue) : returnValue_(returnValue) {}
+    TestFileFilter(FunctionTag, std::function<bool(const std::string &)> filterFunc) : filterFunc_(filterFunc) {}
+
+    bool Filter(const std::string &name) override
+    {
+        if (filterFunc_) {
+            return filterFunc_(name);
+        }
+        return returnValue_;
+    }
+
+private:
+    bool returnValue_ = true;
+    std::function<bool(const std::string &)> filterFunc_ = nullptr;
+};
 
 class ListFileCoreTest : public testing::Test {
 public:
@@ -537,6 +558,320 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_017, testing::ext::TestSi
     EXPECT_EQ(files.size(), 5);
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_017";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_018
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when fileFilter matches all files in
+ * non-recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_018, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_018";
+
+    FsListFileOptions opt;
+    opt.recursion = false;
+    opt.listNum = 0;
+    auto testFilter = std::make_shared<TestFileFilter>(true);
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    std::vector<std::string> expected = { "data_1.data", "image_1.png", "level1", "photo_1.jpg", "text_1.txt" };
+    std::sort(files.begin(), files.end());
+    std::sort(expected.begin(), expected.end());
+    EXPECT_EQ(files, expected);
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_018";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_019
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when fileFilter matches all files with
+ * listNum limit in non-recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_019, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_019";
+
+    FsListFileOptions opt;
+    opt.recursion = false;
+    opt.listNum = 2;
+    auto testFilter = std::make_shared<TestFileFilter>(true);
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    EXPECT_EQ(files.size(), opt.listNum);
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_019";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_020
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when fileFilter matches all files in
+ * recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_020, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_020";
+
+    FsListFileOptions opt;
+    opt.recursion = true;
+    opt.listNum = 0;
+    auto testFilter = std::make_shared<TestFileFilter>(true);
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    EXPECT_EQ(files.size(), 12);
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_020";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_021
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when fileFilter matches all files with
+ * listNum limit in recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_021, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_021";
+
+    FsListFileOptions opt;
+    opt.recursion = true;
+    opt.listNum = 5;
+    auto testFilter = std::make_shared<TestFileFilter>(true);
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    EXPECT_EQ(files.size(), opt.listNum);
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_021";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_022
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when fileFilter matches specific file in
+ * non-recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_022, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_022";
+
+    FsListFileOptions opt;
+    opt.recursion = false;
+    opt.listNum = 0;
+    auto testFilter = std::make_shared<TestFileFilter>(FunctionTag {}, [](const std::string &name) {
+        return name == "text_1.txt";
+    });
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    ASSERT_EQ(files.size(), 1);
+    EXPECT_EQ(files[0], "text_1.txt");
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_022";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_023
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when fileFilter matches files starting with
+ * / in recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_023, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_023";
+
+    FsListFileOptions opt;
+    opt.recursion = true;
+    opt.listNum = 0;
+    auto testFilter = std::make_shared<TestFileFilter>(FunctionTag {}, [](const std::string &name) {
+        return name.find("/") == 0;
+    });
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    ASSERT_EQ(files.size(), 12);
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_023";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_024
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when fileFilter matches files starting with
+ * /level1 in recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_024, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_024";
+
+    FsListFileOptions opt;
+    opt.recursion = true;
+    opt.listNum = 0;
+    auto testFilter = std::make_shared<TestFileFilter>(FunctionTag {}, [](const std::string &name) {
+        return name.find("/level1") == 0;
+    });
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    std::vector<std::string> expected = { "/level1/data_2.data", "/level1/image_2.png", "/level1/level2/data_3.data",
+        "/level1/level2/image_3.png", "/level1/level2/photo_3.jpg", "/level1/level2/text_3.txt", "/level1/photo_2.jpg",
+        "/level1/text_2.txt" };
+    std::sort(files.begin(), files.end());
+    std::sort(expected.begin(), expected.end());
+    EXPECT_EQ(files, expected);
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_024";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_025
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for FAILURE when listNum is negative with fileFilter.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_025, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_025";
+
+    FsListFileOptions opt;
+    opt.recursion = false;
+    opt.listNum = -1;
+    auto testFilter = std::make_shared<TestFileFilter>(true);
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_025";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_026
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when fileFilter matches no files.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_026, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_026";
+
+    FsListFileOptions opt;
+    opt.recursion = false;
+    opt.listNum = 0;
+    auto testFilter = std::make_shared<TestFileFilter>(false);
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    ASSERT_EQ(files.size(), 0);
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_026";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_027
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when listNum exceeds actual file count in
+ * recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_027, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_027";
+
+    FsListFileOptions opt;
+    opt.recursion = true;
+    opt.listNum = 20;
+    auto testFilter = std::make_shared<TestFileFilter>(true);
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    ASSERT_EQ(files.size(), 12);
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_027";
+}
+
+/**
+ * @tc.name: ListFileCoreTest_DoListFile_028
+ * @tc.desc: Test function of ListFileCore::DoListFile interface for SUCCESS when fileFilter matches specific file in
+ * subdirectory in recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_028, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_028";
+
+    FsListFileOptions opt;
+    opt.recursion = true;
+    opt.listNum = 0;
+    auto testFilter = std::make_shared<TestFileFilter>(FunctionTag {}, [](const std::string &name) {
+        return name == "/level1/text_2.txt";
+    });
+    opt.fileFilter = testFilter;
+
+    auto result = ListFileCore::DoListFile(dataDir, opt);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto files = result.GetData().value();
+    ASSERT_EQ(files.size(), 1);
+    EXPECT_EQ(files[0], "/level1/text_2.txt");
+
+    GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_028";
 }
 
 } // namespace Test

@@ -25,6 +25,7 @@
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "i_file_filter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -94,6 +95,7 @@ static bool ValidOptionParam(const string &path, const optional<FsListFileOption
 {
     g_optionArgs.Clear();
     g_optionArgs.path = path;
+    g_optionArgs.originalPath = path;
 
     if (opt.has_value()) {
         auto op = opt.value();
@@ -114,6 +116,8 @@ static bool ValidOptionParam(const string &path, const optional<FsListFileOption
                 HILOGE("Failed to get filter prop.");
                 return false;
             }
+        } else if (op.fileFilter != nullptr) {
+            optionArgs.fileFilter = op.fileFilter;
         }
     }
 
@@ -187,6 +191,23 @@ static bool FilterLastModifyTime(const double lastModifiedAfter, const struct di
 
 static bool FilterResult(const struct dirent &filename)
 {
+    if (g_optionArgs.fileFilter) {
+        std::string filterName;
+        if (g_optionArgs.recursion) {
+            if (g_optionArgs.path == g_optionArgs.originalPath) {
+                filterName = "/" + std::string(filename.d_name);
+            } else {
+                filterName = g_optionArgs.path.substr(g_optionArgs.originalPath.length()) + '/' + filename.d_name;
+            }
+        } else {
+            filterName = filename.d_name;
+        }
+        auto matched = g_optionArgs.fileFilter->Filter(filterName);
+        if (matched) {
+            g_optionArgs.countNum++;
+        }
+        return matched;
+    }
     vector<string> fSuffixs = g_optionArgs.filter.GetSuffix();
     if (!FilterSuffix(fSuffixs, filename) && fSuffixs.size() > 0) {
         return false;

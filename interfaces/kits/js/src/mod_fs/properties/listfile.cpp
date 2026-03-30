@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,13 @@
 
 #include <fnmatch.h>
 #include <memory>
-#include <string>
 #include <string_view>
+#include <string>
 #include <sys/stat.h>
 #include <thread>
 #include <tuple>
 
+#include "file_filter_napi.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
@@ -30,7 +31,7 @@ namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-thread_local OptionArgs g_optionArgs;
+static thread_local OptionArgs g_optionArgs;
 
 static bool CheckSuffix(const vector<string> &suffixs)
 {
@@ -100,6 +101,21 @@ static bool GetFileFilterParam(const NVal &argv, FileFilter *filter)
     return true;
 }
 
+static bool GetFileFilterFunction(const NVal &fileFilterProp, OptionArgs *optionArgs)
+{
+    auto filterCallback = fileFilterProp.GetProp("filter");
+    if (!filterCallback.TypeIs(napi_function)) {
+        HILOGE("Failed to get FileFilter.filter function");
+        return false;
+    }
+    optionArgs->fileFilter = CreateSharedPtr<FileFilterNapi>(fileFilterProp.env_, fileFilterProp.val_, filterCallback);
+    if (!optionArgs->fileFilter) {
+        HILOGE("Failed to request heap memory.");
+        return false;
+    }
+    return true;
+}
+
 static bool GetOptionParam(const NVal &argv, OptionArgs *optionArgs)
 {
     bool succ = false;
@@ -128,7 +144,17 @@ static bool GetOptionParam(const NVal &argv, OptionArgs *optionArgs)
                 return false;
             }
         }
+    } else if (argv.HasProp("fileFilter")) {
+        NVal fileFilterProp = argv.GetProp("fileFilter");
+        if (!fileFilterProp.TypeIs(napi_undefined)) {
+            auto ret = GetFileFilterFunction(fileFilterProp, optionArgs);
+            if (!ret) {
+                HILOGE("Failed to get filterFilter prop.");
+                return false;
+            }
+        }
     }
+
     return true;
 }
 
@@ -136,6 +162,7 @@ static bool GetOptionArg(napi_env env, const NFuncArg &funcArg, OptionArgs &opti
 {
     optionArgs.Clear();
     optionArgs.path = path;
+    optionArgs.originalPath = path;
     if (funcArg.GetArgc() == NARG_CNT::ONE) {
         return true;
     }
@@ -217,6 +244,23 @@ static bool FilterLastModifyTime(const double lastModifiedAfter, const struct di
 
 static bool FilterResult(const struct dirent &filename)
 {
+    if (g_optionArgs.fileFilter) {
+        std::string filterName;
+        if (g_optionArgs.recursion) {
+            if (g_optionArgs.path == g_optionArgs.originalPath) {
+                filterName = "/" + std::string(filename.d_name);
+            } else {
+                filterName = g_optionArgs.path.substr(g_optionArgs.originalPath.length()) + '/' + filename.d_name;
+            }
+        } else {
+            filterName = filename.d_name;
+        }
+        auto matched = g_optionArgs.fileFilter->Filter(filterName);
+        if (matched) {
+            g_optionArgs.countNum++;
+        }
+        return matched;
+    }
     vector<string> fSuffixs = g_optionArgs.filter.GetSuffix();
     if (!FilterSuffix(fSuffixs, filename) && fSuffixs.size() > 0) {
         return false;
@@ -265,7 +309,7 @@ static void Deleter(struct NameListArg *arg)
 
 static int FilterFileRes(const string &path, vector<string> &dirents)
 {
-    unique_ptr<struct NameListArg, decltype(Deleter)*> pNameList = { new (nothrow) struct NameListArg, Deleter };
+    unique_ptr<struct NameListArg, decltype(Deleter) *> pNameList = { new (nothrow) struct NameListArg, Deleter };
     if (!pNameList) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -284,7 +328,7 @@ static int FilterFileRes(const string &path, vector<string> &dirents)
 
 static int RecursiveFunc(const string &path, vector<string> &dirents)
 {
-    unique_ptr<struct NameListArg, decltype(Deleter)*> pNameList = { new (nothrow) struct NameListArg, Deleter };
+    unique_ptr<struct NameListArg, decltype(Deleter) *> pNameList = { new (nothrow) struct NameListArg, Deleter };
     if (!pNameList) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -384,8 +428,8 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
     auto cbExec = [arg, optionArgsTmp]() -> NError {
         g_optionArgs = optionArgsTmp;
         int ret = 0;
-        ret = g_optionArgs.recursion ? RecursiveFunc(g_optionArgs.path, arg->dirents) :
-            FilterFileRes(g_optionArgs.path, arg->dirents);
+        ret = g_optionArgs.recursion ? RecursiveFunc(g_optionArgs.path, arg->dirents)
+                                     : FilterFileRes(g_optionArgs.path, arg->dirents);
         g_optionArgs.Clear();
         return ret ? NError(ret) : NError(ERRNO_NOERR);
     };
@@ -399,13 +443,14 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
 
     NVal thisVar(env, funcArg.GetThisVar());
 
-    if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
-           !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
+    if (funcArg.GetArgc() == NARG_CNT::ONE ||
+        (funcArg.GetArgc() == NARG_CNT::TWO && !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(LIST_FILE_PRODUCE_NAME, cbExec, cbCompl).val_;
     } else {
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
         return NAsyncWorkCallback(env, thisVar, cb, LIST_FILE_PRODUCE_NAME)
-            .Schedule(LIST_FILE_PRODUCE_NAME, cbExec, cbCompl).val_;
+            .Schedule(LIST_FILE_PRODUCE_NAME, cbExec, cbCompl)
+            .val_;
     }
 }
 } // namespace OHOS::FileManagement::ModuleFileIO

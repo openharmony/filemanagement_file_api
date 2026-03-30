@@ -72,7 +72,9 @@ public:
     virtual bool TypeIs(napi_valuetype expType) = 0;
     virtual NVal CreateUndefined(napi_env env) = 0;
     virtual NVal CreateUTF8String(napi_env env, std::string str) = 0;
+    virtual NVal CreateArrayString(napi_env env, std::vector<std::string> strs) = 0;
     virtual NVal CreateBool(napi_env env, bool val) = 0;
+    virtual std::tuple<bool, std::vector<std::string>, uint32_t> ToStringArray() = 0;
 };
 
 class LibnMock : public ILibnMock {
@@ -91,7 +93,7 @@ public:
     MOCK_METHOD(napi_status, napi_get_reference_value, (napi_env, napi_ref, napi_value *), (override));
     MOCK_METHOD(napi_status, napi_typeof, (napi_env, napi_value, napi_valuetype *), (override));
     MOCK_METHOD(
-        napi_value, InstantiateClass, (napi_env, const std::string&, const std::vector<napi_value>&), (override));
+        napi_value, InstantiateClass, (napi_env, const std::string &, const std::vector<napi_value> &), (override));
 
     MOCK_METHOD(void, ThrowErr, (napi_env), (override));
     MOCK_METHOD(void, ThrowErr, (napi_env, int), (override));
@@ -109,12 +111,14 @@ public:
     MOCK_METHOD((std::tuple<bool, int64_t>), ToInt64, (), (override));
     MOCK_METHOD((std::tuple<bool, int64_t>), ToInt64, (int64_t), (override));
     MOCK_METHOD((std::tuple<bool, double>), ToDouble, (), (override));
+    MOCK_METHOD((std::tuple<bool, std::vector<std::string>, uint32_t>), ToStringArray, (), (override));
 
     MOCK_METHOD(bool, HasProp, (std::string), (override));
     MOCK_METHOD(NVal, GetProp, (std::string), (override));
     MOCK_METHOD(bool, TypeIs, (napi_valuetype), (override));
     MOCK_METHOD(NVal, CreateUndefined, (napi_env), (override));
     MOCK_METHOD(NVal, CreateUTF8String, (napi_env, std::string), (override));
+    MOCK_METHOD(NVal, CreateArrayString, (napi_env, std::vector<std::string>), (override));
     MOCK_METHOD(NVal, CreateBool, (napi_env, bool), (override));
 
 public:
