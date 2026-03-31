@@ -61,6 +61,7 @@ constexpr size_t MAX_SIZE = 1024 * 1024 * 4;
 constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(300);
 std::recursive_mutex CopyCore::mutex_;
 std::map<FsFileInfos, std::shared_ptr<FsCallbackObject>> CopyCore::callbackMap_;
+#define O_UNCACHE 010000000000
 
 static int OpenSrcFile(const string &srcPth, std::shared_ptr<FsFileInfos> infos, int32_t &srcFd)
 {
@@ -83,7 +84,7 @@ static int OpenSrcFile(const string &srcPth, std::shared_ptr<FsFileInfos> infos,
             return EPERM;
         }
     } else {
-        srcFd = open(srcPth.c_str(), O_RDONLY);
+        srcFd = open(srcPth.c_str(), O_RDONLY | O_UNCACHE);
         if (srcFd < 0) {
             HILOGE("Error opening src file descriptor. errno = %{public}d", errno);
             return errno;
@@ -194,7 +195,7 @@ int CopyCore::CheckOrCreatePath(const std::string &destPath)
     std::error_code errCode;
     if (!filesystem::exists(destPath, errCode) && errCode.value() == ERRNO_NOERR) {
         HILOGI("DestPath not exist");
-        auto file = open(destPath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+        auto file = open(destPath.c_str(), O_RDWR | O_CREAT | O_UNCACHE, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
         if (file < 0) {
             HILOGE("Error opening file descriptor. errno = %{public}d", errno);
             return errno;
@@ -215,7 +216,7 @@ int CopyCore::CopyFile(const string &src, const string &dest, std::shared_ptr<Fs
         return ret;
     }
 
-    auto destFd = open(dest.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+    auto destFd = open(dest.c_str(), O_RDWR | O_CREAT | O_UNCACHE, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
     if (destFd < 0) {
         HILOGE("Error opening dest file descriptor. errno = %{public}d", errno);
         close(srcFd);

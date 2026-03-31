@@ -148,6 +148,7 @@ void InitOpenMode(napi_env env, napi_value exports)
         DECLARE_NAPI_STATIC_PROPERTY("DIR", NVal::CreateInt32(env, USR_DIRECTORY).val_),
         DECLARE_NAPI_STATIC_PROPERTY("NOFOLLOW", NVal::CreateInt32(env, USR_NOFOLLOW).val_),
         DECLARE_NAPI_STATIC_PROPERTY("SYNC", NVal::CreateInt32(env, USR_SYNC).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("UNCACHE", NVal::CreateInt32(env, USR_UNCACHE).val_),
     };
     napi_value obj = nullptr;
     napi_status status = napi_create_object(env, &obj);
@@ -227,6 +228,7 @@ unsigned int CommonFunc::ConvertJsFlags(unsigned int &flags)
     flagsABI |= ((flags & USR_NONBLOCK) == USR_NONBLOCK) ? NONBLOCK : 0;
     flagsABI |= ((flags & USR_DIRECTORY) == USR_DIRECTORY) ? DIRECTORY : 0;
     flagsABI |= ((flags & USR_NOFOLLOW) == USR_NOFOLLOW) ? NOFOLLOW : 0;
+    flagsABI |= ((flags & USR_UNCACHE) == USR_UNCACHE) ? UNCACHE : 0;
     flagsABI |= ((flags & USR_SYNC) == USR_SYNC) ? SYNC : 0;
     flags = flagsABI;
     return flagsABI;

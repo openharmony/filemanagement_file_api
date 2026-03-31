@@ -38,6 +38,7 @@ constexpr int NONBLOCK = UV_FS_O_NONBLOCK;
 constexpr int DIRECTORY = UV_FS_O_DIRECTORY;
 constexpr int NOFOLLOW = UV_FS_O_NOFOLLOW;
 constexpr int SYNC = UV_FS_O_SYNC;
+constexpr int UNCACHE = 010000000000;
 
 constexpr unsigned int MODE_EXIST = 00;
 constexpr unsigned int MODE_WRITE = 02;
@@ -58,6 +59,7 @@ constexpr unsigned int USR_NONBLOCK = 04000;
 constexpr unsigned int USR_DIRECTORY = 0200000;
 constexpr unsigned int USR_NOFOLLOW = 0400000;
 constexpr unsigned int USR_SYNC = 04010000;
+constexpr unsigned int USR_UNCACHE = 010000000000;
 
 constexpr uint64_t PREFIX_ADDR = 0xabc0000000000000;
 

@@ -133,6 +133,113 @@ HWTEST_F(CommonFuncTest, SetFdTag_001, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "CommonFuncTest-end SetFdTag_001";
 }
 
+/**
+ * @tc.name: ConvertJsFlags_UncacheFlag_001
+ * @tc.desc: Test function of CommonFunc::ConvertJsFlags with UNCACHE flag only.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CommonFuncTest, ConvertJsFlags_UncacheFlag_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CommonFuncTest-begin ConvertJsFlags_UncacheFlag_001";
+
+    unsigned int flags = USR_UNCACHE;
+    unsigned int result = CommonFunc::ConvertJsFlags(flags);
+
+    EXPECT_EQ(result & UNCACHE, static_cast<unsigned int>(UNCACHE));
+
+    GTEST_LOG_(INFO) << "CommonFuncTest-end ConvertJsFlags_UncacheFlag_001";
+}
+
+/**
+ * @tc.name: ConvertJsFlags_UncacheFlag_002
+ * @tc.desc: Test function of CommonFunc::ConvertJsFlags with UNCACHE combined with CREATE flag.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CommonFuncTest, ConvertJsFlags_UncacheFlag_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CommonFuncTest-begin ConvertJsFlags_UncacheFlag_002";
+
+    unsigned int flags = USR_UNCACHE | USR_CREATE;
+    unsigned int result = CommonFunc::ConvertJsFlags(flags);
+
+    EXPECT_EQ(result & UNCACHE, static_cast<unsigned int>(UNCACHE));
+    EXPECT_EQ(result & CREATE, static_cast<unsigned int>(CREATE));
+
+    GTEST_LOG_(INFO) << "CommonFuncTest-end ConvertJsFlags_UncacheFlag_002";
+}
+
+/**
+ * @tc.name: ConvertJsFlags_UncacheFlag_003
+ * @tc.desc: Test function of CommonFunc::ConvertJsFlags without UNCACHE flag.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CommonFuncTest, ConvertJsFlags_UncacheFlag_003, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CommonFuncTest-begin ConvertJsFlags_UncacheFlag_003";
+
+    unsigned int flags = USR_CREATE | USR_RDWR;
+    unsigned int result = CommonFunc::ConvertJsFlags(flags);
+
+    EXPECT_EQ(result & UNCACHE, 0U);
+
+    GTEST_LOG_(INFO) << "CommonFuncTest-end ConvertJsFlags_UncacheFlag_003";
+}
+
+/**
+ * @tc.name: ConvertJsFlags_FlagsCombined_001
+ * @tc.desc: Test UNCACHE flag combined with all other flags.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 2
+ */
+HWTEST_F(CommonFuncTest, ConvertJsFlags_FlagsCombined_001, testing::ext::TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "CommonFuncTest-begin ConvertJsFlags_FlagsCombined_001";
+
+    unsigned int flags = USR_UNCACHE | USR_CREATE | USR_RDWR | USR_TRUNC | USR_APPEND | USR_SYNC;
+    unsigned int result = CommonFunc::ConvertJsFlags(flags);
+
+    EXPECT_EQ(result & UNCACHE, static_cast<unsigned int>(UNCACHE));
+    EXPECT_EQ(result & CREATE, static_cast<unsigned int>(CREATE));
+    EXPECT_EQ(result & RDWR, static_cast<unsigned int>(RDWR));
+    EXPECT_EQ(result & TRUNC, static_cast<unsigned int>(TRUNC));
+    EXPECT_EQ(result & APPEND, static_cast<unsigned int>(APPEND));
+    EXPECT_EQ(result & SYNC, static_cast<unsigned int>(SYNC));
+
+    GTEST_LOG_(INFO) << "CommonFuncTest-end ConvertJsFlags_FlagsCombined_001";
+}
+
+/**
+ * @tc.name: UncacheConstantValue_001
+ * @tc.desc: Test UNCACHE constant value is correct and unique.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(CommonFuncTest, UncacheConstantValue_001, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CommonFuncTest-begin UncacheConstantValue_001";
+
+    EXPECT_EQ(UNCACHE, 010000000000);
+    EXPECT_EQ(USR_UNCACHE, 010000000000U);
+
+    EXPECT_NE(UNCACHE, 0);
+    EXPECT_NE(USR_UNCACHE, 0U);
+
+    EXPECT_NE(UNCACHE, CREATE);
+    EXPECT_NE(UNCACHE, TRUNC);
+    EXPECT_NE(UNCACHE, APPEND);
+    EXPECT_NE(UNCACHE, SYNC);
+
+    GTEST_LOG_(INFO) << "CommonFuncTest-end UncacheConstantValue_001";
+}
+
 } // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement

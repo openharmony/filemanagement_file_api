@@ -243,6 +243,7 @@ export namespace OpenMode {
   export const DIR = 0o200000;
   export const NOFOLLOW = 0o400000;
   export const SYNC = 0o4010000;
+  export const UNCACHE = 0o10000000000;
 }
 
 function access(path: string, mode?: AccessModeType): Promise<boolean> {
