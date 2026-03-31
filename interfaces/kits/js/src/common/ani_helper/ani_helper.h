@@ -90,6 +90,47 @@ public:
         return status;
     }
 
+    static tuple<bool, bool> ParseBooleanOption(ani_env *env, ani_object obj, string tag, bool defaultValue = false)
+    {
+        ani_ref boolRef;
+        ani_boolean isUndefined;
+        if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &boolRef)) {
+            return { false, false };
+        }
+        env->Reference_IsUndefined(boolRef, &isUndefined);
+        if (isUndefined) {
+            return { true, defaultValue };
+        }
+        auto booleanUnboxedDesc = BoxedTypes::Boolean::booleanUnboxedDesc.c_str();
+        auto booleanUnboxedSig = BoxedTypes::Boolean::booleanUnboxedSig.c_str();
+        ani_boolean result;
+        if (ANI_OK != env->Object_CallMethodByName_Boolean(
+                          static_cast<ani_object>(boolRef), booleanUnboxedDesc, booleanUnboxedSig, &result)) {
+            return { false, false };
+        }
+        return { true, static_cast<bool>(result) };
+    }
+
+    static tuple<bool, optional<double>> ParseDoubleOption(ani_env *env, ani_object obj, string tag)
+    {
+        ani_boolean isUndefined;
+        ani_ref resultRef;
+        if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef)) {
+            return { false, nullopt };
+        }
+        env->Reference_IsUndefined(resultRef, &isUndefined);
+        if (isUndefined) {
+            return { true, nullopt };
+        }
+
+        ani_double result;
+        if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(resultRef),
+                          BasicTypesConverter::toDouble.c_str(), nullptr, &result)) {
+            return { false, nullopt };
+        }
+        return { true, static_cast<double>(result) };
+    }
+
     static tuple<bool, optional<int64_t>> ParseInt64Option(ani_env *env, ani_object obj, const string &tag)
     {
         ani_boolean isUndefined = true;
@@ -114,12 +155,11 @@ public:
         return { true, move(result) };
     }
 
-    static tuple<bool, optional<int64_t>> ParseInt64Option(ani_env *env, ani_object obj, const string &className,
-            const string &propertyName)
+    static tuple<bool, optional<int64_t>> ParseInt64Option(
+        ani_env *env, ani_object obj, const string &className, const string &propertyName)
     {
         auto &aniCache = AniCache::GetInstance();
-        auto [ret, method] =
-            aniCache.GetMethod(env, className, propertyName, BoxedTypes::Long::getOptionSig);
+        auto [ret, method] = aniCache.GetMethod(env, className, propertyName, BoxedTypes::Long::getOptionSig);
         if (ANI_OK != ret) {
             return { false, nullopt };
         }
@@ -133,9 +173,9 @@ public:
         if (isUndefined) {
             return { true, nullopt };
         }
-        ani_long value{};
-        tie(ret, method) = aniCache.GetMethod(env, BoxedTypes::Long::classDesc, BoxedTypes::Long::toLongDesc,
-            BoxedTypes::Long::toLongSig);
+        ani_long value {};
+        tie(ret, method) = aniCache.GetMethod(
+            env, BoxedTypes::Long::classDesc, BoxedTypes::Long::toLongDesc, BoxedTypes::Long::toLongSig);
         if (ANI_OK != ret) {
             return { false, nullopt };
         }
@@ -146,6 +186,41 @@ public:
             return { false, nullopt };
         }
         return { true, value };
+    }
+
+    static tuple<bool, optional<vector<string>>> ParseArrayStringOption(ani_env *env, ani_object obj, string tag)
+    {
+        ani_boolean isUndefined;
+        ani_ref resultRef;
+        vector<string> result;
+        if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef)) {
+            return { false, nullopt };
+        }
+        env->Reference_IsUndefined(resultRef, &isUndefined);
+        if (isUndefined) {
+            return { true, nullopt };
+        }
+
+        ani_int length;
+        if (ANI_OK != env->Object_GetPropertyByName_Int(static_cast<ani_object>(resultRef), "length", &length) ||
+            length == 0) {
+            return { false, nullopt };
+        }
+        auto getterDesc = BuiltInTypes::Array::getterDesc.c_str();
+        auto getterSig = BuiltInTypes::Array::objectGetterSig.c_str();
+        for (int i = 0; i < int(length); i++) {
+            ani_ref stringEntryRef;
+            if (ANI_OK != env->Object_CallMethodByName_Ref(
+                              static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)i)) {
+                return { false, nullopt };
+            }
+            auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));
+            if (!succ) {
+                return { false, nullopt };
+            }
+            result.emplace_back(tmp);
+        }
+        return { true, move(result) };
     }
 
     static tuple<bool, optional<string>> ParseEncoding(ani_env *env, ani_object obj)

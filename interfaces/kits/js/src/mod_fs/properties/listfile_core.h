@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 
 #include "file_filter.h"
 #include "filemgmt_libfs.h"
-#include "fs_file_filter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -51,10 +50,18 @@ struct OptionArgs {
     }
 };
 
+struct FsFilter {
+    std::optional<std::vector<std::string>> suffix = std::nullopt;
+    std::optional<std::vector<std::string>> displayName = std::nullopt;
+    std::optional<std::vector<std::string>> mimeType = std::nullopt;
+    std::optional<int64_t> fileSizeOver = std::nullopt;
+    std::optional<double> lastModifiedAfter = std::nullopt;
+};
+
 struct FsListFileOptions {
     bool recursion = false;
-    int64_t listNum = 0;
-    optional<FsFileFilter> filter = nullopt;
+    optional<int64_t> listNum = 0;
+    optional<FsFilter> filter = nullopt;
 };
 
 class ListFileCore {

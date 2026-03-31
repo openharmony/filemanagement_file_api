@@ -98,10 +98,10 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_001, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_001";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
+    FsFilter filter;
     std::vector<std::string> suffixVector = { "txt" };
     std::optional<std::vector<std::string>> optionalSuffix = suffixVector;
-    filter.SetSuffix(optionalSuffix);
+    filter.suffix = std::move(optionalSuffix);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
@@ -126,10 +126,10 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_002, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_002";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
+    FsFilter filter;
     std::vector<std::string> suffixVector = { ".tx@t" };
     std::optional<std::vector<std::string>> optionalSuffix = suffixVector;
-    filter.SetSuffix(optionalSuffix);
+    filter.suffix = std::move(optionalSuffix);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
@@ -178,17 +178,17 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_004, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_004";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
+    FsFilter filter;
     std::vector<std::string> suffixVector = { ".txt" };
     std::optional<std::vector<std::string>> optionalSuffix = suffixVector;
-    filter.SetSuffix(optionalSuffix);
+    filter.suffix = std::move(optionalSuffix);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 2);
+    ASSERT_EQ(files.size(), 2);
     // Sort manually by dictionary
     std::sort(files.begin(), files.end());
     EXPECT_EQ(files[0], "level1");
@@ -209,17 +209,17 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_005, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_005";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
+    FsFilter filter;
     std::vector<std::string> suffixVector = { ".abc" };
     std::optional<std::vector<std::string>> optionalSuffix = suffixVector;
-    filter.SetSuffix(optionalSuffix);
+    filter.suffix = std::move(optionalSuffix);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 1);
+    ASSERT_EQ(files.size(), 1);
     EXPECT_EQ(files[0], "level1");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_005";
@@ -237,17 +237,17 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_006, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_006";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
+    FsFilter filter;
     std::vector<std::string> displayNameVector = { "text*.txt" };
     std::optional<std::vector<std::string>> optionalDisplayName = displayNameVector;
-    filter.SetDisplayName(optionalDisplayName);
+    filter.displayName = std::move(optionalDisplayName);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 1);
+    ASSERT_EQ(files.size(), 1);
     EXPECT_EQ(files[0], "text_1.txt");
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_006";
@@ -265,15 +265,15 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_007, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_007";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
-    filter.SetFileSizeOver(500);
+    FsFilter filter;
+    filter.fileSizeOver = 500;
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 3);
+    ASSERT_EQ(files.size(), 3);
     // Sort manually by dictionary
     std::sort(files.begin(), files.end());
     EXPECT_EQ(files[0], "data_1.data");
@@ -295,10 +295,10 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_008, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_008";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
+    FsFilter filter;
     std::vector<std::string> displayNameVector = {};
     std::optional<std::vector<std::string>> optionalDisplayName = displayNameVector;
-    filter.SetDisplayName(optionalDisplayName);
+    filter.displayName = std::move(optionalDisplayName);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
@@ -323,8 +323,8 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_009, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_009";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
-    filter.SetFileSizeOver(-1);
+    FsFilter filter;
+    filter.fileSizeOver = -1;
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
@@ -349,8 +349,8 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_010, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_010";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
-    filter.SetLastModifiedAfter(-1);
+    FsFilter filter;
+    filter.lastModifiedAfter = -1;
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
@@ -382,7 +382,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_011, testing::ext::TestSi
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
     // Include 12 files, not include dir.
-    EXPECT_EQ(files.size(), 12);
+    ASSERT_EQ(files.size(), 12);
     // Sort manually by dictionary
     std::sort(files.begin(), files.end());
     EXPECT_EQ(files[0], "/data_1.data");
@@ -467,7 +467,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_015, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_015";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
+    FsFilter filter;
 
     const size_t targetLength = 257;
     std::string suffix(targetLength - 1, 'x');
@@ -475,7 +475,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_015, testing::ext::TestSi
 
     std::vector<std::string> suffixVector = { suffix };
     std::optional<std::vector<std::string>> optionalSuffix = suffixVector;
-    filter.SetSuffix(optionalSuffix);
+    filter.suffix = std::move(optionalSuffix);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
@@ -500,10 +500,10 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_016, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_016";
 
     FsListFileOptions opt;
-    FsFileFilter filter;
+    FsFilter filter;
     std::vector<std::string> suffixVector = {};
     std::optional<std::vector<std::string>> optionalSuffix = suffixVector;
-    filter.SetSuffix(optionalSuffix);
+    filter.suffix = std::move(optionalSuffix);
     opt.filter = filter;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
