@@ -46,15 +46,15 @@ static tuple<bool, optional<FsFilter>> ParseFilter(ani_env *env, ani_object obj)
 
     FsFilter filter;
     auto filterObj = static_cast<ani_object>(filterRef);
-    auto [succfileSizeOver, fileSizeOver] = AniHelper::ParseInt64Option(env, filterObj, "fileSizeOver");
-    if (!succfileSizeOver) {
+    auto [succFileSizeOver, fileSizeOver] = AniHelper::ParseInt64Option(env, filterObj, "fileSizeOver");
+    if (!succFileSizeOver) {
         HILOGE("Illegal option.fileSizeOver parameter");
         return { false, nullopt };
     }
     filter.fileSizeOver = move(fileSizeOver);
 
-    auto [succlastModifiedAfter, lastModifiedAfter] = AniHelper::ParseDoubleOption(env, filterObj, "lastModifiedAfter");
-    if (!succlastModifiedAfter) {
+    auto [succLastModifiedAfter, lastModifiedAfter] = AniHelper::ParseDoubleOption(env, filterObj, "lastModifiedAfter");
+    if (!succLastModifiedAfter) {
         HILOGE("Illegal option.lastModifiedAfter parameter");
         return { false, nullopt };
     }
@@ -74,7 +74,7 @@ static tuple<bool, optional<FsFilter>> ParseFilter(ani_env *env, ani_object obj)
     }
     filter.displayName = move(displayName);
 
-    return { true, move(filter) };
+    return { true, filter };
 }
 
 static tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)

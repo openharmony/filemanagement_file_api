@@ -104,8 +104,10 @@ public:
         auto booleanUnboxedDesc = BoxedTypes::Boolean::booleanUnboxedDesc.c_str();
         auto booleanUnboxedSig = BoxedTypes::Boolean::booleanUnboxedSig.c_str();
         ani_boolean result;
-        if (ANI_OK != env->Object_CallMethodByName_Boolean(
-                          static_cast<ani_object>(boolRef), booleanUnboxedDesc, booleanUnboxedSig, &result)) {
+        ani_status status = env->Object_CallMethodByName_Boolean(
+            static_cast<ani_object>(boolRef), booleanUnboxedDesc, booleanUnboxedSig, &result);
+        if (status != ANI_OK) {
+            HILOGE("Object_CallMethodByName_Boolean failed, status: %{public}d", status);
             return { false, false };
         }
         return { true, static_cast<bool>(result) };
@@ -115,7 +117,9 @@ public:
     {
         ani_boolean isUndefined;
         ani_ref resultRef;
-        if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef)) {
+        ani_status status = env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef);
+        if (status != ANI_OK) {
+            HILOGE("Object_GetPropertyByName_Ref failed, status: %{public}d", status);
             return { false, nullopt };
         }
         env->Reference_IsUndefined(resultRef, &isUndefined);
@@ -124,8 +128,10 @@ public:
         }
 
         ani_double result;
-        if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(resultRef),
-                          BasicTypesConverter::toDouble.c_str(), nullptr, &result)) {
+        status = env->Object_CallMethodByName_Double(
+            static_cast<ani_object>(resultRef), BasicTypesConverter::toDouble.c_str(), nullptr, &result);
+        if (status != ANI_OK) {
+            HILOGE("Object_CallMethodByName_Double failed, status: %{public}d", status);
             return { false, nullopt };
         }
         return { true, static_cast<double>(result) };
@@ -138,6 +144,7 @@ public:
         ani_status status = ANI_ERROR;
         status = env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &property);
         if (status != ANI_OK) {
+            HILOGE("Object_GetPropertyByName_Ref failed, status: %{public}d", status);
             return { false, nullopt };
         }
         env->Reference_IsUndefined(property, &isUndefined);
@@ -149,6 +156,7 @@ public:
         status = env->Object_CallMethodByName_Long(
             static_cast<ani_object>(property), BasicTypesConverter::toLong.c_str(), longValueSig.c_str(), &value);
         if (status != ANI_OK) {
+            HILOGE("Object_CallMethodByName_Long failed, status: %{public}d", status);
             return { false, nullopt };
         }
         auto result = make_optional<int64_t>(static_cast<int64_t>(value));
@@ -181,8 +189,8 @@ public:
         }
 
         ret = env->Object_CallMethod_Long(static_cast<ani_object>(property), method, &value);
-        if (ANI_OK != ret) {
-            HILOGE("Failed to Object_CallMethod_Long ret: %{public}d", ret);
+        if (ret != ANI_OK) {
+            HILOGE("Object_CallMethod_Long failed, status: %{public}d", ret);
             return { false, nullopt };
         }
         return { true, value };
@@ -202,16 +210,19 @@ public:
         }
 
         ani_int length;
-        if (ANI_OK != env->Object_GetPropertyByName_Int(static_cast<ani_object>(resultRef), "length", &length) ||
-            length == 0) {
+        ani_status status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(resultRef), "length", &length);
+        if (status != ANI_OK || length == 0) {
+            HILOGE("Object_GetPropertyByName_Int failed, status: %{public}d", status);
             return { false, nullopt };
         }
         auto getterDesc = BuiltInTypes::Array::getterDesc.c_str();
         auto getterSig = BuiltInTypes::Array::objectGetterSig.c_str();
         for (int i = 0; i < int(length); i++) {
             ani_ref stringEntryRef;
-            if (ANI_OK != env->Object_CallMethodByName_Ref(
-                              static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)i)) {
+            status = env->Object_CallMethodByName_Ref(
+                static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)i);
+            if (status != ANI_OK) {
+                HILOGE("Object_CallMethodByName_Ref failed, status: %{public}d", status);
                 return { false, nullopt };
             }
             auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));
