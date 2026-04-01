@@ -83,7 +83,7 @@ static tuple<bool, shared_ptr<IFileFilter>> ParseFileFilter(ani_env *env, ani_ob
     ani_ref filterRef;
     ani_status status = env->Object_GetPropertyByName_Ref(obj, "fileFilter", &filterRef);
     if (status != ANI_OK) {
-        HILOGE("Failed to get fileFilter property, ret: %d", status);
+        HILOGE("Failed to get fileFilter property, ret: %{public}d", status);
         return { false, nullptr };
     }
 
@@ -107,14 +107,14 @@ static bool IsListFileOptions(ani_env *env, ani_object obj)
     AniCache &aniCache = AniCache::GetInstance();
     auto [res, cls] = aniCache.GetClass(env, FS::ListFileOptions::classDesc);
     if (res != ANI_OK) {
-        HILOGE("Cannot find class %s", FS::ListFileOptions::classDesc.c_str());
+        HILOGE("Cannot find class %{public}s", FS::ListFileOptions::classDesc.c_str());
         return false;
     }
 
     ani_boolean result = false;
     auto status = env->Object_InstanceOf(obj, cls, &result);
     if (status != ANI_OK) {
-        HILOGE("Object_InstanceOf failed, status: %d", status);
+        HILOGE("Object_InstanceOf failed, status: %{public}d", status);
         return false;
     }
     return static_cast<bool>(result);
@@ -179,6 +179,15 @@ ani_array ListFileAni::ListFileSync(ani_env *env, [[maybe_unused]] ani_class cla
     }
 
     auto ret = ListFileCore::DoListFile(srcPath, opt);
+    if (opt.has_value() && opt.value().fileFilter) {
+        auto aniFilter = std::static_pointer_cast<FileFilterAni>(opt.value().fileFilter);
+        if (aniFilter && aniFilter->HasException()) {
+            HILOGE("Filter callback threw exception");
+            // Note: No need to throw exception manually
+            // ANI runtime will propagate the pending exception to ETS layer
+            return nullptr;
+        }
+    }
     if (!ret.IsSuccess()) {
         HILOGE("DoListFile failed");
         const auto &err = ret.GetError();

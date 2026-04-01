@@ -60,6 +60,7 @@ private:
     const string testDir = FileUtils::testRootDir + "/ListFileCoreTest";
     const string dataDir = testDir + "/data";
     const string emptyDir = testDir + "/emptyDir";
+    const size_t totalRecursiveFiles = 12;
 };
 
 void ListFileCoreTest::SetUpTestSuite()
@@ -175,7 +176,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_003, testing::ext::TestSi
     GTEST_LOG_(INFO) << "ListFileCoreTest-begin ListFileCoreTest_DoListFile_003";
 
     FsListFileOptions opt;
-    opt.listNum = -5;
+    opt.listNum = -1;
 
     auto result = ListFileCore::DoListFile(dataDir, opt);
 
@@ -403,7 +404,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_011, testing::ext::TestSi
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
     // Include 12 files, not include dir.
-    ASSERT_EQ(files.size(), 12);
+    ASSERT_EQ(files.size(), totalRecursiveFiles);
     // Sort manually by dictionary
     std::sort(files.begin(), files.end());
     EXPECT_EQ(files[0], "/data_1.data");
@@ -639,7 +640,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_020, testing::ext::TestSi
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 12);
+    EXPECT_EQ(files.size(), totalRecursiveFiles);
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_020";
 }
@@ -725,7 +726,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_023, testing::ext::TestSi
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    ASSERT_EQ(files.size(), 12);
+    ASSERT_EQ(files.size(), totalRecursiveFiles);
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_023";
 }
@@ -839,7 +840,7 @@ HWTEST_F(ListFileCoreTest, ListFileCoreTest_DoListFile_027, testing::ext::TestSi
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    ASSERT_EQ(files.size(), 12);
+    ASSERT_EQ(files.size(), totalRecursiveFiles);
 
     GTEST_LOG_(INFO) << "ListFileCoreTest-end ListFileCoreTest_DoListFile_027";
 }

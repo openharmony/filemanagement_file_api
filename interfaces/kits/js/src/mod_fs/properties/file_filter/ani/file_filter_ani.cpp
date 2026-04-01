@@ -38,7 +38,7 @@ bool FileFilterAni::Filter(const std::string &name)
     ani_size scopeSize = ANI_SCOPE_SIZE;
     ani_status status = env_->CreateLocalScope(scopeSize);
     if (status != ANI_OK) {
-        HILOGE("Failed to creat local scope, status: %d", status);
+        HILOGE("Failed to create local scope, status: %{public}d", status);
         filterFailed_ = true;
         return false;
     }
@@ -47,22 +47,28 @@ bool FileFilterAni::Filter(const std::string &name)
     if (!succ) {
         HILOGE("Failed to create ANI string");
         filterFailed_ = true;
-        env_->DestroyLocalScope();
+        status = env_->DestroyLocalScope();
+        if (status != ANI_OK) {
+            HILOGE("Failed to destroy local scope, status: %{public}d", status);
+        }
         return false;
     }
 
     ani_boolean result;
     status = env_->Object_CallMethodByName_Boolean(filterObj_, "filter", nullptr, &result, nameValue);
     if (status != ANI_OK) {
-        HILOGE("Failed to call filter function, status: %d", status);
+        HILOGE("Failed to call filter function, status: %{public}d", status);
         filterFailed_ = true;
-        env_->DestroyLocalScope();
+        status = env_->DestroyLocalScope();
+        if (status != ANI_OK) {
+            HILOGE("Failed to destroy local scope, status: %{public}d", status);
+        }
         return false;
     }
 
     status = env_->DestroyLocalScope();
     if (status != ANI_OK) {
-        HILOGE("Failed to destroy local scope, status: %d", status);
+        HILOGE("Failed to destroy local scope, status: %{public}d", status);
         filterFailed_ = true;
         return false;
     }
@@ -71,6 +77,13 @@ bool FileFilterAni::Filter(const std::string &name)
 }
 
 FileFilterAni::~FileFilterAni() {}
+
+bool FileFilterAni::HasException() const
+{
+    ani_boolean hasError = false;
+    env_->ExistUnhandledError(&hasError);
+    return static_cast<bool>(hasError);
+}
 
 } // namespace ANI
 } // namespace ModuleFileIO

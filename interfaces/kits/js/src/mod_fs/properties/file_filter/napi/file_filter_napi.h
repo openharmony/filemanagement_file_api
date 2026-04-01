@@ -17,7 +17,7 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILEFILTER_NAPI_FILE_FILTER_NAPI_H
 
 #include <mutex>
-#include <thread>
+#include <uv.h>
 
 #include "filemgmt_libn.h"
 #include "i_file_filter.h"
@@ -29,20 +29,20 @@ public:
     FileFilterNapi(napi_env env, napi_value filterObj, LibN::NVal callback);
     bool Filter(const std::string &name) override;
     ~FileFilterNapi();
+    bool HasException() const;
+    napi_value HandleException(napi_env env);
 
 private:
     napi_env env_;
-    napi_value filterObj_;
+    napi_ref filterObjRef_;
     LibN::NRef nRef_;
     bool filterFailed_ = false;
-
-    static std::thread::id mainThreadId;
-    static std::once_flag initFlag;
-
-    static void InitMainThreadId();
+    uv_thread_t createThread_;
+    napi_ref exceptionRef_ = nullptr;
 
     bool CallFilterFunction(const std::string &name);
     bool AsyncCallFilterFunction(const std::string &name);
+    void CaptureException();
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO

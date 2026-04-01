@@ -17,7 +17,6 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILEFILTER_ANI_FILE_FILTER_ANI_H
 
 #include <ani.h>
-#include <thread>
 
 #include "i_file_filter.h"
 
@@ -29,6 +28,7 @@ public:
     FileFilterAni(ani_env *env, ani_object filterObj) : env_(env), filterObj_(filterObj) {};
     bool Filter(const std::string &name) override;
     ~FileFilterAni();
+    bool HasException() const;
 
 private:
     ani_env *env_;
