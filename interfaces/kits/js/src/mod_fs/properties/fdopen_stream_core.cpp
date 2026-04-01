@@ -17,6 +17,7 @@
 
 #include <memory>
 
+#include "fdtag_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "fs_utils.h"
@@ -41,6 +42,9 @@ FsResult<FsStream *> FdopenStreamCore::DoFdopenStream(const int &fd, const strin
         return FsResult<FsStream *>::Error(errno);
     }
 
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    FdTagFunc::SetFdTag(fd, 0);
+#endif
     return StreamInstantiator::InstantiateStream(move(file));
 }
 

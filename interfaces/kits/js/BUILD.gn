@@ -156,6 +156,7 @@ ohos_shared_library("fs") {
     "src/mod_fs/class_file/file_n_exporter.cpp",
     "src/mod_fs/class_stat/stat_n_exporter.cpp",
     "src/mod_fs/common_func.cpp",
+    "src/mod_fs/fdtag_func.cpp",
     "src/mod_fs/module.cpp",
     "src/mod_fs/properties/close.cpp",
     "src/mod_fs/properties/fdatasync.cpp",
@@ -686,6 +687,7 @@ taihe_shared_library("file_fs_taihe") {
   include_dirs = [
     "include/ipc",
     "src/common",
+    "src/mod_fs",
     "src/mod_fs/ani",
     "src/mod_fs/ani/cleaner",
     "src/mod_fs/class_atomicfile",
@@ -752,6 +754,7 @@ taihe_shared_library("file_fs_taihe") {
     "src/mod_fs/class_watcher/fs_file_watcher.cpp",
     "src/mod_fs/class_watcher/fs_watcher.cpp",
     "src/mod_fs/class_watcher/watcher_data_cache.cpp",
+    "src/mod_fs/fdtag_func.cpp",
     "src/mod_fs/fs_utils.cpp",
     "src/mod_fs/properties/access_core.cpp",
     "src/mod_fs/properties/ani/access_ani.cpp",

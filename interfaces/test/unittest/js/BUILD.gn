@@ -89,6 +89,7 @@ ani_file_fs_core = [
   "${src_path}/mod_fs/class_watcher/fs_file_watcher.cpp",
   "${src_path}/mod_fs/class_watcher/fs_watcher.cpp",
   "${src_path}/mod_fs/class_watcher/watcher_data_cache.cpp",
+  "${src_path}/mod_fs/fdtag_func.cpp",
   "${src_path}/mod_fs/fs_utils.cpp",
   "${src_path}/mod_fs/properties/access_core.cpp",
   "${src_path}/mod_fs/properties/close_core.cpp",
@@ -157,6 +158,7 @@ ohos_unittest("ani_file_fs_mock_test") {
   sources = [
     "${file_api_path}/interfaces/test/unittest/common_mock/dfs_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/eventfd_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/fdsan_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/inotify_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/poll_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/stdio_mock.cpp",
@@ -256,13 +258,17 @@ ohos_unittest("ani_file_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/common/obj",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
+    "${file_api_path}/interfaces/test/unittest/common_mock",
     "${file_api_path}/interfaces/test/unittest/common_utils",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/fdtag",
   ]
 
   sources = [
+    "${file_api_path}/interfaces/test/unittest/common_mock/fdsan_mock.cpp"
     "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common/ut_fs_utils.cpp",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/fdtag/fdtag_func_test.cpp",
     "mod_fs/class_atomicfile/fs_atomicfile_test.cpp",
     "mod_fs/class_file/fs_file_test.cpp",
     "mod_fs/class_randomaccessfile/fs_randomaccessfile_test.cpp",
@@ -317,6 +323,7 @@ ohos_unittest("ani_file_fs_test") {
     "data_share:datashare_consumer",
     "dfs_service:distributed_file_daemon_kit_inner",
     "dfs_service:libdistributedfileutils",
+    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",

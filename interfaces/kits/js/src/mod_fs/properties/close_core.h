@@ -16,6 +16,8 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_CORE_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_CLOSE_CORE_H
 
+#include "class_file/file_entity.h"
+#include "class_file/fs_file.h"
 #include "filemgmt_libfs.h"
 #include "fs_file.h"
 #include "fs_utils.h"
@@ -27,6 +29,11 @@ class CloseCore final {
 public:
     static FsResult<void> DoClose(const int32_t &fd);
     static FsResult<void> DoClose(FsFile *file);
+};
+
+struct FileStruct {
+    int fd;
+    FileEntity *fileEntity;
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO

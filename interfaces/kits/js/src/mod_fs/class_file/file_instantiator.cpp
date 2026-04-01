@@ -15,6 +15,7 @@
 
 #include "file_instantiator.h"
 
+#include "fdtag_func.h"
 #include "file_entity.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -75,6 +76,9 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         fileEntity->path_ = pathOrUri;
         fileEntity->uri_ = "";
     }
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    FdTagFunc::SetFdTag(fd, static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(fileEntity)));
+#endif
     return result;
 }
 
