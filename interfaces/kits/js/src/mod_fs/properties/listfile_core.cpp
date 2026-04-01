@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,11 @@
 
 #include <fnmatch.h>
 #include <memory>
-#include <string>
 #include <string_view>
+#include <string>
+#include <sys/stat.h>
 #include <thread>
 #include <tuple>
-#include <sys/stat.h>
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -29,7 +29,7 @@
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 
-thread_local OptionArgs g_optionArgsCore;
+static thread_local OptionArgs g_optionArgs;
 
 static bool CheckSuffix(const vector<string> &suffixs)
 {
@@ -49,11 +49,10 @@ static bool CheckSuffix(const vector<string> &suffixs)
     return true;
 }
 
-static bool ValidFileFilterParam(FsFileFilter &fsFilter, FileFilter *filter)
+static bool ValidFileFilterParam(const FsFilter &fsFilter, FileFilter *filter)
 {
-    auto suffixs = fsFilter.GetSuffix();
-    if (fsFilter.GetSuffix().has_value()) {
-        vector<string> suffixs = fsFilter.GetSuffix().value();
+    if (fsFilter.suffix.has_value()) {
+        vector<string> suffixs = fsFilter.suffix.value();
         if (!CheckSuffix(suffixs) || suffixs.size() == 0) {
             HILOGE("Invalid suffix.");
             return false;
@@ -61,8 +60,8 @@ static bool ValidFileFilterParam(FsFileFilter &fsFilter, FileFilter *filter)
         filter->SetSuffix(suffixs);
     }
 
-    if (fsFilter.GetDisplayName().has_value()) {
-        vector<string> displayNames = fsFilter.GetDisplayName().value();
+    if (fsFilter.displayName.has_value()) {
+        vector<string> displayNames = fsFilter.displayName.value();
         if (displayNames.size() == 0) {
             HILOGE("Invalid displayName.");
             return false;
@@ -70,8 +69,8 @@ static bool ValidFileFilterParam(FsFileFilter &fsFilter, FileFilter *filter)
         filter->SetDisplayName(displayNames);
     }
 
-    if (fsFilter.GetFileSizeOver().has_value()) {
-        int64_t fileSizeOver = fsFilter.GetFileSizeOver().value();
+    if (fsFilter.fileSizeOver.has_value()) {
+        int64_t fileSizeOver = fsFilter.fileSizeOver.value();
         if (fileSizeOver < 0) {
             HILOGE("Failed to get fileSizeOver prop.");
             return false;
@@ -79,8 +78,8 @@ static bool ValidFileFilterParam(FsFileFilter &fsFilter, FileFilter *filter)
         filter->SetFileSizeOver(fileSizeOver);
     }
 
-    if (fsFilter.GetLastModifiedAfter().has_value()) {
-        double lastModifiedAfter = fsFilter.GetLastModifiedAfter().value();
+    if (fsFilter.lastModifiedAfter.has_value()) {
+        double lastModifiedAfter = fsFilter.lastModifiedAfter.value();
         if (lastModifiedAfter < 0) {
             HILOGE("Failed to get lastModifiedAfter prop.");
             return false;
@@ -93,18 +92,21 @@ static bool ValidFileFilterParam(FsFileFilter &fsFilter, FileFilter *filter)
 
 static bool ValidOptionParam(const string &path, const optional<FsListFileOptions> &opt, OptionArgs &optionArgs)
 {
-    g_optionArgsCore.Clear();
-    g_optionArgsCore.path = path;
+    g_optionArgs.Clear();
+    g_optionArgs.path = path;
 
     if (opt.has_value()) {
         auto op = opt.value();
-        if (op.listNum < 0) {
-            HILOGE("Failed to get listNum prop");
-            return false;
+        if (op.listNum.has_value()) {
+            auto listNum = op.listNum.value();
+            if (listNum < 0) {
+                HILOGE("Failed to get listNum prop");
+                return false;
+            }
+            optionArgs.listNum = listNum;
         }
 
         optionArgs.recursion = op.recursion;
-        optionArgs.listNum = op.listNum;
 
         if (op.filter.has_value()) {
             bool ret = ValidFileFilterParam(op.filter.value(), &(optionArgs.filter));
@@ -153,7 +155,7 @@ static bool FilterFilesizeOver(const int64_t fFileSizeOver, const struct dirent 
         return true;
     }
     struct stat info;
-    string stPath = (g_optionArgsCore.path + '/' + string(filename.d_name));
+    string stPath = (g_optionArgs.path + '/' + string(filename.d_name));
     int32_t res = stat(stPath.c_str(), &info);
     if (res != 0) {
         HILOGE("Failed to stat file.");
@@ -171,7 +173,7 @@ static bool FilterLastModifyTime(const double lastModifiedAfter, const struct di
         return true;
     }
     struct stat info;
-    string stPath = g_optionArgsCore.path + '/' + string(filename.d_name);
+    string stPath = g_optionArgs.path + '/' + string(filename.d_name);
     int32_t res = stat(stPath.c_str(), &info);
     if (res != 0) {
         HILOGE("Failed to stat file.");
@@ -185,23 +187,23 @@ static bool FilterLastModifyTime(const double lastModifiedAfter, const struct di
 
 static bool FilterResult(const struct dirent &filename)
 {
-    vector<string> fSuffixs = g_optionArgsCore.filter.GetSuffix();
+    vector<string> fSuffixs = g_optionArgs.filter.GetSuffix();
     if (!FilterSuffix(fSuffixs, filename) && fSuffixs.size() > 0) {
         return false;
     }
-    vector<string> fDisplaynames = g_optionArgsCore.filter.GetDisplayName();
+    vector<string> fDisplaynames = g_optionArgs.filter.GetDisplayName();
     if (!FilterDisplayname(fDisplaynames, filename) && fDisplaynames.size() > 0) {
         return false;
     }
-    int64_t fFileSizeOver = g_optionArgsCore.filter.GetFileSizeOver();
+    int64_t fFileSizeOver = g_optionArgs.filter.GetFileSizeOver();
     if (!FilterFilesizeOver(fFileSizeOver, filename)) {
         return false;
     }
-    double fLastModifiedAfter = g_optionArgsCore.filter.GetLastModifiedAfter();
+    double fLastModifiedAfter = g_optionArgs.filter.GetLastModifiedAfter();
     if (!FilterLastModifyTime(fLastModifiedAfter, filename)) {
         return false;
     }
-    g_optionArgsCore.countNum++;
+    g_optionArgs.countNum++;
     return true;
 }
 
@@ -211,8 +213,8 @@ static int32_t FilterFunc(const struct dirent *filename)
         return FILTER_DISMATCH;
     }
 
-    if (g_optionArgsCore.countNum < g_optionArgsCore.listNum || g_optionArgsCore.listNum == 0) {
-        if ((filename->d_type == DT_DIR && g_optionArgsCore.recursion) || FilterResult(*filename)) {
+    if (g_optionArgs.countNum < g_optionArgs.listNum || g_optionArgs.listNum == 0) {
+        if ((filename->d_type == DT_DIR && g_optionArgs.recursion) || FilterResult(*filename)) {
             return FILTER_MATCH;
         }
     }
@@ -267,13 +269,13 @@ static int RecursiveFunc(const string &path, vector<string> &dirents)
         if ((*(pNameList->namelist[i])).d_type == DT_REG) {
             dirents.emplace_back(path + '/' + pNameList->namelist[i]->d_name);
         } else if ((*(pNameList->namelist[i])).d_type == DT_DIR) {
-            string pathTemp = g_optionArgsCore.path;
-            g_optionArgsCore.path += '/' + string((*(pNameList->namelist[i])).d_name);
-            int ret = RecursiveFunc(g_optionArgsCore.path, dirents);
+            string pathTemp = g_optionArgs.path;
+            g_optionArgs.path += '/' + string((*(pNameList->namelist[i])).d_name);
+            int ret = RecursiveFunc(g_optionArgs.path, dirents);
             if (ret != ERRNO_NOERR) {
                 return ret;
             }
-            g_optionArgsCore.path = pathTemp;
+            g_optionArgs.path = pathTemp;
         }
     }
     return ERRNO_NOERR;
@@ -290,19 +292,19 @@ static void DoListFileVector(const string &path, vector<string> &dirents, bool r
 
 FsResult<std::vector<std::string>> ListFileCore::DoListFile(const string &path, const optional<FsListFileOptions> &opt)
 {
-    if (!ValidOptionParam(path, opt, g_optionArgsCore)) {
+    if (!ValidOptionParam(path, opt, g_optionArgs)) {
         HILOGE("Invalid options");
         return FsResult<std::vector<std::string>>::Error(EINVAL);
     }
 
     vector<string> direntsRes;
     int ret = 0;
-    ret = g_optionArgsCore.recursion ? RecursiveFunc(path, direntsRes) : FilterFileRes(path, direntsRes);
+    ret = g_optionArgs.recursion ? RecursiveFunc(path, direntsRes) : FilterFileRes(path, direntsRes);
     if (ret) {
         return FsResult<std::vector<std::string>>::Error(ret);
     }
-    DoListFileVector(path, direntsRes, g_optionArgsCore.recursion);
-    g_optionArgsCore.Clear();
+    DoListFileVector(path, direntsRes, g_optionArgs.recursion);
+    g_optionArgs.Clear();
 
     return FsResult<std::vector<std::string>>::Success(direntsRes);
 }

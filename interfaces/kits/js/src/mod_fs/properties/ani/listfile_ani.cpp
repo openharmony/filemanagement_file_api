@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "ani_signature.h"
 #include "error_handler.h"
+#include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "listfile_core.h"
 #include "type_converter.h"
@@ -30,168 +31,53 @@ using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
 using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
-tuple<bool, bool> ParseBooleanParam(ani_env *env, ani_object obj, string tag)
-{
-    ani_ref boolRef;
-    ani_boolean isUndefined;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &boolRef)) {
-        return { false, false };
-    }
-    env->Reference_IsUndefined(boolRef, &isUndefined);
-    if (isUndefined) {
-        return { true, false };
-    }
-    auto booleanUnboxedDesc = BoxedTypes::Boolean::booleanUnboxedDesc.c_str();
-    auto booleanUnboxedSig = BoxedTypes::Boolean::booleanUnboxedSig.c_str();
-    ani_boolean boolRef_res;
-    if (ANI_OK != env->Object_CallMethodByName_Boolean(
-        static_cast<ani_object>(boolRef), booleanUnboxedDesc, booleanUnboxedSig, &boolRef_res)) {
-        return { false, false };
-    }
-    return { true, static_cast<bool>(boolRef_res) };
-}
-
-tuple<bool, long> ParseLongParam(ani_env *env, ani_object obj, string tag)
-{
-    long result = 0;
-    ani_boolean isUndefined;
-    ani_ref result_ref;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &result_ref)) {
-        return { false, result };
-    }
-
-    env->Reference_IsUndefined(result_ref, &isUndefined);
-    if (isUndefined) {
-        return { true, result };
-    }
-    
-    ani_long result_ref_res;
-    if (ANI_OK != env->Object_CallMethodByName_Long(
-        static_cast<ani_object>(result_ref), BasicTypesConverter::toLong.c_str(), nullptr, &result_ref_res)) {
-        HILOGE("Failed to call toLong method on result_ref");
-        result = -1;
-        return { false, result };
-    }
-
-    result = static_cast<int64_t>(result_ref_res);
-
-    return { true, result };
-}
-
-tuple<bool, int> ParseIntParam(ani_env *env, ani_object obj, string tag)
-{
-    int result = 0;
-    ani_boolean isUndefined;
-    ani_ref resultRef;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef)) {
-        return { false, result };
-    }
-    env->Reference_IsUndefined(resultRef, &isUndefined);
-    if (isUndefined) {
-        return { true, result };
-    }
-    ani_int resultRefRes;
-    if (ANI_OK != env->Object_CallMethodByName_Int(
-        static_cast<ani_object>(resultRef), BasicTypesConverter::toInt.c_str(), nullptr, &resultRefRes)) {
-        result = -1;
-        return { false, result };
-    }
-    result = static_cast<int>(resultRefRes);
-    return { true, result };
-}
-
-tuple<bool, optional<double>> ParseDoubleParam(ani_env *env, ani_object obj, string tag)
+static tuple<bool, optional<FsFilter>> ParseFilter(ani_env *env, ani_object obj)
 {
     ani_boolean isUndefined;
-    ani_ref resultRef;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef)) {
+    ani_ref filterRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "filter", &filterRef)) {
+        HILOGE("Invalid filter");
         return { false, nullopt };
     }
-    env->Reference_IsUndefined(resultRef, &isUndefined);
+    env->Reference_IsUndefined(filterRef, &isUndefined);
     if (isUndefined) {
         return { true, nullopt };
     }
 
-    ani_double resultRefRes;
-    if (ANI_OK != env->Object_CallMethodByName_Double(
-        static_cast<ani_object>(resultRef), BasicTypesConverter::toDouble.c_str(), nullptr, &resultRefRes)) {
-        return { false, nullopt };
-    }
-    double result = static_cast<double>(resultRefRes);
-    return { true, make_optional<double>(result) };
-}
-
-tuple<bool, optional<vector<string>>> ParseArrayString(ani_env *env, ani_object obj, string tag)
-{
-    ani_boolean isUndefined;
-    ani_ref resultRef;
-    vector<string> strings;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, tag.c_str(), &resultRef)) {
-        return { false, nullopt };
-    }
-    env->Reference_IsUndefined(resultRef, &isUndefined);
-    if (isUndefined) {
-        return { true, nullopt };
-    }
-
-    ani_int length;
-    if (ANI_OK != env->Object_GetPropertyByName_Int(
-        static_cast<ani_object>(resultRef), "length", &length) || length == 0) {
-        return { false, nullopt };
-    }
-    auto getterDesc = BuiltInTypes::Array::getterDesc.c_str();
-    auto getterSig = BuiltInTypes::Array::objectGetterSig.c_str();
-    for (int i = 0; i < int(length); i++) {
-        ani_ref stringEntryRef;
-        if (ANI_OK != env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)i)) {
-            return { false, nullopt };
-        }
-        auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));
-        if (!succ) {
-            return { false, nullopt };
-        }
-        strings.emplace_back(tmp);
-    }
-    return { true, make_optional<vector<string>>(move(strings)) };
-}
-
-tuple<bool, optional<FsFileFilter>> ParseFilter(ani_env *env, ani_object obj)
-{
-    FsFileFilter filter;
-
-    auto [succfileSizeOver, fileSizeOver] = ParseLongParam(env, obj, "fileSizeOver");
-    if (!succfileSizeOver) {
+    FsFilter filter;
+    auto filterObj = static_cast<ani_object>(filterRef);
+    auto [succFileSizeOver, fileSizeOver] = AniHelper::ParseInt64Option(env, filterObj, "fileSizeOver");
+    if (!succFileSizeOver) {
         HILOGE("Illegal option.fileSizeOver parameter");
-        return { false, move(filter) };
+        return { false, nullopt };
     }
-    filter.SetFileSizeOver(fileSizeOver);
+    filter.fileSizeOver = move(fileSizeOver);
 
-    auto [succlastModifiedAfter, lastModifiedAfter] = ParseDoubleParam(env, obj, "lastModifiedAfter");
-    if (!succlastModifiedAfter) {
+    auto [succLastModifiedAfter, lastModifiedAfter] = AniHelper::ParseDoubleOption(env, filterObj, "lastModifiedAfter");
+    if (!succLastModifiedAfter) {
         HILOGE("Illegal option.lastModifiedAfter parameter");
-        return { false, move(filter) };
+        return { false, nullopt };
     }
-    filter.SetLastModifiedAfter(lastModifiedAfter);
+    filter.lastModifiedAfter = move(lastModifiedAfter);
 
-    auto [succSuffix, suffix] = ParseArrayString(env, obj, "suffix");
+    auto [succSuffix, suffix] = AniHelper::ParseArrayStringOption(env, filterObj, "suffix");
     if (!succSuffix) {
         HILOGE("Illegal option.suffix parameter");
-        return { false, move(filter) };
+        return { false, nullopt };
     }
-    filter.SetSuffix(move(suffix));
+    filter.suffix = move(suffix);
 
-    auto [succDisplayName, displayName] = ParseArrayString(env, obj, "displayName");
+    auto [succDisplayName, displayName] = AniHelper::ParseArrayStringOption(env, filterObj, "displayName");
     if (!succDisplayName) {
         HILOGE("Illegal option.displayName parameter");
-        return { false, move(filter) };
+        return { false, nullopt };
     }
-    filter.SetDisplayName(move(displayName));
+    filter.displayName = move(displayName);
 
-    return { true, move(filter) };
+    return { true, filter };
 }
 
-tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
+static tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
 {
     FsListFileOptions result;
     ani_boolean isUndefined;
@@ -200,35 +86,26 @@ tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
         return { true, nullopt };
     }
 
-    auto [succRecursion, recursion] = ParseBooleanParam(env, obj, "recursion");
+    auto [succRecursion, recursion] = AniHelper::ParseBooleanOption(env, obj, "recursion");
     if (!succRecursion) {
         HILOGE("Invalid recursion");
         return { false, nullopt };
     }
     result.recursion = recursion;
 
-    auto [succlistNum, listNumRes] = ParseLongParam(env, obj, "listNum");
-    if (!succlistNum) {
+    auto [succListNum, listNumRes] = AniHelper::ParseInt64Option(env, obj, "listNum");
+    if (!succListNum) {
         HILOGE("Invalid listNum");
         return { false, nullopt };
     }
     result.listNum = listNumRes;
 
-    ani_ref filterRef;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(obj, "filter", &filterRef)) {
-        HILOGE("Invalid filter");
-        return { false, nullopt };
-    }
-    env->Reference_IsUndefined(filterRef, &isUndefined);
-    if (isUndefined) {
-        return { true, make_optional<FsListFileOptions>(result) };
-    }
-    auto [succFilter, filterFilterClass] = ParseFilter(env, static_cast<ani_object>(filterRef));
+    auto [succFilter, filter] = ParseFilter(env, obj);
     if (!succFilter) {
         HILOGE("Invalid filter");
         return { false, nullopt };
     }
-    result.filter = move(filterFilterClass);
+    result.filter = move(filter);
 
     return { true, make_optional<FsListFileOptions>(result) };
 }
