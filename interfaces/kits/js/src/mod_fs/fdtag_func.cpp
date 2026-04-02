@@ -31,9 +31,7 @@ inline size_t FS_ALIGN(size_t x, size_t y)
 {
     return (x + y - 1) & -y;
 }
-#endif
- 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+
 static struct FdSanTable g_fdTable = {
     .overflow = nullptr,
 };
