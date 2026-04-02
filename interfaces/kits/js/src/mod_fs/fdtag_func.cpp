@@ -27,9 +27,10 @@ namespace ModuleFileIO {
 using namespace std;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
 #define ALIGN_SIZE 4096
-inline size_t FS_ALIGN(size_t x, size_t y) {
-        return (x + y - 1) & -y;
-    }
+inline size_t FS_ALIGN(size_t x, size_t y)
+{
+    return (x + y - 1) & -y;
+}
 #endif
  
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
