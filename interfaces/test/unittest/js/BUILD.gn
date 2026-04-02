@@ -323,7 +323,6 @@ ohos_unittest("ani_file_fs_test") {
     "data_share:datashare_consumer",
     "dfs_service:distributed_file_daemon_kit_inner",
     "dfs_service:libdistributedfileutils",
-    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
