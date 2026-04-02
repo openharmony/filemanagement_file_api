@@ -49,7 +49,7 @@ static int32_t CloseFdWithFdsan(const int fd, const bool isFd, const uint64_t fi
 {
     FileFsTrace traceCloseFd("CloseFd");
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
-    if (fd >= 2048) {
+    if (fd >= OVERFLOW_END) {
         return CloseFd(fd);
     }
  
