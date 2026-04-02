@@ -265,7 +265,7 @@ ohos_unittest("ani_file_fs_test") {
   ]
 
   sources = [
-    "${file_api_path}/interfaces/test/unittest/common_mock/fdsan_mock.cpp"
+    "${file_api_path}/interfaces/test/unittest/common_mock/fdsan_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common/ut_fs_utils.cpp",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/fdtag/fdtag_func_test.cpp",
