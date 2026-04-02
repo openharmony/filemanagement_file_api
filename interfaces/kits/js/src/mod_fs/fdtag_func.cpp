@@ -27,7 +27,9 @@ namespace ModuleFileIO {
 using namespace std;
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
 #define ALIGN_SIZE 4096
-#define F_ALIGN(x, y) (((x) + (y) - 1) & -(y))
+inline size_t FS_ALIGN(size_t x, size_t y) {
+        return (x + y - 1) & -y;
+    }
 #endif
  
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
@@ -49,7 +51,7 @@ static struct FdSanEntry* GetFsFdEntry(size_t idx)
     if (!localOverflow) {
         size_t overflowCount = FD_SAN_OVERFLOW_END - FD_SAN_TABLE_SIZE;
         size_t requiredSize = sizeof(struct FdSanTableOverflow) + overflowCount * sizeof(struct FdSanEntry);
-        size_t alignedSize = F_ALIGN(requiredSize, ALIGN_SIZE);
+        size_t alignedSize = FS_ALIGN(requiredSize, ALIGN_SIZE);
  
         size_t alignedCount = (alignedSize - sizeof(struct FdSanTableOverflow)) / sizeof(struct FdSanEntry);
         void* allocation =
