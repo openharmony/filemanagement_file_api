@@ -31,7 +31,7 @@ constexpr uint64_t PREFIX_ADDR = 0xabc0000000000000;
 #define FD_SAN_OVERFLOW_END 2048
  
 struct FdSanEntry {
-    _Atomic(uint64_t) close_tag;
+    _Atomic(uint64_t) closeTag;
 };
  
 struct FdSanTableOverflow {
