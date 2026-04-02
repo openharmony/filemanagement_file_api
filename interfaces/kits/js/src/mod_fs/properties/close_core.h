@@ -24,6 +24,7 @@
 #include "fs_result.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
+#define OVERFLOW_END 2048
 
 class CloseCore final {
 public:
