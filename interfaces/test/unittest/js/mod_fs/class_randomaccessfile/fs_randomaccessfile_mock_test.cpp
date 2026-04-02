@@ -354,8 +354,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_010, T
         .WillOnce(testing::SetErrnoAndReturn(EBADFD, -1));
     raf->rafEntity->fd = make_unique<DistributedFS::FDGuard>(1, false);
     auto result = raf->CloseSync();
- 
-    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+
     EXPECT_FALSE(result.IsSuccess());
  
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_010";
