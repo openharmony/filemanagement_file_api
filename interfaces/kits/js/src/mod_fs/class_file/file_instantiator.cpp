@@ -15,7 +15,6 @@
 
 #include "file_instantiator.h"
 
-#include "fdtag_func.h"
 #include "file_entity.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -37,6 +36,7 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         }
         return FsResult<FsFile *>::Error(EIO);
     }
+
     const FsFile *objFile = result.GetData().value();
     if (!objFile) {
         HILOGE("Failed to get fsFile");
@@ -46,6 +46,7 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         }
         return FsResult<FsFile *>::Error(EIO);
     }
+
     auto *fileEntity = objFile->GetFileEntity();
     if (!fileEntity) {
         HILOGE("Failed to get fileEntity");
@@ -57,6 +58,7 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         objFile = nullptr;
         return FsResult<FsFile *>::Error(EIO);
     }
+
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
@@ -73,9 +75,6 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         fileEntity->path_ = pathOrUri;
         fileEntity->uri_ = "";
     }
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
-    FdTagFunc::SetFdTag(fd, static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(fileEntity)));
-#endif
     return result;
 }
 
