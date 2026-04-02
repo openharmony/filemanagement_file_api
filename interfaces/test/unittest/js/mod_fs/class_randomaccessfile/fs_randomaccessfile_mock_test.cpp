@@ -69,7 +69,6 @@ void FsRandomAccessFileMockTest::TearDown()
 }
 
 inline const int32_t MAX_FD = 2048;
-
 /**
  * @tc.name: FsRandomAccessFileMockTest_ReadSync_001
  * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for FAILURE when nullopt and uv_fs_read fails.
@@ -277,6 +276,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, T
 
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(-1));
+    raf->rafEntity->fd = make_unique<DistributedFS::FDGuard>(2048, false);
 
     auto result = raf->CloseSync();
 
@@ -303,7 +303,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, T
 
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
-
+    raf->rafEntity->fd = make_unique<DistributedFS::FDGuard>(2048, false);
     auto result = raf->CloseSync();
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
@@ -318,25 +318,26 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
+
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_009, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_009";
- 
+
     auto uvMock = UvFsMock::GetMock();
     auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(0));
     raf->rafEntity->fd = make_unique<DistributedFS::FDGuard>(2048, false);
     auto result = raf->CloseSync();
- 
+
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_TRUE(result.IsSuccess());
- 
+
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_009";
 }
- 
+
 /**
  * @tc.name: FsRandomAccessFileMockTest_CloseSync_010
  * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for failed.
@@ -349,15 +350,13 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_010, T
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_010";
  
-    auto uvMock = UvFsMock::GetMock();
     auto fdsanMock = FdsanMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_))
         .WillOnce(testing::SetErrnoAndReturn(EBADFD, -1));
-    raf->rafEntity->fd = make_unique<DistributedFS::FDGuard>(2048, false);
+    raf->rafEntity->fd = make_unique<DistributedFS::FDGuard>(1, false);
     auto result = raf->CloseSync();
  
-    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_FALSE(result.IsSuccess());
  
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_010";
