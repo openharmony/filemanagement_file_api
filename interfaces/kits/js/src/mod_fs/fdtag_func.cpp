@@ -57,7 +57,10 @@ static struct FdSanEntry* GetFsFdEntry(size_t idx)
                 mmap(nullptr, alignedSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (allocation == MAP_FAILED) {
             HILOGE("fdsan: mmap failed idx=%{public}zu", idx);
-            return nullptr;
+            localOverflow = atomic_load(&g_fdTable.overflow);
+            if (!localOverflow) {
+                return nullptr;
+            }
         }
         struct FdSanTableOverflow* newOverflow = (struct FdSanTableOverflow*)(allocation);
         newOverflow->len = alignedCount;
