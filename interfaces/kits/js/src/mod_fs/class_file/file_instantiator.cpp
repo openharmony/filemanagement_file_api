@@ -37,7 +37,6 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         }
         return FsResult<FsFile *>::Error(EIO);
     }
-
     const FsFile *objFile = result.GetData().value();
     if (!objFile) {
         HILOGE("Failed to get fsFile");
@@ -47,7 +46,6 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         }
         return FsResult<FsFile *>::Error(EIO);
     }
-
     auto *fileEntity = objFile->GetFileEntity();
     if (!fileEntity) {
         HILOGE("Failed to get fileEntity");
@@ -59,7 +57,6 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         objFile = nullptr;
         return FsResult<FsFile *>::Error(EIO);
     }
-
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
