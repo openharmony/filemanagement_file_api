@@ -89,7 +89,7 @@ uint64_t FdTagFunc::GetFdTag(int fd)
     if (!fde) {
         return 0;
     }
-    return atomic_load(&fde->close_tag);
+    return atomic_load(&fde->closeTag);
 }
  
 void FdTagFunc::SetFdTag(int fd, uint64_t tag)
@@ -98,7 +98,7 @@ void FdTagFunc::SetFdTag(int fd, uint64_t tag)
     if (!fde) {
         return;
     }
-    atomic_store(&fde->close_tag, tag);
+    atomic_store(&fde->closeTag, tag);
 }
 #endif
 } // namespace ModuleFileIO
