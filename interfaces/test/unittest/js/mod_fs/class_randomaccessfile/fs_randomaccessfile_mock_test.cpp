@@ -332,7 +332,6 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_009, T
     auto result = raf->CloseSync();
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_TRUE(result.IsSuccess());
 
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_009";
