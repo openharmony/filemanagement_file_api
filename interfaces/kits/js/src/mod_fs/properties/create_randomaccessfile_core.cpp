@@ -16,6 +16,7 @@
 
 #include <securec.h>
 
+#include "fdtag_func.h"
 #include "file_entity.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -148,6 +149,10 @@ static FsResult<FsRandomAccessFile *> InstantiateRandomAccessFile(unique_ptr<Dis
     rafEntity->filePointer = fp;
     rafEntity->start = start;
     rafEntity->end = end;
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    uint64_t tag = static_cast<uint64_t>(reinterpret_cast<std::uintptr_t>(rafEntity));
+    FdTagFunc::SetFdTag(rafEntity->fd.get()->GetFD(), tag);
+#endif
     return result;
 }
 

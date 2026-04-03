@@ -17,6 +17,7 @@
 
 #include <fcntl.h>
 
+#include "fdtag_func.h"
 #include "file_uri.h"
 #include "file_utils.h"
 #include "filemgmt_libfs.h"
@@ -253,13 +254,39 @@ static int CloseFd(int fd)
     return ERRNO_NOERR;
 }
 
+static int32_t CloseFdWithFdsan(const int fd, const uint64_t fileTag)
+    {
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    if (fd >= FD_SAN_OVERFLOW_END) {
+        return CloseFd(fd);
+    }
+
+    auto tag = FdTagFunc::GetFdTag(fd);
+    if (tag <= 0 || tag != fileTag) {
+        tag = fileTag|PREFIX_ADDR;
+    } else {
+        tag = 0;
+    }
+    FdTagFunc::SetFdTag(fd, 0);
+    int ret = fdsan_close_with_tag(fd, tag);
+    if (ret < 0) {
+        HILOGE("Failed to close file");
+        return ret;
+    }
+    return ERRNO_NOERR;
+#else
+    return CloseFd(fd);
+#endif
+}
+
 FsResult<void> FsRandomAccessFile::CloseSync() const
 {
     if (!rafEntity) {
         HILOGE("Failed to get entity of RandomAccessFile");
         return FsResult<void>::Error(EIO);
     }
-    auto err = CloseFd(rafEntity->fd.get()->GetFD());
+    uint64_t fileTag = reinterpret_cast<uintptr_t>(rafEntity.get());
+    auto err = CloseFdWithFdsan(rafEntity->fd.get()->GetFD(), fileTag);
     if (err) {
         return FsResult<void>::Error(err);
     }
