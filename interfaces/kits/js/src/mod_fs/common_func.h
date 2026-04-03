@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -133,6 +133,27 @@ struct CommonFunc {
     static uint32_t GetApiCompatibleVersion();
 #endif
 };
+
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+class AppInfo {
+public:
+    static AppInfo& GetInstance()
+    {
+        static AppInfo instance;
+        return instance;
+    }
+
+    bool InDenyList();
+
+private:
+    AppInfo();
+    ~AppInfo() = default;
+
+    AppInfo(const AppInfo&) = delete;
+    AppInfo& operator=(const AppInfo&) = delete;
+    bool inDeny = false;
+};
+#endif
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
