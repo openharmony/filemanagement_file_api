@@ -17,6 +17,7 @@
 
 #include "ani_signature.h"
 #include "error_handler.h"
+#include "file_filter_ani.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "listfile_core.h"
@@ -77,6 +78,48 @@ static tuple<bool, optional<FsFilter>> ParseFilter(ani_env *env, ani_object obj)
     return { true, filter };
 }
 
+static tuple<bool, shared_ptr<IFileFilter>> ParseFileFilter(ani_env *env, ani_object obj)
+{
+    ani_ref filterRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(obj, "fileFilter", &filterRef);
+    if (status != ANI_OK) {
+        HILOGE("Failed to get fileFilter property, ret: %{public}d", status);
+        return { false, nullptr };
+    }
+
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(filterRef, &isUndefined);
+    if (isUndefined) {
+        return { true, nullptr };
+    }
+
+    auto fileFilter = CreateSharedPtr<FileFilterAni>(env, static_cast<ani_object>(filterRef));
+    if (!fileFilter) {
+        HILOGE("Failed to request heap memory.");
+        return { false, nullptr };
+    }
+
+    return { true, fileFilter };
+}
+
+static bool IsListFileOptions(ani_env *env, ani_object obj)
+{
+    AniCache &aniCache = AniCache::GetInstance();
+    auto [res, cls] = aniCache.GetClass(env, FS::ListFileOptions::classDesc);
+    if (res != ANI_OK) {
+        HILOGE("Cannot find class %{public}s", FS::ListFileOptions::classDesc.c_str());
+        return false;
+    }
+
+    ani_boolean result = false;
+    auto status = env->Object_InstanceOf(obj, cls, &result);
+    if (status != ANI_OK) {
+        HILOGE("Object_InstanceOf failed, status: %{public}d", status);
+        return false;
+    }
+    return static_cast<bool>(result);
+}
+
 static tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_object obj)
 {
     FsListFileOptions result;
@@ -100,12 +143,21 @@ static tuple<bool, optional<FsListFileOptions>> ParseArgs(ani_env *env, ani_obje
     }
     result.listNum = listNumRes;
 
-    auto [succFilter, filter] = ParseFilter(env, obj);
-    if (!succFilter) {
-        HILOGE("Invalid filter");
-        return { false, nullopt };
+    if (IsListFileOptions(env, obj)) {
+        auto [succFilter, filter] = ParseFilter(env, obj);
+        if (!succFilter) {
+            HILOGE("Invalid filter");
+            return { false, nullopt };
+        }
+        result.filter = move(filter);
+    } else {
+        auto [succFileFilter, fileFilter] = ParseFileFilter(env, obj);
+        if (!succFileFilter) {
+            HILOGE("Invalid fileFilter");
+            return { false, nullopt };
+        }
+        result.fileFilter = fileFilter;
     }
-    result.filter = move(filter);
 
     return { true, make_optional<FsListFileOptions>(result) };
 }
@@ -127,6 +179,15 @@ ani_array ListFileAni::ListFileSync(ani_env *env, [[maybe_unused]] ani_class cla
     }
 
     auto ret = ListFileCore::DoListFile(srcPath, opt);
+    if (opt.has_value() && opt.value().fileFilter) {
+        auto aniFilter = std::static_pointer_cast<FileFilterAni>(opt.value().fileFilter);
+        if (aniFilter && aniFilter->HasException()) {
+            HILOGE("Filter callback threw exception");
+            // Note: No need to throw exception manually
+            // ANI runtime will propagate the pending exception to ETS layer
+            return nullptr;
+        }
+    }
     if (!ret.IsSuccess()) {
         HILOGE("DoListFile failed");
         const auto &err = ret.GetError();
