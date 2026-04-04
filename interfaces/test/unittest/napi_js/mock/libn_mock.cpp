@@ -116,6 +116,28 @@ napi_status napi_create_array(napi_env env, napi_value *result)
     return realNapiCreateArray(env, result);
 }
 
+napi_status napi_create_reference(napi_env env, napi_value value, uint32_t initialRefcount, napi_ref *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_create_reference(env, value, initialRefcount, result);
+    }
+
+    static napi_status (*realNapiCreateReference)(napi_env, napi_value, uint32_t, napi_ref *) = []() {
+        auto func =
+            (napi_status(*)(napi_env, napi_value, uint32_t, napi_ref *))dlsym(RTLD_NEXT, "napi_create_reference");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_create_reference: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realNapiCreateReference) {
+        return napi_ok;
+    }
+
+    return realNapiCreateReference(env, value, initialRefcount, result);
+}
+
 napi_status napi_delete_reference(napi_env env, napi_ref ref)
 {
     if (LibnMock::IsMockable()) {
@@ -881,5 +903,53 @@ std::tuple<bool, std::vector<std::string>, uint32_t> NVal::ToStringArray()
     }
 
     return realToStringArray();
+}
+
+NVal NAsyncWorkPromise::Schedule(std::string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete)
+{
+    if (LibnMock::IsMockable()) {
+        auto err = cbExec();
+        return cbComplete(env_, std::move(err));
+    }
+
+    static NVal (*realSchedule)(std::string, NContextCBExec, NContextCBComplete) = []() {
+        auto func = (NVal(*)(std::string, NContextCBExec, NContextCBComplete))dlsym(RTLD_NEXT,
+            "_ZN4OHOS14FileManagement4LibN17NAsyncWorkPromise8ScheduleENSt3__h12basic_stringIcNS3_11char_"
+            "traitsIcEENS3_9allocatorIcEEEENS3_8functionIFNS1_6NErrorEvEEENSA_IFNS1_4NValEP10napi_env__SB_EEE");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real NAsyncWorkPromise::Schedule: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realSchedule) {
+        return NVal();
+    }
+
+    return realSchedule(std::move(procedureName), std::move(cbExec), std::move(cbComplete));
+}
+
+NVal NAsyncWorkCallback::Schedule(std::string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete)
+{
+    if (LibnMock::IsMockable()) {
+        auto err = cbExec();
+        return cbComplete(env_, std::move(err));
+    }
+
+    static NVal (*realSchedule)(std::string, NContextCBExec, NContextCBComplete) = []() {
+        auto func = (NVal(*)(std::string, NContextCBExec, NContextCBComplete))dlsym(RTLD_NEXT,
+            "_ZN4OHOS14FileManagement4LibN18NAsyncWorkCallback8ScheduleENSt3__h12basic_stringIcNS3_11char_"
+            "traitsIcEENS3_9allocatorIcEEEENS3_8functionIFNS1_6NErrorEvEEENSA_IFNS1_4NValEP10napi_env__SB_EEE");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real NAsyncWorkCallback::Schedule: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realSchedule) {
+        return NVal();
+    }
+
+    return realSchedule(std::move(procedureName), std::move(cbExec), std::move(cbComplete));
 }
 #endif
