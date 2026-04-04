@@ -42,7 +42,8 @@ public:
     virtual napi_status napi_unwrap(napi_env env, napi_value js_object, void **result) = 0;
     virtual napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result) = 0;
     virtual napi_status napi_create_array(napi_env env, napi_value *result) = 0;
-    virtual napi_status napi_create_reference(napi_env env, napi_value value, uint32_t initialRefcount, napi_ref *result) = 0;
+    virtual napi_status napi_create_reference(
+        napi_env env, napi_value value, uint32_t initialRefcount, napi_ref *result) = 0;
     virtual napi_status napi_delete_reference(napi_env env, napi_ref ref) = 0;
     virtual napi_status napi_get_reference_value(napi_env env, napi_ref ref, napi_value *result) = 0;
     virtual napi_status napi_typeof(napi_env env, napi_value value, napi_valuetype *result) = 0;

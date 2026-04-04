@@ -17,8 +17,9 @@
 
 #include <fcntl.h>
 #include <filesystem>
-#include <gtest/gtest.h>
 #include <securec.h>
+
+#include <gtest/gtest.h>
 #include <sys/prctl.h>
 
 #include "file_filter_mock.h"
@@ -109,15 +110,15 @@ static tuple<bool, unique_ptr<char[]>, size_t> BuildTuplePath(const string &path
 }
 
 /**
- * @tc.name: ListFileMockTest_001
+ * @tc.name: ListFileMockTest_Sync_001
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS with fileFilter matching all files.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_001, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_001, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_001";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_001";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -156,20 +157,20 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_001, testing::ext::TestSize.Level1)
     std::sort(expected.begin(), expected.end());
     EXPECT_EQ(actualFiles, expected);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_001";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_001";
 }
 
 /**
- * @tc.name: ListFileMockTest_002
+ * @tc.name: ListFileMockTest_Sync_002
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS with fileFilter matching all files with listNum limit
  * in non-recursive mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_002, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_002, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_002";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_002";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -207,19 +208,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_002, testing::ext::TestSize.Level1)
     EXPECT_EQ(result, expectedRes);
     EXPECT_EQ(actualFiles.size(), static_cast<size_t>(listNum));
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_002";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_002";
 }
 
 /**
- * @tc.name: ListFileMockTest_003
+ * @tc.name: ListFileMockTest_Sync_003
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS with fileFilter matching all files in recursive mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_003, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_003, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_003";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_003";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -255,20 +256,20 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_003, testing::ext::TestSize.Level1)
     EXPECT_EQ(result, expectedRes);
     EXPECT_EQ(actualFiles.size(), totalRecursiveFiles);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_003";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_003";
 }
 
 /**
- * @tc.name: ListFileMockTest_004
+ * @tc.name: ListFileMockTest_Sync_004
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS with fileFilter matching all files with listNum
  * limit in recursive mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_004, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_004, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_004";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_004";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -307,20 +308,20 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_004, testing::ext::TestSize.Level1)
     EXPECT_EQ(result, expectedRes);
     EXPECT_EQ(actualFiles.size(), static_cast<size_t>(listNum));
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_004";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_004";
 }
 
 /**
- * @tc.name: ListFileMockTest_005
+ * @tc.name: ListFileMockTest_Sync_005
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS with fileFilter matching specific file in
  * non-recursive mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_005, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_005, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_005";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_005";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -358,20 +359,20 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_005, testing::ext::TestSize.Level1)
     ASSERT_EQ(actualFiles.size(), 1);
     EXPECT_EQ(actualFiles[0], "text_1.txt");
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_005";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_005";
 }
 
 /**
- * @tc.name: ListFileMockTest_006
+ * @tc.name: ListFileMockTest_Sync_006
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS with fileFilter matching files starting with / in
  * recursive mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_006, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_006, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_006";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_006";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -409,20 +410,20 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_006, testing::ext::TestSize.Level1)
     EXPECT_EQ(result, expectedRes);
     EXPECT_EQ(actualFiles.size(), totalRecursiveFiles);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_006";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_006";
 }
 
 /**
- * @tc.name: ListFileMockTest_007
+ * @tc.name: ListFileMockTest_Sync_007
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS with fileFilter matching files starting with
  * /level1 in recursive mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_007, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_007, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_007";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_007";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -465,19 +466,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_007, testing::ext::TestSize.Level1)
     std::sort(expected.begin(), expected.end());
     EXPECT_EQ(actualFiles, expected);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_007";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_007";
 }
 
 /**
- * @tc.name: ListFileMockTest_008
+ * @tc.name: ListFileMockTest_Sync_008
  * @tc.desc: Test function of ListFile::Sync interface for FAILURE when listNum is negative with fileFilter.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_008, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_008, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_008";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_008";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -507,19 +508,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_008, testing::ext::TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_EQ(result, nullptr);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_008";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_008";
 }
 
 /**
- * @tc.name: ListFileMockTest_009
+ * @tc.name: ListFileMockTest_Sync_009
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS when fileFilter matches no files.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_009, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_009, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_009";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_009";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -554,20 +555,20 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_009, testing::ext::TestSize.Level1)
     EXPECT_EQ(result, expectedRes);
     EXPECT_EQ(actualFiles.size(), 0);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_009";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_009";
 }
 
 /**
- * @tc.name: ListFileMockTest_010
+ * @tc.name: ListFileMockTest_Sync_010
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS when listNum exceeds actual file count in
  * recursive mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_010, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_010, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_010";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_010";
 
     constexpr int64_t listNum = 20;
 
@@ -606,20 +607,20 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_010, testing::ext::TestSize.Level1)
     EXPECT_EQ(result, expectedRes);
     EXPECT_EQ(actualFiles.size(), totalRecursiveFiles);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_010";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_010";
 }
 
 /**
- * @tc.name: ListFileMockTest_011
+ * @tc.name: ListFileMockTest_Sync_011
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS with fileFilter matching specific file in
  * subdirectory in recursive mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_011, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_011, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_011";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_011";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -658,19 +659,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_011, testing::ext::TestSize.Level1)
     ASSERT_EQ(actualFiles.size(), 1);
     EXPECT_EQ(actualFiles[0], "/level1/text_2.txt");
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_011";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_011";
 }
 
 /**
- * @tc.name: ListFileMockTest_012
+ * @tc.name: ListFileMockTest_Sync_012
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS when no filter and no fileFilter.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_012, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_012, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_012";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_012";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -695,19 +696,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_012, testing::ext::TestSize.Level1)
     std::sort(expected.begin(), expected.end());
     EXPECT_EQ(actualFiles, expected);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_012";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_012";
 }
 
 /**
- * @tc.name: ListFileMockTest_013
+ * @tc.name: ListFileMockTest_Sync_013
  * @tc.desc: Test function of ListFile::Sync interface for SUCCESS with suffix filter.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_013, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_013, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_013";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_013";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -744,19 +745,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_013, testing::ext::TestSize.Level1)
     std::sort(expected.begin(), expected.end());
     EXPECT_EQ(actualFiles, expected);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_013";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_013";
 }
 
 /**
- * @tc.name: ListFileMockTest_014
+ * @tc.name: ListFileMockTest_Sync_014
  * @tc.desc: Test function of GetFileFilterFunction when filter is not a function.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_014, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_014, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_014";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_014";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -783,19 +784,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_014, testing::ext::TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_EQ(result, nullptr);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_014";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_014";
 }
 
 /**
- * @tc.name: ListFileMockTest_015
+ * @tc.name: ListFileMockTest_Sync_015
  * @tc.desc: Test function of GetOptionParam when neither filter nor fileFilter exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_015, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_015, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_015";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_015";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -825,19 +826,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_015, testing::ext::TestSize.Level1)
     EXPECT_EQ(result, expectedRes);
     EXPECT_EQ(actualFiles.size(), totalRecursiveFiles);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_015";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_015";
 }
 
 /**
- * @tc.name: ListFileMockTest_016
+ * @tc.name: ListFileMockTest_Sync_016
  * @tc.desc: Test function of GetOptionParam when fileFilter property is undefined.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_016, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_016, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_016";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_016";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -872,19 +873,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_016, testing::ext::TestSize.Level1)
     std::sort(expected.begin(), expected.end());
     EXPECT_EQ(actualFiles, expected);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_016";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_016";
 }
 
 /**
- * @tc.name: ListFileMockTest_017
+ * @tc.name: ListFileMockTest_Sync_017
  * @tc.desc: Test function of ListFile::Sync when InitArgs fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_017, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_017, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_017";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_017";
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>(), testing::A<size_t>())).WillOnce(testing::Return(false));
@@ -895,19 +896,19 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_017, testing::ext::TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     EXPECT_EQ(result, nullptr);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_017";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_017";
 }
 
 /**
- * @tc.name: ListFileMockTest_018
+ * @tc.name: ListFileMockTest_Sync_018
  * @tc.desc: Test function of ListFile::Sync with fileFilter and recursion, filtering .txt files only.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(ListFileMockTest, ListFileMockTest_018, testing::ext::TestSize.Level1)
+HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_018, testing::ext::TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_018";
+    GTEST_LOG_(INFO) << "ListFileMockTest-begin ListFileMockTest_Sync_018";
 
     auto tuplePath = BuildTuplePath(dataDir);
     ASSERT_TRUE(std::get<0>(tuplePath));
@@ -949,7 +950,7 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_018, testing::ext::TestSize.Level1)
     std::sort(expected.begin(), expected.end());
     EXPECT_EQ(actualFiles, expected);
 
-    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_018";
+    GTEST_LOG_(INFO) << "ListFileMockTest-end ListFileMockTest_Sync_018";
 }
 
 /**

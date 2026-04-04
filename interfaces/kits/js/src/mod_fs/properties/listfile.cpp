@@ -19,9 +19,10 @@
 #include <memory>
 #include <string_view>
 #include <string>
-#include <sys/stat.h>
 #include <thread>
 #include <tuple>
+
+#include <sys/stat.h>
 
 #include "file_filter_napi.h"
 #include "file_utils.h"
@@ -149,7 +150,7 @@ static bool GetOptionParam(const NVal &argv, OptionArgs *optionArgs)
         if (!fileFilterProp.TypeIs(napi_undefined)) {
             auto ret = GetFileFilterFunction(fileFilterProp, optionArgs);
             if (!ret) {
-                HILOGE("Failed to get filterFilter prop.");
+                HILOGE("Failed to get fileFilter prop.");
                 return false;
             }
         }
