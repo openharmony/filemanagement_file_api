@@ -15,18 +15,46 @@
 
 #include "listfile_ext_core.h"
 
+#include <dirent.h>
 #include <memory>
-#include <string>
 #include <string_view>
+#include <string>
+
 #include <sys/stat.h>
-#include <thread>
-#include <tuple>
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "i_file_filter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
+
+namespace {
+constexpr int32_t FILTER_MATCH = 1;
+constexpr int32_t FILTER_DISMATCH = 0;
+
+struct NameListArg {
+    struct dirent **namelist = { nullptr };
+    int direntNum = 0;
+};
+
+struct OptionArgs {
+    std::shared_ptr<IFileFilter> fileFilter = nullptr;
+    int listNum = 0;
+    int countNum = 0;
+    bool recursion = false;
+    std::string path = "";
+    std::string originalPath = "";
+    void Clear()
+    {
+        fileFilter = nullptr;
+        listNum = 0;
+        countNum = 0;
+        recursion = false;
+        path = "";
+        originalPath = "";
+    }
+};
+} // namespace
 
 static thread_local OptionArgs g_optionArgs;
 

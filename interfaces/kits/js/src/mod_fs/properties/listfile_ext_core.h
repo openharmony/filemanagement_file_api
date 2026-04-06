@@ -16,42 +16,12 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_EXT_CORE_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_EXT_CORE_H
 
-#include <dirent.h>
 #include <optional>
 
 #include "filemgmt_libfs.h"
 #include "i_file_filter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
-
-namespace {
-constexpr int32_t FILTER_MATCH = 1;
-constexpr int32_t FILTER_DISMATCH = 0;
-
-struct NameListArg {
-    struct dirent **namelist = { nullptr };
-    int direntNum = 0;
-};
-
-struct OptionArgs {
-    std::shared_ptr<IFileFilter> fileFilter = nullptr;
-    int listNum = 0;
-    int countNum = 0;
-    bool recursion = false;
-    std::string path = "";
-    std::string originalPath = "";
-    void Clear()
-    {
-        fileFilter = nullptr;
-        listNum = 0;
-        countNum = 0;
-        recursion = false;
-        path = "";
-        originalPath = "";
-    }
-};
-
-} // namespace
 
 struct ListFileExtOptions {
     bool recursion = false;

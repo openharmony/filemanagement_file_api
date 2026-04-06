@@ -19,8 +19,8 @@
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
-#include "ut_file_utils.h"
 #include "i_file_filter.h"
+#include "ut_file_utils.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -60,6 +60,7 @@ private:
     const string testDir = FileUtils::testRootDir + "/ListFileExtCoreTest";
     const string dataDir = testDir + "/data";
     const string emptyDir = testDir + "/emptyDir";
+    const size_t totalDataDirEntries = 5; // 4 files + 1 dir
     const size_t totalRecursiveFiles = 12;
 };
 
@@ -107,6 +108,13 @@ void ListFileExtCoreTest::TearDown()
     GTEST_LOG_(INFO) << "TearDown";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_001
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when options is nullopt.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_001";
@@ -115,11 +123,19 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_001, testing::ex
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 5);
+    EXPECT_EQ(files.size(), totalDataDirEntries);
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_001";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_002
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when listNum has no value and
+ * fileFilter is nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_002";
@@ -133,11 +149,18 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_002, testing::ex
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 5);
+    EXPECT_EQ(files.size(), totalDataDirEntries);
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_002";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_003
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for FAILURE when listNum is invalid.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_003";
@@ -150,10 +173,20 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_003, testing::ex
     auto result = ListFileExtCore::DoListFileExt(dataDir, opt);
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_003";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_004
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when listNum is zero.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_004";
@@ -167,11 +200,18 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_004, testing::ex
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 5);
+    EXPECT_EQ(files.size(), totalDataDirEntries);
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_004";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_005
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when specifying listNum.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_005";
@@ -185,11 +225,18 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_005, testing::ex
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 3);
+    EXPECT_EQ(files.size(), opt.listNum.value());
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_005";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_006
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when recursion is true.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_006";
@@ -210,6 +257,13 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_006, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_006";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_007
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when recursion with listNum limit.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_007, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_007";
@@ -223,11 +277,19 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_007, testing::ex
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 5);
+    EXPECT_EQ(files.size(), opt.listNum.value());
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_007";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_008
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when fileFilter matches all files in
+ * non-recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_008, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_008";
@@ -249,6 +311,14 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_008, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_008";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_009
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when fileFilter matches all files
+ * with listNum limit in non-recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_009, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_009";
@@ -262,11 +332,18 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_009, testing::ex
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 2);
+    EXPECT_EQ(files.size(), opt.listNum.value());
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_009";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_010
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when fileFilter matches no files.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_010, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_010";
@@ -285,6 +362,14 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_010, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_010";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_011
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when fileFilter matches all files in
+ * recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_011, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_011";
@@ -303,6 +388,14 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_011, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_011";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_012
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when fileFilter matches all files
+ * with listNum limit in recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_012, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_012";
@@ -316,11 +409,19 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_012, testing::ex
 
     ASSERT_TRUE(result.IsSuccess());
     auto files = result.GetData().value();
-    EXPECT_EQ(files.size(), 5);
+    EXPECT_EQ(files.size(), opt.listNum.value());
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_012";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_013
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when fileFilter matches specific file
+ * in non-recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_013, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_013";
@@ -342,6 +443,14 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_013, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_013";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_014
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when fileFilter matches files
+ * starting with / in recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_014, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_014";
@@ -362,6 +471,14 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_014, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_014";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_015
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when fileFilter matches files
+ * starting with /level1 in recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_015, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_015";
@@ -387,6 +504,14 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_015, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_015";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_016
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when fileFilter matches specific file
+ * in subdirectory in recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_016, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_016";
@@ -408,6 +533,14 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_016, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_016";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_017
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for FAILURE when listNum is negative with
+ * fileFilter.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_017, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_017";
@@ -420,10 +553,21 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_017, testing::ex
     auto result = ListFileExtCore::DoListFileExt(dataDir, opt);
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrMsg(), "Invalid argument");
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_017";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_018
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when listNum exceeds actual file
+ * count in recursive mode.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_018, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_018";
@@ -442,6 +586,13 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_018, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_018";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_019
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for SUCCESS when listing an empty directory.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_019, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_019";
@@ -455,6 +606,13 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_019, testing::ex
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_019";
 }
 
+/**
+ * @tc.name: ListFileExtCoreTest_DoListFileExt_020
+ * @tc.desc: Test function of ListFileExtCore::DoListFileExt interface for FAILURE when no such file or directory.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_020, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-begin DoListFileExt_020";
@@ -463,6 +621,9 @@ HWTEST_F(ListFileExtCoreTest, ListFileExtCoreTest_DoListFileExt_020, testing::ex
     auto result = ListFileExtCore::DoListFileExt(path, std::nullopt);
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002);
+    EXPECT_EQ(err.GetErrMsg(), "No such file or directory");
 
     GTEST_LOG_(INFO) << "ListFileExtCoreTest-end DoListFileExt_020";
 }

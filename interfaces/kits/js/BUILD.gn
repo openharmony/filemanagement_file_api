@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -230,9 +230,9 @@ ohos_shared_library("fs") {
       "src/mod_fs/class_watcher/watcher_entity.cpp",
       "src/mod_fs/class_watcher/watcher_n_exporter.cpp",
       "src/mod_fs/properties/connectdfs.cpp",
+      "src/mod_fs/properties/copy.cpp",
       "src/mod_fs/properties/copy_file.cpp",
       "src/mod_fs/properties/copy_listener/trans_listener.cpp",
-      "src/mod_fs/properties/copy.cpp",
       "src/mod_fs/properties/copydir.cpp",
       "src/mod_fs/properties/create_randomaccessfile.cpp",
       "src/mod_fs/properties/create_stream.cpp",
@@ -241,8 +241,8 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/dup.cpp",
       "src/mod_fs/properties/fdopen_stream.cpp",
       "src/mod_fs/properties/file_filter/napi/file_filter_napi.cpp",
-      "src/mod_fs/properties/listfile_ext_core.cpp",
       "src/mod_fs/properties/listfile.cpp",
+      "src/mod_fs/properties/listfile_ext_core.cpp",
       "src/mod_fs/properties/lseek.cpp",
       "src/mod_fs/properties/move.cpp",
       "src/mod_fs/properties/movedir.cpp",
@@ -779,8 +779,8 @@ taihe_shared_library("file_fs_taihe") {
     "src/mod_fs/properties/ani/fdatasync_ani.cpp",
     "src/mod_fs/properties/ani/fdopen_stream_ani.cpp",
     "src/mod_fs/properties/ani/fsync_ani.cpp",
-    "src/mod_fs/properties/ani/listfile_ext_ani.cpp",
     "src/mod_fs/properties/ani/listfile_ani.cpp",
+    "src/mod_fs/properties/ani/listfile_ext_ani.cpp",
     "src/mod_fs/properties/ani/lseek_ani.cpp",
     "src/mod_fs/properties/ani/mkdir_ani.cpp",
     "src/mod_fs/properties/ani/mkdtemp_ani.cpp",
@@ -812,8 +812,8 @@ taihe_shared_library("file_fs_taihe") {
     "src/mod_fs/properties/fdopen_stream_core.cpp",
     "src/mod_fs/properties/file_filter/ani/file_filter_ani.cpp",
     "src/mod_fs/properties/fsync_core.cpp",
-    "src/mod_fs/properties/listfile_ext_core.cpp",
     "src/mod_fs/properties/listfile_core.cpp",
+    "src/mod_fs/properties/listfile_ext_core.cpp",
     "src/mod_fs/properties/lseek_core.cpp",
     "src/mod_fs/properties/lstat_core.cpp",
     "src/mod_fs/properties/mkdir_core.cpp",

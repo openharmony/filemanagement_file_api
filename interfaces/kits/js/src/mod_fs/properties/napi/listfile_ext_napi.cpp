@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+
 #include "file_filter_napi.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -24,6 +25,18 @@
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace OHOS::FileManagement::LibN;
+
+static std::optional<NVal> GetFilterException(napi_env env, const std::optional<ListFileExtOptions> &options)
+{
+    if (!options.has_value()) {
+        return nullopt;
+    }
+    auto napiFilter = std::static_pointer_cast<FileFilterNapi>(options.value().fileFilter);
+    if (!napiFilter || !napiFilter->HasException()) {
+        return nullopt;
+    }
+    return NVal(env, napiFilter->HandleException(env));
+}
 
 static bool GetFileFilterFunction(const NVal &fileFilterProp, ListFileExtOptions &options)
 {
@@ -153,11 +166,9 @@ napi_value ListFileExtNapi::Async(napi_env env, napi_callback_info info)
         return NError(ERRNO_NOERR);
     };
     auto cbCompl = [arg, options](napi_env env, NError err) -> NVal {
-        if (options.has_value()) {
-            auto napiFilter = std::static_pointer_cast<FileFilterNapi>(options.value().fileFilter);
-            if (napiFilter && napiFilter->HasException()) {
-                return { env, napiFilter->HandleException(env) };
-            }
+        auto filterException = GetFilterException(env, options);
+        if (filterException.has_value()) {
+            return filterException.value();
         }
         if (err) {
             return { env, err.GetNapiErr(env) };
