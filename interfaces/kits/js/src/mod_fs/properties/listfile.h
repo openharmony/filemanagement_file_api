@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,10 @@
 #ifndef INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_H
 #define INTERFACES_KITS_JS_SRC_MOD_FS_PROPERTIES_LISTFILE_H
 
-#include <dirent.h>
-#include <memory>
-
-#include "file_filter.h"
 #include "filemgmt_libn.h"
-#include "i_file_filter.h"
+#include "file_filter.h"
+
+#include <dirent.h>
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace OHOS::FileManagement::LibN;
@@ -37,32 +35,30 @@ public:
 };
 
 struct NameListArg {
-    struct dirent **namelist = { nullptr };
+    struct dirent** namelist = { nullptr };
     int direntNum = 0;
 };
 
 constexpr int DEFAULT_SIZE = -1;
 constexpr int DEFAULT_MODIFY_AFTER = -1;
 struct OptionArgs {
-    FileFilter filter =
-        FileFilterBuilder().SetFileSizeOver(DEFAULT_SIZE).SetLastModifiedAfter(DEFAULT_MODIFY_AFTER).Build();
-    std::shared_ptr<IFileFilter> fileFilter = nullptr;
+    FileFilter filter = FileFilterBuilder()
+        .SetFileSizeOver(DEFAULT_SIZE)
+        .SetLastModifiedAfter(DEFAULT_MODIFY_AFTER)
+        .Build();
     int listNum = 0;
     int countNum = 0;
     bool recursion = false;
     std::string path = "";
-    std::string originalPath = "";
     void Clear()
     {
         filter.FilterClear();
         filter.SetFileSizeOver(DEFAULT_SIZE);
         filter.SetLastModifiedAfter(DEFAULT_MODIFY_AFTER);
-        fileFilter = nullptr;
         listNum = 0;
         countNum = 0;
         recursion = false;
         path = "";
-        originalPath = "";
     }
 };
 
