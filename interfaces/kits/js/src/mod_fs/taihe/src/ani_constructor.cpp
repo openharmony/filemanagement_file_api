@@ -42,6 +42,7 @@
 #include "fs_watcher_ani.h"
 #include "fsync_ani.h"
 #include "listfile_ani.h"
+#include "listfile_ext_ani.h"
 #include "lseek_ani.h"
 #include "lstat_ani.h"
 #include "mkdir_ani.h"
@@ -254,6 +255,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "fsyncSync", nullptr, reinterpret_cast<void *>(FsyncAni::FsyncSync) },
         ani_native_function { "getxattrSync", nullptr, reinterpret_cast<void *>(XattrAni::GetXattrSync) },
         ani_native_function { "listFileSync", nullptr, reinterpret_cast<void *>(ListFileAni::ListFileSync) },
+        ani_native_function { "listFileExtSync", nullptr, reinterpret_cast<void *>(ListFileExtAni::ListFileExtSync) },
         ani_native_function { "lseekSync", nullptr, reinterpret_cast<void *>(LseekAni::LseekSync) },
         ani_native_function { "lstatSync", nullptr, reinterpret_cast<void *>(LstatAni::LstatSync) },
         ani_native_function { "mkdirSync", mkdirCtorSig0.c_str(), reinterpret_cast<void *>(MkdirAni::MkdirSync0) },

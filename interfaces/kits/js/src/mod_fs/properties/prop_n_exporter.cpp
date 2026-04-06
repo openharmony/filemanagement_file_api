@@ -58,6 +58,7 @@
 #include "fdopen_stream.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "listfile_ext_napi.h"
 #include "listfile.h"
 #include "lseek.h"
 #include "move.h"
@@ -825,6 +826,7 @@ bool PropNExporter::ExportSync()
         NVal::DeclareNapiFunction("createWriteStream", CreateStreamRw::Write),
         NVal::DeclareNapiFunction("dup", Dup::Sync),
         NVal::DeclareNapiFunction("fdopenStreamSync", FdopenStream::Sync),
+        NVal::DeclareNapiFunction("listFileExtSync", ListFileExtNapi::Sync),
         NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
         NVal::DeclareNapiFunction("lseek", Lseek::Sync),
         NVal::DeclareNapiFunction("moveDirSync", MoveDir::Sync),
@@ -865,6 +867,7 @@ bool PropNExporter::ExportAsync()
         NVal::DeclareNapiFunction("createRandomAccessFile", CreateRandomAccessFile::Async),
         NVal::DeclareNapiFunction("createStream", CreateStream::Async),
         NVal::DeclareNapiFunction("fdopenStream", FdopenStream::Async),
+        NVal::DeclareNapiFunction("listFileExt", ListFileExtNapi::Async),
         NVal::DeclareNapiFunction("listFile", ListFile::Async),
         NVal::DeclareNapiFunction("moveDir", MoveDir::Async),
         NVal::DeclareNapiFunction("moveFile", Move::Async),

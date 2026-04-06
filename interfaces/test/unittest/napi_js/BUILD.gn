@@ -32,14 +32,19 @@ ohos_unittest("napi_file_fs_mock_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/class_stat",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/file_filter",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/file_filter/napi",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/napi",
     "${file_api_path}/interfaces/kits/native/task_signal",
     "${file_api_path}/interfaces/kits/rust/include",
+    "${utils_path}/filemgmt_libfs/include",
     "${file_api_path}/interfaces/test/unittest/common_mock",
     "${file_api_path}/interfaces/test/unittest/napi_js/mock",
     "${utils_path}/common/include",
   ]
 
   sources = [
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/file_filter/napi/file_filter_napi.cpp",
     "${file_api_path}/interfaces/kits/js/src/common/file_api_debug.cpp",
     "${file_api_path}/interfaces/kits/js/src/common/file_fs_trace.cpp",
     "${file_api_path}/interfaces/kits/js/src/common/file_helper/fd_guard.cpp",
@@ -70,6 +75,8 @@ ohos_unittest("napi_file_fs_mock_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/fdopen_stream.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/fsync.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/listfile.cpp",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/listfile_ext_core.cpp",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/napi/listfile_ext_napi.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/lseek.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/lstat.cpp",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/mkdtemp.cpp",
@@ -129,6 +136,7 @@ ohos_unittest("napi_file_fs_mock_test") {
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "${file_api_path}/interfaces/kits/native:task_signal_native",
     "${file_api_path}/interfaces/kits/rust:rust_file",
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
   ]

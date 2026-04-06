@@ -104,6 +104,7 @@ ani_file_fs_core = [
   "${src_path}/mod_fs/properties/fdopen_stream_core.cpp",
   "${src_path}/mod_fs/properties/fsync_core.cpp",
   "${src_path}/mod_fs/properties/listfile_core.cpp",
+  "${src_path}/mod_fs/properties/listfile_ext_core.cpp",
   "${src_path}/mod_fs/properties/lseek_core.cpp",
   "${src_path}/mod_fs/properties/lstat_core.cpp",
   "${src_path}/mod_fs/properties/mkdir_core.cpp",
@@ -149,6 +150,7 @@ ohos_unittest("ani_file_fs_mock_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/common/obj",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/file_filter",
     "${file_api_path}/interfaces/test/unittest/common_mock",
     "${file_api_path}/interfaces/test/unittest/common_utils",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common",
@@ -258,9 +260,11 @@ ohos_unittest("ani_file_fs_test") {
     "${file_api_path}/interfaces/kits/js/src/mod_fs/common/obj",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties",
     "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/copy_listener",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs/properties/file_filter",
     "${file_api_path}/interfaces/test/unittest/common_utils",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/fdtag",
+    "${utils_path}/common/include",
   ]
 
   sources = [
@@ -285,6 +289,7 @@ ohos_unittest("ani_file_fs_test") {
     "mod_fs/properties/dup_core_test.cpp",
     "mod_fs/properties/fdopen_stream_core_test.cpp",
     "mod_fs/properties/listfile_core_test.cpp",
+    "mod_fs/properties/listfile_ext_core_test.cpp",
     "mod_fs/properties/lseek_core_test.cpp",
     "mod_fs/properties/lstat_core_test.cpp",
     "mod_fs/properties/move_core_test.cpp",
