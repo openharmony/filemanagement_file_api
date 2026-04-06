@@ -20,7 +20,6 @@
 
 #include "file_filter.h"
 #include "filemgmt_libfs.h"
-#include "i_file_filter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -35,23 +34,19 @@ constexpr int DEFAULT_MODIFY_AFTER = -1;
 struct OptionArgs {
     FileFilter filter =
         FileFilterBuilder().SetFileSizeOver(DEFAULT_SIZE).SetLastModifiedAfter(DEFAULT_MODIFY_AFTER).Build();
-    std::shared_ptr<IFileFilter> fileFilter = nullptr;
     int listNum = 0;
     int countNum = 0;
     bool recursion = false;
     std::string path = "";
-    std::string originalPath = "";
     void Clear()
     {
         filter.FilterClear();
         filter.SetFileSizeOver(DEFAULT_SIZE);
         filter.SetLastModifiedAfter(DEFAULT_MODIFY_AFTER);
-        fileFilter = nullptr;
         listNum = 0;
         countNum = 0;
         recursion = false;
         path = "";
-        originalPath = "";
     }
 };
 
@@ -67,7 +62,6 @@ struct FsListFileOptions {
     bool recursion = false;
     optional<int64_t> listNum = 0;
     optional<FsFilter> filter = nullopt;
-    std::shared_ptr<IFileFilter> fileFilter = nullptr;
 };
 
 class ListFileCore {

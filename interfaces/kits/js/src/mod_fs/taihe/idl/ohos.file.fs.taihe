@@ -104,12 +104,6 @@ export interface RandomAccessFileOptions {
   end?: long;
 }
 
-export interface ListFileFilterOptions {
-  recursion?: boolean;
-  listNum?: long;
-  fileFilter?: FileFilter;
-}
-
 export interface ListFileOptions {
   recursion?: boolean;
   listNum?: long;
@@ -141,10 +135,6 @@ export class WriteStreamOptionsInner implements WriteStreamOptions {
 export interface ReaderIteratorResult {
   done: boolean;
   value: string;
-}
-
-export interface FileFilter {
-  filter(name: string): boolean;
 }
 
 export interface Filter {
@@ -186,7 +176,7 @@ export class FileIoImpl {
 
   static native dup(fd: int): fileIo.File;
 
-  static native listFileSync(path: string, options?: ListFileOptions | ListFileFilterOptions): string[];
+  static native listFileSync(path: string, options?: ListFileOptions): string[];
 
   static native lstatSync(path: string): fileIo.Stat;
 
@@ -1002,9 +992,9 @@ function readTextSync(filePath: string, options?: ReadTextOptions): string {
   return FileIoImpl.readTextSync(filePath, options);
 }
 
-function listFile(path: string, options?: ListFileOptions | ListFileFilterOptions): Promise<string[]> {
+function listFile(path: string, options?: ListFileOptions): Promise<string[]> {
   return new Promise<string[]>((resolve: (result: string[]) => void, reject: (e: BusinessError<void>) => void) => {
-    let promise = taskpool.execute((path: string, options?: ListFileOptions | ListFileFilterOptions):  string[] => {
+    let promise = taskpool.execute((path: string, options?: ListFileOptions):  string[] => {
       return FileIoImpl.listFileSync(path, options);
     }, path, options);
     promise.then((ret: Any): void => {
@@ -1030,8 +1020,8 @@ function listFile(path: string, callback: AsyncCallback<string[]>): void {
   });
 }
 
-function listFile(path: string, options: ListFileOptions | ListFileFilterOptions, callback: AsyncCallback<string[]>): void {
-  let promise = taskpool.execute((path: string, options: ListFileOptions | ListFileFilterOptions):  string[] => {
+function listFile(path: string, options: ListFileOptions, callback: AsyncCallback<string[]>): void {
+  let promise = taskpool.execute((path: string, options: ListFileOptions): string[] => {
     return FileIoImpl.listFileSync(path, options);
   }, path, options);
   promise.then((ret: Any): void => {
@@ -1044,7 +1034,7 @@ function listFile(path: string, options: ListFileOptions | ListFileFilterOptions
   });
 }
 
-function listFileSync(path: string, options?: ListFileOptions | ListFileFilterOptions): string[] {
+function listFileSync(path: string, options?: ListFileOptions): string[] {
   return FileIoImpl.listFileSync(path, options);
 }
 

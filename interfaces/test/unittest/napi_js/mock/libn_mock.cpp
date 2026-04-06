@@ -116,28 +116,6 @@ napi_status napi_create_array(napi_env env, napi_value *result)
     return realNapiCreateArray(env, result);
 }
 
-napi_status napi_create_reference(napi_env env, napi_value value, uint32_t initialRefcount, napi_ref *result)
-{
-    if (LibnMock::IsMockable()) {
-        return LibnMock::GetMock()->napi_create_reference(env, value, initialRefcount, result);
-    }
-
-    static napi_status (*realNapiCreateReference)(napi_env, napi_value, uint32_t, napi_ref *) = []() {
-        auto func =
-            (napi_status(*)(napi_env, napi_value, uint32_t, napi_ref *))dlsym(RTLD_NEXT, "napi_create_reference");
-        if (!func) {
-            GTEST_LOG_(ERROR) << "Failed to resolve real napi_create_reference: " << dlerror();
-        }
-        return func;
-    }();
-
-    if (!realNapiCreateReference) {
-        return napi_ok;
-    }
-
-    return realNapiCreateReference(env, value, initialRefcount, result);
-}
-
 napi_status napi_delete_reference(napi_env env, napi_ref ref)
 {
     if (LibnMock::IsMockable()) {
@@ -468,14 +446,14 @@ void NError::ThrowErrWithMsg(napi_env env, const std::string &errMsg)
         return LibnMock::GetMock()->ThrowErrWithMsg(env, errMsg);
     }
 
-    static void (*realThrowErrWithMsg)(napi_env, const std::string &errMsg) = []() {
-        auto func = (void (*)(napi_env, const std::string &errMsg))dlsym(RTLD_NEXT,
-            "_ZN4OHOS14FileManagement4LibN6NError15ThrowErrWithMsgEP10napi_env__RKNSt3__h12basic_stringIcNS5_11char_"
-            "traitsIcEENS5_9allocatorIcEEEE");
-        if (!func) {
-            GTEST_LOG_(ERROR) << "Failed to resolve real ThrowErrWithMsg: " << dlerror();
-        }
-        return func;
+    static void (*realThrowErrWithMsg)(napi_env, const std::string&) = []() {
+        auto func = (void (*)(napi_env, const std::string&))dlsym(RTLD_NEXT,
+        "_ZN4OHOS14FileManagement4LibN6NError15ThrowErrWithMsgEP10napi_env__RKNSt3__h12basic_stringIcNS5_11char_"
+        "traitsIcEENS5_9allocatorIcEEEE");
+    if (!func) {
+        GTEST_LOG_(ERROR) << "Failed to resolve real ThrowErrWithMsg: " << dlerror();
+    }
+    return func;
     }();
 
     if (!realThrowErrWithMsg) {
@@ -823,8 +801,8 @@ NVal NVal::CreateUTF8String(napi_env env, const char *str, ssize_t len)
     }
 
     static NVal (*realCreateUTF8String)(napi_env, const char *, ssize_t) = []() {
-        auto func = (NVal(*)(napi_env, const char *, ssize_t))dlsym(
-            RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN4NVal15CreateUTF8StringEP10napi_envPKcl");
+        auto func = (NVal(*)(napi_env, const char *, ssize_t))dlsym(RTLD_NEXT,
+            "_ZN4OHOS14FileManagement4LibN4NVal15CreateUTF8StringEP10napi_envPKcl");
         if (!func) {
             GTEST_LOG_(ERROR) << "Failed to resolve real CreateUTF8String (with len): " << dlerror();
         }
@@ -858,98 +836,5 @@ NVal NVal::CreateBool(napi_env env, bool val)
     }
 
     return realCreateBool(env, val);
-}
-
-NVal NVal::CreateArrayString(napi_env env, std::vector<std::string> strs)
-{
-    if (LibnMock::IsMockable()) {
-        return LibnMock::GetMock()->CreateArrayString(env, strs);
-    }
-
-    static NVal (*realCreateArrayString)(napi_env, std::vector<std::string>) = []() {
-        auto func = (NVal(*)(napi_env, std::vector<std::string>))dlsym(RTLD_NEXT,
-            "_ZN4OHOS14FileManagement4LibN4NVal17CreateArrayStringEP10napi_env__NSt3__h6vectorINS5_12basic_"
-            "stringIcNS5_11char_traitsIcEENS5_9allocatorIcEEEENSA_ISC_EEEE");
-        if (!func) {
-            GTEST_LOG_(ERROR) << "Failed to resolve real CreateArrayString: " << dlerror();
-        }
-        return func;
-    }();
-
-    if (!realCreateArrayString) {
-        return { nullptr, nullptr };
-    }
-
-    return realCreateArrayString(env, strs);
-}
-
-std::tuple<bool, std::vector<std::string>, uint32_t> NVal::ToStringArray()
-{
-    if (LibnMock::IsMockable()) {
-        return LibnMock::GetMock()->ToStringArray();
-    }
-
-    static std::tuple<bool, std::vector<std::string>, uint32_t> (*realToStringArray)() = []() {
-        auto func = (std::tuple<bool, std::vector<std::string>, uint32_t>(*)())dlsym(
-            RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN4NVal13ToStringArrayEv");
-        if (!func) {
-            GTEST_LOG_(ERROR) << "Failed to resolve real ToStringArray: " << dlerror();
-        }
-        return func;
-    }();
-
-    if (!realToStringArray) {
-        return { false, {}, 0 };
-    }
-
-    return realToStringArray();
-}
-
-NVal NAsyncWorkPromise::Schedule(std::string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete)
-{
-    if (LibnMock::IsMockable()) {
-        auto err = cbExec();
-        return cbComplete(env_, std::move(err));
-    }
-
-    static NVal (*realSchedule)(std::string, NContextCBExec, NContextCBComplete) = []() {
-        auto func = (NVal(*)(std::string, NContextCBExec, NContextCBComplete))dlsym(RTLD_NEXT,
-            "_ZN4OHOS14FileManagement4LibN17NAsyncWorkPromise8ScheduleENSt3__h12basic_stringIcNS3_11char_"
-            "traitsIcEENS3_9allocatorIcEEEENS3_8functionIFNS1_6NErrorEvEEENSA_IFNS1_4NValEP10napi_env__SB_EEE");
-        if (!func) {
-            GTEST_LOG_(ERROR) << "Failed to resolve real NAsyncWorkPromise::Schedule: " << dlerror();
-        }
-        return func;
-    }();
-
-    if (!realSchedule) {
-        return NVal();
-    }
-
-    return realSchedule(std::move(procedureName), std::move(cbExec), std::move(cbComplete));
-}
-
-NVal NAsyncWorkCallback::Schedule(std::string procedureName, NContextCBExec cbExec, NContextCBComplete cbComplete)
-{
-    if (LibnMock::IsMockable()) {
-        auto err = cbExec();
-        return cbComplete(env_, std::move(err));
-    }
-
-    static NVal (*realSchedule)(std::string, NContextCBExec, NContextCBComplete) = []() {
-        auto func = (NVal(*)(std::string, NContextCBExec, NContextCBComplete))dlsym(RTLD_NEXT,
-            "_ZN4OHOS14FileManagement4LibN18NAsyncWorkCallback8ScheduleENSt3__h12basic_stringIcNS3_11char_"
-            "traitsIcEENS3_9allocatorIcEEEENS3_8functionIFNS1_6NErrorEvEEENSA_IFNS1_4NValEP10napi_env__SB_EEE");
-        if (!func) {
-            GTEST_LOG_(ERROR) << "Failed to resolve real NAsyncWorkCallback::Schedule: " << dlerror();
-        }
-        return func;
-    }();
-
-    if (!realSchedule) {
-        return NVal();
-    }
-
-    return realSchedule(std::move(procedureName), std::move(cbExec), std::move(cbComplete));
 }
 #endif

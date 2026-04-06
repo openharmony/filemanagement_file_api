@@ -298,18 +298,6 @@ struct ReadTextOptions : public BaseType {
     static const string getEncodingSig;
 };
 
-struct ListFileOptions : public BaseType {
-    static const Type classType;
-    static const string classDesc;
-    static const string ctorSig;
-};
-
-struct ListFileFilterOptions : public BaseType {
-    static const Type classType;
-    static const string classDesc;
-    static const string ctorSig;
-};
-
 } // namespace FS
 
 namespace Impl {
