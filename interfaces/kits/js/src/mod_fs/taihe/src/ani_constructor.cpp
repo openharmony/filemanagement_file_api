@@ -50,6 +50,8 @@
 #include "move_ani.h"
 #include "movedir_ani.h"
 #include "open_ani.h"
+#include "mmap_ani.h"
+#include "filemapping_ani.h"
 #include "randomaccessfile_ani.h"
 #include "read_ani.h"
 #include "read_lines_ani.h"
@@ -120,6 +122,30 @@ static ani_status BindFileMethods(ani_env *env)
             reinterpret_cast<void *>(FileAni::GetPath) },
         ani_native_function { FS::FileInner::getNameDesc.c_str(), FS::FileInner::getNameSig.c_str(),
             reinterpret_cast<void *>(FileAni::GetName) },
+    };
+
+    return BindClass(env, classDesc, methods);
+}
+
+static ani_status BindFileMappingMethods(ani_env *env)
+{
+    auto classDesc = FS::FileMappingInner::classDesc.c_str();
+
+    std::array methods = {
+        ani_native_function { "setPosition", nullptr, reinterpret_cast<void *>(FileMappingAni::SetPosition) },
+        ani_native_function { "getPosition", nullptr, reinterpret_cast<void *>(FileMappingAni::GetPosition) },
+        ani_native_function { "capacity", nullptr, reinterpret_cast<void *>(FileMappingAni::Capacity) },
+        ani_native_function { "setLimit", nullptr, reinterpret_cast<void *>(FileMappingAni::SetLimit) },
+        ani_native_function { "getLimit", nullptr, reinterpret_cast<void *>(FileMappingAni::GetLimit) },
+        ani_native_function { "flip", nullptr, reinterpret_cast<void *>(FileMappingAni::Flip) },
+        ani_native_function { "remaining", nullptr, reinterpret_cast<void *>(FileMappingAni::Remaining) },
+        ani_native_function { "ntvRead", nullptr, reinterpret_cast<void *>(FileMappingAni::Read) },
+        ani_native_function { "ntvReadFrom", nullptr, reinterpret_cast<void *>(FileMappingAni::ReadFrom) },
+        ani_native_function { "ntvWrite", nullptr, reinterpret_cast<void *>(FileMappingAni::Write) },
+        ani_native_function { "ntvWriteTo", nullptr, reinterpret_cast<void *>(FileMappingAni::WriteTo) },
+        ani_native_function { "msyncSync", nullptr, reinterpret_cast<void *>(FileMappingAni::MsyncSync) },
+        ani_native_function { "ntvMsyncSyncWith", nullptr, reinterpret_cast<void *>(FileMappingAni::MsyncSyncWith) },
+        ani_native_function { "unmapSync", nullptr, reinterpret_cast<void *>(FileMappingAni::UnmapSync) },
     };
 
     return BindClass(env, classDesc, methods);
@@ -264,6 +290,7 @@ static ani_status BindStaticMethods(ani_env *env)
         ani_native_function { "movedirSync", nullptr, reinterpret_cast<void *>(MoveDirAni::MoveDirSync) },
         ani_native_function { "moveFileSync", nullptr, reinterpret_cast<void *>(MoveAni::MoveFileSync) },
         ani_native_function { "openSync", nullptr, reinterpret_cast<void *>(OpenAni::OpenSync) },
+        ani_native_function { "mmapSync", nullptr, reinterpret_cast<void *>(MmapAni::MmapSync) },
         ani_native_function { "readlinesSync", nullptr, reinterpret_cast<void *>(ReadLinesAni::ReadLinesSync) },
         ani_native_function { "readSync", nullptr, reinterpret_cast<void *>(ReadAni::ReadSync) },
         ani_native_function { "readTextSync", nullptr, reinterpret_cast<void *>(ReadTextAni::ReadTextSync) },
@@ -301,6 +328,11 @@ static ani_status DoBindMethods(ani_env *env)
 
     if ((status = BindFileMethods(env)) != ANI_OK) {
         HILOGE("Cannot bind native methods for file Class");
+        return status;
+    };
+
+    if ((status = BindFileMappingMethods(env)) != ANI_OK) {
+        HILOGE("Cannot bind native methods for FileMapping Class");
         return status;
     };
 

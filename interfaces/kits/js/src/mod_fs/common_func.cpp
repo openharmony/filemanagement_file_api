@@ -195,6 +195,32 @@ void InitWhenceType(napi_env env, napi_value exports)
     }
 }
 
+void InitMappingMode(napi_env env, napi_value exports)
+{
+    char propertyName[] = "MappingMode";
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("READ_ONLY", NVal::CreateInt32(env, 0).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("READ_WRITE", NVal::CreateInt32(env, 1).val_),
+        DECLARE_NAPI_STATIC_PROPERTY("PRIVATE", NVal::CreateInt32(env, 2).val_),
+    };
+    napi_value obj = nullptr;
+    napi_status status = napi_create_object(env, &obj);
+    if (status != napi_ok) {
+        HILOGE("Failed to create object at initializing MappingMode");
+        return;
+    }
+    status = napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    if (status != napi_ok) {
+        HILOGE("Failed to set properties of character at initializing MappingMode");
+        return;
+    }
+    status = napi_set_named_property(env, exports, propertyName, obj);
+    if (status != napi_ok) {
+        HILOGE("Failed to set direction property at initializing MappingMode");
+        return;
+    }
+}
+
 static tuple<bool, size_t> GetActualLen(napi_env env, size_t bufLen, size_t bufOff, NVal op)
 {
     bool succ = false;
