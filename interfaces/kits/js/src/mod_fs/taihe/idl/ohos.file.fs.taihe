@@ -104,6 +104,12 @@ export interface RandomAccessFileOptions {
   end?: long;
 }
 
+export interface ListFileExtOptions {
+  recursion?: boolean;
+  listNum?: long;
+  fileFilter?: FileFilter;
+}
+
 export interface ListFileOptions {
   recursion?: boolean;
   listNum?: long;
@@ -135,6 +141,10 @@ export class WriteStreamOptionsInner implements WriteStreamOptions {
 export interface ReaderIteratorResult {
   done: boolean;
   value: string;
+}
+
+export interface FileFilter {
+  filter(name: string): boolean;
 }
 
 export interface Filter {
@@ -177,6 +187,8 @@ export class FileIoImpl {
   static native dup(fd: int): fileIo.File;
 
   static native listFileSync(path: string, options?: ListFileOptions): string[];
+
+  static native listFileExtSync(path: string, options?: ListFileExtOptions): string[];
 
   static native lstatSync(path: string): fileIo.Stat;
 
@@ -1036,6 +1048,24 @@ function listFile(path: string, options: ListFileOptions, callback: AsyncCallbac
 
 function listFileSync(path: string, options?: ListFileOptions): string[] {
   return FileIoImpl.listFileSync(path, options);
+}
+
+function listFileExtSync(path: string, options?: ListFileExtOptions): string[] {
+  return FileIoImpl.listFileExtSync(path, options);
+}
+
+function listFileExt(path: string, options?: ListFileExtOptions): Promise<string[]> {
+  return new Promise<string[]>((resolve: (result: string[]) => void, reject: (e: BusinessError<void>) => void) => {
+    let promise = taskpool.execute((path: string, options?: ListFileExtOptions): string[] => {
+      return FileIoImpl.listFileExtSync(path, options);
+    }, path, options);
+    promise.then((ret: Any): void => {
+      let r = ret as string[];
+      resolve(r);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
+    });
+  });
 }
 
 function copyFileSync(src: string | int, dest: string | int, mode?: int): void {

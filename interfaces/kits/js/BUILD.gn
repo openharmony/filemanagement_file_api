@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -146,7 +146,11 @@ ohos_shared_library("fs") {
     "${src_path}/mod_fs",
     "${src_path}/mod_fs/properties",
     "${src_path}/mod_fs/properties/copy_listener",
+    "${src_path}/mod_fs/properties/file_filter",
+    "${src_path}/mod_fs/properties/file_filter/napi",
+    "${src_path}/mod_fs/properties/napi",
     "${utils_path}/common/include",
+    "${utils_path}/filemgmt_libfs/include",
   ]
 
   sources = [
@@ -236,10 +240,13 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/disconnectdfs.cpp",
       "src/mod_fs/properties/dup.cpp",
       "src/mod_fs/properties/fdopen_stream.cpp",
+      "src/mod_fs/properties/file_filter/napi/file_filter_napi.cpp",
       "src/mod_fs/properties/listfile.cpp",
+      "src/mod_fs/properties/listfile_ext_core.cpp",
       "src/mod_fs/properties/lseek.cpp",
       "src/mod_fs/properties/move.cpp",
       "src/mod_fs/properties/movedir.cpp",
+      "src/mod_fs/properties/napi/listfile_ext_napi.cpp",
       "src/mod_fs/properties/read_lines.cpp",
       "src/mod_fs/properties/read_text.cpp",
       "src/mod_fs/properties/symlink.cpp",
@@ -272,6 +279,7 @@ ohos_shared_library("fs") {
       "${file_api_path}/interfaces/kits/native:remote_uri_native",
       "${file_api_path}/interfaces/kits/native:task_signal_native",
       "${file_api_path}/interfaces/kits/rust:rust_file",
+      "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     ]
   }
 }
@@ -668,9 +676,7 @@ config("ani_config") {
 }
 
 copy_taihe_idl("copy_taihe") {
-  sources = [
-    "src/mod_fs/taihe/idl/ohos.file.fs.taihe"
-  ]
+  sources = [ "src/mod_fs/taihe/idl/ohos.file.fs.taihe" ]
 }
 
 ohos_taihe("run_taihe") {
@@ -708,11 +714,15 @@ taihe_shared_library("file_fs_taihe") {
     "src/mod_fs/class_watcher",
     "src/mod_fs/class_watcher/ani",
     "src/mod_fs/common/obj",
-    "src/mod_fs/taihe/include",
     "src/mod_fs/properties",
     "src/mod_fs/properties/ani",
     "src/mod_fs/properties/copy_listener",
     "src/mod_fs/properties/copy_listener/ani",
+    "src/mod_fs/properties/file_filter",
+    "src/mod_fs/properties/file_filter/ani",
+    "src/mod_fs/properties/napi",
+    "src/mod_fs/taihe/include",
+    "src/mod_fs/taihe/include",
   ]
 
   sources = [
@@ -770,6 +780,7 @@ taihe_shared_library("file_fs_taihe") {
     "src/mod_fs/properties/ani/fdopen_stream_ani.cpp",
     "src/mod_fs/properties/ani/fsync_ani.cpp",
     "src/mod_fs/properties/ani/listfile_ani.cpp",
+    "src/mod_fs/properties/ani/listfile_ext_ani.cpp",
     "src/mod_fs/properties/ani/lseek_ani.cpp",
     "src/mod_fs/properties/ani/mkdir_ani.cpp",
     "src/mod_fs/properties/ani/mkdtemp_ani.cpp",
@@ -799,8 +810,10 @@ taihe_shared_library("file_fs_taihe") {
     "src/mod_fs/properties/dup_core.cpp",
     "src/mod_fs/properties/fdatasync_core.cpp",
     "src/mod_fs/properties/fdopen_stream_core.cpp",
+    "src/mod_fs/properties/file_filter/ani/file_filter_ani.cpp",
     "src/mod_fs/properties/fsync_core.cpp",
     "src/mod_fs/properties/listfile_core.cpp",
+    "src/mod_fs/properties/listfile_ext_core.cpp",
     "src/mod_fs/properties/lseek_core.cpp",
     "src/mod_fs/properties/lstat_core.cpp",
     "src/mod_fs/properties/mkdir_core.cpp",
@@ -821,8 +834,8 @@ taihe_shared_library("file_fs_taihe") {
     "src/mod_fs/properties/watcher_core.cpp",
     "src/mod_fs/properties/write_core.cpp",
     "src/mod_fs/properties/xattr_core.cpp",
-    "src/mod_fs/taihe/src/ani_dfslistener.cpp",
     "src/mod_fs/taihe/src/ani_constructor.cpp",
+    "src/mod_fs/taihe/src/ani_dfslistener.cpp",
     "src/mod_fs/taihe/src/ohos.file.fs.impl.cpp",
   ]
 
@@ -830,12 +843,12 @@ taihe_shared_library("file_fs_taihe") {
 
   deps = [
     ":ohos_file_fs_abc_etc",
+    ":run_taihe",
     "${file_api_path}/interfaces/kits/native:remote_uri_native",
     "${file_api_path}/interfaces/kits/native:task_signal_native",
     "${file_api_path}/interfaces/kits/rust:rust_file",
     "${utils_path}/filemgmt_libfs:filemgmt_libfs",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
-    ":run_taihe"
   ]
   use_exceptions = true
   external_deps = [
@@ -1186,13 +1199,12 @@ ohos_prebuilt_etc("ohos_file_statvfs_abc_etc") {
   deps = [ ":ohos_file_statvfs_abc" ]
 }
 
-
 group("ani_file_api") {
   deps = [
     ":ani_file_environment",
-    ":file_fs_taihe",
     ":ani_file_hash",
     ":ani_file_securitylabel",
     ":ani_file_statvfs",
+    ":file_fs_taihe",
   ]
 }
