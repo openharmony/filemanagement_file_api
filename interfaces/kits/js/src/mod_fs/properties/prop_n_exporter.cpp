@@ -61,6 +61,7 @@
 #include "listfile_ext_napi.h"
 #include "listfile.h"
 #include "lseek.h"
+#include "napi/mmap_napi.h"
 #include "move.h"
 #include "movedir.h"
 #include "read_lines.h"
@@ -829,6 +830,7 @@ bool PropNExporter::ExportSync()
         NVal::DeclareNapiFunction("listFileExtSync", ListFileExtNapi::Sync),
         NVal::DeclareNapiFunction("listFileSync", ListFile::Sync),
         NVal::DeclareNapiFunction("lseek", Lseek::Sync),
+        NVal::DeclareNapiFunction("mmapSync", MmapNapi::Sync),
         NVal::DeclareNapiFunction("moveDirSync", MoveDir::Sync),
         NVal::DeclareNapiFunction("moveFileSync", Move::Sync),
         NVal::DeclareNapiFunction("readLinesSync", ReadLines::Sync),
@@ -869,6 +871,7 @@ bool PropNExporter::ExportAsync()
         NVal::DeclareNapiFunction("fdopenStream", FdopenStream::Async),
         NVal::DeclareNapiFunction("listFileExt", ListFileExtNapi::Async),
         NVal::DeclareNapiFunction("listFile", ListFile::Async),
+        NVal::DeclareNapiFunction("mmap", MmapNapi::Async),
         NVal::DeclareNapiFunction("moveDir", MoveDir::Async),
         NVal::DeclareNapiFunction("moveFile", Move::Async),
         NVal::DeclareNapiFunction("readLines", ReadLines::Async),

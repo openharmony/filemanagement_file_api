@@ -100,6 +100,7 @@ public:
 void InitAccessModeType(napi_env env, napi_value exports);
 void InitAccessFlagType(napi_env env, napi_value exports);
 void InitLocationType(napi_env env, napi_value exports);
+void InitMappingMode(napi_env env, napi_value exports);
 void InitOpenMode(napi_env env, napi_value exports);
 void InitWhenceType(napi_env env, napi_value exports);
 

@@ -38,6 +38,7 @@ public:
     static bool CreateFile(const fs::path &path, const std::string &content);
     static bool CreateFile(const fs::path &path, int32_t len);
     static bool CreateDirectories(const fs::path &dir, bool deleteIfExist = false);
+    static std::tuple<int, bool> CreateFileWithContent(const fs::path &path, const std::string &content);
     static bool RemoveAll(const fs::path &path);
 
 private:
@@ -52,6 +53,7 @@ private:
     static bool DoCreateDirectories(const fs::path &dir, bool deleteIfExist = false);
     static bool DoRemoveAll(const fs::path &path);
     static std::tuple<bool, fs::path> CheckAndNormalizePath(const fs::path &path);
+    static std::tuple<int, bool> DoCreateFileWithContent(const fs::path &path, const std::string &content);
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

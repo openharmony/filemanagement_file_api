@@ -206,6 +206,8 @@ export class FileIoImpl {
 
   static native openSync(path: String, mode?: int): fileIo.File;
 
+  static native mmapSync(file: int | fileIo.File, mode: fileIo.MappingMode, offset: long, size: int): fileIo.FileMapping;
+
   static native readlinesSync(filePath: string, options?: Options): fileIo.ReaderIterator;
 
   static native readSync(fd: int, buffer: ArrayBuffer, options?: ReadOptions): long;
@@ -255,6 +257,12 @@ export namespace OpenMode {
   export const DIR = 0o200000;
   export const NOFOLLOW = 0o400000;
   export const SYNC = 0o4010000;
+}
+
+export enum MappingMode {
+  READ_ONLY = 0,
+  READ_WRITE = 1,
+  PRIVATE = 2,
 }
 
 function access(path: string, mode?: AccessModeType): Promise<boolean> {
@@ -716,6 +724,24 @@ function open(path: String, callback: AsyncCallback<File, void>): void {
   }).catch((e: Error): void => {
     let f: File = new FileInner(0);
     callback(e as BusinessError, f);
+  });
+}
+
+function mmapSync(file: int | File, mode: MappingMode, offset: long, size: int): FileMapping {
+  return FileIoImpl.mmapSync(file, mode, offset, size);
+}
+
+function mmap(file: int | File, mode: MappingMode, offset: long, size: int): Promise<FileMapping> {
+  return new Promise<FileMapping>((resolve: (result: FileMapping) => void, reject: (e: BusinessError<void>) => void) => {
+    let promise = taskpool.execute((file: int | File, mode: MappingMode, offset: long, size: int): FileMapping => {
+      return FileIoImpl.mmapSync(file, mode, offset, size);
+    }, file, mode, offset, size);
+    promise.then((ret: Any): void => {
+      let result = ret as FileMapping;
+      resolve(result);
+    }).catch((e: Error): void => {
+      reject(e as BusinessError);
+    });
   });
 }
 
@@ -2290,6 +2316,135 @@ class WatcherInner implements Watcher {
   native start(): void;
 
   native stop(): void;
+}
+
+export interface FileMapping {
+  setPosition(position: int): void;
+  getPosition(): int;
+  capacity(): int;
+  setLimit(limit: int): void;
+  getLimit(): int;
+  flip(): void;
+  remaining(): int;
+  read(buffer: ArrayBuffer, length?: int): int;
+  read(position: int, buffer: ArrayBuffer, length?: int): int;
+  write(data: ArrayBuffer, length?: int): int;
+  write(position: int, data: ArrayBuffer, length?: int): int;
+  msync(): Promise<void>;
+  msync(position: int, length: int): Promise<void>;
+  msyncSync(): void;
+  msyncSync(position: int, length: int): void;
+  unmap(): Promise<void>;
+  unmapSync(): void;
+}
+
+export class FileMappingInner implements FileMapping {
+  private nativePtr: long = 0;
+  private cleaner: Cleaner | null = null;
+
+  constructor(ptr: long) {
+    if (this.nativePtr === 0) {
+      this.nativePtr = ptr;
+      this.registerCleaner(this.nativePtr);
+    }
+  }
+
+  registerCleaner(ptr: long): void {
+    this.cleaner = new Cleaner(ptr, "FileMapping");
+    destroyRegister.register(this, this.cleaner!, this);
+  }
+
+  unregisterCleaner(): void {
+    destroyRegister.unregister(this);
+  }
+
+  native setPosition(position: int): void;
+  native getPosition(): int;
+  native capacity(): int;
+  native setLimit(limit: int): void;
+  native getLimit(): int;
+  native flip(): void;
+  native remaining(): int;
+
+  native read0(buffer: ArrayBuffer, length?: int): int;
+  native read1(position: int, buffer: ArrayBuffer, length?: int): int;
+  native write0(data: ArrayBuffer, length?: int): int;
+  native write1(position: int, data: ArrayBuffer, length?: int): int;
+
+  read(buffer: ArrayBuffer, length?: int): int {
+    let result = length ? this.read0(buffer, length) : this.read0(buffer)
+    return result;
+  }
+
+  read(position: int, buffer: ArrayBuffer, length?: int): int {
+    let result = length ? this.read1(position, buffer, length) : this.read1(position, buffer)
+    return result;
+  }
+
+  write(data: ArrayBuffer, length?: int): int {
+    let result = length ? this.write0(data, length) : this.write0(data)
+    return result;
+  }
+
+  write(position: int, data: ArrayBuffer, length?: int): int {
+    let result = length ? this.write1(position, data, length) : this.write1(position, data)
+    return result;
+  }
+
+  msync(): Promise<void> {
+    return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
+      let promise = taskpool.execute((): undefined => {
+        this.msyncSync();
+        return undefined;
+      });
+      promise.then((ret: Any): void => {
+        resolve(undefined);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
+      });
+    });
+  }
+
+  msync(position: int, length: int): Promise<void> {
+    return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
+      let promise = taskpool.execute((position: int, length: int): undefined => {
+        this.msyncSync1(position, length);
+        return undefined;
+      }, position, length);
+      promise.then((ret: Any): void => {
+        resolve(undefined);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
+      });
+    });
+  }
+
+  native msyncSync0(): void;
+  native msyncSync1(position: int, length: int): void;
+
+  msyncSync(): void {
+    this.msyncSync0();
+  }
+
+  msyncSync(position: int, length: int): void {
+    this.msyncSync1(position, length);
+  }
+
+  unmap(): Promise<void> {
+    return new Promise<void>((resolve: (result: undefined) => void, reject: (e: BusinessError<void>) => void): void => {
+      let promise = taskpool.execute((): undefined => {
+        this.unmapSync();
+        return undefined;
+      });
+      promise.then((ret: Any): void => {
+        resolve(undefined);
+      }).catch((e: Error): void => {
+        reject(e as BusinessError);
+      });
+    });
+  }
+
+  native unmapSync(): void;
 }
 """)
 
