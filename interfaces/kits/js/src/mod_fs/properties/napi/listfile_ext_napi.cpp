@@ -148,6 +148,8 @@ napi_value ListFileExtNapi::Async(napi_env env, napi_callback_info info)
     }
     auto [succOpt, tmpOptions] = ParseOptionsArg(env, funcArg);
     if (!succOpt) {
+        HILOGE("Invalid options");
+        NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     std::optional<ListFileExtOptions> options = tmpOptions;
