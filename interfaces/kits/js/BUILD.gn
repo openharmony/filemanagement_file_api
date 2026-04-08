@@ -141,9 +141,11 @@ ohos_shared_library("fs") {
   relative_install_dir = "module/file"
 
   include_dirs = [
+    "${file_api_path}/interfaces/kits/rust/include",
     "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_fs",
+    "${src_path}/mod_fs/class_filemapping",
     "${src_path}/mod_fs/properties",
     "${src_path}/mod_fs/properties/copy_listener",
     "${src_path}/mod_fs/properties/file_filter",
@@ -219,15 +221,10 @@ ohos_shared_library("fs") {
       debug = false
     }
 
-    include_dirs += [
-      "${file_api_path}/interfaces/kits/rust/include",
-      "${src_path}/mod_fs/class_filemapping",
-      "${utils_path}/filemgmt_libfs/include",
-    ]
     sources += [
       "src/mod_fs/class_atomicfile/atomicfile_n_exporter.cpp",
-      "src/mod_fs/class_filemapping/napi/filemapping_napi.cpp",
       "src/mod_fs/class_filemapping/fs_filemapping.cpp",
+      "src/mod_fs/class_filemapping/napi/filemapping_napi.cpp",
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
       "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
       "src/mod_fs/class_stream/stream_n_exporter.cpp",
@@ -710,8 +707,6 @@ taihe_shared_library("file_fs_taihe") {
     "src/mod_fs/class_atomicfile/ani",
     "src/mod_fs/class_file",
     "src/mod_fs/class_file/ani",
-    "src/mod_fs/class_filemapping",
-    "src/mod_fs/class_filemapping/ani",
     "src/mod_fs/class_randomaccessfile",
     "src/mod_fs/class_randomaccessfile/ani",
     "src/mod_fs/class_readeriterator",
@@ -751,12 +746,7 @@ taihe_shared_library("file_fs_taihe") {
     "src/mod_fs/class_file/ani/file_wrapper.cpp",
     "src/mod_fs/class_file/file_instantiator.cpp",
     "src/mod_fs/class_file/fs_file.cpp",
-    "src/mod_fs/class_filemapping/ani/filemapping_ani.cpp",
-    "src/mod_fs/class_filemapping/ani/filemapping_wrapper.cpp",
-    "src/mod_fs/class_filemapping/fs_filemapping.cpp",
     "src/mod_fs/class_randomaccessfile/ani/randomaccessfile_ani.cpp",
-    "src/mod_fs/properties/ani/mmap_ani.cpp",
-    "src/mod_fs/properties/mmap_core.cpp",
     "src/mod_fs/class_randomaccessfile/fs_randomaccessfile.cpp",
     "src/mod_fs/class_readeriterator/ani/reader_iterator_ani.cpp",
     "src/mod_fs/class_readeriterator/ani/reader_iterator_result_ani.cpp",
@@ -889,6 +879,20 @@ taihe_shared_library("file_fs_taihe") {
     "runtime_core:libarkruntime",
     "samgr:samgr_proxy",
   ]
+
+  if (!use_mingw_win && !use_mac) {
+    include_dirs += [
+      "src/mod_fs/class_filemapping",
+      "src/mod_fs/class_filemapping/ani",
+    ]
+    sources += [
+      "src/mod_fs/class_filemapping/ani/filemapping_ani.cpp",
+      "src/mod_fs/class_filemapping/ani/filemapping_wrapper.cpp",
+      "src/mod_fs/class_filemapping/fs_filemapping.cpp",
+      "src/mod_fs/properties/ani/mmap_ani.cpp",
+      "src/mod_fs/properties/mmap_core.cpp",
+    ]
+  }
 
   branch_protector_ret = "pac_ret"
   sanitize = {

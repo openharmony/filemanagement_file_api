@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,20 +63,20 @@ static tuple<int, int, int, off_t, size_t> ParseMmapArgs(napi_env env, NFuncArg 
     }
 
     auto [succMode, mode] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
-    if (!succMode || mode < 0 || mode > MappingMode::PRIVATE) {
-        HILOGE("Invalid mode value");
+    if (!succMode) {
+        HILOGE("Failed to convert mode to int32");
         return { EINVAL, -1, 0, 0, 0 };
     }
 
     auto [succOffset, offset] = NVal(env, funcArg[NARG_POS::THIRD]).ToInt64();
-    if (!succOffset || offset < 0) {
-        HILOGE("Invalid offset value");
+    if (!succOffset) {
+        HILOGE("Failed to convert offset to int64");
         return { EINVAL, -1, 0, 0, 0 };
     }
 
     auto [succSize, size] = NVal(env, funcArg[NARG_POS::FOURTH]).ToInt32();
-    if (!succSize || size <= 0) {
-        HILOGE("Invalid size value");
+    if (!succSize) {
+        HILOGE("Failed to convert size to int32");
         return { EINVAL, -1, 0, 0, 0 };
     }
 
@@ -139,12 +139,6 @@ napi_value MmapNapi::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    if (fd < 0) {
-        HILOGE("Invalid fd");
-        NError(EBADF).ThrowErr(env);
-        return nullptr;
-    }
-
     auto result = MmapCore::DoMmap(fd, mode, offset, size);
     if (!result.IsSuccess()) {
         HILOGE("DoMmap failed");
@@ -173,12 +167,6 @@ napi_value MmapNapi::Async(napi_env env, napi_callback_info info)
     auto [err, fd, mode, offset, size] = ParseMmapArgs(env, funcArg);
     if (err != 0) {
         NError(err).ThrowErr(env);
-        return nullptr;
-    }
-
-    if (fd < 0) {
-        HILOGE("Invalid fd");
-        NError(EBADF).ThrowErr(env);
         return nullptr;
     }
 

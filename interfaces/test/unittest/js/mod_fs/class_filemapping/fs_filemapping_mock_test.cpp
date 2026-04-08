@@ -38,6 +38,7 @@ public:
 
 protected:
     static FsFileMapping *CreateTestMapping();
+    static FsFileMapping *DoUnmapAfterCreate();
 };
 
 void FsFileMappingMockTest::SetUpTestSuite()
@@ -82,6 +83,23 @@ FsFileMapping *FsFileMappingMockTest::CreateTestMapping()
         return result.GetData().value();
     }
     return nullptr;
+}
+
+FsFileMapping *FsFileMappingMockTest::DoUnmapAfterCreate()
+{
+    auto mapping = CreateTestMapping();
+    if (!mapping) {
+        return nullptr;
+    }
+
+    auto mmapMock = MmapMock::GetMock();
+    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
+
+    auto unmapResult = mapping->Unmap();
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_TRUE(unmapResult.IsSuccess());
+
+    return mapping;
 }
 
 /**
@@ -402,15 +420,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_SetPosition_AfterUnmap_001
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_SetPosition_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     auto result = mapping->SetPosition(10);
     EXPECT_FALSE(result.IsSuccess());
@@ -431,15 +442,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_GetPosition_AfterUnmap_001
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_GetPosition_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     auto result = mapping->GetPosition();
     EXPECT_FALSE(result.IsSuccess());
@@ -460,15 +464,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Capacity_AfterUnmap_001, T
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Capacity_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     auto result = mapping->Capacity();
     EXPECT_FALSE(result.IsSuccess());
@@ -489,15 +486,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_SetLimit_AfterUnmap_001, T
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_SetLimit_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     auto result = mapping->SetLimit(100);
     EXPECT_FALSE(result.IsSuccess());
@@ -518,15 +508,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_GetLimit_AfterUnmap_001, T
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_GetLimit_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     auto result = mapping->GetLimit();
     EXPECT_FALSE(result.IsSuccess());
@@ -547,15 +530,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Flip_AfterUnmap_001, TestS
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Flip_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     auto result = mapping->Flip();
     EXPECT_FALSE(result.IsSuccess());
@@ -576,15 +552,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Remaining_AfterUnmap_001, 
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Remaining_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     auto result = mapping->Remaining();
     EXPECT_FALSE(result.IsSuccess());
@@ -605,15 +574,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_AfterUnmap_001, TestS
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Read_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     char buffer[100] = {0};
     auto result = mapping->Read(buffer, sizeof(buffer), 10);
@@ -635,15 +597,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Write_AfterUnmap_001, Test
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Write_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     const char *data = "test";
     auto result = mapping->Write(data, strlen(data), strlen(data));
@@ -665,15 +620,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Msync_AfterUnmap_001, Test
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Msync_AfterUnmap_001";
 
-    auto mapping = CreateTestMapping();
+    auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
-
-    auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(0));
-
-    auto unmapResult = mapping->Unmap();
-    EXPECT_TRUE(unmapResult.IsSuccess());
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
 
     auto result = mapping->Msync(0, 100);
     EXPECT_FALSE(result.IsSuccess());

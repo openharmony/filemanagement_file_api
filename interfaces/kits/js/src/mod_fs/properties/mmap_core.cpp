@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,13 +15,11 @@
 
 #include "mmap_core.h"
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <fcntl.h>
 #include <unistd.h>
-#endif
 
 #include <optional>
 
@@ -31,8 +29,6 @@
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
-
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 
 std::tuple<int, int> MmapCore::GetMmapProtFlags(int mode)
 {
@@ -113,10 +109,6 @@ static std::optional<PageAlignResult> AlignToPage(off_t offset, size_t size)
 
 int MmapCore::ExpandFileIfNeeded(int fd, int mode, off_t offset, size_t size)
 {
-    if (mode != MappingMode::READ_WRITE) {
-        return 0;
-    }
-
     struct stat st;
     if (fstat(fd, &st) < 0) {
         HILOGE("Failed to fstat, error: %{public}d", errno);
@@ -124,10 +116,15 @@ int MmapCore::ExpandFileIfNeeded(int fd, int mode, off_t offset, size_t size)
     }
 
     off_t requiredSize = offset + static_cast<off_t>(size);
-    if (requiredSize > st.st_size) {
-        if (ftruncate(fd, requiredSize) < 0) {
-            HILOGE("Failed to expand file size, error: %{public}d", errno);
-            return errno;
+    if (requiredSize <= st.st_size) {
+        return 0;
+    }
+
+    if (ftruncate(fd, requiredSize) < 0) {
+        int truncateErr = errno;
+        HILOGE("Failed to expand file size, error: %{public}d", truncateErr);
+        if (S_ISREG(st.st_mode) || truncateErr != EINVAL) {
+            return truncateErr;
         }
     }
 
@@ -206,16 +203,6 @@ FsResult<FsFileMapping *> MmapCore::DoMmap(int fd, int mode, off_t offset, size_
 
     return result;
 }
-
-#else
-
-FsResult<FsFileMapping *> MmapCore::DoMmap(int fd, int mode, off_t offset, size_t size)
-{
-    HILOGE("mmap is not supported on this platform");
-    return FsResult<FsFileMapping *>::Error(EOPNOTSUPP);
-}
-
-#endif
 
 } // namespace ModuleFileIO
 } // namespace FileManagement

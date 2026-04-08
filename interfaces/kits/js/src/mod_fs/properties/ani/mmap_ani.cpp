@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,69 +16,73 @@
 #include "mmap_ani.h"
 
 #include "error_handler.h"
+#include "file_fs_trace.h"
 #include "file_wrapper.h"
+#include "filemapping_wrapper.h"
 #include "filemgmt_libhilog.h"
 #include "mmap_core.h"
 #include "type_converter.h"
-#include "filemapping_wrapper.h"
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-static bool ValidateMmapParams(ani_env *env, int fd, int mode, ani_long offset, ani_int size)
+static tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
 {
-    if (fd < 0) {
-        HILOGE("Invalid fd value");
-        ErrorHandler::Throw(env, EBADF);
-        return false;
+    int32_t result = -1;
+    AniCache& aniCache = AniCache::GetInstance();
+    auto [ret, intClass] = aniCache.GetClass(env, BoxedTypes::Int::classDesc);
+    if (ret != ANI_OK) {
+        return { false, result, nullptr };
     }
-    if (mode < 0 || mode > MappingMode::PRIVATE) {
-        HILOGE("Invalid mode value");
-        ErrorHandler::Throw(env, EINVAL);
-        return false;
+
+    ani_boolean isInt;
+    if (ANI_OK != env->Object_InstanceOf(obj, intClass, &isInt)) {
+        HILOGE("Failed to instance object");
+        return { false, result, nullptr };
     }
-    if (offset < 0) {
-        HILOGE("Invalid offset value");
-        ErrorHandler::Throw(env, EINVAL);
-        return false;
+    if (isInt) {
+        ani_int fd;
+        if (ANI_OK != env->Object_CallMethodByName_Int(obj, BasicTypesConverter::toInt.c_str(), nullptr, &fd)) {
+            HILOGE("Get fd value failed");
+            return { false, result, nullptr };
+        }
+        result = static_cast<int32_t>(fd);
+        return { true, result, nullptr };
     }
-    if (size <= 0) {
-        HILOGE("Invalid size value");
-        ErrorHandler::Throw(env, EINVAL);
-        return false;
+
+    FsFile *file = FileWrapper::Unwrap(env, obj);
+    if (file != nullptr) {
+        return { true, -1, file };
     }
-    return true;
+
+    HILOGE("Cannot unwrap fsfile!");
+    ErrorHandler::Throw(env, UNKNOWN_ERR);
+    return { false, -1, nullptr };
 }
 
 ani_object MmapAni::MmapSync(ani_env *env, [[maybe_unused]] ani_class clazz,
     ani_object file, ani_enum_item mode,
     ani_long offset, ani_int size)
 {
-#ifdef FILE_API_TRACE
-    HITRACE_METER_NAME(HITRACE_TAG_FILEMANAGEMENT, __PRETTY_FUNCTION__);
-#endif
+    FileFsTrace traceMmap("MmapSync");
 
-    auto [succPathOrFd, fileInfo] = TypeConverter::ToFileInfo(env, file);
-    if (!succPathOrFd) {
-        HILOGE("Invalid file parameter");
+    auto [succ, fd, fsFile] = ParseFdOrFile(env, file);
+    if (!succ) {
+        HILOGE("Parse fd or file argument failed");
         ErrorHandler::Throw(env, EINVAL);
         return nullptr;
     }
 
-    int fd = -1;
-    if (fileInfo.isPath) {
-        HILOGE("mmap does not support path, need fd or File object");
-        ErrorHandler::Throw(env, EINVAL);
-        return nullptr;
-    } else {
-        if (!fileInfo.fdg) {
-            HILOGE("Invalid fd");
-            ErrorHandler::Throw(env, EBADF);
+    if (fsFile != nullptr) {
+        auto res = fsFile->GetFD();
+        if (!res.IsSuccess()) {
+            HILOGE("Parse file argument failed");
+            ErrorHandler::Throw(env, EINVAL);
             return nullptr;
         }
-        fd = fileInfo.fdg->GetFD();
+        fd = res.GetData().value();
     }
 
     auto [succMode, modeOp] = TypeConverter::EnumToInt32(env, mode);
@@ -88,10 +92,6 @@ ani_object MmapAni::MmapSync(ani_env *env, [[maybe_unused]] ani_class clazz,
         return nullptr;
     }
     int modeValue = modeOp.value();
-
-    if (!ValidateMmapParams(env, fd, modeValue, offset, size)) {
-        return nullptr;
-    }
 
     auto result = MmapCore::DoMmap(fd, modeValue, static_cast<off_t>(offset), static_cast<size_t>(size));
     if (!result.IsSuccess()) {
