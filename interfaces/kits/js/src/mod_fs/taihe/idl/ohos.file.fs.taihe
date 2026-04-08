@@ -2372,23 +2372,19 @@ export class FileMappingInner implements FileMapping {
   native write1(position: int, data: ArrayBuffer, length?: int): int;
 
   read(buffer: ArrayBuffer, length?: int): int {
-    let result = length ? this.read0(buffer, length) : this.read0(buffer)
-    return result;
+    return this.read0(buffer, length);
   }
 
   read(position: int, buffer: ArrayBuffer, length?: int): int {
-    let result = length ? this.read1(position, buffer, length) : this.read1(position, buffer)
-    return result;
+    return this.read1(position, buffer, length);
   }
 
   write(data: ArrayBuffer, length?: int): int {
-    let result = length ? this.write0(data, length) : this.write0(data)
-    return result;
+    return this.write0(data, length);
   }
 
   write(position: int, data: ArrayBuffer, length?: int): int {
-    let result = length ? this.write1(position, data, length) : this.write1(position, data)
-    return result;
+    return this.write1(position, data, length);
   }
 
   msync(): Promise<void> {

@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,8 +25,6 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 using namespace std;
-
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 
 FileMappingEntity::~FileMappingEntity()
 {
@@ -89,7 +87,7 @@ FsResult<FsFileMapping *> FsFileMapping::Constructor(const FileMappingParams &pa
         return FsResult<FsFileMapping *>::Error(ENOMEM);
     }
 
-    return FsResult<FsFileMapping *>::Success(move(mapping));
+    return FsResult<FsFileMapping *>::Success(mapping);
 }
 
 FsResult<void> FsFileMapping::SetPosition(size_t position)
@@ -193,7 +191,7 @@ FsResult<size_t> FsFileMapping::Read(void *buffer, size_t bufLen, size_t length)
     if (opLength > 0) {
         int ret = memcpy_s(buffer, bufLen, static_cast<char *>(entity_->mapAddr) + entity_->position, opLength);
         if (ret != 0) {
-            HILOGE("memcpy_s failed, error: %{public}d", ret);
+            HILOGE("Memcpy_s failed, error: %{public}d", ret);
             return FsResult<size_t>::Error(EIO);
         }
         entity_->position += opLength;
@@ -222,7 +220,7 @@ FsResult<size_t> FsFileMapping::ReadFrom(size_t position, void *buffer, size_t b
     if (opLength > 0) {
         int ret = memcpy_s(buffer, bufLen, static_cast<char *>(entity_->mapAddr) + position, opLength);
         if (ret != 0) {
-            HILOGE("memcpy_s failed, error: %{public}d", ret);
+            HILOGE("Memcpy_s failed, error: %{public}d", ret);
             return FsResult<size_t>::Error(EIO);
         }
     }
@@ -243,7 +241,7 @@ FsResult<size_t> FsFileMapping::Write(const void *data, size_t dataLen, size_t l
 
     if (entity_->IsReadOnly()) {
         HILOGE("Read-only mmap buffer");
-        return FsResult<size_t>::Error(E_MMAP_RO);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_RO);
     }
 
     size_t remaining = (entity_->position < entity_->limit) ? (entity_->limit - entity_->position) : 0;
@@ -256,7 +254,7 @@ FsResult<size_t> FsFileMapping::Write(const void *data, size_t dataLen, size_t l
         int ret = memcpy_s(static_cast<char *>(entity_->mapAddr) + entity_->position,
             entity_->capacity - entity_->position, data, opLength);
         if (ret != 0) {
-            HILOGE("memcpy_s failed, error: %{public}d", ret);
+            HILOGE("Memcpy_s failed, error: %{public}d", ret);
             return FsResult<size_t>::Error(EIO);
         }
         entity_->position += opLength;
@@ -278,7 +276,7 @@ FsResult<size_t> FsFileMapping::WriteTo(size_t position, const void *data, size_
 
     if (entity_->IsReadOnly()) {
         HILOGE("Read-only mmap buffer");
-        return FsResult<size_t>::Error(E_MMAP_RO);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_RO);
     }
 
     size_t remaining = (position < entity_->limit) ? (entity_->limit - position) : 0;
@@ -291,7 +289,7 @@ FsResult<size_t> FsFileMapping::WriteTo(size_t position, const void *data, size_
         int ret = memcpy_s(static_cast<char *>(entity_->mapAddr) + position,
             entity_->capacity - position, data, opLength);
         if (ret != 0) {
-            HILOGE("memcpy_s failed, error: %{public}d", ret);
+            HILOGE("Memcpy_s failed, error: %{public}d", ret);
             return FsResult<size_t>::Error(EIO);
         }
     }
@@ -308,11 +306,11 @@ FsResult<void> FsFileMapping::Msync(size_t offset, size_t length)
 
     size_t rawOffset = entity_->adjustment + offset;
     if (rawOffset < entity_->adjustment) {
-        HILOGE("msync offset overflow");
+        HILOGE("Msync offset overflow");
         return FsResult<void>::Error(EINVAL);
     }
     if (rawOffset > entity_->rawCapacity) {
-        HILOGE("msync offset exceeds raw capacity");
+        HILOGE("Msync offset exceeds raw capacity");
         return FsResult<void>::Error(EINVAL);
     }
     long pageSize = sysconf(_SC_PAGESIZE);
@@ -324,11 +322,11 @@ FsResult<void> FsFileMapping::Msync(size_t offset, size_t length)
     size_t extra = rawOffset - alignedRawOffset;
     size_t rawLength = length + extra;
     if (rawLength < extra) {
-        HILOGE("msync length overflow");
+        HILOGE("Msync length overflow");
         return FsResult<void>::Error(EINVAL);
     }
     if (alignedRawOffset + rawLength > entity_->rawCapacity) {
-        HILOGE("msync range exceeds raw capacity");
+        HILOGE("Msync range exceeds raw capacity");
         return FsResult<void>::Error(EINVAL);
     }
     int ret = msync(static_cast<char *>(entity_->rawMapAddr) + alignedRawOffset, rawLength, MS_SYNC);
@@ -364,91 +362,6 @@ FsResult<void> FsFileMapping::Unmap()
 
     return FsResult<void>::Success();
 }
-
-#else
-
-bool FsFileMapping::CheckValid() const
-{
-    return false;
-}
-
-bool FsFileMapping::IsReadOnly() const
-{
-    return true;
-}
-
-FsResult<FsFileMapping *> FsFileMapping::Constructor(const FileMappingParams &params)
-{
-    HILOGE("mmap is not supported on this platform");
-    return FsResult<FsFileMapping *>::Error(EOPNOTSUPP);
-}
-
-FsResult<void> FsFileMapping::SetPosition(size_t position)
-{
-    return FsResult<void>::Error(EOPNOTSUPP);
-}
-
-FsResult<size_t> FsFileMapping::GetPosition() const
-{
-    return FsResult<size_t>::Error(EOPNOTSUPP);
-}
-
-FsResult<size_t> FsFileMapping::Capacity() const
-{
-    return FsResult<size_t>::Error(EOPNOTSUPP);
-}
-
-FsResult<void> FsFileMapping::SetLimit(size_t limit)
-{
-    return FsResult<void>::Error(EOPNOTSUPP);
-}
-
-FsResult<size_t> FsFileMapping::GetLimit() const
-{
-    return FsResult<size_t>::Error(EOPNOTSUPP);
-}
-
-FsResult<void> FsFileMapping::Flip()
-{
-    return FsResult<void>::Error(EOPNOTSUPP);
-}
-
-FsResult<size_t> FsFileMapping::Remaining() const
-{
-    return FsResult<size_t>::Error(EOPNOTSUPP);
-}
-
-FsResult<size_t> FsFileMapping::Read(void *buffer, size_t bufLen, size_t length)
-{
-    return FsResult<size_t>::Error(EOPNOTSUPP);
-}
-
-FsResult<size_t> FsFileMapping::ReadFrom(size_t position, void *buffer, size_t bufLen, size_t length)
-{
-    return FsResult<size_t>::Error(EOPNOTSUPP);
-}
-
-FsResult<size_t> FsFileMapping::Write(const void *data, size_t dataLen, size_t length)
-{
-    return FsResult<size_t>::Error(EOPNOTSUPP);
-}
-
-FsResult<size_t> FsFileMapping::WriteTo(size_t position, const void *data, size_t dataLen, size_t length)
-{
-    return FsResult<size_t>::Error(EOPNOTSUPP);
-}
-
-FsResult<void> FsFileMapping::Msync(size_t offset, size_t length)
-{
-    return FsResult<void>::Error(EOPNOTSUPP);
-}
-
-FsResult<void> FsFileMapping::Unmap()
-{
-    return FsResult<void>::Error(EOPNOTSUPP);
-}
-
-#endif
 
 } // namespace ModuleFileIO
 } // namespace FileManagement

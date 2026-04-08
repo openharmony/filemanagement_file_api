@@ -113,10 +113,10 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_002, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(Return(4));
     EXPECT_CALL(*libnMock, ToInt32())
         .WillOnce(Return(make_tuple(true, -1)))
+        .WillOnce(Return(make_tuple(true, 0)))
         .WillOnce(Return(make_tuple(true, 0)));
     EXPECT_CALL(*libnMock, ToInt64())
-        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))))
-        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(1024))));
+        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))));
     EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = MmapNapi::Sync(env, info);
@@ -207,10 +207,10 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_005, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(Return(4));
     EXPECT_CALL(*libnMock, ToInt32())
         .WillOnce(Return(make_tuple(true, 10)))
+        .WillOnce(Return(make_tuple(true, 0)))
         .WillOnce(Return(make_tuple(true, 0)));
     EXPECT_CALL(*libnMock, ToInt64())
-        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))))
-        .WillOnce(Return(make_tuple(false, static_cast<int64_t>(0))));
+        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))));
     EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = MmapNapi::Sync(env, info);
@@ -242,10 +242,10 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_006, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(Return(4));
     EXPECT_CALL(*libnMock, ToInt32())
         .WillOnce(Return(make_tuple(true, 10)))
-        .WillOnce(Return(make_tuple(true, 0)));
+        .WillOnce(Return(make_tuple(true, 0)))
+        .WillOnce(Return(make_tuple(true, 1024)));
     EXPECT_CALL(*libnMock, ToInt64())
-        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))))
-        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(1024))));
+        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))));
     
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -309,7 +309,9 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_008, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(Return(4));
     EXPECT_CALL(*libnMock, ToInt32())
         .WillOnce(Return(make_tuple(true, 10)))
-        .WillOnce(Return(make_tuple(true, -1)));
+        .WillOnce(Return(make_tuple(true, -1)))
+        .WillOnce(Return(make_tuple(true, 0)));
+    EXPECT_CALL(*libnMock, ToInt64()).WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))));
     EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = MmapNapi::Sync(env, info);
@@ -339,7 +341,9 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_009, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(Return(4));
     EXPECT_CALL(*libnMock, ToInt32())
         .WillOnce(Return(make_tuple(true, 10)))
-        .WillOnce(Return(make_tuple(true, 100)));
+        .WillOnce(Return(make_tuple(true, 100)))
+        .WillOnce(Return(make_tuple(true, 0)));
+    EXPECT_CALL(*libnMock, ToInt64()).WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))));
     EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = MmapNapi::Sync(env, info);
@@ -369,6 +373,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_010, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(Return(4));
     EXPECT_CALL(*libnMock, ToInt32())
         .WillOnce(Return(make_tuple(true, 10)))
+        .WillOnce(Return(make_tuple(true, 0)))
         .WillOnce(Return(make_tuple(true, 0)));
     EXPECT_CALL(*libnMock, ToInt64()).WillOnce(Return(make_tuple(true, static_cast<int64_t>(-1))));
     EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
@@ -400,10 +405,10 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_011, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(Return(4));
     EXPECT_CALL(*libnMock, ToInt32())
         .WillOnce(Return(make_tuple(true, 10)))
-        .WillOnce(Return(make_tuple(true, 0)));
+        .WillOnce(Return(make_tuple(true, 0)))
+        .WillOnce(Return(make_tuple(true, -1)));
     EXPECT_CALL(*libnMock, ToInt64())
-        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))))
-        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(-1))));
+        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))));
     EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = MmapNapi::Sync(env, info);

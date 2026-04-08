@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,6 @@ namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
-static_assert(sizeof(ani_long) >= sizeof(void *), "ani_long must be large enough to hold a pointer");
-
 FsFileMapping *FileMappingWrapper::Unwrap(ani_env *env, ani_object object)
 {
     if (env == nullptr) {
@@ -38,7 +36,7 @@ FsFileMapping *FileMappingWrapper::Unwrap(ani_env *env, ani_object object)
     ani_long nativePtr;
     auto ret = env->Object_GetFieldByName_Long(object, "nativePtr", &nativePtr);
     if (ret != ANI_OK) {
-        HILOGE("Unwrap file mapping err: %{private}d", ret);
+        HILOGE("Unwrap file mapping err: %{public}d", ret);
         return nullptr;
     }
     uintptr_t ptrValue = static_cast<uintptr_t>(nativePtr);
@@ -64,14 +62,14 @@ ani_object FileMappingWrapper::Wrap(ani_env *env, const FsFileMapping *mapping)
     tie(ret, ctor) = aniCache.GetMethod(env, FS::FileMappingInner::classDesc,
         FS::FileMappingInner::ctorDesc, FS::FileMappingInner::ctorSig);
     if (ret != ANI_OK) {
-        HILOGE("Cannot find constructor method for class %s", classDesc);
+        HILOGE("Cannot find constructor method for class %{private}s", classDesc);
         return nullptr;
     }
 
     ani_long ptr = static_cast<ani_long>(reinterpret_cast<std::uintptr_t>(mapping));
     ani_object obj;
     if (ANI_OK != env->Object_New(cls, ctor, &obj, ptr)) {
-        HILOGE("New %s obj Failed!", classDesc);
+        HILOGE("New %{public}s obj Failed!", classDesc);
         return nullptr;
     }
 

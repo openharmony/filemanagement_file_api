@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,25 +15,40 @@
 
 #include "filemapping_ani.h"
 
+#include <securec.h>
+
 #include "error_handler.h"
 #include "filemapping_wrapper.h"
 #include "filemgmt_libhilog.h"
 #include "fs_filemapping.h"
 #include "type_converter.h"
-#include <securec.h>
 
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
 
+static bool ValidateLength(ani_env *env, FileMappingEntity *entity, size_t position,
+    size_t opLength)
+{
+    size_t remaining = (position < entity->limit) ? (entity->limit - position) : 0;
+    if (opLength > remaining) {
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
+        return false;
+    }
+    return true;
+}
+
 void FileMappingAni::SetPosition(ani_env *env, [[maybe_unused]] ani_object object, ani_int position)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
 
@@ -43,19 +58,18 @@ void FileMappingAni::SetPosition(ani_env *env, [[maybe_unused]] ani_object objec
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
     }
-#else
-    HILOGE("mmap is not supported on this platform");
-    ErrorHandler::Throw(env, EOPNOTSUPP);
-#endif
 }
 
 ani_int FileMappingAni::GetPosition(ani_env *env, [[maybe_unused]] ani_object object)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
 
@@ -68,18 +82,19 @@ ani_int FileMappingAni::GetPosition(ani_env *env, [[maybe_unused]] ani_object ob
     }
 
     return static_cast<ani_int>(ret.GetData().value());
-#else
-    return -1;
-#endif
 }
 
 ani_int FileMappingAni::Capacity(ani_env *env, [[maybe_unused]] ani_object object)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
         HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
 
@@ -92,18 +107,18 @@ ani_int FileMappingAni::Capacity(ani_env *env, [[maybe_unused]] ani_object objec
     }
 
     return static_cast<ani_int>(ret.GetData().value());
-#else
-    return -1;
-#endif
 }
 
 void FileMappingAni::SetLimit(ani_env *env, [[maybe_unused]] ani_object object, ani_int limit)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
 
@@ -113,19 +128,18 @@ void FileMappingAni::SetLimit(ani_env *env, [[maybe_unused]] ani_object object, 
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
     }
-#else
-    HILOGE("mmap is not supported on this platform");
-    ErrorHandler::Throw(env, EOPNOTSUPP);
-#endif
 }
 
 ani_int FileMappingAni::GetLimit(ani_env *env, [[maybe_unused]] ani_object object)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
 
@@ -138,18 +152,18 @@ ani_int FileMappingAni::GetLimit(ani_env *env, [[maybe_unused]] ani_object objec
     }
 
     return static_cast<ani_int>(ret.GetData().value());
-#else
-    return -1;
-#endif
 }
 
 void FileMappingAni::Flip(ani_env *env, [[maybe_unused]] ani_object object)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
 
@@ -159,19 +173,18 @@ void FileMappingAni::Flip(ani_env *env, [[maybe_unused]] ani_object object)
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
     }
-#else
-    HILOGE("mmap is not supported on this platform");
-    ErrorHandler::Throw(env, EOPNOTSUPP);
-#endif
 }
 
 ani_int FileMappingAni::Remaining(ani_env *env, [[maybe_unused]] ani_object object)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
 
@@ -184,19 +197,19 @@ ani_int FileMappingAni::Remaining(ani_env *env, [[maybe_unused]] ani_object obje
     }
 
     return static_cast<ani_int>(ret.GetData().value());
-#else
-    return -1;
-#endif
 }
 
 ani_int FileMappingAni::Read(ani_env *env, [[maybe_unused]] ani_object object,
     ani_arraybuffer buffer, ani_object length)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
 
@@ -208,31 +221,42 @@ ani_int FileMappingAni::Read(ani_env *env, [[maybe_unused]] ani_object object,
         return -1;
     }
 
+    auto *entity = mapping->GetEntity();
     auto [succLength, lenOpt] = TypeConverter::ToOptionalInt32(env, length);
     size_t readLen = lenOpt.has_value() ? static_cast<size_t>(lenOpt.value()) : bufLen;
+    if (readLen > bufLen) {
+        readLen = bufLen;
+    }
+    if (!ValidateLength(env, entity, entity->position, readLen)) {
+        return -1;
+    }
 
     auto ret = mapping->Read(buf, bufLen, readLen);
     if (!ret.IsSuccess()) {
         HILOGE("Read failed");
-        const auto &err = ret.GetError();
-        ErrorHandler::Throw(env, err);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_ACCS);
         return -1;
     }
 
     return static_cast<ani_int>(ret.GetData().value());
-#else
-    return -1;
-#endif
 }
 
 ani_int FileMappingAni::ReadFrom(ani_env *env, [[maybe_unused]] ani_object object,
     ani_int position, ani_arraybuffer buffer, ani_object length)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (position < 0 || static_cast<size_t>(position) > mapping->GetEntity()->capacity) {
+        HILOGE("Invalid position value");
+        ErrorHandler::Throw(env, EINVAL);
         return -1;
     }
 
@@ -244,31 +268,42 @@ ani_int FileMappingAni::ReadFrom(ani_env *env, [[maybe_unused]] ani_object objec
         return -1;
     }
 
+    auto *entity = mapping->GetEntity();
     auto [succLength, lenOpt] = TypeConverter::ToOptionalInt32(env, length);
     size_t readLen = lenOpt.has_value() ? static_cast<size_t>(lenOpt.value()) : bufLen;
+    if (readLen > bufLen) {
+        readLen = bufLen;
+    }
+    if (!ValidateLength(env, entity, static_cast<size_t>(position), readLen)) {
+        return -1;
+    }
 
     auto ret = mapping->ReadFrom(static_cast<size_t>(position), buf, bufLen, readLen);
     if (!ret.IsSuccess()) {
         HILOGE("ReadFrom failed");
-        const auto &err = ret.GetError();
-        ErrorHandler::Throw(env, err);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_ACCS);
         return -1;
     }
 
     return static_cast<ani_int>(ret.GetData().value());
-#else
-    return -1;
-#endif
 }
 
 ani_int FileMappingAni::Write(ani_env *env, [[maybe_unused]] ani_object object,
     ani_arraybuffer data, ani_object length)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (mapping->IsReadOnly()) {
+        HILOGE("Read-only mmap buffer");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_RO);
         return -1;
     }
 
@@ -280,31 +315,47 @@ ani_int FileMappingAni::Write(ani_env *env, [[maybe_unused]] ani_object object,
         return -1;
     }
 
+    auto *entity = mapping->GetEntity();
     auto [succLength, lenOpt] = TypeConverter::ToOptionalInt32(env, length);
     size_t writeLen = lenOpt.has_value() ? static_cast<size_t>(lenOpt.value()) : bufLen;
+    if (writeLen > bufLen) {
+        writeLen = bufLen;
+    }
+    if (!ValidateLength(env, entity, entity->position, writeLen)) {
+        return -1;
+    }
 
     auto ret = mapping->Write(buf, bufLen, writeLen);
     if (!ret.IsSuccess()) {
         HILOGE("Write failed");
-        const auto &err = ret.GetError();
-        ErrorHandler::Throw(env, err);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_ACCS);
         return -1;
     }
 
     return static_cast<ani_int>(ret.GetData().value());
-#else
-    return -1;
-#endif
 }
 
 ani_int FileMappingAni::WriteTo(ani_env *env, [[maybe_unused]] ani_object object,
     ani_int position, ani_arraybuffer data, ani_object length)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (!mapping->CheckValid()) {
+        HILOGE("File mapping is invalid");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return -1;
+    }
+    if (mapping->IsReadOnly()) {
+        HILOGE("Read-only mmap buffer");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_RO);
+        return -1;
+    }
+    if (position < 0 || static_cast<size_t>(position) > mapping->GetEntity()->capacity) {
+        HILOGE("Invalid position value");
+        ErrorHandler::Throw(env, EINVAL);
         return -1;
     }
 
@@ -316,36 +367,36 @@ ani_int FileMappingAni::WriteTo(ani_env *env, [[maybe_unused]] ani_object object
         return -1;
     }
 
+    auto *entity = mapping->GetEntity();
     auto [succLength, lenOpt] = TypeConverter::ToOptionalInt32(env, length);
     size_t writeLen = lenOpt.has_value() ? static_cast<size_t>(lenOpt.value()) : bufLen;
+    if (writeLen > bufLen) {
+        writeLen = bufLen;
+    }
+    if (!ValidateLength(env, entity, static_cast<size_t>(position), writeLen)) {
+        return -1;
+    }
 
     auto ret = mapping->WriteTo(static_cast<size_t>(position), buf, bufLen, writeLen);
     if (!ret.IsSuccess()) {
         HILOGE("WriteTo failed");
-        const auto &err = ret.GetError();
-        ErrorHandler::Throw(env, err);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_ACCS);
         return -1;
     }
 
     return static_cast<ani_int>(ret.GetData().value());
-#else
-    return -1;
-#endif
 }
 
 void FileMappingAni::MsyncSync(ani_env *env, [[maybe_unused]] ani_object object)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
-
     if (!mapping->CheckValid()) {
         HILOGE("File mapping is invalid");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
 
@@ -355,26 +406,24 @@ void FileMappingAni::MsyncSync(ani_env *env, [[maybe_unused]] ani_object object)
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
     }
-#else
-    HILOGE("mmap is not supported on this platform");
-    ErrorHandler::Throw(env, EOPNOTSUPP);
-#endif
 }
 
 void FileMappingAni::MsyncSyncWith(ani_env *env, [[maybe_unused]] ani_object object,
     ani_int position, ani_int length)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
-
     if (!mapping->CheckValid()) {
         HILOGE("File mapping is invalid");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return;
+    }
+    if (position < 0 || length < 0) {
+        HILOGE("Invalid msync arguments");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
@@ -384,19 +433,13 @@ void FileMappingAni::MsyncSyncWith(ani_env *env, [[maybe_unused]] ani_object obj
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
     }
-#else
-    HILOGE("mmap is not supported on this platform");
-    ErrorHandler::Throw(env, EOPNOTSUPP);
-#endif
 }
 
 void FileMappingAni::UnmapSync(ani_env *env, [[maybe_unused]] ani_object object)
 {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        HILOGE("Cannot unwrap file mapping!");
-        ErrorHandler::Throw(env, UNKNOWN_ERR);
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
@@ -406,14 +449,7 @@ void FileMappingAni::UnmapSync(ani_env *env, [[maybe_unused]] ani_object object)
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
     }
-    // Do not delete mapping here. The cleaner registered with the ANI object
-    // holds a separate copy of the pointer and is responsible for final deletion.
-    // Deleting here would cause double-free when the cleaner runs during GC.
     env->Object_SetFieldByName_Long(object, "nativePtr", 0);
-#else
-    HILOGE("mmap is not supported on this platform");
-    ErrorHandler::Throw(env, EOPNOTSUPP);
-#endif
 }
 
 } // namespace ANI
