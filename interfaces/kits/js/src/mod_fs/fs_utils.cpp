@@ -52,6 +52,7 @@ uint32_t FsUtils::ConvertFlags(const uint32_t &flags)
     flagsABI |= ((flags & USR_NONBLOCK) == USR_NONBLOCK) ? NONBLOCK : 0;
     flagsABI |= ((flags & USR_DIRECTORY) == USR_DIRECTORY) ? DIRECTORY : 0;
     flagsABI |= ((flags & USR_NOFOLLOW) == USR_NOFOLLOW) ? NOFOLLOW : 0;
+    flagsABI |= ((flags & USR_UNCACHE) == USR_UNCACHE) ? UNCACHE : 0;
     flagsABI |= ((flags & USR_SYNC) == USR_SYNC) ? SYNC : 0;
     return flagsABI;
 }

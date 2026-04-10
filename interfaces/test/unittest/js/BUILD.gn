@@ -169,6 +169,7 @@ ohos_unittest("ani_file_fs_mock_test") {
     "${file_api_path}/interfaces/test/unittest/common_mock/unistd_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_mock/uv_fs_mock.cpp",
     "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/common/fs_utils_test.cpp",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common/ut_fs_utils.cpp",
     "mod_fs/class_atomicfile/fs_atomicfile_mock_test.cpp",
     "mod_fs/class_file/fs_file_mock_test.cpp",

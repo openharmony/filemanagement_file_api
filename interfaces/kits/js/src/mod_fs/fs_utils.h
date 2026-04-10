@@ -49,6 +49,7 @@ constexpr int32_t NONBLOCK = UV_FS_O_NONBLOCK;
 constexpr int32_t DIRECTORY = UV_FS_O_DIRECTORY;
 constexpr int32_t NOFOLLOW = UV_FS_O_NOFOLLOW;
 constexpr int32_t SYNC = UV_FS_O_SYNC;
+constexpr int32_t UNCACHE = 010000000000;
 
 constexpr uint32_t MODE_EXIST = 00;
 constexpr uint32_t MODE_WRITE = 02;
@@ -65,6 +66,7 @@ constexpr uint32_t USR_NONBLOCK = 04000;
 constexpr uint32_t USR_DIRECTORY = 0200000;
 constexpr uint32_t USR_NOFOLLOW = 0400000;
 constexpr uint32_t USR_SYNC = 04010000;
+constexpr uint32_t USR_UNCACHE = 010000000000;
 
 const double NS = 1e9;
 const double MS = 1e3;
