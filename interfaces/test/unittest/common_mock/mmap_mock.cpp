@@ -128,23 +128,6 @@ int fstat(int fd, struct stat *statbuf)
     return realFstat(fd, statbuf);
 }
 
-int fstatfs(int fd, struct statfs *buf)
-{
-    if (MmapMock::IsMockable()) {
-        return MmapMock::GetMock()->fstatfs(fd, buf);
-    }
-
-    static int (*realFstatfs)(int, struct statfs *) = nullptr;
-    if (!realFstatfs) {
-        realFstatfs = (int (*)(int, struct statfs *))dlsym(RTLD_NEXT, "fstatfs");
-        if (!realFstatfs) {
-            GTEST_LOG_(ERROR) << "Failed to resolve real fstatfs: " << dlerror();
-            return -1;
-        }
-    }
-    return realFstatfs(fd, buf);
-}
-
 int ftruncate(int fd, off_t length)
 {
     if (MmapMock::IsMockable()) {

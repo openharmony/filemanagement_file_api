@@ -18,7 +18,6 @@
 
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <sys/vfs.h>
 
 #include <gmock/gmock.h>
 
@@ -31,7 +30,6 @@ public:
     virtual int munmap(void *addr, size_t length) = 0;
     virtual int msync(void *addr, size_t length, int flags) = 0;
     virtual int fstat(int fd, struct stat *statbuf) = 0;
-    virtual int fstatfs(int fd, struct statfs *buf) = 0;
     virtual int ftruncate(int fd, off_t length) = 0;
     virtual long sysconf(int name) = 0;
 };
@@ -42,7 +40,6 @@ public:
     MOCK_METHOD(int, munmap, (void *addr, size_t length), (override));
     MOCK_METHOD(int, msync, (void *addr, size_t length, int flags), (override));
     MOCK_METHOD(int, fstat, (int fd, struct stat *statbuf), (override));
-    MOCK_METHOD(int, fstatfs, (int fd, struct statfs *buf), (override));
     MOCK_METHOD(int, ftruncate, (int fd, off_t length), (override));
     MOCK_METHOD(long, sysconf, (int name), (override));
 

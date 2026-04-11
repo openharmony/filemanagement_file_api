@@ -40,7 +40,6 @@ public:
 private:
     static std::tuple<int, int> GetMmapProtFlags(int mode);
     static int ValidateFile(int fd);
-    static int ValidateFilesystem(int fd);
     static int ExpandFileIfNeeded(int fd, int mode, off_t offset, size_t size);
 };
 

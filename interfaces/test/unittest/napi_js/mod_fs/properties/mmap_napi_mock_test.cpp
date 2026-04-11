@@ -250,7 +250,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_006, testing::ext::TestSize.Lev
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
     EXPECT_CALL(*mmapMock, fstat(10, _)).WillOnce(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(10, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(-1));
     
     EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 

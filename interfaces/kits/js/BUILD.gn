@@ -141,7 +141,6 @@ ohos_shared_library("fs") {
   relative_install_dir = "module/file"
 
   include_dirs = [
-    "${file_api_path}/interfaces/kits/rust/include",
     "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_fs",

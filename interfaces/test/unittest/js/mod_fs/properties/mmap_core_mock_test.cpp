@@ -83,7 +83,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_001, TestSize.Level1)
 
 /**
  * @tc.name: MmapCoreMockTest_DoMmap_002
- * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when file type is not regular/block.
+ * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when file type is not regular file.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -110,7 +110,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_002, TestSize.Level1)
 
 /**
  * @tc.name: MmapCoreMockTest_DoMmap_003
- * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when fstatfs fails.
+ * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when sysconf fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -124,8 +124,8 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_003, TestSize.Level1)
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
     EXPECT_CALL(*mmapMock, fstat(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(fd, _)).WillOnce(Return(-1));
+        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
+    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(-1));
 
     auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
 
@@ -137,7 +137,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_003, TestSize.Level1)
 
 /**
  * @tc.name: MmapCoreMockTest_DoMmap_004
- * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when filesystem type is unsupported.
+ * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when ftruncate fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -150,74 +150,9 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_004, TestSize.Level1)
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
-    struct statfs mockFsInfo = {0};
-    mockFsInfo.f_type = 0x12345678;
-    EXPECT_CALL(*mmapMock, fstat(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockFsInfo), Return(0)));
-
-    auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
-
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
-    EXPECT_FALSE(result.IsSuccess());
-
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_004";
-}
-
-/**
- * @tc.name: MmapCoreMockTest_DoMmap_005
- * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when sysconf fails.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_005, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_005";
-
-    int fd = 10;
-    auto mmapMock = MmapMock::GetMock();
-    struct stat mockStat = {0};
-    mockStat.st_mode = S_IFREG;
-    struct statfs mockFsInfo = {0};
-    mockFsInfo.f_type = 0xEF53;
-    EXPECT_CALL(*mmapMock, fstat(fd, _))
-        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockFsInfo), Return(0)));
-    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(-1));
-
-    auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
-
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
-    EXPECT_FALSE(result.IsSuccess());
-
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_005";
-}
-
-/**
- * @tc.name: MmapCoreMockTest_DoMmap_006
- * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when ftruncate fails.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_006, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_006";
-
-    int fd = 10;
-    auto mmapMock = MmapMock::GetMock();
-    struct stat mockStat = {0};
-    mockStat.st_mode = S_IFREG;
     mockStat.st_size = 100;
-    struct statfs mockFsInfo = {0};
-    mockFsInfo.f_type = 0xEF53;
     EXPECT_CALL(*mmapMock, fstat(fd, _))
         .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockFsInfo), Return(0)));
     EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
     EXPECT_CALL(*mmapMock, ftruncate(fd, _))
         .WillOnce(Invoke([](int fd, off_t length) {
@@ -230,12 +165,74 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_006, TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
 
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_004";
+}
+
+/**
+ * @tc.name: MmapCoreMockTest_DoMmap_005
+ * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when mmap fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_005";
+
+    int fd = 10;
+    auto mmapMock = MmapMock::GetMock();
+    struct stat mockStat = {0};
+    mockStat.st_mode = S_IFREG;
+    mockStat.st_size = 4096;
+    EXPECT_CALL(*mmapMock, fstat(fd, _))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
+    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
+    EXPECT_CALL(*mmapMock, mmap(_, _, _, _, _, _)).WillOnce(Return(MAP_FAILED));
+
+    auto result = MmapCore::DoMmap(fd, MappingMode::READ_WRITE, 0, 1024);
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_005";
+}
+
+/**
+ * @tc.name: MmapCoreMockTest_DoMmap_006
+ * @tc.desc: Test function of MmapCore::DoMmap interface for SUCCESS with regular file.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_006";
+
+    int fd = 10;
+    auto mmapMock = MmapMock::GetMock();
+    struct stat mockStat = {0};
+    mockStat.st_mode = S_IFREG;
+    mockStat.st_size = 4096;
+    char mockBuffer[4096] = {0};
+    EXPECT_CALL(*mmapMock, fstat(fd, _))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
+    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
+    EXPECT_CALL(*mmapMock, mmap(_, _, _, _, _, _)).WillOnce(Return(mockBuffer));
+
+    auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    ASSERT_TRUE(result.IsSuccess());
+    auto mapping = result.GetData().value();
+    ASSERT_NE(mapping, nullptr);
+    delete mapping;
+
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_006";
 }
 
 /**
  * @tc.name: MmapCoreMockTest_DoMmap_007
- * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when mmap fails.
+ * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE with block device (not regular file).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -247,171 +244,17 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_007, TestSize.Level1)
     int fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
-    mockStat.st_mode = S_IFREG;
+    mockStat.st_mode = S_IFBLK;
     mockStat.st_size = 4096;
-    struct statfs mockFsInfo = {0};
-    mockFsInfo.f_type = 0xEF53;
     EXPECT_CALL(*mmapMock, fstat(fd, _))
         .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockFsInfo), Return(0)));
-    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
-    EXPECT_CALL(*mmapMock, mmap(_, _, _, _, _, _)).WillOnce(Return(MAP_FAILED));
 
-    auto result = MmapCore::DoMmap(fd, MappingMode::READ_WRITE, 0, 1024);
+    auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_007";
-}
-
-/**
- * @tc.name: MmapCoreMockTest_DoMmap_008
- * @tc.desc: Test function of MmapCore::DoMmap interface for SUCCESS with EXT4 filesystem.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_008, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_008";
-
-    int fd = 10;
-    auto mmapMock = MmapMock::GetMock();
-    struct stat mockStat = {0};
-    mockStat.st_mode = S_IFREG;
-    mockStat.st_size = 4096;
-    struct statfs mockFsInfo = {0};
-    mockFsInfo.f_type = 0xEF53;
-    char mockBuffer[4096] = {0};
-    EXPECT_CALL(*mmapMock, fstat(fd, _))
-        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockFsInfo), Return(0)));
-    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
-    EXPECT_CALL(*mmapMock, mmap(_, _, _, _, _, _)).WillOnce(Return(mockBuffer));
-
-    auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
-
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
-    ASSERT_TRUE(result.IsSuccess());
-    auto mapping = result.GetData().value();
-    ASSERT_NE(mapping, nullptr);
-    delete mapping;
-
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_008";
-}
-
-/**
- * @tc.name: MmapCoreMockTest_DoMmap_009
- * @tc.desc: Test function of MmapCore::DoMmap interface for SUCCESS with F2FS filesystem.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_009, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_009";
-
-    int fd = 10;
-    auto mmapMock = MmapMock::GetMock();
-    struct stat mockStat = {0};
-    mockStat.st_mode = S_IFREG;
-    mockStat.st_size = 4096;
-    struct statfs mockFsInfo = {0};
-    mockFsInfo.f_type = 0xF2F52010;
-    char mockBuffer[4096] = {0};
-    EXPECT_CALL(*mmapMock, fstat(fd, _))
-        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockFsInfo), Return(0)));
-    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
-    EXPECT_CALL(*mmapMock, mmap(_, _, _, _, _, _)).WillOnce(Return(mockBuffer));
-
-    auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
-
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
-    ASSERT_TRUE(result.IsSuccess());
-    auto mapping = result.GetData().value();
-    ASSERT_NE(mapping, nullptr);
-    delete mapping;
-
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_009";
-}
-
-/**
- * @tc.name: MmapCoreMockTest_DoMmap_010
- * @tc.desc: Test function of MmapCore::DoMmap interface for SUCCESS with HMDFS_LOCAL filesystem.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_010, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_010";
-
-    int fd = 10;
-    auto mmapMock = MmapMock::GetMock();
-    struct stat mockStat = {0};
-    mockStat.st_mode = S_IFREG;
-    mockStat.st_size = 4096;
-    struct statfs mockFsInfo = {0};
-    mockFsInfo.f_type = 0x20200302;
-    char mockBuffer[4096] = {0};
-    EXPECT_CALL(*mmapMock, fstat(fd, _))
-        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockFsInfo), Return(0)));
-    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
-    EXPECT_CALL(*mmapMock, mmap(_, _, _, _, _, _)).WillOnce(Return(mockBuffer));
-
-    auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
-
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
-    ASSERT_TRUE(result.IsSuccess());
-    auto mapping = result.GetData().value();
-    ASSERT_NE(mapping, nullptr);
-    delete mapping;
-
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_010";
-}
-
-/**
- * @tc.name: MmapCoreMockTest_DoMmap_011
- * @tc.desc: Test function of MmapCore::DoMmap interface for SUCCESS with block device.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_011, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_011";
-
-    int fd = 10;
-    auto mmapMock = MmapMock::GetMock();
-    struct stat mockStat = {0};
-    mockStat.st_mode = S_IFBLK;
-    mockStat.st_size = 4096;
-    struct statfs mockFsInfo = {0};
-    mockFsInfo.f_type = 0xEF53;
-    char mockBuffer[4096] = {0};
-    EXPECT_CALL(*mmapMock, fstat(fd, _))
-        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, fstatfs(fd, _))
-        .WillOnce(DoAll(SetArgPointee<1>(mockFsInfo), Return(0)));
-    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
-    EXPECT_CALL(*mmapMock, mmap(_, _, _, _, _, _)).WillOnce(Return(mockBuffer));
-
-    auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
-
-    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
-    ASSERT_TRUE(result.IsSuccess());
-    auto mapping = result.GetData().value();
-    ASSERT_NE(mapping, nullptr);
-    delete mapping;
-
-    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_011";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
