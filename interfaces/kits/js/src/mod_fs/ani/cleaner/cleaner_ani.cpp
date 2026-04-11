@@ -18,6 +18,7 @@
 #include "filemgmt_libhilog.h"
 #include "fs_atomicfile.h"
 #include "fs_file.h"
+#include "fs_filemapping.h"
 #include "fs_randomaccessfile.h"
 #include "fs_reader_iterator.h"
 #include "fs_stat.h"
@@ -52,6 +53,8 @@ static void DoCleanByClassType(ani_env *env, ani_long ptr, ani_ref classTypeObj)
         delete reinterpret_cast<FsStream *>(ptr);
     } else if (classType == "AtomicFile") {
         delete reinterpret_cast<FsAtomicFile *>(ptr);
+    } else if (classType == "FileMapping") {
+        delete reinterpret_cast<FsFileMapping *>(ptr);
     } else {
         HILOGE("Clean unsupport className: %{public}s", classType.c_str());
     }

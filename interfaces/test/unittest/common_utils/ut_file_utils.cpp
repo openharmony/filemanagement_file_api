@@ -15,6 +15,7 @@
 
 #include "ut_file_utils.h"
 
+#include <fcntl.h>
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
@@ -355,6 +356,48 @@ std::tuple<bool, fs::path> FileUtils::CheckAndNormalizePath(const fs::path &path
         return { false, {} };
     }
     return { true, normalizedPath };
+}
+
+std::tuple<int, bool> FileUtils::DoCreateFileWithContent(const fs::path &path, const std::string &content)
+{
+    auto [succ, normalizedPath] = CheckAndNormalizePath(path);
+    if (!succ) {
+        GTEST_LOG_(ERROR) << "Failed to check and normalize path before creating!";
+        return { -1, false };
+    }
+
+    std::error_code err;
+    auto parentPath = normalizedPath.parent_path();
+    if (!parentPath.empty() && !fs::exists(parentPath, err)) {
+        fs::create_directories(parentPath, err);
+        if (err) {
+            GTEST_LOG_(ERROR) << "Failed to create parent directory! Error: " << err.message()
+                              << ". Code: " << err.value();
+            return { -1, false };
+        }
+    }
+
+    int fd = open(normalizedPath.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (fd < 0) {
+        GTEST_LOG_(ERROR) << "Failed to open file! errno: " << errno;
+        return { -1, false };
+    }
+
+    if (!content.empty()) {
+        ssize_t written = write(fd, content.c_str(), content.size());
+        if (written != static_cast<ssize_t>(content.size())) {
+            GTEST_LOG_(ERROR) << "Failed to write content to file! errno: " << errno;
+            close(fd);
+            return { -1, false };
+        }
+    }
+
+    return { fd, true };
+}
+
+std::tuple<int, bool> FileUtils::CreateFileWithContent(const fs::path &path, const std::string &content)
+{
+    return InvokeWithMockDisabled(&DoCreateFileWithContent, path, content);
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
