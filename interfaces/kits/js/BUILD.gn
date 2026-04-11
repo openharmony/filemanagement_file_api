@@ -144,6 +144,7 @@ ohos_shared_library("fs") {
     "${src_path}/common",
     "${src_path}/common/file_helper",
     "${src_path}/mod_fs",
+    "${src_path}/mod_fs/class_filemapping",
     "${src_path}/mod_fs/properties",
     "${src_path}/mod_fs/properties/copy_listener",
     "${src_path}/mod_fs/properties/file_filter",
@@ -219,9 +220,10 @@ ohos_shared_library("fs") {
       debug = false
     }
 
-    include_dirs += [ "${file_api_path}/interfaces/kits/rust/include" ]
     sources += [
       "src/mod_fs/class_atomicfile/atomicfile_n_exporter.cpp",
+      "src/mod_fs/class_filemapping/fs_filemapping.cpp",
+      "src/mod_fs/class_filemapping/napi/filemapping_napi.cpp",
       "src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
       "src/mod_fs/class_readeriterator/readeriterator_n_exporter.cpp",
       "src/mod_fs/class_stream/stream_n_exporter.cpp",
@@ -244,6 +246,8 @@ ohos_shared_library("fs") {
       "src/mod_fs/properties/listfile.cpp",
       "src/mod_fs/properties/listfile_ext_core.cpp",
       "src/mod_fs/properties/lseek.cpp",
+      "src/mod_fs/properties/mmap_core.cpp",
+      "src/mod_fs/properties/napi/mmap_napi.cpp",
       "src/mod_fs/properties/move.cpp",
       "src/mod_fs/properties/movedir.cpp",
       "src/mod_fs/properties/napi/listfile_ext_napi.cpp",
@@ -657,6 +661,7 @@ config("ani_config") {
     "${utils_path}/common/include",
     "${utils_path}/filemgmt_libfs/include",
     "${utils_path}/filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn/include",
     "src/common",
     "src/common/ani_helper",
     "src/common/file_helper",
@@ -873,6 +878,20 @@ taihe_shared_library("file_fs_taihe") {
     "runtime_core:libarkruntime",
     "samgr:samgr_proxy",
   ]
+
+  if (!use_mingw_win && !use_mac) {
+    include_dirs += [
+      "src/mod_fs/class_filemapping",
+      "src/mod_fs/class_filemapping/ani",
+    ]
+    sources += [
+      "src/mod_fs/class_filemapping/ani/filemapping_ani.cpp",
+      "src/mod_fs/class_filemapping/ani/filemapping_wrapper.cpp",
+      "src/mod_fs/class_filemapping/fs_filemapping.cpp",
+      "src/mod_fs/properties/ani/mmap_ani.cpp",
+      "src/mod_fs/properties/mmap_core.cpp",
+    ]
+  }
 
   branch_protector_ret = "pac_ret"
   sanitize = {

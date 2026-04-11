@@ -257,6 +257,13 @@ struct WatchEventInner : public BaseType {
     static const string ctorSig;
 };
 
+struct FileMappingInner : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string ctorSig;
+    static const string nativePtr;
+};
+
 struct LocationType : public BaseType {
     static const Type classType;
     static const string classDesc;

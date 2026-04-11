@@ -175,6 +175,11 @@ const Type FS::WatchEventInner::classType = Builder::BuildClass("@ohos.file.fs.W
 const string FS::WatchEventInner::classDesc = FS::WatchEventInner::classType.Descriptor();
 const string FS::WatchEventInner::ctorSig =
     Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType, BasicTypes::intType, BasicTypes::intType });
+// FS::FileMappingInner
+const Type FS::FileMappingInner::classType = Builder::BuildClass("@ohos.file.fs.fileIo.FileMappingInner");
+const string FS::FileMappingInner::classDesc = FS::FileMappingInner::classType.Descriptor();
+const string FS::FileMappingInner::ctorSig = Builder::BuildSignatureDescriptor({ BasicTypes::longType });
+const string FS::FileMappingInner::nativePtr = "nativePtr";
 // FS::ReadStreamOptions
 const Type FS::ReadStreamOptions::classType = Builder::BuildClass("@ohos.file.fs.ReadStreamOptions");
 // FS::WriteStreamOptions
