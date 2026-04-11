@@ -20,6 +20,7 @@
 #include <sys/prctl.h>
 
 #include "mmap_mock.h"
+#include "securec.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 using namespace testing;
@@ -28,6 +29,8 @@ using namespace std;
 
 #define BUFFER_LENGTH 1024
 #define CAPACITY_LENGTH 924
+#define ADJUSTMENT_LENGTH (BUFFER_LENGTH - CAPACITY_LENGTH)
+#define MOCK_FD 10
 
 class FsFileMappingMockTest : public testing::Test {
 public:
@@ -69,13 +72,13 @@ FsFileMapping *FsFileMappingMockTest::CreateTestMapping()
     char *mockBuffer = new char[BUFFER_LENGTH];
     memset_s(mockBuffer, BUFFER_LENGTH, 0, BUFFER_LENGTH);
     struct FileMappingParams params;
-    params.mapAddr = mockBuffer + 100;
+    params.mapAddr = mockBuffer + ADJUSTMENT_LENGTH;
     params.rawMapAddr = mockBuffer;
     params.capacity = CAPACITY_LENGTH;
     params.rawCapacity = BUFFER_LENGTH;
-    params.adjustment = 100;
+    params.adjustment = ADJUSTMENT_LENGTH;
     params.mode = MappingMode::READ_WRITE;
-    params.fd = 10;
+    params.fd = MOCK_FD;
     params.offset = 0;
 
     auto result = FsFileMapping::Constructor(params);

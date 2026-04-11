@@ -17,7 +17,6 @@
 
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <sys/vfs.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -61,30 +60,11 @@ int MmapCore::ValidateFile(int fd)
         return errno;
     }
 
-    if (!S_ISREG(st.st_mode) && !S_ISBLK(st.st_mode)) {
+    if (!S_ISREG(st.st_mode)) {
         HILOGE("File type does not support mmap, mode: %{public}u", st.st_mode);
         return FILEIO_SYS_CAP_TAG + E_MMAP_FILE;
     }
 
-    return 0;
-}
-
-static constexpr long FS_TYPE_EXT4 = 0xEF53;
-static constexpr long FS_TYPE_HMDFS_LOCAL = 0x20200302;
-static constexpr long FS_TYPE_F2FS = 0xF2F52010;
-
-int MmapCore::ValidateFilesystem(int fd)
-{
-    struct statfs fsInfo;
-    if (fstatfs(fd, &fsInfo) < 0) {
-        HILOGE("Failed to fstatfs, error: %{public}d", errno);
-        return FILEIO_SYS_CAP_TAG + E_MMAP_UNSUP;
-    }
-    long fsType = static_cast<long>(fsInfo.f_type);
-    if (fsType != FS_TYPE_EXT4 && fsType != FS_TYPE_HMDFS_LOCAL && fsType != FS_TYPE_F2FS) {
-        HILOGE("Unsupported filesystem type: %{public}lx", static_cast<unsigned long>(fsType));
-        return FILEIO_SYS_CAP_TAG + E_MMAP_UNSUP;
-    }
     return 0;
 }
 
@@ -164,11 +144,6 @@ FsResult<FsFileMapping *> MmapCore::DoMmap(int fd, int mode, off_t offset, size_
     int validateResult = ValidateFile(fd);
     if (validateResult != 0) {
         return FsResult<FsFileMapping *>::Error(validateResult);
-    }
-
-    int fsResult = ValidateFilesystem(fd);
-    if (fsResult != 0) {
-        return FsResult<FsFileMapping *>::Error(fsResult);
     }
 
     auto alignResult = AlignToPage(offset, size);
