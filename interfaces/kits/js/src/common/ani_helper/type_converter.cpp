@@ -120,8 +120,8 @@ tuple<bool, optional<double>> TypeConverter::ToOptionalDouble(ani_env *env, cons
     AniCache &aniCache = AniCache::GetInstance();
     ani_method toDoubleAniMethod;
     ani_status ret;
-    tie(ret, toDoubleAniMethod) = aniCache.GetMethod(env, BoxedTypes::Double::classDesc,
-        BoxedTypes::Double::toDoubleDesc, BoxedTypes::Double::toDoubleSig);
+    tie(ret, toDoubleAniMethod) = aniCache.GetMethod(
+        env, BoxedTypes::Double::classDesc, BoxedTypes::Double::toDoubleDesc, BoxedTypes::Double::toDoubleSig);
     if (ret != ANI_OK) {
         return { false, {} };
     }
@@ -134,7 +134,7 @@ tuple<bool, optional<double>> TypeConverter::ToOptionalDouble(ani_env *env, cons
     return { false, {} };
 }
 
-std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::string str)
+std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, const std::string &str)
 {
     if (env == nullptr) {
         return { false, {} };
@@ -147,7 +147,7 @@ std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::strin
     return { true, std::move(result) };
 }
 
-std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, std::string str, size_t size)
+std::tuple<bool, ani_string> TypeConverter::ToAniString(ani_env *env, const std::string &str, size_t size)
 {
     if (env == nullptr) {
         return { false, {} };
@@ -292,8 +292,8 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
     }
 
     ani_method ctor;
-    tie(ret, ctor) = aniCache.GetMethod(env, BuiltInTypes::ArrayBuffer::classDesc,
-        BuiltInTypes::ArrayBuffer::ctorDesc, BuiltInTypes::ArrayBuffer::ctorSig);
+    tie(ret, ctor) = aniCache.GetMethod(env, BuiltInTypes::ArrayBuffer::classDesc, BuiltInTypes::ArrayBuffer::ctorDesc,
+        BuiltInTypes::ArrayBuffer::ctorSig);
     if (ret != ANI_OK) {
         HILOGE("Not found ctor, err: %{public}d", ret);
         return { false, nullptr };
@@ -364,25 +364,25 @@ std::tuple<bool, ani_array> TypeConverter::ToAniStringList(
 
 std::tuple<bool, ani_object> TypeConverter::ToAniBigInt(ani_env *env, int64_t value)
 {
-    AniCache& aniCache = AniCache::GetInstance();
+    AniCache &aniCache = AniCache::GetInstance();
     auto [ret, cls] = aniCache.GetClass(env, BuiltInTypes::BigInt::classDesc);
     if (ret != ANI_OK) {
-        return {false, nullptr};
+        return { false, nullptr };
     }
 
     ani_method ctor;
-    tie(ret, ctor) = aniCache.GetMethod(env, BuiltInTypes::BigInt::classDesc, BuiltInTypes::BigInt::ctorDesc,
-        BuiltInTypes::BigInt::ctorSig);
+    tie(ret, ctor) = aniCache.GetMethod(
+        env, BuiltInTypes::BigInt::classDesc, BuiltInTypes::BigInt::ctorDesc, BuiltInTypes::BigInt::ctorSig);
     if (ret != ANI_OK) {
-        return {false, nullptr};
+        return { false, nullptr };
     }
 
     ani_object object;
     if ((ret = env->Object_New(cls, ctor, &object, value)) != ANI_OK) {
         HILOGE("New Object Fail, err: %{public}d", ret);
-        return {false, nullptr};
+        return { false, nullptr };
     }
-    return {true, object};
+    return { true, object };
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

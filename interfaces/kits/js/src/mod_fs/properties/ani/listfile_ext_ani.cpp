@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,7 +45,23 @@ static std::tuple<bool, shared_ptr<IFileFilter>> ParseFileFilter(ani_env *env, a
         return { true, nullptr };
     }
 
-    auto fileFilter = CreateSharedPtr<FileFilterAni>(env, static_cast<ani_object>(filterRef));
+    AniCache &aniCache = AniCache::GetInstance();
+    auto classDesc = FS::FileFilter::classDesc;
+    auto filterSig = FS::FileFilter::filterSig;
+    auto [ret, cls] = aniCache.GetClass(env, classDesc);
+    if (ret != ANI_OK) {
+        HILOGE("Failed to find class: %{public}s. ret: %{public}d", classDesc.c_str(), ret);
+        return { false, nullptr };
+    }
+
+    ani_method filterMethod;
+    tie(ret, filterMethod) = aniCache.GetMethod(env, classDesc, "filter", filterSig);
+    if (ret != ANI_OK) {
+        HILOGE("Failed to find filter method: %{public}s. ret: %{public}d", filterSig.c_str(), ret);
+        return { false, nullptr };
+    }
+
+    auto fileFilter = CreateSharedPtr<FileFilterAni>(env, static_cast<ani_object>(filterRef), filterMethod);
     if (!fileFilter) {
         HILOGE("Failed to request heap memory.");
         return { false, nullptr };
