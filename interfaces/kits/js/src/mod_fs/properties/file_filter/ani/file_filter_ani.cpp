@@ -55,7 +55,7 @@ bool FileFilterAni::Filter(const std::string &name)
     }
 
     ani_boolean result;
-    status = env_->Object_CallMethodByName_Boolean(filterObj_, "filter", nullptr, &result, nameValue);
+    status = env_->Object_CallMethod_Boolean(filterObj_, filterMethod_, &result, nameValue);
     if (status != ANI_OK) {
         HILOGE("Failed to call filter function, status: %{public}d", status);
         filterFailed_ = true;

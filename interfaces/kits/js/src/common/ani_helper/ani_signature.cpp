@@ -220,6 +220,11 @@ const string FS::ReadTextOptions::getLengthSig = Builder::BuildSignatureDescript
 const string FS::ReadTextOptions::getEncodingDesc = Builder::BuildGetterName("encoding");
 const string FS::ReadTextOptions::getEncodingSig =
     Builder::BuildSignatureDescriptor({}, BuiltInTypes::String::classType);
+// FS::FileFilter
+const Type FS::FileFilter::classType = Builder::BuildClass("@ohos.file.fs.FileFilter");
+const string FS::FileFilter::classDesc = FS::FileFilter::classType.Descriptor();
+const string FS::FileFilter::filterSig =
+    Builder::BuildSignatureDescriptor({ BuiltInTypes::stringType }, BasicTypes::booleanType);
 // Impl::EnvironmentImpl
 const Type Impl::EnvironmentImpl::classType = Builder::BuildClass("@ohos.file.environment.EnvironmentImpl");
 const string Impl::EnvironmentImpl::classDesc = Impl::EnvironmentImpl::classType.Descriptor();
