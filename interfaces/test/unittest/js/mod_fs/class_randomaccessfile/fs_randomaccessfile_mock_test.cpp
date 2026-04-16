@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
+#include "fdtag_func.h"
 #include "fdsan_mock.h"
 #include "uv_fs_mock.h"
 
@@ -75,7 +76,6 @@ inline const int32_t MAX_FD = 2048;
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, TestSize.Level1)
 {
@@ -104,7 +104,6 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, Te
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, TestSize.Level1)
 {
@@ -140,7 +139,6 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, Te
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, TestSize.Level1)
 {
@@ -167,7 +165,6 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, TestSize.Level1)
 {
@@ -200,7 +197,6 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, TestSize.Level1)
 {
@@ -233,7 +229,6 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, TestSize.Level1)
 {
@@ -268,7 +263,6 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, TestSize.Level1)
 {
@@ -295,7 +289,6 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, TestSize.Level1)
 {
@@ -314,40 +307,63 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, T
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_CloseSync_009
- * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for SUCCESS
+ *           when fd < FD_SAN_OVERFLOW_END (fdsan path on non-Win/iOS/CROSS).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_009, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_009";
-
-    auto uvMock = UvFsMock::GetMock();
+    raf->rafEntity->fd = make_unique<DistributedFS::FDGuard>(3, false);
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
     auto fdsanMock = FdsanMock::GetMock();
-    EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(0));
-    raf->rafEntity->fd = make_unique<DistributedFS::FDGuard>(2048, false);
+#else
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
+#endif
     auto result = raf->CloseSync();
-
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+#else
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+#endif
     EXPECT_TRUE(result.IsSuccess());
-
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_009";
 }
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_CloseSync_010
- * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for failed.
+ * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for SUCCESS
+ *           when fd >= FD_SAN_OVERFLOW_END (always uv_fs_close path).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
- 
 */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_010, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_010";
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(0));
+    raf->rafEntity->fd = make_unique<DistributedFS::FDGuard>(FD_SAN_OVERFLOW_END, false);
+    auto result = raf->CloseSync();
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    EXPECT_TRUE(result.IsSuccess());
+    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_010";
+}
+
+/**
+ * @tc.name: FsRandomAccessFileMockTest_CloseSync_011
+ * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for failed.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+*/
+HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_011, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_011";
  
     auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_))
@@ -357,6 +373,6 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_010, T
 
     EXPECT_FALSE(result.IsSuccess());
  
-    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_010";
+    GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_011";
 }
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
