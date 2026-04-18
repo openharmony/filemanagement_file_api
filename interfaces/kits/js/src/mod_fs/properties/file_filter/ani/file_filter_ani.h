@@ -25,7 +25,8 @@ namespace ANI {
 
 class FileFilterAni final : public IFileFilter {
 public:
-    FileFilterAni(ani_env *env, ani_object filterObj) : env_(env), filterObj_(filterObj) {};
+    FileFilterAni(ani_env *env, ani_object filterObj, ani_method filterMethod)
+        : env_(env), filterObj_(filterObj), filterMethod_(filterMethod) {};
     bool Filter(const std::string &name) override;
     ~FileFilterAni();
     bool HasException() const;
@@ -33,6 +34,7 @@ public:
 private:
     ani_env *env_;
     ani_object filterObj_;
+    ani_method filterMethod_;
     bool filterFailed_ = false;
 };
 } // namespace ANI
