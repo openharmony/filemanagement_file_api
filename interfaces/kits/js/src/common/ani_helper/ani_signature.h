@@ -305,6 +305,12 @@ struct ReadTextOptions : public BaseType {
     static const string getEncodingSig;
 };
 
+struct FileFilter : public BaseType {
+    static const Type classType;
+    static const string classDesc;
+    static const string filterSig;
+};
+
 } // namespace FS
 
 namespace Impl {
