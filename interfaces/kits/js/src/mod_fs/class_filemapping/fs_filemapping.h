@@ -17,17 +17,14 @@
 #define INTERFACES_KITS_JS_SRC_MOD_FS_CLASS_FILEMAPPING_FS_FILEMAPPING_H
 
 #include <cinttypes>
-#include <iostream>
 #include <memory>
 
 #include "filemgmt_libfs.h"
 #include "filemgmt_libhilog.h"
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#endif
 
 namespace OHOS {
 namespace FileManagement {
