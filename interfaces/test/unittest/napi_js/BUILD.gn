@@ -181,3 +181,55 @@ ohos_unittest("napi_file_fs_mock_test") {
 
   use_exceptions = true
 }
+
+ohos_unittest("napi_file_environment_test") {
+  branch_protector_ret = "pac_ret"
+  testonly = true
+
+  module_out_path = "file_api/file_api"
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/common",
+    "${file_api_path}/interfaces/kits/js/src/common/fileHelper",
+    "${file_api_path}/interfaces/kits/js/src/mod_environment",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs",
+    "${file_api_path}/interfaces/test/unittest/common_mock",
+    "${file_api_path}/interfaces/test/unittest/napi_js/mock",
+    "${utils_path}/common/include",
+    "${utils_path}/filemgmt_libfs/include",
+    "${utils_path}/filemgmt_libn/include",
+  ]
+
+  sources = [
+    "${file_api_path}/interfaces/kits/js/src/mod_environment/environment_n_exporter.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/accesstoken_kit_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/os_account_manager_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/parameter_mock.cpp",
+    "${file_api_path}/interfaces/test/unittest/common_mock/tokenid_kit_mock.cpp",
+    "mock/libn_mock.cpp",
+    "mod_environment/environment_n_exporter_mock_test.cpp",
+  ]
+
+  deps = [
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+    "${utils_path}/filemgmt_libn:filemgmt_libn",
+  ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "init:libbegetutil",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "os_account:os_account_innerkits",
+  ]
+
+  defines = [ "private=public" ]
+
+  use_exceptions = true
+}
