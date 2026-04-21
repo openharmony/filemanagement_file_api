@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -78,11 +78,16 @@ static std::optional<PageAlignResult> AlignToPage(off_t offset, size_t size)
 {
     long pageSize = sysconf(_SC_PAGESIZE);
     if (pageSize <= 0) {
+        HILOGE("Failed to get system page size, error: %{public}ld", pageSize);
         return std::nullopt;
     }
     off_t pageSz = static_cast<off_t>(pageSize);
     off_t alignedOffset = (offset / pageSz) * pageSz;
     size_t adjustment = static_cast<size_t>(offset - alignedOffset);
+    if (size > SIZE_MAX - adjustment) {
+        HILOGE("Size overflow after page alignment");
+        return std::nullopt;
+    }
     size_t adjustedSize = size + adjustment;
     return PageAlignResult{ alignedOffset, adjustment, adjustedSize };
 }
@@ -95,6 +100,14 @@ int MmapCore::ExpandFileIfNeeded(int fd, int mode, off_t offset, size_t size)
         return errno;
     }
 
+    if (size > static_cast<size_t>(INT64_MAX)) {
+        HILOGE("Size exceeds off_t range");
+        return EOVERFLOW;
+    }
+    if (offset > INT64_MAX - static_cast<off_t>(size)) {
+        HILOGE("Offset + size overflow");
+        return EOVERFLOW;
+    }
     off_t requiredSize = offset + static_cast<off_t>(size);
     if (requiredSize <= st.st_size) {
         return 0;

@@ -43,6 +43,7 @@ void FileMappingAni::SetPosition(ani_env *env, [[maybe_unused]] ani_object objec
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
@@ -52,6 +53,11 @@ void FileMappingAni::SetPosition(ani_env *env, [[maybe_unused]] ani_object objec
         return;
     }
 
+    if (position < 0 || static_cast<size_t>(position) > mapping->GetEntity()->limit) {
+        HILOGE("Invalid position value");
+        ErrorHandler::Throw(env, EINVAL);
+        return;
+    }
     auto ret = mapping->SetPosition(static_cast<size_t>(position));
     if (!ret.IsSuccess()) {
         HILOGE("SetPosition failed");
@@ -64,6 +70,7 @@ ani_int FileMappingAni::GetPosition(ani_env *env, [[maybe_unused]] ani_object ob
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
@@ -113,12 +120,19 @@ void FileMappingAni::SetLimit(ani_env *env, [[maybe_unused]] ani_object object, 
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
     if (!mapping->CheckValid()) {
         HILOGE("File mapping is invalid");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+        return;
+    }
+
+    if (limit < 0 || static_cast<size_t>(limit) > mapping->GetEntity()->capacity) {
+        HILOGE("Invalid limit value");
+        ErrorHandler::Throw(env, EINVAL);
         return;
     }
 
@@ -134,6 +148,7 @@ ani_int FileMappingAni::GetLimit(ani_env *env, [[maybe_unused]] ani_object objec
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
@@ -158,6 +173,7 @@ void FileMappingAni::Flip(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
@@ -179,6 +195,7 @@ ani_int FileMappingAni::Remaining(ani_env *env, [[maybe_unused]] ani_object obje
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
@@ -204,6 +221,7 @@ ani_int FileMappingAni::Read(ani_env *env, [[maybe_unused]] ani_object object,
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
@@ -215,7 +233,7 @@ ani_int FileMappingAni::Read(ani_env *env, [[maybe_unused]] ani_object object,
 
     void *buf = nullptr;
     ani_size bufLen = 0;
-    if (ANI_OK != env->ArrayBuffer_GetInfo(buffer, &buf, &bufLen) || !buf) {
+    if (ANI_OK != env->ArrayBuffer_GetInfo(buffer, &buf, &bufLen)) {
         HILOGE("Invalid buffer argument");
         ErrorHandler::Throw(env, EINVAL);
         return -1;
@@ -224,17 +242,18 @@ ani_int FileMappingAni::Read(ani_env *env, [[maybe_unused]] ani_object object,
     auto *entity = mapping->GetEntity();
     auto [succLength, lenOpt] = TypeConverter::ToOptionalInt32(env, length);
     size_t readLen = lenOpt.has_value() ? static_cast<size_t>(lenOpt.value()) : bufLen;
-    if (readLen > bufLen) {
-        readLen = bufLen;
-    }
     if (!ValidateLength(env, entity, entity->position, readLen)) {
         return -1;
+    }
+    if (readLen > bufLen) {
+        readLen = bufLen;
     }
 
     auto ret = mapping->Read(buf, bufLen, readLen);
     if (!ret.IsSuccess()) {
         HILOGE("Read failed");
-        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_ACCS);
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return -1;
     }
 
@@ -246,6 +265,7 @@ ani_int FileMappingAni::ReadFrom(ani_env *env, [[maybe_unused]] ani_object objec
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
@@ -262,7 +282,7 @@ ani_int FileMappingAni::ReadFrom(ani_env *env, [[maybe_unused]] ani_object objec
 
     void *buf = nullptr;
     ani_size bufLen = 0;
-    if (ANI_OK != env->ArrayBuffer_GetInfo(buffer, &buf, &bufLen) || !buf) {
+    if (ANI_OK != env->ArrayBuffer_GetInfo(buffer, &buf, &bufLen)) {
         HILOGE("Invalid buffer argument");
         ErrorHandler::Throw(env, EINVAL);
         return -1;
@@ -271,17 +291,18 @@ ani_int FileMappingAni::ReadFrom(ani_env *env, [[maybe_unused]] ani_object objec
     auto *entity = mapping->GetEntity();
     auto [succLength, lenOpt] = TypeConverter::ToOptionalInt32(env, length);
     size_t readLen = lenOpt.has_value() ? static_cast<size_t>(lenOpt.value()) : bufLen;
-    if (readLen > bufLen) {
-        readLen = bufLen;
-    }
     if (!ValidateLength(env, entity, static_cast<size_t>(position), readLen)) {
         return -1;
+    }
+    if (readLen > bufLen) {
+        readLen = bufLen;
     }
 
     auto ret = mapping->ReadFrom(static_cast<size_t>(position), buf, bufLen, readLen);
     if (!ret.IsSuccess()) {
         HILOGE("ReadFrom failed");
-        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_ACCS);
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return -1;
     }
 
@@ -293,6 +314,7 @@ ani_int FileMappingAni::Write(ani_env *env, [[maybe_unused]] ani_object object,
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
@@ -309,7 +331,7 @@ ani_int FileMappingAni::Write(ani_env *env, [[maybe_unused]] ani_object object,
 
     void *buf = nullptr;
     ani_size bufLen = 0;
-    if (ANI_OK != env->ArrayBuffer_GetInfo(data, &buf, &bufLen) || !buf) {
+    if (ANI_OK != env->ArrayBuffer_GetInfo(data, &buf, &bufLen)) {
         HILOGE("Invalid data argument");
         ErrorHandler::Throw(env, EINVAL);
         return -1;
@@ -318,17 +340,18 @@ ani_int FileMappingAni::Write(ani_env *env, [[maybe_unused]] ani_object object,
     auto *entity = mapping->GetEntity();
     auto [succLength, lenOpt] = TypeConverter::ToOptionalInt32(env, length);
     size_t writeLen = lenOpt.has_value() ? static_cast<size_t>(lenOpt.value()) : bufLen;
-    if (writeLen > bufLen) {
-        writeLen = bufLen;
-    }
     if (!ValidateLength(env, entity, entity->position, writeLen)) {
         return -1;
+    }
+    if (writeLen > bufLen) {
+        writeLen = bufLen;
     }
 
     auto ret = mapping->Write(buf, bufLen, writeLen);
     if (!ret.IsSuccess()) {
         HILOGE("Write failed");
-        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_ACCS);
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return -1;
     }
 
@@ -340,6 +363,7 @@ ani_int FileMappingAni::WriteTo(ani_env *env, [[maybe_unused]] ani_object object
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return -1;
     }
@@ -361,7 +385,7 @@ ani_int FileMappingAni::WriteTo(ani_env *env, [[maybe_unused]] ani_object object
 
     void *buf = nullptr;
     ani_size bufLen = 0;
-    if (ANI_OK != env->ArrayBuffer_GetInfo(data, &buf, &bufLen) || !buf) {
+    if (ANI_OK != env->ArrayBuffer_GetInfo(data, &buf, &bufLen)) {
         HILOGE("Invalid data argument");
         ErrorHandler::Throw(env, EINVAL);
         return -1;
@@ -370,17 +394,18 @@ ani_int FileMappingAni::WriteTo(ani_env *env, [[maybe_unused]] ani_object object
     auto *entity = mapping->GetEntity();
     auto [succLength, lenOpt] = TypeConverter::ToOptionalInt32(env, length);
     size_t writeLen = lenOpt.has_value() ? static_cast<size_t>(lenOpt.value()) : bufLen;
-    if (writeLen > bufLen) {
-        writeLen = bufLen;
-    }
     if (!ValidateLength(env, entity, static_cast<size_t>(position), writeLen)) {
         return -1;
+    }
+    if (writeLen > bufLen) {
+        writeLen = bufLen;
     }
 
     auto ret = mapping->WriteTo(static_cast<size_t>(position), buf, bufLen, writeLen);
     if (!ret.IsSuccess()) {
         HILOGE("WriteTo failed");
-        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_ACCS);
+        const auto &err = ret.GetError();
+        ErrorHandler::Throw(env, err);
         return -1;
     }
 
@@ -391,6 +416,7 @@ void FileMappingAni::MsyncSync(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
+        HILOGE("Cannot unwrap file mapping!");
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
@@ -413,7 +439,8 @@ void FileMappingAni::MsyncSyncWith(ani_env *env, [[maybe_unused]] ani_object obj
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        ErrorHandler::Throw(env, EINVAL);
+        HILOGE("Cannot unwrap file mapping!");
+        ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
         return;
     }
     if (!mapping->CheckValid()) {
@@ -439,7 +466,7 @@ void FileMappingAni::UnmapSync(ani_env *env, [[maybe_unused]] ani_object object)
 {
     auto mapping = FileMappingWrapper::Unwrap(env, object);
     if (mapping == nullptr) {
-        ErrorHandler::Throw(env, EINVAL);
+        HILOGE("Cannot unwrap file mapping!");
         return;
     }
 
@@ -449,7 +476,6 @@ void FileMappingAni::UnmapSync(ani_env *env, [[maybe_unused]] ani_object object)
         const auto &err = ret.GetError();
         ErrorHandler::Throw(env, err);
     }
-    env->Object_SetFieldByName_Long(object, "nativePtr", 0);
 }
 
 } // namespace ANI
