@@ -144,4 +144,56 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDownl
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserDownloadDir_001";
 }
 
+/**
+ * @tc.name: EnvironmentNExporterMockTest_GetUserDesktopDir_001
+ * @tc.desc: Test function of GetUserDesktopDir interface for FAILURE when GetParameter fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDesktopDir_001,
+         testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDesktopDir_001";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    auto parameterMock = ParameterMock::GetMock();
+    EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(-1));
+
+    auto res = GetUserDesktopDir(env, info);
+
+    EXPECT_EQ(res, nullptr);
+    testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserDesktopDir_001";
+}
+
+/**
+ * @tc.name: EnvironmentNExporterMockTest_GetUserDocumentDir_001
+ * @tc.desc: Test function of GetUserDocumentDir interface for FAILURE when GetParameter fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDocumentDir_001,
+         testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDocumentDir_001";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    auto parameterMock = ParameterMock::GetMock();
+    EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(-1));
+
+    auto res = GetUserDocumentDir(env, info);
+
+    EXPECT_EQ(res, nullptr);
+    testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserDocumentDir_001";
+}
+
 } // namespace OHOS::FileManagement::ModuleEnvironment::Test
