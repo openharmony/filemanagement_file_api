@@ -290,4 +290,98 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetExternalStorageDir_003";
 }
 
+/**
+ * @tc.name: EnvironmentNExporterMockTest_GetUserHomeDir_001
+ * @tc.desc: Test function of GetUserHomeDir interface for FAILURE when GetParameter fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_001,
+         testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserHomeDir_001";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    auto parameterMock = ParameterMock::GetMock();
+    EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(-1));
+
+    auto res = GetUserHomeDir(env, info);
+
+    EXPECT_EQ(res, nullptr);
+    testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserHomeDir_001";
+}
+
+/**
+ * @tc.name: EnvironmentNExporterMockTest_GetUserHomeDir_002
+ * @tc.desc: Test function of GetUserHomeDir interface for FAILURE when is not system app.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_002,
+         testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserHomeDir_002";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    auto parameterMock = ParameterMock::GetMock();
+    auto tokenIdKitMock = TokenIdKitMock::GetMock();
+    EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
+            strcpy_s(value, len, "true");
+            return 1;
+        }));
+    EXPECT_CALL(*tokenIdKitMock, IsSystemAppByFullTokenID(testing::_)).WillOnce(testing::Return(false));
+
+    auto res = GetUserHomeDir(env, info);
+
+    EXPECT_EQ(res, nullptr);
+    testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+    testing::Mock::VerifyAndClearExpectations(tokenIdKitMock.get());
+
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserHomeDir_002";
+}
+
+/**
+ * @tc.name: EnvironmentNExporterMockTest_GetUserHomeDir_003
+ * @tc.desc: Test function of GetUserHomeDir interface for FAILURE when VerifyAccessToken fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_003,
+         testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserHomeDir_003";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    auto parameterMock = ParameterMock::GetMock();
+    auto tokenIdKitMock = TokenIdKitMock::GetMock();
+    auto accessTokenKitMock = AccessTokenKitMock::GetMock();
+    EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
+            strcpy_s(value, len, "true");
+            return 1;
+        }));
+    EXPECT_CALL(*tokenIdKitMock, IsSystemAppByFullTokenID(testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*accessTokenKitMock, VerifyAccessToken(testing::_, testing::_))
+        .WillOnce(testing::Return(PermissionState::PERMISSION_DENIED));
+
+    auto res = GetUserHomeDir(env, info);
+
+    EXPECT_EQ(res, nullptr);
+    testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+    testing::Mock::VerifyAndClearExpectations(tokenIdKitMock.get());
+    testing::Mock::VerifyAndClearExpectations(accessTokenKitMock.get());
+
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserHomeDir_003";
+}
+
 } // namespace OHOS::FileManagement::ModuleEnvironment::Test
