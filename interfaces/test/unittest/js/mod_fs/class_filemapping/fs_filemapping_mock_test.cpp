@@ -692,4 +692,196 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_AfterUnmap_001, T
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_ReadFrom_AfterUnmap_001";
 }
 
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_MemcpyFailed_EINVAL_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Read_MemcpyFailed_EINVAL_001";
+
+    auto mapping = CreateTestMapping();
+    ASSERT_NE(mapping, nullptr);
+
+    auto mmapMock = MmapMock::GetMock();
+    const void *srcPtr = mapping->GetEntity()->mapAddr;
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, srcPtr, _)).WillOnce(Return(EINVAL));
+
+    char buffer[100] = {0};
+    auto result = mapping->Read(buffer, sizeof(buffer), 10);
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_Read_MemcpyFailed_EINVAL_001";
+}
+
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_MemcpyFailed_OOB_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Read_MemcpyFailed_OOB_001";
+
+    auto mapping = CreateTestMapping();
+    ASSERT_NE(mapping, nullptr);
+
+    auto mmapMock = MmapMock::GetMock();
+    const void *srcPtr = mapping->GetEntity()->mapAddr;
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, srcPtr, _)).WillOnce(Return(ERANGE));
+
+    char buffer[100] = {0};
+    auto result = mapping->Read(buffer, sizeof(buffer), 10);
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_Read_MemcpyFailed_OOB_001";
+}
+
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_MemcpyFailed_EINVAL_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_ReadFrom_MemcpyFailed_EINVAL_001";
+
+    auto mapping = CreateTestMapping();
+    ASSERT_NE(mapping, nullptr);
+
+    auto mmapMock = MmapMock::GetMock();
+    const void *srcPtr = mapping->GetEntity()->mapAddr;
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, srcPtr, _)).WillOnce(Return(EINVAL));
+
+    char buffer[100] = {0};
+    auto result = mapping->ReadFrom(0, buffer, sizeof(buffer), 10);
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_ReadFrom_MemcpyFailed_EINVAL_001";
+}
+
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_MemcpyFailed_OOB_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_ReadFrom_MemcpyFailed_OOB_001";
+
+    auto mapping = CreateTestMapping();
+    ASSERT_NE(mapping, nullptr);
+
+    auto mmapMock = MmapMock::GetMock();
+    const void *srcPtr = mapping->GetEntity()->mapAddr;
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, srcPtr, _)).WillOnce(Return(ERANGE));
+
+    char buffer[100] = {0};
+    auto result = mapping->ReadFrom(0, buffer, sizeof(buffer), 10);
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_ReadFrom_MemcpyFailed_OOB_001";
+}
+
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Write_MemcpyFailed_EINVAL_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Write_MemcpyFailed_EINVAL_001";
+
+    auto mapping = CreateTestMapping();
+    ASSERT_NE(mapping, nullptr);
+
+    auto mmapMock = MmapMock::GetMock();
+    void *destPtr = mapping->GetEntity()->mapAddr;
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mmapMock, memcpy_s(destPtr, _, _, _)).WillOnce(Return(EINVAL));
+
+    const char *data = "test";
+    auto result = mapping->Write(data, strlen(data), strlen(data));
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_Write_MemcpyFailed_EINVAL_001";
+}
+
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Write_MemcpyFailed_OOB_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Write_MemcpyFailed_OOB_001";
+
+    auto mapping = CreateTestMapping();
+    ASSERT_NE(mapping, nullptr);
+
+    auto mmapMock = MmapMock::GetMock();
+    void *destPtr = mapping->GetEntity()->mapAddr;
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mmapMock, memcpy_s(destPtr, _, _, _)).WillOnce(Return(ERANGE));
+
+    const char *data = "test";
+    auto result = mapping->Write(data, strlen(data), strlen(data));
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_Write_MemcpyFailed_OOB_001";
+}
+
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_WriteTo_MemcpyFailed_EINVAL_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_WriteTo_MemcpyFailed_EINVAL_001";
+
+    auto mapping = CreateTestMapping();
+    ASSERT_NE(mapping, nullptr);
+
+    auto mmapMock = MmapMock::GetMock();
+    void *destPtr = mapping->GetEntity()->mapAddr;
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mmapMock, memcpy_s(destPtr, _, _, _)).WillOnce(Return(EINVAL));
+
+    const char *data = "test";
+    auto result = mapping->WriteTo(0, data, strlen(data), strlen(data));
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_WriteTo_MemcpyFailed_EINVAL_001";
+}
+
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_WriteTo_MemcpyFailed_OOB_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_WriteTo_MemcpyFailed_OOB_001";
+
+    auto mapping = CreateTestMapping();
+    ASSERT_NE(mapping, nullptr);
+
+    auto mmapMock = MmapMock::GetMock();
+    void *destPtr = mapping->GetEntity()->mapAddr;
+    EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mmapMock, memcpy_s(destPtr, _, _, _)).WillOnce(Return(ERANGE));
+
+    const char *data = "test";
+    auto result = mapping->WriteTo(0, data, strlen(data), strlen(data));
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_WriteTo_MemcpyFailed_OOB_001";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
