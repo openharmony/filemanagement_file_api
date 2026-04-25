@@ -275,8 +275,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_008, TestSize.Level1)
     mockStat.st_size = 100;
     EXPECT_CALL(*mmapMock, fstat(fd, _))
         .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, sysconf(_)).Times(testing::AnyNumber());
-    EXPECT_CALL(*mmapMock, ftruncate(_, _)).Times(testing::AnyNumber());
+    EXPECT_CALL(*mmapMock, sysconf(_)).WillRepeatedly(Return(4096));
 
     auto result = MmapCore::DoMmap(fd, MappingMode::READ_WRITE, 0,
         static_cast<size_t>(INT64_MAX) + 1);
@@ -305,8 +304,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_009, TestSize.Level1)
     mockStat.st_size = 100;
     EXPECT_CALL(*mmapMock, fstat(fd, _))
         .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
-    EXPECT_CALL(*mmapMock, sysconf(_)).Times(testing::AnyNumber());
-    EXPECT_CALL(*mmapMock, ftruncate(_, _)).Times(testing::AnyNumber());
+    EXPECT_CALL(*mmapMock, sysconf(_)).WillRepeatedly(Return(4096));
 
     off_t largeOffset = INT64_MAX - 100;
     auto result = MmapCore::DoMmap(fd, MappingMode::READ_WRITE, largeOffset, 4096);
