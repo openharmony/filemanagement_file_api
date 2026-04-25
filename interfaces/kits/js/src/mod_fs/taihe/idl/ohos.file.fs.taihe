@@ -402,7 +402,7 @@ function copyDirWithConflictFiles(src: string, dest: string, callback: AsyncCall
   promise.then((ret: Any): void => {
     let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
-    e.data = new Array<ConflictFiles>(0);
+    e.data = new Array<ConflictFiles>();
     callback(e, undefined);
   }).catch((e: Error): void => {
     callback(e as BusinessError<Array<ConflictFiles>>, undefined);
@@ -430,7 +430,7 @@ function copyDirWithConflictFiles(src: string, dest: string, mode: int, callback
   promise.then((ret: Any): void => {
     let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
-    e.data = new Array<ConflictFiles>(0);
+    e.data = new Array<ConflictFiles>();
     callback(e, undefined);
   }).catch((e: Error): void => {
     callback(e as BusinessError<Array<ConflictFiles>>, undefined);
@@ -568,7 +568,7 @@ function moveDirWithConflictFiles(src: string, dest: string, callback: AsyncCall
   promise.then((ret: Any): void => {
     let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
-    e.data = new Array<ConflictFiles>(0);
+    e.data = new Array<ConflictFiles>();
     callback(e, undefined);
   }).catch((e: Error): void => {
     callback(e as BusinessError<Array<ConflictFiles>>, undefined);
@@ -598,7 +598,7 @@ function moveDirWithConflictFiles(src: string, dest: string, mode: int, callback
   promise.then((ret: Any): void => {
     let e = new BusinessError<Array<ConflictFiles>>();
     e.code = 0;
-    e.data = new Array<ConflictFiles>(0);
+    e.data = new Array<ConflictFiles>();
     callback(e, undefined);
   }).catch((e: Error): void => {
     callback(e as BusinessError<Array<ConflictFiles>>, undefined);
