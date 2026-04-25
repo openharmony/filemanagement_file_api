@@ -428,6 +428,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_SetPosition_AfterUnmap_001
 
     auto result = mapping->SetPosition(10);
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
@@ -450,6 +451,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_GetPosition_AfterUnmap_001
 
     auto result = mapping->GetPosition();
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
@@ -472,6 +474,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Capacity_AfterUnmap_001, T
 
     auto result = mapping->Capacity();
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
@@ -494,6 +497,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_SetLimit_AfterUnmap_001, T
 
     auto result = mapping->SetLimit(100);
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
@@ -516,6 +520,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_GetLimit_AfterUnmap_001, T
 
     auto result = mapping->GetLimit();
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
@@ -538,6 +543,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Flip_AfterUnmap_001, TestS
 
     auto result = mapping->Flip();
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
@@ -560,6 +566,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Remaining_AfterUnmap_001, 
 
     auto result = mapping->Remaining();
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
@@ -583,6 +590,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_AfterUnmap_001, TestS
     char buffer[100] = {0};
     auto result = mapping->Read(buffer, sizeof(buffer), 10);
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
@@ -606,6 +614,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Write_AfterUnmap_001, Test
     const char *data = "test";
     auto result = mapping->Write(data, strlen(data), strlen(data));
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
@@ -628,10 +637,59 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Msync_AfterUnmap_001, Test
 
     auto result = mapping->Msync(0, 100);
     EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
 
     delete mapping;
 
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_Msync_AfterUnmap_001";
+}
+
+/**
+ * @tc.name: FsFileMappingMockTest_WriteTo_AfterUnmap_001
+ * @tc.desc: Test function of FsFileMapping::WriteTo interface for FAILURE after unmap.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_WriteTo_AfterUnmap_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_WriteTo_AfterUnmap_001";
+
+    auto mapping = DoUnmapAfterCreate();
+    ASSERT_NE(mapping, nullptr);
+
+    const char *data = "test";
+    auto result = mapping->WriteTo(0, data, strlen(data), strlen(data));
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_WriteTo_AfterUnmap_001";
+}
+
+/**
+ * @tc.name: FsFileMappingMockTest_ReadFrom_AfterUnmap_001
+ * @tc.desc: Test function of FsFileMapping::ReadFrom interface for FAILURE after unmap.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_AfterUnmap_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_ReadFrom_AfterUnmap_001";
+
+    auto mapping = DoUnmapAfterCreate();
+    ASSERT_NE(mapping, nullptr);
+
+    char buffer[100] = {0};
+    auto result = mapping->ReadFrom(0, buffer, sizeof(buffer), 10);
+    EXPECT_FALSE(result.IsSuccess());
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+
+    delete mapping;
+
+    GTEST_LOG_(INFO) << "FsFileMappingMockTest-end FsFileMappingMockTest_ReadFrom_AfterUnmap_001";
 }
 
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
