@@ -605,4 +605,102 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Constructor_001, TestSize.Level1)
     GTEST_LOG_(INFO) << "FsFileMappingTest-end FsFileMappingTest_Constructor_001";
 }
 
+/**
+ * @tc.name: FsFileMappingTest_Read_LimitConstraint_001
+ * @tc.desc: Test function of FsFileMapping::Read interface for SUCCESS with limit < capacity.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileMappingTest, FsFileMappingTest_Read_LimitConstraint_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingTest-begin FsFileMappingTest_Read_LimitConstraint_001";
+
+    ASSERT_NE(testMapping_, nullptr);
+    size_t capacity = testMapping_->GetEntity()->capacity;
+    size_t newLimit = capacity / 2;
+    testMapping_->SetLimit(newLimit);
+    testMapping_->SetPosition(0);
+
+    char buffer[1024] = {0};
+    auto result = testMapping_->Read(buffer, sizeof(buffer), capacity);
+
+    EXPECT_TRUE(result.IsSuccess());
+    EXPECT_LE(result.GetData().value(), newLimit);
+
+    GTEST_LOG_(INFO) << "FsFileMappingTest-end FsFileMappingTest_Read_LimitConstraint_001";
+}
+
+/**
+ * @tc.name: FsFileMappingTest_Write_LimitConstraint_001
+ * @tc.desc: Test function of FsFileMapping::Write interface for SUCCESS with limit < capacity.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileMappingTest, FsFileMappingTest_Write_LimitConstraint_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingTest-begin FsFileMappingTest_Write_LimitConstraint_001";
+
+    ASSERT_NE(testMapping_, nullptr);
+    size_t capacity = testMapping_->GetEntity()->capacity;
+    size_t newLimit = 10;
+    testMapping_->SetLimit(newLimit);
+    testMapping_->SetPosition(0);
+
+    string longData(capacity, 'X');
+    auto result = testMapping_->Write(longData.c_str(), longData.size(), longData.size());
+
+    EXPECT_TRUE(result.IsSuccess());
+    EXPECT_LE(result.GetData().value(), newLimit);
+
+    GTEST_LOG_(INFO) << "FsFileMappingTest-end FsFileMappingTest_Write_LimitConstraint_001";
+}
+
+/**
+ * @tc.name: FsFileMappingTest_Remaining_LimitLessThanPosition_001
+ * @tc.desc: Test function of FsFileMapping::Remaining interface for SUCCESS when limit < position.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileMappingTest, FsFileMappingTest_Remaining_LimitLessThanPosition_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingTest-begin FsFileMappingTest_Remaining_LimitLessThanPosition_001";
+
+    ASSERT_NE(testMapping_, nullptr);
+    testMapping_->SetPosition(20);
+    testMapping_->SetLimit(10);
+
+    auto result = testMapping_->Remaining();
+
+    EXPECT_TRUE(result.IsSuccess());
+    EXPECT_EQ(result.GetData().value(), 0);
+
+    GTEST_LOG_(INFO) << "FsFileMappingTest-end FsFileMappingTest_Remaining_LimitLessThanPosition_001";
+}
+
+/**
+ * @tc.name: FsFileMappingTest_ReadFrom_PositionExceedLimit_001
+ * @tc.desc: Test function of FsFileMapping::ReadFrom interface when position >= limit.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FsFileMappingTest, FsFileMappingTest_ReadFrom_PositionExceedLimit_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FsFileMappingTest-begin FsFileMappingTest_ReadFrom_PositionExceedLimit_001";
+
+    ASSERT_NE(testMapping_, nullptr);
+    testMapping_->SetLimit(5);
+
+    char buffer[100] = {0};
+    auto result = testMapping_->ReadFrom(10, buffer, sizeof(buffer), 50);
+
+    EXPECT_TRUE(result.IsSuccess());
+    EXPECT_EQ(result.GetData().value(), 0);
+
+    GTEST_LOG_(INFO) << "FsFileMappingTest-end FsFileMappingTest_ReadFrom_PositionExceedLimit_001";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
