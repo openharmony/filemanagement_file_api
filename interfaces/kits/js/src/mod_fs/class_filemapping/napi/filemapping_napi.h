@@ -30,15 +30,10 @@ public:
 
     bool Export() override;
 
-#ifdef WIN_PLATFORM
-    std::string GetNExporterName() override;
-#else
     std::string GetClassName() override;
-#endif
 
     static napi_value Constructor(napi_env env, napi_callback_info info);
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     static napi_value SetPosition(napi_env env, napi_callback_info info);
     static napi_value GetPosition(napi_env env, napi_callback_info info);
     static napi_value Capacity(napi_env env, napi_callback_info info);
@@ -52,7 +47,6 @@ public:
     static napi_value MsyncSync(napi_env env, napi_callback_info info);
     static napi_value Unmap(napi_env env, napi_callback_info info);
     static napi_value UnmapSync(napi_env env, napi_callback_info info);
-#endif
 
     FileMappingNapi(napi_env env, napi_value exports);
     ~FileMappingNapi() override;

@@ -16,6 +16,7 @@
 #include "mmap_mock.h"
 
 #include <dlfcn.h>
+#include <securec.h>
 
 namespace OHOS {
 namespace FileManagement {
@@ -160,6 +161,23 @@ long sysconf(int name)
         }
     }
     return realSysconf(name);
+}
+
+errno_t memcpy_s(void *dest, size_t destMax, const void *src, size_t count)
+{
+    if (MmapMock::IsMockable()) {
+        return MmapMock::GetMock()->memcpy_s(dest, destMax, src, count);
+    }
+
+    static errno_t (*realMemcpyS)(void *, size_t, const void *, size_t) = nullptr;
+    if (!realMemcpyS) {
+        realMemcpyS = (errno_t(*)(void *, size_t, const void *, size_t))dlsym(RTLD_NEXT, "memcpy_s");
+        if (!realMemcpyS) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real memcpy_s: " << dlerror();
+            return ERANGE;
+        }
+    }
+    return realMemcpyS(dest, destMax, src, count);
 }
 
 #ifdef __cplusplus

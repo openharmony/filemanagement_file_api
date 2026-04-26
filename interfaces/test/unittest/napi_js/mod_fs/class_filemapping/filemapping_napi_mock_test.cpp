@@ -433,6 +433,140 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Constructor_001, testi
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Constructor_001";
 }
 
+/**
+ * @tc.name: FileMappingNapiMockTest_SetPosition_002
+ * @tc.desc: Test function of FileMappingNapi::SetPosition interface for FAILURE when position is negative.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_SetPosition_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FileMappingNapiMockTest-begin FileMappingNapiMockTest_SetPosition_002";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    auto libnMock = LibnMock::GetMock();
+    auto mmapMock = MmapMock::GetMock();
+
+    EXPECT_CALL(*libnMock, InitArgs(NARG_CNT::ONE)).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(reinterpret_cast<napi_value>(0x2000)));
+    EXPECT_CALL(*libnMock, napi_unwrap(env, reinterpret_cast<napi_value>(0x2000), _))
+        .WillOnce(Invoke([](napi_env, napi_value, void **result) {
+            *result = nullptr;
+            return napi_ok;
+        }));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(testing::AtLeast(1));
+
+    auto res = FileMappingNapi::SetPosition(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_SetPosition_002";
+}
+
+/**
+ * @tc.name: FileMappingNapiMockTest_SetLimit_002
+ * @tc.desc: Test function of FileMappingNapi::SetLimit interface for FAILURE when GetMapping returns nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_SetLimit_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FileMappingNapiMockTest-begin FileMappingNapiMockTest_SetLimit_002";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    auto libnMock = LibnMock::GetMock();
+
+    EXPECT_CALL(*libnMock, InitArgs(NARG_CNT::ONE)).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(reinterpret_cast<napi_value>(0x2000)));
+    EXPECT_CALL(*libnMock, napi_unwrap(env, reinterpret_cast<napi_value>(0x2000), _))
+        .WillOnce(Invoke([](napi_env, napi_value, void **result) {
+            *result = nullptr;
+            return napi_ok;
+        }));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(testing::AtLeast(1));
+
+    auto res = FileMappingNapi::SetLimit(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_SetLimit_002";
+}
+
+/**
+ * @tc.name: FileMappingNapiMockTest_GetPosition_002
+ * @tc.desc: Test function of FileMappingNapi::GetPosition interface for FAILURE when GetMapping returns nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_GetPosition_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FileMappingNapiMockTest-begin FileMappingNapiMockTest_GetPosition_002";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    auto libnMock = LibnMock::GetMock();
+
+    EXPECT_CALL(*libnMock, InitArgs(NARG_CNT::ZERO)).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(reinterpret_cast<napi_value>(0x2000)));
+    EXPECT_CALL(*libnMock, napi_unwrap(env, reinterpret_cast<napi_value>(0x2000), _))
+        .WillOnce(Invoke([](napi_env, napi_value, void **result) {
+            *result = nullptr;
+            return napi_ok;
+        }));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(testing::AtLeast(1));
+
+    auto res = FileMappingNapi::GetPosition(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_GetPosition_002";
+}
+
+/**
+ * @tc.name: FileMappingNapiMockTest_Capacity_002
+ * @tc.desc: Test function of FileMappingNapi::Capacity interface for FAILURE when GetMapping returns nullptr.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Capacity_002, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FileMappingNapiMockTest-begin FileMappingNapiMockTest_Capacity_002";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    auto libnMock = LibnMock::GetMock();
+
+    EXPECT_CALL(*libnMock, InitArgs(NARG_CNT::ZERO)).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(reinterpret_cast<napi_value>(0x2000)));
+    EXPECT_CALL(*libnMock, napi_unwrap(env, reinterpret_cast<napi_value>(0x2000), _))
+        .WillOnce(Invoke([](napi_env, napi_value, void **result) {
+            *result = nullptr;
+            return napi_ok;
+        }));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(testing::AtLeast(1));
+
+    auto res = FileMappingNapi::Capacity(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Capacity_002";
+}
+
 } // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement

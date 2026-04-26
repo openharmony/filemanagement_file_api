@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 
 #include <gmock/gmock.h>
+#include <securec.h>
 
 namespace OHOS::FileManagement::ModuleFileIO::Test {
 
@@ -32,6 +33,7 @@ public:
     virtual int fstat(int fd, struct stat *statbuf) = 0;
     virtual int ftruncate(int fd, off_t length) = 0;
     virtual long sysconf(int name) = 0;
+    virtual errno_t memcpy_s(void *dest, size_t destMax, const void *src, size_t count) = 0;
 };
 
 class MmapMock : public IMmapMock {
@@ -42,6 +44,7 @@ public:
     MOCK_METHOD(int, fstat, (int fd, struct stat *statbuf), (override));
     MOCK_METHOD(int, ftruncate, (int fd, off_t length), (override));
     MOCK_METHOD(long, sysconf, (int name), (override));
+    MOCK_METHOD(errno_t, memcpy_s, (void *dest, size_t destMax, const void *src, size_t count), (override));
 
 public:
     static std::shared_ptr<MmapMock> GetMock();

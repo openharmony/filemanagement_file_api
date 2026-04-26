@@ -419,6 +419,39 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_011, testing::ext::TestSize.Lev
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_011";
 }
 
+/**
+ * @tc.name: MmapNapiMockTest_Sync_012
+ * @tc.desc: Test function of MmapNapi::Sync interface for FAILURE when size is zero.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_012, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MmapNapiMockTest-begin MmapNapiMockTest_Sync_012";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(NARG_CNT::FOUR)).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, GetArgc()).WillOnce(Return(4));
+    EXPECT_CALL(*libnMock, ToInt32())
+        .WillOnce(Return(make_tuple(true, 10)))
+        .WillOnce(Return(make_tuple(true, 0)))
+        .WillOnce(Return(make_tuple(true, 0)));
+    EXPECT_CALL(*libnMock, ToInt64())
+        .WillOnce(Return(make_tuple(true, static_cast<int64_t>(0))));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
+
+    auto res = MmapNapi::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_012";
+}
+
 } // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement

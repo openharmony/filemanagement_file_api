@@ -93,7 +93,7 @@ FsResult<FsFileMapping *> FsFileMapping::Constructor(const FileMappingParams &pa
 FsResult<void> FsFileMapping::SetPosition(size_t position)
 {
     if (!CheckValid()) {
-        return FsResult<void>::Error(EINVAL);
+        return FsResult<void>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     if (position > entity_->limit) {
@@ -108,7 +108,7 @@ FsResult<void> FsFileMapping::SetPosition(size_t position)
 FsResult<size_t> FsFileMapping::GetPosition() const
 {
     if (!CheckValid()) {
-        return FsResult<size_t>::Error(EINVAL);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     return FsResult<size_t>::Success(entity_->position);
@@ -117,7 +117,7 @@ FsResult<size_t> FsFileMapping::GetPosition() const
 FsResult<size_t> FsFileMapping::Capacity() const
 {
     if (!CheckValid()) {
-        return FsResult<size_t>::Error(EINVAL);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     return FsResult<size_t>::Success(entity_->capacity);
@@ -126,7 +126,7 @@ FsResult<size_t> FsFileMapping::Capacity() const
 FsResult<void> FsFileMapping::SetLimit(size_t limit)
 {
     if (!CheckValid()) {
-        return FsResult<void>::Error(EINVAL);
+        return FsResult<void>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     if (limit > entity_->capacity) {
@@ -144,7 +144,7 @@ FsResult<void> FsFileMapping::SetLimit(size_t limit)
 FsResult<size_t> FsFileMapping::GetLimit() const
 {
     if (!CheckValid()) {
-        return FsResult<size_t>::Error(EINVAL);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     return FsResult<size_t>::Success(entity_->limit);
@@ -153,7 +153,7 @@ FsResult<size_t> FsFileMapping::GetLimit() const
 FsResult<void> FsFileMapping::Flip()
 {
     if (!CheckValid()) {
-        return FsResult<void>::Error(EINVAL);
+        return FsResult<void>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     entity_->limit = entity_->position;
@@ -164,7 +164,7 @@ FsResult<void> FsFileMapping::Flip()
 FsResult<size_t> FsFileMapping::Remaining() const
 {
     if (!CheckValid()) {
-        return FsResult<size_t>::Error(EINVAL);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     size_t remaining = (entity_->limit > entity_->position) ? (entity_->limit - entity_->position) : 0;
@@ -174,7 +174,7 @@ FsResult<size_t> FsFileMapping::Remaining() const
 FsResult<size_t> FsFileMapping::Read(void *buffer, size_t bufLen, size_t length)
 {
     if (!CheckValid()) {
-        return FsResult<size_t>::Error(EINVAL);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     if (buffer == nullptr && bufLen > 0) {
@@ -192,7 +192,10 @@ FsResult<size_t> FsFileMapping::Read(void *buffer, size_t bufLen, size_t length)
         int ret = memcpy_s(buffer, bufLen, static_cast<char *>(entity_->mapAddr) + entity_->position, opLength);
         if (ret != 0) {
             HILOGE("Memcpy_s failed, error: %{public}d", ret);
-            return FsResult<size_t>::Error(EIO);
+            if (ret == EINVAL) {
+                return FsResult<size_t>::Error(EINVAL);
+            }
+            return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
         }
         entity_->position += opLength;
     }
@@ -203,7 +206,7 @@ FsResult<size_t> FsFileMapping::Read(void *buffer, size_t bufLen, size_t length)
 FsResult<size_t> FsFileMapping::ReadFrom(size_t position, void *buffer, size_t bufLen, size_t length)
 {
     if (!CheckValid()) {
-        return FsResult<size_t>::Error(EINVAL);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     if ((buffer == nullptr && bufLen > 0) || position > entity_->capacity) {
@@ -221,7 +224,10 @@ FsResult<size_t> FsFileMapping::ReadFrom(size_t position, void *buffer, size_t b
         int ret = memcpy_s(buffer, bufLen, static_cast<char *>(entity_->mapAddr) + position, opLength);
         if (ret != 0) {
             HILOGE("Memcpy_s failed, error: %{public}d", ret);
-            return FsResult<size_t>::Error(EIO);
+            if (ret == EINVAL) {
+                return FsResult<size_t>::Error(EINVAL);
+            }
+            return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
         }
     }
 
@@ -231,7 +237,7 @@ FsResult<size_t> FsFileMapping::ReadFrom(size_t position, void *buffer, size_t b
 FsResult<size_t> FsFileMapping::Write(const void *data, size_t dataLen, size_t length)
 {
     if (!CheckValid()) {
-        return FsResult<size_t>::Error(EINVAL);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     if (data == nullptr && dataLen > 0) {
@@ -251,11 +257,15 @@ FsResult<size_t> FsFileMapping::Write(const void *data, size_t dataLen, size_t l
     }
 
     if (opLength > 0) {
+        size_t destSize = (entity_->position < entity_->limit) ? (entity_->limit - entity_->position) : 0;
         int ret = memcpy_s(static_cast<char *>(entity_->mapAddr) + entity_->position,
-            entity_->capacity - entity_->position, data, opLength);
+            destSize, data, opLength);
         if (ret != 0) {
             HILOGE("Memcpy_s failed, error: %{public}d", ret);
-            return FsResult<size_t>::Error(EIO);
+            if (ret == EINVAL) {
+                return FsResult<size_t>::Error(EINVAL);
+            }
+            return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
         }
         entity_->position += opLength;
     }
@@ -266,7 +276,7 @@ FsResult<size_t> FsFileMapping::Write(const void *data, size_t dataLen, size_t l
 FsResult<size_t> FsFileMapping::WriteTo(size_t position, const void *data, size_t dataLen, size_t length)
 {
     if (!CheckValid()) {
-        return FsResult<size_t>::Error(EINVAL);
+        return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     if ((data == nullptr && dataLen > 0) || position > entity_->capacity) {
@@ -286,11 +296,15 @@ FsResult<size_t> FsFileMapping::WriteTo(size_t position, const void *data, size_
     }
 
     if (opLength > 0) {
+        size_t destSize = (position < entity_->limit) ? (entity_->limit - position) : 0;
         int ret = memcpy_s(static_cast<char *>(entity_->mapAddr) + position,
-            entity_->capacity - position, data, opLength);
+            destSize, data, opLength);
         if (ret != 0) {
             HILOGE("Memcpy_s failed, error: %{public}d", ret);
-            return FsResult<size_t>::Error(EIO);
+            if (ret == EINVAL) {
+                return FsResult<size_t>::Error(EINVAL);
+            }
+            return FsResult<size_t>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
         }
     }
 
@@ -301,7 +315,7 @@ FsResult<void> FsFileMapping::Msync(size_t offset, size_t length)
 {
     FileFsTrace traceMsync("Msync");
     if (!CheckValid()) {
-        return FsResult<void>::Error(EINVAL);
+        return FsResult<void>::Error(FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
     }
 
     size_t rawOffset = entity_->adjustment + offset;
