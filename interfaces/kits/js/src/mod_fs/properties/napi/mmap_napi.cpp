@@ -36,8 +36,6 @@ using namespace OHOS::FileManagement::LibN;
 
 const string PROCEDURE_MMAP_NAME = "fs.mmap";
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
-
 static tuple<int, int, int, off_t, size_t> ParseMmapArgs(napi_env env, NFuncArg &funcArg)
 {
     if (funcArg.GetArgc() < NARG_CNT::FOUR) {
@@ -75,8 +73,8 @@ static tuple<int, int, int, off_t, size_t> ParseMmapArgs(napi_env env, NFuncArg 
     }
 
     auto [succSize, size] = NVal(env, funcArg[NARG_POS::FOURTH]).ToInt32();
-    if (!succSize) {
-        HILOGE("Failed to convert size to int32");
+    if (!succSize || size <= 0) {
+        HILOGE("Failed to convert size to int32 or size is non-positive");
         return { EINVAL, -1, 0, 0, 0 };
     }
 
@@ -206,24 +204,6 @@ napi_value MmapNapi::Async(napi_env env, napi_callback_info info)
     NVal thisVar(env, funcArg.GetThisVar());
     return NAsyncWorkPromise(env, thisVar).Schedule(PROCEDURE_MMAP_NAME, cbExec, cbCompl).val_;
 }
-
-#else
-
-napi_value MmapNapi::Sync(napi_env env, napi_callback_info info)
-{
-    HILOGE("mmap is not supported on this platform");
-    NError(EOPNOTSUPP).ThrowErr(env);
-    return nullptr;
-}
-
-napi_value MmapNapi::Async(napi_env env, napi_callback_info info)
-{
-    HILOGE("mmap is not supported on this platform");
-    NError(EOPNOTSUPP).ThrowErr(env);
-    return nullptr;
-}
-
-#endif
 
 } // namespace ModuleFileIO
 } // namespace FileManagement

@@ -350,4 +350,39 @@ HWTEST_F(MmapCoreTest, MmapCoreTest_DoMmap_011, TestSize.Level1)
     GTEST_LOG_(INFO) << "MmapCoreTest-end MmapCoreTest_DoMmap_011";
 }
 
+/**
+ * @tc.name: MmapCoreTest_DoMmap_012
+ * @tc.desc: Test function of MmapCore::DoMmap interface for SUCCESS verifying entity fields.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(MmapCoreTest, MmapCoreTest_DoMmap_013, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MmapCoreTest-begin MmapCoreTest_DoMmap_013";
+
+    string content = "Regression test for mmap entity fields";
+    string filepath = testDir + "/test_013.txt";
+    auto [fd, success] = FileUtils::CreateFileWithContent(filepath, content);
+    ASSERT_TRUE(success);
+
+    off_t offset = 0;
+    size_t mapSize = content.size();
+    auto result = MmapCore::DoMmap(fd, MappingMode::READ_WRITE, offset, mapSize);
+
+    ASSERT_TRUE(result.IsSuccess());
+    auto mapping = result.GetData().value();
+    ASSERT_NE(mapping, nullptr);
+    EXPECT_NE(mapping->GetEntity(), nullptr);
+    EXPECT_EQ(mapping->GetEntity()->capacity, mapSize);
+    EXPECT_EQ(mapping->GetEntity()->offset, offset);
+    EXPECT_EQ(mapping->GetEntity()->mode, MappingMode::READ_WRITE);
+    EXPECT_FALSE(mapping->IsReadOnly());
+    EXPECT_TRUE(mapping->CheckValid());
+
+    delete mapping;
+    close(fd);
+    GTEST_LOG_(INFO) << "MmapCoreTest-end MmapCoreTest_DoMmap_013";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

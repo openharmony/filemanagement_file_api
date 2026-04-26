@@ -257,4 +257,91 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_007, TestSize.Level1)
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_007";
 }
 
+/**
+ * @tc.name: MmapCoreMockTest_DoMmap_008
+ * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when size exceeds INT64_MAX.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_008, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_008";
+
+    int fd = 10;
+    auto mmapMock = MmapMock::GetMock();
+    struct stat mockStat = {0};
+    mockStat.st_mode = S_IFREG;
+    mockStat.st_size = 100;
+    EXPECT_CALL(*mmapMock, fstat(fd, _))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
+    EXPECT_CALL(*mmapMock, sysconf(_)).WillRepeatedly(Return(4096));
+
+    auto result = MmapCore::DoMmap(fd, MappingMode::READ_WRITE, 0,
+        static_cast<size_t>(INT64_MAX) + 1);
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_008";
+}
+
+/**
+ * @tc.name: MmapCoreMockTest_DoMmap_009
+ * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when offset + size overflows.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_009, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_009";
+
+    int fd = 10;
+    auto mmapMock = MmapMock::GetMock();
+    struct stat mockStat = {0};
+    mockStat.st_mode = S_IFREG;
+    mockStat.st_size = 100;
+    EXPECT_CALL(*mmapMock, fstat(fd, _))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
+    EXPECT_CALL(*mmapMock, sysconf(_)).WillRepeatedly(Return(4096));
+
+    off_t largeOffset = INT64_MAX - 100;
+    auto result = MmapCore::DoMmap(fd, MappingMode::READ_WRITE, largeOffset, 4096);
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_009";
+}
+
+/**
+ * @tc.name: MmapCoreMockTest_DoMmap_010
+ * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when page alignment overflows.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_010, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_010";
+
+    int fd = 10;
+    auto mmapMock = MmapMock::GetMock();
+    struct stat mockStat = {0};
+    mockStat.st_mode = S_IFREG;
+    mockStat.st_size = 100;
+    EXPECT_CALL(*mmapMock, fstat(fd, _))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
+    EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
+
+    off_t offset = 100;
+    auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, offset, SIZE_MAX);
+
+    testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    EXPECT_FALSE(result.IsSuccess());
+
+    GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_010";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

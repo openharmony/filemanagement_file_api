@@ -54,6 +54,7 @@ ani_object FileMappingWrapper::Wrap(ani_env *env, const FsFileMapping *mapping)
     AniCache &aniCache = AniCache::GetInstance();
     auto [ret, cls] = aniCache.GetClass(env, FS::FileMappingInner::classDesc);
     if (ret != ANI_OK) {
+        HILOGE("Failed to get FileMappingInner class");
         return nullptr;
     }
 

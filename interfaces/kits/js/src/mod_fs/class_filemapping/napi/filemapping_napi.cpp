@@ -37,23 +37,21 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
-static FsFileMapping *GetMapping(napi_env env, napi_value obj)
-{
-    auto entity = NClass::GetEntityOf<FileMappingEntity>(env, obj);
-    if (!entity || !entity->fsMapping) {
-        HILOGE("Failed to get file mapping");
-        NError(EINVAL).ThrowErr(env);
-        return nullptr;
-    }
-    return entity->fsMapping;
-}
-
 static NError ThrowMmapError(int errCode)
 {
     return NError(FILEIO_SYS_CAP_TAG + errCode);
 }
 
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
+static FsFileMapping *GetMapping(napi_env env, napi_value obj)
+{
+    auto entity = NClass::GetEntityOf<FileMappingEntity>(env, obj);
+    if (!entity || !entity->fsMapping) {
+        HILOGE("Failed to get file mapping");
+        ThrowMmapError(E_MMAP_FREE).ThrowErr(env);
+        return nullptr;
+    }
+    return entity->fsMapping;
+}
 
 static constexpr size_t BUFFER_ARG_OFFSET = 1;
 static constexpr size_t LENGTH_ARG_OFFSET = 2;
@@ -64,7 +62,7 @@ static bool ParsePositionArg(napi_env env, NFuncArg &funcArg, FileMappingEntity 
     if (!NVal(env, funcArg[NARG_POS::FIRST]).TypeIs(napi_number)) {
         return true;
     }
-    auto [succ, pos] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt64();
+    auto [succ, pos] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ || pos < 0 || static_cast<size_t>(pos) > entity->capacity) {
         HILOGE("Invalid position value");
         NError(EINVAL).ThrowErr(env);
@@ -85,7 +83,7 @@ static bool GetBufferArg(napi_env env, NFuncArg &funcArg, ReadWriteArgs &args,
         return false;
     }
     auto [succ, buffer, bufLen] = NVal(env, funcArg[args.bufferArgIndex]).ToArraybuffer();
-    if (!succ) {
+    if (!succ || buffer == nullptr) {
         HILOGE("Invalid buffer argument");
         NError(EINVAL).ThrowErr(env);
         return false;
@@ -101,7 +99,7 @@ static void ParseLengthArg(napi_env env, NFuncArg &funcArg, ReadWriteArgs &args,
     if (args.lengthArgIndex >= argc) {
         return;
     }
-    auto [succ, len] = NVal(env, funcArg[args.lengthArgIndex]).ToInt64();
+    auto [succ, len] = NVal(env, funcArg[args.lengthArgIndex]).ToInt32();
     if (succ && len >= 0) {
         args.opLength = static_cast<size_t>(len);
     }
@@ -136,7 +134,7 @@ napi_value FileMappingNapi::SetPosition(napi_env env, napi_callback_info info)
         ThrowMmapError(E_MMAP_FREE).ThrowErr(env);
         return nullptr;
     }
-    auto [succ, newPosition] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt64();
+    auto [succ, newPosition] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ || newPosition < 0 || static_cast<size_t>(newPosition) > mapping->GetEntity()->limit) {
         HILOGE("Invalid position value");
         NError(EINVAL).ThrowErr(env);
@@ -171,7 +169,7 @@ napi_value FileMappingNapi::GetPosition(napi_env env, napi_callback_info info)
         NError(ret.GetError().GetErrNo()).ThrowErr(env);
         return nullptr;
     }
-    return NVal::CreateInt64(env, static_cast<int64_t>(ret.GetData().value())).val_;
+    return NVal::CreateInt32(env, static_cast<int32_t>(ret.GetData().value())).val_;
 }
 
 napi_value FileMappingNapi::Capacity(napi_env env, napi_callback_info info)
@@ -195,7 +193,7 @@ napi_value FileMappingNapi::Capacity(napi_env env, napi_callback_info info)
         NError(ret.GetError().GetErrNo()).ThrowErr(env);
         return nullptr;
     }
-    return NVal::CreateInt64(env, static_cast<int64_t>(ret.GetData().value())).val_;
+    return NVal::CreateInt32(env, static_cast<int32_t>(ret.GetData().value())).val_;
 }
 
 napi_value FileMappingNapi::SetLimit(napi_env env, napi_callback_info info)
@@ -214,7 +212,7 @@ napi_value FileMappingNapi::SetLimit(napi_env env, napi_callback_info info)
         ThrowMmapError(E_MMAP_FREE).ThrowErr(env);
         return nullptr;
     }
-    auto [succ, newLimit] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt64();
+    auto [succ, newLimit] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ || newLimit < 0 || static_cast<size_t>(newLimit) > mapping->GetEntity()->capacity) {
         HILOGE("Invalid limit value");
         NError(EINVAL).ThrowErr(env);
@@ -249,7 +247,7 @@ napi_value FileMappingNapi::GetLimit(napi_env env, napi_callback_info info)
         NError(ret.GetError().GetErrNo()).ThrowErr(env);
         return nullptr;
     }
-    return NVal::CreateInt64(env, static_cast<int64_t>(ret.GetData().value())).val_;
+    return NVal::CreateInt32(env, static_cast<int32_t>(ret.GetData().value())).val_;
 }
 
 napi_value FileMappingNapi::Flip(napi_env env, napi_callback_info info)
@@ -297,7 +295,7 @@ napi_value FileMappingNapi::Remaining(napi_env env, napi_callback_info info)
         NError(ret.GetError().GetErrNo()).ThrowErr(env);
         return nullptr;
     }
-    return NVal::CreateInt64(env, static_cast<int64_t>(ret.GetData().value())).val_;
+    return NVal::CreateInt32(env, static_cast<int32_t>(ret.GetData().value())).val_;
 }
 
 napi_value FileMappingNapi::Read(napi_env env, napi_callback_info info)
@@ -332,18 +330,18 @@ napi_value FileMappingNapi::Read(napi_env env, napi_callback_info info)
         auto ret = mapping->Read(args.buffer, args.bufLen, args.opLength);
         if (!ret.IsSuccess()) {
             HILOGE("Read failed");
-            ThrowMmapError(E_MMAP_ACCS).ThrowErr(env);
+            NError(ret.GetError().GetErrNo()).ThrowErr(env);
             return nullptr;
         }
     } else {
         auto ret = mapping->ReadFrom(args.position, args.buffer, args.bufLen, args.opLength);
         if (!ret.IsSuccess()) {
             HILOGE("ReadFrom failed");
-            ThrowMmapError(E_MMAP_ACCS).ThrowErr(env);
+            NError(ret.GetError().GetErrNo()).ThrowErr(env);
             return nullptr;
         }
     }
-    return NVal::CreateInt64(env, static_cast<int64_t>(args.opLength)).val_;
+    return NVal::CreateInt32(env, static_cast<int32_t>(args.opLength)).val_;
 }
 
 napi_value FileMappingNapi::Write(napi_env env, napi_callback_info info)
@@ -382,18 +380,18 @@ napi_value FileMappingNapi::Write(napi_env env, napi_callback_info info)
         auto ret = mapping->Write(args.buffer, args.bufLen, args.opLength);
         if (!ret.IsSuccess()) {
             HILOGE("Write failed");
-            ThrowMmapError(E_MMAP_ACCS).ThrowErr(env);
+            NError(ret.GetError().GetErrNo()).ThrowErr(env);
             return nullptr;
         }
     } else {
         auto ret = mapping->WriteTo(args.position, args.buffer, args.bufLen, args.opLength);
         if (!ret.IsSuccess()) {
             HILOGE("WriteTo failed");
-            ThrowMmapError(E_MMAP_ACCS).ThrowErr(env);
+            NError(ret.GetError().GetErrNo()).ThrowErr(env);
             return nullptr;
         }
     }
-    return NVal::CreateInt64(env, static_cast<int64_t>(args.opLength)).val_;
+    return NVal::CreateInt32(env, static_cast<int32_t>(args.opLength)).val_;
 }
 
 napi_value FileMappingNapi::Msync(napi_env env, napi_callback_info info)
@@ -414,9 +412,9 @@ napi_value FileMappingNapi::Msync(napi_env env, napi_callback_info info)
     }
     off_t msyncOffset = 0;
     size_t msyncLength = mapping->GetEntity()->capacity;
-    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
-        auto [succOffset, offset] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt64();
-        auto [succLen, len] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64();
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
+        auto [succOffset, offset] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
+        auto [succLen, len] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
         if (!succOffset || !succLen || offset < 0 || len < 0) {
             HILOGE("Invalid msync arguments");
             NError(EINVAL).ThrowErr(env);
@@ -461,9 +459,9 @@ napi_value FileMappingNapi::MsyncSync(napi_env env, napi_callback_info info)
     }
     off_t msyncOffset = 0;
     size_t msyncLength = mapping->GetEntity()->capacity;
-    if (funcArg.GetArgc() >= NARG_CNT::TWO) {
-        auto [succOffset, offset] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt64();
-        auto [succLen, len] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt64();
+    if (funcArg.GetArgc() == NARG_CNT::TWO) {
+        auto [succOffset, offset] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
+        auto [succLen, len] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32();
         if (!succOffset || !succLen || offset < 0 || len < 0) {
             HILOGE("Invalid msync arguments");
             NError(EINVAL).ThrowErr(env);
@@ -530,8 +528,6 @@ napi_value FileMappingNapi::UnmapSync(napi_env env, napi_callback_info info)
     return NVal::CreateUndefined(env).val_;
 }
 
-#endif
-
 napi_value FileMappingNapi::Constructor(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
@@ -557,7 +553,6 @@ napi_value FileMappingNapi::Constructor(napi_env env, napi_callback_info info)
 bool FileMappingNapi::Export()
 {
     vector<napi_property_descriptor> props = {
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
         NVal::DeclareNapiFunction("setPosition", SetPosition),
         NVal::DeclareNapiFunction("getPosition", GetPosition),
         NVal::DeclareNapiFunction("capacity", Capacity),
@@ -571,13 +566,8 @@ bool FileMappingNapi::Export()
         NVal::DeclareNapiFunction("msyncSync", MsyncSync),
         NVal::DeclareNapiFunction("unmap", Unmap),
         NVal::DeclareNapiFunction("unmapSync", UnmapSync),
-#endif
     };
-#ifdef WIN_PLATFORM
-    string className = GetNExporterName();
-#else
     string className = GetClassName();
-#endif
     bool succ = false;
     napi_value classValue = nullptr;
     tie(succ, classValue) = NClass::DefineClass(exports_.env_, className,
@@ -597,11 +587,7 @@ bool FileMappingNapi::Export()
     return exports_.AddProp(className, classValue);
 }
 
-#ifdef WIN_PLATFORM
-string FileMappingNapi::GetNExporterName()
-#else
 string FileMappingNapi::GetClassName()
-#endif
 {
     return FileMappingNapi::className_;
 }

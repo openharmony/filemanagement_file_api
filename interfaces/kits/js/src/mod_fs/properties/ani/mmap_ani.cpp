@@ -34,6 +34,7 @@ static tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
     AniCache& aniCache = AniCache::GetInstance();
     auto [ret, intClass] = aniCache.GetClass(env, BoxedTypes::Int::classDesc);
     if (ret != ANI_OK) {
+        HILOGE("Failed to get Int class");
         return { false, result, nullptr };
     }
 
@@ -58,13 +59,36 @@ static tuple<bool, int32_t, FsFile*> ParseFdOrFile(ani_env *env, ani_object obj)
     }
 
     HILOGE("Cannot unwrap fsfile!");
-    ErrorHandler::Throw(env, UNKNOWN_ERR);
+    ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_INTERN_RES);
     return { false, -1, nullptr };
 }
 
+static tuple<bool, int, off_t, size_t> ValidateMmapParams(ani_env *env,
+    ani_enum_item mode, ani_long offset, ani_int size)
+{
+    auto [succMode, modeOp] = TypeConverter::EnumToInt32(env, mode);
+    if (!succMode || !modeOp.has_value()) {
+        HILOGE("Invalid mode");
+        ErrorHandler::Throw(env, EINVAL);
+        return { false, 0, 0, 0 };
+    }
+
+    if (offset < 0) {
+        HILOGE("Invalid offset value");
+        ErrorHandler::Throw(env, EINVAL);
+        return { false, 0, 0, 0 };
+    }
+    if (size <= 0) {
+        HILOGE("Invalid size value");
+        ErrorHandler::Throw(env, EINVAL);
+        return { false, 0, 0, 0 };
+    }
+
+    return { true, modeOp.value(), static_cast<off_t>(offset), static_cast<size_t>(size) };
+}
+
 ani_object MmapAni::MmapSync(ani_env *env, [[maybe_unused]] ani_class clazz,
-    ani_object file, ani_enum_item mode,
-    ani_long offset, ani_int size)
+    ani_object file, ani_enum_item mode, ani_long offset, ani_int size)
 {
     FileFsTrace traceMmap("MmapSync");
 
@@ -85,27 +109,23 @@ ani_object MmapAni::MmapSync(ani_env *env, [[maybe_unused]] ani_class clazz,
         fd = res.GetData().value();
     }
 
-    auto [succMode, modeOp] = TypeConverter::EnumToInt32(env, mode);
-    if (!succMode || !modeOp.has_value()) {
-        HILOGE("Invalid mode");
-        ErrorHandler::Throw(env, EINVAL);
+    auto [valid, modeValue, off, sz] = ValidateMmapParams(env, mode, offset, size);
+    if (!valid) {
         return nullptr;
     }
-    int modeValue = modeOp.value();
 
-    auto result = MmapCore::DoMmap(fd, modeValue, static_cast<off_t>(offset), static_cast<size_t>(size));
+    auto result = MmapCore::DoMmap(fd, modeValue, off, sz);
     if (!result.IsSuccess()) {
         HILOGE("DoMmap failed");
-        const auto &err = result.GetError();
-        ErrorHandler::Throw(env, err);
+        ErrorHandler::Throw(env, result.GetError());
         return nullptr;
     }
 
     FsFileMapping *mapping = result.GetData().value();
     auto wrapResult = FileMappingWrapper::Wrap(env, mapping);
     if (wrapResult == nullptr) {
+        HILOGE("Failed to wrap file mapping");
         delete mapping;
-        mapping = nullptr;
         ErrorHandler::Throw(env, FILEIO_SYS_CAP_TAG + E_INTERN_RES);
         return nullptr;
     }
