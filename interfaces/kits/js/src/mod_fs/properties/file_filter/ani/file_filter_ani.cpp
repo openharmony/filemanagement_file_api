@@ -81,7 +81,11 @@ FileFilterAni::~FileFilterAni() {}
 bool FileFilterAni::HasException() const
 {
     ani_boolean hasError = false;
-    env_->ExistUnhandledError(&hasError);
+    auto status = env_->ExistUnhandledError(&hasError);
+    if (status != ANI_OK) {
+        HILOGE("Failed to check unhandled error, status: %{public}d", status);
+        return false;
+    }
     return static_cast<bool>(hasError);
 }
 
