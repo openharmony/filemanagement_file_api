@@ -135,8 +135,7 @@ ani_array ListFileAni::ListFileSync(ani_env *env, [[maybe_unused]] ani_class cla
     }
 
     auto fileList = ret.GetData().value();
-    const std::string *strArray = fileList.data();
-    auto [succ, result] = TypeConverter::ToAniStringList(env, strArray, fileList.size());
+    auto [succ, result] = TypeConverter::ToAniStringList(env, fileList);
     if (!succ) {
         HILOGE("Convert list file result to ani string array failed");
         ErrorHandler::Throw(env, UNKNOWN_ERR);

@@ -331,8 +331,7 @@ std::tuple<bool, ani_arraybuffer> TypeConverter::ToAniArrayBuffer(ani_env *env, 
     return { true, static_cast<ani_arraybuffer>(obj) };
 }
 
-std::tuple<bool, ani_array> TypeConverter::ToAniStringList(
-    ani_env *env, const std::string strList[], const uint32_t length)
+std::tuple<bool, ani_array> TypeConverter::ToAniStringList(ani_env *env, const std::vector<std::string> &strList)
 {
     if (env == nullptr) {
         return { false, nullptr };
@@ -346,10 +345,10 @@ std::tuple<bool, ani_array> TypeConverter::ToAniStringList(
     }
 
     ani_array result = nullptr;
-    if (env->Array_New(length, undefined, &result) != ANI_OK) {
+    if (env->Array_New(strList.size(), undefined, &result) != ANI_OK) {
         return { false, result };
     }
-    for (uint32_t i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < strList.size(); i++) {
         auto [ret, item] = TypeConverter::ToAniString(env, strList[i]);
         if (!ret) {
             return { false, nullptr };
