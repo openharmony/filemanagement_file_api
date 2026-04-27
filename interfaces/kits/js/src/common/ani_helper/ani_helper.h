@@ -90,7 +90,8 @@ public:
         return status;
     }
 
-    static tuple<bool, bool> ParseBooleanOption(ani_env *env, ani_object obj, string tag, bool defaultValue = false)
+    static tuple<bool, bool> ParseBooleanOption(
+        ani_env *env, ani_object obj, const string &tag, bool defaultValue = false)
     {
         ani_ref boolRef;
         ani_boolean isUndefined;
@@ -113,7 +114,7 @@ public:
         return { true, static_cast<bool>(result) };
     }
 
-    static tuple<bool, optional<double>> ParseDoubleOption(ani_env *env, ani_object obj, string tag)
+    static tuple<bool, optional<double>> ParseDoubleOption(ani_env *env, ani_object obj, const string &tag)
     {
         ani_boolean isUndefined;
         ani_ref resultRef;
@@ -196,7 +197,7 @@ public:
         return { true, value };
     }
 
-    static tuple<bool, optional<vector<string>>> ParseArrayStringOption(ani_env *env, ani_object obj, string tag)
+    static tuple<bool, optional<vector<string>>> ParseArrayStringOption(ani_env *env, ani_object obj, const string &tag)
     {
         ani_boolean isUndefined;
         ani_ref resultRef;
@@ -215,14 +216,29 @@ public:
             HILOGE("Object_GetPropertyByName_Int failed, status: %{public}d", status);
             return { false, nullopt };
         }
+        AniCache &aniCache = AniCache::GetInstance();
+        auto classDesc = BuiltInTypes::Array::classDesc;
+        auto [ret, cls] = aniCache.GetClass(env, classDesc);
+        if (ret != ANI_OK) {
+            HILOGE("Failed to find class: %{public}s. ret: %{public}d", classDesc.c_str(), ret);
+            return { false, nullopt };
+        }
+
+        ani_method getterMethod;
         auto getterDesc = BuiltInTypes::Array::getterDesc.c_str();
         auto getterSig = BuiltInTypes::Array::objectGetterSig.c_str();
+        tie(ret, getterMethod) = aniCache.GetMethod(env, classDesc, getterDesc, getterSig);
+        if (ret != ANI_OK) {
+            HILOGE("Failed to find getter method: %{public}s. ret: %{public}d", getterDesc, ret);
+            return { false, nullopt };
+        }
+
         for (int i = 0; i < int(length); i++) {
             ani_ref stringEntryRef;
-            status = env->Object_CallMethodByName_Ref(
-                static_cast<ani_object>(resultRef), getterDesc, getterSig, &stringEntryRef, (ani_int)i);
+            status = env->Object_CallMethod_Ref(
+                static_cast<ani_object>(resultRef), getterMethod, &stringEntryRef, (ani_int)i);
             if (status != ANI_OK) {
-                HILOGE("Object_CallMethodByName_Ref failed, status: %{public}d", status);
+                HILOGE("Object_CallMethod_Ref failed, status: %{public}d", status);
                 return { false, nullopt };
             }
             auto [succ, tmp] = TypeConverter::ToUTF8String(env, static_cast<ani_string>(stringEntryRef));

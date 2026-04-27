@@ -137,8 +137,7 @@ ani_array ListFileExtAni::ListFileExtSync(
     }
 
     auto fileList = ret.GetData().value();
-    const std::string *strArray = fileList.data();
-    auto [succ, result] = TypeConverter::ToAniStringList(env, strArray, fileList.size());
+    auto [succ, result] = TypeConverter::ToAniStringList(env, fileList);
     if (!succ) {
         HILOGE("Convert listfile ext result to ani string array failed");
         ErrorHandler::Throw(env, EINVAL);
