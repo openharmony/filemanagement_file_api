@@ -17,6 +17,7 @@
 
 #include <optional>
 
+#include "ani_helper.h"
 #include "ani_signature.h"
 #include "copy_dir_core.h"
 #include "error_handler.h"

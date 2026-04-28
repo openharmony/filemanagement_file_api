@@ -17,6 +17,7 @@
 
 #include <optional>
 
+#include "ani_helper.h"
 #include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"

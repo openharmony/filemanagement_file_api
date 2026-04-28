@@ -15,6 +15,8 @@
 
 #include "hashstream_ani.h"
 
+#include "ani_helper.h"
+#include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "hs_hashstream.h"
@@ -27,6 +29,7 @@ namespace ANI {
 namespace fs = std::filesystem;
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 HsHashStream *Unwrap(ani_env *env, ani_object object)
 {

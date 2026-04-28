@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,119 +17,25 @@
 #define INTERFACES_KITS_JS_SRC_COMMON_ANI_HELPER_ERROR_HANDLER_H
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <ani.h>
-#include "ani_helper.h"
-#include "ani_signature.h"
-#include "filemgmt_libhilog.h"
 #include "fs_error.h"
-#include "type_converter.h"
 
 namespace OHOS::FileManagement::ModuleFileIO::ANI {
-using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 class ErrorHandler {
 public:
-    static ani_status Throw(
+    static void Throw(
         ani_env *env, int32_t code, const std::string &errMsg, const std::optional<ani_object> &errData = std::nullopt);
 
-    static ani_status Throw(ani_env *env, int32_t code, const std::optional<ani_object> &errData = std::nullopt)
-    {
-        if (env == nullptr) {
-            HILOGE("Invalid parameter env");
-            return ANI_INVALID_ARGS;
-        }
-        FsError err(code);
-        return Throw(env, std::move(err), errData);
-    }
+    static void Throw(ani_env *env, int32_t code, const std::optional<ani_object> &errData = std::nullopt);
 
-    static ani_status Throw(ani_env *env, const FsError &err, const std::optional<ani_object> &errData = std::nullopt)
-    {
-        if (env == nullptr) {
-            HILOGE("Invalid parameter env");
-            return ANI_INVALID_ARGS;
-        }
-        auto code = err.GetErrNo();
-        const auto &errMsg = err.GetErrMsg();
-        return Throw(env, code, errMsg, errData);
-    }
+    static void Throw(ani_env *env, const FsError &err, const std::optional<ani_object> &errData = std::nullopt);
 
 private:
-    static ani_status Throw(ani_env *env, const char *className, int32_t code, const std::string &errMsg,
-        const std::optional<ani_object> &errData = std::nullopt)
-    {
-        if (env == nullptr) {
-            HILOGE("Invalid parameter env");
-            return ANI_INVALID_ARGS;
-        }
-
-        if (className == nullptr) {
-            HILOGE("Invalid parameter className");
-            return ANI_INVALID_ARGS;
-        }
-
-        auto [status, err] = CreateErrorObj(env, className, code, errMsg, errData);
-
-        if (status != ANI_OK) {
-            HILOGE("Create error object failed!");
-            return status;
-        }
-
-        status = env->ThrowError(err);
-        if (status != ANI_OK) {
-            HILOGE("Throw ani error object failed!");
-            return status;
-        }
-        return ANI_OK;
-    }
-
-    static std::tuple<ani_status, ani_error> CreateErrorObj(ani_env *env, const char *className, int32_t code,
-        const std::string &errMsg, const std::optional<ani_object> &errData = std::nullopt)
-    {
-        AniCache& aniCache = AniCache::GetInstance();
-        auto [ret, cls] = aniCache.GetClass(env, className);
-        if (ret != ANI_OK) {
-            return { ANI_NOT_FOUND, nullptr };
-        }
-
-        ani_method ctor;
-        tie(ret, ctor) = aniCache.GetMethod(env, className, BaseType::ctorDesc,
-            BaseType::ctorSig0);
-        if (ret != ANI_OK) {
-            return { ANI_NOT_FOUND, nullptr };
-        }
-
-        ani_object obj;
-        if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
-            HILOGE("Cannot create ani error object");
-            return { ANI_ERROR, nullptr };
-        }
-
-        ani_status status = ANI_ERROR;
-
-        status = AniHelper::SetPropertyValue(env, obj, "message", errMsg);
-        if (status != ANI_OK) {
-            HILOGE("Set property 'message' value failed");
-            return { status, nullptr };
-        }
-
-        status = AniHelper::SetPropertyValue(env, obj, "code", code);
-        if (status != ANI_OK) {
-            HILOGE("Set property 'code' value failed");
-            return { status, nullptr };
-        }
-
-        if (errData.has_value()) {
-            status = AniHelper::SetPropertyValue(env, obj, "data", errData.value());
-            if (status != ANI_OK) {
-                HILOGE("Set property 'data' value failed");
-                return { status, nullptr };
-            }
-        }
-
-        ani_error err = static_cast<ani_error>(obj);
-        return { ANI_OK, std::move(err) };
-    }
+    static ani_error CreateErrorObj(
+        ani_env *env, int32_t code, const std::string &errMsg, const std::optional<ani_object> &errData = std::nullopt);
 };
 
 } // namespace OHOS::FileManagement::ModuleFileIO::ANI

@@ -15,6 +15,7 @@
 
 #include "listfile_ani.h"
 
+#include "ani_helper.h"
 #include "ani_signature.h"
 #include "error_handler.h"
 #include "file_utils.h"

@@ -15,6 +15,7 @@
 
 #include "mmap_ani.h"
 
+#include "ani_helper.h"
 #include "error_handler.h"
 #include "file_fs_trace.h"
 #include "file_wrapper.h"

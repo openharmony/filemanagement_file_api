@@ -17,6 +17,7 @@
 
 #include <fcntl.h>
 
+#include "ani_helper.h"
 #include "ani_signature.h"
 #include "close_core.h"
 #include "error_handler.h"

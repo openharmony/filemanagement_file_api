@@ -17,6 +17,7 @@
 
 #include <filesystem>
 
+#include "ani_helper.h"
 #include "ani_signature.h"
 #include "error_handler.h"
 #include "file_wrapper.h"
