@@ -19,6 +19,7 @@
 #include <string_view>
 #include <string>
 
+#include "ani_helper.h"
 #include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"

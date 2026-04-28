@@ -16,6 +16,7 @@
 #include "stat_ani.h"
 
 #include "ani_cache.h"
+#include "ani_signature.h"
 #include "error_handler.h"
 #include "filemgmt_libhilog.h"
 #include "stat_core.h"
@@ -28,6 +29,7 @@ namespace ModuleFileIO {
 namespace ANI {
 using namespace std;
 using namespace OHOS::FileManagement::ModuleFileIO;
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 ani_object StatAni::StatSync(ani_env *env, [[maybe_unused]] ani_class clazz, ani_object file)
 {
