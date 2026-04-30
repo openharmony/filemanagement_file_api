@@ -79,10 +79,6 @@ static NError CloseFdWithFdsan(const int fd, const bool isFd, const uint64_t fil
             tag = 0;
         }
         CommonFunc::SetFdTag(fd, 0);
-        auto& appInfo = AppInfo::GetInstance();
-        if (appInfo.InDenyList()) {
-            return CloseFd(fd);
-        }
         int ret = fdsan_close_with_tag(fd, tag);
         if (ret < 0) {
             HILOGE("Failed to close file with errno: %{public}d", errno);

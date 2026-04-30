@@ -136,27 +136,6 @@ struct CommonFunc {
     static uint32_t GetApiCompatibleVersion();
 #endif
 };
-
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
-class AppInfo {
-public:
-    static AppInfo& GetInstance()
-    {
-        static AppInfo instance;
-        return instance;
-    }
-
-    bool InDenyList();
-
-private:
-    AppInfo();
-    ~AppInfo() = default;
-
-    AppInfo(const AppInfo&) = delete;
-    AppInfo& operator=(const AppInfo&) = delete;
-    bool inDeny = false;
-};
-#endif
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS
