@@ -27,6 +27,7 @@
 #include "tokenid_kit_mock.h"
 
 namespace OHOS::FileManagement::ModuleEnvironment::Test {
+using namespace OHOS::FileManagement::LibN;
 using namespace OHOS::Security::AccessToken;
 
 class EnvironmentNExporterMockTest : public testing::Test {
@@ -382,6 +383,44 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeD
     testing::Mock::VerifyAndClearExpectations(accessTokenKitMock.get());
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserHomeDir_003";
+}
+
+/**
+ * @tc.name: EnvironmentNExporterMockTest_GetUserDownloadDir_002
+ * @tc.desc: Test function of GetUserDownloadDir interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDownloadDir_002,
+         testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDownloadDir_002";
+
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    auto parameterMock = ParameterMock::GetMock();
+    auto libnMock = OHOS::FileManagement::ModuleFileIO::Test::LibnMock::GetMock();
+    auto accountManagerMock = OsAccountManagerMock::GetMock();
+    EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
+            strcpy_s(value, len, "true");
+            return 1;
+        }));
+    EXPECT_CALL(*libnMock, InitArgs(NARG_CNT::ZERO)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*accountManagerMock, GetOsAccountShortName(testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgReferee<0>("fakeName"), testing::Return(ERR_OK)));
+    EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_))
+        .WillOnce(testing::Return(NVal(env, reinterpret_cast<napi_value>(0x2000))));
+
+    auto res = GetUserDownloadDir(env, info);
+
+    EXPECT_NE(res, nullptr);
+    testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    testing::Mock::VerifyAndClearExpectations(accountManagerMock.get());
+
+    GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserDownloadDir_002";
 }
 
 } // namespace OHOS::FileManagement::ModuleEnvironment::Test
