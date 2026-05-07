@@ -26,6 +26,7 @@ namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
 namespace ANI {
+using namespace OHOS::FileManagement::ModuleFileIO::ANI::AniSignature;
 
 FsFileMapping *FileMappingWrapper::Unwrap(ani_env *env, ani_object object)
 {
