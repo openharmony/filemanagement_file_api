@@ -247,17 +247,17 @@ export interface DfsListeners {
 }
 
 export namespace OpenMode {
-  export const READ_ONLY = 0o0;
-  export const WRITE_ONLY = 0o1;
-  export const READ_WRITE = 0o2;
-  export const CREATE = 0o100;
-  export const TRUNC = 0o1000;
-  export const APPEND = 0o2000;
-  export const NONBLOCK = 0o4000;
-  export const DIR = 0o200000;
-  export const NOFOLLOW = 0o400000;
-  export const SYNC = 0o4010000;
-  export const UNCACHE = 0o10000000000;
+  export const READ_ONLY: int = 0o0;
+  export const WRITE_ONLY: int = 0o1;
+  export const READ_WRITE: int = 0o2;
+  export const CREATE: int = 0o100;
+  export const TRUNC: int = 0o1000;
+  export const APPEND: int = 0o2000;
+  export const NONBLOCK: int = 0o4000;
+  export const DIR: int = 0o200000;
+  export const NOFOLLOW: int = 0o400000;
+  export const SYNC: int = 0o4010000;
+  export const UNCACHE: int = 0o10000000000;
 }
 
 export enum MappingMode {
