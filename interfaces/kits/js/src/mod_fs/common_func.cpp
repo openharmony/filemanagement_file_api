@@ -38,9 +38,7 @@
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
 #include <sys/mman.h>
 #include <stdatomic.h>
-#include <unordered_set>
 
-#include "application_context.h"
 #include "bundle_mgr_proxy.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -716,29 +714,6 @@ tuple<bool, unique_ptr<char[]>, void *, size_t, int64_t> CommonFunc::GetWriteArg
     }
     return { true, move(bufferGuard), buf, retLen, offset };
 }
-
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
-bool AppInfo::InDenyList()
-{
-    return inDeny;
-}
-
-AppInfo::AppInfo()
-{
-    auto applicationContext = OHOS::AbilityRuntime::ApplicationContext::GetInstance();
-    if (applicationContext == nullptr) {
-        HILOGE("applicationContext is nullptr");
-        return;
-    }
-    auto applicationInfo = applicationContext->GetApplicationInfo();
-    if (applicationInfo == nullptr) {
-        HILOGE("applicationInfo is nullptr");
-        return;
-    }
-    std::unordered_set<std::string> denyList = {};
-    inDeny = denyList.find(applicationInfo->bundleName) != denyList.end();
-}
-#endif
 } // namespace ModuleFileIO
 } // namespace FileManagement
 } // namespace OHOS

@@ -130,7 +130,6 @@ ohos_shared_library("cj_file_fs_ffi") {
       "ability_base:zuri",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
-      "ability_runtime:app_context",
       "access_token:libtokenid_sdk",
       "app_file_service:fileuri_native",
       "bounds_checking_function:libsec_shared",
