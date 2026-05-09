@@ -73,6 +73,8 @@ public:
     virtual NVal CreateUndefined(napi_env env) = 0;
     virtual NVal CreateUTF8String(napi_env env, std::string str) = 0;
     virtual NVal CreateBool(napi_env env, bool val) = 0;
+    virtual std::tuple<bool, void *, size_t> ToArraybuffer() = 0;
+    virtual NVal CreateInt64(napi_env env, int64_t val) = 0;
 };
 
 class LibnMock : public ILibnMock {
@@ -116,6 +118,8 @@ public:
     MOCK_METHOD(NVal, CreateUndefined, (napi_env), (override));
     MOCK_METHOD(NVal, CreateUTF8String, (napi_env, std::string), (override));
     MOCK_METHOD(NVal, CreateBool, (napi_env, bool), (override));
+    MOCK_METHOD((std::tuple<bool, void *, size_t>), ToArraybuffer, (), (override));
+    MOCK_METHOD(NVal, CreateInt64, (napi_env, int64_t), (override));
 
 public:
     static std::shared_ptr<LibnMock> GetMock();

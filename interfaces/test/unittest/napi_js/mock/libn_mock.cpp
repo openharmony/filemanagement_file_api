@@ -837,4 +837,48 @@ NVal NVal::CreateBool(napi_env env, bool val)
 
     return realCreateBool(env, val);
 }
+
+std::tuple<bool, void *, size_t> NVal::ToArraybuffer() const
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->ToArraybuffer();
+    }
+
+    static std::tuple<bool, void *, size_t> (*realToArraybuffer)() = []() {
+        auto func = (std::tuple<bool, void *, size_t>(*)())dlsym(
+            RTLD_NEXT, "_ZNK4OHOS14FileManagement4LibN4NVal13ToArraybufferEv");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real ToArraybuffer: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realToArraybuffer) {
+        return { false, nullptr, 0 };
+    }
+
+    return realToArraybuffer();
+}
+
+NVal NVal::CreateInt64(napi_env env, int64_t val)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->CreateInt64(env, val);
+    }
+
+    static NVal (*realCreateInt64)(napi_env, int64_t) = []() {
+        auto func = (NVal(*)(napi_env, int64_t))dlsym(
+            RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN4NVal11CreateInt64EP10napi_env__x");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real CreateInt64: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realCreateInt64) {
+        return { nullptr, nullptr };
+    }
+
+    return realCreateInt64(env, val);
+}
 #endif
