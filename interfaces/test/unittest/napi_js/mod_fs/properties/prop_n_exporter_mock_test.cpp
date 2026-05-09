@@ -529,7 +529,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_005, TestSize.Lev
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1122);
     tuple<bool, int32_t> fdTuple = { true, 1 };
-    char bufArr[1024];
+    char bufArr[1024] = { 0 };
     void *bufPtr = static_cast<void *>(bufArr);
     tuple<bool, void *, size_t> arrayBufResult = { true, bufPtr, 1024 };
 
@@ -566,7 +566,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_006, TestSize.Lev
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1122);
     napi_value val = reinterpret_cast<napi_value>(0x2000);
     tuple<bool, int32_t> fdTuple = { true, 1 };
-    char bufArr[1024];
+    char bufArr[1024] = { 0 };
     void *bufPtr = static_cast<void *>(bufArr);
     tuple<bool, void *, size_t> arrayBufResult = { true, bufPtr, 1024 };
 
