@@ -408,4 +408,184 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_006, testing::ext::TestSize.Leve
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_006";
 }
+/**
+ * @tc.name: PropNExporterMockTest_ReadSync_001
+ * @tc.desc: Test function of PropNExporter::ReadSync interface for FAILURE when InitArgs fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_ReadSync_001";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1122);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>(), A<size_t>())).WillOnce(Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = PropNExporter::ReadSync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_001";
+}
+
+/**
+ * @tc.name: PropNExporterMockTest_ReadSync_002
+ * @tc.desc: Test function of PropNExporter::ReadSync interface for FAILURE when ToInt32 fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_ReadSync_002";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1122);
+    tuple<bool, int32_t> fdTuple = { false, 0 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>(), A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(fdTuple));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = PropNExporter::ReadSync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_002";
+}
+
+/**
+ * @tc.name: PropNExporterMockTest_ReadSync_003
+ * @tc.desc: Test function of PropNExporter::ReadSync interface for FAILURE when fd is negative.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_ReadSync_003";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1122);
+    tuple<bool, int32_t> fdTuple = { true, -1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>(), A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(fdTuple));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = PropNExporter::ReadSync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_003";
+}
+
+/**
+ * @tc.name: PropNExporterMockTest_ReadSync_004
+ * @tc.desc: Test function of PropNExporter::ReadSync interface for FAILURE when GetReadArg fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_ReadSync_004";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1122);
+    tuple<bool, int32_t> fdTuple = { true, 1 };
+    tuple<bool, void *, size_t> arrayBufResult = { false, nullptr, 0 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>(), A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(fdTuple));
+    EXPECT_CALL(*libnMock, ToArraybuffer()).WillOnce(Return(arrayBufResult));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(2);
+
+    auto res = PropNExporter::ReadSync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_004";
+}
+
+/**
+ * @tc.name: PropNExporterMockTest_ReadSync_005
+ * @tc.desc: Test function of PropNExporter::ReadSync interface for FAILURE when uv_fs_read fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_ReadSync_005";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1122);
+    tuple<bool, int32_t> fdTuple = { true, 1 };
+    char bufArr[1024];
+    void *bufPtr = static_cast<void *>(bufArr);
+    tuple<bool, void *, size_t> arrayBufResult = { true, bufPtr, 1024 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>(), A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(fdTuple));
+    EXPECT_CALL(*libnMock, ToArraybuffer()).WillOnce(Return(arrayBufResult));
+    EXPECT_CALL(*libnMock, HasProp(std::string("length"))).WillOnce(Return(false));
+    EXPECT_CALL(*libnMock, HasProp(std::string("offset"))).WillOnce(Return(false));
+    EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(_));
+
+    auto res = PropNExporter::ReadSync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_005";
+}
+
+/**
+ * @tc.name: PropNExporterMockTest_ReadSync_006
+ * @tc.desc: Test function of PropNExporter::ReadSync interface for SUCCESS.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-begin PropNExporterMockTest_ReadSync_006";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1122);
+    napi_value val = reinterpret_cast<napi_value>(0x2000);
+    tuple<bool, int32_t> fdTuple = { true, 1 };
+    char bufArr[1024];
+    void *bufPtr = static_cast<void *>(bufArr);
+    tuple<bool, void *, size_t> arrayBufResult = { true, bufPtr, 1024 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>(), A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(fdTuple));
+    EXPECT_CALL(*libnMock, ToArraybuffer()).WillOnce(Return(arrayBufResult));
+    EXPECT_CALL(*libnMock, HasProp(std::string("length"))).WillOnce(Return(false));
+    EXPECT_CALL(*libnMock, HasProp(std::string("offset"))).WillOnce(Return(false));
+    EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(100));
+    EXPECT_CALL(*libnMock, CreateInt64(_, _)).WillOnce(Return(NVal {env, val}));
+
+    auto res = PropNExporter::ReadSync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, val);
+
+    GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_006";
+}
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
