@@ -858,7 +858,7 @@ RetDataCArrConflictFiles FileFsImpl::MoveDir(string src, string dest, int32_t mo
     } else {
         ret.code = SUCCESS_CODE;
     }
-    ret.data.size = (int64_t)errfiles.size();
+    ret.data.size = static_cast<int64_t>(errfiles.size());
     ret.data.head = DequeToCConflict(errfiles);
     return ret;
 }
