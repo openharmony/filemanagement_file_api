@@ -193,6 +193,9 @@ tuple<bool, vector<string>, uint32_t> NVal::ToStringArray()
     for (uint32_t i = 0; i < size; i++) {
         status = napi_get_element(env_, val_, i, &result);
         auto [succ, str, ignore] = NVal(env_, result).ToUTF8String();
+        if (!succ) {
+            return {false, {}, 0};
+        }
         stringArray.push_back(string(str.get()));
     }
     return make_tuple(status == napi_ok, stringArray, size);

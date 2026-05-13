@@ -30,7 +30,7 @@ using namespace std;
 
 static tuple<int, string> HashFinal(int err, const unique_ptr<unsigned char[]> &hashBuf, size_t hashLen)
 {
-    if (err) {
+    if (err != 0) {
         return { err, "" };
     }
 
@@ -61,7 +61,7 @@ static int ForEachFileSegment(const string &fpath, function<void(char *, size_t)
         }
     } while (actLen == pageSize);
 
-    return ferror(filp.get()) ? errno : 0;
+    return ferror(filp.get()) != 0 ? errno : 0;
 }
 
 tuple<int, string> HashFile::HashWithMD5(const string &fpath)
