@@ -260,7 +260,7 @@ RetDataCArrConflictFiles CopyDirImpl::CopyDir(const std::string& src, const std:
     LOGI("FS_TEST:: FileFsImpl::Copy parameter check passed");
     std::vector<struct ConflictFiles> errfiles = {};
     ret.code = CopyDirFunc(src, dest, mode, errfiles);
-    ret.data.size = (int64_t)errfiles.size();
+    ret.data.size = static_cast<int64_t>(errfiles.size());
     ret.data.head = VectorToCConflict(errfiles);
     return ret;
 }

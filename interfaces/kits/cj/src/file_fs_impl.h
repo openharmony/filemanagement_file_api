@@ -76,7 +76,7 @@ public:
     static RetDataI64 Write(int32_t fd, void* buf, size_t length, int64_t offset, std::string encode);
     static RetDataI64 WriteCur(int32_t fd, void* buf, size_t length, std::string encode);
     static int Truncate(std::string file, int64_t len);
-    static int Truncate(int32_t file, int64_t len);
+    static int Truncate(int32_t fd, int64_t len);
     static int Close(int32_t file);
     static int Close(sptr<OHOS::CJSystemapi::FileFs::FileEntity> file);
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)

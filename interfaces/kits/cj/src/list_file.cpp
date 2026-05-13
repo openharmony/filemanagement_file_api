@@ -325,7 +325,7 @@ RetDataCArrStringN ListFileImpl::ListFile(const string& path, CListFileOptions o
             direntsRes[i] = direntsRes[i].substr(path.length());
         }
     }
-    ret.data.size = (int64_t)direntsRes.size();
+    ret.data.size = static_cast<int64_t>(direntsRes.size());
     ret.data.head = VectorToCArrString(direntsRes);
     LOGI("FS_TEST:: ListFileImpl::ListFile end");
     g_optionArgs.Clear();
