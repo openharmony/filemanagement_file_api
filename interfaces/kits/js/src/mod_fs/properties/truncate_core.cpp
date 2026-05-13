@@ -51,13 +51,14 @@ static int Truncate(FileInfo &fileInfo, int64_t truncateLen)
         if (ret < 0) {
             return ret;
         }
+        DistributedFS::FDGuard fd(ret);
         unique_ptr<uv_fs_t, decltype(FsUtils::FsReqCleanup) *> ftruncateReq = { new (nothrow) uv_fs_t,
             FsUtils::FsReqCleanup };
         if (!ftruncateReq) {
             HILOGE("Failed to request heap memory.");
             return ENOMEM;
         }
-        ret = uv_fs_ftruncate(nullptr, ftruncateReq.get(), ret, truncateLen, nullptr);
+        ret = uv_fs_ftruncate(nullptr, ftruncateReq.get(), fd.GetFD(), truncateLen, nullptr);
         if (ret < 0) {
             HILOGE("Failed to truncate file by path");
             return ret;
