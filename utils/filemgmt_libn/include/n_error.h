@@ -158,7 +158,11 @@ enum ErrCodeSuffixOfStorageService {
     E_STORAGE_RETRY,
     E_GET_INODE = 16,
     E_GET_BUNDLE_INODES = 17,
-    E_GET_SYSTEM_DATA_SIZE = 18
+    E_GET_SYSTEM_DATA_SIZE = 18,
+    E_GET_PARTITION_ERROR = 21,
+    E_CREATE_PARTITION_ERROR = 22,
+    E_DELETE_PARTITION_ERROR = 23,
+    E_FORMAT_PARTITION_ERROR = 25,
 };
 
 enum ErrCodeSuffixOfUserFileService {
@@ -434,6 +438,14 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         "Failed to query the inode information of the application" } },
     { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_SYSTEM_DATA_SIZE, { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_SYSTEM_DATA_SIZE,
         "Failed to query the system data size" } },
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_PARTITION_ERROR, { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_PARTITION_ERROR,
+        "Failed to get partition table info" } },
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_CREATE_PARTITION_ERROR, { STORAGE_SERVICE_SYS_CAP_TAG + E_CREATE_PARTITION_ERROR,
+        "Failed to create partition" } },
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_DELETE_PARTITION_ERROR, { STORAGE_SERVICE_SYS_CAP_TAG + E_DELETE_PARTITION_ERROR,
+        "Failed to delete partition" } },
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_SYSTEM_DATA_SIZE, { STORAGE_SERVICE_SYS_CAP_TAG + E_FORMAT_PARTITION_ERROR,
+        "Failed to format partition" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, "IPC error" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_URIS, { USER_FILE_SERVICE_SYS_CAP_TAG + E_URIS, "Invalid uri" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_GETINFO, { USER_FILE_SERVICE_SYS_CAP_TAG + E_GETINFO,
