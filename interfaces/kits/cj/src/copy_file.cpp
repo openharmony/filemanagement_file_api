@@ -35,7 +35,6 @@ using namespace OHOS::CJSystemapi::FileFs;
 
 std::tuple<int, FileInfo> ParseOperand(int32_t file)
 {
-    LOGI("FS_TEST:: FS_TEST::ParseOperand");
     if (file < 0) {
         LOGE("Invalid fd");
         return { EINVAL, FileInfo { false, {}, {} } };
@@ -45,13 +44,11 @@ std::tuple<int, FileInfo> ParseOperand(int32_t file)
         LOGE("Failed to request heap memory.");
         return { ENOMEM, FileInfo { false, {}, {} } };
     }
-    LOGI("FS_TEST:: FS_TEST::ParseOperand success");
     return { SUCCESS_CODE, FileInfo { false, {}, move(fdg) } };
 };
 
 std::tuple<int, FileInfo> ParseOperand(std::string file)
 {
-    LOGI("FS_TEST:: ParseOperand");
     std::unique_ptr<char[]> filePath = std::make_unique<char[]>(file.length() + 1);
     if (!filePath) {
         return { ENOMEM, FileInfo { true, {}, {} } };
@@ -59,8 +56,6 @@ std::tuple<int, FileInfo> ParseOperand(std::string file)
     for (size_t i = 0; i < file.length(); i++) {
         filePath[i] = file[i];
     }
-
-    LOGI("FS_TEST:: ParseOperand success");
     return { SUCCESS_CODE, FileInfo { true, move(filePath), {} } };
 };
 
@@ -70,8 +65,6 @@ static int IsAllPath(FileInfo& srcFile, FileInfo& destFile)
     filesystem::path srcPath(string(srcFile.path.get()));
     filesystem::path dstPath(string(destFile.path.get()));
     error_code errCode;
-    LOGI("srcPath: %{public}s", srcPath.c_str());
-    LOGI("dstPath: %{public}s", dstPath.c_str());
     if (!filesystem::copy_file(srcPath, dstPath, filesystem::copy_options::overwrite_existing, errCode)) {
         LOGE("Failed to copy file, error code: %{public}d", errCode.value());
         return errCode.value();
@@ -199,7 +192,6 @@ static int OpenFile(FileInfo& srcFile, FileInfo& destFile)
 
 int CopyFileImpl::CopyFile(const std::string& src, const std::string& dest, int mode)
 {
-    LOGI("FS_TEST:: CopyFile::CopyFile start");
     auto [succSrc, srcFileInfo] = ParseOperand(src);
     if (succSrc != SUCCESS_CODE) {
         return succSrc;
@@ -213,7 +205,6 @@ int CopyFileImpl::CopyFile(const std::string& src, const std::string& dest, int 
 
 int CopyFileImpl::CopyFile(const std::string& src, int32_t dest, int mode)
 {
-    LOGI("FS_TEST:: CopyFile::CopyFile start");
     auto [succSrc, srcFileInfo] = ParseOperand(src);
     if (succSrc != SUCCESS_CODE) {
         return succSrc;
@@ -227,7 +218,6 @@ int CopyFileImpl::CopyFile(const std::string& src, int32_t dest, int mode)
 
 int CopyFileImpl::CopyFile(int32_t src, const std::string& dest, int mode)
 {
-    LOGI("FS_TEST:: CopyFile::CopyFile start");
     auto [succSrc, srcFileInfo] = ParseOperand(src);
     if (succSrc != SUCCESS_CODE) {
         return succSrc;
@@ -241,7 +231,6 @@ int CopyFileImpl::CopyFile(int32_t src, const std::string& dest, int mode)
 
 int CopyFileImpl::CopyFile(int32_t src, int32_t dest, int mode)
 {
-    LOGI("FS_TEST:: CopyFile::CopyFile start");
     auto [succSrc, srcFileInfo] = ParseOperand(src);
     if (succSrc != SUCCESS_CODE) {
         return succSrc;

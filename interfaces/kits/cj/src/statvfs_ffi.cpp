@@ -26,23 +26,19 @@ namespace Statvfs {
 extern "C" {
 RetDataI64 FfiOHOSStatvfsGetFreeSize(char* path)
 {
-    LOGI("OHOS::CJSystemapi::FfiOHOSStatvfsGetFreeSize");
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto [state, size] = StatvfsImpl::GetFreeSize(path);
     ret.code = state;
     ret.data = size;
-    LOGI("OHOS::CJSystemapi::FfiOHOSStatvfsGetFreeSize success");
     return ret;
 }
 
 RetDataI64 FfiOHOSStatvfsGetTotalSize(char* path)
 {
-    LOGI("OHOS::CJSystemapi::FfiOHOSStatvfsGetTotalSize");
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto [state, size] = StatvfsImpl::GetTotalSize(path);
     ret.code = state;
     ret.data = size;
-    LOGI("OHOS::CJSystemapi::FfiOHOSStatvfsGetTotalSize success");
     return ret;
 }
 }

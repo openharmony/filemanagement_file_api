@@ -51,8 +51,6 @@ struct NameListArg {
 
 constexpr int DEFAULT_SIZE = -1;
 constexpr int DEFAULT_MODIFY_AFTER = -1;
-constexpr int FILTER_MATCH = 1;
-constexpr int FILTER_DISMATCH = 0;
 const int32_t MAX_SUFFIX_LENGTH = 256;
 
 struct OptionArgs {

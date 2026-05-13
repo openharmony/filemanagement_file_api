@@ -17,6 +17,7 @@
 #include "n_error.h"
 #include "securec.h"
 #include "copy_dir.h"
+#include "utils.h"
 
 using namespace OHOS;
 using namespace OHOS::FFI;
@@ -29,22 +30,6 @@ namespace {
 static int RecurCopyDir(const std::string &srcPath, const std::string &destPath, const int mode,
     std::vector<struct ConflictFiles> &errfiles);
 
-static int MakeDir(const std::string &path)
-{
-    std::filesystem::path destDir(path);
-    std::error_code errCode;
-    if (!std::filesystem::create_directory(destDir, errCode)) {
-        LOGE("Failed to create directory, error code: %{public}d", errCode.value());
-        return errCode.value();
-    }
-    return OHOS::FileManagement::LibN::ERRNO_NOERR;
-}
-
-struct NameList {
-    struct dirent** namelist = { nullptr };
-    int direntNum = 0;
-};
-
 static int RemoveFile(const std::string &destPath)
 {
     std::filesystem::path destFile(destPath);
@@ -54,18 +39,6 @@ static int RemoveFile(const std::string &destPath)
         return errCode.value();
     }
     return OHOS::FileManagement::LibN::ERRNO_NOERR;
-}
-
-static void Deleter(struct NameList *arg)
-{
-    for (int i = 0; i < arg->direntNum; i++) {
-        free((arg->namelist)[i]);
-        (arg->namelist)[i] = nullptr;
-    }
-    free(arg->namelist);
-    arg->namelist = nullptr;
-    delete arg;
-    arg = nullptr;
 }
 
 static int CopyFile(const std::string &src, const std::string &dest, const int mode)
@@ -91,7 +64,7 @@ static int CopySubDir(const std::string &srcPath, const std::string &destPath, c
     std::vector<struct ConflictFiles> &errfiles)
 {
     if (!std::filesystem::exists(destPath)) {
-        int res = MakeDir(destPath);
+        int res = OHOS::CJSystemapi::FileFs::CommonMakeDir(destPath);
         if (res != OHOS::FileManagement::LibN::ERRNO_NOERR) {
             LOGE("Failed to mkdir");
             return res;
@@ -100,23 +73,20 @@ static int CopySubDir(const std::string &srcPath, const std::string &destPath, c
     return RecurCopyDir(srcPath, destPath, mode, errfiles);
 }
 
-static int FilterFunc(const struct dirent *filename)
-{
-    if (std::string_view(filename->d_name) == "." || std::string_view(filename->d_name) == "..") {
-        return DISMATCH;
-    }
-    return MATCH;
-}
-
 static int RecurCopyDir(const std::string &srcPath, const std::string &destPath, const int mode,
     std::vector<struct ConflictFiles> &errfiles)
 {
-    std::unique_ptr<struct NameList, decltype(Deleter)*> pNameList = {new (std::nothrow) struct NameList, Deleter};
+    using OHOS::CJSystemapi::FileFs::NameListArg;
+    using OHOS::CJSystemapi::FileFs::NameListArgDeleter;
+    using OHOS::CJSystemapi::FileFs::CommonFilterFunc;
+
+    std::unique_ptr<NameListArg, decltype(NameListArgDeleter)*> pNameList = {
+        new (std::nothrow) NameListArg, NameListArgDeleter };
     if (pNameList == nullptr) {
         LOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int num = scandir(srcPath.c_str(), &(pNameList->namelist), FilterFunc, alphasort);
+    int num = scandir(srcPath.c_str(), &(pNameList->namelist), CommonFilterFunc, alphasort);
     pNameList->direntNum = num;
 
     for (int i = 0; i < num; i++) {
@@ -131,12 +101,8 @@ static int RecurCopyDir(const std::string &srcPath, const std::string &destPath,
             }
             return res;
         } else {
-            LOGI("srcPath %{public}s from", srcPath.c_str());
-            LOGI("destPath %{public}s to", destPath.c_str());
             std::string src = srcPath + '/' + std::string((pNameList->namelist[i])->d_name);
             std::string dest = destPath + '/' + std::string((pNameList->namelist[i])->d_name);
-            LOGI("CopyFile %{public}s from", src.c_str());
-            LOGI("CopyFile %{public}s to", dest.c_str());
             int res = CopyFile(src, dest, mode);
             if (res == EEXIST) {
                 errfiles.emplace_back(src, dest);
@@ -172,7 +138,7 @@ static int CopyDirFunc(const std::string &src, const std::string &dest, const in
     std::string destStr = dest + dirName;
     LOGI("destStr: %{public}s", destStr.c_str());
     if (!std::filesystem::exists(destStr)) {
-        int res = MakeDir(destStr);
+        int res = OHOS::CJSystemapi::FileFs::CommonMakeDir(destStr);
         if (res != OHOS::FileManagement::LibN::ERRNO_NOERR) {
             LOGE("Failed to mkdir");
             return res;
@@ -186,55 +152,6 @@ static int CopyDirFunc(const std::string &src, const std::string &dest, const in
     return res;
 }
 
-static CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errfiles)
-{
-    CConflictFiles* result = new(std::nothrow) CConflictFiles[errfiles.size()];
-    if (result == nullptr) {
-        return nullptr;
-    }
-    size_t temp = 0;
-    for (size_t i = 0; i < errfiles.size(); i++) {
-        size_t srcFilesLen = errfiles[i].srcFiles.length() + 1;
-        result[i].srcFiles = new(std::nothrow) char[srcFilesLen];
-        if (result[i].srcFiles == nullptr) {
-            break;
-        }
-        if (strcpy_s(result[i].srcFiles, srcFilesLen, errfiles[i].srcFiles.c_str()) != 0) {
-            delete[] result[i].srcFiles;
-            result[i].srcFiles = nullptr;
-            break;
-        }
-        size_t destFilesLen = errfiles[i].destFiles.length() + 1;
-        result[i].destFiles = new(std::nothrow) char[destFilesLen];
-        if (result[i].destFiles == nullptr) {
-            delete[] result[i].srcFiles;
-            result[i].srcFiles = nullptr;
-            break;
-        }
-        if (strcpy_s(result[i].destFiles, destFilesLen, errfiles[i].destFiles.c_str()) != 0) {
-            delete[] result[i].srcFiles;
-            delete[] result[i].destFiles;
-
-            result[i].srcFiles = nullptr;
-            result[i].destFiles = nullptr;
-            break;
-        }
-        temp++;
-    }
-    if (temp != errfiles.size()) {
-        for (size_t j = temp; j > 0; j--) {
-            delete[] result[j - 1].srcFiles;
-            delete[] result[j - 1].destFiles;
-
-            result[j - 1].srcFiles = nullptr;
-            result[j - 1].destFiles = nullptr;
-        }
-        delete[] result;
-        return nullptr;
-    }
-    return result;
-}
-
 }
 
 namespace OHOS {
@@ -242,7 +159,6 @@ namespace CJSystemapi {
 
 RetDataCArrConflictFiles CopyDirImpl::CopyDir(const std::string& src, const std::string& dest, int mode)
 {
-    LOGI("FS_TEST:: FileFsImpl::CopyDir start");
     std::error_code errCode;
     RetDataCArrConflictFiles ret = { .code = EINVAL, .data = { .head = nullptr, .size = 0 } };
     if (!std::filesystem::is_directory(std::filesystem::status(dest, errCode))) {
@@ -257,11 +173,10 @@ RetDataCArrConflictFiles CopyDirImpl::CopyDir(const std::string& src, const std:
         LOGE("Invalid mode");
         return ret;
     }
-    LOGI("FS_TEST:: FileFsImpl::Copy parameter check passed");
     std::vector<struct ConflictFiles> errfiles = {};
     ret.code = CopyDirFunc(src, dest, mode, errfiles);
     ret.data.size = static_cast<int64_t>(errfiles.size());
-    ret.data.head = VectorToCConflict(errfiles);
+    ret.data.head = OHOS::CJSystemapi::FileFs::VectorToCConflict(errfiles);
     return ret;
 }
 

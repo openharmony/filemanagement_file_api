@@ -20,15 +20,23 @@
 #include "fd_guard.h"
 #include <string>
 #include <tuple>
+#include <vector>
+#include <deque>
+#include <dirent.h>
+#include <memory>
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "iremote_broker.h"
 #endif
 
 namespace OHOS {
 namespace CJSystemapi {
-namespace FileFs {
-std::tuple<int, std::unique_ptr<char[]>, size_t, int64_t> GetReadArg(size_t bufLen, int64_t length, int64_t offset);
-}
+
+constexpr int DISMATCH = 0;
+constexpr int MATCH = 1;
+constexpr int FILTER_DISMATCH = 0;
+constexpr int FILTER_MATCH = 1;
+constexpr int FILE_DISMATCH = 0;
+constexpr int FILE_MATCH = 1;
 
 constexpr int RDONLY = UV_FS_O_RDONLY;
 constexpr int WRONLY = UV_FS_O_WRONLY;
@@ -101,6 +109,35 @@ struct RetDataCArrConflictFiles {
     int code;
     CArrConflictFiles data;
 };
+
+using UvFsReqPtr = std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*>;
+
+inline UvFsReqPtr MakeUvFsReq()
+{
+    return UvFsReqPtr { new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+}
+
+namespace FileFs {
+std::tuple<int, std::unique_ptr<char[]>, size_t, int64_t> GetReadArg(size_t bufLen, int64_t length, int64_t offset);
+
+struct NameListArg {
+    struct dirent** namelist = { nullptr };
+    int direntNum = 0;
+};
+
+void NameListArgDeleter(NameListArg *arg);
+
+int CommonFilterFunc(const struct dirent *filename);
+
+int CommonMakeDir(const std::string &path);
+
+char** VectorToCArrString(std::vector<std::string> &vec);
+
+CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errfiles);
+
+CConflictFiles* DequeToCConflict(std::deque<struct ConflictFiles> &errfiles);
+}
+
 }
 }
 

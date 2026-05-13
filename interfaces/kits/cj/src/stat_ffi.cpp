@@ -26,7 +26,6 @@ using namespace OHOS::CJSystemapi::FileFs;
 extern "C" {
 int64_t FfiOHOSStatGetIno(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatGetIno");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -36,7 +35,6 @@ int64_t FfiOHOSStatGetIno(int64_t id)
 }
 int64_t FfiOHOSStatGetMode(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatGetMode");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -46,7 +44,6 @@ int64_t FfiOHOSStatGetMode(int64_t id)
 }
 int64_t FfiOHOSStatGetUid(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatGetUid");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -56,7 +53,6 @@ int64_t FfiOHOSStatGetUid(int64_t id)
 }
 int64_t FfiOHOSStatGetGid(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatGetGid");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -66,7 +62,6 @@ int64_t FfiOHOSStatGetGid(int64_t id)
 }
 int64_t FfiOHOSStatGetSize(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatGetSize");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -76,7 +71,6 @@ int64_t FfiOHOSStatGetSize(int64_t id)
 }
 int64_t FfiOHOSStatGetAtime(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatGetAtime");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -86,7 +80,6 @@ int64_t FfiOHOSStatGetAtime(int64_t id)
 }
 int64_t FfiOHOSStatGetMtime(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatGetMtime");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -96,7 +89,6 @@ int64_t FfiOHOSStatGetMtime(int64_t id)
 }
 int64_t FfiOHOSStatGetCtime(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatGetCtime");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -107,7 +99,6 @@ int64_t FfiOHOSStatGetCtime(int64_t id)
 
 bool FfiOHOSStatIsBlockDevice(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatIsBlockDevice");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -118,7 +109,6 @@ bool FfiOHOSStatIsBlockDevice(int64_t id)
 
 FFI_EXPORT RetDataBool FfiOHOSStatIsBlockDeviceV2(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSStatIsBlockDeviceV2");
     auto instance = FFIData::GetData<StatImpl>(id);
     RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
     if (!instance) {
@@ -132,7 +122,6 @@ FFI_EXPORT RetDataBool FfiOHOSStatIsBlockDeviceV2(int64_t id)
 
 bool FfiOHOSStatIsCharacterDevice(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatIsCharacterDevice");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -143,7 +132,6 @@ bool FfiOHOSStatIsCharacterDevice(int64_t id)
 
 FFI_EXPORT RetDataBool FfiOHOSStatIsCharacterDeviceV2(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSStatIsCharacterDeviceV2");
     auto instance = FFIData::GetData<StatImpl>(id);
     RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
     if (!instance) {
@@ -157,7 +145,6 @@ FFI_EXPORT RetDataBool FfiOHOSStatIsCharacterDeviceV2(int64_t id)
 
 bool FfiOHOSStatIsDirectory(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatIsDirectory");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -168,7 +155,6 @@ bool FfiOHOSStatIsDirectory(int64_t id)
 
 FFI_EXPORT RetDataBool FfiOHOSStatIsDirectoryV2(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSStatIsDirectoryV2");
     auto instance = FFIData::GetData<StatImpl>(id);
     RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
     if (!instance) {
@@ -182,7 +168,6 @@ FFI_EXPORT RetDataBool FfiOHOSStatIsDirectoryV2(int64_t id)
 
 bool FfiOHOSStatIsFIFO(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatIsFIFO");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -193,7 +178,6 @@ bool FfiOHOSStatIsFIFO(int64_t id)
 
 FFI_EXPORT RetDataBool FfiOHOSStatIsFIFOV2(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSStatIsFIFOV2");
     auto instance = FFIData::GetData<StatImpl>(id);
     RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
     if (!instance) {
@@ -207,7 +191,6 @@ FFI_EXPORT RetDataBool FfiOHOSStatIsFIFOV2(int64_t id)
 
 bool FfiOHOSStatIsFile(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatIsFile");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -218,7 +201,6 @@ bool FfiOHOSStatIsFile(int64_t id)
 
 FFI_EXPORT RetDataBool FfiOHOSStatIsFileV2(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSStatIsFileV2");
     auto instance = FFIData::GetData<StatImpl>(id);
     RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
     if (!instance) {
@@ -232,7 +214,6 @@ FFI_EXPORT RetDataBool FfiOHOSStatIsFileV2(int64_t id)
 
 bool FfiOHOSStatIsSocket(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatIsSocket");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -243,7 +224,6 @@ bool FfiOHOSStatIsSocket(int64_t id)
 
 FFI_EXPORT RetDataBool FfiOHOSStatIsSocketV2(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSStatIsSocketV2");
     auto instance = FFIData::GetData<StatImpl>(id);
     RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
     if (!instance) {
@@ -257,7 +237,6 @@ FFI_EXPORT RetDataBool FfiOHOSStatIsSocketV2(int64_t id)
 
 bool FfiOHOSStatIsSymbolicLink(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatIsSymbolicLink");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);
@@ -268,7 +247,6 @@ bool FfiOHOSStatIsSymbolicLink(int64_t id)
 
 FFI_EXPORT RetDataBool FfiOHOSStatIsSymbolicLinkV2(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSStatIsSymbolicLinkV2");
     auto instance = FFIData::GetData<StatImpl>(id);
     RetDataBool ret = {.code = ERR_INVALID_INSTANCE_CODE, .data = false};
     if (!instance) {
@@ -283,7 +261,6 @@ FFI_EXPORT RetDataBool FfiOHOSStatIsSymbolicLinkV2(int64_t id)
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 RetDataI32 FfiOHOSStatGetLocation(int64_t id)
 {
-    LOGI("FS_TEST:: FfiOHOSStatGetLocation");
     auto instance = FFIData::GetData<StatImpl>(id);
     if (!instance) {
         LOGE("StatImpl instance not exist %{public}" PRId64, id);

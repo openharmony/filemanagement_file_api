@@ -25,9 +25,10 @@
 #include <thread>
 #include "datashare_helper.h"
 #include "file_uri.h"
-#include "file_utils.h"
+#include "cj_file_utils.h"
 #include "iservice_registry.h"
 #include "translistener.h"
+#include "utils.h"
 
 namespace OHOS {
 namespace CJSystemapi {
@@ -35,8 +36,6 @@ using namespace FileFs;
 namespace fs = std::filesystem;
 const std::string NETWORK_PARA = "?networkid=";
 const std::string MEDIALIBRARY_DATA_URI = "datashare:///media";
-constexpr int DISMATCH = 0;
-constexpr int MATCH = 1;
 constexpr int BUF_SIZE = 1024;
 constexpr size_t MAX_SIZE = 1024 * 1024 * 128;
 constexpr std::chrono::milliseconds NOTIFY_PROGRESS_DELAY(300);
@@ -76,8 +75,7 @@ static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg,
                         std::unique_ptr<DistributedFS::FDGuard> destFdg,
                         std::shared_ptr<FileInfos> infos)
 {
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> sendFileReq = {
-        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+    UvFsReqPtr sendFileReq = MakeUvFsReq();
     if (sendFileReq == nullptr) {
         LOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -115,26 +113,9 @@ static int SendFileCore(std::unique_ptr<DistributedFS::FDGuard> srcFdg,
     return ERRNO_NOERR;
 }
 
-static int FilterFunc(const struct dirent *filename)
+int CopyImpl::MakeDir(const std::string &path)
 {
-    if (std::string_view(filename->d_name) == "." || std::string_view(filename->d_name) == "..") {
-        return DISMATCH;
-    }
-    return MATCH;
-}
-
-struct NameList {
-    struct dirent **namelist = { nullptr };
-    int direntNum = 0;
-};
-
-static void Deleter(struct NameList *arg)
-{
-    for (int i = 0; i < arg->direntNum; i++) {
-        free((arg->namelist)[i]);
-        (arg->namelist)[i] = nullptr;
-    }
-    free(arg->namelist);
+    return CommonMakeDir(path);
 }
 
 std::string CopyImpl::GetRealPath(const std::string& path)
@@ -193,7 +174,7 @@ int CopyImpl::UpdateProgressSize(const std::string &filePath,
     if (iter == receivedInfo->fileList.end()) {
         receivedInfo->fileList.insert({ filePath, size });
         callback->progressSize += size;
-    } else { // file
+    } else {
         if (size > iter->second) {
             callback->progressSize += (size - iter->second);
             iter->second = size;
@@ -216,17 +197,6 @@ void CopyImpl::CheckOrCreatePath(const std::string &destPath)
     }
 }
 
-int CopyImpl::MakeDir(const std::string &path)
-{
-    std::filesystem::path destDir(path);
-    std::error_code errCode;
-    if (!std::filesystem::create_directory(destDir, errCode)) {
-        LOGE("Failed to create directory, error code: %{public}d", errCode.value());
-        return errCode.value();
-    }
-    return ERRNO_NOERR;
-}
-
 int CopyImpl::CopySubDir(const std::string &srcPath, const std::string &destPath, std::shared_ptr<FileInfos> infos)
 {
     if (!std::filesystem::exists(destPath)) {
@@ -246,7 +216,7 @@ int CopyImpl::CopySubDir(const std::string &srcPath, const std::string &destPath
         {
             std::lock_guard<std::recursive_mutex> lock(CopyImpl::mutex_);
             auto iter = CopyImpl::cjCbMap_.find(*infos);
-            auto receiveInfo = FileManagement::CreateSharedPtr<ReceiveInfo>();
+            auto receiveInfo = FileFs::CreateSharedPtr<ReceiveInfo>();
             if (receiveInfo == nullptr) {
                 LOGE("Failed to request heap memory.");
                 return ENOMEM;
@@ -265,12 +235,13 @@ int CopyImpl::CopySubDir(const std::string &srcPath, const std::string &destPath
 
 int CopyImpl::RecurCopyDir(const std::string &srcPath, const std::string &destPath, std::shared_ptr<FileInfos> infos)
 {
-    std::unique_ptr<struct NameList, decltype(Deleter) *> pNameList = { new (std::nothrow) struct NameList, Deleter };
+    std::unique_ptr<NameListArg, decltype(NameListArgDeleter)*> pNameList = {
+        new (std::nothrow) NameListArg, NameListArgDeleter };
     if (pNameList == nullptr) {
         LOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int num = scandir(srcPath.c_str(), &(pNameList->namelist), FilterFunc, alphasort);
+    int num = scandir(srcPath.c_str(), &(pNameList->namelist), CommonFilterFunc, alphasort);
     pNameList->direntNum = num;
 
     for (int i = 0; i < num; i++) {
@@ -322,12 +293,13 @@ int CopyImpl::CopyDirFunc(const std::string &src, const std::string &dest, std::
 
 uint64_t CopyImpl::GetDirSize(std::shared_ptr<FileInfos> infos, std::string path)
 {
-    std::unique_ptr<struct NameList, decltype(Deleter) *> pNameList = { new (std::nothrow) struct NameList, Deleter };
+    std::unique_ptr<NameListArg, decltype(NameListArgDeleter)*> pNameList = {
+        new (std::nothrow) NameListArg, NameListArgDeleter };
     if (pNameList == nullptr) {
         LOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int num = scandir(path.c_str(), &(pNameList->namelist), FilterFunc, alphasort);
+    int num = scandir(path.c_str(), &(pNameList->namelist), CommonFilterFunc, alphasort);
     pNameList->direntNum = num;
 
     long int size = 0;
@@ -352,7 +324,7 @@ uint64_t CopyImpl::GetDirSize(std::shared_ptr<FileInfos> infos, std::string path
 std::shared_ptr<FileInfos> CopyImpl::InitCjFileInfo(
     const std::string& srcUri, const std::string& destUri, sptr<CopyInfo> info)
 {
-    auto infos = FileManagement::CreateSharedPtr<FileInfos>();
+    auto infos = FileFs::CreateSharedPtr<FileInfos>();
     if (infos == nullptr) {
         LOGE("Failed to request heap memory by create FileInfos struct.");
         return nullptr;
@@ -435,8 +407,8 @@ int CopyImpl::CopyFile(const std::string &src, const std::string &dest, std::sha
         close(srcFd);
         return errno;
     }
-    auto srcFdg = FileManagement::CreateUniquePtr<DistributedFS::FDGuard>(srcFd, true);
-    auto destFdg = FileManagement::CreateUniquePtr<DistributedFS::FDGuard>(destFd, true);
+    auto srcFdg = FileFs::CreateUniquePtr<DistributedFS::FDGuard>(srcFd, true);
+    auto destFdg = FileFs::CreateUniquePtr<DistributedFS::FDGuard>(destFd, true);
     if (srcFdg == nullptr || destFdg == nullptr) {
         LOGE("Failed to request heap memory.");
         close(srcFd);
@@ -582,7 +554,7 @@ int CopyImpl::ExecCopy(std::shared_ptr<FileInfos> infos)
 
 std::shared_ptr<CjCallbackObject> CopyImpl::RegisterListener(std::shared_ptr<FileInfos>& infos)
 {
-    auto callback = FileManagement::CreateSharedPtr<CjCallbackObject>(infos->listenerId);
+    auto callback = FileFs::CreateSharedPtr<CjCallbackObject>(infos->listenerId);
     if (callback == nullptr) {
         LOGE("Failed to request heap memory by create callback object.");
         return nullptr;
@@ -683,7 +655,7 @@ int64_t CopyImpl::SubscribeLocalListener(std::shared_ptr<FileInfos>& infos, std:
         CloseNotifyFd(infos, callback);
         return errno;
     }
-    auto receiveInfo = FileManagement::CreateSharedPtr<ReceiveInfo>();
+    auto receiveInfo = FileFs::CreateSharedPtr<ReceiveInfo>();
     if (receiveInfo == nullptr) {
         LOGE("Failed to request heap memory.");
         inotify_rm_watch(infos->notifyFd, newWd);

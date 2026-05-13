@@ -14,11 +14,14 @@
  */
 
 #include <cinttypes>
+#include <filesystem>
+#include <securec.h>
 
 #include "utils.h"
 #include "cj_common_ffi.h"
 #include "macro.h"
 #include "uni_error.h"
+#include "filemgmt_libhilog.h"
 
 namespace OHOS {
 namespace CJSystemapi {
@@ -55,6 +58,166 @@ std::tuple<int, std::unique_ptr<char[]>, size_t, int64_t> GetReadArg(size_t bufL
     }
 
     return { SUCCESS_CODE, move(buf), retLen, offset };
+}
+
+void NameListArgDeleter(NameListArg *arg)
+{
+    if (arg == nullptr) {
+        return;
+    }
+    for (int i = 0; i < arg->direntNum; i++) {
+        free((arg->namelist)[i]);
+        (arg->namelist)[i] = nullptr;
+    }
+    free(arg->namelist);
+    arg->namelist = nullptr;
+    delete arg;
+    arg = nullptr;
+}
+
+int CommonFilterFunc(const struct dirent *filename)
+{
+    if (std::string_view(filename->d_name) == "." || std::string_view(filename->d_name) == "..") {
+        return DISMATCH;
+    }
+    return MATCH;
+}
+
+int CommonMakeDir(const std::string &path)
+{
+    std::filesystem::path destDir(path);
+    std::error_code errCode;
+    if (!std::filesystem::create_directory(destDir, errCode)) {
+        LOGE("Failed to create directory, error code: %{public}d", errCode.value());
+        return errCode.value();
+    }
+    return ERRNO_NOERR;
+}
+
+char** VectorToCArrString(std::vector<std::string> &vec)
+{
+    char** result = new(std::nothrow) char* [vec.size()];
+    if (result == nullptr) {
+        return nullptr;
+    }
+    size_t temp = 0;
+    for (size_t i = 0; i < vec.size(); i++) {
+        result[i] = new char[vec[i].length() + 1];
+        if (result[i] == nullptr) {
+            break;
+        }
+        if (strcpy_s(result[i], vec[i].length() + 1, vec[i].c_str()) != 0) {
+            delete[] result[i];
+            result[i] = nullptr;
+            break;
+        }
+        temp++;
+    }
+    if (temp != vec.size()) {
+        for (size_t j = temp; j > 0; j--) {
+            delete[] result[j - 1];
+            result[j - 1] = nullptr;
+        }
+        delete[] result;
+        result = nullptr;
+        return nullptr;
+    }
+    return result;
+}
+
+CConflictFiles* VectorToCConflict(std::vector<struct ConflictFiles> &errfiles)
+{
+    CConflictFiles* result = new(std::nothrow) CConflictFiles[errfiles.size()];
+    if (result == nullptr) {
+        return nullptr;
+    }
+    size_t temp = 0;
+    for (size_t i = 0; i < errfiles.size(); i++) {
+        size_t srcFilesLen = errfiles[i].srcFiles.length() + 1;
+        result[i].srcFiles = new(std::nothrow) char[srcFilesLen];
+        if (result[i].srcFiles == nullptr) {
+            break;
+        }
+        if (strcpy_s(result[i].srcFiles, srcFilesLen, errfiles[i].srcFiles.c_str()) != 0) {
+            delete[] result[i].srcFiles;
+            result[i].srcFiles = nullptr;
+            break;
+        }
+        size_t destFilesLen = errfiles[i].destFiles.length() + 1;
+        result[i].destFiles = new(std::nothrow) char[destFilesLen];
+        if (result[i].destFiles == nullptr) {
+            delete[] result[i].srcFiles;
+            result[i].srcFiles = nullptr;
+            break;
+        }
+        if (strcpy_s(result[i].destFiles, destFilesLen, errfiles[i].destFiles.c_str()) != 0) {
+            delete[] result[i].srcFiles;
+            delete[] result[i].destFiles;
+            result[i].srcFiles = nullptr;
+            result[i].destFiles = nullptr;
+            break;
+        }
+        temp++;
+    }
+    if (temp != errfiles.size()) {
+        for (size_t j = temp; j > 0; j--) {
+            delete[] result[j - 1].srcFiles;
+            delete[] result[j - 1].destFiles;
+            result[j - 1].srcFiles = nullptr;
+            result[j - 1].destFiles = nullptr;
+        }
+        delete[] result;
+        return nullptr;
+    }
+    return result;
+}
+
+CConflictFiles* DequeToCConflict(std::deque<struct ConflictFiles> &errfiles)
+{
+    CConflictFiles* result = new(std::nothrow) CConflictFiles[errfiles.size()];
+    if (result == nullptr) {
+        return nullptr;
+    }
+    size_t temp = 0;
+    for (size_t i = 0; i < errfiles.size(); i++) {
+        size_t srcFilesLen = errfiles[i].srcFiles.length() + 1;
+        result[i].srcFiles = static_cast<char*>(malloc(srcFilesLen));
+        if (result[i].srcFiles == nullptr) {
+            break;
+        }
+        if (strcpy_s(result[i].srcFiles, srcFilesLen, errfiles[i].srcFiles.c_str()) != 0) {
+            free(result[i].srcFiles);
+            result[i].srcFiles = nullptr;
+            break;
+        }
+        size_t destFilesLen = errfiles[i].destFiles.length() + 1;
+        result[i].destFiles = static_cast<char*>(malloc(destFilesLen));
+        if (result[i].destFiles == nullptr) {
+            free(result[i].srcFiles);
+            result[i].srcFiles = nullptr;
+            break;
+        }
+        if (strcpy_s(result[i].destFiles, destFilesLen, errfiles[i].destFiles.c_str()) != 0) {
+            free(result[i].srcFiles);
+            free(result[i].destFiles);
+            result[i].srcFiles = nullptr;
+            result[i].destFiles = nullptr;
+            break;
+        }
+        temp++;
+    }
+    if (temp != errfiles.size()) {
+        for (size_t j = temp; j > 0; j--) {
+            free(result[j - 1].srcFiles);
+            free(result[j - 1].destFiles);
+            result[j - 1].srcFiles = nullptr;
+            result[j - 1].destFiles = nullptr;
+        }
+        delete[] result;
+        result = nullptr;
+        return nullptr;
+    }
+    return result;
 }
 }
 

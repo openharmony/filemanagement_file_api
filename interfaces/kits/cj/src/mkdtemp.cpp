@@ -43,7 +43,6 @@ char* MallocCString(const std::string& origin)
 
 RetDataCString MkdtempImpl::Mkdtemp(const std::string& prefix)
 {
-    LOGI("FS_TEST:: MkdtempImpl::Mkdtemp start");
     RetDataCString ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = nullptr };
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> mkdtemp_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
@@ -59,7 +58,6 @@ RetDataCString MkdtempImpl::Mkdtemp(const std::string& prefix)
         return ret;
     }
     ret.data = MallocCString(mkdtemp_req->path);
-    LOGI("FS_TEST:: MkdtempImpl::Mkdtemp end");
     return ret;
 }
 

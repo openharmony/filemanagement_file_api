@@ -27,7 +27,6 @@ using namespace std;
 
 int FsyncImpl::Fsync(int32_t fd)
 {
-    LOGI("FS_TEST::FsyncImpl::Fsync start");
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> fsync_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!fsync_req) {
@@ -39,7 +38,6 @@ int FsyncImpl::Fsync(int32_t fd)
         LOGE("Failed to transfer data associated with file descriptor: %{public}d", fd);
         return ret;
     }
-    LOGI("FS_TEST::FsyncImpl::Fsync success");
     return ret;
 }
 

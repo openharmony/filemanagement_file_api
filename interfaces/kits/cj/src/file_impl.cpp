@@ -20,7 +20,7 @@
 #include "uni_error.h"
 #include "open.h"
 #include "utils.h"
-#include "file_utils.h"
+#include "cj_file_utils.h"
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 #include "uri.h"
 #include "datashare_helper.h"
@@ -259,7 +259,6 @@ int FileEntity::GetFD(int64_t id)
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 std::tuple<int32_t, sptr<FileEntity>> FileEntity::Dup(int32_t fd)
 {
-    LOGI("FS_TEST::FileEntity::Dup start");
     if (fd < 0) {
         LOGE("Invalid fd");
         return {EINVAL, nullptr};
@@ -403,7 +402,6 @@ int FileEntity::UnLock(int64_t id)
 
 RetDataCString FileEntity::GetParent()
 {
-    LOGI("FS_TEST::FileEntity::GetParent start");
     RetDataCString ret = { .code = EINVAL, .data = nullptr };
     string path(path_);
     if (uri_.length() != 0) {
@@ -437,7 +435,6 @@ RetDataCString FileEntity::GetParent()
         return ret;
     }
     ret.data = result;
-    LOGI("FS_TEST::FileEntity::GetParent success");
     return ret;
 }
 #endif

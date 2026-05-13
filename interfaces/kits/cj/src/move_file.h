@@ -19,7 +19,7 @@
 #include <string>
 
 #include "filemgmt_libn.h"
-#include "file_utils.h"
+#include "cj_file_utils.h"
 
 namespace OHOS {
 namespace CJSystemapi {

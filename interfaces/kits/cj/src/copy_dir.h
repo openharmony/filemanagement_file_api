@@ -25,9 +25,6 @@ namespace CJSystemapi {
 constexpr int COPYMODE_MIN = 0;
 constexpr int COPYMODE_MAX = 1;
 
-constexpr int DISMATCH = 0;
-constexpr int MATCH = 1;
-
 enum ModeOfCopyDir {
     DIRMODE_FILE_COPY_THROW_ERR = 0,
     DIRMODE_FILE_COPY_REPLACE

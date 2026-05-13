@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "file_utils.h"
+#include "cj_file_utils.h"
 #include "fd_guard.h"
 #include "utils.h"
 #include "uv.h"
