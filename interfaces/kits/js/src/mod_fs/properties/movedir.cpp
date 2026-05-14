@@ -27,6 +27,8 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -321,11 +323,14 @@ napi_value MoveDir::Sync(napi_env env, napi_callback_info info)
     }
 
     deque<struct ErrFiles> errfiles = {};
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.moveDirSync");
     int ret = MoveDirFunc(src.get(), dest.get(), mode, errfiles);
     if (ret == EEXIST) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.moveDirSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErrAddData(env, EEXIST, GetErrData(env, errfiles));
         return nullptr;
     } else if (ret) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.moveDirSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -357,14 +362,15 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.moveDir");
     auto cbExec = [srcPath = string(src.get()), destPath = string(dest.get()), mode = mode, arg]() -> NError {
         arg->errNo = MoveDirFunc(srcPath, destPath, mode, arg->errfiles);
         if (arg->errNo) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.moveDir.Err", NError(arg->errNo).GetErrCode());
             return NError(arg->errNo);
         }
         return NError(ERRNO_NOERR);
     };
-
     auto cbComplCallback = [arg, mode = mode](napi_env env, NError err) -> NVal {
         if (arg->errNo == EEXIST) {
             napi_value data = err.GetNapiErr(env);
@@ -379,7 +385,6 @@ napi_value MoveDir::Async(napi_env env, napi_callback_info info)
         }
         return NVal::CreateUndefined(env);
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
             !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {

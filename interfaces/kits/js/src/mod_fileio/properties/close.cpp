@@ -19,6 +19,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -42,6 +43,7 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.closeSync");
     if (close(fd) == -1) {
         UniError(errno).ThrowErr(env);
         return nullptr;
@@ -64,6 +66,7 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.close");
     auto cbExec = [fd = fd](napi_env env) -> UniError {
         int ret = close(fd);
         if (ret == -1) {

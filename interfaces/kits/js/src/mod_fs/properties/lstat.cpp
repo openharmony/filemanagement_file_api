@@ -23,6 +23,7 @@
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -66,12 +67,14 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!lstat_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.lstatSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     int ret = uv_fs_lstat(nullptr, lstat_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to get stat of file, ret: %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.lstatSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -123,7 +126,11 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [arg, path]() -> NError {
-        return LstatExec(arg, path);
+        auto err = LstatExec(arg, path);
+        if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.lstat.Err", err.GetErrCode());
+        }
+        return err;
     };
 
     auto cbCompl = [arg](napi_env env, NError err) -> NVal {

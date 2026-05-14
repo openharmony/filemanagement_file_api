@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -96,6 +97,7 @@ napi_value Rmdirent::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.rmdirSync");
     auto err = rmdirent(env, string(path.get()));
     if (err) {
         err.ThrowErr(env);
@@ -118,6 +120,7 @@ napi_value Rmdirent::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.rmdir");
     auto cbExec = [path = string(path.get())](napi_env env) -> UniError {
         return rmdirent(env, path);
     };

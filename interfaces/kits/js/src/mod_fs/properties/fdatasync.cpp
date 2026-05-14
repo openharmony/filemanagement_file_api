@@ -23,6 +23,7 @@
 
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -44,16 +45,20 @@ napi_value Fdatasync::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.fdatasyncSync");
+
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fdatasync_req = {
         new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!fdatasync_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.fdatasyncSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     int ret = uv_fs_fdatasync(nullptr, fdatasync_req.get(), fd, nullptr);
     if (ret < 0) {
         HILOGE("Failed to transfer data associated with file descriptor: %{public}d, ret:%{public}d", fd, ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.fdatasyncSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -77,16 +82,20 @@ napi_value Fdatasync::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.fdatasync");
+
     auto cbExec = [fd = fd]() -> NError {
         std::unique_ptr<uv_fs_t, decltype(CommonFunc::fs_req_cleanup)*> fdatasync_req = {
             new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!fdatasync_req) {
             HILOGE("Failed to request heap memory.");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.fdatasync.Err", NError(ENOMEM).GetErrCode());
             return NError(ENOMEM);
         }
         int ret = uv_fs_fdatasync(nullptr, fdatasync_req.get(), fd, nullptr);
         if (ret < 0) {
             HILOGE("Failed to transfer data associated with file descriptor: %{public}d, ret %{public}d", fd, ret);
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.fdatasync.Err", NError(ret).GetErrCode());
             return NError(ret);
         } else {
             return NError(ERRNO_NOERR);

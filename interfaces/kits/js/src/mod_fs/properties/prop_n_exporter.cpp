@@ -29,6 +29,7 @@
 #include "fdatasync.h"
 #include "file_fs_trace.h"
 #include "file_utils.h"
+#include "file_fs_metrics.h"
 #include "filemgmt_libn.h"
 #include "fsync.h"
 #include "js_native_api_types.h"
@@ -275,6 +276,7 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
     int ret = AccessCore(args.path, args.mode, args.flag);
     if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
         HILOGE("Failed to access file by path, ret:%{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.accessSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -302,6 +304,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
     auto result = CreateSharedPtr<AsyncAccessArg>();
     if (result == nullptr) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.access.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -312,7 +315,11 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         } else {
             HILOGE("Accesscore finish ret %{public}d", ret);
         }
-        return (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) ? NError(ret) : NError(ERRNO_NOERR);
+        if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.access.Err", NError(ret).GetErrCode());
+            return NError(ret);
+        }
+        return NError(ERRNO_NOERR);
     };
 
     auto cbComplete = [result](napi_env env, NError err) -> NVal {
@@ -352,11 +359,13 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
             new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!unlink_req) {
             HILOGE("Failed to request heap memory.");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.unlink.Err", NError(ENOMEM).GetErrCode());
             return NError(ENOMEM);
         }
         int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
             HILOGD("Failed to unlink with path ret %{public}d", ret);
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.unlink.Err", NError(ret).GetErrCode());
             return NError(ret);
         }
         return NError(ERRNO_NOERR);
@@ -399,6 +408,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!unlink_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.unlinkSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -407,6 +417,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     traceUvUnlink.End();
     if (ret < 0) {
         HILOGD("Failed to unlink with path ret %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.unlinkSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         if (FileApiDebug::isLogEnabled) {
             HILOGD("Path is %{private}s", path.get());
@@ -491,7 +502,11 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
     }
 #endif
     auto cbExec = [path = string(tmp.get()), recursion, hasOption]() -> NError {
-        return MkdirExec(path, recursion, hasOption);
+        auto err = MkdirExec(path, recursion, hasOption);
+        if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.mkdir.Err", err.GetErrCode());
+        }
+        return err;
     };
     auto cbCompl = [](napi_env env, NError err) -> NVal {
         if (err) {
@@ -540,6 +555,7 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
 #endif
     auto err = MkdirExec(path.get(), recursion, hasOption);
     if (err) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.mkdirSync.Err", err.GetErrCode());
         err.ThrowErr(env);
         if (FileApiDebug::isLogEnabled) {
             HILOGD("Path is %{private}s, recursion is %{public}d", path.get(), recursion);
@@ -587,12 +603,14 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.readSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     int ret = uv_fs_read(nullptr, read_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to read file for %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.readSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -607,11 +625,13 @@ static NError ReadExec(shared_ptr<AsyncIOReadArg> arg, char *buf, size_t len, in
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.read.Err", NError(ENOMEM).GetErrCode());
         return NError(ENOMEM);
     }
     int ret = uv_fs_read(nullptr, read_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to read file for %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.read.Err", NError(ret).GetErrCode());
         return NError(ret);
     }
     arg->lenRead = ret;
@@ -653,6 +673,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     auto arg = CreateSharedPtr<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.read.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -684,11 +705,13 @@ static NError WriteExec(shared_ptr<AsyncIOWrtieArg> arg, char *buf, size_t len, 
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!write_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.write.Err", NError(ENOMEM).GetErrCode());
         return NError(ENOMEM);
     }
     int ret = uv_fs_write(nullptr, write_req.get(), fd, &buffer, 1, offset, nullptr);
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.write.Err", NError(ret).GetErrCode());
         return NError(ret);
     }
     arg->actLen = ret;
@@ -726,6 +749,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
     auto arg = CreateSharedPtr<AsyncIOWrtieArg>(move(bufGuard));
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.write.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -785,6 +809,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!write_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.writeSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -793,6 +818,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
     traceUvWrite.End();
     if (ret < 0) {
         HILOGE("Failed to write file for %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.writeSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }

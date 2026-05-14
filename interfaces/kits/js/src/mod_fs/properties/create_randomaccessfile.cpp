@@ -20,6 +20,8 @@
 #include "common_func.h"
 #include "file_utils.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -194,12 +196,14 @@ napi_value CreateRandomAccessFile::Sync(napi_env env, napi_callback_info info)
             new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.createRandomAccessFileSync.Err", NError(ENOMEM).GetErrCode());
             NError(ENOMEM).ThrowErr(env);
             return nullptr;
         }
         int ret = uv_fs_open(nullptr, open_req.get(), fileInfo.path.get(), flags, S_IRUSR |
             S_IWUSR | S_IRGRP | S_IWGRP, NULL);
         if (ret < 0) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.createRandomAccessFileSync.Err", NError(ret).GetErrCode());
             NError(ret).ThrowErr(env);
             return nullptr;
         }
@@ -227,11 +231,13 @@ NError AsyncExec(shared_ptr<AsyncCreateRandomAccessFileArg> arg,
             new (nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!open_req) {
             HILOGE("Failed to request heap memory.");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.createRandomAccessFile.Err", NError(ENOMEM).GetErrCode());
             return NError(ENOMEM);
         }
         int ret = uv_fs_open(nullptr, open_req.get(), fileInfo->path.get(), flags, S_IRUSR |
             S_IWUSR | S_IRGRP | S_IWGRP, NULL);
         if (ret < 0) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.createRandomAccessFile.Err", NError(ret).GetErrCode());
             return NError(ret);
         }
         fileInfo->fdg->SetFD(open_req.get()->result, false);

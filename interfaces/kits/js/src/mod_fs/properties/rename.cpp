@@ -21,6 +21,7 @@
 
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -55,12 +56,14 @@ napi_value Rename::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!rename_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.renameSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     int ret = uv_fs_rename(nullptr, rename_req.get(), src.get(), dest.get(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to rename file with path ret %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.renameSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -96,11 +99,13 @@ napi_value Rename::Async(napi_env env, napi_callback_info info)
             new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!rename_req) {
             HILOGE("Failed to request heap memory.");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.rename.Err", NError(ENOMEM).GetErrCode());
             return NError(ENOMEM);
         }
         int ret = uv_fs_rename(nullptr, rename_req.get(), opath.c_str(), npath.c_str(), nullptr);
         if (ret < 0) {
             HILOGE("Failed to rename file with path ret %{public}d", ret);
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.rename.Err", NError(ret).GetErrCode());
             return NError(ret);
         }
         return NError(ERRNO_NOERR);

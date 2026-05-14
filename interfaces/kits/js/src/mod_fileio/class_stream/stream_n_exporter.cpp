@@ -32,6 +32,7 @@
 #include "securec.h"
 #include "stream_entity.h"
 #include "uni_error.h"
+#include "file_fs_metrics.h"
 
 namespace OHOS {
 namespace DistributedFS {
@@ -57,6 +58,7 @@ napi_value StreamNExporter::ReadSync(napi_env env, napi_callback_info info)
         filp = streamEntity->fp.get();
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Stream.readSync");
     void *buf = nullptr;
     size_t len = 0;
     int64_t pos = -1;
@@ -92,6 +94,7 @@ napi_value StreamNExporter::CloseSync(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Stream may have been closed yet");
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Stream.closeSync");
     streamEntity->fp.reset();
     (void)NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
 
@@ -116,6 +119,7 @@ napi_value StreamNExporter::WriteSync(napi_env env, napi_callback_info info)
         filp = streamEntity->fp.get();
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Stream.writeSync");
     void *buf = nullptr;
     size_t len = 0;
     int64_t position = -1;
@@ -156,7 +160,6 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
     }
-
     bool succ = false;
     FILE *filp = nullptr;
     int64_t position = -1;
@@ -166,7 +169,6 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
     filp = streamEntity->fp.get();
-
     unique_ptr<char[]> bufGuard = nullptr;
     void *buf = nullptr;
     size_t len = 0;
@@ -176,6 +178,7 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Stream.write");
     auto arg = make_shared<AsyncWriteArg>(move(bufGuard));
     auto cbExec = [arg, buf, len, filp, position](napi_env env) -> UniError {
         if (position >= 0 && (fseek(filp, static_cast<long>(position), SEEK_SET) == -1)) {
@@ -188,14 +191,12 @@ napi_value StreamNExporter::Write(napi_env env, napi_callback_info info)
         }
         return UniError(ERRNO_NOERR);
     };
-
     auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
         return { NVal::CreateInt64(env, arg->actLen) };
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
         !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
@@ -225,7 +226,6 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
     }
-
     /* To get entity */
     auto streamEntity = NClass::GetEntityOf<StreamEntity>(env, funcArg.GetThisVar());
     if (!streamEntity || !streamEntity->fp) {
@@ -234,7 +234,6 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
     }
     FILE *filp = nullptr;
     filp = streamEntity->fp.get();
-
     bool succ = false;
     void *buf = nullptr;
     size_t len = 0;
@@ -245,7 +244,7 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
     if (!succ) {
         return nullptr;
     }
-
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Stream.read");
     auto arg = make_shared<AsyncReadArg>(NVal(env, funcArg[NARG_POS::FIRST]));
     auto cbExec = [arg, buf, position, filp, len, offset](napi_env env) -> UniError {
         if (position >= 0 && (fseek(filp, static_cast<long>(position), SEEK_SET) == -1)) {
@@ -261,7 +260,6 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
             return UniError(ERRNO_NOERR);
         }
     };
-
     auto cbCompl = [arg](napi_env env, UniError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
@@ -274,7 +272,6 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
             });
         return { obj };
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
         !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
@@ -283,7 +280,6 @@ napi_value StreamNExporter::Read(napi_env env, napi_callback_info info)
         NVal cb(env, funcArg[((funcArg.GetArgc() == NARG_CNT::TWO) ? NARG_POS::SECOND : NARG_POS::THIRD)]);
         return NAsyncWorkCallback(env, thisVar, cb).Schedule("FileIOStreamRead", cbExec, cbCompl).val_;
     }
-
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -301,6 +297,7 @@ napi_value StreamNExporter::Close(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Stream.close");
     auto fp = NClass::RemoveEntityOfFinal<StreamEntity>(env, funcArg.GetThisVar());
     if (!fp) {
         UniError(EINVAL).ThrowErr(env);

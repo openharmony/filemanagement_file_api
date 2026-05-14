@@ -22,4 +22,9 @@ use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 declare_args() {
     file_api_read_optimize = false
     file_api_feature_hyperaio = false
+
+    file_api_hiviewdfx_api_metrics_enable = false
+    if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
+        file_api_hiviewdfx_api_metrics_enable = true
+    }
 }

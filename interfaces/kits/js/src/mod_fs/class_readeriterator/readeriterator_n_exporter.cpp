@@ -15,6 +15,7 @@
 
 #include "readeriterator_n_exporter.h"
 
+#include "file_fs_metrics.h"
 #include "filemgmt_libhilog.h"
 #include "file_utils.h"
 #include "readeriterator_entity.h"
@@ -41,6 +42,7 @@ napi_value ReaderIteratorNExporter::Constructor(napi_env env, napi_callback_info
     }
     if (!NClass::SetEntityFor<ReaderIteratorEntity>(env, funcArg.GetThisVar(), move(readerIteratorEntity))) {
         HILOGE("Failed to set reader iterator entity");
+        METRICS_COUNT("CoreFileKit.fileio.Dyn.ReaderIterator.Constructor.unknownErr");
         NError(UNKROWN_ERR).ThrowErr(env);
         return nullptr;
     }
@@ -58,6 +60,8 @@ napi_value ReaderIteratorNExporter::Next(napi_env env, napi_callback_info info)
     auto readerIteratorEntity = NClass::GetEntityOf<ReaderIteratorEntity>(env, funcArg.GetThisVar());
     if (!readerIteratorEntity) {
         HILOGE("Failed to get reader iterator entity");
+        METRICS_COUNT("CoreFileKit.fileio.Dyn.ReaderIterator.next.unknownErr");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.ReaderIterator.next.Err", NError(UNKROWN_ERR).GetErrCode());
         NError(UNKROWN_ERR).ThrowErr(env);
         return nullptr;
     }
@@ -65,6 +69,7 @@ napi_value ReaderIteratorNExporter::Next(napi_env env, napi_callback_info info)
     Str *str = NextLine(readerIteratorEntity->iterator);
     if (str == nullptr && readerIteratorEntity->offset != 0) {
         HILOGE("Failed to get next line, error:%{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.ReaderIterator.next.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -97,12 +102,14 @@ bool ReaderIteratorNExporter::Export()
         std::move(props));
     if (!succ) {
         HILOGE("Failed to define class");
+        METRICS_COUNT("CoreFileKit.fileio.Dyn.ReaderIterator.Export.unknownErr");
         NError(UNKROWN_ERR).ThrowErr(exports_.env_);
         return false;
     }
     succ = NClass::SaveClass(exports_.env_, className, classValue);
     if (!succ) {
         HILOGE("Failed to save class");
+        METRICS_COUNT("CoreFileKit.fileio.Dyn.ReaderIterator.Export.unknownErr");
         NError(UNKROWN_ERR).ThrowErr(exports_.env_);
         return false;
     }

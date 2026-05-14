@@ -21,6 +21,8 @@
 #include "file_utils.h"
 #include "randomaccessfile_entity.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -145,6 +147,7 @@ napi_value RandomAccessFileNExporter::ReadSync(napi_env env, napi_callback_info 
     auto [succEntity, rafEntity] = GetRAFEntity(env, funcArg.GetThisVar());
     if (!succEntity) {
         HILOGE("Failed to get entity of RandomAccessFile");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.readSync.Err", NError(EIO).GetErrCode());
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -159,6 +162,7 @@ napi_value RandomAccessFileNExporter::ReadSync(napi_env env, napi_callback_info 
     int actLen = DoReadRAF(env, buf, len, rafEntity->fd.get()->GetFD(), offset);
     if (actLen < 0) {
         HILOGE("Failed to read file for %{public}d", actLen);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.readSync.Err", NError(actLen).GetErrCode());
         NError(actLen).ThrowErr(env);
         return nullptr;
     }
@@ -197,10 +201,12 @@ static napi_value ReadExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnti
     auto cbExec = [env, arg, buf, len, offset, rafEntity]() -> NError {
         if (!rafEntity || !rafEntity->fd.get()) {
             HILOGE("RandomAccessFile has been closed in read cbExec possibly");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.read.Err", NError(EIO).GetErrCode());
             return NError(EIO);
         }
         int actLen = DoReadRAF(env, buf, len, rafEntity->fd.get()->GetFD(), offset);
         if (actLen < 0) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.read.Err", NError(actLen).GetErrCode());
             return NError(actLen);
         }
         arg->lenRead = actLen;
@@ -236,6 +242,7 @@ napi_value RandomAccessFileNExporter::Read(napi_env env, napi_callback_info info
     auto[succ, rafEntity] = GetRAFEntity(env, funcArg.GetThisVar());
     if (!succ) {
         HILOGE("Failed to get entity of RandomAccessFile");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.read.Err", NError(EIO).GetErrCode());
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -253,6 +260,7 @@ napi_value RandomAccessFileNExporter::WriteSync(napi_env env, napi_callback_info
     auto [succEntity, rafEntity] = GetRAFEntity(env, funcArg.GetThisVar());
     if (!succEntity) {
         HILOGE("Failed to get entity of RandomAccessFile");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.writeSync.Err", NError(EIO).GetErrCode());
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -266,6 +274,7 @@ napi_value RandomAccessFileNExporter::WriteSync(napi_env env, napi_callback_info
     offset = CalculateOffset(offset, rafEntity->filePointer);
     int writeLen = DoWriteRAF(env, buf, len, rafEntity->fd.get()->GetFD(), offset);
     if (writeLen < 0) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.writeSync.Err", NError(writeLen).GetErrCode());
         NError(writeLen).ThrowErr(env);
         return nullptr;
     }
@@ -296,7 +305,6 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     auto arg = CreateSharedPtr<AsyncIORafWriteArg>(move(bufGuard));
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
@@ -307,11 +315,13 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
     auto cbExec = [env, arg, buf, len, fd = rafEntity->fd.get()->GetFD(), offset, rafEntity]() -> NError {
         if (!rafEntity || !rafEntity->fd.get()) {
             HILOGE("RandomAccessFile has been closed in write cbExec possibly");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.write.Err", NError(EIO).GetErrCode());
             return NError(EIO);
         }
         int writeLen = DoWriteRAF(env, buf, len, fd, offset);
         if (writeLen < 0) {
             HILOGE("Failed to write file for %{public}d", writeLen);
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.write.Err", NError(writeLen).GetErrCode());
             return NError(writeLen);
         }
         arg->actLen = writeLen;
@@ -324,7 +334,6 @@ static napi_value WriteExec(napi_env env, NFuncArg &funcArg, RandomAccessFileEnt
         }
         return { NVal::CreateInt64(env, arg->actLen) };
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
         !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
@@ -347,6 +356,7 @@ napi_value RandomAccessFileNExporter::Write(napi_env env, napi_callback_info inf
     auto[succ, rafEntity] = GetRAFEntity(env, funcArg.GetThisVar());
     if (!succ) {
         HILOGE("Failed to get entity of RandomAccessFile");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.write.Err", NError(EIO).GetErrCode());
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -405,6 +415,7 @@ napi_value RandomAccessFileNExporter::CloseSync(napi_env env, napi_callback_info
     auto [succEntity, rafEntity] = GetRAFEntity(env, funcArg.GetThisVar());
     if (!succEntity) {
         HILOGE("Failed to get entity of RandomAccessFile");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.close.Err", NError(EIO).GetErrCode());
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -413,12 +424,14 @@ napi_value RandomAccessFileNExporter::CloseSync(napi_env env, napi_callback_info
 
     auto err = CloseFdWithFdsan(rafEntity->fd.get()->GetFD(), fileTag);
     if (err) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.close.Err", err.GetErrCode());
         err.ThrowErr(env);
         return nullptr;
     }
     auto fp = NClass::RemoveEntityOfFinal<RandomAccessFileEntity>(env, funcArg.GetThisVar());
     if (!fp) {
         HILOGE("Failed to remove entity of RandomAccessFile");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.close.Err", NError(EIO).GetErrCode());
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -509,6 +522,7 @@ napi_value RandomAccessFileNExporter::GetReadStream(napi_env env, napi_callback_
     auto [succEntity, rafEntity] = GetRAFEntity(env, funcArg.GetThisVar());
     if (!succEntity) {
         HILOGE("Failed to get entity of RandomAccessFile");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.getReadStream.Err", NError(EIO).GetErrCode());
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -517,6 +531,7 @@ napi_value RandomAccessFileNExporter::GetReadStream(napi_env env, napi_callback_
     unsigned int uflags = static_cast<unsigned int>(flags);
     if (((uflags & O_ACCMODE) != O_RDONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
         HILOGE("Failed to check Permission");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.getReadStream.Err", NError(EACCES).GetErrCode());
         NError(EACCES).ThrowErr(env);
         return nullptr;
     }
@@ -535,6 +550,7 @@ napi_value RandomAccessFileNExporter::GetWriteStream(napi_env env, napi_callback
     auto [succEntity, rafEntity] = GetRAFEntity(env, funcArg.GetThisVar());
     if (!succEntity) {
         HILOGE("Failed to get entity of RandomAccessFile");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.getWriteStream.Err", NError(EIO).GetErrCode());
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -543,6 +559,7 @@ napi_value RandomAccessFileNExporter::GetWriteStream(napi_env env, napi_callback
     unsigned int uflags = static_cast<unsigned int>(flags);
     if (((uflags & O_ACCMODE) != O_WRONLY) && ((uflags & O_ACCMODE) != O_RDWR)) {
         HILOGE("Failed to check Permission");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.RandomAccessFile.getWriteStream.Err", NError(EACCES).GetErrCode());
         NError(EACCES).ThrowErr(env);
         return nullptr;
     }

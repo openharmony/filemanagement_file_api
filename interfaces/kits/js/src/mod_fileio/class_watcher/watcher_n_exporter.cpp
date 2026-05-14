@@ -20,6 +20,7 @@
 #include <cstring>
 #include <memory>
 
+#include "file_fs_metrics.h"
 #include "log.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
@@ -65,6 +66,7 @@ napi_value WatcherNExporter::StopSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Hidden.Watcher.stopSync");
     watchEntity->fsEventReq_.reset();
     return NVal::CreateUndefined(env).val_;
 }
@@ -83,6 +85,7 @@ napi_value WatcherNExporter::Stop(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Watcher.stop");
     auto cbExec = [watchEntity](napi_env env) -> UniError {
         watchEntity->fsEventReq_.reset();
         return UniError(ERRNO_NOERR);

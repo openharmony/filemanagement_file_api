@@ -25,6 +25,8 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -67,6 +69,7 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
     traceFopen.End();
     if (!file) {
         HILOGE("Failed to fdopen file by path, errno is %{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.createStreamSync.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         if (FileApiDebug::isLogEnabled) {
             HILOGD("StreamPath is %{private}s, StreamMode is %{public}s", argPath.c_str(), argMode.c_str());
@@ -98,10 +101,13 @@ napi_value CreateStream::Async(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.createStream");
+
     auto cbExec = [arg, argPath = move(argPath), argMode = move(argMode)]() -> NError {
         FILE *file = fopen(argPath.c_str(), argMode.c_str());
         if (!file) {
             HILOGE("Failed to fdopen file by path");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.createStream.Err", NError(errno).GetErrCode());
             return NError(errno);
         }
         arg->fp = std::shared_ptr<FILE>(file, fclose);

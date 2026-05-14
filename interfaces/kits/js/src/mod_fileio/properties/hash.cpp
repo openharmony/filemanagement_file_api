@@ -19,6 +19,7 @@
 #include <string_view>
 #include <tuple>
 
+#include "file_fs_metrics.h"
 #include "file_helper/hash_file.h"
 
 namespace OHOS {
@@ -89,6 +90,7 @@ napi_value Hash::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.hash");
     auto arg = make_shared<string>();
     auto cbExec = [fpath = string(fpath.release()), arg, algType = algType](napi_env env) -> UniError {
         int ret = EIO;

@@ -19,6 +19,8 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace DistributedFS {
 namespace ModuleFileIO {
@@ -46,6 +48,7 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
             UniError(EINVAL).ThrowErr(env, "Invalid len");
         }
     }
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.truncateSync");
     int ret = truncate(path.get(), len);
     if (ret == -1) {
         UniError(errno).ThrowErr(env);
@@ -79,6 +82,7 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
         }
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.truncate");
     auto cbExec = [path = string(path.get()), len](napi_env env) -> UniError {
         int ret = truncate(path.c_str(), len);
         if (ret == -1) {

@@ -19,6 +19,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -30,6 +31,7 @@ using namespace std;
 
 napi_value Chown::Sync(napi_env env, napi_callback_info info)
 {
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.chownSync");
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -37,6 +39,7 @@ napi_value Chown::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     funcArg.InitArgs(NARG_CNT::THREE, NARG_CNT::FOUR);
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.chown");
     auto cbExec = [](napi_env env) -> UniError {
         return UniError(ERRNO_NOERR);
     };

@@ -18,6 +18,8 @@
 #include <sys/statvfs.h>
 #include <tuple>
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleStatfs {
@@ -400,6 +402,7 @@ napi_value GetFreeBytesSync(napi_env env, napi_callback_info info)
 
 napi_value GetFreeBytes(napi_env env, napi_callback_info info)
 {
+    METRICS_COUNT("CoreFileKit.statfs.Legacy.getFreeBytes");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         NError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
@@ -472,6 +475,7 @@ napi_value GetTotalBytesSync(napi_env env, napi_callback_info info)
 
 napi_value GetTotalBytes(napi_env env, napi_callback_info info)
 {
+    METRICS_COUNT("CoreFileKit.statfs.Legacy.getTotalBytes");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         NError(EINVAL).ThrowErr(env, "Number of arguments unmatched");

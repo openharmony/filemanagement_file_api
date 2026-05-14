@@ -19,6 +19,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -48,6 +49,7 @@ napi_value Rename::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.renameSync");
     if (rename(src.get(), dest.get()) == -1) {
         UniError(errno).ThrowErr(env);
         return nullptr;
@@ -76,6 +78,7 @@ napi_value Rename::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.rename");
     auto cbExec = [opath = string(src.get()), npath = string(dest.get())](napi_env env) -> UniError {
         int ret = rename(opath.c_str(), npath.c_str());
         if (ret == -1) {

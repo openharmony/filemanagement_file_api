@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "common_func.h"
+#include "file_fs_metrics.h"
 #include "n_async/n_async_work_callback.h"
 #include "n_async/n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -38,7 +39,6 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Number of arguments unmatched");
         return nullptr;
     }
-
     bool succ = false;
     unique_ptr<char[]> path = nullptr;
     tie(succ, path, ignore) = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
@@ -46,7 +46,6 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
     }
-
     unsigned int flags = O_RDONLY;
     if (funcArg.GetArgc() >= NARG_CNT::TWO) {
         auto [succGetFlags, authFlags] = NVal(env, funcArg[NARG_POS::SECOND]).ToInt32(O_RDONLY);
@@ -57,12 +56,10 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         flags = static_cast<unsigned int>(authFlags);
         (void)CommonFunc::ConvertJsFlags(flags);
     }
-
     int fd = -1;
     if (ModuleRemoteUri::RemoteUri::IsRemoteUri(path.get(), fd, flags)) {
         return NVal::CreateInt64(env, fd).val_;
     }
-
     int32_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
     if (funcArg.GetArgc() != NARG_CNT::THREE) {
         size_t flagsFirst { flags };
@@ -77,6 +74,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.openSync");
     fd = open(path.get(), flags, mode);
     if (fd == -1) {
         if (errno == ENAMETOOLONG) {
@@ -86,7 +84,6 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         UniError(errno).ThrowErr(env);
         return nullptr;
     }
-
     return NVal::CreateInt64(env, fd).val_;
 }
 
@@ -144,6 +141,7 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.open");
     auto arg = make_shared<int32_t>();
     auto cbExec = [path = string(path.get()), flags, mode, arg](napi_env env) -> UniError {
         return DoOpenExec(path, flags, mode, arg);

@@ -28,6 +28,8 @@
 #include "filemgmt_libn.h"
 #include "mmap_core.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -137,9 +139,11 @@ napi_value MmapNapi::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.mmapSync");
     auto result = MmapCore::DoMmap(fd, mode, offset, size);
     if (!result.IsSuccess()) {
         HILOGE("DoMmap failed");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.mmapSync.Err", NError(result.GetError().GetErrNo()).GetErrCode());
         NError(result.GetError().GetErrNo()).ThrowErr(env);
         return nullptr;
     }
@@ -180,9 +184,11 @@ napi_value MmapNapi::Async(napi_env env, napi_callback_info info)
     ctx->size = size;
     ctx->mapping = nullptr;
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.mmap");
     auto cbExec = [ctx]() -> NError {
         auto result = MmapCore::DoMmap(ctx->fd, ctx->mode, ctx->offset, ctx->size);
         if (!result.IsSuccess()) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.mmap.Err", NError(result.GetError().GetErrNo()).GetErrCode());
             return NError(result.GetError().GetErrNo());
         }
         ctx->mapping = result.GetData().value();

@@ -15,6 +15,7 @@
 
 #include "mkdtemp.h"
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -37,6 +38,7 @@ napi_value Mkdtemp::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.mkdtempSync");
     string path = tmp.get();
     if (mkdtemp(const_cast<char *>(path.c_str())) == nullptr) {
         UniError(errno).ThrowErr(env);
@@ -60,6 +62,7 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.mkdtemp");
     string path = tmp.get();
     auto arg = make_shared<string>();
     auto cbExec = [path, arg](napi_env env) -> UniError {

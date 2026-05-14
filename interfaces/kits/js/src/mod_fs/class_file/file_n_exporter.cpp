@@ -25,6 +25,7 @@
 
 #include "common_func.h"
 #include "file_entity.h"
+#include "file_fs_metrics.h"
 #include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -171,6 +172,7 @@ napi_value FileNExporter::GetParent(napi_env env, napi_callback_info info)
     auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
     if (!fileEntity) {
         HILOGE("Failed to get file entity");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.File.getParent.Err", NError(EINVAL).GetErrCode());
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -183,6 +185,7 @@ napi_value FileNExporter::GetParent(napi_env env, napi_callback_info info)
         auto [realPathRes, realPath] = RealPathCore(path);
         if (realPathRes) {
             HILOGE("Failed to get real path");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.File.getParent.Err", NError(realPathRes).GetErrCode());
             NError(realPathRes).ThrowErr(env);
             return nullptr;
         }
@@ -191,6 +194,7 @@ napi_value FileNExporter::GetParent(napi_env env, napi_callback_info info)
     auto pos = path.find_last_of('/');
     if (pos == string::npos) {
         HILOGE("Failed to split filename from path");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.File.getParent.Err", NError(ENOENT).GetErrCode());
         NError(ENOENT).ThrowErr(env);
         return nullptr;
     }
@@ -209,6 +213,7 @@ napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
     auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
     if (!fileEntity) {
         HILOGE("Failed to get file entity");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.File.lock.Err", NError(EINVAL).GetErrCode());
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -220,6 +225,7 @@ napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
     auto cbExec = [exclusive, fileEntity]() -> NError {
         if (!fileEntity || !fileEntity->fd_.get()) {
             HILOGE("File has been closed in Lock cbExec possibly");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.File.lock.Err", NError(EIO).GetErrCode());
             return NError(EIO);
         }
         int ret = 0;
@@ -227,6 +233,7 @@ napi_value FileNExporter::Lock(napi_env env, napi_callback_info info)
         ret = flock(fileEntity->fd_.get()->GetFD(), mode);
         if (ret < 0) {
             HILOGE("Failed to lock file");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.File.lock.Err", NError(errno).GetErrCode());
             return NError(errno);
         } else {
             return NError(ERRNO_NOERR);
@@ -265,6 +272,7 @@ napi_value FileNExporter::TryLock(napi_env env, napi_callback_info info)
     auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
     if (!fileEntity) {
         HILOGE("Failed to get file entity");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.File.tryLock.Err", NError(EINVAL).GetErrCode());
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -281,6 +289,7 @@ napi_value FileNExporter::TryLock(napi_env env, napi_callback_info info)
     traceFlock.End();
     if (ret < 0) {
         HILOGE("Failed to try to lock file");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.File.tryLock.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
     }
 
@@ -300,6 +309,7 @@ napi_value FileNExporter::UnLock(napi_env env, napi_callback_info info)
     auto fileEntity = GetFileEntity(env, funcArg.GetThisVar());
     if (!fileEntity) {
         HILOGE("Failed to get file entity");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.File.unlock.Err", NError(EINVAL).GetErrCode());
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -310,6 +320,7 @@ napi_value FileNExporter::UnLock(napi_env env, napi_callback_info info)
     traceFlock.End();
     if (ret < 0) {
         HILOGE("Failed to unlock file");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.File.unlock.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }

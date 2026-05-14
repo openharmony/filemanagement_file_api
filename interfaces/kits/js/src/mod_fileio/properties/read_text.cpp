@@ -23,6 +23,7 @@
 
 #include "common_func.h"
 #include "file_helper/fd_guard.h"
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -88,6 +89,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.readTextSync");
     struct stat statbf;
     FDGuard sfd;
     sfd.SetFD(open(path.get(), O_RDONLY));
@@ -187,6 +189,7 @@ napi_value ReadText::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.readText");
     auto arg = make_shared<AsyncReadTextArg>(NVal(env, funcArg.GetThisVar()));
     if (arg == nullptr) {
         return nullptr;

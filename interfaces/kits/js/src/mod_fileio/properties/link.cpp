@@ -19,6 +19,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -58,6 +59,7 @@ napi_value Link::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Hidden.linkSync");
     if (link(oldPath.c_str(), newPath.c_str()) == -1) {
         UniError(errno).ThrowErr(env);
         return nullptr;
@@ -79,6 +81,7 @@ napi_value Link::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Hidden.link");
     auto cbExec = [oldPath = move(oldPath), newPath = move(newPath)](napi_env env) -> UniError {
         int ret = link(oldPath.c_str(), newPath.c_str());
         if (ret == -1) {

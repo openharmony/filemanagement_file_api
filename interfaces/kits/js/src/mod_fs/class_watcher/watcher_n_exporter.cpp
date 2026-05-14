@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "common_func.h"
+#include "file_fs_metrics.h"
 #include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -67,12 +68,14 @@ napi_value WatcherNExporter::Stop(napi_env env, napi_callback_info info)
     auto watchEntity = NClass::GetEntityOf<WatcherEntity>(env, funcArg.GetThisVar());
     if (!watchEntity) {
         HILOGE("Failed to get watcherEntity when stop.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.Watcher.stop.Err", NError(EINVAL).GetErrCode());
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
     int ret = FileWatcher::GetInstance().StopNotify(watchEntity->data_);
     if (ret != ERRNO_NOERR) {
         HILOGE("Failed to stopNotify errno:%{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.Watcher.stop.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -92,6 +95,7 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
     auto watchEntity = NClass::GetEntityOf<WatcherEntity>(env, funcArg.GetThisVar());
     if (!watchEntity) {
         HILOGE("Failed to get watcherEntity when start.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.Watcher.start.Err", NError(EINVAL).GetErrCode());
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
@@ -99,6 +103,7 @@ napi_value WatcherNExporter::Start(napi_env env, napi_callback_info info)
     int ret = FileWatcher::GetInstance().StartNotify(watchEntity->data_);
     if (ret != ERRNO_NOERR) {
         HILOGE("Failed to startNotify.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.Watcher.start.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }

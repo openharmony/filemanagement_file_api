@@ -20,6 +20,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_metrics.h"
 #include "class_watcher/watcher_entity.h"
 #include "class_watcher/watcher_n_exporter.h"
 #include "file_utils.h"
@@ -75,6 +76,7 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.createWatcher");
     unique_ptr<WatcherInforArg> data = make_unique<WatcherInforArg>();
     data->events = event;
     data->env = env;

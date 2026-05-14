@@ -23,6 +23,8 @@
 #include "filemgmt_libhilog.h"
 #include "rust_file.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -76,6 +78,7 @@ static NVal InstantiateReaderIterator(napi_env env, void *iterator, int64_t offs
     napi_value objReaderIterator = NClass::InstantiateClass(env, ReaderIteratorNExporter::className_, {});
     if (!objReaderIterator) {
         HILOGE("Failed to instantiate class ReaderIterator");
+        METRICS_COUNT("CoreFileKit.fileio.Dyn.readLines.unknownErr");
         if (async) {
             return {env, NError(UNKROWN_ERR).GetNapiErr(env)};
         }
@@ -86,6 +89,7 @@ static NVal InstantiateReaderIterator(napi_env env, void *iterator, int64_t offs
     auto readerIteratorEntity = NClass::GetEntityOf<ReaderIteratorEntity>(env, objReaderIterator);
     if (!readerIteratorEntity) {
         HILOGE("Failed to get readerIteratorEntity");
+        METRICS_COUNT("CoreFileKit.fileio.Dyn.readLines.unknownErr");
         if (async) {
             return {env, NError(UNKROWN_ERR).GetNapiErr(env)};
         }
@@ -108,11 +112,13 @@ static NError AsyncExec(ReaderIteratorArg &readerIterator, const string &pathStr
     readerIterator.iterator = ::ReaderIterator(pathStr.c_str());
     if (readerIterator.iterator == nullptr) {
         HILOGE("Failed to read lines of the file, error: %{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.readLines.Err", NError(errno).GetErrCode());
         return NError(errno);
     }
     int ret = GetFileSize(pathStr, readerIterator.offset);
     if (ret < 0) {
         HILOGE("Failed to get size of the file ret %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.readLines.Err", NError(ret).GetErrCode());
         return NError(ret);
     }
 
@@ -150,6 +156,7 @@ napi_value ReadLines::Async(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.readLines");
     auto cbExec = [arg, pathStr = string(path.get())]() -> NError {
         return AsyncExec(*arg, pathStr);
     };
@@ -197,9 +204,11 @@ napi_value ReadLines::Sync(napi_env env, napi_callback_info info)
         }
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.readLinesSync");
     auto iterator = ::ReaderIterator(path.get());
     if (iterator == nullptr) {
         HILOGE("Failed to read lines of the file, error: %{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.readLinesSync.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -208,6 +217,7 @@ napi_value ReadLines::Sync(napi_env env, napi_callback_info info)
     int ret = GetFileSize(path.get(), offset);
     if (ret != 0) {
         HILOGE("Failed to get size of the file");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.readLinesSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }

@@ -20,6 +20,7 @@
 
 #include "class_stream/stream_entity.h"
 #include "class_stream/stream_n_exporter.h"
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_class.h"
@@ -80,6 +81,7 @@ napi_value FdopenStream::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.fdopenStreamSync");
     unique_ptr<FILE, decltype(&fclose)> fp = { fdopen(fd, mode.c_str()), fclose };
     if (!fp) {
         UniError(errno).ThrowErr(env);
@@ -106,6 +108,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.fdopenStream");
     auto arg = make_shared<AsyncFdopenStreamArg>();
     auto cbExec = [arg = arg, fd = fd, mode = mode](napi_env env) -> UniError {
         arg->fp = { fdopen(fd, mode.c_str()), fclose };

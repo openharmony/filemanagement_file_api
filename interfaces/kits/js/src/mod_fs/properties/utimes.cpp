@@ -19,6 +19,7 @@
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -53,6 +54,7 @@ napi_value Utimes::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!stat_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.utimes.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -60,6 +62,7 @@ napi_value Utimes::Sync(napi_env env, napi_callback_info info)
     int ret = uv_fs_stat(nullptr, stat_req.get(), path.get(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to get stat of the file by path");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.utimes.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -68,6 +71,7 @@ napi_value Utimes::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!utimes_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.utimes.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -77,6 +81,7 @@ napi_value Utimes::Sync(napi_env env, napi_callback_info info)
     ret = uv_fs_utime(nullptr, utimes_req.get(), path.get(), atime, mtime / MS, nullptr);
     if (ret < 0) {
         HILOGE("Failed to chang mtime of the file for %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.utimes.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }

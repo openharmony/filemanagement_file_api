@@ -19,6 +19,7 @@
 
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_class.h"
@@ -45,6 +46,7 @@ napi_value Lstat::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.lstatSync");
     struct stat buf;
     int ret = lstat(pathPtr.get(), &buf);
     if (ret == -1) {
@@ -84,6 +86,7 @@ napi_value Lstat::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.lstat");
     string path = tmp.get();
     auto arg = make_shared<AsyncStatArg>();
     auto cbExec = [arg, path](napi_env env) -> UniError {

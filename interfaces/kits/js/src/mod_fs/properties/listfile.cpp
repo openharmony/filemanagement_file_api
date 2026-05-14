@@ -26,6 +26,8 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
@@ -340,10 +342,12 @@ napi_value ListFile::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.listFileSync");
     vector<string> direntsRes;
     int ret = 0;
     ret = g_optionArgs.recursion ? RecursiveFunc(path.get(), direntsRes) : FilterFileRes(path.get(), direntsRes);
     if (ret) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.listFileSync.Err", NError(errno).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -360,45 +364,44 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     auto [succPath, path, unused] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succPath) {
         HILOGE("Invalid path");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     OptionArgs optionArgsTmp = {};
     if (!GetOptionArg(env, funcArg, optionArgsTmp, string(path.get()))) {
         HILOGE("Invalid options");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     auto arg = CreateSharedPtr<ListFileArgs>();
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.listFile");
     auto cbExec = [arg, optionArgsTmp]() -> NError {
         g_optionArgs = optionArgsTmp;
         int ret = 0;
         ret = g_optionArgs.recursion ? RecursiveFunc(g_optionArgs.path, arg->dirents) :
             FilterFileRes(g_optionArgs.path, arg->dirents);
         g_optionArgs.Clear();
-        return ret ? NError(ret) : NError(ERRNO_NOERR);
+        if (ret) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.listFile.Err", NError(errno).GetErrCode());
+            return NError(ret);
+        }
+        return NError(ERRNO_NOERR);
     };
-
     auto cbCompl = [arg, optionArgsTmp, path = string(path.get())](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
         return { env, DoListFileVector2NV(env, path, arg->dirents, optionArgsTmp.recursion) };
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
-
     if (funcArg.GetArgc() == NARG_CNT::ONE || (funcArg.GetArgc() == NARG_CNT::TWO &&
            !NVal(env, funcArg[NARG_POS::SECOND]).TypeIs(napi_function))) {
         return NAsyncWorkPromise(env, thisVar).Schedule(LIST_FILE_PRODUCE_NAME, cbExec, cbCompl).val_;

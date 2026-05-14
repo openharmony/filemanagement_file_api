@@ -22,6 +22,7 @@
 #include "class_stream/stream_n_exporter.h"
 #include "common_func.h"
 #include "file_utils.h"
+#include "file_fs_metrics.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS {
@@ -63,6 +64,7 @@ napi_value FdopenStream::Sync(napi_env env, napi_callback_info info)
     FILE *file = fdopen(fd, mode.c_str());
     if (!file) {
         HILOGE("Failed to fdopen file by path");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.fdopenStreamSync.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -93,6 +95,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
     shared_ptr<AsyncFdopenStreamArg> arg = CreateSharedPtr<AsyncFdopenStreamArg>();
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.fdopenStream.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -100,6 +103,7 @@ napi_value FdopenStream::Async(napi_env env, napi_callback_info info)
         FILE *file = fdopen(fd, mode.c_str());
         if (!file) {
             HILOGE("Failed to fdopen file by path");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.fdopenStream.Err", NError(errno).GetErrCode());
             return NError(errno);
         }
 
