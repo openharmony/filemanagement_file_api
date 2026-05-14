@@ -45,7 +45,7 @@ tuple<bool, napi_value> NClass::DefineClass(napi_env env,
 bool NClass::SaveClass(napi_env env, string className, napi_value exClass)
 {
     NClass &nClass = NClass::GetInstance();
-    lock_guard<std::mutex>(nClass.exClassMapLock);
+    lock_guard<std::mutex> lock(nClass.exClassMapLock);
 
     if (nClass.exClassMap.find(className) != nClass.exClassMap.end()) {
         return true;
@@ -74,9 +74,9 @@ void NClass::CleanClass(void *arg)
 {
     napi_env env = reinterpret_cast<napi_env>(arg);
     NClass &nClass = NClass::GetInstance();
-    lock_guard<std::mutex>(nClass.exClassMapLock);
+    lock_guard<std::mutex> lock(nClass.exClassMapLock);
     {
-        lock_guard<std::mutex>(nClass.wrapLock);
+        lock_guard<std::mutex> wrapLock(nClass.wrapLock);
         nClass.wrapReleased = true;
     }
     napi_status res;
@@ -92,7 +92,7 @@ void NClass::CleanClass(void *arg)
 napi_value NClass::InstantiateClass(napi_env env, const string& className, const vector<napi_value>& args)
 {
     NClass &nClass = NClass::GetInstance();
-    lock_guard<std::mutex>(nClass.exClassMapLock);
+    lock_guard<std::mutex> lock(nClass.exClassMapLock);
 
     auto it = nClass.exClassMap.find(className);
     if (it == nClass.exClassMap.end()) {
