@@ -444,7 +444,7 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         "Failed to create partition" } },
     { STORAGE_SERVICE_SYS_CAP_TAG + E_DELETE_PARTITION_ERROR, { STORAGE_SERVICE_SYS_CAP_TAG + E_DELETE_PARTITION_ERROR,
         "Failed to delete partition" } },
-    { STORAGE_SERVICE_SYS_CAP_TAG + E_GET_SYSTEM_DATA_SIZE, { STORAGE_SERVICE_SYS_CAP_TAG + E_FORMAT_PARTITION_ERROR,
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_FORMAT_PARTITION_ERROR, { STORAGE_SERVICE_SYS_CAP_TAG + E_FORMAT_PARTITION_ERROR,
         "Failed to format partition" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, "IPC error" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_URIS, { USER_FILE_SERVICE_SYS_CAP_TAG + E_URIS, "Invalid uri" } },
