@@ -16,7 +16,6 @@
 
 #include "common_func.h"
 #include "file_utils.h"
-#include "file_fs_metrics.h"
 #include "filemgmt_libhilog.h"
 #include "rust_file.h"
 
@@ -63,7 +62,6 @@ napi_value Lseek::Sync(napi_env env, napi_callback_info info)
     int64_t ret = ::Lseek(fd, offset, whence);
     if (ret < 0) {
         HILOGE("Failed to lseek, error:%{public}d", errno);
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.lseek.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }

@@ -25,8 +25,6 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
-#include "file_fs_metrics.h"
-
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -84,30 +82,27 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!open_req) {
         HILOGE("Failed to request heap memory.");
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readText.Err", NError(ENOMEM).GetErrCode());
         return NError(ENOMEM);
     }
     int ret = uv_fs_open(nullptr, open_req.get(), path.c_str(), O_RDONLY,
                          S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, nullptr);
     if (ret < 0) {
         HILOGE("Failed to open file, ret: %{public}d", ret);
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readText.Err", NError(errno).GetErrCode());
         return NError(errno);
     }
+
     sfd.SetFD(ret);
     if (sfd.GetFD() < 0) {
         HILOGE("Failed to open file by path");
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readText.Err", NError(errno).GetErrCode());
         return NError(errno);
     }
     if (fstat(sfd.GetFD(), &statbf) < 0) {
         HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readText.Err", NError(errno).GetErrCode());
         return NError(errno);
     }
+
     if (offset > statbf.st_size) {
         HILOGE("Invalid offset");
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readText.Err", NError(EINVAL).GetErrCode());
         return NError(EINVAL);
     }
 
@@ -118,13 +113,11 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!read_req) {
         HILOGE("Failed to request heap memory.");
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readText.Err", NError(ENOMEM).GetErrCode());
         return NError(ENOMEM);
     }
     arg->len = uv_fs_read(nullptr, read_req.get(), sfd.GetFD(), &readbuf, 1, offset, nullptr);
     if (arg->len < 0) {
         HILOGE("Failed to read file by fd: %{public}d", sfd.GetFD());
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readText.Err", NError(errno).GetErrCode());
         return NError(errno);
     }
     arg->buffer = buffer;
@@ -178,25 +171,26 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+
     auto [resGetReadTextArg, offset, hasLen, len, encoding] = GetReadTextArg(env, funcArg[NARG_POS::SECOND]);
     if (!resGetReadTextArg) {
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+
     OHOS::DistributedFS::FDGuard sfd;
     int fd = OpenFile(path.get());
     if (fd < 0) {
         HILOGD("Failed to open file by ret: %{public}d", fd);
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readTextSync.Err", NError(fd).GetErrCode());
         NError(fd).ThrowErr(env);
         return nullptr;
     }
     sfd.SetFD(fd);
+
     struct stat statbf;
     FileFsTrace traceFstat("fstat");
     if ((!sfd) || (fstat(sfd.GetFD(), &statbf) < 0)) {
         HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readTextSync.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -204,16 +198,15 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
 
     if (offset > statbf.st_size) {
         HILOGE("Invalid offset: %{public}" PRIu64, offset);
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readTextSync.Err", NError(EINVAL).GetErrCode());
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+
     len = (!hasLen || len > statbf.st_size) ? statbf.st_size : len;
     string buffer(len, '\0');
     int readRet = ReadFromFile(sfd.GetFD(), offset, buffer);
     if (readRet < 0) {
         HILOGE("Failed to read file by fd: %{public}d", fd);
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.readTextSync.Err", NError(readRet).GetErrCode());
         NError(readRet).ThrowErr(env);
         return nullptr;
     }

@@ -21,7 +21,6 @@
 
 #include "class_file/file_entity.h"
 #include "common_func.h"
-#include "file_fs_metrics.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -45,7 +44,6 @@ napi_value Dup::Sync(napi_env env, napi_callback_info info)
     int dstFd = dup(srcFd);
     if (dstFd < 0) {
         HILOGE("Failed to dup fd, errno: %{public}d", errno);
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.dup.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -53,7 +51,6 @@ napi_value Dup::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!readlink_req) {
         HILOGE("Failed to request heap memory.");
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.dup.Err", NError(ENOMEM).GetErrCode());
         close(dstFd);
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
@@ -62,7 +59,6 @@ napi_value Dup::Sync(napi_env env, napi_callback_info info)
     int ret = uv_fs_readlink(nullptr, readlink_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
         HILOGE("Failed to readlink fd, ret: %{public}d", ret);
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.dup.Err", NError(ret).GetErrCode());
         close(dstFd);
         NError(ret).ThrowErr(env);
         return nullptr;
