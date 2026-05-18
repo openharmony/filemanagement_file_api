@@ -22,6 +22,7 @@
 
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -64,12 +65,14 @@ napi_value Symlink::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!symlink_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.symlinkSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
     if (ret < 0) {
         HILOGE("Failed to create a link for old path ret %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.symlinkSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -98,11 +101,13 @@ napi_value Symlink::Async(napi_env env, napi_callback_info info)
             new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!symlink_req) {
             HILOGE("Failed to request heap memory.");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.symlink.Err", NError(ENOMEM).GetErrCode());
             return NError(ENOMEM);
         }
         int ret = uv_fs_symlink(nullptr, symlink_req.get(), oldPath.c_str(), newPath.c_str(), 0, nullptr);
         if (ret < 0) {
             HILOGE("Failed to create a link for old path ret %{public}d", ret);
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.symlink.Err", NError(ret).GetErrCode());
             return NError(ret);
         }
         return NError(ERRNO_NOERR);

@@ -22,6 +22,7 @@
 
 #include <sys/stat.h>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -45,6 +46,7 @@ napi_value Fdatasync::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.fdatasyncSync");
     int ret = fdatasync(fd);
     if (ret == -1) {
         UniError(errno).ThrowErr(env);
@@ -69,6 +71,7 @@ napi_value Fdatasync::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.fdatasync");
     auto cbExec = [fd = fd](napi_env env) -> UniError {
         int ret = fdatasync(fd);
         if (ret == -1) {

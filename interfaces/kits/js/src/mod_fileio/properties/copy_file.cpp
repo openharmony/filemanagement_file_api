@@ -25,6 +25,7 @@
 #include <sys/types.h>
 
 #include "file_helper/fd_guard.h"
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "napi/n_func_arg.h"
@@ -136,6 +137,7 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.copyFileSync");
     auto err = CopyFileCore(src, dest);
     if (err) {
         if (err.GetErrno(ERR_CODE_SYSTEM_POSIX) == ENAMETOOLONG) {
@@ -178,6 +180,7 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.copyFile");
     auto cbExec = [para = make_shared<Para>(move(src), move(dest))](napi_env env) -> UniError {
         return CopyFileCore(para->src_, para->dest_);
     };

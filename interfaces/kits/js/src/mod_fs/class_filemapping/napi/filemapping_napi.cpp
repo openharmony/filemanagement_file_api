@@ -30,6 +30,8 @@
 #include "filemgmt_libn.h"
 #include "fs_filemapping.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -311,6 +313,7 @@ napi_value FileMappingNapi::Read(napi_env env, napi_callback_info info)
         if (!mapping) {
             return nullptr;
         }
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.read.Err", ThrowMmapError(E_MMAP_FREE).GetErrCode());
         ThrowMmapError(E_MMAP_FREE).ThrowErr(env);
         return nullptr;
     }
@@ -330,6 +333,8 @@ napi_value FileMappingNapi::Read(napi_env env, napi_callback_info info)
         auto ret = mapping->Read(args.buffer, args.bufLen, args.opLength);
         if (!ret.IsSuccess()) {
             HILOGE("Read failed");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.read.Err",
+                NError(ret.GetError().GetErrNo()).GetErrCode());
             NError(ret.GetError().GetErrNo()).ThrowErr(env);
             return nullptr;
         }
@@ -337,6 +342,8 @@ napi_value FileMappingNapi::Read(napi_env env, napi_callback_info info)
         auto ret = mapping->ReadFrom(args.position, args.buffer, args.bufLen, args.opLength);
         if (!ret.IsSuccess()) {
             HILOGE("ReadFrom failed");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.read.Err",
+                NError(ret.GetError().GetErrNo()).GetErrCode());
             NError(ret.GetError().GetErrNo()).ThrowErr(env);
             return nullptr;
         }
@@ -357,10 +364,12 @@ napi_value FileMappingNapi::Write(napi_env env, napi_callback_info info)
         if (!mapping) {
             return nullptr;
         }
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.write.Err", ThrowMmapError(E_MMAP_FREE).GetErrCode());
         ThrowMmapError(E_MMAP_FREE).ThrowErr(env);
         return nullptr;
     }
     if (mapping->IsReadOnly()) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.write.Err", ThrowMmapError(E_MMAP_RO).GetErrCode());
         ThrowMmapError(E_MMAP_RO).ThrowErr(env);
         return nullptr;
     }
@@ -380,6 +389,8 @@ napi_value FileMappingNapi::Write(napi_env env, napi_callback_info info)
         auto ret = mapping->Write(args.buffer, args.bufLen, args.opLength);
         if (!ret.IsSuccess()) {
             HILOGE("Write failed");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.write.Err",
+                NError(ret.GetError().GetErrNo()).GetErrCode());
             NError(ret.GetError().GetErrNo()).ThrowErr(env);
             return nullptr;
         }
@@ -387,6 +398,8 @@ napi_value FileMappingNapi::Write(napi_env env, napi_callback_info info)
         auto ret = mapping->WriteTo(args.position, args.buffer, args.bufLen, args.opLength);
         if (!ret.IsSuccess()) {
             HILOGE("WriteTo failed");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.write.Err",
+                NError(ret.GetError().GetErrNo()).GetErrCode());
             NError(ret.GetError().GetErrNo()).ThrowErr(env);
             return nullptr;
         }
@@ -423,9 +436,12 @@ napi_value FileMappingNapi::Msync(napi_env env, napi_callback_info info)
         msyncOffset = static_cast<off_t>(offset);
         msyncLength = static_cast<size_t>(len);
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.FileMapping.msync");
     auto cbExec = [mapping, msyncOffset, msyncLength]() -> NError {
         auto ret = mapping->Msync(static_cast<size_t>(msyncOffset), msyncLength);
         if (!ret.IsSuccess()) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.msync.Err",
+                NError(ret.GetError().GetErrNo()).GetErrCode());
             return NError(ret.GetError().GetErrNo());
         }
         return NError(ERRNO_NOERR);
@@ -470,8 +486,11 @@ napi_value FileMappingNapi::MsyncSync(napi_env env, napi_callback_info info)
         msyncOffset = static_cast<off_t>(offset);
         msyncLength = static_cast<size_t>(len);
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.FileMapping.msyncSync");
     auto ret = mapping->Msync(static_cast<size_t>(msyncOffset), msyncLength);
     if (!ret.IsSuccess()) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.msyncSync.Err",
+            NError(ret.GetError().GetErrNo()).GetErrCode());
         NError(ret.GetError().GetErrNo()).ThrowErr(env);
         return nullptr;
     }
@@ -493,6 +512,8 @@ napi_value FileMappingNapi::Unmap(napi_env env, napi_callback_info info)
     auto cbExec = [mapping]() -> NError {
         auto ret = mapping->Unmap();
         if (!ret.IsSuccess()) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.unmap.Err",
+                NError(ret.GetError().GetErrNo()).GetErrCode());
             return NError(ret.GetError().GetErrNo());
         }
         return NError(ERRNO_NOERR);
@@ -522,6 +543,8 @@ napi_value FileMappingNapi::UnmapSync(napi_env env, napi_callback_info info)
     }
     auto ret = mapping->Unmap();
     if (!ret.IsSuccess()) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.FileMapping.unmapSync.Err",
+            NError(ret.GetError().GetErrNo()).GetErrCode());
         NError(ret.GetError().GetErrNo()).ThrowErr(env);
         return nullptr;
     }

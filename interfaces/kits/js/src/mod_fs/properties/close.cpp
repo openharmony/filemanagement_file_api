@@ -23,6 +23,7 @@
 #include "common_func.h"
 #include "file_fs_trace.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -129,17 +130,20 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
     if (fileStruct.isFd) {
         auto err = CloseFdWithFdsan(fileStruct.fd, fileStruct.isFd, fileTag);
         if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.closeSync.Err", err.GetErrCode());
             err.ThrowErr(env);
             return nullptr;
         }
     } else {
         auto err = CloseFdWithFdsan(fileStruct.fileEntity->fd_->GetFD(), fileStruct.isFd, fileTag);
         if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.closeSync.Err", err.GetErrCode());
             err.ThrowErr(env);
             return nullptr;
         }
         auto fp = NClass::RemoveEntityOfFinal<FileEntity>(env, funcArg[NARG_POS::FIRST]);
         if (!fp) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.closeSync.Err", NError(EINVAL).GetErrCode());
             NError(EINVAL).ThrowErr(env);
             return nullptr;
         }
@@ -176,7 +180,11 @@ napi_value Close::Async(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [fileStruct = fileStruct, fileTag]() -> NError {
-        return CloseFdWithFdsan(fileStruct.fd, fileStruct.isFd, fileTag);
+        auto err = CloseFdWithFdsan(fileStruct.fd, fileStruct.isFd, fileTag);
+        if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.close.Err", err.GetErrCode());
+        }
+        return err;
     };
 
     auto cbComplete = [](napi_env env, NError err) -> NVal {

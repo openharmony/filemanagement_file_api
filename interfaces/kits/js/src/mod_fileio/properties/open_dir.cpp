@@ -21,6 +21,7 @@
 
 #include "class_dir/dir_entity.h"
 #include "class_dir/dir_n_exporter.h"
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_class.h"
@@ -46,6 +47,7 @@ napi_value OpenDir::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.opendirSync");
     std::unique_ptr<DIR, std::function<void(DIR *)>> dir = { opendir(path.get()), closedir };
     if (dir == nullptr) {
         UniError(errno).ThrowErr(env);
@@ -89,6 +91,7 @@ napi_value OpenDir::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.opendir");
     string path = tmp.get();
     auto arg = make_shared<OpenDirArgs>(NVal(env, funcArg.GetThisVar()));
     auto cbExec = [arg, path](napi_env env) -> UniError {

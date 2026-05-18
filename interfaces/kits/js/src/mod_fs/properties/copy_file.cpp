@@ -28,6 +28,8 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -248,12 +250,14 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
     if (src.isPath && dest.isPath) {
         auto err = IsAllPath(src, dest);
         if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.copyFileSync.Err", err.GetErrCode());
             err.ThrowErr(env);
             return nullptr;
         }
     } else {
         auto err = OpenFile(src, dest);
         if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.copyFileSync.Err", err.GetErrCode());
             err.ThrowErr(env);
             return nullptr;
         }
@@ -269,7 +273,6 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     auto [succSrc, src] = ParseJsOperand(env, { env, funcArg[NARG_POS::FIRST] });
     auto [succDest, dest] = ParseJsOperand(env, { env, funcArg[NARG_POS::SECOND] });
     if (!succSrc || !succDest) {
@@ -277,14 +280,12 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     auto [succMode, mode] = ParseJsMode(env, funcArg);
     if (!succMode) {
         HILOGE("Failed to convert mode to int32");
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     auto para = CreateSharedPtr<Para>(move(src), move(dest));
     if (para == nullptr) {
         HILOGE("Failed to request heap memory.");
@@ -293,18 +294,24 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
     }
     auto cbExec = [para]() -> NError {
         if (para->src_.isPath && para->dest_.isPath) {
-            return IsAllPath(para->src_, para->dest_);
+            auto err = IsAllPath(para->src_, para->dest_);
+            if (err) {
+                METRICS_ERROR("CoreFileKit.fileio.Dyn.copyFile.Err", err.GetErrCode());
+            }
+            return err;
         }
-        return OpenFile(para->src_, para->dest_);
+        auto err = OpenFile(para->src_, para->dest_);
+        if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.copyFile.Err", err.GetErrCode());
+        }
+        return err;
     };
-
     auto cbCompl = [](napi_env env, NError err) -> NVal {
         if (err) {
             return { env, err.GetNapiErr(env) };
         }
         return { NVal::CreateUndefined(env) };
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
         !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {

@@ -24,6 +24,7 @@
 #include <sys/xattr.h>
 #endif
 
+#include "file_fs_metrics.h"
 #include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -251,6 +252,7 @@ napi_value StatNExporter::GetAtimeNs(napi_env env, napi_callback_info info)
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
+        METRICS_COUNT("CoreFileKit.fileio.Dyn.Stat.GetAtimeNs.unknownErr");
         NError(UNKROWN_ERR).ThrowErr(env);
         return nullptr;
     }
@@ -276,6 +278,7 @@ napi_value StatNExporter::GetMtimeNs(napi_env env, napi_callback_info info)
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
+        METRICS_COUNT("CoreFileKit.fileio.Dyn.Stat.GetMtimeNs.unknownErr");
         NError(UNKROWN_ERR).ThrowErr(env);
         return nullptr;
     }
@@ -301,6 +304,7 @@ napi_value StatNExporter::GetCtimeNs(napi_env env, napi_callback_info info)
     auto statEntity = NClass::GetEntityOf<StatEntity>(env, funcArg.GetThisVar());
     if (!statEntity) {
         HILOGE("Failed to get stat entity");
+        METRICS_COUNT("CoreFileKit.fileio.Dyn.Stat.GetCtimeNs.unknownErr");
         NError(UNKROWN_ERR).ThrowErr(env);
         return nullptr;
     }

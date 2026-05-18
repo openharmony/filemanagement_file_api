@@ -132,6 +132,11 @@ ohos_shared_library("fileio") {
     "openssl:libcrypto_shared",
   ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+
+  if (!use_mingw_win && !use_mac && file_api_hiviewdfx_api_metrics_enable) {
+    defines += [ "FILE_API_METRICS" ]
+    external_deps += [ "api_metrics:histogrammanager" ]
+  }
 }
 
 ohos_shared_library("fs") {
@@ -210,6 +215,9 @@ ohos_shared_library("fs") {
       "-Oz",
     ]
     defines = [ "FILE_API_TRACE" ]
+    if (file_api_hiviewdfx_api_metrics_enable) {
+      defines += [ "FILE_API_METRICS" ]
+    }
     branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
@@ -278,6 +286,9 @@ ohos_shared_library("fs") {
       "libuv:uv",
       "samgr:samgr_proxy",
     ]
+    if (file_api_hiviewdfx_api_metrics_enable) {
+      external_deps += [ "api_metrics:histogrammanager" ]
+    }
     deps += [
       "${file_api_path}/interfaces/kits/native:remote_uri_native",
       "${file_api_path}/interfaces/kits/native:task_signal_native",
@@ -433,6 +444,8 @@ ohos_shared_library("statfs") {
     "src/mod_statfs/statfs_napi.cpp",
   ]
 
+  include_dirs = [ "src/common" ]
+
   deps = [
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
@@ -442,6 +455,11 @@ ohos_shared_library("statfs") {
     "hilog:libhilog",
     "napi:ace_napi",
   ]
+
+  if (!use_mingw_win && !use_mac && file_api_hiviewdfx_api_metrics_enable) {
+    defines = [ "FILE_API_METRICS" ]
+    external_deps += [ "api_metrics:histogrammanager" ]
+  }
 }
 
 ohos_shared_library("statvfs") {

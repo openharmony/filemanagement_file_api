@@ -21,6 +21,7 @@
 
 #include <sys/stat.h>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -32,6 +33,7 @@ using namespace std;
 
 napi_value Chmod::Sync(napi_env env, napi_callback_info info)
 {
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.chmodSync");
     return NVal::CreateUndefined(env).val_;
 }
 
@@ -39,6 +41,7 @@ napi_value Chmod::Async(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE);
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.chmod");
     auto cbExec = [](napi_env env) -> UniError {
         return UniError(ERRNO_NOERR);
     };

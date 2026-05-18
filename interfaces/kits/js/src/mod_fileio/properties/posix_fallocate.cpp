@@ -19,6 +19,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -64,6 +65,7 @@ napi_value PosixFallocate::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Hidden.posixFallocateSync");
     int ret = posix_fallocate(fd, offset, len);
     if (ret == -1) {
         UniError(errno).ThrowErr(env);
@@ -86,6 +88,7 @@ napi_value PosixFallocate::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Hidden.posixFallocate");
     auto cbExec = [fd = fd, offset = offset, len = len](napi_env env) -> UniError {
         if (posix_fallocate(fd, offset, len) == -1) {
             return UniError(errno);

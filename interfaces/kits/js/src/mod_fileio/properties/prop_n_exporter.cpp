@@ -21,6 +21,7 @@
 #include <sstream>
 #include <unistd.h>
 
+#include "file_fs_metrics.h"
 #include "chmod.h"
 #include "chown.h"
 #include "close.h"
@@ -83,6 +84,7 @@ napi_value PropNExporter::AccessSync(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.accessSync");
     int ret = access(path.get(), mode);
     if (ret == -1) {
         UniError(errno).ThrowErr(env);
@@ -115,6 +117,7 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         }
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.access");
     auto cbExec = [path = string(path.get()), mode](napi_env env) -> UniError {
         int ret = access(path.c_str(), mode);
         if (ret == -1) {
@@ -158,6 +161,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.unlink");
     auto cbExec = [path = string(path.get())](napi_env env) -> UniError {
         if (unlink(path.c_str()) == -1) {
             return UniError(errno);
@@ -206,6 +210,7 @@ napi_value PropNExporter::Mkdir(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.mkdir");
     auto cbExec = [path = string(path.get()), mode](napi_env env) -> UniError {
         if (mkdir(path.c_str(), mode) == -1) {
             return UniError(errno);
@@ -255,6 +260,7 @@ napi_value PropNExporter::MkdirSync(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.mkdirSync");
     int ret = mkdir(path.get(), mode);
     if (ret == -1) {
         UniError(errno).ThrowErr(env);
@@ -361,6 +367,7 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.readSync");
     ssize_t actLen = 0;
     if (pos >= 0) {
         actLen = pread(fd, buf, len, pos);
@@ -436,6 +443,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.read");
     auto arg = make_shared<AsyncIOReadArg>(NVal(env, funcArg[NARG_POS::SECOND]));
     auto cbExec = [arg, buf, len, fd, pos, offset](napi_env env) -> UniError {
         ssize_t actLen = 0;
@@ -502,6 +510,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.write");
     auto arg = make_shared<AsyncIOWrtieArg>(move(bufGuard));
     auto cbExec = [arg, buf, len, fd, position](napi_env env) -> UniError {
         return WriteExec(arg, buf, len, fd, position);
@@ -541,6 +550,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.unlinkSync");
     if (unlink(path.get()) == -1) {
         UniError(errno).ThrowErr(env);
         return nullptr;
@@ -575,6 +585,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.writeSync");
     ssize_t writeLen = 0;
     if (position >= 0) {
         writeLen = pwrite(fd, buf, len, position);

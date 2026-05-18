@@ -20,6 +20,7 @@
 
 #include "class_stream/stream_entity.h"
 #include "class_stream/stream_n_exporter.h"
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_class.h"
@@ -80,6 +81,7 @@ napi_value CreateStream::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.createStreamSync");
     unique_ptr<FILE, decltype(&fclose)> fp = { fopen(argPath.c_str(), argMode.c_str()), fclose };
     if (!fp) {
         UniError(errno).ThrowErr(env);
@@ -106,6 +108,7 @@ napi_value CreateStream::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.createStream");
     auto arg = make_shared<AsyncCreateStreamArg>();
     auto cbExec = [arg, argPath = move(argPath), argMode = move(argMode)](napi_env env) -> UniError {
         arg->fp = { fopen(argPath.c_str(), argMode.c_str()), fclose };

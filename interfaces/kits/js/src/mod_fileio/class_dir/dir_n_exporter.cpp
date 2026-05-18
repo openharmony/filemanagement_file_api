@@ -29,6 +29,7 @@
 #include "n_async_work_promise.h"
 #include "n_class.h"
 #include "n_func_arg.h"
+#include "file_fs_metrics.h"
 #include "securec.h"
 
 namespace OHOS {
@@ -59,7 +60,7 @@ napi_value DirNExporter::CloseSync(napi_env env, napi_callback_info info)
         UniError(EBADF).ThrowErr(env, "Dir has been closed yet");
         return nullptr;
     }
-
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Dir.closeSync");
     lock_guard(dirEntity->lock_);
     dirEntity->dir_.reset();
     return nullptr;
@@ -84,6 +85,7 @@ napi_value DirNExporter::Close(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Dir.close");
     auto cbExec = [dirEntity](napi_env env) -> UniError {
         lock_guard(dirEntity->lock_);
         DIR *dir = dirEntity->dir_.release();
@@ -165,7 +167,7 @@ napi_value DirNExporter::Read(napi_env env, napi_callback_info info)
         UniError(EBADF).ThrowErr(env, "Dir has been closed yet");
         return nullptr;
     }
-
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Dir.read");
     DIR *dir = dirEntity->dir_.get();
     auto arg = make_shared<DirReadArgs>(NVal(env, funcArg.GetThisVar()));
     auto cbExec = [arg, dir, dirEntity](napi_env env) -> UniError {
@@ -188,7 +190,6 @@ napi_value DirNExporter::Read(napi_env env, napi_callback_info info)
                 break;
             }
         } while (true);
-
         arg->dirRes = tmpDirent;
         return UniError(ERRNO_NOERR);
     };
@@ -218,6 +219,7 @@ napi_value DirNExporter::ReadSync(napi_env env, napi_callback_info info)
         UniError(EBADF).ThrowErr(env, "Dir has been closed yet");
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Dir.readSync");
     DIR *dir = dirEntity->dir_.get();
 
     struct dirent tmpDirent;

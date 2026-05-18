@@ -502,6 +502,15 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         "Cloud disk is not allowed on this device" } },
 };
 
+constexpr int FILEIO_ERR_INDEX_MAX = 56;
+
+inline int ToErrCodeIndex(int errCode)
+{
+    int suffix = errCode - FILEIO_SYS_CAP_TAG;
+    if (suffix >= 1 && suffix <= FILEIO_ERR_INDEX_MAX) return suffix;
+    return ErrCodeSuffixOfFileIO::E_INTERN_RES;
+}
+
 class NError {
 public:
     NError();
@@ -518,6 +527,12 @@ public:
     void ThrowErr(napi_env env, std::string errMsg);
     void ThrowErrAddData(napi_env env, int errCode, napi_value data);
     void ThrowErrWithMsg(napi_env env, const std::string &errMsg);
+
+    int GetErrCode() const
+    {
+        auto it = errCodeTable.find(errno_);
+        return (it != errCodeTable.end()) ? it->second.first : errno_;
+    }
 
 private:
     int errno_ = ERRNO_NOERR;

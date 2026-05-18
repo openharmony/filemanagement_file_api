@@ -26,6 +26,8 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -276,13 +278,17 @@ napi_value CopyDir::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.copyDirSync");
+
     vector<struct ConflictFiles> errfiles = {};
     int ret = CopyDirFunc(src.get(), dest.get(), mode, errfiles);
     if (ret == EEXIST && mode == DIRMODE_FILE_COPY_THROW_ERR) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.copyDirSync.Err", NError(errno).GetErrCode());
         NError(ret).ThrowErrAddData(env, EEXIST, PushErrFilesInData(env, errfiles));
         return nullptr;
     } else if (ret) {
         HILOGE("Failed to copy dir, ret %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.copyDirSync.Err", NError(errno).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -307,21 +313,21 @@ napi_value CopyDir::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-
     auto arg = CreateSharedPtr<CopyDirArgs>();
     if (arg == nullptr) {
         HILOGE("Failed to request heap memory.");
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.copyDir");
     auto cbExec = [srcPath = string(src.get()), destPath = string(dest.get()), mode = mode, arg]() -> NError {
         arg->errNo = CopyDirFunc(srcPath, destPath, mode, arg->errfiles);
         if (arg->errNo) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.copyDir.Err", NError(errno).GetErrCode());
             return NError(arg->errNo);
         }
         return NError(ERRNO_NOERR);
     };
-
     auto cbComplCallback = [arg, mode = mode](napi_env env, NError err) -> NVal {
         if (arg->errNo == EEXIST && mode == DIRMODE_FILE_COPY_THROW_ERR) {
             napi_value data = err.GetNapiErr(env);
@@ -336,7 +342,6 @@ napi_value CopyDir::Async(napi_env env, napi_callback_info info)
         }
         return NVal::CreateUndefined(env);
     };
-
     NVal thisVar(env, funcArg.GetThisVar());
     if (funcArg.GetArgc() == NARG_CNT::TWO || (funcArg.GetArgc() == NARG_CNT::THREE &&
             !NVal(env, funcArg[NARG_POS::THIRD]).TypeIs(napi_function))) {

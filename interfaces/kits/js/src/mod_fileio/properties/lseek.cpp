@@ -18,6 +18,7 @@
 #include <tuple>
 #include <unistd.h>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_func_arg.h"
@@ -63,6 +64,7 @@ napi_value Lseek::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Hidden.lseekSync");
     int ret = lseek(fd, offset, whence);
     if (ret == -1) {
         UniError(errno).ThrowErr(env);
@@ -85,6 +87,7 @@ napi_value Lseek::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Hidden.lseek");
     auto arg = make_shared<int32_t>();
     auto cbExec = [fd = fd, offset = offset, whence = whence, arg](napi_env env) -> UniError {
         int ret = lseek(fd, offset, whence);

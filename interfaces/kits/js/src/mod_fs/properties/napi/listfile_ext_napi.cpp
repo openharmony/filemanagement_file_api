@@ -23,6 +23,8 @@
 #include "filemgmt_libhilog.h"
 #include "listfile_ext_core.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace OHOS::FileManagement::LibN;
 
@@ -123,8 +125,10 @@ napi_value ListFileExtNapi::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.listFileExtSync");
     auto ret = ListFileExtCore::DoListFileExt(string(path.get()), options);
     if (!ret.IsSuccess()) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.listFileExtSync.Err", NError(errno).GetErrCode());
         NError(ret.GetError().GetErrNo()).ThrowErr(env);
         return nullptr;
     }
@@ -159,9 +163,11 @@ napi_value ListFileExtNapi::Async(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.listFileExt");
     auto cbExec = [arg, options, pathStr = string(path.get())]() -> NError {
         auto ret = ListFileExtCore::DoListFileExt(pathStr, options);
         if (!ret.IsSuccess()) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.listFileExt.Err", NError(errno).GetErrCode());
             return NError(ret.GetError().GetErrNo());
         }
         arg->dirents = ret.GetData().value();

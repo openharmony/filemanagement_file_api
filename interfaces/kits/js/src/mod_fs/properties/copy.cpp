@@ -44,6 +44,8 @@
 #include "utils_log.h"
 #include "common_func.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -401,6 +403,7 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.copy");
     auto cbExec = [infos, callback]() -> NError {
         auto result = ExecCopy(infos, callback);
         auto it = softbusErr2ErrCodeTable.find(result);
@@ -409,6 +412,7 @@ napi_value Copy::Async(napi_env env, napi_callback_info info)
         }
         if (result != ERRNO_NOERR) {
             infos->exceptionCode = result;
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.copy.Err", NError(errno).GetErrCode());
             return NError(infos->exceptionCode);
         }
         CopyComplete(infos, callback);

@@ -30,6 +30,8 @@
 #include "filemgmt_libhilog.h"
 #include "filemgmt_libn.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -196,8 +198,10 @@ napi_value AtomicFileNExporter::GetBaseFile(napi_env env, napi_callback_info inf
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.getBaseFile.Err", E_UNKNOWN_ERROR);
             NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.getBaseFile.Err", NError(errcode).GetErrCode());
             NError(errcode).ThrowErr(env);
         }
         return nullptr;
@@ -205,6 +209,7 @@ napi_value AtomicFileNExporter::GetBaseFile(napi_env env, napi_callback_info inf
 
     if (rafEntity->baseFileName.size() >= PATH_MAX) {
         HILOGE("Base file name is too long");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.getBaseFile.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Base file name is too long");
         return nullptr;
     }
@@ -213,6 +218,7 @@ napi_value AtomicFileNExporter::GetBaseFile(napi_env env, napi_callback_info inf
     char *result = realpath(rafEntity->baseFileName.c_str(), realPath);
     if (result == nullptr) {
         HILOGE("Failed to resolve real path, err:%{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.getBaseFile.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -220,6 +226,7 @@ napi_value AtomicFileNExporter::GetBaseFile(napi_env env, napi_callback_info inf
     int fd = open(result, O_RDONLY);
     if (fd < 0) {
         HILOGE("Failed to open file, err:%{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.getBaseFile.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -231,8 +238,10 @@ napi_value AtomicFileNExporter::OpenRead(napi_env env, napi_callback_info info)
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.openRead.Err", E_UNKNOWN_ERROR);
             NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.openRead.Err", NError(errcode).GetErrCode());
             NError(errcode).ThrowErr(env);
         }
         return nullptr;
@@ -283,8 +292,10 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.readFully.Err", E_UNKNOWN_ERROR);
             NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.readFully.Err", NError(errcode).GetErrCode());
             NError(errcode).ThrowErr(env);
         }
         return nullptr;
@@ -294,6 +305,7 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
     char *result = realpath(rafEntity->baseFileName.c_str(), realPath);
     if (result == nullptr) {
         HILOGE("Failed to resolve file real path, err:%{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.readFully.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -302,6 +314,7 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
         std::fopen(result, "rb"), &std::fclose);
     if (!file) {
         HILOGE("Failed to open file, err:%{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.readFully.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -309,8 +322,10 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
     auto [bufferData, readErrcode] = ReadFileToBuffer(env, file.get());
     if (readErrcode != 0) {
         if (readErrcode == UNKROWN_ERR) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.readFully.Err", E_UNKNOWN_ERROR);
             NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to read file to buffer");
         } else {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.readFully.Err", NError(readErrcode).GetErrCode());
             NError(readErrcode).ThrowErr(env);
         }
         return nullptr;
@@ -321,6 +336,7 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
     napi_status status = napi_create_external_arraybuffer(
         env, bufferData->buffer, bufferData->length, FinalizeCallback, bufferData.release(), &externalBuffer);
     if (status != napi_ok) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.readFully.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "1.napi_invalid_arg 2.napi_pending_exception");
         return nullptr;
     }
@@ -328,6 +344,7 @@ napi_value AtomicFileNExporter::ReadFully(napi_env env, napi_callback_info info)
     napi_value outputArray = nullptr;
     status = napi_create_typedarray(env, napi_int8_array, length, externalBuffer, 0, &outputArray);
     if (status != napi_ok) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.readFully.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE +
             "1.napi_invalid_arg 2.napi_pending_exception 3.napi_arraybuffer_expected");
         return nullptr;
@@ -341,8 +358,10 @@ napi_value AtomicFileNExporter::StartWrite(napi_env env, napi_callback_info info
     auto [rafEntity, errcode] = GetAtomicFileEntity(env, info);
     if (errcode != 0) {
         if (errcode == UNKROWN_ERR) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.startWrite.Err", E_UNKNOWN_ERROR);
             NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to get atomicFile entity");
         } else {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.startWrite.Err", NError(errcode).GetErrCode());
             NError(errcode).ThrowErr(env);
         }
         return nullptr;
@@ -352,6 +371,7 @@ napi_value AtomicFileNExporter::StartWrite(napi_env env, napi_callback_info info
     fs::path parentPath = filePath.parent_path();
     if (access(parentPath.c_str(), F_OK) != 0) {
         HILOGE("Parent directory does not exist, err:%{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.startWrite.Err", NError(ENOENT).GetErrCode());
         NError(ENOENT).ThrowErr(env);
         return nullptr;
     }
@@ -359,6 +379,7 @@ napi_value AtomicFileNExporter::StartWrite(napi_env env, napi_callback_info info
     char *tmpfile = const_cast<char *>(rafEntity->newFileName.c_str());
     if (mkstemp(tmpfile) == -1) {
         HILOGE("Fail to create tmp file err:%{public}d!", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.startWrite.Err", NError(ENOENT).GetErrCode());
         NError(ENOENT).ThrowErr(env);
         return nullptr;
     }
@@ -371,6 +392,7 @@ napi_value AtomicFileNExporter::StartWrite(napi_env env, napi_callback_info info
     napi_status status = napi_create_reference(env, writeStream, 1, &rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to create reference");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.startWrite.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
         return nullptr;
     }
@@ -389,10 +411,13 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.AtomicFile.finishWrite");
+
     napi_value writeStream;
     napi_status status = napi_get_reference_value(env, rafEntity->writeStreamObj, &writeStream);
     if (status != napi_ok) {
         HILOGE("Failed to get reference value");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.finishWrite.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
         return nullptr;
     }
@@ -405,9 +430,11 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
         status = napi_delete_reference(env, rafEntity->writeStreamObj);
         if (status != napi_ok) {
             HILOGE("Failed to delete reference");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.finishWrite.Err", E_UNKNOWN_ERROR);
             NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
             return nullptr;
         }
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.finishWrite.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to rename file");
         return nullptr;
     }
@@ -417,6 +444,7 @@ napi_value AtomicFileNExporter::FinishWrite(napi_env env, napi_callback_info inf
     status = napi_delete_reference(env, rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to delete reference");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.finishWrite.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
         return nullptr;
     }
@@ -435,10 +463,13 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.AtomicFile.failWrite");
+
     napi_value writeStream;
     napi_status status = napi_get_reference_value(env, rafEntity->writeStreamObj, &writeStream);
     if (status != napi_ok) {
         HILOGE("Failed to get reference value");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.failWrite.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
         return nullptr;
     }
@@ -450,9 +481,11 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
         status = napi_delete_reference(env, rafEntity->writeStreamObj);
         if (status != napi_ok) {
             HILOGE("Failed to delete reference");
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.failWrite.Err", E_UNKNOWN_ERROR);
             NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
             return nullptr;
         }
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.failWrite.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, "Failed to remove file");
         return nullptr;
     }
@@ -461,6 +494,7 @@ napi_value AtomicFileNExporter::FailWrite(napi_env env, napi_callback_info info)
     status = napi_delete_reference(env, rafEntity->writeStreamObj);
     if (status != napi_ok) {
         HILOGE("Failed to delete reference");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.failWrite.Err", E_UNKNOWN_ERROR);
         NError(E_UNKNOWN_ERROR).ThrowErrWithMsg(env, NAPI_EMSG_PRE + "napi_invalid_arg");
     }
     return nullptr;
@@ -478,6 +512,8 @@ napi_value AtomicFileNExporter::Delete(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.AtomicFile.delete");
+
     bool errFlag = false;
     std::error_code fsErrcode;
     if (fs::exists(rafEntity->newFileName, fsErrcode) && !fs::remove(rafEntity->newFileName, fsErrcode)) {
@@ -488,6 +524,7 @@ napi_value AtomicFileNExporter::Delete(napi_env env, napi_callback_info info)
     }
     if (errFlag) {
         HILOGE("Failed to remove file, err:%{public}s", fsErrcode.message().c_str());
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.AtomicFile.delete.Err", NError(fsErrcode.value()).GetErrCode());
         NError(fsErrcode.value()).ThrowErr(env);
     }
 

@@ -24,6 +24,7 @@
 #include "class_watcher/watcher_entity.h"
 #include "class_watcher/watcher_n_exporter.h"
 #include "file_utils.h"
+#include "file_fs_metrics.h"
 #include "filemgmt_libhilog.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
@@ -98,6 +99,7 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     auto [objWatcher, err] = CreateAndCheckForWatcherEntity(env);
     if (!objWatcher) {
         HILOGE("Failed to create watcher entity.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.createWatcher.Err", NError(err).GetErrCode());
         NError(err).ThrowErr(env);
         return nullptr;
     }
@@ -105,6 +107,7 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     auto watcherEntity = NClass::GetEntityOf<WatcherEntity>(env, objWatcher);
     if (!watcherEntity) {
         HILOGE("Failed to get WatcherEntity.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.createWatcher.Err", NError(EIO).GetErrCode());
         NError(EIO).ThrowErr(env);
         return nullptr;
     }
@@ -113,6 +116,7 @@ napi_value Watcher::CreateWatcher(napi_env env, napi_callback_info info)
     bool ret = FileWatcher::GetInstance().AddWatcherInfo(infoArg->fileName, infoArg);
     if (!ret) {
         HILOGE("Failed to add watcher info.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.createWatcher.Err", NError(EINVAL).GetErrCode());
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }

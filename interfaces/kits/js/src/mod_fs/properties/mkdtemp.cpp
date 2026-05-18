@@ -18,6 +18,7 @@
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -46,12 +47,14 @@ napi_value Mkdtemp::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!mkdtemp_req) {
         HILOGE("Failed to request heap memory.");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.mkdtempSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     int ret = uv_fs_mkdtemp(nullptr, mkdtemp_req.get(), const_cast<char *>(path.c_str()), nullptr);
     if (ret < 0) {
         HILOGE("Failed to create a temporary directory with path");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.mkdtempSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -100,7 +103,11 @@ napi_value Mkdtemp::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
     auto cbExec = [path = string(tmp.get()), arg]() -> NError {
-        return MkdTempExec(arg, path);
+        auto err = MkdTempExec(arg, path);
+        if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.mkdtemp.Err", err.GetErrCode());
+        }
+        return err;
     };
     auto cbComplete = [arg](napi_env env, NError err) -> NVal {
         if (err) {

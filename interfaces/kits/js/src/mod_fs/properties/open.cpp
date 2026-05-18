@@ -43,6 +43,7 @@
 #ifdef FILE_API_TRACE
 #include "hitrace_meter.h"
 #endif
+#include "file_fs_metrics.h"
 
 namespace OHOS {
 namespace FileManagement {
@@ -292,6 +293,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     if (pathStr.find("://") != string::npos) {
         auto [res, uriStr] = OpenFileByUri(pathStr, mode);
         if (res < 0) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.openSync.Err", NError(res).GetErrCode());
             NError(res).ThrowErr(env);
             return nullptr;
         }
@@ -301,6 +303,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     int ret = OpenFileByPath(pathStr, mode);
     if (ret < 0) {
         HILOGD("Failed to open file for libuv error %{public}d", ret);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.openSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -320,6 +323,7 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
     if (pathStr.find("://") != string::npos) {
         auto [res, uriStr] = OpenFileByUri(pathStr, mode);
         if (res < 0) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.open.Err", NError(res).GetErrCode());
             return NError(res);
         }
         arg->fd = res;
@@ -331,6 +335,7 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
     int ret = OpenFileByPath(pathStr, mode);
     if (ret < 0) {
         HILOGD("Failed to open file for libuv error %{public}d", ret);
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.open.Err", NError(ret).GetErrCode());
         return NError(ret);
     }
     arg->fd = ret;

@@ -22,6 +22,7 @@
 #include "common_func.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -117,6 +118,7 @@ napi_value Truncate::Sync(napi_env env, napi_callback_info info)
     }
     auto err = TruncateCore(env, fileInfo, truncateLen);
     if (err) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.truncateSync.Err", err.GetErrCode());
         err.ThrowErr(env);
         return nullptr;
     }
@@ -148,7 +150,11 @@ napi_value Truncate::Async(napi_env env, napi_callback_info info)
         }
     }
     auto cbExec = [fileInfo = make_shared<FileInfo>(move(fileInfo)), truncateLen, env = env]() -> NError {
-        return TruncateCore(env, *fileInfo, truncateLen);
+        auto err = TruncateCore(env, *fileInfo, truncateLen);
+        if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.truncate.Err", err.GetErrCode());
+        }
+        return err;
     };
     auto cbCompl = [](napi_env env, NError err) -> NVal {
         if (err) {

@@ -19,6 +19,7 @@
 
 #include "class_stat/stat_entity.h"
 #include "class_stat/stat_n_exporter.h"
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_class.h"
@@ -49,6 +50,7 @@ napi_value Flush::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Stream.flushSync");
     int ret = fflush(streamEntity->fp.get());
     if (ret == -1) {
         UniError(errno).ThrowErr(env);
@@ -71,6 +73,7 @@ napi_value Flush::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Stream.flush");
     auto cbExec = [streamEntity](napi_env env) -> UniError {
         int ret = fflush(streamEntity->fp.get());
         if (ret == -1) {

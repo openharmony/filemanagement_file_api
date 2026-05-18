@@ -28,6 +28,8 @@
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
 
+#include "file_fs_metrics.h"
+
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -182,8 +184,10 @@ napi_value Move::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.moveFileSync");
     int ret = MoveFile(string(src.get()), string(dest.get()), mode);
     if (ret) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.moveFileSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -204,10 +208,12 @@ napi_value Move::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    METRICS_COUNT("CoreFileKit.fileio.Dyn.moveFile");
     auto cbExec = [srcPath = string(src.get()), destPath = string(dest.get()), mode = mode]() -> NError {
         int ret = MoveFile(srcPath, destPath, mode);
         if (ret) {
             HILOGE("Failed movefile ret %{public}d", ret);
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.moveFile.Err", NError(ret).GetErrCode());
             return NError(ret);
         }
         return NError(ERRNO_NOERR);

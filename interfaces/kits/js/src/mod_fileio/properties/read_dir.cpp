@@ -20,6 +20,7 @@
 #include <string>
 #include <tuple>
 
+#include "file_fs_metrics.h"
 #include "n_async_work_callback.h"
 #include "n_async_work_promise.h"
 #include "n_class.h"
@@ -54,6 +55,7 @@ napi_value ReadDir::Sync(napi_env env, napi_callback_info info)
         UniError(EINVAL).ThrowErr(env, "Invalid path");
         return nullptr;
     }
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Hidden.readdirSync");
     unique_ptr<DIR, function<void(DIR *)>> dir = { opendir(path.get()), closedir };
     if (!dir) {
         UniError(errno).ThrowErr(env);
@@ -93,6 +95,7 @@ napi_value ReadDir::Async(napi_env env, napi_callback_info info)
         return nullptr;
     }
     path = tmp.get();
+    METRICS_COUNT("CoreFileKit.fileio.Legacy.Hidden.readdir");
     auto arg = make_shared<ReadDirArgs>();
     auto cbExec = [arg, path](napi_env env) -> UniError {
         unique_ptr<DIR, function<void(DIR *)>> dir = { opendir(path.c_str()), closedir };

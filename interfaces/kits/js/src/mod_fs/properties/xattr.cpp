@@ -21,6 +21,7 @@
 
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 #include "n_error.h"
 
 namespace OHOS {
@@ -94,6 +95,7 @@ napi_value Xattr::SetSync(napi_env env, napi_callback_info info)
     }
     if (setxattr(path.get(), key.get(), value.get(), strnlen(value.get(), MAX_XATTR_SIZE), 0) < 0) {
         HILOGE("setxattr fail, errno is %{public}d", errno);
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.setxattrSync.Err", NError(errno).GetErrCode());
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -128,6 +130,7 @@ napi_value Xattr::GetSync(napi_env env, napi_callback_info info)
     int32_t ret = GetXattrCore(path.get(), key.get(), result);
     if (ret != ERRNO_NOERR) {
         HILOGE("Invalid getxattr");
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.getxattrSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         return nullptr;
     }
@@ -162,6 +165,9 @@ napi_value Xattr::GetAsync(napi_env env, napi_callback_info info)
     string keyString(key.get());
     auto cbExec = [path = move(pathString), key = move(keyString), result]() -> NError {
         int ret = GetXattrCore(path.c_str(), key.c_str(), result);
+        if (ret != ERRNO_NOERR) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.getxattr.Err", NError(ret).GetErrCode());
+        }
         return NError(ret);
     };
     auto cbComplete = [result](napi_env env, NError err) -> NVal {
@@ -214,6 +220,7 @@ napi_value Xattr::SetAsync(napi_env env, napi_callback_info info)
     auto cbExec = [path = move(pathString), key = move(keyString), value = move(valueString)]() -> NError {
         if (setxattr(path.c_str(), key.c_str(), value.c_str(), strnlen(value.c_str(), MAX_XATTR_SIZE), 0) < 0) {
             HILOGE("setxattr fail, errno is %{public}d", errno);
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.setxattr.Err", NError(errno).GetErrCode());
             return NError(errno);
         }
         return NError(ERRNO_NOERR);

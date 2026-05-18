@@ -25,6 +25,7 @@
 
 #include "common_func.h"
 #include "filemgmt_libhilog.h"
+#include "file_fs_metrics.h"
 #include "uv.h"
 
 namespace OHOS {
@@ -124,6 +125,7 @@ napi_value Rmdirent::Sync(napi_env env, napi_callback_info info)
 
     auto err = RmDirent(string(path.get()));
     if (err) {
+        METRICS_ERROR("CoreFileKit.fileio.Dyn.rmdirSync.Err", err.GetErrCode());
         err.ThrowErr(env);
         return nullptr;
     }
@@ -148,7 +150,11 @@ napi_value Rmdirent::Async(napi_env env, napi_callback_info info)
     }
 
     auto cbExec = [tmpPath = string(path.get())]() -> NError {
-        return RmDirent(tmpPath);
+        auto err = RmDirent(tmpPath);
+        if (err) {
+            METRICS_ERROR("CoreFileKit.fileio.Dyn.rmdir.Err", err.GetErrCode());
+        }
+        return err;
     };
     auto cbCompl = [](napi_env env, NError err) -> NVal {
         if (err) {

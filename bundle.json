@@ -31,6 +31,7 @@
             "ability_base",
             "ability_runtime",
             "access_token",
+            "api_metrics",
             "app_file_service",
             "bounds_checking_function",
             "bundle_framework",
