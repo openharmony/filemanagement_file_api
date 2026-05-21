@@ -16,7 +16,7 @@ static OH_Archive_ProgressType ProgressHandler(int progress, void *userData)
 
 TEST(ArchiveReadTest, ZipDecompressEmptyDir)
 {
-    const char *inFile = "./data/zip-empty-dir.zip";
+    const char *inFile = "./compress_data/zip-empty-dir.zip";
     const char *outDir = "./test_archive_reader_empty_dir";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
@@ -37,7 +37,7 @@ TEST(ArchiveReadTest, ZipDecompressEmptyDir)
 
 TEST(ArchiveReadTest, ZipDecompressEmptyFile)
 {
-    const char *inFile = "./data/zip-empty.zip";
+    const char *inFile = "./compress_data/zip-empty.zip";
     const char *outDir = "./test_archive_reader_empty_file";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
@@ -58,7 +58,7 @@ TEST(ArchiveReadTest, ZipDecompressEmptyFile)
 
 TEST(ArchiveReadTest, ZipDecompressNormal)
 {
-    const char *inFile = "./data/default.zip";
+    const char *inFile = "./compress_data/default.zip";
     const char *outDir = "./test_archive_reader_default_file";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
@@ -79,7 +79,7 @@ TEST(ArchiveReadTest, ZipDecompressNormal)
 
 TEST(ArchiveReadTest, ZipDecompressFileNotExist)
 {
-    const char *inFile = "./data/file_not_exist.zip";
+    const char *inFile = "./compress_data/file_not_exist.zip";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
     ASSERT_NE(NULL, arc);
@@ -87,7 +87,7 @@ TEST(ArchiveReadTest, ZipDecompressFileNotExist)
 
 TEST(ArchiveReadTest, ZipDecompressChineseName)
 {
-    const char *inFile = "./data/中文名测试.zip";
+    const char *inFile = "./compress_data/中文名测试.zip";
     const char *outDir = "./test_archive_reader_chinese_name";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
@@ -108,7 +108,7 @@ TEST(ArchiveReadTest, ZipDecompressChineseName)
 
 TEST(ArchiveReadTest, ZipDecompressExtraField)
 {
-    const char *inFile = "./data/silesia_extra_field.zip";
+    const char *inFile = "./compress_data/silesia_extra_field.zip";
     const char *outDir = "./test_archive_reader_zip_decompress_extra_field";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
@@ -138,7 +138,7 @@ static OH_Archive_ProgressType ProgressHandlerWithCancel(int progress, void *use
 
 TEST(ArchiveReadTest, ZipDecompressProgressCancel)
 {
-    const char *inFile = "./data/silesia.zip";
+    const char *inFile = "./compress_data/default.zip";
     const char *outDir = "./test_archive_reader_zip_decompress_cancel";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
@@ -159,7 +159,7 @@ TEST(ArchiveReadTest, ZipDecompressProgressCancel)
 
 TEST(ArchiveReadTest, ZipDecompressProgressCancelAndDelete)
 {
-    const char *inFile = "./data/big_zip64.zip";
+    const char *inFile = "./compress_data/big_zip64.zip";
     const char *outDir = "./test_archive_reader_zip_decompress_cancel_and_delete";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
@@ -184,7 +184,7 @@ TEST(ArchiveReadTest, ZipDecompressProgressCancelAndDelete)
 
 TEST(ArchiveReadTest, ZipDecompressZip64File)
 {
-    const char *inFile = "./data/big_zip64.zip";
+    const char *inFile = "./compress_data/big_zip64.zip";
     const char *outDir = "./test_archive_reader_zip_decompress_zip64File";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
@@ -351,7 +351,7 @@ OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase1)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./data/gzip_txt", "./buffer_read_normal_case1", crc);
+    int ret = TestCompress("./compress_data/gzip_txt", "./buffer_read_normal_case1", crc);
     EXPECT_EQ(Z_OK, ret);
 
     ret = TestBufferReadDecompress("./buffer_read_normal_case1", "./buffer_read_normal_case1_decompress");
@@ -361,7 +361,7 @@ TEST(ArchiveReadTest, BufferReadDecompressNormalCase1)
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase2)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./data/utf32.txt", "./buffer_read_normal_case2", crc);
+    int ret = TestCompress("./compress_data/utf32.txt", "./buffer_read_normal_case2", crc);
     EXPECT_EQ(Z_OK, ret);
 
     ret = TestBufferReadDecompress("./buffer_read_normal_case2", "./buffer_read_normal_case2_decompress");
@@ -371,7 +371,7 @@ TEST(ArchiveReadTest, BufferReadDecompressNormalCase2)
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase3)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./data/dickens", "./buffer_read_normal_case3", crc);
+    int ret = TestCompress("./compress_data/dickens", "./buffer_read_normal_case3", crc);
     EXPECT_EQ(Z_OK, ret);
 
     ret = TestBufferReadDecompress("./buffer_read_normal_case3", "./buffer_read_normal_case3_decompress");
@@ -380,7 +380,7 @@ TEST(ArchiveReadTest, BufferReadDecompressNormalCase3)
 
 TEST(ArchiveReadTest, BufferReadDecompressEmptyFile)
 {
-    OH_Archive_ErrCode ret = TestBufferReadDecompress("./data/aafgGWKC1E23.txt",
+    OH_Archive_ErrCode ret = TestBufferReadDecompress("./compress_data/aafgGWKC1E23.txt",
             "./buffer_read_normal_EmptyFile_decompress");
     EXPECT_EQ(OH_ARCHIVE_PARAM_ERROR, ret);
 }
@@ -388,7 +388,7 @@ TEST(ArchiveReadTest, BufferReadDecompressEmptyFile)
 TEST(ArchiveReadTest, BufferReadDecompressOutBufInsuff)
 {
     uint32_t crc = 0;
-    int ret2 = TestCompress("./data/dickens", "./buffer_read_normal_case_outbuf_insuff", crc);
+    int ret2 = TestCompress("./compress_data/dickens", "./buffer_read_normal_case_outbuf_insuff", crc);
     EXPECT_EQ(Z_OK, ret2);
 
     const char *inFileName = "./buffer_read_normal_case_outbuf_insuff";
@@ -444,7 +444,7 @@ TEST(ArchiveReadTest, BufferReadDecompressNotSupportMethod)
 
 uint64_t ReaderHandler(const void *data, uint64_t size, void* userData)
 {
-    const char *outFileName = "./data/stream_decompress";
+    const char *outFileName = "./compress_data/stream_decompress";
     FILE *outFile = fopen(outFileName, "ab");
     if (outFile == NULL) {
         fclose(outFile);
@@ -462,7 +462,7 @@ uint64_t ReaderHandler(const void *data, uint64_t size, void* userData)
 TEST(ArchiveReadTest, StreamReadDecompressNormalCase1)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./data/gzip_txt", "./stream_read_normal_case1", crc);
+    int ret = TestCompress("./compress_data/gzip_txt", "./stream_read_normal_case1", crc);
     EXPECT_EQ(Z_OK, ret);
 
     const char *inFileName = "./stream_read_normal_case1";
@@ -504,7 +504,7 @@ TEST(ArchiveReadTest, StreamReadDecompressNormalCase1)
 TEST(ArchiveReadTest, StreamReadDecompressCancel)
 {
     uint32_t crc = 0;
-    int ret2 = TestCompress("./data/gzip_txt", "./stream_read_cancel", crc);
+    int ret2 = TestCompress("./compress_data/gzip_txt", "./stream_read_cancel", crc);
     EXPECT_EQ(Z_OK, ret2);
 
     const char *inFileName = "./stream_read_cancel";
@@ -547,7 +547,7 @@ TEST(ArchiveReadTest, StreamReadDecompressCancel)
 TEST(ArchiveReadTest, StreamReadDecompressNotSupportMethod)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./data/gzip_txt", "./stream_read_not_support_method", crc);
+    int ret = TestCompress("./compress_data/gzip_txt", "./stream_read_not_support_method", crc);
     EXPECT_EQ(Z_OK, ret);
 
     const char *inFileName = "./stream_read_not_support_method";
