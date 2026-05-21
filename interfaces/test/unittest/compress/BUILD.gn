@@ -27,6 +27,7 @@ ohos_unittest("compress_test") {
   sources = [
     "streamwrite_ut.cpp",
     "zip_writer_test.cpp",
+    "archive_reader_test.cpp"
   ]
 
   deps = [
