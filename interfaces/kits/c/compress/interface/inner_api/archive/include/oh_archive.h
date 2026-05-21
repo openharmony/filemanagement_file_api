@@ -125,7 +125,7 @@ OH_Archive_StreamRead_Ctx OH_Archive_StreamRead_Create(OH_Archive_Stream_Config 
 OH_Archive_ErrCode OH_Archive_StreamRead_Start(OH_Archive_StreamRead_Ctx ctx,
                                                OH_Archive_Stream_OutputHandler outputHandler, void *userData);
 
-OH_Archive_ErrCode OH_Archive_StreamRead_Abort(OH_Archive_StreamRead_Ctx ctx);
+OH_Archive_ErrCode OH_Archive_StreamRead_Cancel(OH_Archive_StreamRead_Ctx ctx);
 
 OH_Archive_ErrCode OH_Archive_StreamRead_Update(OH_Archive_StreamRead_Ctx ctx,
                                                 const uint8_t *data, uint64_t size);

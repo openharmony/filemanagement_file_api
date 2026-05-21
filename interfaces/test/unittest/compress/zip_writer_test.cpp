@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <stdio.h>
+#include <cstdio>
 #include "oh_archive.h"
 #include "oh_archive_errcode.h"
 #include "unistd.h"
@@ -60,9 +60,10 @@ TEST(ARCHIVE_ZIP_WRITER_TEST, test_archive_writer_zip_compress_kongdir)
     const char* infile[] = {file};
     const char* outfile = "kong.zip";
     OH_Archive_ErrCode ret = OH_ARCHIVE_OK;
-    int result = mkdir(file,0777);
+    int result = mkdir(file, 0777);
     if (result == 0) {
-        OH_Archive_Writer_Ctx ctx = OH_Archive_Writer_OpenFile(outfile, OH_ARCHIVE_OPEN_MODE_CREATE, OH_ARCHIVE_FMT_ZIP);
+        OH_Archive_Writer_Ctx ctx =
+            OH_Archive_Writer_OpenFile(outfile, OH_ARCHIVE_OPEN_MODE_CREATE, OH_ARCHIVE_FMT_ZIP);
         ASSERT_NE(ctx, NULL);
         ret = OH_Archive_Writer_SetProgressHandlerWithData(ctx, progressHandler, NULL);
         // 设置压缩算法
@@ -73,6 +74,4 @@ TEST(ARCHIVE_ZIP_WRITER_TEST, test_archive_writer_zip_compress_kongdir)
         ret = OH_Archive_Writer_Close(ctx);
         EXPECT_EQ(ret, OH_ARCHIVE_OK);
     }
-
 }
-

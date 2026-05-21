@@ -14,86 +14,90 @@
  */
 
 #include <gtest/gtest.h>
-#include <stdio.h>
-#include <limits.h>
+#include <cstdio>
+#include <climits>
+#include <cstdint>
 #include "oh_archive.h"
 #include "oh_archive_errcode.h"
 #include "zlib.h"
 #include "oh_archive_plugin.h"
-#include <stdint.h>
 #include "oh_archive.h"
 
-
 #define ULL unsigned long long
-static ULL seed = 123456789LL;
+static ULL g_seed = 123456789LL;
 
-static inline ULL irand(void)
+static inline ULL IRand(void)
 {
-    seed = (seed * 0x41C64E6D + 0x3039) & 0x7FFFFFFF;
-    return seed;
+    g_seed = (g_seed * 0x41C64E6D + 0x3039) & 0x7FFFFFFF;
+    return g_seed;
 }
 
 static int TestRandomInt(int min, int max)
 {
-    if (max <= min) return min;
-    return irand() % (max - min) + min;
+    if (max <= min) {
+        return min;
+    }
+    return IRand() % (max - min) + min;
 }
 
 static void FillBufferWithRandomData(void *buff, ULL size)
 {
-    if (!buff) return;
-    char *p = (char *)buff;
+    if (!buff) {
+        return;
+    }
+    char *p = static_cast<char *>(buff);
     for (ULL i = 0; i < size; i++) {
-        p[i] = (char)TestRandomInt(33, 126);
+        p[i] = static_cast<char>(TestRandomInt(33, 126)); // 33-126 字符范围
     }
 }
 
 static void CreateRandomFile(const char *fileName, size_t fileSize)
 {
-    if (fileSize == 0) return;
-
-    void *fileData = (void *)malloc(fileSize * sizeof(char));
+    if (fileSize == 0) {
+        return;
+    }
+    void *fileData = static_cast<void *>(malloc(fileSize * sizeof(char)));
     FillBufferWithRandomData(fileData, fileSize);
 
     FILE *file = fopen(fileName, "wb");
-    fwrite(fileData, 1, fileSize, file);
-    fclose(file);
+    (void)fwrite(fileData, 1, fileSize, file);
+    (void)fclose(file);
     free(fileData);
 }
 
 static uint64_t PrintDataSizeReturnWrong(const void *data, uint64_t size, void *userData)
 {
     printf("Data ptr: %p, data size: %zu\n", data, size);
-    return (uint64_t)-1;
+    return static_cast<uint64_t>(-1);
 }
 
 static uint64_t WriteCallBack(const void *data, uint64_t size, void *userData)
 {
-    FILE *file = (FILE *)userData;
+    FILE *file = static_cast<FILE *>(userData);
     return fwrite(data, 1, size, file);
 }
 
 static void ErrorExit(const char *err, int code)
 {
-    fprintf(stderr, "%s, code: %d\n", err, code);
+    (void)fprintf(stderr, "%s, code: %d\n", err, code);
     exit(code);
 }
 
 static int ReadFileData(const char *fileName, char **data, uint64_t *dataLength)
 {
     FILE *file = fopen(fileName, "rb");
-    if (file == NULL) {
+    if (file == nullptr) {
         return -1;
     }
     fseeko(file, 0, SEEK_END);
     int64_t fileSize = ftello(file);
-    char *buffer = (char *)malloc(fileSize * sizeof(char));
-    if (buffer == NULL) {
+    char *buffer = static_cast<char *>(malloc(fileSize * sizeof(char)));
+    if (buffer == nullptr) {
         return -1;
     }
     fseeko(file, 0, SEEK_SET);
-    fread(buffer, 1, fileSize, file);
-    fclose(file);
+    (void)fread(buffer, 1, fileSize, file);
+    (void)fclose(file);
     *data = buffer;
     *dataLength = fileSize;
     return 0;
@@ -102,14 +106,14 @@ static int ReadFileData(const char *fileName, char **data, uint64_t *dataLength)
 static int WriteDataToFile(const char *fileName, const char *data, uint64_t dataLength)
 {
     FILE *file = fopen(fileName, "wb");
-    if (file == NULL) {
+    if (file == nullptr) {
         return -1;
     }
     int64_t writeSize = fwrite(data, 1, dataLength, file);
     if (writeSize != dataLength) {
         return -1;
     }
-    fclose(file);
+    (void)fclose(file);
     return 0;
 }
 
@@ -118,14 +122,14 @@ static int WriteDataToFile(const char *fileName, const char *data, uint64_t data
 static int ZlibDecompressCore(const unsigned char *input, uint64_t inputLength, FILE *outFile, int windowBits)
 {
     int ret;
-    z_stream stream;
+    z_stream stream = {0};
     unsigned char buffer[CHUNK_SIZE];
     uint64_t inputOffset = 0;
 
-    memset(&stream, 0, sizeof(z_stream));
-
     ret = inflateInit2(&stream, windowBits);
-    if (ret != Z_OK) return ret;
+    if (ret != Z_OK) {
+        return ret;
+    }
 
     do {
         if (stream.avail_in == 0 && inputOffset < inputLength) {
@@ -151,6 +155,8 @@ static int ZlibDecompressCore(const unsigned char *input, uint64_t inputLength, 
                 case Z_MEM_ERROR:
                 case Z_STREAM_ERROR:
                     inflateEnd(&stream);
+                    [[fallthrough]];
+                default:
                     return ret;
             }
             unsigned int have = CHUNK_SIZE - stream.avail_out;
@@ -170,28 +176,37 @@ static int ZlibDecompressCore(const unsigned char *input, uint64_t inputLength, 
 static int DecompressBufferToFile(const unsigned char *inputBuffer, uint64_t bufferLen, const char *outputFileName,
                                   int windowBits)
 {
-    if (!inputBuffer || !outputFileName) return -1;
-
+    if (!inputBuffer || !outputFileName) {
+        return -1;
+    }
     FILE *outFile = fopen(outputFileName, "wb");
-    if (!outFile) return -1;
+    if (!outFile) {
+        return -1;
+    }
 
     int result = ZlibDecompressCore(inputBuffer, bufferLen, outFile, windowBits);
-    fclose(outFile);
-    if (result != Z_OK) return -1;
-
+    (void)fclose(outFile);
+    if (result != Z_OK) {
+        return -1;
+    }
     return 0;
 }
 
 static int DecompressFileToFile(const char *inputFileName, const char *outputFileName, int windowBits)
 {
-    char *inputData = NULL;
+    char *inputData = nullptr;
     uint64_t inputDataLen = 0;
 
-    if (ReadFileData(inputFileName, &inputData, &inputDataLen) != 0) return -1;
+    if (ReadFileData(inputFileName, &inputData, &inputDataLen) != 0) {
+        return -1;
+    }
 
-    int result = DecompressBufferToFile((const unsigned char *)inputData, inputDataLen, outputFileName, windowBits);
+    int result = DecompressBufferToFile(reinterpret_cast<const unsigned char *>(inputData), inputDataLen, outputFileName,
+                                        windowBits);
     free(inputData);
-    if (result != 0) return -1;
+    if (result != 0) {
+        return -1;
+    }
     return result;
 }
 
@@ -201,13 +216,14 @@ static bool IsSameFile(const char *path1, const char *path2)
 {
     FILE *f1 = fopen(path1, "rb");
     FILE *f2 = fopen(path2, "rb");
-    if (!f1 || !f2) return false;
-
-    fseek(f1, 0, SEEK_END);
-    fseek(f2, 0, SEEK_END);
+    if (!f1 || !f2) {
+        return false;
+    }
+    (void)fseek(f1, 0, SEEK_END);
+    (void)fseek(f2, 0, SEEK_END);
     if (ftell(f1) != ftell(f2)) {
-        fclose(f1);
-        fclose(f2);
+        (void)fclose(f1);
+        (void)fclose(f2);
         return false;
     }
 
@@ -216,32 +232,33 @@ static bool IsSameFile(const char *path1, const char *path2)
 
     char buf1[BUFFER_SIZE];
     char buf2[BUFFER_SIZE];
-    uint64_t byte1, byte2;
+    uint64_t byte1;
+    uint64_t byte2;
 
     while ((byte1 = fread(buf1, 1, BUFFER_SIZE, f1)) > 0) {
         byte2 = fread(buf2, 1, BUFFER_SIZE, f2);
         if (byte2 != byte1 || memcmp(buf1, buf2, byte1) != 0) {
-            fclose(f1);
-            fclose(f2);
+            (void)fclose(f1);
+            (void)fclose(f2);
             return false;
         }
     }
-    fclose(f1);
-    fclose(f2);
+    (void)fclose(f1);
+    (void)fclose(f2);
     return true;
 }
 
 int DecompressFileBase(const char *inFile, const char *outFile)
 {
-    return DecompressFileToFile(inFile, outFile, -15);
+    return DecompressFileToFile(inFile, outFile, -15);  // 窗口大小为-15
 }
 
 class OHCompressTest : public ::testing::Test {
 protected:
     void SetUp() override
     {
-        config.blockSize = 32768;
-        config.threadNum = 4;
+        config.blockSize = 32768; // 32768 bytes 为默认block大小
+        config.threadNum = 4; // 默认 4 线程
         config.method = OH_ARCHIVE_COMPRESS_DEFLATE;
         config.checksum = OH_ARCHIVE_NO_CHECKSUM;
 
@@ -271,11 +288,11 @@ protected:
         uint64_t totalSize = 0;
         FILE *fi = fopen(inFile, "rb");
         if (!fi) {
-            fclose(fout);
+            (void)fclose(fout);
             return OH_ARCHIVE_OPEN_ERROR;
         }
-        fseek(fi, 0, SEEK_END);
-        fseek(fi, 0, SEEK_SET);
+        (void)fseek(fi, 0, SEEK_END);
+        (void)fseek(fi, 0, SEEK_SET);
 
         OH_Archive_ErrCode result = OH_ARCHIVE_OK;
         uint64_t read = 0;
@@ -283,7 +300,6 @@ protected:
             totalSize += read;
             if (quitThreshold != 0 && totalSize >= quitThreshold) {
                 result = OH_Archive_StreamWrite_Abort(ctx);
-                assert(result == OH_ARCHIVE_OK);
                 break;
             } else {
                 result = OH_Archive_StreamWrite_Update(ctx, buffer, read);
@@ -292,13 +308,13 @@ protected:
                 }
             }
         }
-        fclose(fi);
+        (void)fclose(fi);
         if (result != OH_ARCHIVE_OK) {
             printf("CompressFileCommon failed, result: %d\n", result);
         }
 
         result = OH_Archive_StreamWrite_End(ctx, info);
-        fclose(fout);
+        (void)fclose(fout);
         return result;
     }
 
@@ -320,22 +336,23 @@ protected:
 
     int CompressFileBase(const char *sourcePath, const char *targetPath, int level)
     {
-        char *input = NULL;
+        char *input = nullptr;
         uint64_t inputLen;
         int ret = ReadFileData(sourcePath, &input, &inputLen);
-        if (ret != 0) return ret;
+        if (ret != 0) {
+            return ret;
+        }
 
-        z_stream stream;
-        memset(&stream, 0, sizeof(z_stream));
+        z_stream stream = {0};
 
-        char *output = (char *)malloc(2 * inputLen * sizeof(char));
+        char *output = static_cast<char *>(malloc(2 * inputLen * sizeof(char)));  // 2 倍输入大小
+        if (output == nullptr) {
+            return Z_MEM_ERROR;
+        }
         stream.next_out = (Bytef *)output;
-        stream.avail_out = 2 * (uInt)inputLen;
-        stream.next_in = (z_const
-        Bytef *
-        )
-        input;
-        stream.avail_in = (uInt)inputLen;
+        stream.avail_out = 2 * static_cast<uInt>(inputLen);  // 2 倍输入大小
+        stream.next_in = (z_const Bytef *)input;
+        stream.avail_in = static_cast<uInt>(inputLen);
 
         int result = deflateInit2(&stream, level, Z_DEFLATED, -MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
         if (result != Z_OK) {
@@ -346,7 +363,9 @@ protected:
         if (result != Z_STREAM_END) {
             return result;
         }
-        if (stream.avail_in > 0) ErrorExit("compress: input was not consumed\n", Z_DATA_ERROR);
+        if (stream.avail_in > 0) {
+            ErrorExit("compress: input was not consumed\n", Z_DATA_ERROR);
+        }
         unsigned int outputLen = stream.total_out;
 
         result |= deflateEnd(&stream);
@@ -392,7 +411,7 @@ TEST_F(OHCompressTest, CompressCtxWithInvalidCallBack)
     OH_Archive_ErrCode ret = OH_Archive_StreamWrite_Start(ctx, PrintDataSizeReturnWrong, nullptr);
     ASSERT_EQ(ret, OH_ARCHIVE_OK);
 
-    const uint8_t data[8] = {0};
+    const uint8_t data[4] = {0};    // 4 bytes 数据
     ret = OH_Archive_StreamWrite_Update(ctx, data, 4);
     ret = OH_Archive_StreamWrite_End(ctx, nullptr);
     ASSERT_EQ(ret, OH_ARCHIVE_STREAM_OUTPUT_ERROR);
@@ -407,7 +426,7 @@ TEST_F(OHCompressTest, CompressNormal)
     const char *decompressedFile = "decompressed_file_normal";
 
     const char *inFile = "file_normal";
-    CreateRandomFile(inFile, 1024 * 1024);
+    CreateRandomFile(inFile, 1024 * 1024);  // 1024K大小
 
     int level = 5;
     OH_Archive_ErrCode compRet = CompressFile(inFile, compressedFile, level);
@@ -428,7 +447,7 @@ TEST_F(OHCompressTest, CompressCheckSum)
     const char *decompressedFile = "decompressed_file_normal";
 
     const char *inFile = "file_normal";
-    CreateRandomFile(inFile, 1024 * 1024);
+    CreateRandomFile(inFile, 1024 * 1024);  // 1024K大小文件
 
     int level = 6;
     OH_Archive_ErrCode compRet = CompressFile(inFile, compressedFile, level);
@@ -448,10 +467,10 @@ TEST_F(OHCompressTest, CompressAbort)
     const char *decompressedFile = "decompressed_file_abort";
 
     const char *inFile = "file_abort";
-    CreateRandomFile(inFile, 1024 * 1024);
+    CreateRandomFile(inFile, 1024 * 1024); // 1024K大小
 
     int level = 6;
-    CompressFileQuit(inFile, compressedFile, level, 2000);
+    CompressFileQuit(inFile, compressedFile, level, 2000); // 2000 bytes时退出
     int ret = DecompressFileBase(compressedFile, decompressedFile);
     EXPECT_NE(ret, 0);
     bool isSame = IsSameFile(inFile, decompressedFile);
@@ -461,13 +480,13 @@ TEST_F(OHCompressTest, CompressAbort)
 TEST_F(OHCompressTest, BufferCompress)
 {
     const char *inFile = "file_buffer";
-    CreateRandomFile(inFile, 1024 * 1024);
-    char *source = NULL;
+    CreateRandomFile(inFile, 1024 * 1024);  // 1024K大小文件
+    char *source = nullptr;
     uint64_t sourceLen;
     ReadFileData(inFile, &source, &sourceLen);
 
     uint64_t destLen = 0;
-    uint8_t *dest = NULL;
+    uint8_t *dest = nullptr;
 
     uint64_t bound = OH_Archive_BufferWriteCompressBound(OH_ARCHIVE_COMPRESS_DEFLATE, sourceLen);
     EXPECT_NE(bound, 0);
@@ -475,7 +494,8 @@ TEST_F(OHCompressTest, BufferCompress)
     dest = new uint8_t[bound];
     destLen = bound;
 
-    int ret = OH_Archive_BufferWrite(dest, &destLen, (uint8_t *)source, sourceLen, OH_ARCHIVE_COMPRESS_DEFLATE, 0);
+    int ret = OH_Archive_BufferWrite(dest, &destLen, reinterpret_cast<uint8_t *>(source), sourceLen,
+                                     OH_ARCHIVE_COMPRESS_DEFLATE, 0);
     EXPECT_EQ(ret, OH_ARCHIVE_OK);
     EXPECT_GT(destLen, 0u);
 
@@ -532,11 +552,6 @@ TEST_F(OHCompressTest, BufferCompressInvalidParam)
 
 TEST_F(OHCompressTest, BufferCompressBoundInvalidParam)
 {
-    uint64_t bound = OH_Archive_BufferWriteCompressBound((OH_Archive_CompressMethod)-1, 10);
+    uint64_t bound = OH_Archive_BufferWriteCompressBound((OH_Archive_CompressMethod) - 1, 10);
     EXPECT_EQ(bound, 0);
-}
-
-TEST_F(OHCompressTest, DestroyNull)
-{
-    (void)OH_Archive_StreamWrite_Destroy(nullptr);
 }

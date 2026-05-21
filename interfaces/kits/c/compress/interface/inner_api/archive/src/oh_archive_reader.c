@@ -313,7 +313,7 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_StreamRead_Start(OH_Archive_StreamRead
     return OH_ARCHIVE_OK;
 }
 
-ARCHIVE_API OH_Archive_ErrCode OH_Archive_StreamRead_Abort(OH_Archive_StreamRead_Ctx ctx)
+ARCHIVE_API OH_Archive_ErrCode OH_Archive_StreamRead_Cancel(OH_Archive_StreamRead_Ctx ctx)
 {
     if (ctx == NULL) {
         return OH_ARCHIVE_PARAM_ERROR;

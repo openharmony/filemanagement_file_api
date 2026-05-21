@@ -1,8 +1,23 @@
-#include <stdio.h>
-#include <stdlib.h>
+/*
+* Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <cstdio>
+#include <cstdlib>
 #include <pthread.h>
 #include <gtest/gtest.h>
-#include <locale.h>
+#include <clocale>
 #include "oh_archive.h"
 #include "zlib.h"
 
@@ -16,16 +31,16 @@ static OH_Archive_ProgressType ProgressHandler(int progress, void *userData)
 
 TEST(ArchiveReadTest, ZipDecompressEmptyDir)
 {
-    const char *inFile = "./compress_data/zip-empty-dir.zip";
-    const char *outDir = "./test_archive_reader_empty_dir";
+    const char *inFile = "/data/test/zip-empty-dir.zip";
+    const char *outDir = "/data/test/test_archive_reader_empty_dir";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(NULL, arc);
+    ASSERT_NE(nullptr, arc);
 
     OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandler;
     int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
     OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc, progressHandlerFunc,
-        (void*)userData);
+        static_cast<void*>(userData));
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
@@ -37,16 +52,16 @@ TEST(ArchiveReadTest, ZipDecompressEmptyDir)
 
 TEST(ArchiveReadTest, ZipDecompressEmptyFile)
 {
-    const char *inFile = "./compress_data/zip-empty.zip";
-    const char *outDir = "./test_archive_reader_empty_file";
+    const char *inFile = "/data/test/zip-empty.zip";
+    const char *outDir = "/data/test/test_archive_reader_empty_file";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(NULL, arc);
+    ASSERT_NE(nullptr, arc);
 
     OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandler;
     int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
     OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc, progressHandlerFunc,
-        (void*)userData);
+        static_cast<void*>(userData));
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
@@ -58,16 +73,16 @@ TEST(ArchiveReadTest, ZipDecompressEmptyFile)
 
 TEST(ArchiveReadTest, ZipDecompressNormal)
 {
-    const char *inFile = "./compress_data/default.zip";
-    const char *outDir = "./test_archive_reader_default_file";
+    const char *inFile = "/data/test/default.zip";
+    const char *outDir = "/data/test/test_archive_reader_default_file";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(NULL, arc);
+    ASSERT_NE(nullptr, arc);
 
     OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandler;
     int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
     OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc, progressHandlerFunc,
-        (void*)userData);
+        static_cast<void*>(userData));
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
@@ -79,24 +94,24 @@ TEST(ArchiveReadTest, ZipDecompressNormal)
 
 TEST(ArchiveReadTest, ZipDecompressFileNotExist)
 {
-    const char *inFile = "./compress_data/file_not_exist.zip";
+    const char *inFile = "/data/test/file_not_exist.zip";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(NULL, arc);
+    ASSERT_NE(nullptr, arc);
 }
 
 TEST(ArchiveReadTest, ZipDecompressChineseName)
 {
-    const char *inFile = "./compress_data/中文名测试.zip";
-    const char *outDir = "./test_archive_reader_chinese_name";
+    const char *inFile = "/data/test/中文名测试.zip";
+    const char *outDir = "/data/test/test_archive_reader_chinese_name";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(NULL, arc);
+    ASSERT_NE(nullptr, arc);
 
     OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandler;
     int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
     OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc, progressHandlerFunc,
-        (void*)userData);
+        static_cast<void*>(userData));
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
@@ -108,16 +123,16 @@ TEST(ArchiveReadTest, ZipDecompressChineseName)
 
 TEST(ArchiveReadTest, ZipDecompressExtraField)
 {
-    const char *inFile = "./compress_data/silesia_extra_field.zip";
-    const char *outDir = "./test_archive_reader_zip_decompress_extra_field";
+    const char *inFile = "/data/test/silesia_extra_field.zip";
+    const char *outDir = "/data/test/test_archive_reader_zip_decompress_extra_field";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(NULL, arc);
+    ASSERT_NE(nullptr, arc);
 
     OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandler;
     int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
     OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc, progressHandlerFunc,
-        (void*)userData);
+        static_cast<void*>(userData));
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
@@ -130,7 +145,7 @@ TEST(ArchiveReadTest, ZipDecompressExtraField)
 static OH_Archive_ProgressType ProgressHandlerWithCancel(int progress, void *userData)
 {
     printf("\rProgress: %d%%\n", progress);
-    if (progress > 50) {
+    if (progress > 50) {    // 进度大于50
         return OH_ARCHIVE_PROGRESS_CANCEL;
     }
     return OH_ARCHIVE_PROGRESS_CONTINUE;
@@ -138,16 +153,16 @@ static OH_Archive_ProgressType ProgressHandlerWithCancel(int progress, void *use
 
 TEST(ArchiveReadTest, ZipDecompressProgressCancel)
 {
-    const char *inFile = "./compress_data/default.zip";
-    const char *outDir = "./test_archive_reader_zip_decompress_cancel";
+    const char *inFile = "/data/test/default.zip";
+    const char *outDir = "/data/test/test_archive_reader_zip_decompress_cancel";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(NULL, arc);
+    ASSERT_NE(nullptr, arc);
 
     OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandlerWithCancel;
     int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
     OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc,
-        progressHandlerFunc, (void*)userData);
+        progressHandlerFunc, static_cast<void*>(userData));
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
@@ -159,16 +174,16 @@ TEST(ArchiveReadTest, ZipDecompressProgressCancel)
 
 TEST(ArchiveReadTest, ZipDecompressProgressCancelAndDelete)
 {
-    const char *inFile = "./compress_data/big_zip64.zip";
-    const char *outDir = "./test_archive_reader_zip_decompress_cancel_and_delete";
+    const char *inFile = "/data/test/big_zip64.zip";
+    const char *outDir = "/data/test/test_archive_reader_zip_decompress_cancel_and_delete";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(NULL, arc);
+    ASSERT_NE(nullptr, arc);
 
     OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandlerWithCancel;
     int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
     OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc,
-        progressHandlerFunc, (void*)userData);
+        progressHandlerFunc, static_cast<void*>(userData));
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
@@ -177,23 +192,23 @@ TEST(ArchiveReadTest, ZipDecompressProgressCancelAndDelete)
     ret = OH_Archive_Reader_Close(arc);
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
-    int ret2 = access("./test_archive_reader_zip_decompress_cancel_and_delete/test_big_zip64_file",
+    int ret2 = access("/data/test/test_archive_reader_zip_decompress_cancel_and_delete/test_big_zip64_file",
         F_OK);
     EXPECT_NE(0, ret2);
 }
 
 TEST(ArchiveReadTest, ZipDecompressZip64File)
 {
-    const char *inFile = "./compress_data/big_zip64.zip";
-    const char *outDir = "./test_archive_reader_zip_decompress_zip64File";
+    const char *inFile = "/data/test/big_zip64.zip";
+    const char *outDir = "/data/test/test_archive_reader_zip_decompress_zip64File";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(NULL, arc);
+    ASSERT_NE(nullptr, arc);
 
     OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandler;
     int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
     OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc,
-        progressHandlerFunc, (void*)userData);
+        progressHandlerFunc, static_cast<void*>(userData));
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
@@ -203,23 +218,23 @@ TEST(ArchiveReadTest, ZipDecompressZip64File)
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 }
 
-#define ZLIB_OK 0;
-#define ZLIB_ERROR 1;
+#define ZLIB_OK 0
+#define ZLIB_ERROR 1
 
 static int TestCompressBase(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen)
 {
     z_stream stream;
     int err;
-    const uInt max = (uInt)-1;
+    const uInt max = static_cast<uInt>(-1);
     uLong left;
 
     left = *destLen;
     *destLen = 0;
-    stream.zalloc = (alloc_func)0;
-    stream.zfree = (free_func)0;
-    stream.opaque = (voidpf)0;
+    stream.zalloc = nullptr;
+    stream.zfree = nullptr;
+    stream.opaque = nullptr;
 
-    err = deflateInit2(&stream, -1, Z_DEFLATED, -15 , 6, 4);
+    err = deflateInit2(&stream, -1, Z_DEFLATED, -15, 6, 4); // windowBits为-15，压缩级别为6，strategy为4
     if (err != Z_OK) {
         return err;
     }
@@ -231,12 +246,12 @@ static int TestCompressBase(Bytef *dest, uLongf *destLen, const Bytef *source, u
 
     do {
         if (stream.avail_out == 0) {
-            stream.avail_out = left > (uLong)max ? max : (uInt)left;
+            stream.avail_out = left > static_cast<uLong>(max) ? max : static_cast<uInt>(left);
             left -= stream.avail_out;
         }
 
         if (stream.avail_in == 0) {
-            stream.avail_in = sourceLen > (uLong)max ? max : (uInt)sourceLen;
+            stream.avail_in = sourceLen > static_cast<uLong>(max) ? max : static_cast<uInt>(sourceLen);
             sourceLen -= stream.avail_in;
         }
         err = deflate(&stream, sourceLen ? Z_NO_FLUSH : Z_FINISH);
@@ -246,45 +261,46 @@ static int TestCompressBase(Bytef *dest, uLongf *destLen, const Bytef *source, u
     return err == Z_STREAM_END ? Z_OK : err;
 }
 
-static int TestCompress(const char *inFileName , const char *outFileName, uint32_t &crc)
+static int TestCompress(const char *inFileName, const char *outFileName, uint32_t &crc)
 {
-    FILE *inFile, *outFile;
+    FILE *inFile;
+    FILE *outFile;
     inFile = fopen(inFileName, "rb");
-    if (inFile == NULL) {
+    if (inFile == nullptr) {
         return ZLIB_ERROR;
     }
-    Byte *data = NULL;
-    fseek(inFile, 0, SEEK_END);
+    Byte *data = nullptr;
+    (void)fseek(inFile, 0, SEEK_END);
     uLong dataLen = ftell(inFile);
     if (dataLen == 0) {
         return ZLIB_ERROR;
     }
 
-    data = (Byte *)malloc(dataLen);
-    if (data == NULL) {
+    data = static_cast<Byte *>(malloc(dataLen));
+    if (data == nullptr) {
         return ZLIB_ERROR;
     }
 
     rewind(inFile);
-    fread(data, dataLen, 1, inFile);
+    (void)fread(data, dataLen, 1, inFile);
     crc = crc32(0, data, dataLen);
     outFile = fopen(outFileName, "wb");
-    if (outFile == NULL) {
+    if (outFile == nullptr) {
         fclose(inFile);
         return ZLIB_ERROR;
     }
 
-    Byte *compr = NULL;
+    Byte *compr = nullptr;
     uLong comprLen = compressBound(dataLen);
-    compr = (Bytef*)malloc(dataLen * sizeof(Bytef));
-    if (compr == NULL) {
+    compr = static_cast<Bytef*>(malloc(comprLen * sizeof(Bytef)));
+    if (compr == nullptr) {
         free(data);
         fclose(inFile);
         fclose(outFile);
         return ZLIB_ERROR;
     }
 
-    if (TestCompressBase(compr, &comprLen, (const Bytef*)data, dataLen) != Z_OK) {
+    if (TestCompressBase(compr, &comprLen, static_cast<const Bytef*>(data), dataLen) != Z_OK) {
         free(data);
         free(compr);
         fclose(inFile);
@@ -305,116 +321,112 @@ static int TestCompress(const char *inFileName , const char *outFileName, uint32
 OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *outFileName)
 {
     OH_Archive_ErrCode ret = OH_ARCHIVE_OK;
-    FILE *inFile, *outFile;
+    FILE *inFile;
     inFile = fopen(inFileName, "rb");
-    if (inFile == NULL) {
+    if (inFile == nullptr) {
         return OH_ARCHIVE_DEFLATE_ERROR;
     }
-    Byte *data = NULL;
-    fseek(inFile, 0, SEEK_END);
+    Byte *data = nullptr;
+    (void)fseek(inFile, 0, SEEK_END);
     uLong dataLen = ftell(inFile);
     if (dataLen == 0) {
         return OH_ARCHIVE_DEFLATE_ERROR;
     }
 
-    data = (Byte *)malloc(dataLen);
-    if (data == NULL) {
+    data = static_cast<Byte *>(malloc(dataLen));
+    if (data == nullptr) {
         return OH_ARCHIVE_DEFLATE_ERROR;
     }
-
     rewind(inFile);
-    fread(data, dataLen, 1, inFile);
-    outFile = fopen(outFileName, "wb");
-    if (outFile == NULL) {
-        fclose(inFile);
-        return OH_ARCHIVE_DEFLATE_ERROR;
-    }
+    (void)fread(data, dataLen, 1, inFile);
 
-    Byte *uncompr = NULL;
+    Byte *uncompr = nullptr;
     uLong uncomprLen = 1<<30;
-    uncompr = (Bytef*)malloc(dataLen * sizeof(Bytef));
-    if (uncompr == NULL) {
+    uncompr = static_cast<Bytef*>(malloc(uncomprLen * sizeof(Bytef)));
+    if (uncompr == nullptr) {
         free(data);
         fclose(inFile);
-        fclose(outFile);
         return OH_ARCHIVE_DEFLATE_ERROR;
     }
 
-    ret = OH_Archive_BufferRead(uncompr, &uncomprLen, (const Bytef*)data, dataLen,
+    ret = OH_Archive_BufferRead(uncompr, &uncomprLen, static_cast<const Bytef*>(data), dataLen,
         OH_ARCHIVE_COMPRESS_DEFLATE);
     free(data);
     free(uncompr);
-    fclose(inFile);
+    (void)fclose(inFile);
     return ret;
 }
 
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase1)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./compress_data/gzip_txt", "./buffer_read_normal_case1", crc);
+    int ret = TestCompress("/data/test/gzip_txt", "./buffer_read_normal_case1", crc);
     EXPECT_EQ(Z_OK, ret);
 
-    ret = TestBufferReadDecompress("./buffer_read_normal_case1", "./buffer_read_normal_case1_decompress");
+    ret = TestBufferReadDecompress("/data/test/buffer_read_normal_case1",
+        "/data/test/buffer_read_normal_case1_decompress");
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 }
 
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase2)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./compress_data/utf32.txt", "./buffer_read_normal_case2", crc);
+    int ret = TestCompress("/data/test/utf32.txt", "/data/test/buffer_read_normal_case2", crc);
     EXPECT_EQ(Z_OK, ret);
 
-    ret = TestBufferReadDecompress("./buffer_read_normal_case2", "./buffer_read_normal_case2_decompress");
+    ret = TestBufferReadDecompress("/data/test/buffer_read_normal_case2",
+        "/data/test/buffer_read_normal_case2_decompress");
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 }
 
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase3)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./compress_data/dickens", "./buffer_read_normal_case3", crc);
+    int ret = TestCompress("/data/test/dickens", "/data/test/buffer_read_normal_case3", crc);
     EXPECT_EQ(Z_OK, ret);
 
-    ret = TestBufferReadDecompress("./buffer_read_normal_case3", "./buffer_read_normal_case3_decompress");
+    ret = TestBufferReadDecompress("/data/test/buffer_read_normal_case3",
+        "/data/test/buffer_read_normal_case3_decompress");
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 }
 
 TEST(ArchiveReadTest, BufferReadDecompressEmptyFile)
 {
-    OH_Archive_ErrCode ret = TestBufferReadDecompress("./compress_data/aafgGWKC1E23.txt",
-            "./buffer_read_normal_EmptyFile_decompress");
+    OH_Archive_ErrCode ret = TestBufferReadDecompress("/data/test/aafgGWKC1E23.txt",
+            "/data/test/buffer_read_normal_EmptyFile_decompress");
     EXPECT_EQ(OH_ARCHIVE_PARAM_ERROR, ret);
 }
 
 TEST(ArchiveReadTest, BufferReadDecompressOutBufInsuff)
 {
     uint32_t crc = 0;
-    int ret2 = TestCompress("./compress_data/dickens", "./buffer_read_normal_case_outbuf_insuff", crc);
+    int ret2 = TestCompress("/data/test/dickens", "/data/test/buffer_read_normal_case_outbuf_insuff", crc);
     EXPECT_EQ(Z_OK, ret2);
 
-    const char *inFileName = "./buffer_read_normal_case_outbuf_insuff";
-    const char *outFileName = "./buffer_read_normal_case_outbuf_insuff_decompress";
+    const char *inFileName = "/data/test/buffer_read_normal_case_outbuf_insuff";
+    const char *outFileName = "/data/test/buffer_read_normal_case_outbuf_insuff_decompress";
 
     FILE *inFile, *outFile;
     inFile = fopen(inFileName, "rb");
-    ASSERT_NE(NULL, inFile);
+    ASSERT_NE(nullptr, inFile);
 
     fseek(inFile, 0, SEEK_END);
     uLong dataLen = ftell(inFile);
-    Byte *data = (Byte *)malloc(dataLen);
-    ASSERT_NE(NULL, data);
+    Byte *data = static_cast<Byte *>(malloc(dataLen));
+    ASSERT_NE(nullptr, data);
     rewind(inFile);
     fread(data, dataLen, 1, inFile);
 
     crc = crc32(0, data, dataLen);
     outFile = fopen(outFileName, "wb");
-    ASSERT_NE(NULL, outFile);
+    ASSERT_NE(nullptr, outFile);
 
-    Byte *uncompr = NULL;
+    Byte *uncompr = nullptr;
     uLong uncomprLen = 10; // insufficient outbuf
-    uncompr = (Bytef*)malloc(dataLen * sizeof(Bytef));
-    ASSERT_NE(NULL, uncompr);
+    uncompr = static_cast<Bytef*>(malloc(dataLen * sizeof(Bytef)));
+    ASSERT_NE(nullptr, uncompr);
 
-    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, &uncomprLen, (const Bytef*)data, dataLen,
+    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, &uncomprLen, static_cast<const Bytef*>(data), dataLen,
         OH_ARCHIVE_COMPRESS_DEFLATE);
     EXPECT_EQ(OH_ARCHIVE_INSUFFICIENT_OUTBUF_ERROR, ret);
     
@@ -427,15 +439,15 @@ TEST(ArchiveReadTest, BufferReadDecompressOutBufInsuff)
 TEST(ArchiveReadTest, BufferReadDecompressNotSupportMethod)
 {
     uLong dataLen = 10;
-    Byte *data = (Bytef*)malloc(dataLen * sizeof(Bytef));
-    ASSERT_NE(NULL, data);
+    Byte *data = static_cast<Bytef*>(malloc(dataLen * sizeof(Bytef)));
+    ASSERT_NE(nullptr, data);
 
     uLong uncomprLen = 10;
-    Byte *uncompr = (Bytef*)malloc(uncomprLen * sizeof(Bytef));
-    ASSERT_NE(NULL, uncompr);
+    Byte *uncompr = static_cast<Bytef*>(malloc(uncomprLen * sizeof(Bytef)));
+    ASSERT_NE(nullptr, uncompr);
 
-    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, &uncomprLen, (const Bytef*)data, dataLen,
-        (OH_Archive_CompressMethod)7);
+    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, &uncomprLen, static_cast<const Bytef*>(data), dataLen,
+        static_cast<OH_Archive_CompressMethod>(7));
     EXPECT_EQ(OH_ARCHIVE_PARAM_ERROR, ret);
     
     free(data);
@@ -444,9 +456,9 @@ TEST(ArchiveReadTest, BufferReadDecompressNotSupportMethod)
 
 uint64_t ReaderHandler(const void *data, uint64_t size, void* userData)
 {
-    const char *outFileName = "./compress_data/stream_decompress";
+    const char *outFileName = "/data/test/stream_decompress";
     FILE *outFile = fopen(outFileName, "ab");
-    if (outFile == NULL) {
+    if (outFile == nullptr) {
         fclose(outFile);
         return 0;
     }
@@ -455,24 +467,24 @@ uint64_t ReaderHandler(const void *data, uint64_t size, void* userData)
         return 0;
     }
 
-    fclose(outFile);
+    (void)fclose(outFile);
     return size;
 }
 
 TEST(ArchiveReadTest, StreamReadDecompressNormalCase1)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./compress_data/gzip_txt", "./stream_read_normal_case1", crc);
+    int ret = TestCompress("/data/test/gzip_txt", "/data/test/stream_read_normal_case1", crc);
     EXPECT_EQ(Z_OK, ret);
 
-    const char *inFileName = "./stream_read_normal_case1";
+    const char *inFileName = "/data/test/stream_read_normal_case1";
     FILE *inFile = fopen(inFileName, "rb");
-    ASSERT_NE(NULL, inFile);
+    ASSERT_NE(nullptr, inFile);
 
     fseek(inFile, 0, SEEK_END);
     uLong dataLen = ftell(inFile);
-    uint8_t *data = (uint8_t *)malloc(dataLen * sizeof(uint8_t));
-    ASSERT_NE(NULL, data);
+    uint8_t *data = static_cast<uint8_t *>(malloc(dataLen * sizeof(uint8_t)));
+    ASSERT_NE(nullptr, data);
     rewind(inFile);
     fread(data, dataLen, 1, inFile);
 
@@ -481,10 +493,10 @@ TEST(ArchiveReadTest, StreamReadDecompressNormalCase1)
     config.method = OH_ARCHIVE_COMPRESS_DEFLATE;
     config.checksum = OH_ARCHIVE_CRC32;
     OH_Archive_StreamRead_Ctx ctx = OH_Archive_StreamRead_Create(config);
-    ASSERT_NE(NULL, ctx);
+    ASSERT_NE(nullptr, ctx);
 
     OH_Archive_Stream_OutputHandler readerHandler = ReaderHandler;
-    OH_Archive_ErrCode ret2 = OH_Archive_StreamRead_Start(ctx, readerHandler, NULL);
+    OH_Archive_ErrCode ret2 = OH_Archive_StreamRead_Start(ctx, readerHandler, nullptr);
     EXPECT_EQ(OH_ARCHIVE_OK, ret2);
 
     ret2 = OH_Archive_StreamRead_Update(ctx, data, dataLen);
@@ -504,17 +516,17 @@ TEST(ArchiveReadTest, StreamReadDecompressNormalCase1)
 TEST(ArchiveReadTest, StreamReadDecompressCancel)
 {
     uint32_t crc = 0;
-    int ret2 = TestCompress("./compress_data/gzip_txt", "./stream_read_cancel", crc);
+    int ret2 = TestCompress("/data/test/gzip_txt", "/data/test/stream_read_cancel", crc);
     EXPECT_EQ(Z_OK, ret2);
 
-    const char *inFileName = "./stream_read_cancel";
+    const char *inFileName = "/data/test/stream_read_cancel";
     FILE *inFile = fopen(inFileName, "rb");
-    ASSERT_NE(NULL, inFile);
+    ASSERT_NE(nullptr, inFile);
 
     fseek(inFile, 0, SEEK_END);
     uLong dataLen = ftell(inFile);
     uint8_t *data = (uint8_t *)malloc(dataLen * sizeof(uint8_t));
-    ASSERT_NE(NULL, data);
+    ASSERT_NE(nullptr, data);
     rewind(inFile);
     fread(data, dataLen, 1, inFile);
 
@@ -523,10 +535,10 @@ TEST(ArchiveReadTest, StreamReadDecompressCancel)
     config.method = OH_ARCHIVE_COMPRESS_DEFLATE;
     config.checksum = OH_ARCHIVE_CRC32;
     OH_Archive_StreamRead_Ctx ctx = OH_Archive_StreamRead_Create(config);
-    ASSERT_NE(NULL, ctx);
+    ASSERT_NE(nullptr, ctx);
 
     OH_Archive_Stream_OutputHandler readerHandler = ReaderHandler;
-    OH_Archive_ErrCode ret = OH_Archive_StreamRead_Start(ctx, readerHandler, NULL);
+    OH_Archive_ErrCode ret = OH_Archive_StreamRead_Start(ctx, readerHandler, nullptr);
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     ret = OH_Archive_StreamRead_Cancel(ctx);
@@ -535,7 +547,7 @@ TEST(ArchiveReadTest, StreamReadDecompressCancel)
     ret = OH_Archive_StreamRead_Update(ctx, data, dataLen);
     EXPECT_EQ(OH_ARCHIVE_CANCEL_ERROR, ret);
 
-    ret = OH_Archive_StreamRead_End(ctx, NULL);
+    ret = OH_Archive_StreamRead_End(ctx, nullptr);
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 
     OH_Archive_StreamRead_Destroy(ctx);
@@ -547,17 +559,17 @@ TEST(ArchiveReadTest, StreamReadDecompressCancel)
 TEST(ArchiveReadTest, StreamReadDecompressNotSupportMethod)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("./compress_data/gzip_txt", "./stream_read_not_support_method", crc);
+    int ret = TestCompress("/data/test/gzip_txt", "/data/test/stream_read_not_support_method", crc);
     EXPECT_EQ(Z_OK, ret);
 
-    const char *inFileName = "./stream_read_not_support_method";
+    const char *inFileName = "/data/test/stream_read_not_support_method";
     FILE *inFile = fopen(inFileName, "rb");
-    ASSERT_NE(NULL, inFile);
+    ASSERT_NE(nullptr, inFile);
 
     fseek(inFile, 0, SEEK_END);
     uLong dataLen = ftell(inFile);
     uint8_t *data = (uint8_t *)malloc(dataLen * sizeof(uint8_t));
-    ASSERT_NE(NULL, data);
+    ASSERT_NE(nullptr, data);
     rewind(inFile);
     fread(data, dataLen, 1, inFile);
 
@@ -566,13 +578,8 @@ TEST(ArchiveReadTest, StreamReadDecompressNotSupportMethod)
     config.method = (OH_Archive_CompressMethod)7;
     config.checksum = OH_ARCHIVE_CRC32;
     OH_Archive_StreamRead_Ctx ctx = OH_Archive_StreamRead_Create(config);
-    EXPECT_EQ(NULL, ctx);
+    EXPECT_EQ(nullptr, ctx);
 
     fclose(inFile);
     free(data);
 }
-
-
-
-
-

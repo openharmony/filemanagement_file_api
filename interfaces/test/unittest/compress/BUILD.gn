@@ -14,20 +14,12 @@
 import("//build/test.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
-ohos_unittest("compress_test") {
-  testonly = true
-
+common_compress_test_props = {
   module_out_path = "file_api/file_api"
   include_dirs = [
     "${file_api_path}/interfaces/kits/c/compress/interface/inner_api/archive/src",
     "${file_api_path}/interfaces/kits/c/compress/interface/inner_api/archive/include",
     "${file_api_path}/interfaces/kits/c/compress/frameworks",
-  ]
-
-  sources = [
-    "streamwrite_ut.cpp",
-    "zip_writer_test.cpp",
-    "archive_reader_test.cpp"
   ]
 
   deps = [
@@ -37,5 +29,35 @@ ohos_unittest("compress_test") {
   external_deps = [
     "googletest:gtest_main",
     "zlib:shared_libz",
+  ]
+}
+
+ohos_unittest("streamwrite_test") {
+  forward_variables_from(common_compress_test_props, "*")
+  sources = [
+    "streamwrite_ut.cpp",
+  ]
+}
+
+ohos_unittest("zip_writer_test") {
+  forward_variables_from(common_compress_test_props, "*")
+  sources = [
+    "zip_writer_test.cpp",
+  ]
+}
+
+ohos_unittest("archive_reader_test") {
+  forward_variables_from(common_compress_test_props, "*")
+  sources = [
+    "archive_reader_test.cpp",
+  ]
+}
+
+group("compress_test") {
+  testonly = true
+  deps = [
+    ":streamwrite_test",
+    ":zip_writer_test",
+    ":archive_reader_test",
   ]
 }
