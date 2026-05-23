@@ -53,7 +53,8 @@
             "os_account",
             "runtime_core",
             "rust_libc",
-            "samgr"
+            "samgr",
+            "zlib"
         ],
         "third_party": []
       },
@@ -159,6 +160,16 @@
                 "fileio.h"
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/c/fileio"
+            }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/c/compress:ohcompress",
+            "header": {
+              "header_files": [
+                "interface/inner_api/archive/include/oh_archive.h",
+                "interface/inner_api/archive/include/oh_archive_errcode.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/c/compress"
             }
           },
           {

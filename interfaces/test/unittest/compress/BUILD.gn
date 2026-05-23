@@ -1,0 +1,63 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
+
+common_compress_test_props = {
+  module_out_path = "file_api/file_api"
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/c/compress/interface/inner_api/archive/src",
+    "${file_api_path}/interfaces/kits/c/compress/interface/inner_api/archive/include",
+    "${file_api_path}/interfaces/kits/c/compress/frameworks",
+  ]
+
+  deps = [
+    "${file_api_path}/interfaces/kits/c/compress:ohcompress",
+  ]
+
+  external_deps = [
+    "googletest:gtest_main",
+    "zlib:shared_libz",
+  ]
+}
+
+ohos_unittest("streamwrite_test") {
+  forward_variables_from(common_compress_test_props, "*")
+  sources = [
+    "streamwrite_ut.cpp",
+  ]
+}
+
+ohos_unittest("zip_writer_test") {
+  forward_variables_from(common_compress_test_props, "*")
+  sources = [
+    "zip_writer_test.cpp",
+  ]
+}
+
+ohos_unittest("archive_reader_test") {
+  forward_variables_from(common_compress_test_props, "*")
+  sources = [
+    "archive_reader_test.cpp",
+  ]
+}
+
+group("compress_test") {
+  testonly = true
+  deps = [
+    ":streamwrite_test",
+    ":zip_writer_test",
+    ":archive_reader_test",
+  ]
+}

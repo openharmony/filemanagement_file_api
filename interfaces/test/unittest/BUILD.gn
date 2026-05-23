@@ -28,6 +28,7 @@ group("file_api_unittest") {
     "napi_js:napi_file_fs_mock_test",
     "remote_uri:remote_uri_test",
     "task_signal:task_signal_test",
+    "compress:compress_test",
   ]
   if (file_api_feature_hyperaio) {
     deps += [ "hyperaio:hyperaio_test" ]
