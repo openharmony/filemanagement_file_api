@@ -324,7 +324,7 @@ OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *
         return OH_ARCHIVE_DEFLATE_ERROR;
     }
 
-    ret = OH_Archive_BufferRead(uncompr, &uncomprLen, static_cast<const Bytef*>(data), dataLen,
+    ret = OH_Archive_BufferRead(uncompr, (uint64_t *)&uncomprLen, static_cast<const Bytef*>(data), dataLen,
         OH_ARCHIVE_COMPRESS_DEFLATE);
     free(data);
     free(uncompr);
@@ -401,10 +401,10 @@ TEST(ArchiveReadTest, BufferReadDecompressOutBufInsuff)
     uncompr = static_cast<Bytef*>(malloc(dataLen * sizeof(Bytef)));
     ASSERT_NE(nullptr, uncompr);
 
-    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, &uncomprLen, static_cast<const Bytef*>(data), dataLen,
-        OH_ARCHIVE_COMPRESS_DEFLATE);
+    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, (uint64_t *)&uncomprLen,
+        static_cast<const Bytef*>(data), dataLen, OH_ARCHIVE_COMPRESS_DEFLATE);
     EXPECT_EQ(OH_ARCHIVE_INSUFFICIENT_OUTBUF_ERROR, ret);
-    
+
     free(data);
     free(uncompr);
     fclose(inFile);
@@ -421,10 +421,10 @@ TEST(ArchiveReadTest, BufferReadDecompressNotSupportMethod)
     Byte *uncompr = static_cast<Bytef*>(malloc(uncomprLen * sizeof(Bytef)));
     ASSERT_NE(nullptr, uncompr);
 
-    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, &uncomprLen, static_cast<const Bytef*>(data), dataLen,
-        static_cast<OH_Archive_CompressMethod>(7));
+    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, (uint64_t *)&uncomprLen,
+        static_cast<const Bytef*>(data), dataLen, static_cast<OH_Archive_CompressMethod>(7));
     EXPECT_EQ(OH_ARCHIVE_PARAM_ERROR, ret);
-    
+
     free(data);
     free(uncompr);
 }

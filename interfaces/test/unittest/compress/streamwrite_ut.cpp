@@ -58,7 +58,7 @@ static void CreateRandomFile(const char *fileName, size_t fileSize)
     }
     void *fileData = static_cast<void *>(malloc(fileSize * sizeof(char)));
     if (fileData == nullptr) {
- 	    return;
+        return;
  	}
     FillBufferWithRandomData(fileData, fileSize);
 
@@ -70,7 +70,7 @@ static void CreateRandomFile(const char *fileName, size_t fileSize)
 
 static uint64_t PrintDataSizeReturnWrong(const void *data, uint64_t size, void *userData)
 {
-    printf("Data ptr: %p, data size: %zu\n", data, size);
+    printf("Data ptr: %p, data size: %llu\n", data, size);
     return static_cast<uint64_t>(-1);
 }
 

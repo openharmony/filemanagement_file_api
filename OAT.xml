@@ -40,6 +40,16 @@
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies">
                 <filteritem type="filepath" name="figures/file-api-架构图.png" desc="self developed image"/>
                 <filteritem type="filepath" name="figures/file-api-architecture.png" desc="self developed image"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/aafgGWKC1E23.txt" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/big_zip64.zip" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/default.zip" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/dickens.zip" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/gzip_txt.zip" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/utf32.zip" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/xml" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/zip-empty-dir.zip" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/zip-empty.zip" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/中文名测试.zip" desc="compress test file"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
