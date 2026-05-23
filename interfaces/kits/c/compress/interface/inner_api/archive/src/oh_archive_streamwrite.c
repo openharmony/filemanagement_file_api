@@ -203,11 +203,11 @@ EXPORT_API OH_Archive_ErrCode OH_Archive_StreamWrite_SetCompressLevel(OH_Archive
     return OH_ARCHIVE_OK;
 }
 
-EXPORT_API OH_Archive_ErrCode OH_Archive_StreamWrite_Abort(OH_Archive_StreamWrite_Ctx ctx)
+EXPORT_API OH_Archive_ErrCode OH_Archive_StreamWrite_Cancel(OH_Archive_StreamWrite_Ctx ctx)
 {
     const HispeedArchivePlugin* plugin = GetHispeedArchivePluginHandle();
-    if (plugin != NULL && plugin->streamWriteAbort != NULL) {
-        return plugin->streamWriteAbort(ctx);
+    if (plugin != NULL && plugin->streamWriteCancel != NULL) {
+        return plugin->streamWriteCancel(ctx);
     }
     if (ctx == NULL) {
         return OH_ARCHIVE_PARAM_ERROR;
@@ -235,7 +235,7 @@ EXPORT_API OH_Archive_ErrCode OH_Archive_StreamWrite_Start(OH_Archive_StreamWrit
     }
 
     if (ctx->state != W_STREAM_CREATED && ctx->state != W_STREAM_ENDED && ctx->state != W_STREAM_CANCELED) {
-        OH_Archive_StreamWrite_Abort(ctx);
+        OH_Archive_StreamWrite_Cancel(ctx);
     }
     if (deflateReset(&ctx->zstream) != Z_OK) {
         return OH_ARCHIVE_DEFLATE_ERROR;

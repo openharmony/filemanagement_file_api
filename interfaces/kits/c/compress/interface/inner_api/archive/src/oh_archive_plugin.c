@@ -87,8 +87,8 @@ static void ArchiveLoadHispeedPlugin()
         "HSD_Archive_StreamWrite_Start");
     g_hispeedArchivePlugin.streamWriteSetCompressLevel = (HSDPlugin_StreamWrite_SetCompressLevel)dlsym(
         g_HSDCompressHandle, "HSD_Archive_StreamWrite_SetCompressLevel");
-    g_hispeedArchivePlugin.streamWriteAbort = (HSDPlugin_StreamWrite_Abort)dlsym(g_HSDCompressHandle,
-        "HSD_Archive_StreamWrite_Abort");
+    g_hispeedArchivePlugin.streamWriteCancel = (HSDPlugin_StreamWrite_Cancel)dlsym(g_HSDCompressHandle,
+        "HSD_Archive_StreamWrite_Cancel");
     g_hispeedArchivePlugin.streamWriteUpdate = (HSDPlugin_StreamWrite_Update)dlsym(g_HSDCompressHandle,
         "HSD_Archive_StreamWrite_Update");
     g_hispeedArchivePlugin.streamWriteEnd = (HSDPlugin_StreamWrite_End)dlsym(g_HSDCompressHandle,
@@ -107,7 +107,7 @@ static void ArchiveLoadHispeedPlugin()
     CloseHispeedArchivePluginIfSymNotFound((GenericFuncPtr)g_hispeedArchivePlugin.streamWriteCreate);
     CloseHispeedArchivePluginIfSymNotFound((GenericFuncPtr)g_hispeedArchivePlugin.streamWriteStart);
     CloseHispeedArchivePluginIfSymNotFound((GenericFuncPtr)g_hispeedArchivePlugin.streamWriteSetCompressLevel);
-    CloseHispeedArchivePluginIfSymNotFound((GenericFuncPtr)g_hispeedArchivePlugin.streamWriteAbort);
+    CloseHispeedArchivePluginIfSymNotFound((GenericFuncPtr)g_hispeedArchivePlugin.streamWriteCancel);
     CloseHispeedArchivePluginIfSymNotFound((GenericFuncPtr)g_hispeedArchivePlugin.streamWriteUpdate);
     CloseHispeedArchivePluginIfSymNotFound((GenericFuncPtr)g_hispeedArchivePlugin.streamWriteEnd);
     CloseHispeedArchivePluginIfSymNotFound((GenericFuncPtr)g_hispeedArchivePlugin.streamWriteDestroy);

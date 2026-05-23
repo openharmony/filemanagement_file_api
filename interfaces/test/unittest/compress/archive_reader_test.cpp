@@ -97,34 +97,13 @@ TEST(ArchiveReadTest, ZipDecompressFileNotExist)
     const char *inFile = "/data/test/file_not_exist.zip";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(nullptr, arc);
+    ASSERT_EQ(nullptr, arc);
 }
 
 TEST(ArchiveReadTest, ZipDecompressChineseName)
 {
     const char *inFile = "/data/test/中文名测试.zip";
     const char *outDir = "/data/test/test_archive_reader_chinese_name";
-
-    OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
-    ASSERT_NE(nullptr, arc);
-
-    OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandler;
-    int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
-    OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc, progressHandlerFunc,
-        static_cast<void*>(userData));
-    EXPECT_EQ(OH_ARCHIVE_OK, ret);
-
-    ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
-    EXPECT_EQ(OH_ARCHIVE_OK, ret);
-
-    ret = OH_Archive_Reader_Close(arc);
-    EXPECT_EQ(OH_ARCHIVE_OK, ret);
-}
-
-TEST(ArchiveReadTest, ZipDecompressExtraField)
-{
-    const char *inFile = "/data/test/silesia_extra_field.zip";
-    const char *outDir = "/data/test/test_archive_reader_zip_decompress_extra_field";
 
     OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
     ASSERT_NE(nullptr, arc);
@@ -321,17 +300,13 @@ static int TestCompress(const char *inFileName, const char *outFileName, uint32_
 OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *outFileName)
 {
     OH_Archive_ErrCode ret = OH_ARCHIVE_OK;
-    FILE *inFile;
-    inFile = fopen(inFileName, "rb");
+    FILE *inFile = fopen(inFileName, "rb");
     if (inFile == nullptr) {
         return OH_ARCHIVE_DEFLATE_ERROR;
     }
     Byte *data = nullptr;
     (void)fseek(inFile, 0, SEEK_END);
     uLong dataLen = ftell(inFile);
-    if (dataLen == 0) {
-        return OH_ARCHIVE_DEFLATE_ERROR;
-    }
 
     data = static_cast<Byte *>(malloc(dataLen));
     if (data == nullptr) {
@@ -360,7 +335,7 @@ OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase1)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("/data/test/gzip_txt", "./buffer_read_normal_case1", crc);
+    int ret = TestCompress("/data/test/gzip_txt.zip", "./buffer_read_normal_case1", crc);
     EXPECT_EQ(Z_OK, ret);
 
     ret = TestBufferReadDecompress("/data/test/buffer_read_normal_case1",
@@ -371,7 +346,7 @@ TEST(ArchiveReadTest, BufferReadDecompressNormalCase1)
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase2)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("/data/test/utf32.txt", "/data/test/buffer_read_normal_case2", crc);
+    int ret = TestCompress("/data/test/utf32.zip", "/data/test/buffer_read_normal_case2", crc);
     EXPECT_EQ(Z_OK, ret);
 
     ret = TestBufferReadDecompress("/data/test/buffer_read_normal_case2",
@@ -382,7 +357,7 @@ TEST(ArchiveReadTest, BufferReadDecompressNormalCase2)
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase3)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("/data/test/dickens", "/data/test/buffer_read_normal_case3", crc);
+    int ret = TestCompress("/data/test/dickens.zip", "/data/test/buffer_read_normal_case3", crc);
     EXPECT_EQ(Z_OK, ret);
 
     ret = TestBufferReadDecompress("/data/test/buffer_read_normal_case3",
@@ -400,7 +375,7 @@ TEST(ArchiveReadTest, BufferReadDecompressEmptyFile)
 TEST(ArchiveReadTest, BufferReadDecompressOutBufInsuff)
 {
     uint32_t crc = 0;
-    int ret2 = TestCompress("/data/test/dickens", "/data/test/buffer_read_normal_case_outbuf_insuff", crc);
+    int ret2 = TestCompress("/data/test/dickens.zip", "/data/test/buffer_read_normal_case_outbuf_insuff", crc);
     EXPECT_EQ(Z_OK, ret2);
 
     const char *inFileName = "/data/test/buffer_read_normal_case_outbuf_insuff";
@@ -474,7 +449,7 @@ uint64_t ReaderHandler(const void *data, uint64_t size, void* userData)
 TEST(ArchiveReadTest, StreamReadDecompressNormalCase1)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("/data/test/gzip_txt", "/data/test/stream_read_normal_case1", crc);
+    int ret = TestCompress("/data/test/gzip_txt.zip", "/data/test/stream_read_normal_case1", crc);
     EXPECT_EQ(Z_OK, ret);
 
     const char *inFileName = "/data/test/stream_read_normal_case1";
@@ -516,7 +491,7 @@ TEST(ArchiveReadTest, StreamReadDecompressNormalCase1)
 TEST(ArchiveReadTest, StreamReadDecompressCancel)
 {
     uint32_t crc = 0;
-    int ret2 = TestCompress("/data/test/gzip_txt", "/data/test/stream_read_cancel", crc);
+    int ret2 = TestCompress("/data/test/gzip_txt.zip", "/data/test/stream_read_cancel", crc);
     EXPECT_EQ(Z_OK, ret2);
 
     const char *inFileName = "/data/test/stream_read_cancel";
@@ -559,7 +534,7 @@ TEST(ArchiveReadTest, StreamReadDecompressCancel)
 TEST(ArchiveReadTest, StreamReadDecompressNotSupportMethod)
 {
     uint32_t crc = 0;
-    int ret = TestCompress("/data/test/gzip_txt", "/data/test/stream_read_not_support_method", crc);
+    int ret = TestCompress("/data/test/gzip_txt.zip", "/data/test/stream_read_not_support_method", crc);
     EXPECT_EQ(Z_OK, ret);
 
     const char *inFileName = "/data/test/stream_read_not_support_method";

@@ -39,7 +39,7 @@ typedef OH_Archive_ErrCode (*HSDPlugin_StreamWrite_Start)(OH_Archive_StreamWrite
 typedef OH_Archive_ErrCode (*HSDPlugin_StreamWrite_SetCompressLevel)(OH_Archive_StreamWrite_Ctx ctx,
                                                                      int32_t compressLevel);
 
-typedef OH_Archive_ErrCode (*HSDPlugin_StreamWrite_Abort)(OH_Archive_StreamWrite_Ctx ctx);
+typedef OH_Archive_ErrCode (*HSDPlugin_StreamWrite_Cancel)(OH_Archive_StreamWrite_Ctx ctx);
 
 typedef OH_Archive_ErrCode (*HSDPlugin_StreamWrite_Update)(OH_Archive_StreamWrite_Ctx ctx, const uint8_t *data,
                                                            uint64_t size);
@@ -53,7 +53,7 @@ typedef struct {
     HSDPlugin_StreamWrite_Create streamWriteCreate;
     HSDPlugin_StreamWrite_Start streamWriteStart;
     HSDPlugin_StreamWrite_SetCompressLevel streamWriteSetCompressLevel;
-    HSDPlugin_StreamWrite_Abort streamWriteAbort;
+    HSDPlugin_StreamWrite_Cancel streamWriteCancel;
     HSDPlugin_StreamWrite_Update streamWriteUpdate;
     HSDPlugin_StreamWrite_End streamWriteEnd;
     HSDPlugin_StreamWrite_Destroy streamWriteDestroy;

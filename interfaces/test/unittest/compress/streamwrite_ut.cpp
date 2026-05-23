@@ -57,6 +57,9 @@ static void CreateRandomFile(const char *fileName, size_t fileSize)
         return;
     }
     void *fileData = static_cast<void *>(malloc(fileSize * sizeof(char)));
+    if (fileData == nullptr) {
+ 	    return;
+ 	}
     FillBufferWithRandomData(fileData, fileSize);
 
     FILE *file = fopen(fileName, "wb");
@@ -201,8 +204,8 @@ static int DecompressFileToFile(const char *inputFileName, const char *outputFil
         return -1;
     }
 
-    int result = DecompressBufferToFile(reinterpret_cast<const unsigned char *>(inputData), inputDataLen, outputFileName,
-                                        windowBits);
+    int result = DecompressBufferToFile(reinterpret_cast<const unsigned char *>(inputData), inputDataLen,
+                                        outputFileName, windowBits);
     free(inputData);
     if (result != 0) {
         return -1;
@@ -299,7 +302,7 @@ protected:
         while ((read = fread(buffer, 1, bufferSize, fi)) > 0) {
             totalSize += read;
             if (quitThreshold != 0 && totalSize >= quitThreshold) {
-                result = OH_Archive_StreamWrite_Abort(ctx);
+                result = OH_Archive_StreamWrite_Cancel(ctx);
                 break;
             } else {
                 result = OH_Archive_StreamWrite_Update(ctx, buffer, read);
@@ -458,7 +461,7 @@ TEST_F(OHCompressTest, CompressCheckSum)
     EXPECT_TRUE(isSame);
 }
 
-TEST_F(OHCompressTest, CompressAbort)
+TEST_F(OHCompressTest, CompressCancel)
 {
     ctx = OH_Archive_StreamWrite_Create(config);
     ASSERT_NE(ctx, nullptr);
@@ -503,18 +506,18 @@ TEST_F(OHCompressTest, BufferCompress)
     delete[] dest;
 }
 
-TEST_F(OHCompressTest, CompressAbortNull)
+TEST_F(OHCompressTest, CompressCancelNull)
 {
-    OH_Archive_ErrCode ret = OH_Archive_StreamWrite_Abort(nullptr);
+    OH_Archive_ErrCode ret = OH_Archive_StreamWrite_Cancel(nullptr);
     EXPECT_EQ(ret, OH_ARCHIVE_PARAM_ERROR);
 }
 
-TEST_F(OHCompressTest, CompressAbortBeforeStart)
+TEST_F(OHCompressTest, CompressCancelBeforeStart)
 {
     ctx = OH_Archive_StreamWrite_Create(config);
     EXPECT_NE(ctx, nullptr);
 
-    OH_Archive_ErrCode ret = OH_Archive_StreamWrite_Abort(nullptr);
+    OH_Archive_ErrCode ret = OH_Archive_StreamWrite_Cancel(nullptr);
     EXPECT_EQ(ret, OH_ARCHIVE_PARAM_ERROR);
 }
 

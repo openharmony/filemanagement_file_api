@@ -20,9 +20,9 @@
             <option name="push" value="compress_data/aafgGWKC1E23.txt -> /data/test" src="res"/>
             <option name="push" value="compress_data/big_zip64.zip -> /data/test/" src="res"/>
             <option name="push" value="compress_data/default.zip -> /data/test/" src="res"/>
-            <option name="push" value="compress_data/dickens -> /data/test/" src="res"/>
-            <option name="push" value="compress_data/gzip_txt -> /data/test/" src="res"/>
-            <option name="push" value="compress_data/utf32.txt -> /data/test/" src="res"/>
+            <option name="push" value="compress_data/dickens.zip -> /data/test/" src="res"/>
+            <option name="push" value="compress_data/gzip_txt.zip -> /data/test/" src="res"/>
+            <option name="push" value="compress_data/utf32.zip -> /data/test/" src="res"/>
             <option name="push" value="compress_data/xml -> /data/test/" src="res"/>
             <option name="push" value="compress_data/zip-empty-dir.zip -> /data/test/" src="res"/>
             <option name="push" value="compress_data/zip-empty.zip -> /data/test/" src="res"/>
