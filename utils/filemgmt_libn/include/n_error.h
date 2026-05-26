@@ -162,7 +162,7 @@ enum ErrCodeSuffixOfStorageService {
     E_GET_PARTITION_ERROR = 21,
     E_CREATE_PARTITION_ERROR = 22,
     E_DELETE_PARTITION_ERROR = 23,
-    E_FORMAT_PARTITION_ERROR = 25,
+    E_FORMAT_PARTITION_ERROR = 32,
 };
 
 enum ErrCodeSuffixOfUserFileService {
