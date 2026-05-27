@@ -59,7 +59,7 @@ static void CreateRandomFile(const char *fileName, size_t fileSize)
     void *fileData = static_cast<void *>(malloc(fileSize * sizeof(char)));
     if (fileData == nullptr) {
         return;
- 	}
+    }
     FillBufferWithRandomData(fileData, fileSize);
 
     FILE *file = fopen(fileName, "wb");
@@ -158,9 +158,9 @@ static int ZlibDecompressCore(const unsigned char *input, uint64_t inputLength, 
                 case Z_MEM_ERROR:
                 case Z_STREAM_ERROR:
                     inflateEnd(&stream);
-                    [[fallthrough]];
-                default:
                     return ret;
+                default:
+                    break;
             }
             unsigned int have = CHUNK_SIZE - stream.avail_out;
             if (have > 0) {
