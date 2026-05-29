@@ -21,6 +21,24 @@
 #include <stdio.h>
 #include <limits.h>
 
+#define ARCHIVE_OPEN_MODE_READ 0X01
+#define ARCHIVE_OPEN_MODE_CREATE 0X08
+
+#define PROGRESS_UPDATE_INTERVAL (1024 * 1024) // 1MB
+#define PROGRESS_PERCENT 100
+
+#define ARCHIVE_SEEK_SET 0
+#define ARCHIVE_SEEK_CUR 1
+#define ARCHIVE_SEEK_END 2
+
+#define BITS_SHIFT_7 7
+#define BITS_SHIFT_8 8
+#define BITS_SHIFT_16 16
+#define BITS_SHIFT_24 24
+
+#define EXTRA_FIELD_HEADER_BYTES 4
+#define EXTRA_FIELD_UNICODE_PATH_MIN_LEN 5
+
 #define ZIP_FILE_NAME_LEN_MAX PATH_MAX
 #define ZIP_BUF_INTERNAL 32768
 
@@ -40,6 +58,29 @@
 
 #define ARCHIVE_IMPL __attribute__((visibility("hidden")))
 #define ARCHIVE_API __attribute__((visibility("default")))
+#define LOCAL static
+
+#define BYTE_OFFSET 8
+static inline uint64_t GetLittleEndianValue(uint8_t *buf, size_t bytes)
+{
+    uint64_t value = buf[0];
+    size_t i = 1;
+    size_t offset = BYTE_OFFSET;
+    for (; i < bytes; i++, offset += BYTE_OFFSET) {
+        value += (uint64_t)buf[i] << (i * BYTE_OFFSET);
+    }
+    return value;
+}
+
+#if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+    #define GETV(x) x
+    #define SETV(x) x
+#elif defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#else
+    #define GETV(x) GetLittleEndianValue(&x, sizeof(x))
+    #define SETV(x) GetLittleEndianValue(&x, sizeof(x))
+#endif
+
 
 #define LOCAL static
 #define ARCHIVE_UNUSED(x) ((void)0)

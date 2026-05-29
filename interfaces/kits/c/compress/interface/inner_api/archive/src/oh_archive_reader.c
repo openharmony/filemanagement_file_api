@@ -25,8 +25,9 @@
 #include "oh_archive_plugin.h"
 #include "errorcode.h"
 
+extern const FmtReaderOps g_ZipReaderFmtOps;
 const FmtReaderOps *g_AllFmtReaderOps[] = {
-    NULL,
+    &g_ZipReaderFmtOps,
     NULL,
     NULL
 };
@@ -124,6 +125,7 @@ ARCHIVE_API OH_Archive_Reader_Ctx OH_Archive_Reader_OpenFile(const char *inFile)
     if (archive == NULL) {
         return NULL;
     }
+    archive->fmtOps = g_AllFmtReaderOps[fmt];
 
     // dlopen hispeed
 #if defined(__aarch64__) || defined(_M_ARM64)
@@ -221,19 +223,21 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_BufferRead(uint8_t *dstBuffer, uint64_
     }
 
     int ret = Z_OK;
+    uint64_t maxSrcLen = srcSize;
+    uint64_t tempMaxDstLen = maxDstLen;
     do {
-        if (maxDstLen == 0) {
+        if (tempMaxDstLen == 0) {
             ret = inflateEnd(&stream);
             return OH_ARCHIVE_INSUFFICIENT_OUTBUF_ERROR;
         }
 
         if (stream.avail_out == 0) {
-            stream.avail_out = maxDstLen > UINT_MAX ? UINT_MAX : maxDstLen;
+            stream.avail_out = tempMaxDstLen > UINT_MAX ? UINT_MAX : tempMaxDstLen;
             stream.next_out = (Bytef *)dstBuffer + stream.total_out;
         }
 
         if (stream.avail_in == 0) {
-            stream.avail_in = srcSize > UINT_MAX ? UINT_MAX : srcSize;
+            stream.avail_in = maxSrcLen > UINT_MAX ? UINT_MAX : maxSrcLen;
             stream.next_in = (z_const Bytef *)srcBuffer + stream.total_in;
         }
         
@@ -252,9 +256,9 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_BufferRead(uint8_t *dstBuffer, uint64_
             return OH_ARCHIVE_DEFLATE_ERROR;
         }
 
-        srcSize -= stream.total_in;
-        maxDstLen -= stream.total_out;
-    } while (srcSize > 0);
+        maxSrcLen = srcSize - stream.total_in;
+        tempMaxDstLen = maxDstLen - stream.total_out;
+    } while (maxSrcLen > 0);
 
     ret = inflateEnd(&stream);
     if (ret != Z_OK) {

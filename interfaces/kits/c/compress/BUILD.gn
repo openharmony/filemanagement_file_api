@@ -43,6 +43,17 @@ ohos_shared_library("ohcompress") {
   ]
 
   sources = [
+    "frameworks/format/zip/zip_writer.c",
+    "frameworks/format/zip/zip_reader.c",
+    "frameworks/format/zip/zip_reader_impl.c",
+    "frameworks/format/zip/zip_writer_impl.c",
+    "frameworks/format/zip/zip_handler_common.c",
+    "frameworks/stream/stream.c",
+    "frameworks/stream/file/stream_file_posix.c",
+    "frameworks/stream/memory/stream_mem.c",
+    "frameworks/stream/raw/stream_raw.c",
+    "frameworks/stream/compress/stream_deflate.c",
+    "frameworks/resource/container/dir_item_queue.c",
     "interface/inner_api/archive/src/oh_archive_streamwrite.c",
     "interface/inner_api/archive/src/oh_archive_writer.c",
     "interface/inner_api/archive/src/oh_archive_plugin.c",

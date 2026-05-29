@@ -18,6 +18,7 @@
 
 #include "oh_archive_errcode.h"
 #include "archive_macros.h"
+#include <stdbool.h>
 
 typedef enum {
     ARCHIVE_FMT_ZIP = 0,
@@ -38,4 +39,14 @@ typedef struct {
 } ErrCodeMap;
 
 int CreateDirectory(const char *path, const char *base);
+int CreateSymlink(const char *old, const char *newSym);
+int CreateParentDirectory(const char *filePath, const char* base);
+int GetOutputFilePath(const char *fileName, const char *outDir, char *outPath,
+    size_t size);
+uint8_t IsUTF8Str(char *fStr);
+char *ConvertStrGBKToUTF8(const char *str);
+int IsFileExists(const char *fileName);
+int GenerateNewFilename(const char *originalPath, char *newPath, size_t newPathSize);
+int IsSymlinkExists(const char *fileName);
+bool IsUtf8Encoded(unsigned char *data, bool skipTwoBytes);
 #endif

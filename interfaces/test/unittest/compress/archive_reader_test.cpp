@@ -270,7 +270,7 @@ static int TestCompress(const char *inFileName, const char *outFileName, uint32_
     }
 
     Byte *compr = nullptr;
-    uLong comprLen = compressBound(dataLen);
+    uLong comprLen = 1 << 30;
     compr = static_cast<Bytef*>(malloc(comprLen * sizeof(Bytef)));
     if (compr == nullptr) {
         free(data);
@@ -297,7 +297,8 @@ static int TestCompress(const char *inFileName, const char *outFileName, uint32_
     return ZLIB_OK;
 }
 
-OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *outFileName)
+OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *outFileName,
+    uint32_t &crc)
 {
     OH_Archive_ErrCode ret = OH_ARCHIVE_OK;
     FILE *inFile = fopen(inFileName, "rb");
@@ -316,7 +317,7 @@ OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *
     (void)fread(data, dataLen, 1, inFile);
 
     Byte *uncompr = nullptr;
-    uLong uncomprLen = 1<<30;
+    uLong uncomprLen = 1 << 30;
     uncompr = static_cast<Bytef*>(malloc(uncomprLen * sizeof(Bytef)));
     if (uncompr == nullptr) {
         free(data);
@@ -326,6 +327,7 @@ OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *
 
     ret = OH_Archive_BufferRead(uncompr, (uint64_t *)&uncomprLen, static_cast<const Bytef*>(data), dataLen,
         OH_ARCHIVE_COMPRESS_DEFLATE);
+    crc = crc32(0, uncompr, uncomprLen);
     free(data);
     free(uncompr);
     (void)fclose(inFile);
@@ -338,9 +340,11 @@ TEST(ArchiveReadTest, BufferReadDecompressNormalCase1)
     int ret = TestCompress("/data/test/gzip_txt.zip", "./buffer_read_normal_case1", crc);
     EXPECT_EQ(Z_OK, ret);
 
+    uint32_t crcRslt = 0;
     ret = TestBufferReadDecompress("/data/test/buffer_read_normal_case1",
-        "/data/test/buffer_read_normal_case1_decompress");
+        "/data/test/buffer_read_normal_case1_decompress", crcRslt);
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
+    EXPECT_EQ(crc, crcRslt);
 }
 
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase2)
@@ -349,9 +353,11 @@ TEST(ArchiveReadTest, BufferReadDecompressNormalCase2)
     int ret = TestCompress("/data/test/utf32.zip", "/data/test/buffer_read_normal_case2", crc);
     EXPECT_EQ(Z_OK, ret);
 
+    uint32_t crcRslt = 0;
     ret = TestBufferReadDecompress("/data/test/buffer_read_normal_case2",
-        "/data/test/buffer_read_normal_case2_decompress");
+        "/data/test/buffer_read_normal_case2_decompress", crcRslt);
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
+    EXPECT_EQ(crc, crcRslt);
 }
 
 TEST(ArchiveReadTest, BufferReadDecompressNormalCase3)
@@ -360,15 +366,18 @@ TEST(ArchiveReadTest, BufferReadDecompressNormalCase3)
     int ret = TestCompress("/data/test/dickens.zip", "/data/test/buffer_read_normal_case3", crc);
     EXPECT_EQ(Z_OK, ret);
 
+    uint32_t crcRslt = 0;
     ret = TestBufferReadDecompress("/data/test/buffer_read_normal_case3",
-        "/data/test/buffer_read_normal_case3_decompress");
+        "/data/test/buffer_read_normal_case3_decompress", crcRslt);
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
+    EXPECT_EQ(crc, crcRslt);
 }
 
 TEST(ArchiveReadTest, BufferReadDecompressEmptyFile)
 {
+    uint32_t crcRslt = 0;
     OH_Archive_ErrCode ret = TestBufferReadDecompress("/data/test/aafgGWKC1E23.txt",
-            "/data/test/buffer_read_normal_EmptyFile_decompress");
+            "/data/test/buffer_read_normal_EmptyFile_decompress", crcRslt);
     EXPECT_EQ(OH_ARCHIVE_PARAM_ERROR, ret);
 }
 
