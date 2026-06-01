@@ -33,6 +33,7 @@ common_compress_test_props = {
 }
 
 ohos_unittest("streamwrite_test") {
+  resource_config_file = "../resource/ohos_test.xml"
   forward_variables_from(common_compress_test_props, "*")
   sources = [
     "streamwrite_ut.cpp",
@@ -40,6 +41,7 @@ ohos_unittest("streamwrite_test") {
 }
 
 ohos_unittest("zip_writer_test") {
+  resource_config_file = "../resource/ohos_test.xml"
   forward_variables_from(common_compress_test_props, "*")
   sources = [
     "zip_writer_test.cpp",
@@ -47,9 +49,18 @@ ohos_unittest("zip_writer_test") {
 }
 
 ohos_unittest("archive_reader_test") {
+  resource_config_file = "../resource/ohos_test.xml"
   forward_variables_from(common_compress_test_props, "*")
   sources = [
     "archive_reader_test.cpp",
+  ]
+}
+
+ohos_unittest("archive_reader_open_source_test") {
+  resource_config_file = "../resource/ohos_test.xml"
+  forward_variables_from(common_compress_test_props, "*")
+  sources = [
+    "archive_reader_open_source_test.cpp",
   ]
 }
 
@@ -59,5 +70,6 @@ group("compress_test") {
     ":streamwrite_test",
     ":zip_writer_test",
     ":archive_reader_test",
+    ":archive_reader_open_source_test",
   ]
 }
