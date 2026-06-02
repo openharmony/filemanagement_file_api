@@ -38,6 +38,7 @@ ohos_shared_library("ohcompress") {
     "./",
     "frameworks",
     "frameworks/stream",
+    "frameworks/format/zip",
     "interface/inner_api/archive/src",
     "interface/inner_api/archive/include",
   ]

@@ -958,15 +958,29 @@ static int GetSaveName(char *filePath, const char *inputDir, const char **saveNa
     return ARCHIVE_OK;
 }
 
-int32_t ZipWriterAddEmptyDir(HmArchiveWriteInfo *archive, struct ZipWriter *writer, FilePathNodePtr nodeptr)
+int32_t ZipWriterAddEmptyDir(HmArchiveWriteInfo *archive, struct ZipWriter *writer, const char *inputDir, char *path)
 {
+    FilePathNode pathNode;
+    pathNode.filePath = path;
+    char newPath[ZIP_FILE_NAME_LEN_MAX + 1] = {0};
+    if (EOK != strncpy_s(newPath, ZIP_FILE_NAME_LEN_MAX + 1, path, strlen(path))) {
+        return ARCHIVE_INTERNAL_ERROR;
+    }
     int ret;
+    ret = GetSaveName(newPath, inputDir, (const char **)&pathNode.saveName);
+    if (ret != ARCHIVE_OK) {
+        return ret;
+    }
+    ret = PathAppendSlash(newPath, ZIP_FILE_NAME_LEN_MAX, ARCHIVE_PATH_SLASH_PLATFORM);
+    if (ret != ARCHIVE_OK) {
+        return ret;
+    }
     struct ZipWriterTaskParam param;
     memset_s(&param, sizeof(param), 0, sizeof(param));
     param.archive = archive;
     param.writer = writer;
     param.fileType = FILE_TYPE_EMPTY_DIR;
-    param.fileNode = nodeptr;
+    param.fileNode = &pathNode;
     ret = ZipWriterEntryOpen(&param);
     if (ret == ARCHIVE_OK) {
         ret = ZipWriterCloseStream(&param, 0);
@@ -986,10 +1000,7 @@ static int ZipWriterAddOnePath(HmArchiveWriteInfo *archive, struct ZipWriter *wr
         char *path = PopDirItemQueueNode(&dirItemQueue);
         if (IsDir(path)) {
             if (IsValidFolderEnd(path)) {
-                FilePathNode pathNode;
-                pathNode.filePath = path;
-                ret = GetSaveName(path, inputDir, (const char **)&pathNode.saveName);
-                ret = ZipWriterAddEmptyDir(archive, writer, &pathNode);
+                ret = ZipWriterAddEmptyDir(archive, writer, inputDir, path);
             }
             if (ret == ARCHIVE_OK) {
                 ret = TraversalDir(&dirItemQueue, path);
@@ -998,7 +1009,9 @@ static int ZipWriterAddOnePath(HmArchiveWriteInfo *archive, struct ZipWriter *wr
             FilePathNode pathNode;
             pathNode.filePath = path;
             ret = GetSaveName(path, inputDir, (const char **)&pathNode.saveName);
-            ret = ZipWriterAddOneFile(archive, writer, &pathNode);
+            if (ret == ARCHIVE_OK) {
+                ret = ZipWriterAddOneFile(archive, writer, &pathNode);
+            }
         }
         free(path);
     }
