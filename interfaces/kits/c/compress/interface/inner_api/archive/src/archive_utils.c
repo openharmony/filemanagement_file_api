@@ -39,20 +39,33 @@ static bool IsDirectoryExists(const char *path)
     return S_ISDIR(st.st_mode);
 }
 
+static int ValidatePathPrefix(const char *path, const char *base)
+{
+    size_t baseLen = base == NULL ? 0 : strlen(base);
+    if (baseLen == 0) {
+        return ARCHIVE_OK;
+    }
+
+    if (strncmp(path, base, baseLen) != 0 ||
+        (base[baseLen - 1] != '/' && path[baseLen] != '/' && path[baseLen] != '\0')) {
+        return ARCHIVE_PARAM_ERROR;
+    }
+
+    return ARCHIVE_OK;
+}
+
 ARCHIVE_IMPL int CreateDirectory(const char *path, const char *base)
 {
     if (IsDirectoryExists(path)) {
         return ARCHIVE_OK;
     }
 
-    size_t baseLen = base == NULL ? 0 : strlen(base);
-    if (base != NULL) {
-        if (strncmp(path, base, baseLen) != 0 ||
-            (base[baseLen - 1] != '/' && path[baseLen] != '/' && path[baseLen] != '\0')) {
-            return ARCHIVE_PARAM_ERROR;
-        }
+    int ret = ValidatePathPrefix(path, base);
+    if (ret != ARCHIVE_OK) {
+        return ret;
     }
 
+    size_t baseLen = base == NULL ? 0 : strlen(base);
     char temp[ZIP_FILE_NAME_LEN_MAX];
     const char *p = path;
     char *t = temp;
@@ -106,7 +119,7 @@ ARCHIVE_IMPL int CreateParentDirectory(const char *filePath, const char *base)
     const char *p;
 
     if (!filePath || strlen(filePath) >= ZIP_FILE_NAME_LEN_MAX) {
-        return ARCHIVE_PARAM_ERROR;
+        return ARCHIVE_INTERNAL_ERROR;
     }
 
     for (p = filePath; *p; p++) {
@@ -121,12 +134,12 @@ ARCHIVE_IMPL int CreateParentDirectory(const char *filePath, const char *base)
 
     size_t parentPathLen = lastSeparator - filePath;
     if (parentPathLen >= ZIP_FILE_NAME_LEN_MAX) {
-        return ARCHIVE_PARAM_ERROR;
+        return ARCHIVE_FULL_PATH_TOO_LONG;
     }
 
     int ret = strncpy_s(parentPath, ZIP_FILE_NAME_LEN_MAX, filePath, parentPathLen);
     if (ret != EOK) {
-        return ARCHIVE_PARAM_ERROR;
+        return ARCHIVE_INTERNAL_ERROR;
     }
     parentPath[parentPathLen] = '\0';
 
@@ -138,7 +151,7 @@ ARCHIVE_IMPL int CreateParentDirectory(const char *filePath, const char *base)
 }
 
 static int32_t PathHandleDot(const char **source, char **target, int32_t *maxOutput,
-                             const char *path, const char *output, const char *check)
+                             const char *path, char *output, const char *check)
 {
     check += 1;
 
@@ -159,9 +172,9 @@ static int32_t PathHandleDot(const char **source, char **target, int32_t *maxOut
     return 0;
 }
 
-static void PathHandleDotDotSearchBack(char **target, int32_t *maxOutput, const char *output)
+static void PathHandleDotDotSearchBack(char **target, int32_t *maxOutput, char *output)
 {
-    if (*target == output) {
+    if (*target != output) {
         (*target)--;
         do {
             if ((*target) == output || **target == '/') {
@@ -175,7 +188,7 @@ static void PathHandleDotDotSearchBack(char **target, int32_t *maxOutput, const 
 }
 
 static int32_t PathHandleDotDot(const char **source, char **target, int32_t *maxOutput,
-                                const char *path, const char *output, const char *check)
+                                const char *path, char *output, const char *check)
 {
     check += 2; // skip 2 chars ".."
 
@@ -197,10 +210,10 @@ static int32_t PathHandleDotDot(const char **source, char **target, int32_t *max
 }
 
 static int32_t NormalizePathDot(const char **source, char **target, int32_t *maxOutput,
-    const char *path, const char *output, const char *check)
+    const char *path, char *output, const char *check)
 {
     if (*check == '.') {
-        if (PathHandleDot(source, target, maxOutput, path, output, check) == 0) {
+        if (PathHandleDot(source, target, maxOutput, path, output, check)) {
             return 1;
         }
 
@@ -269,7 +282,7 @@ ARCHIVE_IMPL int GetOutputFilePath(const char *fileName, const char *outDir, cha
         "%s/%s", outDir, normalizedPath);
     free(normalizedPath);
     if (ret < 0) {
-        return ARCHIVE_INTERNAL_ERROR;
+        return ARCHIVE_FULL_PATH_TOO_LONG;
     }
 
     char *completePathNormalized = NormalizePath(completePath);
@@ -280,7 +293,7 @@ ARCHIVE_IMPL int GetOutputFilePath(const char *fileName, const char *outDir, cha
     ret = snprintf_s(outPath, size, size - 1, "%s", completePathNormalized);
     free(completePathNormalized);
     if (ret < 0) {
-        return ARCHIVE_NAME_TOO_LONG_ERROR;
+        return ARCHIVE_INTERNAL_ERROR;
     }
 
     return ARCHIVE_OK;
@@ -404,7 +417,7 @@ static int TryNewFileNameCount(const char *dir, const char *base, const char *ex
         }
         counter++;
 
-        if (counter > MAX_RENAME_COUNT) {
+        if (counter >= MAX_RENAME_COUNT) {
             return ARCHIVE_EXIST_ERROR;
         }
     }

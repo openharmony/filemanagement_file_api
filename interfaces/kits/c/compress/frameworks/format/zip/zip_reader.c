@@ -468,7 +468,7 @@ LOCAL int ZipReaderOpenFile(HmArchiveReadInfo *archive, const char *infile)
     struct Stream *stream = FileStreamCreate(infile);
     if (stream == NULL) {
         ZipReaderDestroy(&reader);
-        return ARCHIVE_STREAM_ERROR;
+        return ARCHIVE_INTERNAL_ERROR;
     }
     reader->resource.baseStream = stream;
 
@@ -840,7 +840,7 @@ LOCAL int ZipReaderSetFileAttribs(struct ZipReaderExtractContext *context, const
     return ARCHIVE_OK;
 }
 
-LOCAL int ZipReaderExtractEntry(struct ZipReader *reader, const char *outPath)
+LOCAL int ZipReaderExtractEntry(struct ZipReader *reader, char *outPath)
 {
     int ret;
     if (ZipReaderEntryIsDirectory(&reader->context) && !ZipReaderEntryIsSymlink(&reader->context.centralDirHeader)) {

@@ -27,6 +27,7 @@
             <option name="push" value="compress_data/zip-empty-dir.zip -> /data/test/" src="res"/>
             <option name="push" value="compress_data/zip-empty.zip -> /data/test/" src="res"/>
             <option name="push" value="compress_data/中文名测试.zip -> /data/test/" src="res"/>
+            <option name="push" value="compress_data/other.zip -> /data/test/" src="res"/>
         </preparer>
         <cleaner>
             <option name="shell" value="rm -rf /data/test"/>
@@ -45,6 +46,7 @@
             <option name="push" value="compress_data/zip-empty-dir.zip -> /data/test/" src="res"/>
             <option name="push" value="compress_data/zip-empty.zip -> /data/test/" src="res"/>
             <option name="push" value="compress_data/中文名测试.zip -> /data/test/" src="res"/>
+            <option name="push" value="compress_data/other.zip -> /data/test/" src="res"/>
         </preparer>
         <cleaner>
             <option name="shell" value="rm -rf /data/test"/>

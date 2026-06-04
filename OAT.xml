@@ -50,6 +50,7 @@
                 <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/zip-empty-dir.zip" desc="compress test file"/>
                 <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/zip-empty.zip" desc="compress test file"/>
                 <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/中文名测试.zip" desc="compress test file"/>
+                <filteritem type="filepath" name="interfaces/test/unittest/resource/compress_data/other.zip" desc="compress test file"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
