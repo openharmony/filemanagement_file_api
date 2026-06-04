@@ -102,6 +102,30 @@ TEST(ArchiveReadOpenSourceTest, ZipDecompressNormal)
     EXPECT_EQ(OH_ARCHIVE_OK, ret);
 }
 
+TEST(ArchiveReadOpenSourceTest, ZipDecompressNormalCase2)
+{
+    GetHispeedArchivePluginHandle();
+    ReleaseHispeedArchivePluginHandle();
+
+    const char *inFile = "/data/test/other.zip";
+    const char *outDir = "/data/test/test_archive_reader_files";
+
+    OH_Archive_Reader_Ctx arc = OH_Archive_Reader_OpenFile(inFile);
+    ASSERT_NE(nullptr, arc);
+
+    OH_Archive_ProgressHandlerWithData progressHandlerFunc = ProgressHandler;
+    int userData[2] = {0}; // 解压进程回调函数传递的用户自定义数据
+    OH_Archive_ErrCode ret  = OH_Archive_Reader_SetProgressHandlerWithData(arc, progressHandlerFunc,
+        static_cast<void*>(userData));
+    EXPECT_EQ(OH_ARCHIVE_OK, ret);
+
+    ret = OH_Archive_Reader_ExtractAllFile(arc, outDir);
+    EXPECT_EQ(OH_ARCHIVE_OK, ret);
+
+    ret = OH_Archive_Reader_Close(arc);
+    EXPECT_EQ(OH_ARCHIVE_OK, ret);
+}
+
 TEST(ArchiveReadOpenSourceTest, ZipDecompressFileNotExist)
 {
     GetHispeedArchivePluginHandle();

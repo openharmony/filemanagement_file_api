@@ -87,6 +87,7 @@ static ErrCodeMap errCodeMap[] = {
     {ARCHIVE_NO_SPACE_ERROR, OH_ARCHIVE_NO_SPACE_ERROR},
     {ARCHIVE_EXIST_ERROR, OH_ARCHIVE_PATH_NOT_EXIST_ERROR},
     {ARCHIVE_NAME_TOO_LONG_ERROR, OH_ARCHIVE_NAME_TOO_LONG_ERROR},
+    {ARCHIVE_FULL_PATH_TOO_LONG, OH_ARCHIVE_FULL_PATH_TOO_LONG_ERROR},
     {ARCHIVE_DATA_ERROR, OH_ARCHIVE_DATA_ERROR},
     {ARCHIVE_CANCEL_ERROR, OH_ARCHIVE_CANCEL_ERROR},
     {ARCHIVE_CRC_ERROR, OH_ARCHIVE_CRC_ERROR},
@@ -170,6 +171,11 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_Reader_ExtractAllFile(OH_Archive_Reade
     HmArchiveReadInfo *archive = (HmArchiveReadInfo *)arc;
     if (archive->fmtOps == NULL || archive->fmtOps->extract == NULL) {
         return OH_ARCHIVE_UNKNOWN_ERROR;
+    }
+
+    size_t len = strlen(outDir);
+    if (len >= PATH_MAX) {
+        return OH_ARCHIVE_FULL_PATH_TOO_LONG_ERROR;
     }
 
     if (CreateDirectory(outDir, NULL) != ARCHIVE_OK) {

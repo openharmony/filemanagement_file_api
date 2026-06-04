@@ -36,7 +36,7 @@ ARCHIVE_IMPL int ZipCheckSignature(struct Stream *stream, uint32_t check)
     uint32_t sigRead;
     size_t read = StreamRead(stream, &sigRead, ZIP_SIZE_SIGNATURE);
     if (read != ZIP_SIZE_SIGNATURE) {
-        return ARCHIVE_STREAM_ERROR;
+        return ARCHIVE_INTERNAL_ERROR;
     }
 
     if (sigRead != check) {
@@ -164,7 +164,7 @@ ARCHIVE_IMPL int ZipSearchEOCD(struct Stream *stream, struct EndOfCentralDir *eo
     size_t read = StreamRead(stream, buffer, maxRead);
     if ((int64_t)read != maxRead) {
         free(buffer);
-        return ARCHIVE_STREAM_ERROR;
+        return ARCHIVE_INTERNAL_ERROR;
     }
 
     ret = ZipSearchEOCDFromback(stream, buffer, maxRead, eocd, offsetOfEOCD, eocd64, offsetOfEOCD64, isZip64, fileSize);
