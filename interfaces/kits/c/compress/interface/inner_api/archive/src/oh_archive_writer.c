@@ -17,6 +17,7 @@
 #include "oh_archive_plugin.h"
 #include "archive_macros.h"
 #include "archive_inner.h"
+#include "zip_util.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -25,7 +26,7 @@
 #define ARCHIVE_DEFAULT_COMPRESS_LEVEL (6)
 #define ARCHIVE_MAX_COMPRESS_LEVEL (9)
 const FmtWriterOps *g_AllFmtWriterOps[] = {
-    NULL,
+    &g_ZipWriterFmtOps,
     NULL,
     NULL
 };
