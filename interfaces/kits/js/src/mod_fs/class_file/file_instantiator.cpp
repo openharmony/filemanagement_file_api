@@ -15,6 +15,7 @@
 
 #include "file_instantiator.h"
 
+#include "fdtag_func.h"
 #include "file_entity.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
@@ -25,35 +26,34 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::DistributedFS;
 
+static void CloseOnError(int fd)
+{
+    int ret = close(fd);
+    if (ret < 0) {
+        HILOGE("Failed to close fd");
+    }
+}
+
 FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, bool isUri)
 {
     FsResult<FsFile *> result = FsFile::Constructor();
     if (!result.IsSuccess()) {
         HILOGE("Failed to instantiate class");
-        int ret = close(fd);
-        if (ret < 0) {
-            HILOGE("Failed to close fd");
-        }
+        CloseOnError(fd);
         return FsResult<FsFile *>::Error(EIO);
     }
 
     const FsFile *objFile = result.GetData().value();
     if (!objFile) {
         HILOGE("Failed to get fsFile");
-        int ret = close(fd);
-        if (ret < 0) {
-            HILOGE("Failed to close fd");
-        }
+        CloseOnError(fd);
         return FsResult<FsFile *>::Error(EIO);
     }
 
     auto *fileEntity = objFile->GetFileEntity();
     if (!fileEntity) {
         HILOGE("Failed to get fileEntity");
-        int ret = close(fd);
-        if (ret < 0) {
-            HILOGE("Failed to close fd");
-        }
+        CloseOnError(fd);
         delete objFile;
         objFile = nullptr;
         return FsResult<FsFile *>::Error(EIO);
@@ -75,6 +75,9 @@ FsResult<FsFile *> FileInstantiator::InstantiateFile(int fd, string pathOrUri, b
         fileEntity->path_ = pathOrUri;
         fileEntity->uri_ = "";
     }
+#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
+    FdTagFunc::SetFdTag(fd, reinterpret_cast<uintptr_t>(fileEntity));
+#endif
     return result;
 }
 
