@@ -401,7 +401,7 @@ TEST_F(OHCompressTest, CreateCompressCtxWithInvalidMethod)
 
 TEST_F(OHCompressTest, CreateCompressCtxWithInvalidCheckSum)
 {
-    config.checksum = (OH_Archive_StreamChecksum)(-1);
+    config.checksum = (OH_Archive_StreamChecksumAlg)(-1);
     ctx = OH_Archive_StreamWrite_Create(config);
     EXPECT_EQ(ctx, nullptr);
 }

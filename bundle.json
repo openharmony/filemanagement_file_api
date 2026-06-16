@@ -163,7 +163,7 @@
             }
           },
           {
-            "name": "//foundation/filemanagement/file_api/interfaces/kits/c/compress:ohcompress",
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/c/compress:oharchive",
             "header": {
               "header_files": [
                 "interface/inner_api/archive/include/oh_archive.h",

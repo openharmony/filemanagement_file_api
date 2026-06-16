@@ -49,7 +49,7 @@ struct ArchiveStreamReadCtx {
     z_stream zlibStream;
     uint32_t outBlockSize;
     uint8_t *outBuf;
-    OH_Archive_StreamChecksum checksum;
+    OH_Archive_StreamChecksumAlg checksum;
     OH_Archive_Stream_OutputHandler readerHandler;
     void *readHandlerData;
     _Atomic uint8_t decompressCancel;

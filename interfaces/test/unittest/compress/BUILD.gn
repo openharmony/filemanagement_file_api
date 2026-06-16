@@ -23,7 +23,7 @@ common_compress_test_props = {
   ]
 
   deps = [
-    "${file_api_path}/interfaces/kits/c/compress:ohcompress",
+    "${file_api_path}/interfaces/kits/c/compress:oharchive",
   ]
 
   external_deps = [
@@ -45,6 +45,14 @@ ohos_unittest("zip_writer_test") {
   forward_variables_from(common_compress_test_props, "*")
   sources = [
     "zip_writer_test.cpp",
+  ]
+}
+
+ohos_unittest("zip_writer_open_source_test") {
+  resource_config_file = "../resource/ohos_test.xml"
+  forward_variables_from(common_compress_test_props, "*")
+  sources = [
+    "zip_writer_open_source_test.cpp",
   ]
 }
 

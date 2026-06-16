@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//build/ohos/ndk/ndk.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
-ohos_shared_library("ohcompress") {
+ohos_shared_library("oharchive") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -66,7 +66,7 @@ ohos_shared_library("ohcompress") {
      "zlib:libz",
   ]
 
-  output_name = "ohcompress"
+  output_name = "oharchive"
   output_extension = "so"
   relative_install_dir = "ndk"
   part_name = "file_api"
