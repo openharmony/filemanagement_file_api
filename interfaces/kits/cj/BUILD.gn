@@ -68,6 +68,7 @@ ohos_shared_library("cj_file_fs_ffi") {
 
   external_deps = [
     "hilog:libhilog",
+    "c_utils:utils",
     "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
@@ -135,7 +136,6 @@ ohos_shared_library("cj_file_fs_ffi") {
       "bounds_checking_function:libsec_shared",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
-      "c_utils:utils",
       "data_share:datashare_common",
       "data_share:datashare_consumer",
       "dfs_service:distributed_file_daemon_kit_inner",
