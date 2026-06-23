@@ -116,7 +116,7 @@ bool CheckUri(napi_env env, string &path)
         pathTmp = pathTmp.substr(pos + 1, pathTmp.size());
         pos = pathTmp.find(pattern);
     }
-    if (uriSplit[SPLITE_ZERO] != "internal:" || uriSplit[spilteOne] != "" || uriSplit.size() <= spilteThree) {
+    if (uriSplit.size() <= spilteThree || uriSplit[SPLITE_ZERO] != "internal:" || uriSplit[spilteOne] != "") {
         return false;
     }
     AppExecFwk::Ability *ability = AbilityHelper::GetJsAbility(env);
