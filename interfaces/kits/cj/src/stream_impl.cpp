@@ -112,6 +112,10 @@ tuple<int, int64_t> StreamImpl::Read(uint8_t* buffer, size_t buLen, int64_t leng
 
 tuple<int, int64_t> StreamImpl::WriteCur(void* buffer, int64_t length, const std::string& encode)
 {
+    if (!fp_) {
+        LOGE("Stream may have been closed");
+        return {GetErrorCode(EIO), 0};
+    }
     FILE *filp = nullptr;
     filp = fp_.get();
 
@@ -132,6 +136,10 @@ tuple<int, int64_t> StreamImpl::WriteCur(void* buffer, int64_t length, const std
 
 tuple<int, int64_t> StreamImpl::Write(void* buffer, int64_t length, int64_t offset, const std::string& encode)
 {
+    if (!fp_) {
+        LOGE("Stream may have been closed");
+        return {GetErrorCode(EIO), 0};
+    }
     FILE *filp = nullptr;
     filp = fp_.get();
 
