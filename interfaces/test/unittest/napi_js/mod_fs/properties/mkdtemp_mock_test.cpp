@@ -137,12 +137,12 @@ HWTEST_F(MkdtempMockTest, MkdtempMockTest_Sync_002, testing::ext::TestSize.Level
 }
 
 /**
-* @tc.name: MkdtempMockTest_Sync_003
-* @tc.desc: Test function of Mkdtemp::Sync interface for FAILURE when InitArgs fails.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: MkdtempMockTest_Sync_003
+ * @tc.desc: Test function of Mkdtemp::Sync interface for FAILURE when InitArgs fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(MkdtempMockTest, MkdtempMockTest_Sync_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MkdtempMockTest-begin MkdtempMockTest_Sync_003";
