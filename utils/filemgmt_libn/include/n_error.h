@@ -163,6 +163,7 @@ enum ErrCodeSuffixOfStorageService {
     E_CREATE_PARTITION_ERROR = 22,
     E_DELETE_PARTITION_ERROR = 23,
     E_FORMAT_PARTITION_ERROR = 32,
+    E_QUERY_VOLUME_IN_USE_ERROR = 33,
 };
 
 enum ErrCodeSuffixOfUserFileService {
@@ -446,6 +447,8 @@ static inline std::unordered_map<int, std::pair<int32_t, std::string>> errCodeTa
         "Failed to delete partition" } },
     { STORAGE_SERVICE_SYS_CAP_TAG + E_FORMAT_PARTITION_ERROR, { STORAGE_SERVICE_SYS_CAP_TAG + E_FORMAT_PARTITION_ERROR,
         "Failed to format partition" } },
+    { STORAGE_SERVICE_SYS_CAP_TAG + E_QUERY_VOLUME_IN_USE_ERROR,
+        { STORAGE_SERVICE_SYS_CAP_TAG + E_QUERY_VOLUME_IN_USE_ERROR, "Failed to query volume is in use" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, { USER_FILE_SERVICE_SYS_CAP_TAG + E_IPCS, "IPC error" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_URIS, { USER_FILE_SERVICE_SYS_CAP_TAG + E_URIS, "Invalid uri" } },
     { USER_FILE_SERVICE_SYS_CAP_TAG + E_GETINFO, { USER_FILE_SERVICE_SYS_CAP_TAG + E_GETINFO,
