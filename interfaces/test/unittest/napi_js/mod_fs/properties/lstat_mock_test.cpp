@@ -188,6 +188,58 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_003, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_003";
 }
 
+/**
+* @tc.name: LstatMockTest_Sync_004
+* @tc.desc: Test function of Lstat::Sync interface for FAILURE when InitArgs fails.
+* @tc.size: MEDIUM
+* @tc.type: FUNC
+* @tc.level Level 1
+*/
+HWTEST_F(LstatMockTest, LstatMockTest_Sync_004, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatMockTest-begin LstatMockTest_Sync_004";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto stat = Lstat::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(stat, nullptr);
+
+    GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_004";
+}
+
+/**
+* @tc.name: LstatMockTest_Sync_005
+* @tc.desc: Test function of Lstat::Sync interface for FAILURE when path is invalid.
+* @tc.size: MEDIUM
+* @tc.type: FUNC
+* @tc.level Level 1
+*/
+HWTEST_F(LstatMockTest, LstatMockTest_Sync_005, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LstatMockTest-begin LstatMockTest_Sync_005";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    tuple<bool, std::unique_ptr<char[]>, size_t> badRes = { false, nullptr, 0 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(badRes)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto stat = Lstat::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(stat, nullptr);
+
+    GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_005";
+}
+ 	 
 } // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement
