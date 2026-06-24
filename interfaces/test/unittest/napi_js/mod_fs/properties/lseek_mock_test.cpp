@@ -135,4 +135,93 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_003, testing::ext::TestSize.Level1)
 
     GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_003";
 }
+
+/**
+* @tc.name: LseekMockTest_Sync_004
+* @tc.desc: Test function of Lseek::Sync interface for FAILURE when fd is negative.
+* @tc.size: MEDIUM
+* @tc.type: FUNC
+* @tc.level Level 1
+*/
+HWTEST_F(LseekMockTest, LseekMockTest_Sync_004, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LseekMockTest-begin LseekMockTest_Sync_004";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    tuple<bool, int> isFd = { true, -1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Lseek::Sync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_004";
+}
+
+/**
+* @tc.name: LseekMockTest_Sync_005
+* @tc.desc: Test function of Lseek::Sync interface for FAILURE when whence is out of range.
+* @tc.size: MEDIUM
+* @tc.type: FUNC
+* @tc.level Level 1
+*/
+HWTEST_F(LseekMockTest, LseekMockTest_Sync_005, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LseekMockTest-begin LseekMockTest_Sync_005";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    tuple<bool, int> isFd = { true, 5 };
+    tuple<bool, int64_t> isOffset = { true, 0 };
+    tuple<bool, int32_t> isWhence = { true, 99 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, ToInt64()).WillOnce(testing::Return(isOffset));
+    EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
+    EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(isWhence));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Lseek::Sync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_005";
+}
+
+/**
+* @tc.name: LseekMockTest_Sync_006
+* @tc.desc: Test function of Lseek::Sync interface for FAILURE when whence ToInt32 fails.
+* @tc.size: MEDIUM
+* @tc.type: FUNC
+* @tc.level Level 1
+*/
+HWTEST_F(LseekMockTest, LseekMockTest_Sync_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "LseekMockTest-begin LseekMockTest_Sync_006";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    tuple<bool, int> isFd = { true, 5 };
+    tuple<bool, int64_t> isOffset = { true, 0 };
+    tuple<bool, int32_t> isWhence = { false, 0 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, ToInt64()).WillOnce(testing::Return(isOffset));
+    EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
+    EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(isWhence));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Lseek::Sync(env, info);
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_006";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
