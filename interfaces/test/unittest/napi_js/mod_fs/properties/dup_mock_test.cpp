@@ -215,4 +215,32 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_005, testing::ext::TestSize.Level1)
 
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_005";
 }
+
+/**
+* @tc.name: DupMockTest_Sync_006
+* @tc.desc: Test function of Dup::Sync interface for FAILURE when srcFd is negative.
+* @tc.size: MEDIUM
+* @tc.type: FUNC
+* @tc.level Level 1
+*/
+HWTEST_F(DupMockTest, DupMockTest_Sync_006, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DupMockTest-begin DupMockTest_Sync_006";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    tuple<bool, int> isFd = { true, -1 };
+
+    auto libnMock = LibnMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    auto res = Dup::Sync(env, info);
+
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, nullptr);
+
+    GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_006";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
