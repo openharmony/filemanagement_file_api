@@ -189,12 +189,12 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_003, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: LstatMockTest_Sync_004
-* @tc.desc: Test function of Lstat::Sync interface for FAILURE when InitArgs fails.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: LstatMockTest_Sync_004
+ * @tc.desc: Test function of Lstat::Sync interface for FAILURE when InitArgs fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(LstatMockTest, LstatMockTest_Sync_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "LstatMockTest-begin LstatMockTest_Sync_004";
@@ -214,12 +214,12 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_004, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: LstatMockTest_Sync_005
-* @tc.desc: Test function of Lstat::Sync interface for FAILURE when path is invalid.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: LstatMockTest_Sync_005
+ * @tc.desc: Test function of Lstat::Sync interface for FAILURE when path is invalid.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(LstatMockTest, LstatMockTest_Sync_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "LstatMockTest-begin LstatMockTest_Sync_005";
