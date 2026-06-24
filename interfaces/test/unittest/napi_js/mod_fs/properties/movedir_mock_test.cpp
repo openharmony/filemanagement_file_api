@@ -196,12 +196,12 @@ HWTEST_F(MovedirMockTest, MovedirMockTest_Sync_002, testing::ext::TestSize.Level
 }
 
 /**
-* @tc.name: MovedirMockTest_Sync_003
-* @tc.desc: Test function of MoveDir::Sync interface for FAILURE when src path is invalid.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: MovedirMockTest_Sync_003
+ * @tc.desc: Test function of MoveDir::Sync interface for FAILURE when src path is invalid.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(MovedirMockTest, MovedirMockTest_Sync_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MovedirMockTest-begin MovedirMockTest_Sync_003";
