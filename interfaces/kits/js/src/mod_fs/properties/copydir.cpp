@@ -34,6 +34,9 @@ namespace ModuleFileIO {
 using namespace std;
 using namespace OHOS::FileManagement::LibN;
 
+static string g_parseEmsg = "CopyDir failed. Possible causes: 1. SrcPath or DestPath is invalid. "
+        "2. SrcPath or DestPath is not exist. 3.SrcPath or DestPath is not directory.";
+
 static int RecurCopyDir(const string &srcPath, const string &destPath, const int mode,
     vector<struct ConflictFiles> &errfiles);
 
@@ -269,12 +272,12 @@ napi_value CopyDir::Sync(napi_env env, napi_callback_info info)
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "CopyDir failed, number of arguments unmatched.").ThrowErr(env);
         return nullptr;
     }
     auto [succ, src, dest, mode] = ParseAndCheckJsOperand(env, funcArg);
     if (!succ) {
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, g_parseEmsg).ThrowErr(env);
         return nullptr;
     }
 
@@ -289,7 +292,9 @@ napi_value CopyDir::Sync(napi_env env, napi_callback_info info)
     } else if (ret) {
         HILOGE("Failed to copy dir, ret %{public}d", ret);
         METRICS_ERROR("CoreFileKit.fileio.Dyn.copyDirSync.Err", NError(errno).GetErrCode());
-        NError(ret).ThrowErr(env);
+        string anonymizeSrc = AnonymizePath(src.get());
+        string anonymizeDest = AnonymizePath(dest.get());
+        NError(ret, "CopyDir failed. SrcPath is: " + anonymizeSrc + ", DestPath is: " + anonymizeDest).ThrowErr(env);
         return nullptr;
     }
     return NVal::CreateUndefined(env).val_;
@@ -305,12 +310,12 @@ napi_value CopyDir::Async(napi_env env, napi_callback_info info)
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
         HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "CopyDir failed. Number of arguments unmatched").ThrowErr(env);
         return nullptr;
     }
     auto [succ, src, dest, mode] = ParseAndCheckJsOperand(env, funcArg);
     if (!succ) {
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, g_parseEmsg).ThrowErr(env);
         return nullptr;
     }
     auto arg = CreateSharedPtr<CopyDirArgs>();
