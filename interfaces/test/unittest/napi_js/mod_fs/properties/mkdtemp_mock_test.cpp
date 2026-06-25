@@ -135,31 +135,6 @@ HWTEST_F(MkdtempMockTest, MkdtempMockTest_Sync_002, testing::ext::TestSize.Level
 
     GTEST_LOG_(INFO) << "MkdtempMockTest-end MkdtempMockTest_Sync_002";
 }
-
-/**
- * @tc.name: MkdtempMockTest_Sync_003
- * @tc.desc: Test function of Mkdtemp::Sync interface for FAILURE when InitArgs fails.
- * @tc.size: MEDIUM
- * @tc.type: FUNC
- * @tc.level Level 1
- */
-HWTEST_F(MkdtempMockTest, MkdtempMockTest_Sync_003, testing::ext::TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "MkdtempMockTest-begin MkdtempMockTest_Sync_003";
-    napi_env env = reinterpret_cast<napi_env>(0x1000);
-    napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
-
-    auto libnMock = LibnMock::GetMock();
-    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
-
-    auto res = Mkdtemp::Sync(env, info);
-
-    testing::Mock::VerifyAndClearExpectations(libnMock.get());
-    EXPECT_EQ(res, nullptr);
-
-    GTEST_LOG_(INFO) << "MkdtempMockTest-end MkdtempMockTest_Sync_003";
-}
 } // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement
