@@ -151,4 +151,37 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_003, TestSize.Level1)
     GTEST_LOG_(INFO) << "FdatasyncMockTest-end FdatasyncMockTest_Sync_003";
 }
 
+/**
+* @tc.name: FdatasyncMockTest_Sync_004
+* @tc.desc: Test function of Fdatasync::Sync interface for SUCCESS when uv_fs_fdatasync succeeds.
+* @tc.size: MEDIUM
+* @tc.type: FUNC
+* @tc.level Level 1
+
+*/
+HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FdatasyncMockTest-begin FdatasyncMockTest_Sync_004";
+    napi_env env = reinterpret_cast<napi_env>(0x1000);
+    napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
+    napi_value val = reinterpret_cast<napi_value>(0x1200);
+    NVal mockNval = { env, val };
+    tuple<bool, int32_t> tp = { true, 1 };
+
+    auto libnMock = LibnMock::GetMock();
+    auto uvMock = UvFsMock::GetMock();
+    EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
+    EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(tp));
+    EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(0));
+    EXPECT_CALL(*libnMock, CreateUndefined(_)).WillOnce(Return(mockNval));
+
+    auto res = Fdatasync::Sync(env, mInfo);
+
+    testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    EXPECT_EQ(res, val);
+
+    GTEST_LOG_(INFO) << "FdatasyncMockTest-end FdatasyncMockTest_Sync_004";
+}
+
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
