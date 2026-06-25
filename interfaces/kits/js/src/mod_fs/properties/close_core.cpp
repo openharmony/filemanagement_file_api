@@ -66,8 +66,8 @@ static int32_t CloseFdWithFdsan(const int fd, const bool isFd, const uint64_t fi
         FdTagFunc::SetFdTag(fd, 0);
         int ret = fdsan_close_with_tag(fd, tag);
         if (ret < 0) {
-            HILOGE("Failed to close file with errno: %{public}d", ret);
-            return ret;
+            HILOGE("Failed to close file with errno: %{public}d", errno);
+            return errno;
         }
     }
     return ERRNO_NOERR;

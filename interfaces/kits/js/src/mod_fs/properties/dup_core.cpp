@@ -63,9 +63,6 @@ FsResult<FsFile *> DupCore::DoDup(const int32_t &fd)
         close(dstFd);
         return FsResult<FsFile *>::Error(ret);
     }
-#if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM) && !defined(CROSS_PLATFORM)
-    FdTagFunc::SetFdTag(fd, 0);
-#endif
     return FileInstantiator::InstantiateFile(dstFd, string(static_cast<const char *>(readLinkReq->ptr)), false);
 }
 } // namespace OHOS::FileManagement::ModuleFileIO
