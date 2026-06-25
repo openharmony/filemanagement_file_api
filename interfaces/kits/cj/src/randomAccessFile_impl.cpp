@@ -36,7 +36,6 @@ static int DoWriteRAF(char* buf, size_t len, int fd, int64_t offset)
         LOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    LOGI("write buffer is %{public}s", buf);
     uv_buf_t iov = uv_buf_init(buf, len);
     int ret = uv_fs_write(nullptr, write_req.get(), fd, &iov, 1, offset, nullptr);
     return ret;
