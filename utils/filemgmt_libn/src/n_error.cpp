@@ -26,6 +26,23 @@ namespace FileManagement {
 namespace LibN {
 using namespace std;
 
+constexpr size_t NAME_THRESH_LONG = 6;
+constexpr size_t NAME_THRESH_MID = 4;
+constexpr size_t NAME_THRESH_SHORT = 2;
+constexpr size_t SHOW_FIRST_LONG = 2;
+constexpr size_t SHOW_LAST_LONG = 1;
+constexpr size_t SHOW_FIRST_MID = 1;
+constexpr size_t SHOW_LAST_MID = 1;
+constexpr size_t SHOW_FIRST_SHORT = 1;
+constexpr char ANON_CHAR = '*';
+constexpr size_t SUFFIX_LEN = 3;
+constexpr size_t PATH_MAX_LEN = 4096;
+constexpr size_t NAME_MAX_LEN = 256;
+constexpr size_t CHAR_LEN_1BYTE = 1;
+constexpr size_t CHAR_LEN_2BYTE = 2;
+constexpr size_t CHAR_LEN_3BYTE = 3;
+constexpr size_t CHAR_LEN_4BYTE = 4;
+
 static napi_value GenerateBusinessError(napi_env env, int32_t errCode, string errMsg)
 {
     napi_value businessError = nullptr;
@@ -59,6 +76,140 @@ static int ConvertUVCode2ErrCode(int errCode)
     return NO_ERR_MSG_ERR;
 }
 
+static size_t Utf8CharLen(unsigned char lead)
+{
+    if (lead < 0x80) {
+        return CHAR_LEN_1BYTE;
+    }
+    if ((lead & 0xE0) == 0xC0) {
+        return CHAR_LEN_2BYTE;
+    }
+    if ((lead & 0xF0) == 0xE0) {
+        return CHAR_LEN_3BYTE;
+    }
+    if ((lead & 0xF8) == 0xF0) {
+        return CHAR_LEN_4BYTE;
+    }
+    return CHAR_LEN_1BYTE;
+}
+
+static size_t Utf8CharsNum(const std::string& s)
+{
+    size_t count = 0;
+    for (size_t i = 0; i < s.size();) {
+        i += Utf8CharLen(static_cast<unsigned char>(s[i]));
+        count++;
+    }
+    return count;
+}
+
+static std::string Utf8FirstN(const std::string& s, size_t n)
+{
+    size_t i = 0;
+    for (size_t c = 0; c < n && i < s.size(); c++) {
+        i += Utf8CharLen(static_cast<unsigned char>(s[i]));
+    }
+    return s.substr(0, i);
+}
+
+static std::string Utf8LastN(const std::string& s, size_t n)
+{
+    size_t end = s.size();
+    for (size_t c = 0; c < n && end > 0; c++) {
+        end--;
+        while (end > 0 && (static_cast<unsigned char>(s[end]) & 0xC0) == 0x80) {
+            end--;
+        }
+    }
+    return s.substr(end);
+}
+
+static std::string TruncateToBytes(const std::string& s, size_t maxBytes)
+{
+    if (s.size() <= maxBytes) {
+        return s;
+    }
+    size_t i = 0;
+    while (i < s.size()) {
+        size_t charLen = Utf8CharLen(static_cast<unsigned char>(s[i]));
+        if (i + charLen > maxBytes) {
+            break;
+        }
+        i += charLen;
+    }
+    return s.substr(0, i);
+}
+
+static std::string AnonymizeName(const std::string& name)
+{
+    size_t len = Utf8CharsNum(name);
+    if (len >= NAME_THRESH_LONG) {
+        return Utf8FirstN(name, SHOW_FIRST_LONG)
+             + std::string(len - SHOW_FIRST_LONG - SHOW_LAST_LONG, ANON_CHAR)
+             + Utf8LastN(name, SHOW_LAST_LONG);
+    } else if (len >= NAME_THRESH_MID) {
+        return Utf8FirstN(name, SHOW_FIRST_MID)
+             + std::string(len - SHOW_FIRST_MID - SHOW_LAST_MID, ANON_CHAR)
+             + Utf8LastN(name, SHOW_LAST_MID);
+    } else if (len >= NAME_THRESH_SHORT) {
+        return Utf8FirstN(name, SHOW_FIRST_SHORT)
+             + std::string(len - SHOW_FIRST_SHORT, ANON_CHAR);
+    } else if (len == 1) {
+        return std::string(1, ANON_CHAR);
+    }
+    return name;
+}
+
+std::string AnonymizePath(const std::string& path)
+{
+    if (path.empty()) {
+        return "";
+    }
+
+    std::string input = TruncateToBytes(path, PATH_MAX_LEN);
+
+    std::string prefix;
+    std::string rest = input;
+    size_t pos = input.find("://");
+    if (pos != std::string::npos) {
+        prefix = input.substr(0, pos + SUFFIX_LEN);
+        rest = input.substr(pos + SUFFIX_LEN);
+    }
+
+    std::vector<std::string> parts;
+    size_t start = 0;
+    for (size_t i = 0; i <= rest.size(); i++) {
+        if (i == rest.size() || rest[i] == '/') {
+            parts.push_back(rest.substr(start, i - start));
+            start = i + 1;
+        }
+    }
+
+    std::string result = prefix;
+    for (size_t i = 0; i < parts.size(); i++) {
+        if (i > 0) {
+            result += '/';
+        }
+        std::string p = TruncateToBytes(parts[i], NAME_MAX_LEN);
+        bool isLast = (i == parts.size() - 1);
+        if (isLast && !p.empty() && p.find('.') != std::string::npos) {
+            size_t dot = p.rfind('.');
+            std::string before = p.substr(0, dot);
+            std::string after = p.substr(dot + 1);
+
+            if (!before.empty()) {
+                result += AnonymizeName(before);
+            }
+            result += '.';
+            result += AnonymizeName(after);
+        } else {
+            result += AnonymizeName(p);
+        }
+    }
+
+    return result;
+}
+
 NError::NError() {}
 
 NError::NError(int errCode)
@@ -80,10 +231,11 @@ NError::NError(int errCode, const std::string &errMsg)
     auto it = errCodeTable.find(genericCode);
     if (it != errCodeTable.end()) {
         errno_ = it->second.first;
+        errMsg_ = it->second.second + ". " + errMsg;
     } else {
         errno_ = errCodeTable.at(UNKROWN_ERR).first;
+        errMsg_ = errMsg;
     }
-    errMsg_ = errMsg;
 }
 
 NError::NError(std::function<std::tuple<uint32_t, std::string>()> errGen)

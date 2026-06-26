@@ -23,6 +23,7 @@ ohos_unittest("filemgmt_libn_test") {
 
   sources = [
     "./src/n_class_test.cpp",
+    "./src/n_error_test.cpp",
     "./src/napi_mock.cpp",
   ]
 

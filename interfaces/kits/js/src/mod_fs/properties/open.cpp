@@ -77,7 +77,7 @@ static tuple<bool, unsigned int> GetJsFlags(napi_env env, const NFuncArg &funcAr
         int32_t invalidMode = (O_WRONLY | O_RDWR);
         if (!succ || mode < 0 || ((mode & invalidMode) == invalidMode)) {
             HILOGE("Invalid mode");
-            NError(EINVAL).ThrowErr(env);
+            NError(EINVAL, "Open failed, invalid open mode").ThrowErr(env);
             return { false, flags };
         }
         flags = static_cast<unsigned int>(mode);
@@ -275,13 +275,13 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Open failed, number of arguments unmatched.").ThrowErr(env);
         return nullptr;
     }
     auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succPath) {
         HILOGE("Invalid path");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Open failed, invalid path.").ThrowErr(env);
         return nullptr;
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);
@@ -294,7 +294,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
         auto [res, uriStr] = OpenFileByUri(pathStr, mode);
         if (res < 0) {
             METRICS_ERROR("CoreFileKit.fileio.Dyn.openSync.Err", NError(res).GetErrCode());
-            NError(res).ThrowErr(env);
+            NError(res, "Open failed, path is: " + AnonymizePath(pathStr)).ThrowErr(env);
             return nullptr;
         }
         return InstantiateFile(env, res, uriStr, true).val_;
@@ -304,7 +304,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
     if (ret < 0) {
         HILOGD("Failed to open file for libuv error %{public}d", ret);
         METRICS_ERROR("CoreFileKit.fileio.Dyn.openSync.Err", NError(ret).GetErrCode());
-        NError(ret).ThrowErr(env);
+        NError(ret, "Open failed, path is: " + AnonymizePath(pathStr)).ThrowErr(env);
         return nullptr;
     }
     return InstantiateFile(env, ret, pathStr, false).val_;
@@ -324,7 +324,7 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
         auto [res, uriStr] = OpenFileByUri(pathStr, mode);
         if (res < 0) {
             METRICS_ERROR("CoreFileKit.fileio.Dyn.open.Err", NError(res).GetErrCode());
-            return NError(res);
+            return NError(res, "Open failed, path is: " + AnonymizePath(pathStr));
         }
         arg->fd = res;
         arg->path = "";
@@ -336,7 +336,7 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
     if (ret < 0) {
         HILOGD("Failed to open file for libuv error %{public}d", ret);
             METRICS_ERROR("CoreFileKit.fileio.Dyn.open.Err", NError(ret).GetErrCode());
-        return NError(ret);
+        return NError(ret, "Open failed, path is: " + AnonymizePath(pathStr));
     }
     arg->fd = ret;
     arg->path = pathStr;
@@ -352,13 +352,13 @@ napi_value Open::Async(napi_env env, napi_callback_info info)
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Open failed, number of arguments unmatched").ThrowErr(env);
         return nullptr;
     }
     auto [succPath, path, ignore] = NVal(env, funcArg[NARG_POS::FIRST]).ToUTF8StringPath();
     if (!succPath) {
         HILOGE("Invalid path");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Open failed, invalid path").ThrowErr(env);
         return nullptr;
     }
     auto [succMode, mode] = GetJsFlags(env, funcArg);

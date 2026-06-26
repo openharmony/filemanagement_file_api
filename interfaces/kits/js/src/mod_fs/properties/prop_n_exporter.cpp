@@ -574,7 +574,7 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
 
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
         HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Read failed. Number of arguments unmatched.").ThrowErr(env);
         return nullptr;
     }
 
@@ -583,7 +583,7 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Read failed. Invalid fd.").ThrowErr(env);
         return nullptr;
     }
 
@@ -594,7 +594,7 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Read failed. Invalid arraybuffer or options.").ThrowErr(env);
         return nullptr;
     }
 
@@ -646,7 +646,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
         HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Read failed. Number of arguments unmatched.").ThrowErr(env);
         return nullptr;
     }
 
@@ -658,7 +658,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Read failed. Invalid fd.").ThrowErr(env);
         return nullptr;
     }
 
@@ -666,7 +666,7 @@ napi_value PropNExporter::Read(napi_env env, napi_callback_info info)
         CommonFunc::GetReadArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Read failed. Invalid arraybuffer or options.").ThrowErr(env);
         return nullptr;
     }
 
@@ -722,15 +722,15 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
 {
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)) {
-        HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        HILOGE("Number of arguments unmatched.");
+        NError(EINVAL, "Write failed. Number of arguments unmatched").ThrowErr(env);
         return nullptr;
     }
 
     auto[succ, fd] = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Write failed. Invalid fd.").ThrowErr(env);
         return nullptr;
     }
 
@@ -742,7 +742,7 @@ napi_value PropNExporter::Write(napi_env env, napi_callback_info info)
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Write failed. Invalid arraybuffer or options.").ThrowErr(env);
         return nullptr;
     }
 
@@ -779,8 +779,8 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
     FileFsTrace traceWriteSync("WriteSync");
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)) {
-        HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        HILOGE("Number of arguments unmatched.");
+        NError(EINVAL, "Write failed. Number of arguments unmatched").ThrowErr(env);
         return nullptr;
     }
 
@@ -789,7 +789,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
     tie(succ, fd) = NVal(env, funcArg[NARG_POS::FIRST]).ToInt32();
     if (!succ || fd < 0) {
         HILOGE("Invalid fd from JS first argument");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Write failed. Invalid fd.").ThrowErr(env);
         return nullptr;
     }
 
@@ -801,6 +801,7 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         CommonFunc::GetWriteArg(env, funcArg[NARG_POS::SECOND], funcArg[NARG_POS::THIRD]);
     if (!succ) {
         HILOGE("Failed to resolve buf and options");
+        NError(EINVAL, "Write failed. Invalid arraybuffer or options").ThrowErr(env);
         return nullptr;
     }
 

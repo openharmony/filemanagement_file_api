@@ -514,6 +514,8 @@ inline int ToErrCodeIndex(int errCode)
     return ErrCodeSuffixOfFileIO::E_INTERN_RES;
 }
 
+std::string AnonymizePath(const std::string& path);
+
 class NError {
 public:
     NError();

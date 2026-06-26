@@ -66,7 +66,7 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
     if (isFd) {
         if (fd < 0) {
             HILOGE("Invalid fd");
-            NError(EINVAL).ThrowErr(env);
+            NError(EINVAL, "Stat failed, invalid fd.").ThrowErr(env);
             return { false, FileInfo { false, {}, {} } };
         }
         auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
@@ -78,7 +78,7 @@ static tuple<bool, FileInfo> ParseJsFile(napi_env env, napi_value pathOrFdFromJs
         return { true, FileInfo { false, {}, move(fdg) } };
     }
     HILOGE("Invalid parameter");
-    NError(EINVAL).ThrowErr(env);
+    NError(EINVAL, "Stat failed, invalid parameter.").ThrowErr(env);
     return { false, FileInfo { false, {}, {} } };
 };
 
@@ -92,7 +92,7 @@ static NError CheckFsStat(const FileInfo &fileInfo, uv_fs_t* req)
             if (FileApiDebug::isLogEnabled) {
                 HILOGD("Path is %{private}s", fileInfo.path.get());
             }
-            return NError(ret);
+            return NError(ret, "Stat failed, path is: " + AnonymizePath(fileInfo.path.get()));
         }
     } else {
         int ret = uv_fs_fstat(nullptr, req, fileInfo.fdg->GetFD(), nullptr);
@@ -110,7 +110,7 @@ napi_value Stat::Sync(napi_env env, napi_callback_info info)
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE)) {
         HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Stat failed, number of arguments unmatched.").ThrowErr(env);
         return nullptr;
     }
     auto [succ, fileInfo] = ParseJsFile(env, funcArg[NARG_POS::FIRST]);
@@ -151,7 +151,7 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
     NFuncArg funcArg(env, info);
     if (!funcArg.InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)) {
         HILOGE("Number of arguments unmatched");
-        NError(EINVAL).ThrowErr(env);
+        NError(EINVAL, "Stat failed, number of arguments unmatched.").ThrowErr(env);
         return nullptr;
     }
     auto [succ, fileInfo] = ParseJsFile(env, funcArg[NARG_POS::FIRST]);
