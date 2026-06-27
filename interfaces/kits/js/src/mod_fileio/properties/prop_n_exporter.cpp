@@ -367,7 +367,6 @@ napi_value PropNExporter::ReadSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    METRICS_COUNT("CoreFileKit.fileio.Legacy.readSync");
     ssize_t actLen = 0;
     if (pos >= 0) {
         actLen = pread(fd, buf, len, pos);
@@ -585,7 +584,6 @@ napi_value PropNExporter::WriteSync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    METRICS_COUNT("CoreFileKit.fileio.Legacy.writeSync");
     ssize_t writeLen = 0;
     if (position >= 0) {
         writeLen = pwrite(fd, buf, len, position);

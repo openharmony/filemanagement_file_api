@@ -342,7 +342,6 @@ napi_value ListFile::Sync(napi_env env, napi_callback_info info)
         NError(EINVAL).ThrowErr(env);
         return nullptr;
     }
-    METRICS_COUNT("CoreFileKit.fileio.Dyn.listFileSync");
     vector<string> direntsRes;
     int ret = 0;
     ret = g_optionArgs.recursion ? RecursiveFunc(path.get(), direntsRes) : FilterFileRes(path.get(), direntsRes);
@@ -382,7 +381,6 @@ napi_value ListFile::Async(napi_env env, napi_callback_info info)
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
-    METRICS_COUNT("CoreFileKit.fileio.Dyn.listFile");
     auto cbExec = [arg, optionArgsTmp]() -> NError {
         g_optionArgs = optionArgsTmp;
         int ret = 0;
