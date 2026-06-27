@@ -19,6 +19,7 @@
 #include "n_error.h"
 #include "securec.h"
 #include "list_file.h"
+#include "utils.h"
 
 using namespace std;
 using namespace OHOS::CJSystemapi;
@@ -49,18 +50,15 @@ static bool CheckSuffix(const vector<string> &suffixs)
 
 static vector<string> CArrStringToVector(CArrString cArr)
 {
-    LOGI("FS_TEST:: CArrStringToVector start");
     vector<string> ret;
     for (int64_t i = 0; i < cArr.size; i++) {
         ret.push_back(cArr.head[i]);
     }
-    LOGI("FS_TEST:: CArrStringToVector end");
     return ret;
 }
 
 static bool GetFileFilterParam(CFilter cFilter, FileFilter *filter)
 {
-    LOGI("FS_TEST:: GetFileFilterParam start");
     if (cFilter.suffix.size != 0) {
         auto suffix = CArrStringToVector(cFilter.suffix);
         if (!CheckSuffix(suffix) || suffix.size() == 0) {
@@ -89,8 +87,6 @@ static bool GetFileFilterParam(CFilter cFilter, FileFilter *filter)
         LOGI("GetFileFilterParam lastModifiedAfter");
         filter->SetLastModifiedAfter(cFilter.lastModifiedAfter);
     }
-    
-    LOGI("GetFileFilterParam end");
     return true;
 }
 
@@ -184,32 +180,24 @@ static bool FilterResult(const struct dirent &filename)
 static int32_t FilterFunc(const struct dirent *filename)
 {
     if (string_view(filename->d_name) == "." || string_view(filename->d_name) == "..") {
-        return FILTER_DISMATCH;
+        return OHOS::CJSystemapi::FILTER_DISMATCH;
     }
 
     if (g_optionArgs.countNum < g_optionArgs.listNum || g_optionArgs.listNum == 0) {
         if ((filename->d_type == DT_DIR && g_optionArgs.recursion) || FilterResult(*filename)) {
-            return FILTER_MATCH;
+            return OHOS::CJSystemapi::FILTER_MATCH;
         }
     }
-    return FILTER_DISMATCH;
-}
-
-static void Deleter(struct NameListArg *arg)
-{
-    for (int i = 0; i < arg->direntNum; i++) {
-        free((arg->namelist)[i]);
-        (arg->namelist)[i] = nullptr;
-    }
-    free(arg->namelist);
-    arg->namelist = nullptr;
-    delete arg;
-    arg = nullptr;
+    return OHOS::CJSystemapi::FILTER_DISMATCH;
 }
 
 static int FilterFileRes(const string &path, vector<string> &dirents)
 {
-    unique_ptr<struct NameListArg, decltype(Deleter)*> pNameList = { new (nothrow) struct NameListArg, Deleter };
+    unique_ptr<OHOS::CJSystemapi::FileFs::NameListArg, decltype(OHOS::CJSystemapi::FileFs::NameListArgDeleter)*>
+        pNameList = {
+            new (nothrow) OHOS::CJSystemapi::FileFs::NameListArg,
+            OHOS::CJSystemapi::FileFs::NameListArgDeleter
+        };
     if (!pNameList) {
         LOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -229,7 +217,11 @@ static int FilterFileRes(const string &path, vector<string> &dirents)
 
 static int RecursiveFunc(const string &path, vector<string> &dirents)
 {
-    unique_ptr<struct NameListArg, decltype(Deleter)*> pNameList = { new (nothrow) struct NameListArg, Deleter };
+    unique_ptr<OHOS::CJSystemapi::FileFs::NameListArg, decltype(OHOS::CJSystemapi::FileFs::NameListArgDeleter)*>
+        pNameList = {
+            new (nothrow) OHOS::CJSystemapi::FileFs::NameListArg,
+            OHOS::CJSystemapi::FileFs::NameListArgDeleter
+        };
     if (!pNameList) {
         LOGE("Failed to request heap memory.");
         return ENOMEM;
@@ -256,37 +248,6 @@ static int RecursiveFunc(const string &path, vector<string> &dirents)
     return OHOS::FileManagement::LibN::ERRNO_NOERR;
 }
 
-static char** VectorToCArrString(vector<string> &vec)
-{
-    char** result = new(std::nothrow) char* [vec.size()];
-    if (result == nullptr) {
-        return nullptr;
-    }
-    size_t temp = 0;
-    for (size_t i = 0; i < vec.size(); i++) {
-        result[i] = new char[vec[i].length() + 1];
-        if (result[i] == nullptr) {
-            break;
-        }
-        if (strcpy_s(result[i], vec[i].length() + 1, vec[i].c_str()) != 0) {
-            delete[] result[i];
-            result[i] = nullptr;
-            break;
-        }
-        temp++;
-    }
-    if (temp != vec.size()) {
-        for (size_t j = temp; j > 0; j--) {
-            delete[] result[j - 1];
-            result[j - 1] = nullptr;
-        }
-        delete[] result;
-        result = nullptr;
-        return nullptr;
-    }
-    return result;
-}
-
 }
 
 namespace OHOS {
@@ -294,9 +255,7 @@ namespace CJSystemapi {
 
 RetDataCArrStringN ListFileImpl::ListFile(const string& path, CListFileOptions options)
 {
-    LOGI("FS_TEST:: ListFileImpl::ListFile start");
     RetDataCArrStringN ret = { .code = EINVAL, .data = { .head = nullptr, .size = 0 } };
-    LOGI("FS_TEST:: ListFileImpl::Set parameter start");
     if (options.listNum < 0) {
         LOGE("Failed to get listNum prop");
         return ret;
@@ -310,10 +269,8 @@ RetDataCArrStringN ListFileImpl::ListFile(const string& path, CListFileOptions o
         g_optionArgs.Clear();
         return ret;
     }
-    LOGI("FS_TEST:: ListFileImpl::Set parameter end");
     vector<string> direntsRes;
     int code = 0;
-    LOGI("FS_TEST:: ListFileImpl::RecursiveFunc start");
     code = options.recursion ? RecursiveFunc(path, direntsRes) : FilterFileRes(path, direntsRes);
     ret.code = code;
     if (code) {
@@ -326,8 +283,7 @@ RetDataCArrStringN ListFileImpl::ListFile(const string& path, CListFileOptions o
         }
     }
     ret.data.size = static_cast<int64_t>(direntsRes.size());
-    ret.data.head = VectorToCArrString(direntsRes);
-    LOGI("FS_TEST:: ListFileImpl::ListFile end");
+    ret.data.head = OHOS::CJSystemapi::FileFs::VectorToCArrString(direntsRes);
     g_optionArgs.Clear();
     return ret;
 }

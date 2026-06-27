@@ -16,7 +16,7 @@
 #ifndef OHOS_FILE_FS_STAT_IMPL_H
 #define OHOS_FILE_FS_STAT_IMPL_H
 
-#include "file_utils.h"
+#include "cj_file_utils.h"
 #include "filemgmt_libhilog.h"
 #include "ffi_remote_data.h"
 #include "cj_common_ffi.h"
@@ -59,86 +59,22 @@ public:
     }
 #endif
 
-    inline int64_t GetIno() const
-    {
-        return static_cast<int64_t>(real_.st_ino);
-    }
-
-    inline int64_t GetMode() const
-    {
-        return static_cast<int64_t>(real_.st_mode & S_PREMISSION);
-    }
-
-    inline int64_t GetUid() const
-    {
-        return static_cast<int64_t>(real_.st_uid);
-    }
-
-    inline int64_t GetGid() const
-    {
-        return static_cast<int64_t>(real_.st_gid);
-    }
-
-    inline int64_t GetSize() const
-    {
-        return static_cast<int64_t>(real_.st_size);
-    }
-
-    inline int64_t GetAtime() const
-    {
-        return static_cast<int64_t>(real_.st_atim.tv_sec);
-    }
-
-    inline int64_t GetMtime() const
-    {
-        return static_cast<int64_t>(real_.st_mtim.tv_sec);
-    }
-
-    inline int64_t GetCtime() const
-    {
-        return static_cast<int64_t>(real_.st_ctim.tv_sec);
-    }
-
-    bool IsBlockDevice()
-    {
-        return CheckStatMode(S_IFBLK);
-    }
-
-    bool IsCharacterDevice()
-    {
-        return CheckStatMode(S_IFCHR);
-    }
-
-    bool IsDirectory()
-    {
-        return CheckStatMode(S_IFDIR);
-    }
-
-    bool IsFIFO()
-    {
-        return CheckStatMode(S_IFIFO);
-    }
-
-    bool IsFile()
-    {
-        return CheckStatMode(S_IFREG);
-    }
-
-    bool IsSocket()
-    {
-        return CheckStatMode(S_IFSOCK);
-    }
-
-    bool IsSymbolicLink()
-    {
-        return CheckStatMode(S_IFLNK);
-    }
-
-    bool CheckStatMode(mode_t mode)
-    {
-        bool check = (real_.st_mode & S_IFMT) == mode;
-        return check;
-    }
+    int64_t GetIno() const;
+    int64_t GetMode() const;
+    int64_t GetUid() const;
+    int64_t GetGid() const;
+    int64_t GetSize() const;
+    int64_t GetAtime() const;
+    int64_t GetMtime() const;
+    int64_t GetCtime() const;
+    bool IsBlockDevice();
+    bool IsCharacterDevice();
+    bool IsDirectory();
+    bool IsFIFO();
+    bool IsFile();
+    bool IsSocket();
+    bool IsSymbolicLink();
+    bool CheckStatMode(mode_t mode);
 
 private:
     uv_stat_t real_;

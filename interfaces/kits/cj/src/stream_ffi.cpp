@@ -22,7 +22,6 @@ using namespace OHOS::CJSystemapi::FileFs;
 extern "C" {
 RetCode FfiOHOSStreamClose(int64_t id)
 {
-    LOGI("OHOS::CJSystemapi FfiOHOSStreamClose");
     auto instance = FFIData::GetData<StreamImpl>(id);
     if (!instance) {
         LOGE("Stream instance not exist %{public}" PRId64, id);
@@ -33,7 +32,6 @@ RetCode FfiOHOSStreamClose(int64_t id)
 
 RetCode FfiOHOSStreamFlush(int64_t id)
 {
-    LOGI("OHOS::CJSystemapi FfiOHOSStreamFlush");
     auto instance = FFIData::GetData<StreamImpl>(id);
     if (!instance) {
         LOGE("Stream instance not exist %{public}" PRId64, id);
@@ -44,7 +42,6 @@ RetCode FfiOHOSStreamFlush(int64_t id)
 
 RetDataI64 FfiOHOSStreamWriteCur(int64_t id, const char* buffer, int64_t length, const char* encode)
 {
-    LOGI("OHOS::CJSystemapi FfiOHOSStreamWriteCur");
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto instance = FFIData::GetData<StreamImpl>(id);
     if (!instance) {
@@ -64,7 +61,6 @@ RetDataI64 FfiOHOSStreamWriteCur(int64_t id, const char* buffer, int64_t length,
 
 RetDataI64 FfiOHOSStreamWrite(int64_t id, const char* buffer, int64_t length, int64_t offset, const char* encode)
 {
-    LOGI("OHOS::CJSystemapi FfiOHOSStreamWriteByString");
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto instance = FFIData::GetData<StreamImpl>(id);
     if (!instance) {
@@ -84,7 +80,6 @@ RetDataI64 FfiOHOSStreamWrite(int64_t id, const char* buffer, int64_t length, in
 
 RetDataI64 FfiOHOSStreamReadCur(int64_t id, uint8_t* buffer, int64_t bufLen, int64_t length)
 {
-    LOGI("OHOS::CJSystemapi FfiOHOSStreamReadCur");
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto instance = FFIData::GetData<StreamImpl>(id);
     if (!instance) {
@@ -98,13 +93,11 @@ RetDataI64 FfiOHOSStreamReadCur(int64_t id, uint8_t* buffer, int64_t bufLen, int
         return ret;
     }
     ret.data = readLen;
-    LOGI("OHOS::CJSystemapi FfiOHOSStreamReadCur success");
     return ret;
 }
 
 RetDataI64 FfiOHOSStreamRead(int64_t id, uint8_t* buffer, int64_t bufLen, int64_t length, int64_t offset)
 {
-    LOGI("OHOS::CJSystemapi FfiOHOSStreamRead");
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto instance = FFIData::GetData<StreamImpl>(id);
     if (!instance) {
@@ -118,7 +111,6 @@ RetDataI64 FfiOHOSStreamRead(int64_t id, uint8_t* buffer, int64_t bufLen, int64_
         return ret;
     }
     ret.data = readLen;
-    LOGI("OHOS::CJSystemapi FfiOHOSStreamRead success");
     return ret;
 }
 }

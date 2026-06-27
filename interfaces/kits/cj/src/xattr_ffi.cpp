@@ -25,7 +25,6 @@ extern "C" {
 
 FFI_EXPORT int32_t FfiOHOSFileFsSetXattr(const char *path, const char *key, const char *value)
 {
-    LOGD("FS_TEST::FfiOHOSFileFsSetXattr");
     if (path == nullptr || key == nullptr || value == nullptr) {
         return ERR_INVALID_INSTANCE_CODE;
     }
@@ -39,7 +38,6 @@ FFI_EXPORT int32_t FfiOHOSFileFsSetXattr(const char *path, const char *key, cons
 
 FFI_EXPORT RetDataCString FfiOHOSFileFsGetXattr(const char *path, const char *key)
 {
-    LOGD("FS_TEST::FfiOHOSFileFsGetXattr");
     RetDataCString retData = { .code = ERR_INVALID_INSTANCE_CODE, .data = nullptr };
     if (path == nullptr || key == nullptr) {
         return retData;

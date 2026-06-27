@@ -40,10 +40,6 @@ namespace OHOS {
 namespace CJSystemapi {
 constexpr int DIR_DEFAULT_PERM = 0770;
 
-constexpr int FILE_DISMATCH = 0;
-constexpr int FILE_MATCH = 1;
-
-// use for moveDir
 constexpr int DIRMODE_MIN = 0;
 constexpr int DIRMODE_MAX = 3;
 

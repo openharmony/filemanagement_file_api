@@ -17,7 +17,7 @@
 #include "stat_impl.h"
 #include "macro.h"
 #include "n_error.h"
-#include "file_utils.h"
+#include "cj_file_utils.h"
 #include "rust_file.h"
 
 namespace OHOS {
@@ -27,7 +27,6 @@ using namespace OHOS::FileManagement::LibN;
 
 RetDataI64 LseekImpl::Lseek(int32_t fd, int64_t offset, int pos)
 {
-    LOGI("FS_TEST:: LseekImpl::Lseek start");
     RetDataI64 ret = { .code = EINVAL, .data = 0 };
     if (fd < 0) {
         LOGE("Invalid fd");

@@ -59,7 +59,6 @@ RandomAccessFileImpl::RandomAccessFileImpl(std::shared_ptr<
 }
 int32_t RandomAccessFileImpl::GetFd()
 {
-    LOGI("start get fs in cpp");
     if (entity_ == nullptr) {
         LOGE("Failed to creat entity.");
         return -1;

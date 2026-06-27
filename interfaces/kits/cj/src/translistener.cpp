@@ -58,7 +58,6 @@ std::string TransListener::CreateDfsCopyPath()
 int32_t TransListener::CopyFileFromSoftBus(const std::string& srcUri, const std::string& destUri,
     std::shared_ptr<FileInfos> fileInfos, std::shared_ptr<CjCallbackObject> callback)
 {
-    LOGI("CopyFileFromSoftBus begin.");
     sptr<TransListener> transListener = new (std::nothrow) TransListener();
     if (transListener == nullptr) {
         LOGE("new trans listener failed");
@@ -136,7 +135,6 @@ int32_t TransListener::PrepareCopySession(const std::string &srcUri,
 
     info.copyPath = tmpDir;
     auto networkId = GetNetworkIdFromUri(srcUri);
-    LOGI("dfs PrepareSession begin.");
     auto ret = Storage::DistributedFile::DistributedFileDaemonManager::GetInstance().PrepareSession(srcUri, destUri,
         networkId, transListener, info);
     if (ret != ERRNO_NOERR) {
@@ -177,7 +175,6 @@ int32_t TransListener::CopyToSandBox(const std::string &srcUri, const std::strin
             return EIO;
         }
     }
-    LOGI("Copy file success.");
     return ERRNO_NOERR;
 }
 

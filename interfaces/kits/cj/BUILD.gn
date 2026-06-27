@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
-ohos_shared_library("cj_file_fs_ffi") {
+config("js_common_config") {
   include_dirs = [
     "${src_path}/common",
     "${src_path}/common/file_helper",
@@ -28,6 +28,120 @@ ohos_shared_library("cj_file_fs_ffi") {
     "${utils_path}/filemgmt_libhilog",
     "${utils_path}/filemgmt_libh",
     "${utils_path}/filemgmt_libn/include",
+    "${utils_path}/filemgmt_libn/include/n_async",
+  ]
+}
+
+ohos_source_set("js_common_src") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  sources = [
+    "../js/src/common/file_helper/fd_guard.cpp",
+    "../js/src/mod_fs/common_func.cpp",
+    "../js/src/mod_fs/class_file/file_n_exporter.cpp",
+  ]
+  public_configs = [ ":js_common_config" ]
+  cflags_cc = [
+    "-std=c++17",
+    "-fno-rtti",
+    "-fmerge-all-constants",
+    "-fomit-frame-pointer",
+    "-flto",
+  ]
+  use_exceptions = true
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:app_context",
+    "access_token:libtokenid_sdk",
+    "app_file_service:fileuri_native",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "hilog:libhilog",
+  ]
+  part_name = "file_api"
+  subsystem_name = "filemanagement"
+}
+
+ohos_source_set("js_stream_exporter_src") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  sources = [
+    "../js/src/mod_fs/class_stream/stream_n_exporter.cpp",
+    "../js/src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
+  ]
+  public_configs = [ ":js_common_config" ]
+  cflags_cc = [
+    "-std=c++17",
+    "-fno-rtti",
+    "-fmerge-all-constants",
+    "-fomit-frame-pointer",
+    "-flto",
+  ]
+  use_exceptions = true
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:app_context",
+    "access_token:libtokenid_sdk",
+    "app_file_service:fileuri_native",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "hilog:libhilog",
+  ]
+  part_name = "file_api"
+  subsystem_name = "filemanagement"
+}
+
+ohos_source_set("js_trace_src") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  sources = [
+    "../js/src/common/file_api_debug.cpp",
+    "../js/src/common/file_fs_trace.cpp",
+  ]
+  public_configs = [ ":js_common_config" ]
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
+    "-Oz",
+  ]
+  cflags_cc = [
+    "-std=c++17",
+    "-fvisibility-inlines-hidden",
+    "-Oz",
+    "-fno-rtti",
+    "-fmerge-all-constants",
+    "-fomit-frame-pointer",
+    "-flto",
+  ]
+  use_exceptions = true
+  external_deps = [
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+  ]
+  part_name = "file_api"
+  subsystem_name = "filemanagement"
+}
+
+ohos_shared_library("cj_file_fs_ffi") {
+  include_dirs = [
     "${file_api_path}/interfaces/kits/cj/src",
     "${file_api_path}/interfaces/kits/native/remote_uri",
     "${file_api_path}/interfaces/kits/native/task_signal",
@@ -35,9 +149,6 @@ ohos_shared_library("cj_file_fs_ffi") {
   ]
 
   sources = [
-    "../js/src/common/file_helper/fd_guard.cpp",
-    "../js/src/mod_fs/class_file/file_n_exporter.cpp",
-    "../js/src/mod_fs/common_func.cpp",
     "src/fdatasync.cpp",
     "src/file_ffi.cpp",
     "src/file_fs_ffi.cpp",
@@ -52,12 +163,21 @@ ohos_shared_library("cj_file_fs_ffi") {
   ]
 
   deps = [
+    ":js_common_src",
     "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
     "${utils_path}/filemgmt_libn:filemgmt_libn",
   ]
 
-  cflags_cc = [ "-std=c++17" ]
-  use_exceptions = true
+  cflags_cc = [
+    "-fno-exceptions",
+    "-fno-threadsafe-statics",
+    "-std=c++17",
+    "-fno-rtti",
+    "-fmerge-all-constants",
+    "-fomit-frame-pointer",
+    "-flto",
+  ]
+  use_exceptions = false
   if (use_mingw_win) {
     defines = [ "WIN_PLATFORM" ]
     sources += [ "src/file_fs_mock.cpp" ]
@@ -79,13 +199,18 @@ ohos_shared_library("cj_file_fs_ffi") {
       "-fvisibility=hidden",
       "-fdata-sections",
       "-ffunction-sections",
+      "-fno-asynchronous-unwind-tables",
+      "-fno-unwind-tables",
       "-Oz",
     ]
     cflags_cc += [
       "-fvisibility-inlines-hidden",
       "-Oz",
+      "-fno-rtti",
+      "-fmerge-all-constants",
+      "-fomit-frame-pointer",
+      "-flto",
     ]
-    defines = [ "FILE_API_TRACE" ]
     branch_protector_ret = "pac_ret"
     sanitize = {
       integer_overflow = true
@@ -95,12 +220,13 @@ ohos_shared_library("cj_file_fs_ffi") {
       cfi_cross_dso = true
       debug = false
     }
+    ldflags = [
+      "-flto",
+      "-Wl,--icf=all",
+      "-Wl,--gc-sections",
+    ]
 
     sources += [
-      "../js/src/common/file_api_debug.cpp",
-      "../js/src/common/file_fs_trace.cpp",
-      "../js/src/mod_fs/class_randomaccessfile/randomaccessfile_n_exporter.cpp",
-      "../js/src/mod_fs/class_stream/stream_n_exporter.cpp",
       "src/copy.cpp",
       "src/copy_dir.cpp",
       "src/copy_file.cpp",
@@ -120,6 +246,8 @@ ohos_shared_library("cj_file_fs_ffi") {
     ]
 
     deps += [
+      ":js_stream_exporter_src",
+      ":js_trace_src",
       "${file_api_path}/interfaces/kits/js:build_kits_js",
       "${file_api_path}/interfaces/kits/js:fs",
       "${file_api_path}/interfaces/kits/native:remote_uri_native",
@@ -128,7 +256,6 @@ ohos_shared_library("cj_file_fs_ffi") {
     ]
 
     external_deps += [
-      "ability_base:zuri",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
       "access_token:libtokenid_sdk",
@@ -140,7 +267,6 @@ ohos_shared_library("cj_file_fs_ffi") {
       "data_share:datashare_consumer",
       "dfs_service:distributed_file_daemon_kit_inner",
       "hitrace:hitrace_meter",
-      "ipc:ipc_single",
       "samgr:samgr_proxy",
     ]
   }
@@ -155,12 +281,21 @@ ohos_shared_library("cj_statvfs_ffi") {
     "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
     "-Oz",
   ]
   cflags_cc = [
+    "-fno-exceptions",
+    "-fno-threadsafe-statics",
     "-fvisibility-inlines-hidden",
     "-Oz",
+    "-fno-rtti",
+    "-fmerge-all-constants",
+    "-fomit-frame-pointer",
+    "-flto",
   ]
+  use_exceptions = false
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
@@ -170,6 +305,11 @@ ohos_shared_library("cj_statvfs_ffi") {
     cfi_cross_dso = true
     debug = false
   }
+  ldflags = [
+    "-flto",
+    "-Wl,--icf=all",
+    "-Wl,--gc-sections",
+  ]
 
   include_dirs = [ "${file_api_path}/interfaces/kits/cj/src" ]
 

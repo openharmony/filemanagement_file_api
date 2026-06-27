@@ -147,7 +147,6 @@ static int RenameFile(const string &src, const string &dest)
 
 int MoveFileImpl::MoveFile(const std::string& src, const std::string& dest, int mode)
 {
-    LOGI("FS_TEST:: MoveFileImpl::MoveFile start");
     if (CheckDir(src)) {
         LOGE("Invalid src");
         return EINVAL;

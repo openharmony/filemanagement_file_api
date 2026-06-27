@@ -91,8 +91,7 @@ int CheckFsStat(const FileInfo &fileInfo, uv_fs_t* req)
 
 std::tuple<int, uv_stat_t*> GetUvStat(const FileInfo& fileInfo)
 {
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> stat_req = {
-        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+    UvFsReqPtr stat_req = MakeUvFsReq();
     if (!stat_req) {
         LOGE("Failed to request heap memory.");
         return {ENOMEM, nullptr};
@@ -111,7 +110,6 @@ std::tuple<int, uv_stat_t*> GetUvStat(const FileInfo& fileInfo)
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 std::tuple<bool, FileInfo, int> ParseRandomFile(std::string file)
 {
-    LOGI("FS_TEST:: RandomAccessFileImpl::ParseRandomFile");
     std::unique_ptr<char[]> filePath = std::make_unique<char[]>(file.length() + 1);
     if (!filePath) {
         return { false, FileInfo { true, nullptr, {} }, ENOMEM };
@@ -124,14 +122,12 @@ std::tuple<bool, FileInfo, int> ParseRandomFile(std::string file)
     if (fdg == nullptr) {
         return { false, FileInfo { false, nullptr, nullptr }, ENOMEM };
     }
-    LOGI("FS_TEST:: RandomAccessFileImpl::ParseRandomFile success");
     return { true, FileInfo { true, move(filePath), move(fdg) }, ERRNO_NOERR };
 }
 
 std::tuple<int32_t, bool> UvAccess(const std::string &path, int mode)
 {
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> stat_req = {
-        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+    UvFsReqPtr stat_req = MakeUvFsReq();
     if (!stat_req) {
         LOGE("Failed to request heap memory.");
         return {GetErrorCode(ENOMEM), false};
@@ -293,7 +289,6 @@ std::tuple<int32_t, sptr<StreamImpl>> FileFsImpl::CreateStream(std::string path,
 
 std::tuple<int32_t, sptr<StreamImpl>> FileFsImpl::FdopenStream(int32_t fd, std::string mode)
 {
-    LOGI("FS_TEST::FileFsImpl::FdopenStream start");
     if (fd < 0) {
         LOGE("Invalid fd");
         return {GetErrorCode(EINVAL), nullptr};
@@ -312,10 +307,7 @@ std::tuple<int32_t, sptr<StreamImpl>> FileFsImpl::FdopenStream(int32_t fd, std::
 
 std::tuple<int32_t, sptr<StatImpl>> FileFsImpl::Lstat(std::string path)
 {
-    LOGI("FS_TEST::FileFsImpl::Lstat start");
-
-    std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> lstat_req = {
-        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+    UvFsReqPtr lstat_req = MakeUvFsReq();
     if (!lstat_req) {
         LOGE("Failed to request heap memory.");
         return {GetErrorCode(ENOMEM), nullptr};
@@ -348,8 +340,7 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
         }
         unsigned int flags = static_cast<unsigned int>(mode);
         CommonFunc::ConvertCjFlags(flags);
-        std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> open_req = {
-        new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
+        UvFsReqPtr open_req = MakeUvFsReq();
         if (!open_req) {
             LOGE("Failed to request heap memory.");
             return {GetErrorCode(ENOMEM), nullptr};
@@ -581,13 +572,16 @@ static int RestoreTime(const string &srcPath, const string &destPath)
     return ERRNO_NOERR;
 }
 
-struct NameListArg {
+struct MoveDirNameListArg {
     struct dirent** namelist;
     int num;
 };
 
-static void Deleter(struct NameListArg *arg)
+static void MoveDirDeleter(MoveDirNameListArg *arg)
 {
+    if (arg == nullptr) {
+        return;
+    }
     for (int i = 0; i < arg->num; i++) {
         free((arg->namelist)[i]);
         (arg->namelist)[i] = nullptr;
@@ -598,12 +592,12 @@ static void Deleter(struct NameListArg *arg)
     arg = nullptr;
 }
 
-static int32_t FilterFunc(const struct dirent *filename)
+static int32_t FileFsImplFilterFunc(const struct dirent *filename)
 {
     if (string_view(filename->d_name) == "." || string_view(filename->d_name) == "..") {
-        return FILE_DISMATCH;
+        return OHOS::CJSystemapi::FILE_DISMATCH;
     }
-    return FILE_MATCH;
+    return OHOS::CJSystemapi::FILE_MATCH;
 }
 
 static int RemovePath(const string& pathStr)
@@ -703,12 +697,12 @@ static int RecurMoveDir(const string &srcPath, const string &destPath, const int
         return ERRNO_NOERR;
     }
 
-    unique_ptr<struct NameListArg, decltype(Deleter)*> ptr = {new struct NameListArg, Deleter};
+    unique_ptr<MoveDirNameListArg, decltype(MoveDirDeleter)*> ptr = {new MoveDirNameListArg, MoveDirDeleter};
     if (!ptr) {
         HILOGE("Failed to request heap memory.");
         return ENOMEM;
     }
-    int num = scandir(srcPath.c_str(), &(ptr->namelist), FilterFunc, alphasort);
+    int num = scandir(srcPath.c_str(), &(ptr->namelist), FileFsImplFilterFunc, alphasort);
     ptr->num = num;
 
     for (int i = 0; i < num; i++) {
@@ -782,56 +776,6 @@ static int MoveDirFunc(const string &src, const string &dest, const int mode,
     return res;
 }
 
-static CConflictFiles* DequeToCConflict(std::deque<struct ConflictFiles> errfiles)
-{
-    CConflictFiles* result = new(std::nothrow) CConflictFiles[errfiles.size()];
-    if (result == nullptr) {
-        return nullptr;
-    }
-    size_t temp = 0;
-    for (size_t i = 0; i < errfiles.size(); i++) {
-        size_t srcFilesLen = errfiles[i].srcFiles.length() + 1;
-        result[i].srcFiles = static_cast<char*>(malloc(srcFilesLen));
-        if (result[i].srcFiles == nullptr) {
-            break;
-        }
-        if (strcpy_s(result[i].srcFiles, srcFilesLen, errfiles[i].srcFiles.c_str()) != 0) {
-            free(result[i].srcFiles);
-            result[i].srcFiles = nullptr;
-            break;
-        }
-        size_t destFilesLen = errfiles[i].destFiles.length() + 1;
-        result[i].destFiles = static_cast<char*>(malloc(destFilesLen));
-        if (result[i].destFiles == nullptr) {
-            free(result[i].srcFiles);
-            result[i].srcFiles = nullptr;
-            break;
-        }
-        if (strcpy_s(result[i].destFiles, destFilesLen, errfiles[i].destFiles.c_str()) != 0) {
-            free(result[i].srcFiles);
-            free(result[i].destFiles);
-
-            result[i].srcFiles = nullptr;
-            result[i].destFiles = nullptr;
-            break;
-        }
-        temp++;
-    }
-    if (temp != errfiles.size()) {
-        for (size_t j = temp; j > 0; j--) {
-            free(result[j - 1].srcFiles);
-            free(result[j - 1].destFiles);
-
-            result[j - 1].srcFiles = nullptr;
-            result[j - 1].destFiles = nullptr;
-        }
-        delete[] result;
-        result = nullptr;
-        return nullptr;
-    }
-    return result;
-}
-
 RetDataCArrConflictFiles FileFsImpl::MoveDir(string src, string dest, int32_t mode)
 {
     std::error_code errCode;
@@ -859,7 +803,7 @@ RetDataCArrConflictFiles FileFsImpl::MoveDir(string src, string dest, int32_t mo
         ret.code = SUCCESS_CODE;
     }
     ret.data.size = static_cast<int64_t>(errfiles.size());
-    ret.data.head = DequeToCConflict(errfiles);
+    ret.data.head = OHOS::CJSystemapi::FileFs::DequeToCConflict(errfiles);
     return ret;
 }
 #endif
@@ -891,7 +835,6 @@ static bool CheckReadArgs(int32_t fd, const char* buf, int64_t bufLen, size_t le
 
 RetDataI64 FileFsImpl::Read(int32_t fd, char* buf, int64_t bufLen, size_t length, int64_t offset)
 {
-    LOGI("FS_TEST::FileFsImpl::Read start");
     RetDataI64 ret = { .code = EINVAL, .data = 0 };
 
     if (!CheckReadArgs(fd, buf, bufLen, length, offset)) {
@@ -926,7 +869,6 @@ RetDataI64 FileFsImpl::Read(int32_t fd, char* buf, int64_t bufLen, size_t length
 
 RetDataI64 FileFsImpl::ReadCur(int32_t fd, char* buf, int64_t bufLen, size_t length)
 {
-    LOGI("FS_TEST::FileFsImpl::Read start");
     RetDataI64 ret = { .code = EINVAL, .data = 0 };
     
     if (!CheckReadArgs(fd, buf, bufLen, length, 0)) {
@@ -962,7 +904,6 @@ RetDataI64 FileFsImpl::ReadCur(int32_t fd, char* buf, int64_t bufLen, size_t len
 
 RetDataI64 FileFsImpl::Write(int32_t fd, void* buf, size_t length, int64_t offset, std::string encode)
 {
-    LOGI("FS_TEST::FileFsImpl::Write start");
     RetDataI64 ret = { .code = EINVAL, .data = 0 };
     if (fd < 0) {
         LOGE("Invalid fd");
@@ -997,7 +938,6 @@ RetDataI64 FileFsImpl::Write(int32_t fd, void* buf, size_t length, int64_t offse
 
 RetDataI64 FileFsImpl::WriteCur(int32_t fd, void* buf, size_t length, std::string encode)
 {
-    LOGI("FS_TEST::FileFsImpl::Write start");
     RetDataI64 ret = { .code = EINVAL, .data = 0 };
     if (fd < 0) {
         LOGE("Invalid fd");

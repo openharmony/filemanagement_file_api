@@ -36,13 +36,11 @@ namespace FileFs {
 extern "C" {
 FFI_EXPORT void FfiOHOSFileFsReleaseCString(char *str)
 {
-    LOGD("FS_TEST::FfiOHOSFileFsReleaseCString");
     free(str);
 }
 
 RetDataI64 FfiOHOSFileFsOpen(const char* path, int64_t mode)
 {
-    LOGI("FS_TEST::FfiOHOSFILEOpen");
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto [state, nativeStream] = FileEntity::Open(path, mode);
     if (state != SUCCESS_CODE) {
@@ -51,7 +49,6 @@ RetDataI64 FfiOHOSFileFsOpen(const char* path, int64_t mode)
         ret.data = 0;
         return ret;
     }
-    LOGI("FS_TEST::FfiOHOSFILEOpen success");
     ret.code = state;
     ret.data = nativeStream->GetID();
     return ret;
@@ -59,15 +56,12 @@ RetDataI64 FfiOHOSFileFsOpen(const char* path, int64_t mode)
 
 int FfiOHOSFileFsCloseByFd(int32_t file)
 {
-    LOGI("FS_TEST::FfiOHOSFileFsClose");
     int err = FileFsImpl::Close(file);
-    LOGI("FS_TEST::FfiOHOSFileFsClose success");
     return err;
 }
 
 int FfiOHOSFileFsClose(int64_t file)
 {
-    LOGI("FS_TEST::FfiOHOSFileFsClose");
     auto instance = FFIData::GetData<FileEntity>(file);
     if (!instance) {
         LOGE("Stream instance not exist %{public}" PRId64, file);
@@ -75,13 +69,11 @@ int FfiOHOSFileFsClose(int64_t file)
     }
     int err = FileFsImpl::Close(instance);
     FFIData::Release(file);
-    LOGI("FS_TEST::FfiOHOSFileFsClose success");
     return err;
 }
 
 int FfiOHOSFILEFsGetFD(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSFILEGetFD");
     auto instance = FFIData::GetData<FileEntity>(id);
     if (!instance) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
@@ -205,7 +197,6 @@ int64_t FfiCreateFileFromNapi(napi_env env, napi_value objRAF)
 
 RetDataI64 FfiOHOSFileFsDup(int32_t fd)
 {
-    LOGI("FS_TEST::FfiOHOSFileFsDup");
     RetDataI64 ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
     auto [state, nativeFile] = FileEntity::Dup(fd);
     if (state != SUCCESS_CODE) {
@@ -213,7 +204,6 @@ RetDataI64 FfiOHOSFileFsDup(int32_t fd)
         ret.code = GetErrorCode(state);
         return ret;
     }
-    LOGI("FS_TEST::FfiOHOSFileFsDup success");
     ret.code = state;
     ret.data = nativeFile->GetID();
     return ret;
@@ -221,7 +211,6 @@ RetDataI64 FfiOHOSFileFsDup(int32_t fd)
 
 const char* FfiOHOSFILEFsGetPath(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSFILEGetPath");
     auto instance = FFIData::GetData<FileEntity>(id);
     if (!instance) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
@@ -232,7 +221,6 @@ const char* FfiOHOSFILEFsGetPath(int64_t id)
 
 const char* FfiOHOSFILEFsGetName(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSFILEGetName");
     auto instance = FFIData::GetData<FileEntity>(id);
     if (!instance) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
@@ -243,7 +231,6 @@ const char* FfiOHOSFILEFsGetName(int64_t id)
 
 RetCode FfiOHOSFILEFsTryLock(int64_t id, bool exclusive)
 {
-    LOGI("FS_TEST::FfiOHOSFILEFsTryLock");
     auto instance = FFIData::GetData<FileEntity>(id);
     if (!instance) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
@@ -254,7 +241,6 @@ RetCode FfiOHOSFILEFsTryLock(int64_t id, bool exclusive)
 
 RetCode FfiOHOSFILEFsUnLock(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSFILEFsUnLock");
     auto instance = FFIData::GetData<FileEntity>(id);
     if (!instance) {
         LOGE("FileEntity instance not exist %{public}" PRId64, id);
@@ -265,7 +251,6 @@ RetCode FfiOHOSFILEFsUnLock(int64_t id)
 
 RetDataCString FfiOHOSFILEFsGetParent(int64_t id)
 {
-    LOGI("FS_TEST::FfiOHOSFILEFsGetParent");
     auto instance = FFIData::GetData<FileEntity>(id);
     RetDataCString ret = { .code = EINVAL, .data = nullptr };
     if (!instance) {
@@ -276,7 +261,6 @@ RetDataCString FfiOHOSFILEFsGetParent(int64_t id)
     if (ret.code != SUCCESS_CODE) {
         ret.code = GetErrorCode(ret.code);
     }
-    LOGI("FS_TEST::FfiOHOSFILEFsGetParent end");
     return ret;
 }
 #endif

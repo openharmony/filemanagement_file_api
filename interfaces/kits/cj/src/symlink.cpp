@@ -28,8 +28,6 @@ using namespace std;
 
 int SymlinkImpl::Symlink(const std::string& target, const std::string& srcPath)
 {
-    LOGI("FS_TEST::SymlinkImpl::Symlink start");
-
     std::unique_ptr<uv_fs_t, decltype(CommonFunc::FsReqCleanup)*> symlink_req = {
         new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!symlink_req) {
@@ -41,8 +39,6 @@ int SymlinkImpl::Symlink(const std::string& target, const std::string& srcPath)
         LOGE("Failed to create a link for old path");
         return ret;
     }
-
-    LOGI("FS_TEST::SymlinkImpl::Symlink success");
     return ret;
 }
 

@@ -25,6 +25,87 @@ namespace CJSystemapi {
 namespace FileFs {
 using namespace std;
 
+int64_t StatImpl::GetIno() const
+{
+    return static_cast<int64_t>(real_.st_ino);
+}
+
+int64_t StatImpl::GetMode() const
+{
+    return static_cast<int64_t>(real_.st_mode & S_PREMISSION);
+}
+
+int64_t StatImpl::GetUid() const
+{
+    return static_cast<int64_t>(real_.st_uid);
+}
+
+int64_t StatImpl::GetGid() const
+{
+    return static_cast<int64_t>(real_.st_gid);
+}
+
+int64_t StatImpl::GetSize() const
+{
+    return static_cast<int64_t>(real_.st_size);
+}
+
+int64_t StatImpl::GetAtime() const
+{
+    return static_cast<int64_t>(real_.st_atim.tv_sec);
+}
+
+int64_t StatImpl::GetMtime() const
+{
+    return static_cast<int64_t>(real_.st_mtim.tv_sec);
+}
+
+int64_t StatImpl::GetCtime() const
+{
+    return static_cast<int64_t>(real_.st_ctim.tv_sec);
+}
+
+bool StatImpl::IsBlockDevice()
+{
+    return CheckStatMode(S_IFBLK);
+}
+
+bool StatImpl::IsCharacterDevice()
+{
+    return CheckStatMode(S_IFCHR);
+}
+
+bool StatImpl::IsDirectory()
+{
+    return CheckStatMode(S_IFDIR);
+}
+
+bool StatImpl::IsFIFO()
+{
+    return CheckStatMode(S_IFIFO);
+}
+
+bool StatImpl::IsFile()
+{
+    return CheckStatMode(S_IFREG);
+}
+
+bool StatImpl::IsSocket()
+{
+    return CheckStatMode(S_IFSOCK);
+}
+
+bool StatImpl::IsSymbolicLink()
+{
+    return CheckStatMode(S_IFLNK);
+}
+
+bool StatImpl::CheckStatMode(mode_t mode)
+{
+    bool check = (real_.st_mode & S_IFMT) == mode;
+    return check;
+}
+
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
 RetDataI32 StatImpl::GetLocation()
 {

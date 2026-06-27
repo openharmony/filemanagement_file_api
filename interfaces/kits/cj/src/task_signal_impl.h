@@ -17,7 +17,7 @@
 #define OHOS_FILE_FS_TASKSIGNAL_H
 
 #include "cj_common_ffi.h"
-#include "file_utils.h"
+#include "cj_file_utils.h"
 #include "ffi_remote_data.h"
 #include "task_signal.h"
 #include "task_signal_listener.h"
