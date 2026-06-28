@@ -43,7 +43,6 @@ napi_value Close::Sync(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    METRICS_COUNT("CoreFileKit.fileio.Legacy.closeSync");
     if (close(fd) == -1) {
         UniError(errno).ThrowErr(env);
         return nullptr;

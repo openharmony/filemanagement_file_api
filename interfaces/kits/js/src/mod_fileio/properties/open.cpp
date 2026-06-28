@@ -74,7 +74,6 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    METRICS_COUNT("CoreFileKit.fileio.Legacy.openSync");
     fd = open(path.get(), flags, mode);
     if (fd == -1) {
         if (errno == ENAMETOOLONG) {
