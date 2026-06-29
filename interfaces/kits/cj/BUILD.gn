@@ -115,7 +115,6 @@ ohos_source_set("js_trace_src") {
   ]
   public_configs = [ ":js_common_config" ]
   cflags = [
-    "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-fno-asynchronous-unwind-tables",
@@ -130,6 +129,7 @@ ohos_source_set("js_trace_src") {
     "-fmerge-all-constants",
     "-fomit-frame-pointer",
     "-flto",
+    "-fvisibility=hidden",
   ]
   use_exceptions = true
   external_deps = [
@@ -196,7 +196,6 @@ ohos_shared_library("cj_file_fs_ffi") {
 
   if (!use_mingw_win && !use_mac) {
     cflags = [
-      "-fvisibility=hidden",
       "-fdata-sections",
       "-ffunction-sections",
       "-fno-asynchronous-unwind-tables",
@@ -210,6 +209,7 @@ ohos_shared_library("cj_file_fs_ffi") {
       "-fmerge-all-constants",
       "-fomit-frame-pointer",
       "-flto",
+      "-fvisibility=hidden",
     ]
     branch_protector_ret = "pac_ret"
     sanitize = {
@@ -270,6 +270,7 @@ ohos_shared_library("cj_file_fs_ffi") {
       "samgr:samgr_proxy",
     ]
   }
+  version_script = "libcj_file_api.map"
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"
@@ -278,7 +279,6 @@ ohos_shared_library("cj_file_fs_ffi") {
 
 ohos_shared_library("cj_statvfs_ffi") {
   cflags = [
-    "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-fno-asynchronous-unwind-tables",
@@ -294,6 +294,7 @@ ohos_shared_library("cj_statvfs_ffi") {
     "-fmerge-all-constants",
     "-fomit-frame-pointer",
     "-flto",
+    "-fvisibility=hidden",
   ]
   use_exceptions = false
   branch_protector_ret = "pac_ret"
@@ -330,6 +331,7 @@ ohos_shared_library("cj_statvfs_ffi") {
     "napi:cj_bind_native",
     "c_utils:utils",
   ]
+  version_script = "libcj_file_api.map"
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"
