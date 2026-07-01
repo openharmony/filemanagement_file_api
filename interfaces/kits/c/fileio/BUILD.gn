@@ -16,6 +16,7 @@ import("//build/ohos/ndk/ndk.gni")
 import("//foundation/filemanagement/file_api/file_api.gni")
 
 ohos_shared_library("ohfileio") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     ubsan = true
