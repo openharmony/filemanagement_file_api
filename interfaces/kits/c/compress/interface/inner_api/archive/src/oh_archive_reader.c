@@ -152,7 +152,7 @@ ARCHIVE_API OH_Archive_Reader_Ctx OH_Archive_Reader_OpenFile(const char *inFile)
 ARCHIVE_API OH_Archive_ErrCode OH_Archive_Reader_SetProgressHandlerWithData(OH_Archive_Reader_Ctx arc,
     OH_Archive_ProgressHandlerWithData progressHandler, void *userData)
 {
-    if (arc == NULL || progressHandler == NULL || userData == NULL) {
+    if (arc == NULL || progressHandler == NULL) {
         return OH_ARCHIVE_PARAM_ERROR;
     }
 
@@ -217,7 +217,7 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_BufferRead(uint8_t *dstBuffer, uint64_
         return OH_ARCHIVE_PARAM_ERROR;
     }
 
-    if (method != OH_ARCHIVE_NO_COMPRESSION && method != OH_ARCHIVE_COMPRESS_DEFLATE) {
+    if (method != OH_ARCHIVE_COMPRESS_DEFLATE) {
         return OH_ARCHIVE_PARAM_ERROR;
     }
 
@@ -277,9 +277,7 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_BufferRead(uint8_t *dstBuffer, uint64_
 
 ARCHIVE_API OH_Archive_StreamRead_Ctx OH_Archive_StreamRead_Create(OH_Archive_Stream_Config config)
 {
-    if ((config.method != OH_ARCHIVE_NO_COMPRESSION &&
-        config.method != OH_ARCHIVE_COMPRESS_DEFLATE) ||
-        config.blockSize == 0) {
+    if (config.method != OH_ARCHIVE_COMPRESS_DEFLATE || config.blockSize == 0) {
         return NULL;
     }
 
