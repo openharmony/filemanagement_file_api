@@ -312,10 +312,9 @@ napi_value PropNExporter::Access(napi_env env, napi_callback_info info)
         int ret = AccessCore(path, mode, flag);
         if (ret == 0) {
             result->isAccess = true;
-        } else {
-            HILOGE("Accesscore finish ret %{public}d", ret);
         }
         if (ret < 0 && (string_view(uv_err_name(ret)) != "ENOENT")) {
+            HILOGE("Accesscore finish ret %{public}d", ret);
             METRICS_ERROR("CoreFileKit.fileio.Dyn.access.Err", NError(ret).GetErrCode());
             return NError(ret);
         }
@@ -364,7 +363,7 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
         }
         int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
-            HILOGD("Failed to unlink with path ret %{public}d", ret);
+            HILOGE("Failed to unlink with path ret %{public}d", ret);
             METRICS_ERROR("CoreFileKit.fileio.Dyn.unlink.Err", NError(ret).GetErrCode());
             return NError(ret);
         }
@@ -416,7 +415,7 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.get(), nullptr);
     traceUvUnlink.End();
     if (ret < 0) {
-        HILOGD("Failed to unlink with path ret %{public}d", ret);
+        HILOGE("Failed to unlink with path ret %{public}d", ret);
         METRICS_ERROR("CoreFileKit.fileio.Dyn.unlinkSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         if (FileApiDebug::isLogEnabled) {
@@ -454,7 +453,7 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
             return NError(ret);
         }
         if (::Mkdirs(path.c_str(), static_cast<MakeDirectionMode>(recursion)) < 0) {
-            HILOGD("Failed to create directories, error: %{public}d", errno);
+            HILOGE("Failed to create directories, error: %{public}d", errno);
             return NError(errno);
         }
         ret = AccessCore(path, 0);
@@ -467,7 +466,7 @@ static NError MkdirExec(const string &path, bool recursion, bool hasOption)
 #endif
     int ret = MkdirCore(path);
     if (ret) {
-        HILOGD("Failed to create directory");
+        HILOGE("Failed to create directory with ret: %{public}d", ret);
         return NError(ret);
     }
     return NError(ERRNO_NOERR);

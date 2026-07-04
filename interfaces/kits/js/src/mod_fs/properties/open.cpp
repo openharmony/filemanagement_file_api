@@ -219,7 +219,7 @@ static tuple<int, string> OpenByFileDataUri(Uri &uri, const string &uriStr, unsi
     } else if (bundleName == DOCS && access(realPath.c_str(), F_OK) != 0) {
         int res = OpenFileByDatashare(uri.ToString(), mode);
         if (res < 0) {
-            HILOGE("Failed to open file by Datashare error %{public}d", res);
+            HILOGE("Access return false and failed to open file by Datashare error %{public}d", res);
             return { -ENOENT, uri.ToString() };
         }
         return { res, uri.ToString() };
@@ -302,7 +302,7 @@ napi_value Open::Sync(napi_env env, napi_callback_info info)
 #endif
     int ret = OpenFileByPath(pathStr, mode);
     if (ret < 0) {
-        HILOGD("Failed to open file for libuv error %{public}d", ret);
+        HILOGE("Failed to open file for libuv error %{public}d", ret);
         METRICS_ERROR("CoreFileKit.fileio.Dyn.openSync.Err", NError(ret).GetErrCode());
         NError(ret, "Open failed, path is: " + AnonymizePath(pathStr)).ThrowErr(env);
         return nullptr;
@@ -334,7 +334,7 @@ static NError AsyncCbExec(shared_ptr<AsyncOpenFileArg> arg, const string &path, 
 #endif
     int ret = OpenFileByPath(pathStr, mode);
     if (ret < 0) {
-        HILOGD("Failed to open file for libuv error %{public}d", ret);
+        HILOGE("Failed to open file for libuv error %{public}d", ret);
             METRICS_ERROR("CoreFileKit.fileio.Dyn.open.Err", NError(ret).GetErrCode());
         return NError(ret, "Open failed, path is: " + AnonymizePath(pathStr));
     }

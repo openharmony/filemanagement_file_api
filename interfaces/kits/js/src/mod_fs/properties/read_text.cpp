@@ -93,11 +93,11 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
 
     sfd.SetFD(ret);
     if (sfd.GetFD() < 0) {
-        HILOGE("Failed to open file by path");
+        HILOGE("Failed to open file by path with errno: %{public}d", errno);
         return NError(errno);
     }
     if (fstat(sfd.GetFD(), &statbf) < 0) {
-        HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
+        HILOGE("Failed to get stat of file by fd: %{public}d, errno is: %{public}d", sfd.GetFD(), errno);
         return NError(errno);
     }
 
@@ -117,7 +117,7 @@ static NError ReadTextAsync(const std::string &path, std::shared_ptr<AsyncReadTe
     }
     arg->len = uv_fs_read(nullptr, read_req.get(), sfd.GetFD(), &readbuf, 1, offset, nullptr);
     if (arg->len < 0) {
-        HILOGE("Failed to read file by fd: %{public}d", sfd.GetFD());
+        HILOGE("Failed to read file by fd: %{public}d, ret is: %{public}" PRId64, sfd.GetFD(), arg->len);
         return NError(errno);
     }
     arg->buffer = buffer;
@@ -181,7 +181,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     OHOS::DistributedFS::FDGuard sfd;
     int fd = OpenFile(path.get());
     if (fd < 0) {
-        HILOGD("Failed to open file by ret: %{public}d", fd);
+        HILOGE("Failed to open file by ret: %{public}d", fd);
         NError(fd).ThrowErr(env);
         return nullptr;
     }
@@ -190,7 +190,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     struct stat statbf;
     FileFsTrace traceFstat("fstat");
     if ((!sfd) || (fstat(sfd.GetFD(), &statbf) < 0)) {
-        HILOGE("Failed to get stat of file by fd: %{public}d", sfd.GetFD());
+        HILOGE("Failed to get stat of file by fd: %{public}d, errno is: %{public}d", sfd.GetFD(), errno);
         NError(errno).ThrowErr(env);
         return nullptr;
     }
@@ -206,7 +206,7 @@ napi_value ReadText::Sync(napi_env env, napi_callback_info info)
     string buffer(len, '\0');
     int readRet = ReadFromFile(sfd.GetFD(), offset, buffer);
     if (readRet < 0) {
-        HILOGE("Failed to read file by fd: %{public}d", fd);
+        HILOGE("Failed to read file by fd: %{public}d, ret is: %{public}d", fd, readRet);
         NError(readRet).ThrowErr(env);
         return nullptr;
     }
