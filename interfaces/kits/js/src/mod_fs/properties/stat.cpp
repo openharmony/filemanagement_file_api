@@ -88,7 +88,7 @@ static NError CheckFsStat(const FileInfo &fileInfo, uv_fs_t* req)
     if (fileInfo.isPath) {
         int ret = uv_fs_stat(nullptr, req, fileInfo.path.get(), nullptr);
         if (ret < 0) {
-            HILOGD("Failed to stat file with path, ret is %{public}d", ret);
+            HILOGE("Failed to stat file with path, ret is %{public}d", ret);
             if (FileApiDebug::isLogEnabled) {
                 HILOGD("Path is %{private}s", fileInfo.path.get());
             }

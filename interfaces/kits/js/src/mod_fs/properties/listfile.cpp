@@ -274,7 +274,7 @@ static int FilterFileRes(const string &path, vector<string> &dirents)
     }
     int num = scandir(path.c_str(), &(pNameList->namelist), FilterFunc, nullptr);
     if (num < 0) {
-        HILOGE("Failed to scan dir");
+        HILOGE("Failed to scan dir with errno: %{public}d", errno);
         return errno;
     }
     pNameList->direntNum = num;
@@ -293,7 +293,7 @@ static int RecursiveFunc(const string &path, vector<string> &dirents)
     }
     int num = scandir(path.c_str(), &(pNameList->namelist), FilterFunc, nullptr);
     if (num < 0) {
-        HILOGE("Failed to scan dir");
+        HILOGE("Failed to scan dir with errno: %{public}d", errno);
         return errno;
     }
     pNameList->direntNum = num;
