@@ -15,13 +15,14 @@
       "syscap": [
         "SystemCapability.FileManagement.File.FileIO",
         "SystemCapability.FileManagement.File.FileIO.Lite",
+        "SystemCapability.FileManagement.File.Swapfs",
         "SystemCapability.FileManagement.File.Environment",
-        "SystemCapability.FileManagement.File.DistributedFile",
         "SystemCapability.FileManagement.File.Environment.FolderObtain"
       ],
       "features": [
         "file_api_read_optimize",
-        "file_api_feature_hyperaio"
+        "file_api_feature_hyperaio",
+        "file_api_feature_swapfs"
       ],
       "adapted_system_type": [ "mini","small","standard" ],
       "rom": "4096KB",
@@ -54,6 +55,7 @@
             "runtime_core",
             "rust_libc",
             "samgr",
+            "storage_service",
             "zlib"
         ],
         "third_party": []
@@ -67,7 +69,8 @@
             "//foundation/filemanagement/file_api/interfaces/kits/ts/streamrw:streamrw_packages",
             "//foundation/filemanagement/file_api/interfaces/kits/ts/streamhash:streamhash_packages",
             "//foundation/filemanagement/file_api/interfaces/kits/cj:fs_ffi_packages",
-            "//foundation/filemanagement/file_api/interfaces/kits/hyperaio:group_hyperaio"
+            "//foundation/filemanagement/file_api/interfaces/kits/hyperaio:group_hyperaio",
+            "//foundation/filemanagement/file_api/interfaces/kits/c/swapfs:group_swapfs"
           ],
           "service_group": []
         },
@@ -106,6 +109,15 @@
                 "fileio_native.h"
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/native/fileio"
+            }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/native/swapfs:swapfs_native",
+            "header": {
+              "header_files": [
+                "swapfs_c_api.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/native/swapfs/include"
             }
           },
           {
@@ -160,6 +172,16 @@
                 "fileio.h"
               ],
               "header_base": "//foundation/filemanagement/file_api/interfaces/kits/c/fileio"
+            }
+          },
+          {
+            "name": "//foundation/filemanagement/file_api/interfaces/kits/c/swapfs:ohswapfs",
+            "header": {
+              "header_files": [
+                "swapfs.h",
+                "swapfs_errcode.h"
+              ],
+              "header_base": "//foundation/filemanagement/file_api/interfaces/kits/c/swapfs"
             }
           },
           {
