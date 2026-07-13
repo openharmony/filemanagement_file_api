@@ -61,7 +61,9 @@ ohos_source_set("js_common_src") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "ipc:ipc_single",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "hilog:libhilog",
   ]
   part_name = "file_api"
@@ -96,7 +98,9 @@ ohos_source_set("js_stream_exporter_src") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "ipc:ipc_single",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "hilog:libhilog",
   ]
   part_name = "file_api"
@@ -189,9 +193,11 @@ ohos_shared_library("cj_file_fs_ffi") {
   external_deps = [
     "hilog:libhilog",
     "c_utils:utils",
+    "libuv:uv",
     "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
+    "node:node_header_notice",
   ]
 
   if (!use_mingw_win && !use_mac) {
@@ -326,6 +332,7 @@ ohos_shared_library("cj_statvfs_ffi") {
   ]
   external_deps = [
     "hilog:libhilog",
+    "libuv:uv",
     "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
