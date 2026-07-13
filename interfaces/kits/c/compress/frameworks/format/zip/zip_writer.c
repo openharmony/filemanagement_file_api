@@ -235,8 +235,8 @@ static int ZipWriterUpdateProgress(struct ZipWriter *writer, size_t len, bool is
             return writer->progressHandler(ratio, writer->progressHandlerUserData);
         }
     }
-    size_t progressUpdated = writer->progressUpdated + len;
-    int ratio = (int)(progressUpdated * PROGRESS_PERCENT / writer->progressTotal);
+    writer->progressUpdated = writer->progressUpdated + len;
+    int ratio = (int)(writer->progressUpdated * PROGRESS_PERCENT / writer->progressTotal);
     return writer->progressHandler(ratio, writer->progressHandlerUserData);
 }
 
@@ -925,7 +925,7 @@ static void GetprefixOfInput(const char *input, char *prefix)
         return;
     }
 
-    if (EOK != strncpy_s(prefix, ZIP_FILE_NAME_LEN_MAX, input, lastSlashIndex)) {
+    if (EOK != strncpy_s(prefix, ZIP_FILE_NAME_LEN_MAX, input, lastSlashIndex + 1)) {
         prefix[0] = '\0';
         return;
     }
@@ -986,6 +986,9 @@ int32_t ZipWriterAddEmptyDir(HmArchiveWriteInfo *archive, struct ZipWriter *writ
         ret = ZipWriterCloseStream(&param, 0);
     }
     ZipWriterDeleteStream(&param);
+    if (ZipWriterUpdateProgress(writer, 0, 0) == OH_ARCHIVE_PROGRESS_CANCEL) {
+        return ARCHIVE_CANCEL_ERROR;
+    }
     return ret;
 }
 
