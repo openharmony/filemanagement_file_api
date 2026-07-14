@@ -124,6 +124,7 @@ ohos_source_set("streamrw_static") {
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
   subsystem_name = "filemanagement"
   part_name = "file_api"

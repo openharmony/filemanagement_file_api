@@ -146,6 +146,7 @@ ohos_shared_library("environment_native") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
   innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"

@@ -70,7 +70,9 @@ ohos_shared_library("filemgmt_libn") {
 
   external_deps = [
     "hilog:libhilog",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   use_exceptions = true

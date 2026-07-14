@@ -173,6 +173,7 @@ ohos_unittest("napi_file_fs_mock_test") {
     "ipc:ipc_single",
     "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "samgr:samgr_proxy",
   ]
 
@@ -225,6 +226,7 @@ ohos_unittest("napi_file_environment_test") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
     "os_account:os_account_innerkits",
   ]
 
