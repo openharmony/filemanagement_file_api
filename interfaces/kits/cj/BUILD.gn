@@ -334,7 +334,6 @@ ohos_shared_library("cj_statvfs_ffi") {
     "hilog:libhilog",
     "libuv:uv",
     "napi:ace_napi",
-    "node:node_header_notice",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
     "c_utils:utils",
