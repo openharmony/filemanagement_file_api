@@ -56,7 +56,8 @@
             "rust_libc",
             "samgr",
             "storage_service",
-            "zlib"
+            "zlib",
+            "taihe_ffi_gen"
         ],
         "third_party": []
       },
