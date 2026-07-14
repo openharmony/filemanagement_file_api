@@ -129,6 +129,7 @@ ohos_shared_library("fileio") {
     "hilog:libhilog",
     "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "openssl:libcrypto_shared",
   ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
@@ -201,6 +202,7 @@ ohos_shared_library("fs") {
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   if (!use_mingw_win && !use_mac) {
@@ -349,6 +351,7 @@ ohos_shared_library("hash") {
     "bounds_checking_function:libsec_shared",
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
     "openssl:libcrypto_shared",
   ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
@@ -406,6 +409,7 @@ ohos_shared_library("file") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   if (file_api_read_optimize) {
@@ -454,6 +458,7 @@ ohos_shared_library("statfs") {
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   if (!use_mingw_win && !use_mac && file_api_hiviewdfx_api_metrics_enable) {
@@ -505,6 +510,7 @@ ohos_shared_library("statvfs") {
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   if (!use_mingw_win && !use_mac) {
@@ -556,6 +562,7 @@ ohos_shared_library("environment") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
     "os_account:os_account_innerkits",
   ]
 }
@@ -605,6 +612,7 @@ ohos_shared_library("securitylabel") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 }
 
@@ -654,6 +662,7 @@ ohos_shared_library("document") {
   external_deps = [
     "hilog:libhilog",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 }
 
