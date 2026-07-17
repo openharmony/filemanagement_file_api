@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -555,7 +555,7 @@ HWTEST_F(RustTest, RustTest_GetParent_0002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: RustTest_GetParent_0003
- * @tc.desc: Test function of GetParent() interface for SUCCESS.
+ * @tc.desc: Test function of GetParent() interface for FAILURE when fd is closed.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -565,7 +565,11 @@ HWTEST_F(RustTest, RustTest_GetParent_0003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RustTest-begin RustTest_GetParent_0003";
 
-    Str *str = GetParent(34);
+    const char fileStr[] = "/data/test/rust_test.txt";
+    int fd = open(fileStr, O_RDWR);
+    ASSERT_TRUE(fd >= 0);
+    ASSERT_TRUE(close(fd) == 0);
+    Str *str = GetParent(fd);
     ASSERT_TRUE(errno == 2);
     EXPECT_TRUE(str == nullptr);
 
