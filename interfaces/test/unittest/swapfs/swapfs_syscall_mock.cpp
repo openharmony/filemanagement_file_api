@@ -59,6 +59,10 @@ void ConfigureRenameMocks(const std::shared_ptr<SwapfsSyscallMock> &mock)
 
 void ConfigureAtMocks(const std::shared_ptr<SwapfsSyscallMock> &mock)
 {
+    ON_CALL(*mock, UnlinkAt(testing::_, testing::_, testing::_))
+        .WillByDefault(testing::Invoke([](int dirFd, const char *path, int flags) {
+            return static_cast<int>(syscall(SYS_unlinkat, dirFd, path, flags));
+        }));
     ON_CALL(*mock, OpenAt(testing::_, testing::_, testing::_, testing::_))
         .WillByDefault(testing::Invoke([](int dirFd, const char *path, int flags, mode_t mode) {
             return static_cast<int>(syscall(SYS_openat, dirFd, path, flags, mode));
@@ -192,6 +196,14 @@ int unlink(const char *path)
     using UnlinkFunction = int (*)(const char *);
     static UnlinkFunction realUnlink = ResolveFunction<UnlinkFunction>("unlink");
     return realUnlink == nullptr ? -1 : realUnlink(path);
+}
+
+int unlinkat(int dirFd, const char *path, int flags)
+{
+    if (SwapfsSyscallMock::IsMockable()) {
+        return SwapfsSyscallMock::GetMock()->UnlinkAt(dirFd, path, flags);
+    }
+    return static_cast<int>(syscall(SYS_unlinkat, dirFd, path, flags));
 }
 
 int rename(const char *oldpath, const char *newpath)

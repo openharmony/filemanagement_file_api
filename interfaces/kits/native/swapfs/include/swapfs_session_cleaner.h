@@ -26,7 +26,7 @@ namespace OHOS::FileManagement::Swapfs {
 class SwapfsSessionCleaner {
 public:
     explicit SwapfsSessionCleaner(std::string swapRootPath);
-    static int RemoveSessionTree(const std::string &path);
+    static int RemoveSessionTree(const std::string &path, const std::string &safeRoot);
     static int RemoveSessionAt(int rootFd, const std::string &name);
     int AcquireCleanupLock(OHOS::UniqueFd &rootFd, OHOS::UniqueFd &lockFd) const;
     int CleanupInactiveSessionsLocked(int rootFd);

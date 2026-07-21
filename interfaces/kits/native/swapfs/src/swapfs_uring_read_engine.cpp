@@ -13,14 +13,7 @@
  * limitations under the License.
  */
 
-#include "swapfs_err_mapper.h"
 #include "swapfs_uring_read_engine.h"
-
-#include "swapfs_io_engine.h"
-
-#include "filemgmt_libhilog.h"
-
-#include "swapfs_errcode.h"
 
 #include <algorithm>
 #include <cerrno>
@@ -28,6 +21,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <utility>
+
+#include "filemgmt_libhilog.h"
+#include "swapfs_err_mapper.h"
+#include "swapfs_errcode.h"
+#include "swapfs_io_engine.h"
 
 #ifndef O_DIRECT
 #define O_DIRECT 0
@@ -313,7 +311,7 @@ int UringReadEngine::Read(const std::string &path, void *buffer, size_t size, si
     if (slot == nullptr) {
         return SWAPFS_E_FEATURE_DISABLED;
     }
-    int fd = open(path.c_str(), O_RDONLY | O_CLOEXEC | O_DIRECT);
+    int fd = OpenSwapFileForRead(path, static_cast<uint32_t>(O_DIRECT));
     if (fd < 0) {
         ReleaseSlot(*slot);
         return MapErrno(errno, SwapfsErrContext::IO_OPERATION);

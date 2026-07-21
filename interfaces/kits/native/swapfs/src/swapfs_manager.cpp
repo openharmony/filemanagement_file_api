@@ -18,7 +18,9 @@
 #include <chrono>
 #include <cerrno>
 #include <cinttypes>
+#include <climits>
 #include <cstdio>
+#include <cstdlib>
 #include <memory>
 #include <random>
 #include <sstream>
@@ -50,6 +52,7 @@ constexpr uint32_t DESTROY_WAIT_TIMEOUT_MS = 200;
 constexpr uint32_t DESTRUCTOR_WAIT_TIMEOUT_MS = 100;
 constexpr mode_t NON_OWNER_PERMS = S_IRWXG | S_IRWXO;
 constexpr int COMMON_E_PERMISSION_SYS = 202;
+constexpr size_t MAX_PATH_LENGTH = PATH_MAX - 1;
 
 bool IsSystemApp()
 {
@@ -117,6 +120,23 @@ int64_t NowMs()
     auto now = std::chrono::system_clock::now().time_since_epoch();
     return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
 }
+
+std::string BuildDataRoot(const std::string &sessionPath)
+{
+    return sessionPath + "/data";
+}
+
+int RemoveSwapFile(const std::string &path, const char *operation, bool ignoreMissing)
+{
+    if (unlink(path.c_str()) == 0) {
+        return SWAPFS_E_OK;
+    }
+    if (ignoreMissing && errno == ENOENT) {
+        return SWAPFS_E_OK;
+    }
+    HILOGE("[Swapfs] %{public}s unlink failed, errno: %{public}d", operation, errno);
+    return MapErrno(errno, SwapfsErrContext::KEY_OPERATION);
+}
 } // namespace
 
 SwapfsManager::SwapfsManager()
@@ -179,7 +199,8 @@ void SwapfsManager::ResolveConfig(const OH_SwapfsConfig *config, SwapfsConfigInn
 
 int SwapfsManager::PrepareSwapRoot()
 {
-    if (config_.swapRootPath.empty()) {
+    if (config_.swapRootPath.empty() || config_.swapRootPath.front() != '/' ||
+        config_.swapRootPath.size() > MAX_PATH_LENGTH) {
         return SWAPFS_E_INVAL;
     }
     if (config_.swapRootPath == DEFAULT_SWAPFS_ROOT_PATH) {
@@ -187,20 +208,32 @@ int SwapfsManager::PrepareSwapRoot()
             return MapErrno(errno, SwapfsErrContext::PATH_OPERATION);
         }
     }
+    size_t slash = config_.swapRootPath.rfind('/');
+    std::string name = config_.swapRootPath.substr(slash + 1);
+    std::string parent = slash == 0 ? "/" : config_.swapRootPath.substr(0, slash);
+    char resolved[PATH_MAX] = {};
+    if (realpath(parent.c_str(), resolved) == nullptr) {
+        return MapErrno(errno, SwapfsErrContext::PATH_OPERATION);
+    }
+    std::string canonicalParent(resolved);
+    config_.swapRootPath = canonicalParent == "/" ? canonicalParent + name :
+        canonicalParent + "/" + name;
     if (mkdir(config_.swapRootPath.c_str(), DIR_MODE) != 0) {
         if (errno != EEXIST) {
             return MapErrno(errno, SwapfsErrContext::PATH_OPERATION);
         }
-        return ValidateSwapRoot(config_.swapRootPath);
-    }
-    int flags = O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW;
-    OHOS::UniqueFd rootFd(open(config_.swapRootPath.c_str(), flags));
-    if (rootFd < 0) {
-        return SWAPFS_E_PATH_UNAVAILABLE;
-    }
-    int ret = CreateMarkerFileAt(rootFd, ROOT_MARKER);
-    if (ret != SWAPFS_E_OK) {
-        return ret;
+    } else {
+        int flags = O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW;
+        OHOS::UniqueFd rootFd(open(config_.swapRootPath.c_str(), flags));
+        int markerRet = rootFd < 0 ? SWAPFS_E_PATH_UNAVAILABLE :
+            CreateMarkerFileAt(rootFd, ROOT_MARKER);
+        if (markerRet != SWAPFS_E_OK) {
+            rootFd = OHOS::UniqueFd();
+            if (rmdir(config_.swapRootPath.c_str()) != 0) {
+                HILOGE("[Swapfs] rollback newly created root failed, errno: %{public}d", errno);
+            }
+            return markerRet;
+        }
     }
     return ValidateSwapRoot(config_.swapRootPath);
 }
@@ -324,7 +357,10 @@ void SwapfsManager::RemoveSessionDir()
     if (sessionPath_.empty()) {
         return;
     }
-    (void)SwapfsSessionCleaner::RemoveSessionTree(sessionPath_);
+    int ret = SwapfsSessionCleaner::RemoveSessionTree(sessionPath_, config_.swapRootPath);
+    if (ret != SWAPFS_E_OK) {
+        HILOGE("[Swapfs] RemoveSessionDir failed, ret: %{public}d", ret);
+    }
     sessionPath_.clear();
 }
 
@@ -332,7 +368,6 @@ int SwapfsManager::Destroy()
 {
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        if (!initialized_) { return SWAPFS_E_OK; }
         shuttingDown_ = true;
         HILOGI("[Swapfs] Destroy initiated, rejecting new ops");
     }
@@ -341,7 +376,6 @@ int SwapfsManager::Destroy()
 
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        if (!initialized_) { return SWAPFS_E_OK; }
         if (!clean) {
             shuttingDown_ = false;
             HILOGW("[Swapfs] Destroy E_BUSY, shuttingDown reset");
@@ -391,27 +425,34 @@ void SwapfsManager::EndOperation()
     }
 }
 
-int SwapfsManager::PrepareForSwapOut(const OH_SwapfsSwapOutRequest *request, uint64_t &newKey,
-    std::string &tmpPath, std::string &swapPath, bool &useDirectIo)
+int SwapfsManager::PrepareForSwapOut(const OH_SwapfsSwapOutRequest *request,
+    SwapOutContext &context)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!initialized_) {
+        HILOGW("[Swapfs] SwapOut not initialized");
         return SWAPFS_E_INVAL;
     }
     if (shuttingDown_) {
+        HILOGW("[Swapfs] SwapOut rejected, manager shutting down");
         return SWAPFS_E_SHUTTING_DOWN;
     }
-    useDirectIo = config_.useDirectIo;
-    if (useDirectIo && !IsDioAligned(request->buffer, request->bufferSize)) {
-        return SWAPFS_E_DIO_ALIGN;
+    context.useDirectIo = config_.useDirectIo;
+    if (context.useDirectIo) {
+        if (!IsDioAligned(request->buffer, request->bufferSize)) {
+            HILOGW("[Swapfs] SwapOut DIO alignment check failed");
+            return SWAPFS_E_DIO_ALIGN;
+        }
     }
     if (removeAllInProgress_) {
+        HILOGW("[Swapfs] SwapOut rejected, RemoveAllData in progress");
         return SWAPFS_E_BUSY;
     }
     ++activeOps_;
-    newKey = nextKeyId_++;
-    tmpPath = sessionPath_ + "/data/" + std::to_string(newKey) + ".tmp";
-    swapPath = sessionPath_ + "/data/" + std::to_string(newKey) + ".swap";
+    context.keyId = nextKeyId_++;
+    std::string dataRoot = BuildDataRoot(sessionPath_);
+    context.tmpPath = dataRoot + "/" + std::to_string(context.keyId) + ".tmp";
+    context.swapPath = dataRoot + "/" + std::to_string(context.keyId) + ".swap";
     return SWAPFS_E_OK;
 }
 
@@ -427,40 +468,46 @@ int SwapfsManager::SwapOut(const OH_SwapfsSwapOutRequest *request, uint64_t *key
 {
     if (request == nullptr || request->buffer == nullptr ||
         request->bufferSize == 0 || keyId == nullptr) {
+        HILOGW("[Swapfs] SwapOut invalid params");
         return SWAPFS_E_INVAL;
     }
-    uint64_t newKey = 0;
-    std::string tmpPath;
-    std::string swapPath;
-    bool useDirectIo = false;
-    int prepRet = PrepareForSwapOut(request, newKey, tmpPath, swapPath, useDirectIo);
+    SwapOutContext context;
+    int prepRet = PrepareForSwapOut(request, context);
     if (prepRet != SWAPFS_E_OK) {
         return prepRet;
     }
     ActiveOperationGuard operation(*this);
     int reserveRet = control_->ReserveSwapOut(request->bufferSize);
     if (reserveRet != SWAPFS_E_OK) {
+        HILOGW("[Swapfs] SwapOut reserve failed, ret: %{public}d", reserveRet);
         return reserveRet;
     }
 
     SyncWriteEngine writer;
-    int ret = writer.Write(tmpPath, request->buffer, request->bufferSize, useDirectIo);
-    if (ret == SWAPFS_E_OK && rename(tmpPath.c_str(), swapPath.c_str()) != 0) {
+    int ret = writer.Write(
+        context.tmpPath, request->buffer, request->bufferSize, context.useDirectIo);
+    if (ret != SWAPFS_E_OK) {
+        HILOGE("[Swapfs] SwapOut write failed, ret: %{public}d", ret);
+    }
+    if (ret == SWAPFS_E_OK && rename(context.tmpPath.c_str(), context.swapPath.c_str()) != 0) {
+        HILOGE("[Swapfs] SwapOut rename failed, errno: %{public}d", errno);
         ret = MapErrno(errno, SwapfsErrContext::PATH_OPERATION);
     }
     if (ret != SWAPFS_E_OK) {
-        (void)unlink(tmpPath.c_str());
+        (void)RemoveSwapFile(context.tmpPath, "SwapOut tmp", true);
         control_->CancelReservedSwapOut(request->bufferSize);
         return ret;
     }
 
     SwapKeyEntry entry;
-    entry.keyId = newKey;
-    entry.path = swapPath;
+    entry.keyId = context.keyId;
+    entry.path = context.swapPath;
     entry.dataSize = request->bufferSize;
     entry.createTime = NowMs();
     entry.status = OH_SWAPFS_KEY_STATUS_ACTIVE;
     CommitSwapOutEntry(entry, keyId);
+    HILOGI("[Swapfs] SwapOut success, keyId: %{public}" PRIu64 ", size: %{public}" PRIu64,
+        *keyId, request->bufferSize);
     return SWAPFS_E_OK;
 }
 
@@ -497,8 +544,8 @@ int SwapfsManager::LookupKeyForSwapIn(uint64_t keyId, SwapKeyEntry &entry)
     return SWAPFS_E_OK;
 }
 
-int SwapfsManager::ExecuteSwapInRead(const SwapKeyEntry &entry, void *buffer, size_t readIoSize,
-    bool useDirectIo)
+int SwapfsManager::ExecuteSwapInRead(
+    const SwapKeyEntry &entry, void *buffer, size_t readIoSize, bool useDirectIo)
 {
     if (useDirectIo) {
         if (uringReader_.IsAvailable()) {
@@ -553,7 +600,8 @@ int SwapfsManager::SwapIn(const OH_SwapfsSwapInRequest *request, uint64_t *readS
     if (readSize != nullptr) {
         *readSize = entry.dataSize;
     }
-    HILOGD("[Swapfs] SwapIn success, keyId: %{public}" PRIu64, request->keyId);
+    HILOGI("[Swapfs] SwapIn success, keyId: %{public}" PRIu64 ", size: %{public}" PRIu64,
+        request->keyId, entry.dataSize);
     FinishSwapIn(request->keyId);
     return SWAPFS_E_OK;
 }
@@ -577,45 +625,45 @@ void SwapfsManager::FinishSwapIn(uint64_t keyId)
         pathToRemove = iter->second.path;
         removedSize = iter->second.dataSize;
     }
-    if (unlink(pathToRemove.c_str()) == 0) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        auto iter = entries_.find(keyId);
-        if (iter == entries_.end()) {
-            HILOGW("[Swapfs] FinishSwapIn key removed before deferred cleanup");
-            return;
-        }
-        control_->OnEntryRemoved(removedSize, removedSize);
-        entries_.erase(iter);
-        return;
-    }
+    bool removed = RemoveSwapFile(pathToRemove, "FinishSwapIn", false) == SWAPFS_E_OK;
     std::lock_guard<std::mutex> lock(mutex_);
     auto iter = entries_.find(keyId);
     if (iter == entries_.end()) {
-        HILOGW("[Swapfs] FinishSwapIn key removed after deferred unlink failed");
+        HILOGW("[Swapfs] FinishSwapIn key removed before deferred cleanup");
         return;
     }
-    iter->second.status = OH_SWAPFS_KEY_STATUS_ACTIVE;
-    HILOGW("[Swapfs] FinishSwapIn deferred delete unlink failed, reverting status to ACTIVE");
+    if (!removed) {
+        iter->second.status = OH_SWAPFS_KEY_STATUS_ACTIVE;
+        HILOGW("[Swapfs] FinishSwapIn deferred delete failed, reverting status to ACTIVE");
+        return;
+    }
+    control_->OnEntryRemoved(removedSize, removedSize);
+    entries_.erase(iter);
 }
 
 int SwapfsManager::QueryData(uint64_t keyId, OH_SwapfsDataInfo *info)
 {
     if (keyId == 0 || info == nullptr) {
+        HILOGW("[Swapfs] QueryData invalid params");
         return SWAPFS_E_INVAL;
     }
     std::lock_guard<std::mutex> lock(mutex_);
     if (!initialized_) {
+        HILOGW("[Swapfs] QueryData not initialized");
         return SWAPFS_E_INVAL;
     }
     if (shuttingDown_) {
+        HILOGW("[Swapfs] QueryData rejected, manager shutting down");
         return SWAPFS_E_SHUTTING_DOWN;
     }
     auto iter = entries_.find(keyId);
     if (iter == entries_.end()) {
+        HILOGW("[Swapfs] QueryData key not found, keyId: %{public}" PRIu64, keyId);
         return SWAPFS_E_KEY_NOT_FOUND;
     }
     const SwapKeyEntry &entry = iter->second;
     if (entry.status != OH_SWAPFS_KEY_STATUS_ACTIVE) {
+        HILOGW("[Swapfs] QueryData key state invalid");
         return SWAPFS_E_KEY_STATE_INVALID;
     }
     info->keyId = entry.keyId;
@@ -624,26 +672,32 @@ int SwapfsManager::QueryData(uint64_t keyId, OH_SwapfsDataInfo *info)
     info->createTime = entry.createTime;
     info->status = entry.status;
     info->canSwapIn = true;
+    HILOGI("[Swapfs] QueryData success, keyId: %{public}" PRIu64 ", size: %{public}" PRIu64,
+        keyId, entry.dataSize);
     return SWAPFS_E_OK;
 }
 
 int SwapfsManager::GetStats(OH_SwapfsStats *stats)
 {
     if (stats == nullptr) {
+        HILOGW("[Swapfs] GetStats invalid params");
         return SWAPFS_E_INVAL;
     }
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!initialized_) {
+            HILOGW("[Swapfs] GetStats not initialized");
             return SWAPFS_E_INVAL;
         }
         if (shuttingDown_) {
+            HILOGW("[Swapfs] GetStats rejected, manager shutting down");
             return SWAPFS_E_SHUTTING_DOWN;
         }
         ++activeOps_;
     }
     ActiveOperationGuard operation(*this);
     control_->FillStats(*stats);
+    HILOGI("[Swapfs] GetStats success");
     return SWAPFS_E_OK;
 }
 
@@ -691,9 +745,6 @@ void SwapfsManager::FinalizeRemoveEntry(const SwapKeyEntry &entry, bool removed)
             iter->second.status = OH_SWAPFS_KEY_STATUS_ACTIVE;
         }
     }
-    if (removed) {
-        HILOGD("[Swapfs] RemoveData success, keyId: %{public}" PRIu64, entry.keyId);
-    }
 }
 
 int SwapfsManager::RemoveData(uint64_t keyId)
@@ -708,19 +759,17 @@ int SwapfsManager::RemoveData(uint64_t keyId)
         return prepRet;
     }
     if (entry.path.empty()) {
+        HILOGI("[Swapfs] RemoveData deferred, keyId: %{public}" PRIu64, keyId);
         return SWAPFS_E_OK;
     }
     ActiveOperationGuard operation(*this);
-    int unlinkErr = 0;
-    bool removed = unlink(entry.path.c_str()) == 0;
-    if (!removed) {
-        unlinkErr = errno;
-        HILOGE("[Swapfs] RemoveData unlink failed, errno: %{public}d", unlinkErr);
-    }
+    int removeRet = RemoveSwapFile(entry.path, "RemoveData", false);
+    bool removed = removeRet == SWAPFS_E_OK;
     FinalizeRemoveEntry(entry, removed);
     if (!removed) {
-        return MapErrno(unlinkErr, SwapfsErrContext::KEY_OPERATION);
+        return removeRet;
     }
+    HILOGI("[Swapfs] RemoveData success, keyId: %{public}" PRIu64, keyId);
     return SWAPFS_E_OK;
 }
 
@@ -728,12 +777,15 @@ int SwapfsManager::CollectRemovableEntries(std::vector<SwapKeyEntry> &entriesToR
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!initialized_) {
+        HILOGW("[Swapfs] RemoveAllData not initialized");
         return SWAPFS_E_INVAL;
     }
     if (shuttingDown_) {
+        HILOGW("[Swapfs] RemoveAllData rejected, manager shutting down");
         return SWAPFS_E_SHUTTING_DOWN;
     }
     if (activeOps_ > 0) {
+        HILOGW("[Swapfs] RemoveAllData rejected, active ops: %{public}u", activeOps_);
         return SWAPFS_E_BUSY;
     }
     entriesToRemove.reserve(entries_.size());
@@ -758,6 +810,7 @@ int SwapfsManager::RemoveAllData()
         return prepRet;
     }
     if (entriesToRemove.empty()) {
+        HILOGI("[Swapfs] RemoveAllData success, count: 0");
         return SWAPFS_E_OK;
     }
 
@@ -766,10 +819,11 @@ int SwapfsManager::RemoveAllData()
     removedEntries.reserve(entriesToRemove.size());
     int firstError = SWAPFS_E_OK;
     for (const auto &entry : entriesToRemove) {
-        bool removed = unlink(entry.path.c_str()) == 0;
+        int removeRet = RemoveSwapFile(entry.path, "RemoveAllData", false);
+        bool removed = removeRet == SWAPFS_E_OK;
         removedEntries.emplace_back(removed);
         if (!removed && firstError == SWAPFS_E_OK) {
-            firstError = MapErrno(errno, SwapfsErrContext::KEY_OPERATION);
+            firstError = removeRet;
         }
     }
     {
@@ -789,6 +843,11 @@ int SwapfsManager::RemoveAllData()
         }
         removeAllInProgress_ = false;
     }
-    return firstError;
+    if (firstError != SWAPFS_E_OK) {
+        return firstError;
+    }
+    HILOGI("[Swapfs] RemoveAllData success, count: %{public}" PRIu64,
+        static_cast<uint64_t>(entriesToRemove.size()));
+    return SWAPFS_E_OK;
 }
 } // namespace OHOS::FileManagement::Swapfs

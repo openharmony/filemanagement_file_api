@@ -245,7 +245,8 @@ public:
 void WritePayload(const std::string &payload)
 {
     SyncWriteEngine writer;
-    ASSERT_EQ(writer.Write(TEST_FILE_PATH, payload.data(), payload.size(), false), SWAPFS_E_OK);
+    ASSERT_EQ(writer.Write(TEST_FILE_PATH, payload.data(), payload.size(), false),
+        SWAPFS_E_OK);
 }
 
 bool BytesEqual(const void *left, const void *right, size_t size)
@@ -265,7 +266,6 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_IsDioAlignedChecksAddressAndSize_0000,
     EXPECT_TRUE(IsDioAligned(alignedBuffer, SWAPFS_DIO_ALIGNMENT));
     EXPECT_FALSE(IsDioAligned(alignedBuffer, SWAPFS_DIO_ALIGNMENT - 1));
     EXPECT_FALSE(IsDioAligned(static_cast<char *>(alignedBuffer) + 1, SWAPFS_DIO_ALIGNMENT));
-    EXPECT_FALSE(IsDioAligned(nullptr, SWAPFS_DIO_ALIGNMENT));
 }
 
 HWTEST_F(SwapfsIoEngineTest, Swapfs_SyncBufferedReadWriteRoundTrip_0000,
@@ -276,7 +276,8 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_SyncBufferedReadWriteRoundTrip_0000,
 
     std::vector<char> output(payload.size(), 0);
     SyncReadEngine reader;
-    ASSERT_EQ(reader.Read(TEST_FILE_PATH, output.data(), output.size(), 0, false), SWAPFS_E_OK);
+    ASSERT_EQ(reader.Read(TEST_FILE_PATH, output.data(), output.size(), 0, false),
+        SWAPFS_E_OK);
     EXPECT_TRUE(std::equal(output.begin(), output.end(), payload.begin()));
 }
 
@@ -299,7 +300,8 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_SyncDioReadWriteRoundTrip_0000, testing::ext
     std::fill_n(static_cast<unsigned char *>(readBuf), SWAPFS_DIO_ALIGNMENT, 0);
 
     SyncReadEngine reader;
-    ASSERT_EQ(reader.Read(TEST_FILE_PATH, readBuf, SWAPFS_DIO_ALIGNMENT, 0, true), SWAPFS_E_OK);
+    ASSERT_EQ(reader.Read(TEST_FILE_PATH, readBuf, SWAPFS_DIO_ALIGNMENT, 0, true),
+        SWAPFS_E_OK);
     EXPECT_TRUE(BytesEqual(readBuf, writeBuf, SWAPFS_DIO_ALIGNMENT));
 }
 
@@ -315,12 +317,15 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_SyncEnginesRejectInvalidParams_0000,
     SyncReadEngine reader;
     EXPECT_EQ(reader.Read(TEST_FILE_PATH, nullptr, 10, 0, false), SWAPFS_E_INVAL);
     EXPECT_EQ(reader.Read(TEST_FILE_PATH, buf, 0, 0, false), SWAPFS_E_INVAL);
-    EXPECT_EQ(reader.Read(TEST_FILE_PATH, buf, sizeof(buf), 0, true), SWAPFS_E_DIO_ALIGN);
+    EXPECT_EQ(reader.Read(TEST_FILE_PATH, buf, sizeof(buf), 0, true),
+        SWAPFS_E_DIO_ALIGN);
 
     alignas(SWAPFS_DIO_ALIGNMENT) char buffer[SWAPFS_DIO_ALIGNMENT * 2] = {};
-    EXPECT_EQ(reader.Read(TEST_FILE_PATH, buffer + 1, SWAPFS_DIO_ALIGNMENT, 0, true),
+    EXPECT_EQ(reader.Read(TEST_FILE_PATH, buffer + 1, SWAPFS_DIO_ALIGNMENT,
+        0, true),
         SWAPFS_E_DIO_ALIGN);
-    EXPECT_EQ(reader.Read(TEST_FILE_PATH, buffer, SWAPFS_DIO_ALIGNMENT - 1, 0, true),
+    EXPECT_EQ(reader.Read(TEST_FILE_PATH, buffer, SWAPFS_DIO_ALIGNMENT - 1,
+        0, true),
         SWAPFS_E_DIO_ALIGN);
 }
 
@@ -332,11 +337,13 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_SyncReadHandlesFileBoundaryCases_0000,
 
     SyncReadEngine reader;
     char largeOutput[32] = {};
-    EXPECT_EQ(reader.Read(TEST_FILE_PATH, largeOutput, sizeof(largeOutput), 0, false),
+    EXPECT_EQ(
+        reader.Read(TEST_FILE_PATH, largeOutput, sizeof(largeOutput), 0, false),
         SWAPFS_E_IO_ERROR);
 
     char output[7] = {};
-    ASSERT_EQ(reader.Read(TEST_FILE_PATH, output, sizeof(output), 7, false), SWAPFS_E_OK);
+    ASSERT_EQ(reader.Read(TEST_FILE_PATH, output, sizeof(output), 7, false),
+        SWAPFS_E_OK);
     EXPECT_EQ(std::string(output, sizeof(output)), "payload");
 
     const char *badPath = "/data/swapfs_test/nonexistent_file.swap";
@@ -383,7 +390,8 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_SyncEnginesRetryAfterEintr_0000, testing::ex
         .WillOnce(Return(static_cast<ssize_t>(sizeof(output))));
 
     SyncReadEngine reader;
-    EXPECT_EQ(reader.Read(TEST_FILE_PATH, output, sizeof(output), 0, false), SWAPFS_E_OK);
+    EXPECT_EQ(reader.Read(TEST_FILE_PATH, output, sizeof(output), 0, false),
+        SWAPFS_E_OK);
 }
 
 HWTEST_F(SwapfsIoEngineTest, Swapfs_SyncWriteRejectsZeroProgress_0000,
@@ -436,24 +444,11 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_SyncReadReportsPreadFailure_0000,
         }));
 
     SyncReadEngine reader;
-    EXPECT_EQ(reader.Read(TEST_FILE_PATH, output, sizeof(output), 0, false), SWAPFS_E_IO_ERROR);
+    EXPECT_EQ(reader.Read(TEST_FILE_PATH, output, sizeof(output), 0, false),
+        SWAPFS_E_IO_ERROR);
 }
 
 // ============================ io_uring (UringReadEngine) ============================
-
-HWTEST_F(SwapfsIoEngineTest, Swapfs_UringReadEngineAvailability_0000,
-    testing::ext::TestSize.Level1)
-{
-    UringReadEngine uring;
-#ifdef SWAPFS_USE_LIBURING
-    bool avail = uring.IsAvailable();
-    if (!avail) {
-        GTEST_SKIP() << "io_uring not available in this environment";
-    }
-#else
-    EXPECT_FALSE(uring.IsAvailable());
-#endif
-}
 
 HWTEST_F(SwapfsIoEngineTest, Swapfs_UringReadEngineRejectsUnaligned_0000,
     testing::ext::TestSize.Level1)
@@ -468,6 +463,7 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_UringReadEngineRejectsUnaligned_0000,
         uring.Read(TEST_FILE_PATH, buffer + 1, SWAPFS_DIO_ALIGNMENT - 1, 0),
         SWAPFS_E_DIO_ALIGN);
 #else
+    EXPECT_FALSE(uring.IsAvailable());
     char buffer[SWAPFS_DIO_ALIGNMENT];
     EXPECT_EQ(
         uring.Read(TEST_FILE_PATH, buffer, SWAPFS_DIO_ALIGNMENT, 0),
@@ -498,7 +494,8 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_UringReadEngineDioRoundTrip_0000,
     ASSERT_EQ(posix_memalign(&readBuf, SWAPFS_DIO_ALIGNMENT, SWAPFS_DIO_ALIGNMENT), 0);
     std::unique_ptr<void, decltype(&free)> readBufGuard(readBuf, &free);
     std::fill_n(static_cast<unsigned char *>(readBuf), SWAPFS_DIO_ALIGNMENT, 0);
-    EXPECT_EQ(uring.Read(TEST_FILE_PATH, readBuf, SWAPFS_DIO_ALIGNMENT, 0), SWAPFS_E_OK);
+    EXPECT_EQ(uring.Read(TEST_FILE_PATH, readBuf, SWAPFS_DIO_ALIGNMENT, 0),
+        SWAPFS_E_OK);
     EXPECT_TRUE(BytesEqual(readBuf, writeBuf, SWAPFS_DIO_ALIGNMENT));
 #else
     GTEST_SKIP() << "SWAPFS_USE_LIBURING not defined, io_uring disabled";
@@ -522,7 +519,8 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_UringPoolUsesDepth64AndRunsReadsConcurrently
     std::vector<std::thread> threads;
     for (size_t i = 0; i < readCount; ++i) {
         threads.emplace_back([&, i] {
-            results[i] = uring.Read(TEST_FILE_PATH, buffers[i].data(), buffers[i].size(), 0);
+            results[i] = uring.Read(TEST_FILE_PATH, buffers[i].data(),
+                buffers[i].size(), 0);
         });
     }
     for (auto &thread : threads) {
@@ -551,7 +549,8 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_UringPoolHandlesSubmitFailures_0000,
     EXPECT_EQ(adapter->submitCalls, 2);
 
     adapter->nullSqe = true;
-    EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0), SWAPFS_E_IO_ERROR);
+    EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0),
+        SWAPFS_E_IO_ERROR);
     adapter->submitResults.push_back(-EIO);
     EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0),
         SWAPFS_E_IO_ERROR);
@@ -561,7 +560,8 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_UringPoolHandlesSubmitFailures_0000,
 
     adapter->submitResults.push_back(2);
     adapter->waitResults.push_back(-EIO);
-    EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0), SWAPFS_E_IO_ERROR);
+    EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0),
+        SWAPFS_E_IO_ERROR);
     EXPECT_EQ(adapter->cancelCalls, 1);
     EXPECT_EQ(adapter->queueInitCalls, 8);
 }
@@ -584,11 +584,13 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_UringPoolHandlesWaitAndCompletionRouting_000
     EXPECT_EQ(adapter->cqeSeenCalls, 3);
     adapter->waitResults = { -EIO, -EIO };
     adapter->cancelResults = { -EINTR, 0 };
-    EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0), SWAPFS_E_IO_ERROR);
+    EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0),
+        SWAPFS_E_IO_ERROR);
     EXPECT_EQ(adapter->cancelCalls, 2);
 
     adapter->nullCqe = true;
-    EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0), SWAPFS_E_IO_ERROR);
+    EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0),
+        SWAPFS_E_IO_ERROR);
     EXPECT_EQ(adapter->cancelCalls, 3);
     EXPECT_EQ(adapter->queueInitCalls, 7);
     EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0), SWAPFS_E_OK);
@@ -672,7 +674,8 @@ HWTEST_F(SwapfsIoEngineTest, Swapfs_UringPoolReleasesSlotAfterOpenFailure_0000,
     UringReadEngine uring(adapter);
     alignas(SWAPFS_DIO_ALIGNMENT) char buffer[SWAPFS_DIO_ALIGNMENT] = {};
 
-    EXPECT_NE(uring.Read(missingPath, buffer, sizeof(buffer), 0), SWAPFS_E_OK);
+    EXPECT_EQ(uring.Read(missingPath, buffer, sizeof(buffer), 0),
+        SWAPFS_E_IO_ERROR);
     ASSERT_TRUE(CreateEmptyTestFile());
     EXPECT_EQ(uring.Read(TEST_FILE_PATH, buffer, sizeof(buffer), 0), SWAPFS_E_OK);
     EXPECT_EQ(adapter->submitCalls, 1);

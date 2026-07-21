@@ -37,6 +37,7 @@ using testing::Return;
 using testing::SetErrnoAndReturn;
 using testing::StrEq;
 
+constexpr const char *TEST_BASE_DIR = "/data/swapfs_test";
 constexpr const char *TEST_SWAP_BASE = "/data/swapfs_test/swapfs_cleaner_ut";
 constexpr const char *TEST_SWAP_ROOT = "/data/swapfs_test/swapfs_cleaner_ut/swapfs";
 constexpr const char *TEST_EXTERNAL_ROOT = "/data/swapfs_test/swapfs_cleaner_external";
@@ -86,8 +87,8 @@ class SwapfsSessionCleanerTest : public testing::Test {
 public:
     void SetUp() override
     {
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE);
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_EXTERNAL_ROOT);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE, TEST_BASE_DIR);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_EXTERNAL_ROOT, TEST_BASE_DIR);
         Mkdir(TEST_SWAP_BASE);
         Mkdir(TEST_SWAP_ROOT);
         CreateFile(std::string(TEST_SWAP_ROOT) + "/.swapfs-root");
@@ -96,28 +97,16 @@ public:
     void TearDown() override
     {
         SwapfsSyscallMock::DisableMock();
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE);
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_EXTERNAL_ROOT);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE, TEST_BASE_DIR);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_EXTERNAL_ROOT, TEST_BASE_DIR);
     }
 };
-
-HWTEST_F(SwapfsSessionCleanerTest, Swapfs_CleansUnlockedHistoricalSession_0000,
-    testing::ext::TestSize.Level1)
-{
-    std::string inactive = CreateSession("session-inactive-random");
-    CreateFile(inactive + "/session.lock");
-    Mkdir(inactive + "/data");
-    CreateFile(inactive + "/data/entry.swap");
-
-    SwapfsSessionCleaner cleaner(TEST_SWAP_ROOT);
-    EXPECT_EQ(CleanupWithLock(cleaner), SWAPFS_E_OK);
-    EXPECT_FALSE(Exists(inactive));
-}
 
 HWTEST_F(SwapfsSessionCleanerTest, Swapfs_CleansNestedHistoricalSession_0000,
     testing::ext::TestSize.Level1)
 {
     std::string inactive = CreateSession("session-nested-random");
+    CreateFile(inactive + "/session.lock");
     Mkdir(inactive + "/data");
     Mkdir(inactive + "/data/nested");
     CreateFile(inactive + "/data/nested/entry.swap");
@@ -310,17 +299,36 @@ HWTEST_F(SwapfsSessionCleanerTest, Swapfs_RemoveTreeHandlesMissingFileAndSymlink
     testing::ext::TestSize.Level1)
 {
     std::string missing = std::string(TEST_SWAP_ROOT) + "/missing";
-    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(missing), SWAPFS_E_OK);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(missing, TEST_SWAP_ROOT), SWAPFS_E_OK);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree("relative", TEST_SWAP_ROOT),
+        SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(missing, "relative"),
+        SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(
+        std::string(TEST_SWAP_ROOT) + "/", TEST_SWAP_ROOT), SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(
+        std::string(TEST_SWAP_ROOT) + "/.", TEST_SWAP_ROOT), SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(
+        std::string(TEST_SWAP_ROOT) + "/..", TEST_SWAP_ROOT), SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(
+        missing, std::string(TEST_SWAP_ROOT) + "/missing-root"), SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(
+        std::string(TEST_SWAP_ROOT) + "/missing-parent/file", TEST_SWAP_ROOT),
+        SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_ROOT, TEST_SWAP_ROOT),
+        SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree("/file", "/"), SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_TRUE(Exists(TEST_SWAP_ROOT));
 
     std::string regular = std::string(TEST_SWAP_ROOT) + "/regular";
     CreateFile(regular);
-    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(regular), SWAPFS_E_OK);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(regular, TEST_SWAP_ROOT), SWAPFS_E_OK);
 
     Mkdir(TEST_EXTERNAL_ROOT);
     CreateFile(std::string(TEST_EXTERNAL_ROOT) + "/sentinel");
     std::string linkPath = std::string(TEST_SWAP_ROOT) + "/external";
     ASSERT_EQ(symlink(TEST_EXTERNAL_ROOT, linkPath.c_str()), 0);
-    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(linkPath), SWAPFS_E_OK);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(linkPath, TEST_SWAP_ROOT), SWAPFS_E_OK);
     EXPECT_TRUE(Exists(std::string(TEST_EXTERNAL_ROOT) + "/sentinel"));
 }
 
@@ -341,8 +349,8 @@ HWTEST_F(SwapfsSessionCleanerTest, Swapfs_StopsCleanupAtMaximumDirectoryDepth_00
     EXPECT_EQ(CleanupWithLock(cleaner), SWAPFS_E_OK);
     EXPECT_TRUE(Exists(inactive));
     EXPECT_TRUE(Exists(inactive + "/.swapfs-session"));
-    EXPECT_EQ(
-        SwapfsSessionCleaner::RemoveSessionTree(inactive), SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(inactive, TEST_SWAP_ROOT),
+        SWAPFS_E_PATH_UNAVAILABLE);
 
     (void)unlink((nested + "/entry.swap").c_str());
     for (auto iter = directories.rbegin(); iter != directories.rend(); ++iter) {
@@ -355,7 +363,7 @@ HWTEST_F(SwapfsSessionCleanerTest, Swapfs_StopsCleanupAtMaximumDirectoryDepth_00
 HWTEST_F(SwapfsSessionCleanerTest, Swapfs_MissingRootReportsPathUnavailable_0000,
     testing::ext::TestSize.Level1)
 {
-    (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE);
+    (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE, TEST_BASE_DIR);
     ASSERT_FALSE(Exists(TEST_SWAP_ROOT));
 
     SwapfsSessionCleaner cleaner(TEST_SWAP_ROOT);
@@ -428,8 +436,12 @@ HWTEST_F(SwapfsSessionCleanerTest, Swapfs_HandlesDirectLockAndUnlinkFailures_000
 {
     std::string session = CreateSession("session-lock-error");
     CreateFile(session + "/session.lock");
+    CreateFile(std::string(TEST_SWAP_ROOT) + "/unlinkat-file");
+    Mkdir(std::string(TEST_SWAP_ROOT) + "/unlinkat-dir");
     OHOS::UniqueFd sessionFd(open(session.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC));
+    OHOS::UniqueFd rootFd(open(TEST_SWAP_ROOT, O_RDONLY | O_DIRECTORY | O_CLOEXEC));
     ASSERT_GE(sessionFd, 0);
+    ASSERT_GE(rootFd, 0);
     auto mock = SwapfsSyscallMock::GetMock();
     SwapfsSyscallMock::EnableMock();
     EXPECT_CALL(*mock, Flock(_, LOCK_EX | LOCK_NB))
@@ -443,7 +455,16 @@ HWTEST_F(SwapfsSessionCleanerTest, Swapfs_HandlesDirectLockAndUnlinkFailures_000
     CreateFile(regular);
     EXPECT_CALL(*mock, Unlink(StrEq(regular.c_str())))
         .WillOnce(SetErrnoAndReturn(EACCES, -1));
-    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(regular),
+    EXPECT_EQ(SwapfsSessionCleaner::RemoveSessionTree(
+        std::string(TEST_SWAP_ROOT) + "/../swapfs/unlink-failure", TEST_SWAP_ROOT),
         SWAPFS_E_PATH_UNAVAILABLE);
+    EXPECT_CALL(*mock, UnlinkAt(_, StrEq("unlinkat-file"), 0))
+        .WillOnce(SetErrnoAndReturn(EACCES, -1));
+    EXPECT_FALSE(SwapfsSessionCleaner::RemoveEntryAt(rootFd, "unlinkat-file", 0));
+    EXPECT_CALL(*mock, UnlinkAt(_, StrEq(".swapfs-session"), 0))
+        .WillOnce(SetErrnoAndReturn(ENOENT, -1));
+    EXPECT_CALL(*mock, UnlinkAt(_, StrEq("unlinkat-dir"), AT_REMOVEDIR))
+        .WillOnce(SetErrnoAndReturn(EACCES, -1));
+    EXPECT_FALSE(SwapfsSessionCleaner::RemoveEntryAt(rootFd, "unlinkat-dir", 0));
 }
 } // namespace

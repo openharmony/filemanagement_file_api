@@ -66,6 +66,13 @@ public:
     int RemoveAllData();
 
 private:
+    struct SwapOutContext {
+        uint64_t keyId = 0;
+        std::string tmpPath;
+        std::string swapPath;
+        bool useDirectIo = false;
+    };
+
     void EndOperation();
     class ActiveOperationGuard final {
     public:
@@ -87,13 +94,12 @@ private:
     int CreateSessionLocked(int rootFd);
     void CloseSessionLock();
     void RemoveSessionDir();
-    int PrepareForSwapOut(const OH_SwapfsSwapOutRequest *request, uint64_t &newKey,
-        std::string &tmpPath, std::string &swapPath, bool &useDirectIo);
+    int PrepareForSwapOut(const OH_SwapfsSwapOutRequest *request, SwapOutContext &context);
     void CommitSwapOutEntry(const SwapKeyEntry &entry, uint64_t *keyId);
     int PrepareForSwapIn(bool &useDirectIo);
     int LookupKeyForSwapIn(uint64_t keyId, SwapKeyEntry &entry);
-    int ExecuteSwapInRead(
-        const SwapKeyEntry &entry, void *buffer, size_t readIoSize, bool useDirectIo);
+    int ExecuteSwapInRead(const SwapKeyEntry &entry, void *buffer, size_t readIoSize,
+        bool useDirectIo);
     void FinishSwapIn(uint64_t keyId);
     int PrepareRemoveEntry(uint64_t keyId, SwapKeyEntry &entry);
     void FinalizeRemoveEntry(const SwapKeyEntry &entry, bool removed);

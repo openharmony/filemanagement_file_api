@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "swapfs_err_mapper.h"
 #include "swapfs_io_engine.h"
-
-#include "filemgmt_libhilog.h"
 
 #include <cerrno>
 #include <cstdint>
+
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "filemgmt_libhilog.h"
+#include "swapfs_err_mapper.h"
 #include "swapfs_manager.h"
 
 #ifndef O_DIRECT
@@ -33,7 +33,6 @@
 namespace OHOS::FileManagement::Swapfs {
 namespace {
 constexpr mode_t SWAP_FILE_MODE = S_IRUSR | S_IWUSR;
-
 int WriteFull(int fd, const void *buffer, size_t size)
 {
     const char *cursor = static_cast<const char *>(buffer);
@@ -83,8 +82,15 @@ int ReadFull(int fd, void *buffer, size_t size, size_t offset)
 
 bool IsDioAligned(const void *buffer, size_t size)
 {
-    return buffer != nullptr && (reinterpret_cast<uintptr_t>(buffer) % DIO_ALIGNMENT) == 0 &&
+    return (reinterpret_cast<uintptr_t>(buffer) % DIO_ALIGNMENT) == 0 &&
         (size % DIO_ALIGNMENT) == 0;
+}
+
+int OpenSwapFileForRead(const std::string &path, uint32_t extraFlags)
+{
+    uint32_t flags = static_cast<uint32_t>(O_RDONLY) | static_cast<uint32_t>(O_CLOEXEC) |
+        static_cast<uint32_t>(O_NOFOLLOW) | extraFlags;
+    return open(path.c_str(), static_cast<int>(flags));
 }
 
 int SyncReadEngine::Read(
@@ -98,11 +104,11 @@ int SyncReadEngine::Read(
         HILOGW("[Swapfs] Read DIO alignment check failed");
         return SWAPFS_E_DIO_ALIGN;
     }
-    int flags = O_RDONLY | O_CLOEXEC;
+    uint32_t flags = 0;
     if (useDirectIo) {
-        flags |= O_DIRECT;
+        flags |= static_cast<uint32_t>(O_DIRECT);
     }
-    int fd = open(path.c_str(), flags);
+    int fd = OpenSwapFileForRead(path, flags);
     if (fd < 0) {
         HILOGE("[Swapfs] Read open failed, errno: %{public}d", errno);
         return MapErrno(errno, SwapfsErrContext::KEY_OPERATION);
@@ -119,11 +125,13 @@ int SyncWriteEngine::Write(
         HILOGW("[Swapfs] Write invalid params");
         return SWAPFS_E_INVAL;
     }
-    int flags = O_CREAT | O_CLOEXEC | O_TRUNC | O_WRONLY;
+    uint32_t flags = static_cast<uint32_t>(O_CREAT) | static_cast<uint32_t>(O_CLOEXEC) |
+        static_cast<uint32_t>(O_NOFOLLOW) | static_cast<uint32_t>(O_TRUNC) |
+        static_cast<uint32_t>(O_WRONLY);
     if (useDirectIo) {
-        flags |= O_DIRECT;
+        flags |= static_cast<uint32_t>(O_DIRECT);
     }
-    int fd = open(path.c_str(), flags, SWAP_FILE_MODE);
+    int fd = open(path.c_str(), static_cast<int>(flags), SWAP_FILE_MODE);
     if (fd < 0) {
         HILOGE("[Swapfs] Write open failed, errno: %{public}d", errno);
         return MapErrno(errno, SwapfsErrContext::KEY_OPERATION);

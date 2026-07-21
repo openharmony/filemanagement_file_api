@@ -30,6 +30,7 @@ public:
     MOCK_METHOD(ssize_t, Pread, (int fd, void *buffer, size_t size, off_t offset));
     MOCK_METHOD(int, Fsync, (int fd));
     MOCK_METHOD(int, Unlink, (const char *path));
+    MOCK_METHOD(int, UnlinkAt, (int dirFd, const char *path, int flags));
     MOCK_METHOD(int, Rename, (const char *oldpath, const char *newpath));
     MOCK_METHOD(int, RenameAt,
         (int oldDirFd, const char *oldPath, int newDirFd, const char *newPath));
