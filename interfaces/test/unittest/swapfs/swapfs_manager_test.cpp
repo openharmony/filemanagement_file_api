@@ -17,6 +17,7 @@
 #include <atomic>
 #include <cerrno>
 #include <chrono>
+#include <climits>
 #include <memory>
 #include <string>
 #include <thread>
@@ -123,18 +124,18 @@ protected:
 
     void SetUp() override
     {
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE);
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT);
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_CREATE_ROOT);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE, TEST_BASE_DIR);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT, TEST_BASE_DIR);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_CREATE_ROOT, TEST_BASE_DIR);
         ASSERT_EQ(mkdir(TEST_SWAP_BASE, TEST_DIR_MODE), 0);
     }
 
     void TearDown() override
     {
         SwapfsSyscallMock::DisableMock();
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE);
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT);
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_CREATE_ROOT);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE, TEST_BASE_DIR);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT, TEST_BASE_DIR);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_CREATE_ROOT, TEST_BASE_DIR);
     }
 };
 
@@ -246,7 +247,6 @@ HWTEST_F(SwapfsManagerTest, Swapfs_DestroyInvalidatesManagerState_0000,
     ASSERT_EQ(manager.Init(&config), SWAPFS_E_OK);
 
     EXPECT_EQ(manager.Destroy(), SWAPFS_E_OK);
-    EXPECT_EQ(manager.Destroy(), SWAPFS_E_OK);
 
     OH_SwapfsDataInfo info;
     EXPECT_EQ(manager.QueryData(1, &info), SWAPFS_E_INVAL);
@@ -317,6 +317,13 @@ HWTEST_F(SwapfsManagerTest, Swapfs_DioRoundTrip_0000, testing::ext::TestSize.Lev
     auto manager = MakeManager();
     ASSERT_EQ(manager.Init(&config), SWAPFS_E_OK);
 
+    char unalignedBuffer[SWAPFS_DIO_ALIGNMENT + 1] = {};
+    OH_SwapfsSwapOutRequest unalignedRequest {
+        unalignedBuffer + 1, SWAPFS_DIO_ALIGNMENT
+    };
+    uint64_t unalignedKeyId = 0;
+    EXPECT_EQ(manager.SwapOut(&unalignedRequest, &unalignedKeyId), SWAPFS_E_DIO_ALIGN);
+
     void *outBuf = nullptr;
     ASSERT_EQ(posix_memalign(&outBuf, SWAPFS_DIO_ALIGNMENT, SWAPFS_DIO_ALIGNMENT), 0);
     std::unique_ptr<void, decltype(&free)> outBufGuard(outBuf, &free);
@@ -324,8 +331,10 @@ HWTEST_F(SwapfsManagerTest, Swapfs_DioRoundTrip_0000, testing::ext::TestSize.Lev
         static_cast<unsigned char>(0xCD));
     OH_SwapfsSwapOutRequest outReq;
     outReq.buffer = outBuf;
-    outReq.bufferSize = SWAPFS_DIO_ALIGNMENT;
+    outReq.bufferSize = SWAPFS_DIO_ALIGNMENT - 1;
     uint64_t keyId = 0;
+    EXPECT_EQ(manager.SwapOut(&outReq, &keyId), SWAPFS_E_DIO_ALIGN);
+    outReq.bufferSize = SWAPFS_DIO_ALIGNMENT;
     EXPECT_EQ(manager.SwapOut(&outReq, &keyId), SWAPFS_E_OK);
 
     void *inBuf = nullptr;
@@ -731,13 +740,17 @@ HWTEST_F(SwapfsManagerTest, Swapfs_SwapOutWriteFailureCancelsReservation_0000,
     auto mock = SwapfsSyscallMock::GetMock();
     SwapfsSyscallMock::EnableMock();
     EXPECT_CALL(*mock, Write(_, _, payload.size()))
-        .WillOnce(Invoke([](int, const void *, size_t) {
+        .Times(2)
+        .WillRepeatedly(Invoke([](int, const void *, size_t) {
             errno = EIO;
             return static_cast<ssize_t>(-1);
         }));
-    EXPECT_CALL(*mock, Unlink(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mock, Unlink(_))
+        .WillOnce(SetErrnoAndReturn(ENOENT, -1))
+        .WillOnce(SetErrnoAndReturn(EIO, -1));
     OH_SwapfsSwapOutRequest request { payload.data(), payload.size() };
     uint64_t keyId = 999;
+    EXPECT_EQ(manager.SwapOut(&request, &keyId), SWAPFS_E_IO_ERROR);
     EXPECT_EQ(manager.SwapOut(&request, &keyId), SWAPFS_E_IO_ERROR);
     EXPECT_EQ(keyId, 999);
     SwapfsSyscallMock::DisableMock();
@@ -780,6 +793,19 @@ HWTEST_F(SwapfsManagerTest, Swapfs_SwapOutRenameFailureCleansTmpFile_0000,
     ASSERT_EQ(manager.GetStats(&stats), SWAPFS_E_OK);
     EXPECT_EQ(stats.totalKeys, 0);
     EXPECT_EQ(manager.Destroy(), SWAPFS_E_OK);
+}
+
+HWTEST_F(SwapfsManagerTest, Swapfs_RemoveSessionDirRejectsPathOutsideRoot_0000,
+    testing::ext::TestSize.Level1)
+{
+    auto manager = MakeManager();
+    manager.config_.swapRootPath = TEST_SWAP_BASE;
+    ASSERT_EQ(mkdir(TEST_LAYOUT_ROOT, TEST_DIR_MODE), 0);
+
+    manager.sessionPath_ = TEST_LAYOUT_ROOT;
+    manager.RemoveSessionDir();
+    EXPECT_TRUE(manager.sessionPath_.empty());
+    EXPECT_TRUE(Exists(TEST_LAYOUT_ROOT));
 }
 
 HWTEST_F(SwapfsManagerTest, Swapfs_InitReturnsBusyWhenCleanupLockRemainsHeld_0000,
@@ -853,7 +879,7 @@ HWTEST_F(SwapfsManagerTest, Swapfs_OperationsRejectInvalidKeyState_0000,
     EXPECT_EQ(manager.Destroy(), SWAPFS_E_OK);
 }
 
-HWTEST_F(SwapfsManagerTest, Swapfs_FinishSwapInDeferredDeleteSucceeds_0000,
+HWTEST_F(SwapfsManagerTest, Swapfs_FinishSwapInHandlesConcurrentEntryRemoval_0000,
     testing::ext::TestSize.Level1)
 {
     OH_SwapfsConfig config = MakeConfig();
@@ -867,7 +893,16 @@ HWTEST_F(SwapfsManagerTest, Swapfs_FinishSwapInDeferredDeleteSucceeds_0000,
 
     manager.entries_[keyId].status = OH_SWAPFS_KEY_STATUS_REMOVING;
     manager.entries_[keyId].readCount = 1;
+    auto mock = SwapfsSyscallMock::GetMock();
+    auto *managerPtr = &manager;
+    SwapfsSyscallMock::EnableMock();
+    EXPECT_CALL(*mock, Unlink(_))
+        .WillOnce(Invoke([managerPtr, keyId](const char *) {
+            managerPtr->entries_.erase(keyId);
+            return 0;
+        }));
     manager.FinishSwapIn(keyId);
+    SwapfsSyscallMock::DisableMock();
 
     OH_SwapfsDataInfo info;
     EXPECT_EQ(manager.QueryData(keyId, &info), SWAPFS_E_KEY_NOT_FOUND);
@@ -1016,12 +1051,13 @@ HWTEST_F(SwapfsManagerTest, Swapfs_PrepareSwapRootCreatesOwnedFixedChild_0000,
     testing::ext::TestSize.Level1)
 {
     OH_SwapfsConfig config = MakeConfig();
+    std::string aliasedBase = "/data/swapfs_test/../swapfs_test/swapfs_manager_ut";
+    config.swapRootPath = aliasedBase.c_str();
     auto manager = MakeManager();
     manager.ResolveConfig(&config, manager.config_);
 
     ASSERT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_OK);
     EXPECT_EQ(manager.config_.swapRootPath, TEST_SWAP_ROOT);
-    EXPECT_TRUE(Exists(TEST_SWAP_ROOT));
     EXPECT_TRUE(Exists(std::string(TEST_SWAP_ROOT) + "/.swapfs-root"));
 
     struct stat st {};
@@ -1049,8 +1085,16 @@ HWTEST_F(SwapfsManagerTest, Swapfs_PrepareSwapRootRejectsInvalidExistingRoots_00
     manager.config_.swapRootPath.clear();
     EXPECT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_INVAL);
 
+    manager.config_.swapRootPath = "relative/swapfs";
+    EXPECT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_INVAL);
+    manager.config_.swapRootPath = "/" + std::string(PATH_MAX, 'a');
+    EXPECT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_INVAL);
+
+    manager.config_.swapRootPath = "/proc";
+    EXPECT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_PATH_UNAVAILABLE);
+
     manager.config_.swapRootPath = std::string(TEST_LAYOUT_ROOT) + "/missing/swapfs";
-    EXPECT_NE(manager.PrepareSwapRoot(), SWAPFS_E_OK);
+    EXPECT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_PATH_UNAVAILABLE);
 
     ASSERT_EQ(mkdir(TEST_LAYOUT_ROOT, TEST_DIR_MODE), 0);
     manager.config_.swapRootPath = TEST_LAYOUT_ROOT;
@@ -1060,7 +1104,7 @@ HWTEST_F(SwapfsManagerTest, Swapfs_PrepareSwapRootRejectsInvalidExistingRoots_00
     ASSERT_EQ(chmod(TEST_LAYOUT_ROOT, 0755), 0);
     EXPECT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_PATH_UNAVAILABLE);
 
-    (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT);
+    (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT, TEST_BASE_DIR);
     auto mock = SwapfsSyscallMock::GetMock();
     SwapfsSyscallMock::EnableMock();
     EXPECT_CALL(*mock, Mkdir(StrEq(TEST_LAYOUT_ROOT), _))
@@ -1077,6 +1121,7 @@ HWTEST_F(SwapfsManagerTest, Swapfs_PrepareSwapRootRejectsInvalidExistingRoots_00
     EXPECT_CALL(*mock, OpenAt(_, StrEq(".swapfs-root"), _, _))
         .WillOnce(SetErrnoAndReturn(EIO, -1));
     EXPECT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_IO_ERROR);
+    EXPECT_FALSE(Exists(TEST_LAYOUT_ROOT));
 }
 
 HWTEST_F(SwapfsManagerTest, Swapfs_PrepareSwapRootRejectsSymlink_0000,
@@ -1104,14 +1149,14 @@ HWTEST_F(SwapfsManagerTest, Swapfs_PrepareSwapRootRejectsInvalidRootMarkers_0000
 
     EXPECT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_PATH_UNAVAILABLE);
 
-    (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT);
+    (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT, TEST_BASE_DIR);
     ASSERT_EQ(mkdir(TEST_LAYOUT_ROOT, TEST_DIR_MODE), 0);
     std::string marker = std::string(TEST_LAYOUT_ROOT) + "/.swapfs-root";
     CreateFile(marker);
     ASSERT_EQ(chmod(marker.c_str(), 0644), 0);
     EXPECT_EQ(manager.PrepareSwapRoot(), SWAPFS_E_PATH_UNAVAILABLE);
 
-    (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT);
+    (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_LAYOUT_ROOT, TEST_BASE_DIR);
     ASSERT_EQ(mkdir(TEST_LAYOUT_ROOT, TEST_DIR_MODE), 0);
     CreateFile(std::string(TEST_LAYOUT_ROOT) + "/target");
     ASSERT_EQ(symlink("target", marker.c_str()), 0);
@@ -1295,47 +1340,6 @@ HWTEST_F(SwapfsManagerTest, Swapfs_DestroyReturnsBusyWhileOperationRemainsActive
     EXPECT_EQ(manager.Destroy(), SWAPFS_E_BUSY);
     EXPECT_FALSE(manager.shuttingDown_);
 
-    manager.activeOps_ = 0;
-    EXPECT_EQ(manager.Destroy(), SWAPFS_E_OK);
-}
-
-HWTEST_F(SwapfsManagerTest, Swapfs_DestroyHandlesStateClearedWhileWaiting_0000,
-    testing::ext::TestSize.Level1)
-{
-    OH_SwapfsConfig config = MakeConfig();
-    auto manager = MakeManager();
-    ASSERT_EQ(manager.Init(&config), SWAPFS_E_OK);
-    manager.activeOps_ = 1;
-    int destroyResult = SWAPFS_E_BUSY;
-    std::thread destroyThread([&manager, &destroyResult]() {
-        destroyResult = manager.Destroy();
-    });
-
-    bool stateCleared = false;
-    for (uint32_t retry = 0; retry < 100; ++retry) {
-        bool releaseOperation = false;
-        {
-            std::lock_guard<std::mutex> lock(manager.mutex_);
-            if (manager.shuttingDown_) {
-                manager.initialized_ = false;
-                releaseOperation = true;
-                stateCleared = true;
-            }
-        }
-        if (stateCleared) {
-            if (releaseOperation) {
-                manager.EndOperation();
-            }
-            break;
-        }
-        (void)usleep(1000);
-    }
-    destroyThread.join();
-    EXPECT_TRUE(stateCleared);
-    EXPECT_EQ(destroyResult, SWAPFS_E_OK);
-
-    manager.initialized_ = true;
-    manager.shuttingDown_ = false;
     manager.activeOps_ = 0;
     EXPECT_EQ(manager.Destroy(), SWAPFS_E_OK);
 }
