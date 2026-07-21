@@ -70,7 +70,8 @@ static void CreateRandomFile(const char *fileName, size_t fileSize)
 
 static uint64_t PrintDataSizeReturnWrong(const void *data, uint64_t size, void *userData)
 {
-    printf("Data ptr: %p, data size: %llu\n", data, size);
+    (void)size;
+    printf("Data ptr: %p\n", data);
     return static_cast<uint64_t>(-1);
 }
 

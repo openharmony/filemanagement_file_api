@@ -265,7 +265,7 @@ static int TestCompress(const char *inFileName, const char *outFileName, uint32_
     crc = crc32(0, data, dataLen);
     outFile = fopen(outFileName, "wb");
     if (outFile == nullptr) {
-        fclose(inFile);
+        (void)fclose(inFile);
         return ZLIB_ERROR;
     }
 
@@ -274,26 +274,30 @@ static int TestCompress(const char *inFileName, const char *outFileName, uint32_
     compr = static_cast<Bytef*>(malloc(comprLen * sizeof(Bytef)));
     if (compr == nullptr) {
         free(data);
-        fclose(inFile);
-        fclose(outFile);
+        (void)fclose(inFile);
+        (void)fclose(outFile);
         return ZLIB_ERROR;
     }
 
     if (TestCompressBase(compr, &comprLen, static_cast<const Bytef*>(data), dataLen) != Z_OK) {
         free(data);
         free(compr);
-        fclose(inFile);
-        fclose(outFile);
+        (void)fclose(inFile);
+        (void)fclose(outFile);
         return ZLIB_ERROR;
     }
 
     if (fwrite(compr, 1, comprLen, outFile) != comprLen || ferror(outFile)) {
         free(data);
         free(compr);
-        fclose(inFile);
-        fclose(outFile);
+        (void)fclose(inFile);
+        (void)fclose(outFile);
         return ZLIB_ERROR;
     }
+    free(data);
+    free(compr);
+    (void)fclose(inFile);
+    (void)fclose(outFile);
     return ZLIB_OK;
 }
 
@@ -317,15 +321,15 @@ OH_Archive_ErrCode TestBufferReadDecompress(const char *inFileName, const char *
     (void)fread(data, dataLen, 1, inFile);
 
     Byte *uncompr = nullptr;
-    uLong uncomprLen = 1 << 30;
+    uint64_t uncomprLen = 1 << 30;
     uncompr = static_cast<Bytef*>(malloc(uncomprLen * sizeof(Bytef)));
     if (uncompr == nullptr) {
         free(data);
-        fclose(inFile);
+        (void)fclose(inFile);
         return OH_ARCHIVE_DEFLATE_ERROR;
     }
 
-    ret = OH_Archive_BufferRead(uncompr, (uint64_t *)&uncomprLen, static_cast<const Bytef*>(data), dataLen,
+    ret = OH_Archive_BufferRead(uncompr, &uncomprLen, static_cast<const Bytef*>(data), dataLen,
         OH_ARCHIVE_COMPRESS_DEFLATE);
     crc = crc32(0, uncompr, uncomprLen);
     free(data);
@@ -406,18 +410,18 @@ TEST(ArchiveReadTest, BufferReadDecompressOutBufInsuff)
     ASSERT_NE(nullptr, outFile);
 
     Byte *uncompr = nullptr;
-    uLong uncomprLen = 10; // insufficient outbuf
+    uint64_t uncomprLen = 10; // insufficient outbuf
     uncompr = static_cast<Bytef*>(malloc(dataLen * sizeof(Bytef)));
     ASSERT_NE(nullptr, uncompr);
 
-    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, (uint64_t *)&uncomprLen,
+    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, &uncomprLen,
         static_cast<const Bytef*>(data), dataLen, OH_ARCHIVE_COMPRESS_DEFLATE);
     EXPECT_EQ(OH_ARCHIVE_INSUFFICIENT_OUTBUF_ERROR, ret);
 
     free(data);
     free(uncompr);
-    fclose(inFile);
-    fclose(outFile);
+    (void)fclose(inFile);
+    (void)fclose(outFile);
 }
 
 TEST(ArchiveReadTest, BufferReadDecompressNotSupportMethod)
@@ -426,11 +430,11 @@ TEST(ArchiveReadTest, BufferReadDecompressNotSupportMethod)
     Byte *data = static_cast<Bytef*>(malloc(dataLen * sizeof(Bytef)));
     ASSERT_NE(nullptr, data);
 
-    uLong uncomprLen = 10;
+    uint64_t uncomprLen = 10;
     Byte *uncompr = static_cast<Bytef*>(malloc(uncomprLen * sizeof(Bytef)));
     ASSERT_NE(nullptr, uncompr);
 
-    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, (uint64_t *)&uncomprLen,
+    OH_Archive_ErrCode ret = OH_Archive_BufferRead(uncompr, &uncomprLen,
         static_cast<const Bytef*>(data), dataLen, static_cast<OH_Archive_CompressMethod>(7));
     EXPECT_EQ(OH_ARCHIVE_PARAM_ERROR, ret);
 
@@ -443,7 +447,7 @@ uint64_t ReaderHandler(const void *data, uint64_t size, void* userData)
     const char *outFileName = "/data/test/stream_decompress";
     FILE *outFile = fopen(outFileName, "ab");
     if (outFile == nullptr) {
-        fclose(outFile);
+        (void)fclose(outFile);
         return 0;
     }
 
@@ -466,7 +470,7 @@ TEST(ArchiveReadTest, StreamReadDecompressNormalCase1)
     ASSERT_NE(nullptr, inFile);
 
     fseek(inFile, 0, SEEK_END);
-    uLong dataLen = ftell(inFile);
+    uint64_t dataLen = ftell(inFile);
     uint8_t *data = static_cast<uint8_t *>(malloc(dataLen * sizeof(uint8_t)));
     ASSERT_NE(nullptr, data);
     rewind(inFile);
@@ -493,7 +497,7 @@ TEST(ArchiveReadTest, StreamReadDecompressNormalCase1)
 
     OH_Archive_StreamRead_Destroy(ctx);
 
-    fclose(inFile);
+    (void)fclose(inFile);
     free(data);
 }
 
@@ -508,7 +512,7 @@ TEST(ArchiveReadTest, StreamReadDecompressCancel)
     ASSERT_NE(nullptr, inFile);
 
     fseek(inFile, 0, SEEK_END);
-    uLong dataLen = ftell(inFile);
+    uint64_t dataLen = ftell(inFile);
     uint8_t *data = (uint8_t *)malloc(dataLen * sizeof(uint8_t));
     ASSERT_NE(nullptr, data);
     rewind(inFile);
@@ -536,7 +540,7 @@ TEST(ArchiveReadTest, StreamReadDecompressCancel)
 
     OH_Archive_StreamRead_Destroy(ctx);
 
-    fclose(inFile);
+    (void)fclose(inFile);
     free(data);
 }
 
@@ -564,6 +568,6 @@ TEST(ArchiveReadTest, StreamReadDecompressNotSupportMethod)
     OH_Archive_StreamRead_Ctx ctx = OH_Archive_StreamRead_Create(config);
     EXPECT_EQ(nullptr, ctx);
 
-    fclose(inFile);
+    (void)fclose(inFile);
     free(data);
 }

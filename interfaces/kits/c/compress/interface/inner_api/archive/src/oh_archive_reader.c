@@ -228,28 +228,34 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_BufferRead(uint8_t *dstBuffer, uint64_
         return OH_ARCHIVE_DEFLATE_ERROR;
     }
 
+    uint64_t totalInProcessed = 0;
+    uint64_t totalOutProduced = 0;
     int ret = Z_OK;
-    uint64_t maxSrcLen = srcSize;
-    uint64_t tempMaxDstLen = maxDstLen;
     do {
-        if (tempMaxDstLen == 0) {
+        uint64_t remainingDst = maxDstLen - totalOutProduced;
+        if (remainingDst == 0) {
             ret = inflateEnd(&stream);
             return OH_ARCHIVE_INSUFFICIENT_OUTBUF_ERROR;
         }
 
         if (stream.avail_out == 0) {
-            stream.avail_out = tempMaxDstLen > UINT_MAX ? UINT_MAX : tempMaxDstLen;
-            stream.next_out = (Bytef *)dstBuffer + stream.total_out;
+            stream.avail_out = (uInt)(remainingDst > UINT_MAX ? UINT_MAX : remainingDst);
+            stream.next_out = (Bytef *)dstBuffer + totalOutProduced;
         }
 
         if (stream.avail_in == 0) {
-            stream.avail_in = maxSrcLen > UINT_MAX ? UINT_MAX : maxSrcLen;
-            stream.next_in = (z_const Bytef *)srcBuffer + stream.total_in;
+            uint64_t remainingSrc = srcSize - totalInProcessed;
+            stream.avail_in = (uInt)(remainingSrc > UINT_MAX ? UINT_MAX : remainingSrc);
+            stream.next_in = (z_const Bytef *)srcBuffer + totalInProcessed;
         }
-        
+
+        uInt availInBefore = stream.avail_in;
+        uInt availOutBefore = stream.avail_out;
         ret = inflate(&stream, Z_NO_FLUSH);
         if (ret == Z_STREAM_END) {
-            *dstSize = stream.total_out;
+            totalOutProduced += (uint64_t)(availOutBefore - stream.avail_out);
+            totalInProcessed += (uint64_t)(availInBefore - stream.avail_in);
+            *dstSize = totalOutProduced;
             ret = inflateEnd(&stream);
             if (ret != Z_OK) {
                 return OH_ARCHIVE_DEFLATE_ERROR;
@@ -262,16 +268,16 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_BufferRead(uint8_t *dstBuffer, uint64_
             return OH_ARCHIVE_DEFLATE_ERROR;
         }
 
-        maxSrcLen = srcSize - stream.total_in;
-        tempMaxDstLen = maxDstLen - stream.total_out;
-    } while (maxSrcLen > 0);
+        totalOutProduced += (uint64_t)(availOutBefore - stream.avail_out);
+        totalInProcessed += (uint64_t)(availInBefore - stream.avail_in);
+    } while (totalInProcessed < srcSize);
 
     ret = inflateEnd(&stream);
     if (ret != Z_OK) {
         return OH_ARCHIVE_DEFLATE_ERROR;
     }
 
-    *dstSize = stream.total_out;
+    *dstSize = totalOutProduced;
     return OH_ARCHIVE_OK;
 }
 
@@ -312,6 +318,8 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_StreamRead_Start(OH_Archive_StreamRead
     ctx->readerHandler = outputHandler;
     ctx->readHandlerData = userData;
     ctx->crc = 0;
+    ctx->totalInSize = 0;
+    ctx->totalOutSize = 0;
     atomic_store(&ctx->decompressCancel, 0);
 
     if (inflateReset2(&(ctx->zlibStream), -MAX_WBITS) != Z_OK) {
@@ -343,6 +351,7 @@ static OH_Archive_ErrCode StreamReadHandle(OH_Archive_StreamRead_Ctx ctx)
     if (ctx->checksum == OH_ARCHIVE_CRC32) {
         ctx->crc = crc32(ctx->crc, ctx->outBuf, outBufLen);
     }
+    ctx->totalOutSize += outBufLen;
     return OH_ARCHIVE_OK;
 }
 
@@ -356,6 +365,7 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_StreamRead_Update(OH_Archive_StreamRea
     z_stream *strm = &(ctx->zlibStream);
     strm->next_in = (z_const Bytef *)data;
     strm->avail_in = size;
+    ctx->totalInSize += size;
     int ret = 0;
 
     do {
@@ -395,9 +405,8 @@ ARCHIVE_API OH_Archive_ErrCode OH_Archive_StreamRead_End(OH_Archive_StreamRead_C
     }
 
     if (streamInfo != NULL) {
-        z_stream *strm = &(ctx->zlibStream);
-        streamInfo->totalInSize = strm->total_in;
-        streamInfo->totalOutSize = strm->total_out;
+        streamInfo->totalInSize = ctx->totalInSize;
+        streamInfo->totalOutSize = ctx->totalOutSize;
         streamInfo->checksum = ctx->crc;
     }
 

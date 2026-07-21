@@ -96,8 +96,6 @@ int StreamWriteUint64(struct Stream *stream, uint64_t value);
 
 int StreamGetValueInt64(struct Stream *stream, int32_t prop, int64_t *value);
 
-int StreamCopyStream(struct Stream *targetStream, struct Stream *sourceStream, uint64_t size);
-
 #ifdef __cplusplus
 }
 #endif
