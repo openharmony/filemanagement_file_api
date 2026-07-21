@@ -17,6 +17,8 @@
 
 #include <cerrno>
 #include <chrono>
+#include <climits>
+#include <cstdlib>
 #include <thread>
 #include <utility>
 
@@ -38,6 +40,61 @@ constexpr const char *SESSION_MARKER = ".swapfs-session";
 constexpr uint32_t CLEANUP_LOCK_RETRY_COUNT = 10;
 constexpr uint32_t CLEANUP_LOCK_RETRY_INTERVAL_MS = 10;
 constexpr uint32_t MAX_CLEANUP_DEPTH = 16;
+constexpr size_t MAX_PATH_LENGTH = PATH_MAX - 1;
+
+bool IsAbsolutePath(const std::string &path)
+{
+    return !path.empty() && path.front() == '/' && path.size() <= MAX_PATH_LENGTH;
+}
+
+bool IsUnderRoot(const std::string &canonicalPath, const char *root)
+{
+    std::string canonicalRoot(root);
+    size_t rootEnd = canonicalRoot.find_last_not_of('/');
+    if (rootEnd == std::string::npos) {
+        return false;
+    }
+    canonicalRoot.resize(rootEnd + 1);
+    if (canonicalPath == canonicalRoot) {
+        return true;
+    }
+    canonicalRoot += '/';
+    return canonicalPath.compare(0, canonicalRoot.size(), canonicalRoot) == 0;
+}
+
+bool ResolveRemovalPath(const std::string &path, const std::string &safeRoot,
+    std::string &canonicalPath)
+{
+    if (!IsAbsolutePath(path) || !IsAbsolutePath(safeRoot)) {
+        errno = EINVAL;
+        return false;
+    }
+    size_t slash = path.rfind('/');
+    if (path.back() == '/') {
+        errno = EINVAL;
+        return false;
+    }
+    std::string name = path.substr(slash + 1);
+    if (name == "." || name == "..") {
+        errno = EINVAL;
+        return false;
+    }
+    char realRoot[PATH_MAX] = {};
+    if (realpath(safeRoot.c_str(), realRoot) == nullptr) {
+        return false;
+    }
+    std::string parent = slash == 0 ? "/" : path.substr(0, slash);
+    char realParent[PATH_MAX] = {};
+    if (realpath(parent.c_str(), realParent) == nullptr) {
+        return false;
+    }
+    if (!IsUnderRoot(realParent, realRoot)) {
+        errno = EACCES;
+        return false;
+    }
+    canonicalPath = std::string(realParent) + "/" + name;
+    return true;
+}
 
 bool StartsWith(const std::string &value, const char *prefix)
 {
@@ -114,40 +171,36 @@ SwapfsSessionCleaner::SessionState SwapfsSessionCleaner::GetSessionStateAt(
 bool SwapfsSessionCleaner::RemoveEntryAt(int parentFd, const char *name, uint32_t depth)
 {
     if (depth > MAX_CLEANUP_DEPTH) {
-        HILOGW("[Swapfs] RemoveEntryAt depth exceeded, name: %{public}s", name);
+        HILOGW("[Swapfs] RemoveEntryAt depth exceeded");
         return false;
     }
     struct stat st {};
     if (fstatat(parentFd, name, &st, AT_SYMLINK_NOFOLLOW) != 0) {
-        HILOGW("[Swapfs] RemoveEntryAt stat failed, name: %{public}s, errno: %{public}d",
-            name, errno);
+        HILOGW("[Swapfs] RemoveEntryAt stat failed, errno: %{public}d", errno);
         return false;
     }
     if (!S_ISDIR(st.st_mode)) {
         if (unlinkat(parentFd, name, 0) == 0) {
             return true;
         }
-        HILOGW("[Swapfs] RemoveEntryAt unlink failed, name: %{public}s, errno: %{public}d",
-            name, errno);
+        HILOGW("[Swapfs] RemoveEntryAt unlink failed, errno: %{public}d", errno);
         return false;
     }
     int flags = O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW;
     OHOS::UniqueFd childFd(openat(parentFd, name, flags));
     if (childFd < 0) {
-        HILOGW("[Swapfs] RemoveEntryAt open dir failed, name: %{public}s, errno: %{public}d",
-            name, errno);
+        HILOGW("[Swapfs] RemoveEntryAt open dir failed, errno: %{public}d", errno);
         return false;
     }
     if (!RemoveTreeContentsAt(childFd, depth)) {
-        HILOGW("[Swapfs] RemoveEntryAt remove child failed, name: %{public}s", name);
+        HILOGW("[Swapfs] RemoveEntryAt remove child failed");
         return false;
     }
     childFd = OHOS::UniqueFd();
     if (unlinkat(parentFd, name, AT_REMOVEDIR) == 0) {
         return true;
     }
-    HILOGW("[Swapfs] RemoveEntryAt rmdir failed, name: %{public}s, errno: %{public}d",
-        name, errno);
+    HILOGW("[Swapfs] RemoveEntryAt rmdir failed, errno: %{public}d", errno);
     return false;
 }
 
@@ -198,22 +251,27 @@ bool SwapfsSessionCleaner::RemoveTreeContentsAt(int dirFd, uint32_t depth)
     return removed;
 }
 
-int SwapfsSessionCleaner::RemoveSessionTree(const std::string &path)
+int SwapfsSessionCleaner::RemoveSessionTree(const std::string &path, const std::string &safeRoot)
 {
+    std::string canonicalPath;
+    if (!ResolveRemovalPath(path, safeRoot, canonicalPath)) {
+        HILOGE("[Swapfs] RemoveSessionTree path check failed, errno: %{public}d", errno);
+        return SWAPFS_E_PATH_UNAVAILABLE;
+    }
     struct stat st {};
-    if (lstat(path.c_str(), &st) != 0) {
+    if (lstat(canonicalPath.c_str(), &st) != 0) {
         return errno == ENOENT ? SWAPFS_E_OK : SWAPFS_E_PATH_UNAVAILABLE;
     }
     if (!S_ISDIR(st.st_mode)) {
-        return unlink(path.c_str()) == 0 ? SWAPFS_E_OK : SWAPFS_E_PATH_UNAVAILABLE;
+        return unlink(canonicalPath.c_str()) == 0 ? SWAPFS_E_OK : SWAPFS_E_PATH_UNAVAILABLE;
     }
     int flags = O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW;
-    OHOS::UniqueFd dirFd(open(path.c_str(), flags));
+    OHOS::UniqueFd dirFd(open(canonicalPath.c_str(), flags));
     if (dirFd < 0 || !RemoveTreeContentsAt(dirFd, 0)) {
         return SWAPFS_E_PATH_UNAVAILABLE;
     }
     dirFd = OHOS::UniqueFd();
-    return rmdir(path.c_str()) == 0 ? SWAPFS_E_OK : SWAPFS_E_PATH_UNAVAILABLE;
+    return rmdir(canonicalPath.c_str()) == 0 ? SWAPFS_E_OK : SWAPFS_E_PATH_UNAVAILABLE;
 }
 
 int SwapfsSessionCleaner::RemoveSessionAt(int rootFd, const std::string &name)
