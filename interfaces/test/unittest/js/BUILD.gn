@@ -277,6 +277,7 @@ ohos_unittest("ani_file_fs_test") {
 
   sources = [
     "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
+    "${file_api_path}/interfaces/test/unittest/js/mod_fs/common/fs_utils_ext_test.cpp",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/common/ut_fs_utils.cpp",
     "${file_api_path}/interfaces/test/unittest/js/mod_fs/fdtag/fdtag_func_test.cpp",
     "mod_fs/class_atomicfile/fs_atomicfile_test.cpp",
@@ -476,6 +477,49 @@ ohos_unittest("ani_file_statvfs_test") {
     "ability_runtime:ability_manager",
     "c_utils:utils",
     "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "libuv:uv",
+  ]
+
+  defines = [ "private=public" ]
+
+  use_exceptions = true
+}
+
+ani_file_statfs_core = [
+  "${src_path}/common/file_api_debug.cpp",
+  "${src_path}/common/file_fs_trace.cpp",
+  "${src_path}/common/file_helper/fd_guard.cpp",
+  "${src_path}/mod_fs/fs_utils.cpp",
+]
+
+ohos_unittest("ani_file_statfs_test") {
+  module_out_path = "file_api/file_api"
+
+  resource_config_file = "../resource/ohos_test.xml"
+
+  sources = [
+    "${file_api_path}/interfaces/test/unittest/common_utils/ut_file_utils.cpp",
+    "mod_statfs/statfs_core_test.cpp",
+  ]
+  sources += ani_file_statfs_core
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/js/src/common",
+    "${file_api_path}/interfaces/kits/js/src/common/file_helper",
+    "${file_api_path}/interfaces/kits/js/src/mod_fs",
+    "${file_api_path}/interfaces/test/unittest/common_utils",
+  ]
+
+  deps = [
+    "${utils_path}/filemgmt_libfs:filemgmt_libfs",
+    "${utils_path}/filemgmt_libhilog:filemgmt_libhilog",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "ipc:ipc_single",
     "googletest:gtest_main",
     "hilog:libhilog",
     "libuv:uv",
