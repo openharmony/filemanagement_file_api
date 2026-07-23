@@ -79,5 +79,6 @@ group("compress_test") {
     ":zip_writer_test",
     ":archive_reader_test",
     ":archive_reader_open_source_test",
+    ":zip_writer_open_source_test",
   ]
 }

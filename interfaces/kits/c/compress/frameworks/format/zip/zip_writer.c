@@ -637,7 +637,7 @@ static uint32_t GetFileExternalAttributes(const char *path)
     uint32_t msdosAttribute;
     struct stat pathStat;
     memset_s(&pathStat, sizeof(pathStat), 0, sizeof(pathStat));
-    if (stat(path, &pathStat) == -1) {
+    if (lstat(path, &pathStat) == -1) {
         attribute = 0;
     } else {
         attribute = pathStat.st_mode;
