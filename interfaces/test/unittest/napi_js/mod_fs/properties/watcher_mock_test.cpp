@@ -103,6 +103,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_001, testing::ext::TestS
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_001";
@@ -138,6 +139,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_002, testing::ext::TestS
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_002";
@@ -174,6 +176,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_003, testing::ext::TestS
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_003";
@@ -210,6 +213,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_004, testing::ext::TestS
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_004";
@@ -246,6 +250,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_005, testing::ext::TestS
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_005";
@@ -283,6 +288,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_006, testing::ext::TestS
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_006";
@@ -321,6 +327,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_007, testing::ext::TestS
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_007";
@@ -361,6 +368,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_008, testing::ext::TestS
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_008";
@@ -399,6 +407,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_009, testing::ext::TestS
     EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nVal));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void*>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -480,6 +489,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_011, testing::ext::TestS
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_011";
@@ -519,6 +529,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_012, testing::ext::TestS
     EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nVal));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void*>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -562,6 +573,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_013, testing::ext::TestS
     EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nVal));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void*>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 
     auto res = Watcher::CreateWatcher(env, info);
 

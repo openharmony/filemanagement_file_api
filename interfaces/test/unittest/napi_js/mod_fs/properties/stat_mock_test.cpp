@@ -96,11 +96,13 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
     EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto stat = Stat::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001);
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "StatMockTest-end StatURI_0001";
@@ -138,10 +140,12 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_002, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
     EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto stat = Stat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted. Stat failed, path is: /d**a/st****e/e**/b**e/f***s/t**t.t**");
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "StatMockTest-end StatMockTest_Sync_002";
@@ -179,10 +183,12 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_003, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
     EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto stat = Stat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted. Stat failed, path is: datashare://co***********************i/d**a/st****e/e**/b**e/f***s/t**t.t**");
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "StatMockTest-end StatMockTest_Sync_003";

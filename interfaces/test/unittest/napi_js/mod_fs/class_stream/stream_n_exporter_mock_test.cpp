@@ -86,6 +86,7 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_Constructor_001, testi
     auto res = StreamNExporter::Constructor(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-end StreamNExporterMockTest_Constructor_001";
@@ -93,7 +94,7 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_Constructor_001, testi
 
 /**
  * @tc.name: StreamNExporterMockTest_CloseSync_001
- * @tc.desc: Test function of StreamNExporter::CloseSync interface for SUCCESS.
+ * @tc.desc: Test function of StreamNExporter::CloseSync interface for SUCCESS when GetEntityOf succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -128,6 +129,8 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_001, testing
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(streamEntity.get())), testing::Return(napi_ok)));
     
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = StreamNExporter::CloseSync(env, mInfo);
 
@@ -174,6 +177,7 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_002, testing
     auto res = StreamNExporter::CloseSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-end StreamNExporterMockTest_CloseSync_002";
@@ -181,8 +185,7 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_002, testing
 
 /**
  * @tc.name: StreamNExporterMockTest_CloseSync_003
- * @tc.desc: Test function of StreamNExporter::CloseSync interface for FAILURE
- * when RemoveEntityOfFinal returns nullptr.
+ * @tc.desc: Test function of StreamNExporter::CloseSync interface when RemoveEntityOfFinal returns nullptr (result discarded).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -214,6 +217,8 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_003, testing
     // Mock RemoveEntityOfFinal to return nullptr
     EXPECT_CALL(*libnMock, napi_remove_wrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(nullptr), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = StreamNExporter::CloseSync(env, mInfo);
 
@@ -243,12 +248,12 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_004, testing
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>()))
         .WillOnce(testing::Return(false));
 
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_))
-        .Times(1);
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = StreamNExporter::CloseSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-end StreamNExporterMockTest_CloseSync_004";
@@ -256,7 +261,7 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_004, testing
 
 /**
  * @tc.name: StreamNExporterMockTest_FlushSync_001
- * @tc.desc: Test function of StreamNExporter::FlushSync interface for SUCCESS.
+ * @tc.desc: Test function of StreamNExporter::FlushSync interface for SUCCESS when fflush succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -290,6 +295,8 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_001, testing
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(streamEntity.get())), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = StreamNExporter::FlushSync(env, mInfo);
 
@@ -339,6 +346,7 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_002, testing
     auto res = StreamNExporter::FlushSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-end StreamNExporterMockTest_FlushSync_002";
@@ -369,11 +377,12 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_003, testing
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(nv));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(streamEntity.get())), testing::Return(napi_ok)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = StreamNExporter::FlushSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-end StreamNExporterMockTest_FlushSync_003";
@@ -399,12 +408,12 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_004, testing
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>()))
         .WillOnce(testing::Return(false));
 
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_))
-        .Times(1);
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = StreamNExporter::FlushSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-end StreamNExporterMockTest_FlushSync_004";
@@ -433,12 +442,12 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_005, testing
         .WillOnce(testing::Return(nv));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(nullptr), testing::Return(napi_ok)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_))
-        .Times(1);
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = StreamNExporter::FlushSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-end StreamNExporterMockTest_FlushSync_005";

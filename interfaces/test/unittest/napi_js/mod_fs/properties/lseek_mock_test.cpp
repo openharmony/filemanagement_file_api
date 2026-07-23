@@ -77,6 +77,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_001";
@@ -84,7 +85,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: LseekMockTest_Sync_002
- * @tc.desc: Test function of Lseek::Sync interface for FAILURE when ToInt32 fails.
+ * @tc.desc: Test function of Lseek::Sync interface for FAILURE when fd is not a valid integer.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -103,6 +104,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_002, testing::ext::TestSize.Level1)
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_002";
@@ -110,7 +112,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: LseekMockTest_Sync_003
- * @tc.desc: Test function of Lseek::Sync interface for FAILURE when ToInt64 fails.
+ * @tc.desc: Test function of Lseek::Sync interface for FAILURE when offset is not a valid integer.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -131,6 +133,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_003, testing::ext::TestSize.Level1)
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_003";
@@ -157,6 +160,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_004, testing::ext::TestSize.Level1)
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_004";
@@ -188,6 +192,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_005, testing::ext::TestSize.Level1)
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_005";
@@ -195,7 +200,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_005, testing::ext::TestSize.Level1)
 
 /**
 * @tc.name: LseekMockTest_Sync_006
-* @tc.desc: Test function of Lseek::Sync interface for FAILURE when whence ToInt32 fails.
+ * @tc.desc: Test function of Lseek::Sync interface for FAILURE when whence is not a valid integer.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
@@ -219,6 +224,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_006, testing::ext::TestSize.Level1)
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "LseekMockTest-end LseekMockTest_Sync_006";

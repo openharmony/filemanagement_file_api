@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,8 @@ void RandomAccessFileNExporterMockTest::TearDown(void)
 
 /**
  * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_001
- * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for SUCCESS.
+ * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for SUCCESS
+ * when fdsan_close_with_tag succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -98,6 +99,8 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     EXPECT_CALL(*libnMock, napi_remove_wrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateUndefined(_)).WillOnce(Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
@@ -138,6 +141,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    libnMock->VerifyAndClearErr(13900039, "File descriptor in bad state");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_002";
@@ -169,6 +173,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_003";
@@ -195,6 +200,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_004";
@@ -203,7 +209,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 /**
  * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_005
  * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE
- * when GetThisVar fails.
+ * when GetThisVar returns nullptr.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -222,6 +228,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_005";
@@ -230,7 +237,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 /**
  * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_006
  * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE
- * when GetThisVar fails.
+ * when GetThisVar returns nullptr on second call.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -255,6 +262,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_006";
@@ -290,6 +298,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_007";
@@ -297,7 +306,8 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 
 /**
  * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_008
- * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for SUCCESS.
+ * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for SUCCESS
+ * when uv_fs_close succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -327,6 +337,8 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     EXPECT_CALL(*libnMock, napi_remove_wrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateUndefined(_)).WillOnce(Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
@@ -339,7 +351,8 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 
 /**
  * @tc.name: RandomAccessFileNExporterMockTest_CloseSync_009
- * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE.
+ * @tc.desc: Test function of RandomAccessFileNExporter::CloseSync interface for FAILURE
+ * when uv_fs_close fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -372,6 +385,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "RandomAccessFileNExporterMockTest-end RandomAccessFileNExporterMockTest_CloseSync_009";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,6 +161,8 @@ HWTEST_F(MovedirMockTest, MovedirMockTest_Sync_001, testing::ext::TestSize.Level
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(myMode));
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = MoveDir::Sync(env, info);
 
@@ -190,6 +192,7 @@ HWTEST_F(MovedirMockTest, MovedirMockTest_Sync_002, testing::ext::TestSize.Level
     auto res = MoveDir::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MovedirMockTest-end MovedirMockTest_Sync_002";
@@ -217,6 +220,7 @@ HWTEST_F(MovedirMockTest, MovedirMockTest_Sync_003, testing::ext::TestSize.Level
     auto res = MoveDir::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MovedirMockTest-end MovedirMockTest_Sync_003";

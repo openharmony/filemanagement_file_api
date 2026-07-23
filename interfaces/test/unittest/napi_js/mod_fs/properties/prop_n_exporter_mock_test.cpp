@@ -92,6 +92,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.L
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_UnlinkSync_001";
@@ -120,6 +121,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_002, TestSize.L
     auto res = PropNExporter::UnlinkSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_UnlinkSync_002";
@@ -155,6 +157,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_003, TestSize.L
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_UnlinkSync_003";
@@ -184,6 +187,8 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_004, TestSize.L
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(tp)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(1));
 
     auto res = PropNExporter::UnlinkSync(env, mInfo);
@@ -214,6 +219,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_001, testing::ext::TestSize.Leve
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_001";
@@ -242,6 +248,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_002, testing::ext::TestSize.Leve
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_002";
@@ -274,6 +281,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_003, testing::ext::TestSize.Leve
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_003";
@@ -310,6 +318,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_004, testing::ext::TestSize.Leve
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end AccessTest_Sync_004";
@@ -346,6 +355,8 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_005, testing::ext::TestSize.Leve
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isMode));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(isFlag));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     // UvAccess
     EXPECT_CALL(*uvFsMock, uv_fs_access(testing::_, testing::_, testing::_, testing::_, testing::_))
@@ -392,6 +403,8 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_006, testing::ext::TestSize.Leve
         .WillOnce(testing::Return(NARG_CNT::TWO));
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isMode));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     // UvAccess
     EXPECT_CALL(*uvFsMock, uv_fs_access(testing::_, testing::_, testing::_, testing::_, testing::_))
@@ -428,6 +441,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_001, TestSize.Lev
     auto res = PropNExporter::ReadSync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument. Read failed. Number of arguments unmatched.");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_001";
@@ -455,6 +469,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_002, TestSize.Lev
     auto res = PropNExporter::ReadSync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument. Read failed. Invalid fd.");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_002";
@@ -482,6 +497,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_003, TestSize.Lev
     auto res = PropNExporter::ReadSync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument. Read failed. Invalid fd.");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_003";
@@ -511,6 +527,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_004, TestSize.Lev
     auto res = PropNExporter::ReadSync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument. Read failed. Invalid arraybuffer or options.");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_004";
@@ -547,6 +564,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_005, TestSize.Lev
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "PropNExporterMockTest-end PropNExporterMockTest_ReadSync_005";
@@ -578,6 +596,8 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_006, TestSize.Lev
     EXPECT_CALL(*libnMock, HasProp(std::string("length"))).WillOnce(Return(false));
     EXPECT_CALL(*libnMock, HasProp(std::string("offset"))).WillOnce(Return(false));
     EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(100));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*libnMock, CreateInt64(_, _)).WillOnce(Return(NVal {env, val}));
 
     auto res = PropNExporter::ReadSync(env, info);

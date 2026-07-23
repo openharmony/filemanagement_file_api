@@ -67,7 +67,7 @@ void DupMockTest::TearDown(void)
 
 /**
  * @tc.name: DupMockTest_Sync_001
- * @tc.desc: Test function of Dup::Sync interface for FAILED with ARGS ERROR.
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when InitArgs fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -84,6 +84,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     auto res = Dup::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_001";
@@ -91,7 +92,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: DupMockTest_Sync_002
- * @tc.desc: Test function of Dup::Sync interface for FAILED with ToInt32 ERROR.
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when fd is not a valid integer.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -110,6 +111,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_002, testing::ext::TestSize.Level1)
 
     auto res = Dup::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_002";
@@ -117,7 +119,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: DupMockTest_Sync_003
- * @tc.desc: Test function of Dup::Sync interface for FAILED with dup ERROR.
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when dup fails on invalid fd.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -136,6 +138,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_003, testing::ext::TestSize.Level1)
 
     auto res = Dup::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900008, "Bad file descriptor");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_003";
@@ -143,7 +146,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_003, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: DupMockTest_Sync_004
- * @tc.desc: Test function of Dup::Sync interface for FAILED with uv_fs_readlink ERROR.
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when uv_fs_readlink fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -170,6 +173,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_004, testing::ext::TestSize.Level1)
     close(srcFd);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvFsMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_TRUE(filesystem::remove(filePath));
     EXPECT_EQ(res, nullptr);
 
@@ -178,7 +182,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_004, testing::ext::TestSize.Level1)
 
 /**
 * @tc.name: DupMockTest_Sync_005
-* @tc.desc: Test function of Dup::Sync interface for SUCCEED.
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when InstantiateClass fails.
 * @tc.size: MEDIUM
 * @tc.type: FUNC
 * @tc.level Level 1
@@ -210,6 +214,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_005, testing::ext::TestSize.Level1)
     close(srcFd);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvFsMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_TRUE(filesystem::remove(filePath));
     EXPECT_EQ(res, nullptr);
 
@@ -238,6 +243,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_006, testing::ext::TestSize.Level1)
     auto res = Dup::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_006";

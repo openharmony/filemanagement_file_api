@@ -82,6 +82,7 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_001, testing::ext::TestSize.Level1)
     auto res = Open::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument. Open failed, number of arguments unmatched.");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "OpenMockTest-end OpenMockTest_Sync_001";
@@ -111,6 +112,7 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_002, testing::ext::TestSize.Level1)
     auto res = Open::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument. Open failed, invalid path.");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "OpenMockTest-end OpenMockTest_Sync_002";
@@ -155,6 +157,7 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_003, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted. Open failed, path is: /d**a/t**t/Op******************3.t**");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "OpenMockTest-end OpenMockTest_Sync_003";
@@ -201,6 +204,7 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_004, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "OpenMockTest-end OpenMockTest_Sync_004";
@@ -244,6 +248,7 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_005, testing::ext::TestSize.Level1)
     auto res = Open::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument. Open failed, invalid open mode");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "OpenMockTest-end OpenMockTest_Sync_005";
@@ -290,6 +295,8 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_006, testing::ext::TestSize.Level1)
         .WillOnce(testing::Return(objFile));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = Open::Sync(env, info);
 
@@ -345,6 +352,8 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_007, testing::ext::TestSize.Level1)
         .WillOnce(testing::Return(objFile));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = Open::Sync(env, info);
 
@@ -399,6 +408,7 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_008, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "OpenMockTest-end OpenMockTest_Sync_008";
@@ -442,6 +452,7 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_009, testing::ext::TestSize.Level1)
     auto res = Open::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument. Open failed, invalid open mode");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "OpenMockTest-end OpenMockTest_Sync_009";
@@ -492,6 +503,8 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_010, testing::ext::TestSize.Level1)
         .WillOnce(testing::Return(objFile));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = Open::Sync(env, info);
 
@@ -540,6 +553,7 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_011, testing::ext::TestSize.Level1)
     auto res = Open::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument. Open failed, invalid open mode");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "OpenMockTest-end OpenMockTest_Sync_011";

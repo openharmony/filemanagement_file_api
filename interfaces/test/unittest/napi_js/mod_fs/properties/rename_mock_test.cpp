@@ -114,6 +114,7 @@ HWTEST_F(RenameMockTest, RenameMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "RenameMockTest-end RenameMockTest_Sync_001";
@@ -139,6 +140,7 @@ HWTEST_F(RenameMockTest, RenameMockTest_Sync_002, testing::ext::TestSize.Level1)
     auto res = Rename::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "RenameMockTest-end RenameMockTest_Sync_002";

@@ -92,12 +92,14 @@ HWTEST_F(FileMockTest, FileMockTest_GetPath_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
          testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
 
     auto result = FileNExporter::GetPath(env, info);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_GetPath_001";
@@ -119,10 +121,12 @@ HWTEST_F(FileMockTest, FileMockTest_GetPath_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto result = FileNExporter::GetPath(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_GetPath_002";
@@ -153,12 +157,14 @@ HWTEST_F(FileMockTest, FileMockTest_GetName_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
          testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
 
     auto result = FileNExporter::GetName(env, info);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_GetName_001";
@@ -180,10 +186,12 @@ HWTEST_F(FileMockTest, FileMockTest_GetName_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto result = FileNExporter::GetName(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_GetName_002";
@@ -214,12 +222,14 @@ HWTEST_F(FileMockTest, FileMockTest_GetParent_001, testing::ext::TestSize.Level1
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
          testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
 
     auto result = FileNExporter::GetParent(env, info);
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_GetParent_001";
@@ -241,10 +251,12 @@ HWTEST_F(FileMockTest, FileMockTest_GetParent_002, testing::ext::TestSize.Level1
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto result = FileNExporter::GetParent(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_GetParent_002";
@@ -277,6 +289,7 @@ HWTEST_F(FileMockTest, FileMockTest_TryLock_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
          testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
     EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
     auto result = FileNExporter::TryLock(env, info);
@@ -284,6 +297,7 @@ HWTEST_F(FileMockTest, FileMockTest_TryLock_001, testing::ext::TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fileMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_TryLock_001";
@@ -305,10 +319,12 @@ HWTEST_F(FileMockTest, FileMockTest_TryLock_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>(), _)).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto result = FileNExporter::TryLock(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_TryLock_002";
@@ -341,6 +357,7 @@ HWTEST_F(FileMockTest, FileMockTest_UnLock_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
          testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
     EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
     auto result = FileNExporter::UnLock(env, info);
@@ -348,6 +365,7 @@ HWTEST_F(FileMockTest, FileMockTest_UnLock_001, testing::ext::TestSize.Level1)
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fileMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_UnLock_001";
@@ -369,10 +387,12 @@ HWTEST_F(FileMockTest, FileMockTest_UnLock_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto result = FileNExporter::UnLock(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(result, nullptr);
 
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_UnLock_002";

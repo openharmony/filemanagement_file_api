@@ -89,6 +89,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_001, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_001";
@@ -122,6 +123,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_002, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_002";
@@ -152,6 +154,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_003, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_003";
@@ -183,6 +186,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_004, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_004";
@@ -216,6 +220,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_005, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_005";
@@ -258,6 +263,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_006, testing::ext::TestSize.Lev
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_006";
@@ -285,6 +291,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_007, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_007";
@@ -317,6 +324,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_008, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_008";
@@ -349,6 +357,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_009, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_009";
@@ -381,6 +390,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_010, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_010";
@@ -414,6 +424,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_011, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_011";
@@ -447,6 +458,7 @@ HWTEST_F(MmapNapiMockTest, MmapNapiMockTest_Sync_012, testing::ext::TestSize.Lev
     auto res = MmapNapi::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MmapNapiMockTest-end MmapNapiMockTest_Sync_012";

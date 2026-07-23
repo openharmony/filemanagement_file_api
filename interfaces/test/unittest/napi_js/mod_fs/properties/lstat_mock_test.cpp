@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,6 +100,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_001, testing::ext::TestSize.Level1)
     auto stat = Lstat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_001";
@@ -141,6 +142,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_002, testing::ext::TestSize.Level1)
     auto stat = Lstat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(stat, nullptr);
     
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_002";
@@ -183,6 +185,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_003, testing::ext::TestSize.Level1)
     auto stat = Lstat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_003";
@@ -208,6 +211,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_004, testing::ext::TestSize.Level1)
     auto stat = Lstat::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_004";
@@ -235,6 +239,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_005, testing::ext::TestSize.Level1)
     auto stat = Lstat::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_005";

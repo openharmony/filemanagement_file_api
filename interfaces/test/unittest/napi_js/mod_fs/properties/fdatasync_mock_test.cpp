@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,6 +86,7 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_001, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FdatasyncMockTest-end FdatasyncMockTest_Sync_001";
@@ -93,7 +94,7 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_001, TestSize.Level1)
 
 /**
  * @tc.name: FdatasyncMockTest_Sync_002
- * @tc.desc: Test function of Fdatasync::Sync interface for FAILURE when resGetFirstArg is false.
+ * @tc.desc: Test function of Fdatasync::Sync interface for FAILURE when fd is not a valid integer.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -118,6 +119,7 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_002, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FdatasyncMockTest-end FdatasyncMockTest_Sync_002";
@@ -146,6 +148,7 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_003, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FdatasyncMockTest-end FdatasyncMockTest_Sync_003";
@@ -174,6 +177,8 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_004, TestSize.Level1)
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(tp));
     EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*libnMock, CreateUndefined(_)).WillOnce(Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(_, _)).Times(0);
 
     auto res = Fdatasync::Sync(env, mInfo);
 

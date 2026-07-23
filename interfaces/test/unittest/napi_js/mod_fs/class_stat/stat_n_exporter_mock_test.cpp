@@ -61,7 +61,7 @@ void StatNExporter::TearDown()
 
 /**
  * @tc.name: StatNExporter_IsBlockDevice_001
- * @tc.desc: Test function of StatNExporter::IsBlockDevice interface for SUCCESS.
+ * @tc.desc: Test function of StatNExporter::IsBlockDevice interface when st_mode is S_IFBLK.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -82,6 +82,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsBlockDevice_001, testing::ext::TestSize.
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsBlockDevice(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -91,7 +93,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsBlockDevice_001, testing::ext::TestSize.
 
 /**
  * @tc.name: StatNExporter_IsBlockDevice_002
- * @tc.desc: Test function of StatNExporter::IsBlockDevice interface for FAILURE.
+ * @tc.desc: Test function of StatNExporter::IsBlockDevice interface when st_mode is S_IFCHR.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -112,6 +114,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsBlockDevice_002, testing::ext::TestSize.
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsBlockDevice(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -122,7 +126,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsBlockDevice_002, testing::ext::TestSize.
 
 /**
  * @tc.name: StatNExporter_IsCharacterDevice_001
- * @tc.desc: Test function of StatNExporter::IsCharacterDevice interface for SUCCESS.
+ * @tc.desc: Test function of StatNExporter::IsCharacterDevice interface when st_mode is S_IFCHR.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -143,6 +147,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsCharacterDevice_001, testing::ext::TestS
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsCharacterDevice(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -153,7 +159,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsCharacterDevice_001, testing::ext::TestS
 
 /**
  * @tc.name: StatNExporter_IsCharacterDevice_002
- * @tc.desc: Test function of StatNExporter::IsCharacterDevice interface for FAILURE.
+ * @tc.desc: Test function of StatNExporter::IsCharacterDevice interface when st_mode is S_IFDIR.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -174,6 +180,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsCharacterDevice_002, testing::ext::TestS
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsCharacterDevice(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -184,7 +192,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsCharacterDevice_002, testing::ext::TestS
 
 /**
  * @tc.name: StatNExporter_IsDirectory_001
- * @tc.desc: Test function of StatNExporter::IsDirectory interface for SUCCESS.
+ * @tc.desc: Test function of StatNExporter::IsDirectory interface when st_mode is S_IFDIR.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -205,6 +213,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsDirectory_001, testing::ext::TestSize.Le
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsDirectory(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -215,7 +225,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsDirectory_001, testing::ext::TestSize.Le
 
 /**
  * @tc.name: StatNExporter_IsDirectory_002
- * @tc.desc: Test function of StatNExporter::IsDirectory interface for FAILURE.
+ * @tc.desc: Test function of StatNExporter::IsDirectory interface when st_mode is S_IFIFO.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -236,6 +246,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsDirectory_002, testing::ext::TestSize.Le
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsDirectory(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -246,7 +258,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsDirectory_002, testing::ext::TestSize.Le
 
 /**
  * @tc.name: StatNExporter_IsFIFO_001
- * @tc.desc: Test function of StatNExporter::IsFIFO interface for SUCCESS.
+ * @tc.desc: Test function of StatNExporter::IsFIFO interface when st_mode is S_IFIFO.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -267,6 +279,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsFIFO_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsFIFO(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -277,7 +291,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsFIFO_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: StatNExporter_IsFIFO_002
- * @tc.desc: Test function of StatNExporter::IsFIFO interface for FAILURE.
+ * @tc.desc: Test function of StatNExporter::IsFIFO interface when st_mode is S_IFREG.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -297,6 +311,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsFIFO_002, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsFIFO(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -307,7 +323,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsFIFO_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: StatNExporter_IsFile_001
- * @tc.desc: Test function of StatNExporter::IsFile interface for SUCCESS.
+ * @tc.desc: Test function of StatNExporter::IsFile interface when st_mode is S_IFREG.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -328,6 +344,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsFile_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsFile(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -338,7 +356,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsFile_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: StatNExporter_IsFile_002
- * @tc.desc: Test function of StatNExporter::IsFile interface for FAILURE.
+ * @tc.desc: Test function of StatNExporter::IsFile interface when st_mode is S_IFSOCK.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -359,6 +377,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsFile_002, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsFile(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -369,7 +389,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsFile_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: StatNExporter_IsSocket_001
- * @tc.desc: Test function of StatNExporter::IsSocket interface for SUCCESS.
+ * @tc.desc: Test function of StatNExporter::IsSocket interface when st_mode is S_IFSOCK.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -390,6 +410,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsSocket_001, testing::ext::TestSize.Level
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsSocket(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -400,7 +422,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsSocket_001, testing::ext::TestSize.Level
 
 /**
  * @tc.name: StatNExporter_IsSocket_002
- * @tc.desc: Test function of StatNExporter::IsSocket interface for FAILURE.
+ * @tc.desc: Test function of StatNExporter::IsSocket interface when st_mode is S_IFLNK.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -421,6 +443,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsSocket_002, testing::ext::TestSize.Level
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsSocket(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -431,7 +455,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsSocket_002, testing::ext::TestSize.Level
 
 /**
  * @tc.name: StatNExporter_IsSymbolicLink_001
- * @tc.desc: Test function of StatNExporter::IsSymbolicLink interface for SUCCESS.
+ * @tc.desc: Test function of StatNExporter::IsSymbolicLink interface when st_mode is S_IFLNK.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -452,6 +476,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsSymbolicLink_001, testing::ext::TestSize
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsSymbolicLink(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -462,7 +488,7 @@ HWTEST_F(StatNExporter, StatNExporter_IsSymbolicLink_001, testing::ext::TestSize
 
 /**
  * @tc.name: StatNExporter_IsSymbolicLink_002
- * @tc.desc: Test function of StatNExporter::IsSymbolicLink interface for FAILURE.
+ * @tc.desc: Test function of StatNExporter::IsSymbolicLink interface when st_mode is S_IFSOCK.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -483,6 +509,8 @@ HWTEST_F(StatNExporter, StatNExporter_IsSymbolicLink_002, testing::ext::TestSize
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto result = ModuleFileIO::StatNExporter::IsSymbolicLink(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
