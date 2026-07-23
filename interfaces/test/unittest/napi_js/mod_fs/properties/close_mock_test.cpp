@@ -95,6 +95,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_001";
@@ -102,7 +103,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_002
- * @tc.desc: Test function of Close::Sync interface if is fd for SUCCESS.
+ * @tc.desc: Test function of Close::Sync interface for SUCCESS when uv_fs_close succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -124,6 +125,8 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_002, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = Close::Sync(env, info);
 
@@ -172,6 +175,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_003, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    libnMock->VerifyAndClearErr(13900039, "File descriptor in bad state");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_003";
@@ -179,7 +183,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_003, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_004
- * @tc.desc: Test function of Close::Sync interface if no fd for SUCCESS.
+ * @tc.desc: Test function of Close::Sync interface for SUCCESS when fdsan_close_with_tag succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -189,7 +193,9 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_004, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "CloseMockTest-begin CloseMockTest_Sync_004";
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
+    napi_value nVal = reinterpret_cast<napi_value>(0x1300);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
+    NVal mockNval = { env, nVal };
 
     tuple<bool, int> isFd = { false, 1 };
 
@@ -207,20 +213,25 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_004, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, napi_remove_wrap(testing::_, testing::_, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(1));
+    EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
-    EXPECT_EQ(res, nullptr);
+    EXPECT_NE(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_004";
 }
 
 /**
  * @tc.name: CloseMockTest_Sync_005
- * @tc.desc: Test function of Close::Sync interface if no fd for FAILURE when ToInt32 fails.
+ * @tc.desc: Test function of Close::Sync interface for FAILURE when fd is invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -243,6 +254,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_005, testing::ext::TestSize.Level1)
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_005";
@@ -272,6 +284,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_006, testing::ext::TestSize.Level1)
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_006";
@@ -279,7 +292,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_006, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_007
- * @tc.desc: Test function of Close::Sync interface if is fd for SUCCESS.
+ * @tc.desc: Test function of Close::Sync interface if no fd for SUCCESS when fdsan_close_with_tag succeeds and entity is removed.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -313,6 +326,8 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_007, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_remove_wrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = Close::Sync(env, info);
 
@@ -325,7 +340,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_007, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_008
- * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when GetArg fails.
+ * @tc.desc: Test function of Close::Sync interface if no fd for FAILURE when GetArg fails for RemoveEntityOfFinal.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -360,6 +375,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_008, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_008";
@@ -367,7 +383,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_008, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_009
- * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when fdsan_close_with_tag fails.
+ * @tc.desc: Test function of Close::Sync interface if no fd for FAILURE when napi_remove_wrap fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -405,6 +421,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_009, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_009";
@@ -412,7 +429,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_009, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_0010
- * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when fdsan_close_with_tag fails.
+ * @tc.desc: Test function of Close::Sync interface if no fd for FAILURE when napi_unwrap fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -447,6 +464,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0010, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_0010";
@@ -454,7 +472,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0010, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_0011
- * @tc.desc: Test function of Close::Sync interface if is fd for FAILURE when fdsan_close_with_tag fails.
+ * @tc.desc: Test function of Close::Sync interface for FAILURE when InitArgs fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -472,6 +490,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0011, testing::ext::TestSize.Level1)
     auto res = Close::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_0011";
@@ -479,7 +498,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0011, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_0012
- * @tc.desc: Test function of Close::Sync interface for FAILURE when uv_fs_close fails.
+ * @tc.desc: Test function of Close::Sync interface for FAILURE when uv_fs_close fails with FD_SAN_OVERFLOW_END.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -504,6 +523,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0012, testing::ext::TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "CloseMockTest-end CloseMockTest_Sync_0012";
@@ -511,7 +531,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0012, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_0013
- * @tc.desc: Test function of Close::Sync interface for SUCCESS when uv_fs_close fails.
+ * @tc.desc: Test function of Close::Sync interface for SUCCESS when uv_fs_close succeeds with FD_SAN_OVERFLOW_END.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -530,6 +550,8 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0013, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = Close::Sync(env, info);
 

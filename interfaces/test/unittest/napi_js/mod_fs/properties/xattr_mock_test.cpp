@@ -82,6 +82,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_001, TestSize.Level1)
     auto res = Xattr::SetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_001";
@@ -118,6 +119,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_002, TestSize.Level1)
     auto res = Xattr::SetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_002";
@@ -163,6 +165,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_003, TestSize.Level1)
     auto res = Xattr::SetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_003";
@@ -216,6 +219,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_004, TestSize.Level1)
     auto res = Xattr::SetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_004";
@@ -272,6 +276,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_005, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(xattrMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_005";
@@ -325,6 +330,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_006, TestSize.Level1)
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes))).WillOnce(Return(move(toValUtfRes)));
     EXPECT_CALL(*xattrMock, setxattr(_, _, _, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 
     auto res = Xattr::SetSync(env, mInfo);
 
@@ -383,6 +389,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_007, TestSize.Level1)
     auto res = Xattr::SetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_007";
@@ -436,6 +443,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_008, TestSize.Level1)
     auto res = Xattr::SetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_SetXattr_Sync_008";
@@ -461,6 +469,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_001, TestSize.Level1)
     auto res = Xattr::GetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_001";
@@ -496,6 +505,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_002, TestSize.Level1)
     auto res = Xattr::GetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_002";
@@ -541,6 +551,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_003, TestSize.Level1)
     auto res = Xattr::GetSync(env, mInfo);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_003";
@@ -587,6 +598,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_004, TestSize.Level1)
     // getxattr returns 0 means empty xattr
     EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillOnce(Return(0));
     EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 
     auto res = Xattr::GetSync(env, mInfo);
 
@@ -643,6 +655,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_005, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(xattrMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "XattrMockTest-end XattrMockTest_GetXattr_Sync_005";
@@ -691,6 +704,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_006, TestSize.Level1)
         .WillOnce(Return(5))
         .WillOnce(Return(5));
     EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_)).WillOnce(testing::Return(mockNval));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 
     auto res = Xattr::GetSync(env, mInfo);
 

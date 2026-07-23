@@ -102,6 +102,7 @@ HWTEST_F(MkdtempMockTest, MkdtempMockTest_Sync_001, testing::ext::TestSize.Level
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MkdtempMockTest-end MkdtempMockTest_Sync_001";
@@ -127,10 +128,12 @@ HWTEST_F(MkdtempMockTest, MkdtempMockTest_Sync_002, testing::ext::TestSize.Level
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(toUtfRes)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
 
     auto res = Mkdtemp::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "MkdtempMockTest-end MkdtempMockTest_Sync_002";

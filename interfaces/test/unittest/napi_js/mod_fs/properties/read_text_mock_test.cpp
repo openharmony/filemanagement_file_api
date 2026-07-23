@@ -103,6 +103,7 @@ HWTEST_F(ReadTextMockTest, ReadTextMockTest_Sync_001, testing::ext::TestSize.Lev
     auto res = ReadText::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "ReadTextMockTest-end ReadTextMockTest_Sync_001";
@@ -128,6 +129,7 @@ HWTEST_F(ReadTextMockTest, ReadTextMockTest_Sync_002, testing::ext::TestSize.Lev
     auto res = ReadText::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "ReadTextMockTest-end ReadTextMockTest_Sync_002";

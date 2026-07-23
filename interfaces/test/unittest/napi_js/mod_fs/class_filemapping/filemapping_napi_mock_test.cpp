@@ -90,6 +90,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_SetPosition_001, testi
     auto res = FileMappingNapi::SetPosition(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_SetPosition_001";
@@ -116,6 +117,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_GetPosition_001, testi
     auto res = FileMappingNapi::GetPosition(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_GetPosition_001";
@@ -142,6 +144,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Capacity_001, testing:
     auto res = FileMappingNapi::Capacity(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Capacity_001";
@@ -168,6 +171,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_SetLimit_001, testing:
     auto res = FileMappingNapi::SetLimit(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_SetLimit_001";
@@ -194,6 +198,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_GetLimit_001, testing:
     auto res = FileMappingNapi::GetLimit(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_GetLimit_001";
@@ -220,6 +225,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Flip_001, testing::ext
     auto res = FileMappingNapi::Flip(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Flip_001";
@@ -246,6 +252,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Remaining_001, testing
     auto res = FileMappingNapi::Remaining(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Remaining_001";
@@ -272,6 +279,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Read_001, testing::ext
     auto res = FileMappingNapi::Read(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Read_001";
@@ -298,6 +306,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Write_001, testing::ex
     auto res = FileMappingNapi::Write(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Write_001";
@@ -324,6 +333,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Msync_001, testing::ex
     auto res = FileMappingNapi::Msync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Msync_001";
@@ -350,6 +360,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_MsyncSync_001, testing
     auto res = FileMappingNapi::MsyncSync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_MsyncSync_001";
@@ -376,6 +387,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Unmap_001, testing::ex
     auto res = FileMappingNapi::Unmap(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Unmap_001";
@@ -402,6 +414,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_UnmapSync_001, testing
     auto res = FileMappingNapi::UnmapSync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_UnmapSync_001";
@@ -428,6 +441,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Constructor_001, testi
     auto res = FileMappingNapi::Constructor(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Constructor_001";
@@ -435,7 +449,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Constructor_001, testi
 
 /**
  * @tc.name: FileMappingNapiMockTest_SetPosition_002
- * @tc.desc: Test function of FileMappingNapi::SetPosition interface for FAILURE when position is negative.
+ * @tc.desc: Test function of FileMappingNapi::SetPosition interface for FAILURE when GetMapping returns nullptr.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -463,6 +477,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_SetPosition_002, testi
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
+    libnMock->VerifyAndClearErr(13900052, "Mmap buffer released");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_SetPosition_002";
@@ -496,6 +511,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_SetLimit_002, testing:
     auto res = FileMappingNapi::SetLimit(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900052, "Mmap buffer released");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_SetLimit_002";
@@ -529,6 +545,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_GetPosition_002, testi
     auto res = FileMappingNapi::GetPosition(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900052, "Mmap buffer released");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_GetPosition_002";
@@ -562,6 +579,7 @@ HWTEST_F(FileMappingNapiMockTest, FileMappingNapiMockTest_Capacity_002, testing:
     auto res = FileMappingNapi::Capacity(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900052, "Mmap buffer released");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FileMappingNapiMockTest-end FileMappingNapiMockTest_Capacity_002";

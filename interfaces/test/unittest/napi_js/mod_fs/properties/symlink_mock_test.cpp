@@ -113,6 +113,7 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_001, testing::ext::TestSize.Level
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "SymlinkMockTest-end SymlinkMockTest_Sync_001";
@@ -139,6 +140,7 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_002, testing::ext::TestSize.Level
     auto res = Symlink::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "SymlinkMockTest-end SymlinkMockTest_Sync_002";
@@ -175,6 +177,7 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_003, testing::ext::TestSize.Level
     auto res = Symlink::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "SymlinkMockTest-end SymlinkMockTest_Sync_003";
@@ -221,6 +224,7 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_004, testing::ext::TestSize.Level
     auto res = Symlink::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "SymlinkMockTest-end SymlinkMockTest_Sync_004";
@@ -267,6 +271,8 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_005, testing::ext::TestSize.Level
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_symlink(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(0));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(NVal(env, undefinedRes)));
 
     auto res = Symlink::Sync(env, info);

@@ -355,7 +355,10 @@ napi_value NClass::InstantiateClass(napi_env env, const std::string &className, 
 void NError::ThrowErr(napi_env env)
 {
     if (LibnMock::IsMockable()) {
-        return LibnMock::GetMock()->ThrowErr(env);
+        auto mock = LibnMock::GetMock();
+        mock->lastErrno = errno_;
+        mock->lastErrMsg = errMsg_;
+        return mock->ThrowErr(env);
     }
 
     static void (*realThrowErr)(napi_env) = []() {
@@ -376,7 +379,10 @@ void NError::ThrowErr(napi_env env)
 void NError::ThrowErr(napi_env env, int errCode)
 {
     if (LibnMock::IsMockable()) {
-        return LibnMock::GetMock()->ThrowErr(env, errCode);
+        auto mock = LibnMock::GetMock();
+        mock->lastErrno = errCode;
+        mock->lastErrMsg = errMsg_;
+        return mock->ThrowErr(env, errCode);
     }
 
     static void (*realThrowErr)(napi_env, int) = []() {
@@ -398,7 +404,10 @@ void NError::ThrowErr(napi_env env, int errCode)
 void NError::ThrowErr(napi_env env, std::string errMsg)
 {
     if (LibnMock::IsMockable()) {
-        return LibnMock::GetMock()->ThrowErr(env, errMsg);
+        auto mock = LibnMock::GetMock();
+        mock->lastErrno = errno_;
+        mock->lastErrMsg = errMsg;
+        return mock->ThrowErr(env, errMsg);
     }
 
     static void (*realThrowErr)(napi_env, std::string) = []() {
@@ -421,7 +430,10 @@ void NError::ThrowErr(napi_env env, std::string errMsg)
 void NError::ThrowErrAddData(napi_env env, int errCode, napi_value data)
 {
     if (LibnMock::IsMockable()) {
-        return LibnMock::GetMock()->ThrowErrAddData(env, errCode, data);
+        auto mock = LibnMock::GetMock();
+        mock->lastErrno = errCode;
+        mock->lastErrMsg = errMsg_;
+        return mock->ThrowErrAddData(env, errCode, data);
     }
 
     static void (*realThrowErrAddData)(napi_env, int, napi_value) = []() {
@@ -443,7 +455,10 @@ void NError::ThrowErrAddData(napi_env env, int errCode, napi_value data)
 void NError::ThrowErrWithMsg(napi_env env, const std::string &errMsg)
 {
     if (LibnMock::IsMockable()) {
-        return LibnMock::GetMock()->ThrowErrWithMsg(env, errMsg);
+        auto mock = LibnMock::GetMock();
+        mock->lastErrno = errno_;
+        mock->lastErrMsg = errMsg;
+        return mock->ThrowErrWithMsg(env, errMsg);
     }
 
     static void (*realThrowErrWithMsg)(napi_env, const std::string&) = []() {
