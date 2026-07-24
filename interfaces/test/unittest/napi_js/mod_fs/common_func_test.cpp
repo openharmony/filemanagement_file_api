@@ -78,7 +78,7 @@ HWTEST_F(CommonFuncTest, GetFdTag_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: GetFdTag_002
- * @tc.desc: Test function of CommonFunc::GetFdTag interface if is fd for SUCCESS.
+ * @tc.desc: Test function of CommonFunc::GetFdTag interface for SUCCESS when fd is valid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -135,7 +135,7 @@ HWTEST_F(CommonFuncTest, SetFdTag_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: ConvertJsFlags_UncacheFlag_001
- * @tc.desc: Test function of CommonFunc::ConvertJsFlags with UNCACHE flag only.
+ * @tc.desc: Test function of CommonFunc::ConvertJsFlags interface for SUCCESS when UNCACHE flag only.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -154,7 +154,7 @@ HWTEST_F(CommonFuncTest, ConvertJsFlags_UncacheFlag_001, testing::ext::TestSize.
 
 /**
  * @tc.name: ConvertJsFlags_UncacheFlag_002
- * @tc.desc: Test function of CommonFunc::ConvertJsFlags with UNCACHE combined with CREATE flag.
+ * @tc.desc: Test function of CommonFunc::ConvertJsFlags interface for SUCCESS when UNCACHE combined with CREATE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -174,7 +174,7 @@ HWTEST_F(CommonFuncTest, ConvertJsFlags_UncacheFlag_002, testing::ext::TestSize.
 
 /**
  * @tc.name: ConvertJsFlags_UncacheFlag_003
- * @tc.desc: Test function of CommonFunc::ConvertJsFlags without UNCACHE flag.
+ * @tc.desc: Test function of CommonFunc::ConvertJsFlags interface for SUCCESS when UNCACHE flag absent.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -193,7 +193,7 @@ HWTEST_F(CommonFuncTest, ConvertJsFlags_UncacheFlag_003, testing::ext::TestSize.
 
 /**
  * @tc.name: ConvertJsFlags_FlagsCombined_001
- * @tc.desc: Test UNCACHE flag combined with all other flags.
+ * @tc.desc: Test function of CommonFunc::ConvertJsFlags interface for SUCCESS when UNCACHE combined with all flags.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 2
@@ -217,7 +217,7 @@ HWTEST_F(CommonFuncTest, ConvertJsFlags_FlagsCombined_001, testing::ext::TestSiz
 
 /**
  * @tc.name: UncacheConstantValue_001
- * @tc.desc: Test UNCACHE constant value is correct and unique.
+ * @tc.desc: Test function of CommonFunc::UNCACHE constant for SUCCESS when verifying value correctness.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

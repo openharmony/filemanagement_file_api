@@ -58,6 +58,7 @@ void PropNExporterMockTest::SetUp(void)
 
 void PropNExporterMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -86,7 +87,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_001, TestSize.L
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(tp)));
     EXPECT_CALL(*uvMock, uv_fs_unlink(_, _, _, _)).WillOnce(Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = PropNExporter::UnlinkSync(env, mInfo);
 
@@ -116,7 +117,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_002, TestSize.L
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = PropNExporter::UnlinkSync(env, mInfo);
 
@@ -151,7 +152,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_003, TestSize.L
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(tp)));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = PropNExporter::UnlinkSync(env, mInfo);
 
@@ -165,7 +166,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_003, TestSize.L
 
 /**
  * @tc.name: PropNExporterMockTest_UnlinkSync_004
- * @tc.desc: Test function of PropNExporter::UnlinkSync interface for SUCCESS.
+ * @tc.desc: Test function of PropNExporter::UnlinkSync interface for SUCCESS when uv_fs_unlink succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -202,7 +203,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_004, TestSize.L
 
 /**
  * @tc.name: AccessTest_Sync_001
- * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILED with ARGS ERROR.
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILURE with ARGS ERROR.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -215,7 +216,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_001, testing::ext::TestSize.Leve
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -227,7 +228,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_001, testing::ext::TestSize.Leve
 
 /**
  * @tc.name: AccessTest_Sync_002
- * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILED with ToUTF8StringPath ERROR.
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILURE with ToUTF8StringPath ERROR.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -244,7 +245,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_002, testing::ext::TestSize.Leve
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(isStr)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -256,7 +257,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_002, testing::ext::TestSize.Leve
 
 /**
  * @tc.name: AccessTest_Sync_003
- * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILED with invalid mode.
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILURE with invalid mode.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -277,7 +278,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_003, testing::ext::TestSize.Leve
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO));
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isMode));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -289,7 +290,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_003, testing::ext::TestSize.Leve
 
 /**
  * @tc.name: AccessTest_Sync_004
- * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILED with invalid flag.
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILURE with invalid flag.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -314,7 +315,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_004, testing::ext::TestSize.Leve
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isMode));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(isFlag));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -326,7 +327,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_004, testing::ext::TestSize.Leve
 
 /**
  * @tc.name: AccessTest_Sync_005
- * @tc.desc: Test function of PropNExporter::AccessSync interface for SUCCEED with flag.
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for SUCCESS with flag.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -360,11 +361,12 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_005, testing::ext::TestSize.Leve
 
     // UvAccess
     EXPECT_CALL(*uvFsMock, uv_fs_access(testing::_, testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::Invoke(
-            [uvPtr](uv_loop_t *lop, uv_fs_t *req, const char *path, int flags, uv_fs_cb cb) {
-            req->ptr = static_cast<void *>(uvPtr);
-        }), testing::Return(0)));
-    EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+        .WillOnce(testing::DoAll(
+            testing::Invoke([uvPtr](uv_loop_t *lop, uv_fs_t *req, const char *path, int flags, uv_fs_cb cb) {
+                req->ptr = static_cast<void *>(uvPtr);
+            }),
+            testing::Return(0)));
+    EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal { env, val }));
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -376,7 +378,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_005, testing::ext::TestSize.Leve
 
 /**
  * @tc.name: AccessTest_Sync_006
- * @tc.desc: Test function of PropNExporter::AccessSync interface for SUCCEED with no flag.
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for SUCCESS with no flag.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -398,9 +400,7 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_006, testing::ext::TestSize.Leve
     auto uvFsMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(isStr)));
-    EXPECT_CALL(*libnMock, GetArgc())
-        .WillOnce(testing::Return(NARG_CNT::TWO))
-        .WillOnce(testing::Return(NARG_CNT::TWO));
+    EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO)).WillOnce(testing::Return(NARG_CNT::TWO));
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isMode));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
@@ -408,11 +408,12 @@ HWTEST_F(PropNExporterMockTest, AccessTest_Sync_006, testing::ext::TestSize.Leve
 
     // UvAccess
     EXPECT_CALL(*uvFsMock, uv_fs_access(testing::_, testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::Invoke(
-            [uvPtr](uv_loop_t *lop, uv_fs_t *req, const char *path, int flags, uv_fs_cb cb) {
-            req->ptr = static_cast<void *>(uvPtr);
-        }), testing::Return(0)));
-    EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal {env, val}));
+        .WillOnce(testing::DoAll(
+            testing::Invoke([uvPtr](uv_loop_t *lop, uv_fs_t *req, const char *path, int flags, uv_fs_cb cb) {
+                req->ptr = static_cast<void *>(uvPtr);
+            }),
+            testing::Return(0)));
+    EXPECT_CALL(*libnMock, CreateBool(testing::_, testing::_)).WillOnce(testing::Return(NVal { env, val }));
 
     auto res = PropNExporter::AccessSync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -436,7 +437,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_001, TestSize.Lev
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>(), A<size_t>())).WillOnce(Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = PropNExporter::ReadSync(env, info);
 
@@ -464,7 +465,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_002, TestSize.Lev
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>(), A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(fdTuple));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = PropNExporter::ReadSync(env, info);
 
@@ -492,7 +493,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_003, TestSize.Lev
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>(), A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(fdTuple));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = PropNExporter::ReadSync(env, info);
 
@@ -558,7 +559,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_005, TestSize.Lev
     EXPECT_CALL(*libnMock, HasProp(std::string("length"))).WillOnce(Return(false));
     EXPECT_CALL(*libnMock, HasProp(std::string("offset"))).WillOnce(Return(false));
     EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = PropNExporter::ReadSync(env, info);
 
@@ -572,7 +573,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_005, TestSize.Lev
 
 /**
  * @tc.name: PropNExporterMockTest_ReadSync_006
- * @tc.desc: Test function of PropNExporter::ReadSync interface for SUCCESS.
+ * @tc.desc: Test function of PropNExporter::ReadSync interface for SUCCESS when uv_fs_read succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -598,7 +599,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_ReadSync_006, TestSize.Lev
     EXPECT_CALL(*uvMock, uv_fs_read(_, _, _, _, _, _, _)).WillOnce(Return(100));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
     EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(*libnMock, CreateInt64(_, _)).WillOnce(Return(NVal {env, val}));
+    EXPECT_CALL(*libnMock, CreateInt64(_, _)).WillOnce(Return(NVal { env, val }));
 
     auto res = PropNExporter::ReadSync(env, info);
 

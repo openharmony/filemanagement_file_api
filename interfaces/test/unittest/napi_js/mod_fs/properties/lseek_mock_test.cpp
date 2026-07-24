@@ -54,6 +54,7 @@ void LseekMockTest::SetUp(void)
 
 void LseekMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     LibnMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDown";
 }
@@ -73,7 +74,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -100,7 +101,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -129,7 +130,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_003, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*libnMock, ToInt64()).WillOnce(testing::Return(isOffset));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -140,12 +141,12 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_003, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: LseekMockTest_Sync_004
-* @tc.desc: Test function of Lseek::Sync interface for FAILURE when fd is negative.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: LseekMockTest_Sync_004
+ * @tc.desc: Test function of Lseek::Sync interface for FAILURE when fd is negative.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(LseekMockTest, LseekMockTest_Sync_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "LseekMockTest-begin LseekMockTest_Sync_004";
@@ -156,7 +157,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_004, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -167,12 +168,12 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_004, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: LseekMockTest_Sync_005
-* @tc.desc: Test function of Lseek::Sync interface for FAILURE when whence is out of range.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: LseekMockTest_Sync_005
+ * @tc.desc: Test function of Lseek::Sync interface for FAILURE when whence is out of range.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(LseekMockTest, LseekMockTest_Sync_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "LseekMockTest-begin LseekMockTest_Sync_005";
@@ -188,7 +189,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_005, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToInt64()).WillOnce(testing::Return(isOffset));
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(isWhence));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -199,12 +200,12 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_005, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: LseekMockTest_Sync_006
+ * @tc.name: LseekMockTest_Sync_006
  * @tc.desc: Test function of Lseek::Sync interface for FAILURE when whence is not a valid integer.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(LseekMockTest, LseekMockTest_Sync_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "LseekMockTest-begin LseekMockTest_Sync_006";
@@ -220,7 +221,7 @@ HWTEST_F(LseekMockTest, LseekMockTest_Sync_006, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToInt64()).WillOnce(testing::Return(isOffset));
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(isWhence));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Lseek::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());

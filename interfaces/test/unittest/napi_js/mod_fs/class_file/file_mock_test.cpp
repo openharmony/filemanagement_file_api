@@ -64,16 +64,17 @@ void FileMockTest::SetUp()
 
 void FileMockTest::TearDown()
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
- /**
-  * @tc.name: FileMockTest_GetPath_001
-  * @tc.desc: Test function of FsFile::GetPath interface for FAILURE when uv_fs_realpath fails.
-  * @tc.size: MEDIUM
-  * @tc.type: FUNC
-  * @tc.level Level 1
-  */
+/**
+ * @tc.name: FileMockTest_GetPath_001
+ * @tc.desc: Test function of FsFile::GetPath interface for FAILURE when uv_fs_realpath fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FileMockTest, FileMockTest_GetPath_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FileMockTest-begin FileMockTest_GetPath_001";
@@ -90,9 +91,9 @@ HWTEST_F(FileMockTest, FileMockTest_GetPath_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(reinterpret_cast<napi_value>(&fileEntity)));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
-         testing::Return(napi_ok)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+        .WillOnce(
+            testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
 
     auto result = FileNExporter::GetPath(env, info);
@@ -105,13 +106,13 @@ HWTEST_F(FileMockTest, FileMockTest_GetPath_001, testing::ext::TestSize.Level1)
     GTEST_LOG_(INFO) << "FileMockTest-end FileMockTest_GetPath_001";
 }
 
-  /**
-  * @tc.name: FileMockTest_GetPath_002
-  * @tc.desc: Test function of FsFile::GetPath interface for FAILURE when InitArgs fails.
-  * @tc.size: MEDIUM
-  * @tc.type: FUNC
-  * @tc.level Level 1
-  */
+/**
+ * @tc.name: FileMockTest_GetPath_002
+ * @tc.desc: Test function of FsFile::GetPath interface for FAILURE when InitArgs fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(FileMockTest, FileMockTest_GetPath_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FileMockTest-begin FileMockTest_GetPath_002";
@@ -121,7 +122,7 @@ HWTEST_F(FileMockTest, FileMockTest_GetPath_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto result = FileNExporter::GetPath(env, info);
 
@@ -155,9 +156,9 @@ HWTEST_F(FileMockTest, FileMockTest_GetName_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(reinterpret_cast<napi_value>(&fileEntity)));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
-         testing::Return(napi_ok)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+        .WillOnce(
+            testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
 
     auto result = FileNExporter::GetName(env, info);
@@ -186,7 +187,7 @@ HWTEST_F(FileMockTest, FileMockTest_GetName_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto result = FileNExporter::GetName(env, info);
 
@@ -220,9 +221,9 @@ HWTEST_F(FileMockTest, FileMockTest_GetParent_001, testing::ext::TestSize.Level1
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(reinterpret_cast<napi_value>(&fileEntity)));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
-         testing::Return(napi_ok)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+        .WillOnce(
+            testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
     EXPECT_CALL(*uvMock, uv_fs_realpath(_, _, _, _)).WillOnce(Return(-1));
 
     auto result = FileNExporter::GetParent(env, info);
@@ -251,7 +252,7 @@ HWTEST_F(FileMockTest, FileMockTest_GetParent_002, testing::ext::TestSize.Level1
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto result = FileNExporter::GetParent(env, info);
 
@@ -287,9 +288,9 @@ HWTEST_F(FileMockTest, FileMockTest_TryLock_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>(), _)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(reinterpret_cast<napi_value>(&fileEntity)));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
-         testing::Return(napi_ok)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+        .WillOnce(
+            testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
     EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
     auto result = FileNExporter::TryLock(env, info);
@@ -319,7 +320,7 @@ HWTEST_F(FileMockTest, FileMockTest_TryLock_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>(), _)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto result = FileNExporter::TryLock(env, info);
 
@@ -355,9 +356,9 @@ HWTEST_F(FileMockTest, FileMockTest_UnLock_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(reinterpret_cast<napi_value>(&fileEntity)));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)),
-         testing::Return(napi_ok)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+        .WillOnce(
+            testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&fileEntity)), testing::Return(napi_ok)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
     EXPECT_CALL(*fileMock, flock(_, _)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
 
     auto result = FileNExporter::UnLock(env, info);
@@ -387,7 +388,7 @@ HWTEST_F(FileMockTest, FileMockTest_UnLock_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto result = FileNExporter::UnLock(env, info);
 

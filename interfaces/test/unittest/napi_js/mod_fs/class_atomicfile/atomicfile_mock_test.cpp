@@ -63,6 +63,7 @@ void AtomicfileMockTest::SetUp()
 
 void AtomicfileMockTest::TearDown()
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -70,7 +71,8 @@ static const std::string TEMP_FILE_SUFFIX = "_XXXXXX";
 
 /**
  * @tc.name: AtomicfileMockTest_FailWrite_001
- * @tc.desc: Test function of Atomicfile::FailWrite interface for SUCCESS when file remove and napi_delete_reference succeed.
+ * @tc.desc: Test function of Atomicfile::FailWrite interface for SUCCESS when file remove and napi_delete_reference
+ * succeed.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -142,7 +144,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FailWrite_002, testing::ext::Tes
 
     EXPECT_CALL(*stdioMock, remove(testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*libnMock, napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_invalid_arg));
-    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_));
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(1);
 
     auto res = AtomicFileNExporter::FailWrite(env, info);
 
@@ -185,7 +187,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FailWrite_003, testing::ext::Tes
 
     EXPECT_CALL(*stdioMock, remove(testing::_)).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
     EXPECT_CALL(*libnMock, napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_ok));
-    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_));
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(1);
 
     auto res = AtomicFileNExporter::FailWrite(env, info);
 
@@ -199,7 +201,8 @@ HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FailWrite_003, testing::ext::Tes
 
 /**
  * @tc.name: AtomicfileMockTest_FinishWrite_001
- * @tc.desc: Test function of Atomicfile::FinishWrite interface for SUCCESS when file rename and napi_delete_reference succeed.
+ * @tc.desc: Test function of Atomicfile::FinishWrite interface for SUCCESS when file rename and napi_delete_reference
+ * succeed.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -272,7 +275,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FinishWrite_002, testing::ext::T
 
     EXPECT_CALL(*stdioMock, rename(testing::_, testing::_)).WillOnce(testing::Return(1));
     EXPECT_CALL(*libnMock, napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_ok));
-    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_));
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(1);
 
     auto res = AtomicFileNExporter::FinishWrite(env, info);
 
@@ -316,7 +319,7 @@ HWTEST_F(AtomicfileMockTest, AtomicfileMockTest_FinishWrite_003, testing::ext::T
 
     EXPECT_CALL(*stdioMock, rename(testing::_, testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*libnMock, napi_delete_reference(testing::_, testing::_)).WillOnce(testing::Return(napi_invalid_arg));
-    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_));
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(1);
 
     auto res = AtomicFileNExporter::FinishWrite(env, info);
 

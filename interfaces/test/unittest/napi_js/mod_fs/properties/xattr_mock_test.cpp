@@ -58,6 +58,7 @@ void XattrMockTest::SetUp(void)
 
 void XattrMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -77,7 +78,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_001, TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::SetSync(env, mInfo);
 
@@ -114,7 +115,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_002, TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::SetSync(env, mInfo);
 
@@ -160,7 +161,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_003, TestSize.Level1)
     EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::SetSync(env, mInfo);
 
@@ -208,13 +209,12 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_004, TestSize.Level1)
     tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
     tuple<bool, unique_ptr<char[]>, size_t> toValUtfRes = { false, move(valPtr), 1 };
 
-
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes))).WillOnce(Return(move(toValUtfRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::SetSync(env, mInfo);
 
@@ -262,7 +262,6 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_005, TestSize.Level1)
     tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
     tuple<bool, unique_ptr<char[]>, size_t> toValUtfRes = { true, move(valPtr), 1 };
 
-
     auto libnMock = LibnMock::GetMock();
     auto xattrMock = SysXattrMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
@@ -270,7 +269,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_005, TestSize.Level1)
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes))).WillOnce(Return(move(toValUtfRes)));
     EXPECT_CALL(*xattrMock, setxattr(_, _, _, _, _)).WillOnce(SetErrnoAndReturn(EIO, -1));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::SetSync(env, mInfo);
 
@@ -284,7 +283,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_005, TestSize.Level1)
 
 /**
  * @tc.name: XattrMockTest_SetXattr_Sync_006
- * @tc.desc: Test function of Xattr::SetSync interface for SUCCESS.
+ * @tc.desc: Test function of Xattr::SetSync interface for SUCCESS when setxattr succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -321,7 +320,6 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_006, TestSize.Level1)
     tuple<bool, unique_ptr<char[]>, size_t> toUtfRes = { true, move(strPtr), 1 };
     tuple<bool, unique_ptr<char[]>, size_t> toValUtfRes = { true, move(valPtr), 1 };
 
-
     auto libnMock = LibnMock::GetMock();
     auto xattrMock = SysXattrMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
@@ -347,7 +345,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_006, TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_SetXattr_Sync_007";
@@ -384,7 +382,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_007, TestSize.Level1)
     EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes))).WillOnce(Return(move(toValUtfRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::SetSync(env, mInfo);
 
@@ -401,7 +399,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_007, TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_SetXattr_Sync_008";
@@ -438,7 +436,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_008, TestSize.Level1)
     EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes))).WillOnce(Return(move(toValUtfRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::SetSync(env, mInfo);
 
@@ -455,7 +453,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_008, TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_001";
@@ -464,7 +462,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_001, TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::GetSync(env, mInfo);
 
@@ -481,7 +479,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_001, TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_002";
@@ -500,7 +498,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_002, TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::GetSync(env, mInfo);
 
@@ -517,7 +515,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_002, TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_003";
@@ -546,7 +544,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_003, TestSize.Level1)
     EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::GetSync(env, mInfo);
 
@@ -563,7 +561,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_003, TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_004";
@@ -615,7 +613,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_004, TestSize.Level1)
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_005";
@@ -646,10 +644,8 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_005, TestSize.Level1)
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes)));
     // First call returns size, second call fails
-    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _))
-        .WillOnce(Return(5))
-        .WillOnce(SetErrnoAndReturn(EIO, -1));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillOnce(Return(5)).WillOnce(SetErrnoAndReturn(EIO, -1));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Xattr::GetSync(env, mInfo);
 
@@ -663,11 +659,11 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_005, TestSize.Level1)
 
 /**
  * @tc.name: XattrMockTest_GetXattr_Sync_006
- * @tc.desc: Test function of Xattr::GetSync interface for SUCCESS.
+ * @tc.desc: Test function of Xattr::GetSync interface for SUCCESS when getxattr succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "XattrMockTest-begin XattrMockTest_GetXattr_Sync_006";
@@ -700,9 +696,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_GetXattr_Sync_006, TestSize.Level1)
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(Return(move(toUtfPath)));
     EXPECT_CALL(*libnMock, ToUTF8String()).WillOnce(Return(move(toUtfRes)));
     // First call returns size, second call returns actual data
-    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _))
-        .WillOnce(Return(5))
-        .WillOnce(Return(5));
+    EXPECT_CALL(*xattrMock, getxattr(_, _, _, _)).WillOnce(Return(5)).WillOnce(Return(5));
     EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_)).WillOnce(testing::Return(mockNval));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 

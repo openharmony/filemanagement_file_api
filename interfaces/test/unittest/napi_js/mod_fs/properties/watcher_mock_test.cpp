@@ -71,6 +71,7 @@ void WatcherMockTest::SetUp()
 
 void WatcherMockTest::TearDown()
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
     // Reset FileWatcher state
     auto &watcher = FileWatcher::GetInstance();
@@ -98,7 +99,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_001, testing::ext::TestS
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -134,7 +135,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_002, testing::ext::TestS
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -171,7 +172,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_003, testing::ext::TestS
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(std::make_tuple(false, 0)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -208,7 +209,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_004, testing::ext::TestS
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(std::make_tuple(true, 0)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -245,7 +246,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_005, testing::ext::TestS
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(std::make_tuple(true, -1)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -283,7 +284,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_006, testing::ext::TestS
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(std::make_tuple(true, IN_CREATE)));
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -322,7 +323,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_007, testing::ext::TestS
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(std::make_tuple(true, IN_CREATE)));
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nullptr));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -363,7 +364,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_008, testing::ext::TestS
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nVal));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_)).WillOnce(testing::Return(napi_invalid_arg));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -406,7 +407,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_009, testing::ext::TestS
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nVal));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void*>(&entity)), testing::Return(napi_ok)));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 
     auto res = Watcher::CreateWatcher(env, info);
@@ -445,13 +446,14 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_010, testing::ext::TestS
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(std::make_tuple(true, IN_CREATE)));
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*inotifyMock, inotify_init()).WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*inotifyMock, inotify_init()).WillOnce(testing::SetErrnoAndReturn(EIO, -1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(inotifyMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "WatcherMockTest-end WatcherMockTest_CreateWatcher_010";
@@ -484,7 +486,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_011, testing::ext::TestS
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     // Use invalid event that will fail CheckEventValid (event not in IN_ALL_EVENTS)
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(std::make_tuple(true, ~IN_ALL_EVENTS)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Watcher::CreateWatcher(env, info);
 
@@ -528,7 +530,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_012, testing::ext::TestS
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nVal));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void*>(&entity)), testing::Return(napi_ok)));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 
     auto res = Watcher::CreateWatcher(env, info);
@@ -572,7 +574,7 @@ HWTEST_F(WatcherMockTest, WatcherMockTest_CreateWatcher_013, testing::ext::TestS
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nVal));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void*>(&entity)), testing::Return(napi_ok)));
+        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
 
     auto res = Watcher::CreateWatcher(env, info);

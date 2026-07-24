@@ -65,6 +65,7 @@ void TruncateMockTest::SetUp(void)
 
 void TruncateMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -103,7 +104,7 @@ HWTEST_F(TruncateMockTest, TruncateMockTest_Sync_001, testing::ext::TestSize.Lev
         .WillOnce(testing::Return(1));
     EXPECT_CALL(*uvMock, uv_fs_ftruncate(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Truncate::Sync(env, info);
 
@@ -151,7 +152,7 @@ HWTEST_F(TruncateMockTest, TruncateMockTest_Sync_002, testing::ext::TestSize.Lev
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_ftruncate(testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Truncate::Sync(env, info);
 
@@ -179,7 +180,7 @@ HWTEST_F(TruncateMockTest, TruncateMockTest_Sync_003, testing::ext::TestSize.Lev
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Truncate::Sync(env, info);
 
@@ -220,7 +221,7 @@ HWTEST_F(TruncateMockTest, TruncateMockTest_Sync_004, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Truncate::Sync(env, info);
 
@@ -263,7 +264,7 @@ HWTEST_F(TruncateMockTest, TruncateMockTest_Sync_005, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(move(NARG_CNT::TWO)));
     EXPECT_CALL(*libnMock, ToInt64(testing::_)).WillOnce(testing::Return(lenRes));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Truncate::Sync(env, info);
 
@@ -308,7 +309,7 @@ HWTEST_F(TruncateMockTest, TruncateMockTest_Sync_006, testing::ext::TestSize.Lev
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Truncate::Sync(env, info);
 
