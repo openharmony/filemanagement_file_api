@@ -83,7 +83,7 @@ protected:
 
     void SetUp() override
     {
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE, TEST_BASE_DIR);
         ASSERT_EQ(mkdir(TEST_SWAP_BASE, TEST_DIR_MODE), 0);
     }
 
@@ -93,7 +93,7 @@ protected:
             EXPECT_EQ(OH_Swapfs_DestroyManager(manager), SWAPFS_E_OK);
         }
         g_activeManagers.clear();
-        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE);
+        (void)SwapfsSessionCleaner::RemoveSessionTree(TEST_SWAP_BASE, TEST_BASE_DIR);
         (void)unlink(TEST_SWAP_ROOT_FILE);
     }
 };

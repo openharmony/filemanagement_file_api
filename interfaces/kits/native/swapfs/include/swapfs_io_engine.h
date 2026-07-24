@@ -17,6 +17,7 @@
 #define OHOS_FILEMANAGEMENT_FILE_API_NATIVE_SWAPFS_IO_ENGINE_H
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 namespace OHOS::FileManagement::Swapfs {
@@ -31,6 +32,7 @@ public:
 };
 
 bool IsDioAligned(const void *buffer, size_t size);
+int OpenSwapFileForRead(const std::string &path, uint32_t extraFlags);
 } // namespace OHOS::FileManagement::Swapfs
 
 #endif
