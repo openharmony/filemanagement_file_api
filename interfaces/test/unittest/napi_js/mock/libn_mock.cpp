@@ -53,6 +53,32 @@ bool LibnMock::IsMockable()
 using namespace OHOS::FileManagement::ModuleFileIO::Test;
 
 extern "C" {
+// CC-OFFNXT(G.FUN.01-CPP) Parameters are defined by the N-API ABI and cannot be changed.
+napi_status napi_wrap(napi_env env, napi_value jsObject, void *nativeObject,
+    napi_finalize finalizeCb, void *finalizeHint, napi_ref *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_wrap(env, jsObject, nativeObject, finalizeCb, finalizeHint, result);
+    }
+
+    static napi_status (*realNapiWrap)(
+        napi_env, napi_value, void *, napi_finalize, void *, napi_ref *) = []() {
+        auto func = reinterpret_cast<napi_status (*)(
+            napi_env, napi_value, void *, napi_finalize, void *, napi_ref *)>(
+            dlsym(RTLD_NEXT, "napi_wrap"));
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_wrap: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realNapiWrap) {
+        return napi_generic_failure;
+    }
+
+    return realNapiWrap(env, jsObject, nativeObject, finalizeCb, finalizeHint, result);
+}
+
 napi_status napi_unwrap(napi_env env, napi_value js_object, void **result)
 {
     if (LibnMock::IsMockable()) {
@@ -177,6 +203,138 @@ napi_status napi_typeof(napi_env env, napi_value value, napi_valuetype *result)
     }
 
     return realNapTypeof(env, value, result);
+}
+
+napi_status napi_load_module(napi_env env, const char *path, napi_value *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_load_module(env, path, result);
+    }
+    static napi_status (*realFunc)(napi_env, const char *, napi_value *) = []() {
+        auto func = reinterpret_cast<napi_status (*)(napi_env, const char *, napi_value *)>(
+            dlsym(RTLD_NEXT, "napi_load_module"));
+        if (func == nullptr) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_load_module: " << dlerror();
+        }
+        return func;
+    }();
+    return realFunc == nullptr ? napi_generic_failure : realFunc(env, path, result);
+}
+
+napi_status napi_get_named_property(napi_env env, napi_value object, const char *utf8name, napi_value *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_get_named_property(env, object, utf8name, result);
+    }
+    static napi_status (*realFunc)(napi_env, napi_value, const char *, napi_value *) = []() {
+        auto func = reinterpret_cast<napi_status (*)(napi_env, napi_value, const char *, napi_value *)>(
+            dlsym(RTLD_NEXT, "napi_get_named_property"));
+        if (func == nullptr) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_get_named_property: " << dlerror();
+        }
+        return func;
+    }();
+    return realFunc == nullptr ? napi_generic_failure : realFunc(env, object, utf8name, result);
+}
+
+napi_status napi_new_instance(napi_env env, napi_value constructor, size_t argc,
+    const napi_value *argv, napi_value *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_new_instance(env, constructor, argc, argv, result);
+    }
+    static napi_status (*realFunc)(napi_env, napi_value, size_t, const napi_value *, napi_value *) = []() {
+        auto func = reinterpret_cast<napi_status (*)(napi_env, napi_value, size_t, const napi_value *, napi_value *)>(
+            dlsym(RTLD_NEXT, "napi_new_instance"));
+        if (func == nullptr) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_new_instance: " << dlerror();
+        }
+        return func;
+    }();
+    return realFunc == nullptr ? napi_generic_failure : realFunc(env, constructor, argc, argv, result);
+}
+
+napi_status napi_create_reference(napi_env env, napi_value value, uint32_t initialRefcount, napi_ref *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_create_reference(env, value, initialRefcount, result);
+    }
+    static napi_status (*realFunc)(napi_env, napi_value, uint32_t, napi_ref *) = []() {
+        auto func = reinterpret_cast<napi_status (*)(napi_env, napi_value, uint32_t, napi_ref *)>(
+            dlsym(RTLD_NEXT, "napi_create_reference"));
+        if (func == nullptr) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_create_reference: " << dlerror();
+        }
+        return func;
+    }();
+    return realFunc == nullptr ? napi_generic_failure : realFunc(env, value, initialRefcount, result);
+}
+
+napi_status napi_open_handle_scope(napi_env env, napi_handle_scope *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_open_handle_scope(env, result);
+    }
+    static napi_status (*realFunc)(napi_env, napi_handle_scope *) = []() {
+        auto func = reinterpret_cast<napi_status (*)(napi_env, napi_handle_scope *)>(
+            dlsym(RTLD_NEXT, "napi_open_handle_scope"));
+        if (func == nullptr) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_open_handle_scope: " << dlerror();
+        }
+        return func;
+    }();
+    return realFunc == nullptr ? napi_generic_failure : realFunc(env, result);
+}
+
+napi_status napi_close_handle_scope(napi_env env, napi_handle_scope scope)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_close_handle_scope(env, scope);
+    }
+    static napi_status (*realFunc)(napi_env, napi_handle_scope) = []() {
+        auto func = reinterpret_cast<napi_status (*)(napi_env, napi_handle_scope)>(
+            dlsym(RTLD_NEXT, "napi_close_handle_scope"));
+        if (func == nullptr) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_close_handle_scope: " << dlerror();
+        }
+        return func;
+    }();
+    return realFunc == nullptr ? napi_generic_failure : realFunc(env, scope);
+}
+
+// CC-OFFNXT(G.FUN.01-CPP) Parameters are defined by the N-API ABI and cannot be changed.
+napi_status napi_call_function(napi_env env, napi_value recv, napi_value func, size_t argc,
+    const napi_value *argv, napi_value *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_call_function(env, recv, func, argc, argv, result);
+    }
+    static napi_status (*realFunc)(napi_env, napi_value, napi_value, size_t,
+        const napi_value *, napi_value *) = []() {
+        auto func = reinterpret_cast<napi_status (*)(napi_env, napi_value, napi_value, size_t,
+            const napi_value *, napi_value *)>(dlsym(RTLD_NEXT, "napi_call_function"));
+        if (func == nullptr) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_call_function: " << dlerror();
+        }
+        return func;
+    }();
+    return realFunc == nullptr ? napi_generic_failure : realFunc(env, recv, func, argc, argv, result);
+}
+
+napi_status napi_get_and_clear_last_exception(napi_env env, napi_value *result)
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->napi_get_and_clear_last_exception(env, result);
+    }
+    static napi_status (*realFunc)(napi_env, napi_value *) = []() {
+        auto func = reinterpret_cast<napi_status (*)(napi_env, napi_value *)>(
+            dlsym(RTLD_NEXT, "napi_get_and_clear_last_exception"));
+        if (func == nullptr) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real napi_get_and_clear_last_exception: " << dlerror();
+        }
+        return func;
+    }();
+    return realFunc == nullptr ? napi_generic_failure : realFunc(env, result);
 }
 
 } // extern "C"
