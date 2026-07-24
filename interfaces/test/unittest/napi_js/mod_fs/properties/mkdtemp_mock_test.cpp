@@ -65,6 +65,7 @@ void MkdtempMockTest::SetUp(void)
 
 void MkdtempMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -96,7 +97,7 @@ HWTEST_F(MkdtempMockTest, MkdtempMockTest_Sync_001, testing::ext::TestSize.Level
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(toUtfRes)));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_mkdtemp(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Mkdtemp::Sync(env, info);
 
@@ -128,7 +129,7 @@ HWTEST_F(MkdtempMockTest, MkdtempMockTest_Sync_002, testing::ext::TestSize.Level
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(toUtfRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Mkdtemp::Sync(env, info);
 

@@ -29,6 +29,7 @@
 namespace OHOS::FileManagement::ModuleEnvironment::Test {
 using namespace OHOS::FileManagement::LibN;
 using namespace OHOS::Security::AccessToken;
+using LibnMock = OHOS::FileManagement::ModuleFileIO::Test::LibnMock;
 
 class EnvironmentNExporterMockTest : public testing::Test {
 public:
@@ -42,7 +43,7 @@ void EnvironmentNExporterMockTest::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "SetUpTestSuite";
     prctl(PR_SET_NAME, "EnvironmentNExporterMockTest");
-    OHOS::FileManagement::ModuleFileIO::Test::LibnMock::EnableMock();
+    LibnMock::EnableMock();
     ParameterMock::EnableMock();
     TokenIdKitMock::EnableMock();
     AccessTokenKitMock::EnableMock();
@@ -51,7 +52,7 @@ void EnvironmentNExporterMockTest::SetUpTestSuite()
 
 void EnvironmentNExporterMockTest::TearDownTestSuite()
 {
-    OHOS::FileManagement::ModuleFileIO::Test::LibnMock::DisableMock();
+    LibnMock::DisableMock();
     ParameterMock::DisableMock();
     TokenIdKitMock::DisableMock();
     AccessTokenKitMock::DisableMock();
@@ -66,6 +67,7 @@ void EnvironmentNExporterMockTest::SetUp()
 
 void EnvironmentNExporterMockTest::TearDown()
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -76,20 +78,24 @@ void EnvironmentNExporterMockTest::TearDown()
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetStorageDataDir_001,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetStorageDataDir_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetStorageDataDir_001";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto tokenIdKitMock = TokenIdKitMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*tokenIdKitMock, IsSystemAppByFullTokenID(testing::_)).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetStorageDataDir(env, info);
 
     EXPECT_EQ(res, nullptr);
     testing::Mock::VerifyAndClearExpectations(tokenIdKitMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(202, "The caller is not a system application");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetStorageDataDir_001";
 }
@@ -101,20 +107,23 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetStorageDa
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDataDir_001,
-         testing::ext::TestSize.Level1)
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDataDir_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDataDir_001";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto tokenIdKitMock = TokenIdKitMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*tokenIdKitMock, IsSystemAppByFullTokenID(testing::_)).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetUserDataDir(env, info);
 
     EXPECT_EQ(res, nullptr);
     testing::Mock::VerifyAndClearExpectations(tokenIdKitMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(202, "The caller is not a system application");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserDataDir_001";
 }
@@ -126,21 +135,25 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDataD
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDownloadDir_001,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDownloadDir_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDownloadDir_001";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetUserDownloadDir(env, info);
 
     EXPECT_EQ(res, nullptr);
     testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(801, "The device doesn't support this api");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserDownloadDir_001";
 }
@@ -152,21 +165,25 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDownl
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDesktopDir_001,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDesktopDir_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDesktopDir_001";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetUserDesktopDir(env, info);
 
     EXPECT_EQ(res, nullptr);
     testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(801, "The device doesn't support this api");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserDesktopDir_001";
 }
@@ -178,21 +195,25 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDeskt
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDocumentDir_001,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDocumentDir_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDocumentDir_001";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetUserDocumentDir(env, info);
 
     EXPECT_EQ(res, nullptr);
     testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(801, "The device doesn't support this api");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserDocumentDir_001";
 }
@@ -204,21 +225,25 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDocum
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalStorageDir_001,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalStorageDir_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetExternalStorageDir_001";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetExternalStorageDir(env, info);
 
     EXPECT_EQ(res, nullptr);
     testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(801, "The device doesn't support this api");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetExternalStorageDir_001";
 }
@@ -230,8 +255,8 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalStorageDir_002,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalStorageDir_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetExternalStorageDir_002";
 
@@ -239,18 +264,22 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
     auto tokenIdKitMock = TokenIdKitMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
             strcpy_s(value, len, "true");
             return 1;
         }));
     EXPECT_CALL(*tokenIdKitMock, IsSystemAppByFullTokenID(testing::_)).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetExternalStorageDir(env, info);
 
     EXPECT_EQ(res, nullptr);
     testing::Mock::VerifyAndClearExpectations(parameterMock.get());
     testing::Mock::VerifyAndClearExpectations(tokenIdKitMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(202, "The caller is not a system application");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetExternalStorageDir_002";
 }
@@ -262,8 +291,8 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalStorageDir_003,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalStorageDir_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetExternalStorageDir_003";
 
@@ -272,6 +301,7 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
     auto parameterMock = ParameterMock::GetMock();
     auto tokenIdKitMock = TokenIdKitMock::GetMock();
     auto accessTokenKitMock = AccessTokenKitMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
             strcpy_s(value, len, "true");
@@ -280,6 +310,7 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
     EXPECT_CALL(*tokenIdKitMock, IsSystemAppByFullTokenID(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*accessTokenKitMock, VerifyAccessToken(testing::_, testing::_))
         .WillOnce(testing::Return(PermissionState::PERMISSION_DENIED));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetExternalStorageDir(env, info);
 
@@ -287,6 +318,8 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
     testing::Mock::VerifyAndClearExpectations(parameterMock.get());
     testing::Mock::VerifyAndClearExpectations(tokenIdKitMock.get());
     testing::Mock::VerifyAndClearExpectations(accessTokenKitMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(201, "Permission verification failed");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetExternalStorageDir_003";
 }
@@ -298,21 +331,24 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_001,
-         testing::ext::TestSize.Level1)
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserHomeDir_001";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetUserHomeDir(env, info);
 
     EXPECT_EQ(res, nullptr);
     testing::Mock::VerifyAndClearExpectations(parameterMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(801, "The device doesn't support this api");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserHomeDir_001";
 }
@@ -324,8 +360,7 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeD
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_002,
-         testing::ext::TestSize.Level1)
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserHomeDir_002";
 
@@ -333,18 +368,22 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeD
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
     auto tokenIdKitMock = TokenIdKitMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
             strcpy_s(value, len, "true");
             return 1;
         }));
     EXPECT_CALL(*tokenIdKitMock, IsSystemAppByFullTokenID(testing::_)).WillOnce(testing::Return(false));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetUserHomeDir(env, info);
 
     EXPECT_EQ(res, nullptr);
     testing::Mock::VerifyAndClearExpectations(parameterMock.get());
     testing::Mock::VerifyAndClearExpectations(tokenIdKitMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(202, "The caller is not a system application");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserHomeDir_002";
 }
@@ -356,8 +395,7 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeD
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_003,
-         testing::ext::TestSize.Level1)
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserHomeDir_003";
 
@@ -366,6 +404,7 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeD
     auto parameterMock = ParameterMock::GetMock();
     auto tokenIdKitMock = TokenIdKitMock::GetMock();
     auto accessTokenKitMock = AccessTokenKitMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
             strcpy_s(value, len, "true");
@@ -374,6 +413,7 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeD
     EXPECT_CALL(*tokenIdKitMock, IsSystemAppByFullTokenID(testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*accessTokenKitMock, VerifyAccessToken(testing::_, testing::_))
         .WillOnce(testing::Return(PermissionState::PERMISSION_DENIED));
+    EXPECT_CALL(*libnMock, ThrowErr(env)).Times(1);
 
     auto res = GetUserHomeDir(env, info);
 
@@ -381,26 +421,28 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeD
     testing::Mock::VerifyAndClearExpectations(parameterMock.get());
     testing::Mock::VerifyAndClearExpectations(tokenIdKitMock.get());
     testing::Mock::VerifyAndClearExpectations(accessTokenKitMock.get());
+    testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(201, "Permission verification failed");
 
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-end EnvironmentNExporterMockTest_GetUserHomeDir_003";
 }
 
 /**
  * @tc.name: EnvironmentNExporterMockTest_GetUserDownloadDir_002
- * @tc.desc: Test function of GetUserDownloadDir interface for SUCCESS.
+ * @tc.desc: Test function of GetUserDownloadDir interface for SUCCESS when all preconditions are met.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDownloadDir_002,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDownloadDir_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDownloadDir_002";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
-    auto libnMock = OHOS::FileManagement::ModuleFileIO::Test::LibnMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     auto accountManagerMock = OsAccountManagerMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
@@ -412,6 +454,8 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDownl
         .WillOnce(testing::DoAll(testing::SetArgReferee<0>("fakeName"), testing::Return(ERR_OK)));
     EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_))
         .WillOnce(testing::Return(NVal(env, reinterpret_cast<napi_value>(0x2000))));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = GetUserDownloadDir(env, info);
 
@@ -425,20 +469,20 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDownl
 
 /**
  * @tc.name: EnvironmentNExporterMockTest_GetUserDesktopDir_002
- * @tc.desc: Test function of GetUserDesktopDir interface for SUCCESS.
+ * @tc.desc: Test function of GetUserDesktopDir interface for SUCCESS when all preconditions are met.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDesktopDir_002,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDesktopDir_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDesktopDir_002";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
-    auto libnMock = OHOS::FileManagement::ModuleFileIO::Test::LibnMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     auto accountManagerMock = OsAccountManagerMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
@@ -450,6 +494,8 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDeskt
         .WillOnce(testing::DoAll(testing::SetArgReferee<0>("fakeName"), testing::Return(ERR_OK)));
     EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_))
         .WillOnce(testing::Return(NVal(env, reinterpret_cast<napi_value>(0x2000))));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = GetUserDesktopDir(env, info);
 
@@ -463,20 +509,20 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDeskt
 
 /**
  * @tc.name: EnvironmentNExporterMockTest_GetUserDocumentDir_002
- * @tc.desc: Test function of GetUserDocumentDir interface for SUCCESS.
+ * @tc.desc: Test function of GetUserDocumentDir interface for SUCCESS when all preconditions are met.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDocumentDir_002,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDocumentDir_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserDocumentDir_002";
 
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
     auto parameterMock = ParameterMock::GetMock();
-    auto libnMock = OHOS::FileManagement::ModuleFileIO::Test::LibnMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     auto accountManagerMock = OsAccountManagerMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
@@ -488,6 +534,8 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDocum
         .WillOnce(testing::DoAll(testing::SetArgReferee<0>("fakeName"), testing::Return(ERR_OK)));
     EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_))
         .WillOnce(testing::Return(NVal(env, reinterpret_cast<napi_value>(0x2000))));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = GetUserDocumentDir(env, info);
 
@@ -501,13 +549,13 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserDocum
 
 /**
  * @tc.name: EnvironmentNExporterMockTest_GetExternalStorageDir_004
- * @tc.desc: Test function of GetExternalStorageDir interface for SUCCESS.
+ * @tc.desc: Test function of GetExternalStorageDir interface for SUCCESS when all preconditions are met.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalStorageDir_004,
-         testing::ext::TestSize.Level1)
+HWTEST_F(
+    EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalStorageDir_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetExternalStorageDir_004";
 
@@ -516,7 +564,7 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
     auto parameterMock = ParameterMock::GetMock();
     auto tokenIdKitMock = TokenIdKitMock::GetMock();
     auto accessTokenKitMock = AccessTokenKitMock::GetMock();
-    auto libnMock = OHOS::FileManagement::ModuleFileIO::Test::LibnMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
             strcpy_s(value, len, "true");
@@ -528,6 +576,8 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
     EXPECT_CALL(*libnMock, InitArgs(NARG_CNT::ZERO)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_))
         .WillOnce(testing::Return(NVal(env, reinterpret_cast<napi_value>(0x2000))));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = GetExternalStorageDir(env, info);
 
@@ -542,13 +592,12 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetExternalS
 
 /**
  * @tc.name: EnvironmentNExporterMockTest_GetUserHomeDir_004
- * @tc.desc: Test function of GetUserHomeDir interface for SUCCESS.
+ * @tc.desc: Test function of GetUserHomeDir interface for SUCCESS when all preconditions are met.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
  */
-HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_004,
-         testing::ext::TestSize.Level1)
+HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeDir_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "EnvironmentNExporterMockTest-begin EnvironmentNExporterMockTest_GetUserHomeDir_004";
 
@@ -558,7 +607,7 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeD
     auto tokenIdKitMock = TokenIdKitMock::GetMock();
     auto accessTokenKitMock = AccessTokenKitMock::GetMock();
     auto accountManagerMock = OsAccountManagerMock::GetMock();
-    auto libnMock = OHOS::FileManagement::ModuleFileIO::Test::LibnMock::GetMock();
+    auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*parameterMock, GetParameter(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Invoke([](const char *, const char *, char *value, uint32_t len) -> int {
             strcpy_s(value, len, "true");
@@ -572,6 +621,8 @@ HWTEST_F(EnvironmentNExporterMockTest, EnvironmentNExporterMockTest_GetUserHomeD
         .WillOnce(testing::DoAll(testing::SetArgReferee<0>("fakeName"), testing::Return(ERR_OK)));
     EXPECT_CALL(*libnMock, CreateUTF8String(testing::_, testing::_))
         .WillOnce(testing::Return(NVal(env, reinterpret_cast<napi_value>(0x2000))));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = GetUserHomeDir(env, info);
 

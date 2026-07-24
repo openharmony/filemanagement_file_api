@@ -65,6 +65,7 @@ void UtimesMockTest::SetUp(void)
 
 void UtimesMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -101,7 +102,7 @@ HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(1));
     EXPECT_CALL(*uvMock, uv_fs_utime(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Utimes::Sync(env, info);
 
@@ -129,7 +130,7 @@ HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_002, testing::ext::TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Utimes::Sync(env, info);
 
@@ -166,7 +167,7 @@ HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_003, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Utimes::Sync(env, info);
 
@@ -205,7 +206,7 @@ HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_004, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
     EXPECT_CALL(*libnMock, ToDouble()).WillOnce(testing::Return(move(mtimeRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Utimes::Sync(env, info);
 
@@ -247,7 +248,7 @@ HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_005, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToDouble()).WillOnce(testing::Return(move(mtimeRes)));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_)).Times(1);
     EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Utimes::Sync(env, info);
 
@@ -261,7 +262,7 @@ HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_005, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: UtimesMockTest_Sync_006
- * @tc.desc: Test function of Utimes::Sync interface for SUCCESS.
+ * @tc.desc: Test function of Utimes::Sync interface for SUCCESS when uv_fs_utime succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

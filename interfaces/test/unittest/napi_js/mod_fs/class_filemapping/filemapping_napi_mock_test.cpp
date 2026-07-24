@@ -23,7 +23,6 @@
 #include <gtest/gtest.h>
 #include <sys/prctl.h>
 
-#include "fs_filemapping.h"
 #include "libn_mock.h"
 #include "mmap_mock.h"
 #include "securec.h"
@@ -66,6 +65,7 @@ void FileMappingNapiMockTest::SetUp(void)
 
 void FileMappingNapiMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 

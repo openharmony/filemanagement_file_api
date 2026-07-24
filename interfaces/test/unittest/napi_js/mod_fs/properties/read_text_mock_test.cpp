@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,6 +63,7 @@ void ReadTextMockTest::SetUp(void)
 
 void ReadTextMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -98,7 +99,7 @@ HWTEST_F(ReadTextMockTest, ReadTextMockTest_Sync_001, testing::ext::TestSize.Lev
     EXPECT_CALL(*libnMock, GetProp(testing::_)).Times(2).WillRepeatedly(testing::Return(myOp));
     EXPECT_CALL(*libnMock, TypeIs(testing::_)).WillOnce(testing::Return(false));
     EXPECT_CALL(*libnMock, ToInt64()).WillOnce(testing::Return(toIntRes));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = ReadText::Sync(env, info);
 
@@ -124,7 +125,7 @@ HWTEST_F(ReadTextMockTest, ReadTextMockTest_Sync_002, testing::ext::TestSize.Lev
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = ReadText::Sync(env, info);
 

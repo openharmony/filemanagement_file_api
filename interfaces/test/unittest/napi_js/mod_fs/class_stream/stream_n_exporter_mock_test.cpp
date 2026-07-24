@@ -60,6 +60,7 @@ void StreamNExporterMockTest::SetUp()
 
 void StreamNExporterMockTest::TearDown()
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -74,14 +75,14 @@ void StreamNExporterMockTest::TearDown()
 HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_Constructor_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-begin StreamNExporterMockTest_Constructor_001";
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
 
     auto libnMock = LibnMock::GetMock();
-    
+
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = StreamNExporter::Constructor(env, mInfo);
 
@@ -102,32 +103,29 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_Constructor_001, testi
 HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_001, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-begin StreamNExporterMockTest_CloseSync_001";
-    
+
     auto streamEntity = make_unique<StreamEntity>();
-    auto mockFile = std::shared_ptr<FILE>(
-        reinterpret_cast<FILE *>(0x2000),
-        [](FILE *) {}
-    );
+    auto mockFile = std::shared_ptr<FILE>(reinterpret_cast<FILE *>(0x2000), [](FILE *) {});
     streamEntity->fp = mockFile;
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
     NVal mockNval = { env, nv };
 
     auto libnMock = LibnMock::GetMock();
-    
+
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).Times(2).WillRepeatedly(testing::Return(nv));
-    
+
     // Mock GetEntityOf to return stream entity
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(streamEntity.get())), testing::Return(napi_ok)));
-    
+
     // Mock RemoveEntityOfFinal to return non-null
     EXPECT_CALL(*libnMock, napi_remove_wrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(streamEntity.get())), testing::Return(napi_ok)));
-    
+
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(mockNval));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
     EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
@@ -151,28 +149,25 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_001, testing
 HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-begin StreamNExporterMockTest_CloseSync_002";
-    
+
     auto streamEntity = make_unique<StreamEntity>();
-    auto mockFile = std::shared_ptr<FILE>(
-        reinterpret_cast<FILE *>(0x2000),
-        [](FILE *) {}
-    );
+    auto mockFile = std::shared_ptr<FILE>(reinterpret_cast<FILE *>(0x2000), [](FILE *) {});
     streamEntity->fp = mockFile;
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
 
     auto libnMock = LibnMock::GetMock();
-    
+
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv));
-    
+
     // Mock GetEntityOf to return nullptr (stream already closed)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(nullptr), testing::Return(napi_ok)));
-    
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = StreamNExporter::CloseSync(env, mInfo);
 
@@ -185,7 +180,8 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_002, testing
 
 /**
  * @tc.name: StreamNExporterMockTest_CloseSync_003
- * @tc.desc: Test function of StreamNExporter::CloseSync interface when RemoveEntityOfFinal returns nullptr (result discarded).
+ * @tc.desc: Test function of StreamNExporter::CloseSync interface for SUCCESS when RemoveEntityOfFinal returns nullptr
+ * (result discarded).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -193,27 +189,23 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_002, testing
 HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-begin StreamNExporterMockTest_CloseSync_003";
-    
+
     auto streamEntity = make_unique<StreamEntity>();
-    auto mockFile = std::shared_ptr<FILE>(
-        reinterpret_cast<FILE *>(0x2000),
-        [](FILE *) {}
-    );
+    auto mockFile = std::shared_ptr<FILE>(reinterpret_cast<FILE *>(0x2000), [](FILE *) {});
     streamEntity->fp = mockFile;
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
 
     auto libnMock = LibnMock::GetMock();
-    
+
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, GetThisVar())
-        .Times(2).WillRepeatedly(Return(nv));
-    
+    EXPECT_CALL(*libnMock, GetThisVar()).Times(2).WillRepeatedly(Return(nv));
+
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(streamEntity.get())), testing::Return(napi_ok)));
-    
+
     // Mock RemoveEntityOfFinal to return nullptr
     EXPECT_CALL(*libnMock, napi_remove_wrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(nullptr), testing::Return(napi_ok)));
@@ -239,16 +231,15 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_003, testing
 HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_CloseSync_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-begin StreamNExporterMockTest_CloseSync_004";
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
 
     auto libnMock = LibnMock::GetMock();
-    
-    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>()))
-        .WillOnce(testing::Return(false));
 
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
+
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = StreamNExporter::CloseSync(env, mInfo);
 
@@ -273,23 +264,20 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_001, testing
     auto streamEntity = make_unique<StreamEntity>();
     FILE *filePtr = tmpfile();
     ASSERT_NE(filePtr, nullptr);
-    auto mockFile = std::shared_ptr<FILE>(
-        filePtr,
-        [](FILE *fp) {
-            if (fp) {
-                fclose(fp);
-            }
+    auto mockFile = std::shared_ptr<FILE>(filePtr, [](FILE *fp) {
+        if (fp) {
+            fclose(fp);
         }
-    );
+    });
     streamEntity->fp = mockFile;
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
     NVal mockNval = { env, nv };
 
     auto libnMock = LibnMock::GetMock();
-    
+
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
@@ -317,31 +305,28 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_001, testing
 HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_002, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-begin StreamNExporterMockTest_FlushSync_002";
-    
+
     auto streamEntity = make_unique<StreamEntity>();
     FILE *filePtr = tmpfile();
     ASSERT_NE(filePtr, nullptr);
-    auto mockFile = std::shared_ptr<FILE>(
-        filePtr,
-        [](FILE *fp) {
-            if (fp) {
-                fclose(fp);
-            }
+    auto mockFile = std::shared_ptr<FILE>(filePtr, [](FILE *fp) {
+        if (fp) {
+            fclose(fp);
         }
-    );
+    });
     streamEntity->fp = mockFile;
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
 
     auto libnMock = LibnMock::GetMock();
-    
+
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(nv));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(streamEntity.get())), testing::Return(napi_invalid_arg)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = StreamNExporter::FlushSync(env, mInfo);
 
@@ -363,21 +348,21 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_002, testing
 HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_003, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-begin StreamNExporterMockTest_FlushSync_003";
-    
+
     auto streamEntity = make_unique<StreamEntity>();
     streamEntity->fp = nullptr;
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
 
     auto libnMock = LibnMock::GetMock();
-    
+
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(nv));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(streamEntity.get())), testing::Return(napi_ok)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = StreamNExporter::FlushSync(env, mInfo);
 
@@ -399,16 +384,15 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_003, testing
 HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_004, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-begin StreamNExporterMockTest_FlushSync_004";
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
 
     auto libnMock = LibnMock::GetMock();
-    
-    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>()))
-        .WillOnce(testing::Return(false));
 
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
+
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = StreamNExporter::FlushSync(env, mInfo);
 
@@ -430,19 +414,18 @@ HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_004, testing
 HWTEST_F(StreamNExporterMockTest, StreamNExporterMockTest_FlushSync_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StreamNExporterMockTest-begin StreamNExporterMockTest_FlushSync_005";
-    
+
     napi_env env = reinterpret_cast<napi_env>(0x1000);
     napi_callback_info mInfo = reinterpret_cast<napi_callback_info>(0x1122);
     napi_value nv = reinterpret_cast<napi_value>(0x1200);
 
     auto libnMock = LibnMock::GetMock();
-    
+
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, GetThisVar())
-        .WillOnce(testing::Return(nv));
+    EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(testing::Return(nv));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(DoAll(SetArgPointee<2>(nullptr), testing::Return(napi_ok)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = StreamNExporter::FlushSync(env, mInfo);
 

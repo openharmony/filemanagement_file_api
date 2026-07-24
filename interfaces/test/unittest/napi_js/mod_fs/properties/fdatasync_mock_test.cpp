@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,7 @@ void FdatasyncMockTest::SetUp(void)
 
 void FdatasyncMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -80,7 +81,7 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_001, TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(tp));
     EXPECT_CALL(*uvMock, uv_fs_fdatasync(_, _, _, _)).WillOnce(Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Fdatasync::Sync(env, mInfo);
 
@@ -113,7 +114,7 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_002, TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, GetArg(_)).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(Return(tp));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Fdatasync::Sync(env, mInfo);
 
@@ -142,7 +143,7 @@ HWTEST_F(FdatasyncMockTest, FdatasyncMockTest_Sync_003, TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(A<size_t>())).WillOnce(Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(_));
+    EXPECT_CALL(*libnMock, ThrowErr(_)).Times(1);
 
     auto res = Fdatasync::Sync(env, mInfo);
 

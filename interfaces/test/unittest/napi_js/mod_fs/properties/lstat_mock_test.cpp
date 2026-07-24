@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ void LstatMockTest::SetUp(void)
 
 void LstatMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -81,21 +82,19 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_001, testing::ext::TestSize.Level1)
     const char *testUri = "file://com.example.statsupporturi/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
-    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
-    EXPECT_CALL(*uvMock, uv_fs_lstat(testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_lstat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto stat = Lstat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -123,34 +122,32 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_002, testing::ext::TestSize.Level1)
     const char *testUri = "/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
-        tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
-    EXPECT_CALL(*uvMock, uv_fs_lstat(testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_lstat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto stat = Lstat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
     libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(stat, nullptr);
-    
+
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_002";
 }
 
 /**
  * @tc.name: LstatMockTest_Sync_003
- * @tc.desc: Test function of Lstat::Sync interface with unsupported URI path for FAILURE.
+ * @tc.desc: Test function of Lstat::Sync interface for FAILURE when URI path is unsupported.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -166,21 +163,19 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_003, testing::ext::TestSize.Level1)
     const char *testUri = "datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
-    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
-    EXPECT_CALL(*uvMock, uv_fs_lstat(testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_lstat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto stat = Lstat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
@@ -206,7 +201,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_004, testing::ext::TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto stat = Lstat::Sync(env, info);
 
@@ -234,7 +229,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_005, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(badRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto stat = Lstat::Sync(env, info);
 
@@ -244,7 +239,7 @@ HWTEST_F(LstatMockTest, LstatMockTest_Sync_005, testing::ext::TestSize.Level1)
 
     GTEST_LOG_(INFO) << "LstatMockTest-end LstatMockTest_Sync_005";
 }
- 	 
+
 } // namespace Test
 } // namespace ModuleFileIO
 } // namespace FileManagement

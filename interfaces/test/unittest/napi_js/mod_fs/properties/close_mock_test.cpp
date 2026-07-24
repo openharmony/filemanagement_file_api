@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,7 @@ void CloseMockTest::SetUp(void)
 
 void CloseMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -89,7 +90,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_001, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Close::Sync(env, info);
 
@@ -169,7 +170,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_003, testing::ext::TestSize.Level1)
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_))
         .WillOnce(testing::SetErrnoAndReturn(EBADFD, -1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Close::Sync(env, info);
 
@@ -249,7 +250,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_005, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nv));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Close::Sync(env, info);
 
@@ -279,7 +280,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_006, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nullptr));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Close::Sync(env, info);
 
@@ -292,7 +293,8 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_006, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: CloseMockTest_Sync_007
- * @tc.desc: Test function of Close::Sync interface if no fd for SUCCESS when fdsan_close_with_tag succeeds and entity is removed.
+ * @tc.desc: Test function of Close::Sync interface if no fd for SUCCESS when fdsan_close_with_tag succeeds and entity
+ * is removed.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -369,7 +371,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_008, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Close::Sync(env, info);
 
@@ -413,9 +415,9 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_009, testing::ext::TestSize.Level1)
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(1));
     EXPECT_CALL(*libnMock, napi_remove_wrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)),
-        testing::Return(napi_invalid_arg)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+        .WillOnce(
+            testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_invalid_arg)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Close::Sync(env, info);
 
@@ -456,9 +458,9 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0010, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, GetArg(testing::_)).WillOnce(testing::Return(nv));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)),
-        testing::Return(napi_invalid_arg)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+        .WillOnce(
+            testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_invalid_arg)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Close::Sync(env, info);
 
@@ -485,7 +487,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0011, testing::ext::TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Close::Sync(env, info);
 
@@ -517,7 +519,7 @@ HWTEST_F(CloseMockTest, CloseMockTest_Sync_0012, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Close::Sync(env, info);
 

@@ -70,6 +70,7 @@ void RandomAccessFileNExporterMockTest::SetUp(void)
 
 void RandomAccessFileNExporterMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -135,7 +136,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_))
         .WillOnce(testing::SetErrnoAndReturn(EBADFD, -1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
@@ -168,7 +169,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nv));
     EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_invalid_arg)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
@@ -195,7 +196,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
@@ -223,7 +224,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(Return(true));
     EXPECT_CALL(*libnMock, GetThisVar()).WillOnce(Return(nullptr));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
@@ -256,7 +257,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_ok)));
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(0));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
@@ -292,7 +293,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_)).WillOnce(testing::Return(0));
     EXPECT_CALL(*libnMock, napi_remove_wrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity.get())), Return(napi_invalid_arg)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 
@@ -379,7 +380,7 @@ HWTEST_F(RandomAccessFileNExporterMockTest, RandomAccessFileNExporterMockTest_Cl
     EXPECT_CALL(*libnMock, napi_unwrap(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(static_cast<void *>(rafEntity_.get())), Return(napi_ok)));
     EXPECT_CALL(*uvMock, uv_fs_close(_, _, _, _)).WillOnce(Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = RandomAccessFileNExporter::CloseSync(env, mInfo);
 

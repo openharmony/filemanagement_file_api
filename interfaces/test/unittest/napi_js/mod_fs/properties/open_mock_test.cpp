@@ -59,6 +59,7 @@ void OpenMockTest::SetUp(void)
 
 void OpenMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -77,7 +78,7 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Open::Sync(env, info);
 
@@ -105,9 +106,8 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_002, testing::ext::TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Open::Sync(env, info);
 
@@ -132,32 +132,30 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_003, testing::ext::TestSize.Level1)
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
     const char *testPath = "/data/test/OpenMockTest_Sync_003.txt";
-    tuple<bool, unique_ptr<char[]>, size_t> pathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> pathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Open::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
-    libnMock->VerifyAndClearErr(13900001, "Operation not permitted. Open failed, path is: /d**a/t**t/Op******************3.t**");
+    libnMock->VerifyAndClearErr(
+        13900001, "Operation not permitted. Open failed, path is: /d**a/t**t/Op******************3.t**");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "OpenMockTest-end OpenMockTest_Sync_003";
@@ -177,28 +175,24 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_004, testing::ext::TestSize.Level1)
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
     const char *testPath = "/data/test/OpenMockTest_Sync_004.txt";
-    tuple<bool, unique_ptr<char[]>, size_t> pathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> pathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(10));
-    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(nullptr));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nullptr));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Open::Sync(env, info);
 
@@ -224,26 +218,23 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_005, testing::ext::TestSize.Level1)
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
     const char *testPath = "/data/test/OpenMockTest_Sync_005.txt";
-    tuple<bool, unique_ptr<char[]>, size_t> pathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> pathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     tuple<bool, int32_t> modeResult = { true, -1 };
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(2));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(modeResult));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Open::Sync(env, info);
 
@@ -269,16 +260,14 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_006, testing::ext::TestSize.Level1)
     napi_value objFile = reinterpret_cast<napi_value>(0x1200);
 
     const char *testPath = "/data/test/OpenMockTest_Sync_006.txt";
-    tuple<bool, unique_ptr<char[]>, size_t> pathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> pathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     FileEntity entity;
     entity.fd_ = std::make_unique<DistributedFS::FDGuard>(10);
@@ -286,13 +275,11 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_006, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(10));
-    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(objFile));
+    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(objFile));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
@@ -322,16 +309,14 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_007, testing::ext::TestSize.Level1)
     napi_value objFile = reinterpret_cast<napi_value>(0x1200);
 
     const char *testPath = "/data/test/OpenMockTest_Sync_007.txt";
-    tuple<bool, unique_ptr<char[]>, size_t> pathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> pathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     tuple<bool, int32_t> modeResult = { true, O_WRONLY };
 
@@ -341,15 +326,13 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_007, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(2));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(modeResult));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(10));
-    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(objFile));
+    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(objFile));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
@@ -379,30 +362,25 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_008, testing::ext::TestSize.Level1)
     napi_value objFile = reinterpret_cast<napi_value>(0x1200);
 
     const char *testPath = "/data/test/OpenMockTest_Sync_008.txt";
-    tuple<bool, unique_ptr<char[]>, size_t> pathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> pathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(10));
-    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(objFile));
-    EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(napi_invalid_arg));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(objFile));
+    EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_)).WillOnce(testing::Return(napi_invalid_arg));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Open::Sync(env, info);
 
@@ -428,26 +406,23 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_009, testing::ext::TestSize.Level1)
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
     const char *testPath = "/data/test/OpenMockTest_Sync_009.txt";
-    tuple<bool, unique_ptr<char[]>, size_t> pathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> pathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     tuple<bool, int32_t> modeResult = { true, O_WRONLY | O_RDWR };
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(2));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(modeResult));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Open::Sync(env, info);
 
@@ -473,16 +448,14 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_010, testing::ext::TestSize.Level1)
     napi_value objFile = reinterpret_cast<napi_value>(0x1200);
 
     const char *testPath = "/data/test/OpenMockTest_Sync_010.txt";
-    tuple<bool, unique_ptr<char[]>, size_t> pathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> pathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     tuple<bool, int32_t> modeResult = { true, O_RDWR };
 
@@ -492,15 +465,13 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_010, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(2));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(modeResult));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_open(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(10));
-    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(objFile));
+    EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(objFile));
     EXPECT_CALL(*libnMock, napi_unwrap(testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(static_cast<void *>(&entity)), testing::Return(napi_ok)));
     EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
@@ -529,26 +500,23 @@ HWTEST_F(OpenMockTest, OpenMockTest_Sync_011, testing::ext::TestSize.Level1)
     napi_callback_info info = reinterpret_cast<napi_callback_info>(0x1000);
 
     const char *testPath = "/data/test/OpenMockTest_Sync_011.txt";
-    tuple<bool, unique_ptr<char[]>, size_t> pathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> pathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     tuple<bool, int32_t> modeResult = { false, 0 };
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*libnMock, ToUTF8StringPath())
-        .WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
+    EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(pathResult))));
     EXPECT_CALL(*libnMock, GetArgc()).WillOnce(testing::Return(2));
     EXPECT_CALL(*libnMock, ToInt32(testing::_)).WillOnce(testing::Return(modeResult));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Open::Sync(env, info);
 
