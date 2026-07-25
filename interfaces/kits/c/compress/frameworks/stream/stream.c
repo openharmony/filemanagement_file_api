@@ -140,30 +140,3 @@ ARCHIVE_IMPL int StreamWriteUint64(struct Stream *stream, uint64_t value)
 {
     return StreamWriteValue(stream, value, sizeof(uint64_t));
 }
-
-ARCHIVE_IMPL int StreamCopyStream(struct Stream *targetStream, struct Stream *sourceStream, uint64_t size)
-{
-    ASSERT(targetStream != NULL);
-    ASSERT(sourceStream != NULL);
-    uint8_t buf[16384];
-    size_t copybytes = 0;
-    size_t read = 0;
-    size_t written = 0;
-
-    while (size > 0) {
-        copybytes = size;
-        if (copybytes > sizeof(buf)) {
-            copybytes = sizeof(buf);
-        }
-        read = StreamRead(sourceStream, buf, copybytes);
-        if (read != copybytes) {
-            return ARCHIVE_MEM_ERROR;
-        }
-        written = StreamWrite(targetStream, buf, read);
-        if (written != read) {
-            return ARCHIVE_MEM_ERROR;
-        }
-        size -= read;
-    }
-    return ARCHIVE_OK;
-}

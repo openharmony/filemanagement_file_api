@@ -54,6 +54,8 @@ struct ArchiveStreamReadCtx {
     void *readHandlerData;
     _Atomic uint8_t decompressCancel;
     uint32_t crc;
+    uint64_t totalInSize;
+    uint64_t totalOutSize;
 };
 
 #ifdef __cplusplus

@@ -327,23 +327,24 @@ struct SourceMgr {
     uint64_t size;
 };
 
-static void StreamNext(z_stream *stream, uLong *left, uLong *sourceLen)
+static void StreamNext(z_stream *stream, uint64_t *left, uint64_t *sourceLen)
 {
     const uInt max = (uInt)-1;
     if (stream->avail_out == 0) {
-        stream->avail_out = *left > (uLong)max ? max : (uInt)*left;
+        stream->avail_out = *left > (uint64_t)max ? max : (uInt)*left;
         *left -= stream->avail_out;
     }
     if (stream->avail_in == 0) {
-        stream->avail_in = *sourceLen > (uLong)max ? max : (uInt)*sourceLen;
+        stream->avail_in = *sourceLen > (uint64_t)max ? max : (uInt)*sourceLen;
         *sourceLen -= stream->avail_in;
     }
 }
 
-static int CompressDeflate(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen, int level)
+static int CompressDeflate(Bytef *dest, uint64_t *destLen, const Bytef *source, uint64_t sourceLen, int level)
 {
     z_stream stream = {0};
-    uLong left;
+    uint64_t left;
+    uint64_t totalOutProduced = 0;
     int err;
 
     if (destLen == NULL) {
@@ -364,11 +365,14 @@ static int CompressDeflate(Bytef *dest, uLongf *destLen, const Bytef *source, uL
     stream.avail_in = 0;
 
     do {
+        uInt availOutBefore;
         StreamNext(&stream, &left, &sourceLen);
+        availOutBefore = stream.avail_out;
         err = deflate(&stream, (sourceLen != 0) ? Z_NO_FLUSH : Z_FINISH);
+        totalOutProduced += (uint64_t)(availOutBefore - stream.avail_out);
     } while (err == Z_OK);
 
-    *destLen = stream.total_out;
+    *destLen = totalOutProduced;
     deflateEnd(&stream);
     return err == Z_STREAM_END ? Z_OK : err;
 }
@@ -386,7 +390,7 @@ EXPORT_API OH_Archive_ErrCode OH_Archive_BufferWrite(uint8_t *dest, uint64_t *de
         return OH_ARCHIVE_PARAM_ERROR;
     }
 
-    int ret = CompressDeflate(dest, (uLongf *)destLen, source, sourceLen, level);
+    int ret = CompressDeflate(dest, destLen, source, sourceLen, level);
     if (ret == Z_BUF_ERROR) {
         return OH_ARCHIVE_INSUFFICIENT_OUTBUF_ERROR;
     } else if (ret == Z_MEM_ERROR) {

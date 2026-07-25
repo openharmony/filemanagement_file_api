@@ -76,14 +76,14 @@ LOCAL int64_t DeflateStreamRead(struct Stream *stream, void *buf, int64_t size)
     DeflateStream *deflateStream;
     z_stream *zstream;
     size_t len;
-    size_t out0;
-    size_t zstreamOut;
+    uint64_t availOutBefore;
+    uint64_t produced;
     RETURN_IF_MAGIC_ERR(stream, STREAM_MAGIC_DEFLATE);
     deflateStream = (DeflateStream *)(void *)stream;
     zstream = &deflateStream->zstream;
     zstream->next_out = buf;
     zstream->avail_out = size;
-    out0 = zstream->total_out;
+    availOutBefore = zstream->avail_out;
     do {
         if (zstream->avail_in == 0) {
             len = StreamRead(stream->base, deflateStream->buf, sizeof(deflateStream->buf));
@@ -99,17 +99,18 @@ LOCAL int64_t DeflateStreamRead(struct Stream *stream, void *buf, int64_t size)
     if (ret != Z_OK && ret != Z_STREAM_END) {
         return Z_DATA_ERROR;
     }
-    zstreamOut = zstream->total_out - out0;
-    deflateStream->stream.totalOut += zstreamOut;
-    return zstreamOut;
+    produced = availOutBefore - zstream->avail_out;
+    deflateStream->stream.totalOut += produced;
+    return (int64_t)produced;
 }
 
 LOCAL int DeflateWriteBuf(struct Stream *stream, DeflateStream *deflateStream, z_stream *zstream, int flush)
 {
-    size_t processedIn;
-    size_t processedOut;
-    size_t totalOutBefore = zstream->total_out;
-    size_t totalInBefore = zstream->total_in;
+    uint64_t availInBefore = zstream->avail_in;
+    uint64_t availOutBefore = zstream->avail_out;
+    uint64_t flushedToBase = 0;
+    uint64_t processedIn;
+    uint64_t processedOut;
     int ret = Z_OK;
     do {
         if (zstream->avail_out == 0) {
@@ -117,6 +118,7 @@ LOCAL int DeflateWriteBuf(struct Stream *stream, DeflateStream *deflateStream, z
             if (len != (int64_t)deflateStream->len) {
                 return len < 0 ? ret : ARCHIVE_WRITE_ERROR;
             }
+            flushedToBase += (uint64_t)deflateStream->len;
             zstream->next_out = deflateStream->buf;
             zstream->avail_out = deflateStream->len;
         }
@@ -129,10 +131,10 @@ LOCAL int DeflateWriteBuf(struct Stream *stream, DeflateStream *deflateStream, z
             return ARCHIVE_ZLIB_ERROR;
         }
     } while (zstream->avail_in > 0 || (flush == Z_FINISH && ret == Z_OK));
-    processedIn = zstream->total_in - totalInBefore;
-    processedOut = zstream->total_out - totalOutBefore;
-    deflateStream->stream.totalOut += processedOut;
+    processedIn = availInBefore - zstream->avail_in;
+    processedOut = flushedToBase + availOutBefore - (uint64_t)zstream->avail_out;
     deflateStream->stream.totalIn += processedIn;
+    deflateStream->stream.totalOut += processedOut;
     return ARCHIVE_OK;
 }
 
