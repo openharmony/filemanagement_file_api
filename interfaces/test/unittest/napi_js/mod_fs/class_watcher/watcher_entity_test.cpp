@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Copyright (C) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,7 +106,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFd_001, testing::ext::T
 
 /**
  * @tc.name: WatcherEntityTest_CloseNotifyFd_002
- * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFd interface for SUCCESS.
+ * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFd interface for SUCCESS when notifyFd is initialized.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -129,7 +129,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFd_002, testing::ext::T
 
 /**
  * @tc.name: WatcherEntityTest_CloseNotifyFd_003
- * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFd interface for FAILURE.
+ * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFd interface for FAILURE when notifyFd is not initialized.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -149,7 +149,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFd_003, testing::ext::T
 
 /**
  * @tc.name: WatcherEntityTest_InitNotify_001
- * @tc.desc: Test function of FileWatcher::InitNotify interface for SUCCESS.
+ * @tc.desc: Test function of FileWatcher::InitNotify interface for SUCCESS when inotify_init and eventfd succeed.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -267,7 +267,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_ReadNotifyEvent_001, testing::ext:
 
 /**
  * @tc.name: WatcherEntityTest_ReadNotifyEvent_002
- * @tc.desc: Test first if branch - remaining data < sizeof(inotify_event)
+ * @tc.desc: Test function of WatcherEntityTest::ReadNotifyEvent interface for SUCCESS when read returns partial data.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -292,7 +292,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_ReadNotifyEvent_002, testing::ext:
 
 /**
  * @tc.name: WatcherEntityTest_ReadNotifyEvent_003
- * @tc.desc: Test second if branch - event->len exceeds available buffer
+ * @tc.desc: Test function of WatcherEntityTest::ReadNotifyEvent interface for SUCCESS when event->len exceeds buffer.
  * @tc.size: SMALL
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -343,7 +343,7 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_001, testing::
 
 /**
  * @tc.name: WatcherEntityTest_CloseNotifyFdLocked_002
- * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for SUCCESS without close.
+ * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for SUCCESS when reading_ is true.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -362,7 +362,8 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_002, testing::
 
 /**
  * @tc.name: WatcherEntityTest_CloseNotifyFdLocked_003
- * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for multi.
+ * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for SUCCESS when reading_ is true with
+ * concurrent threads.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -398,7 +399,8 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_003, testing::
 
 /**
  * @tc.name: WatcherEntityTest_CloseNotifyFdLocked_004
- * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for multi.
+ * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for SUCCESS when reading_ is true and
+ * run_ is false with concurrent threads.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -439,7 +441,8 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_004, testing::
 
 /**
  * @tc.name: WatcherEntityTest_CloseNotifyFdLocked_005
- * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for multi.
+ * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for SUCCESS after InitNotify with
+ * concurrent threads.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -482,7 +485,8 @@ HWTEST_F(WatcherEntityTest, WatcherEntityTest_CloseNotifyFdLocked_005, testing::
 
 /**
  * @tc.name: WatcherEntityTest_CloseNotifyFdLocked_006
- * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for multi.
+ * @tc.desc: Test function of WatcherEntityTest::CloseNotifyFdLocked interface for FAILURE during concurrent
+ * GetNotifyEvent and close.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

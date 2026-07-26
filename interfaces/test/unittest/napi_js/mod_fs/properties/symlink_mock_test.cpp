@@ -65,6 +65,7 @@ void SymlinkMockTest::SetUp(void)
 
 void SymlinkMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -107,12 +108,13 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_001, testing::ext::TestSize.Level
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_symlink(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Symlink::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "SymlinkMockTest-end SymlinkMockTest_Sync_001";
@@ -134,11 +136,12 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_002, testing::ext::TestSize.Level
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Symlink::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "SymlinkMockTest-end SymlinkMockTest_Sync_002";
@@ -170,11 +173,12 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_003, testing::ext::TestSize.Level
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(srcRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Symlink::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "SymlinkMockTest-end SymlinkMockTest_Sync_003";
@@ -216,11 +220,12 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_004, testing::ext::TestSize.Level
     EXPECT_CALL(*libnMock, ToUTF8StringPath())
         .WillOnce(testing::Return(move(srcRes)))
         .WillOnce(testing::Return(move(destRes)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Symlink::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "SymlinkMockTest-end SymlinkMockTest_Sync_004";
@@ -228,7 +233,7 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_004, testing::ext::TestSize.Level
 
 /**
  * @tc.name: SymlinkMockTest_Sync_005
- * @tc.desc: Test function of Symlink::Sync interface for SUCCESS.
+ * @tc.desc: Test function of Symlink::Sync interface for SUCCESS when uv_fs_symlink succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -267,6 +272,8 @@ HWTEST_F(SymlinkMockTest, SymlinkMockTest_Sync_005, testing::ext::TestSize.Level
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_symlink(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(0));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(NVal(env, undefinedRes)));
 
     auto res = Symlink::Sync(env, info);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ void StatMockTest::SetUp(void)
 
 void StatMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     GTEST_LOG_(INFO) << "TearDown";
 }
 
@@ -81,26 +82,25 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_001, testing::ext::TestSize.Level1)
     const char *testUri = "file://com.example.statsupporturi/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
-    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
-    EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto stat = Stat::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001);
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "StatMockTest-end StatURI_0001";
@@ -123,25 +123,25 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_002, testing::ext::TestSize.Level1)
     const char *testPath = "/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
-    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testPath) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testPath) + 1, testPath, strlen(testPath));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
-    EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto stat = Stat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(
+        13900001, "Operation not permitted. Stat failed, path is: /d**a/st****e/e**/b**e/f***s/t**t.t**");
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "StatMockTest-end StatMockTest_Sync_002";
@@ -149,7 +149,7 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: StatMockTest_Sync_003
- * @tc.desc: Test function of Stat::Sync interface with unsupported URI path for FAILURE.
+ * @tc.desc: Test function of Stat::Sync interface for FAILURE when URI path is unsupported.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -164,25 +164,26 @@ HWTEST_F(StatMockTest, StatMockTest_Sync_003, testing::ext::TestSize.Level1)
     const char *testUri = "datashare://com.example.statsupporturi/data/storage/el2/base/files/test.txt";
     auto libnMock = LibnMock::GetMock();
     auto uvMock = UvFsMock::GetMock();
-    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = {
-        true,
+    tuple<bool, unique_ptr<char[]>, size_t> uriPathResult = { true,
         [&]() -> unique_ptr<char[]> {
             auto ptr = make_unique<char[]>(strlen(testUri) + 1);
             auto ret = strncpy_s(ptr.get(), strlen(testUri) + 1, testUri, strlen(testUri));
             EXPECT_EQ(ret, EOK);
             return ptr;
         }(),
-        1
-    };
+        1 };
 
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(testing::ByMove(std::move(uriPathResult))));
-    EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*uvMock, uv_fs_stat(testing::_, testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto stat = Stat::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvMock.get());
+    libnMock->VerifyAndClearErr(13900001,
+        "Operation not permitted. Stat failed, path is: "
+        "datashare://co***********************i/d**a/st****e/e**/b**e/f***s/t**t.t**");
     EXPECT_EQ(stat, nullptr);
 
     GTEST_LOG_(INFO) << "StatMockTest-end StatMockTest_Sync_003";

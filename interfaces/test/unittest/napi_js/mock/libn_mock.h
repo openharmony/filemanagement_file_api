@@ -122,6 +122,31 @@ public:
     MOCK_METHOD(NVal, CreateInt64, (napi_env, int64_t), (override));
 
 public:
+    int32_t lastErrno = 0;
+    std::string lastErrMsg;
+
+    void ResetErrState()
+    {
+        lastErrno = 0;
+        lastErrMsg.clear();
+    }
+
+    void VerifyAndClearErr(int32_t expectedErrno, const std::string &expectedErrMsg)
+    {
+        EXPECT_EQ(lastErrno, expectedErrno);
+        EXPECT_EQ(lastErrMsg, expectedErrMsg);
+        lastErrno = 0;
+        lastErrMsg.clear();
+    }
+
+    void VerifyAndClearErr(int32_t expectedErrno)
+    {
+        EXPECT_EQ(lastErrno, expectedErrno);
+        lastErrno = 0;
+        lastErrMsg.clear();
+    }
+
+public:
     static std::shared_ptr<LibnMock> GetMock();
     static void EnableMock();
     static void DisableMock();
