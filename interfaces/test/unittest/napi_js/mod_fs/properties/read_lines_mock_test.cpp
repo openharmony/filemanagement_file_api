@@ -57,6 +57,7 @@ void ReadLinesMockTest::SetUp()
 
 void ReadLinesMockTest::TearDown()
 {
+    LibnMock::GetMock()->ResetErrState();
     LibnMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDown";
 }
@@ -77,11 +78,12 @@ HWTEST_F(ReadLinesMockTest, ReadLinesMockTest_Sync_001, testing::ext::TestSize.L
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = ReadLines::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "ReadLinesMockTest-end ReadLinesMockTest_Sync_001";
@@ -107,11 +109,12 @@ HWTEST_F(ReadLinesMockTest, ReadLinesMockTest_Sync_002, testing::ext::TestSize.L
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToUTF8StringPath()).WillOnce(testing::Return(move(isStr)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = ReadLines::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "ReadLinesMockTest-end ReadLinesMockTest_Sync_002";

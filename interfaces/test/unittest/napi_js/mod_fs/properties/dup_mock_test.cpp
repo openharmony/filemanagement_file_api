@@ -60,6 +60,7 @@ void DupMockTest::SetUp(void)
 
 void DupMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     LibnMock::DisableMock();
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDown";
@@ -67,7 +68,7 @@ void DupMockTest::TearDown(void)
 
 /**
  * @tc.name: DupMockTest_Sync_001
- * @tc.desc: Test function of Dup::Sync interface for FAILED with ARGS ERROR.
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when InitArgs fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -80,10 +81,11 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Dup::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_001";
@@ -91,7 +93,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: DupMockTest_Sync_002
- * @tc.desc: Test function of Dup::Sync interface for FAILED with ToInt32 ERROR.
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when fd is not a valid integer.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -106,10 +108,11 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Dup::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_002";
@@ -117,7 +120,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: DupMockTest_Sync_003
- * @tc.desc: Test function of Dup::Sync interface for FAILED with dup ERROR.
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when dup fails on invalid fd.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -132,10 +135,11 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_003, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Dup::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900008, "Bad file descriptor");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_003";
@@ -143,7 +147,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_003, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: DupMockTest_Sync_004
- * @tc.desc: Test function of Dup::Sync interface for FAILED with uv_fs_readlink ERROR.
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when uv_fs_readlink fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -164,12 +168,13 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_004, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*uvFsMock, uv_fs_readlink(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Dup::Sync(env, info);
     close(srcFd);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvFsMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_TRUE(filesystem::remove(filePath));
     EXPECT_EQ(res, nullptr);
 
@@ -177,12 +182,12 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_004, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: DupMockTest_Sync_005
-* @tc.desc: Test function of Dup::Sync interface for SUCCEED.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: DupMockTest_Sync_005
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when InstantiateClass fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(DupMockTest, DupMockTest_Sync_005, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DupMockTest-begin DupMockTest_Sync_005";
@@ -191,7 +196,7 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_005, testing::ext::TestSize.Level1)
     string filePath = "/data/test/DupMockTest_Sync_005.txt";
     char uvArr[] = "DupMockTest_Sync_005";
     char *uvPtr = uvArr;
-    int srcFd = open(filePath.c_str(), O_CREAT|O_RDWR, 0644);
+    int srcFd = open(filePath.c_str(), O_CREAT | O_RDWR, 0644);
     EXPECT_GT(srcFd, -1);
     tuple<bool, int> isFd = { true, srcFd };
 
@@ -202,14 +207,16 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_005, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvFsMock, uv_fs_readlink(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::DoAll(testing::Invoke([uvPtr](uv_loop_t *lop, uv_fs_t *req, const char *path, uv_fs_cb cb) {
             req->ptr = static_cast<void *>(uvPtr);
-        }), testing::Return(0)));
+        }),
+            testing::Return(0)));
     EXPECT_CALL(*libnMock, InstantiateClass(testing::_, testing::_, testing::_)).WillOnce(testing::Return(nullptr));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Dup::Sync(env, info);
     close(srcFd);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvFsMock.get());
+    libnMock->VerifyAndClearErr(13900005, "I/O error");
     EXPECT_TRUE(filesystem::remove(filePath));
     EXPECT_EQ(res, nullptr);
 
@@ -217,12 +224,12 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_005, testing::ext::TestSize.Level1)
 }
 
 /**
-* @tc.name: DupMockTest_Sync_006
-* @tc.desc: Test function of Dup::Sync interface for FAILURE when srcFd is negative.
-* @tc.size: MEDIUM
-* @tc.type: FUNC
-* @tc.level Level 1
-*/
+ * @tc.name: DupMockTest_Sync_006
+ * @tc.desc: Test function of Dup::Sync interface for FAILURE when srcFd is negative.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
 HWTEST_F(DupMockTest, DupMockTest_Sync_006, testing::ext::TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DupMockTest-begin DupMockTest_Sync_006";
@@ -233,11 +240,12 @@ HWTEST_F(DupMockTest, DupMockTest_Sync_006, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Dup::Sync(env, info);
 
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "DupMockTest-end DupMockTest_Sync_006";

@@ -56,6 +56,7 @@ void FsyncMockTest::SetUp(void)
 
 void FsyncMockTest::TearDown(void)
 {
+    LibnMock::GetMock()->ResetErrState();
     LibnMock::DisableMock();
     UvFsMock::DisableMock();
     GTEST_LOG_(INFO) << "TearDown";
@@ -63,7 +64,7 @@ void FsyncMockTest::TearDown(void)
 
 /**
  * @tc.name: FsyncMockTest_Sync_001
- * @tc.desc: Test function of Fsync::Sync interface for FAILED with ARGS ERROR.
+ * @tc.desc: Test function of Fsync::Sync interface for FAILURE when InitArgs fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -76,10 +77,11 @@ HWTEST_F(FsyncMockTest, FsyncMockTest_Sync_001, testing::ext::TestSize.Level1)
 
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Fsync::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FsyncMockTest-end FsyncMockTest_Sync_001";
@@ -87,7 +89,7 @@ HWTEST_F(FsyncMockTest, FsyncMockTest_Sync_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: FsyncMockTest_Sync_002
- * @tc.desc: Test function of Fsync::Sync interface for FAILED with Analyze args ERROR.
+ * @tc.desc: Test function of Fsync::Sync interface for FAILURE when fd is not a valid integer.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -102,10 +104,11 @@ HWTEST_F(FsyncMockTest, FsyncMockTest_Sync_002, testing::ext::TestSize.Level1)
     auto libnMock = LibnMock::GetMock();
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Fsync::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
+    libnMock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FsyncMockTest-end FsyncMockTest_Sync_002";
@@ -113,7 +116,7 @@ HWTEST_F(FsyncMockTest, FsyncMockTest_Sync_002, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: FsyncMockTest_Sync_003
- * @tc.desc: Test function of Fsync::Sync interface for FAILED with uv_fs_fsync ERROR.
+ * @tc.desc: Test function of Fsync::Sync interface for FAILURE when uv_fs_fsync fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -132,14 +135,16 @@ HWTEST_F(FsyncMockTest, FsyncMockTest_Sync_003, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*uvFsMock, uv_fs_fsync(testing::_, testing::_, testing::_, testing::_))
-            .WillOnce(testing::DoAll(testing::Invoke([uvPtr](uv_loop_t *lop, uv_fs_t *req, uv_file fd, uv_fs_cb cb) {
-                req->ptr = static_cast<void *>(uvPtr);
-            }), testing::Return(-1)));
-    EXPECT_CALL(*libnMock, ThrowErr(testing::_));
+        .WillOnce(testing::DoAll(testing::Invoke([uvPtr](uv_loop_t *lop, uv_fs_t *req, uv_file fd, uv_fs_cb cb) {
+            req->ptr = static_cast<void *>(uvPtr);
+        }),
+            testing::Return(-1)));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(1);
 
     auto res = Fsync::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
     testing::Mock::VerifyAndClearExpectations(uvFsMock.get());
+    libnMock->VerifyAndClearErr(13900001, "Operation not permitted");
     EXPECT_EQ(res, nullptr);
 
     GTEST_LOG_(INFO) << "FsyncMockTest-end FsyncMockTest_Sync_003";
@@ -147,7 +152,7 @@ HWTEST_F(FsyncMockTest, FsyncMockTest_Sync_003, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: FsyncMockTest_Sync_004
- * @tc.desc: Test function of Fsync::Sync interface for SUCCEED.
+ * @tc.desc: Test function of Fsync::Sync interface for SUCCESS when uv_fs_fsync succeeds.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -167,10 +172,13 @@ HWTEST_F(FsyncMockTest, FsyncMockTest_Sync_004, testing::ext::TestSize.Level1)
     EXPECT_CALL(*libnMock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*libnMock, ToInt32()).WillOnce(testing::Return(isFd));
     EXPECT_CALL(*uvFsMock, uv_fs_fsync(testing::_, testing::_, testing::_, testing::_))
-            .WillOnce(testing::DoAll(testing::Invoke([uvPtr](uv_loop_t *lop, uv_fs_t *req, uv_file fd, uv_fs_cb cb) {
-                req->ptr = static_cast<void *>(uvPtr);
-            }), testing::Return(0)));
-    EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(NVal {env, val}));
+        .WillOnce(testing::DoAll(testing::Invoke([uvPtr](uv_loop_t *lop, uv_fs_t *req, uv_file fd, uv_fs_cb cb) {
+            req->ptr = static_cast<void *>(uvPtr);
+        }),
+            testing::Return(0)));
+    EXPECT_CALL(*libnMock, CreateUndefined(testing::_)).WillOnce(testing::Return(NVal { env, val }));
+    EXPECT_CALL(*libnMock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*libnMock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
 
     auto res = Fsync::Sync(env, info);
     testing::Mock::VerifyAndClearExpectations(libnMock.get());
