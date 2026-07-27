@@ -1,0 +1,42 @@
+[
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_Swapfs_CreateManager",
+        "api_type": "system"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_Swapfs_DestroyManager",
+        "api_type": "system"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_Swapfs_SwapOut",
+        "api_type": "system"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_Swapfs_SwapIn",
+        "api_type": "system"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_Swapfs_QueryData",
+        "api_type": "system"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_Swapfs_GetStats",
+        "api_type": "system"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_Swapfs_RemoveData",
+        "api_type": "system"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_Swapfs_RemoveAllData",
+        "api_type": "system"
+    }
+]
