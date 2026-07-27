@@ -93,7 +93,7 @@ ohos_shared_library("task_signal_native") {
 
     public_configs = [ ":task_signal_config" ]
 
-    deps = [ "${utils_path}/filemgmt_libhilog:filemgmt_libhilog" ]
+    deps = [ "${utils_path}/filemgmt_libhilog" ]
 
     external_deps = [
       "ability_runtime:abilitykit_native",
@@ -136,7 +136,7 @@ ohos_shared_library("environment_native") {
   sources = [ "environment/environment_native.cpp" ]
   public_configs = [ ":environment_config" ]
 
-  deps = [ "${utils_path}/filemgmt_libhilog:filemgmt_libhilog" ]
+  deps = [ "${utils_path}/filemgmt_libhilog" ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
@@ -181,7 +181,7 @@ ohos_shared_library("fileio_native") {
 
   public_configs = [ ":fileio_config" ]
 
-  deps = [ "${utils_path}/filemgmt_libhilog:filemgmt_libhilog" ]
+  deps = [ "${utils_path}/filemgmt_libhilog" ]
 
   external_deps = [
     "ability_base:zuri",
@@ -202,4 +202,7 @@ group("build_kits_native") {
     ":remote_uri_native",
     ":task_signal_native",
   ]
+  if (file_api_feature_swapfs) {
+    deps += [ "swapfs:swapfs_native" ]
+  }
 }

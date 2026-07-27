@@ -1,0 +1,79 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/filemanagement/file_api/file_api.gni")
+
+ohos_unittest("swapfs_native_test") {
+  resource_config_file = "../resource/ohos_test.xml"
+  module_out_path = "file_api/file_api"
+
+  sources = [
+    "${file_api_path}/interfaces/kits/c/swapfs/swapfs.c",
+    "${file_api_path}/interfaces/kits/native/swapfs/src/swapfs_c_api.cpp",
+    "${file_api_path}/interfaces/kits/native/swapfs/src/swapfs_err_mapper.cpp",
+    "${file_api_path}/interfaces/kits/native/swapfs/src/swapfs_manager.cpp",
+    "${file_api_path}/interfaces/kits/native/swapfs/src/swapfs_proxy_control.cpp",
+    "${file_api_path}/interfaces/kits/native/swapfs/src/swapfs_session_cleaner.cpp",
+    "${file_api_path}/interfaces/kits/native/swapfs/src/swapfs_sync_io_engine.cpp",
+    "${file_api_path}/interfaces/kits/native/swapfs/src/swapfs_uring_read_engine.cpp",
+    "../common_mock/accesstoken_kit_mock.cpp",
+    "../common_mock/tokenid_kit_mock.cpp",
+    "swapfs_err_mapper_test.cpp",
+    "swapfs_io_engine_test.cpp",
+    "swapfs_manager_test.cpp",
+    "swapfs_proxy_control_test.cpp",
+    "swapfs_session_cleaner_test.cpp",
+    "swapfs_syscall_mock.cpp",
+    "swapfs_test.cpp",
+  ]
+
+  include_dirs = [
+    "${file_api_path}/interfaces/kits/c/swapfs",
+    "${file_api_path}/interfaces/kits/native/swapfs/include",
+    "${utils_path}/filemgmt_libhilog",
+    "../common_mock",
+  ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  deps = [ "${utils_path}/filemgmt_libhilog" ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+    "storage_service:storage_manager_sa_proxy",
+  ]
+  libs = [ "dl" ]
+  if (file_api_feature_hyperaio) {
+    defines = [ "SWAPFS_USE_LIBURING" ]
+    external_deps += [
+      "ipc:ipc_single",
+      "liburing",
+    ]
+  }
+}
+
+group("swapfs_test") {
+  testonly = true
+  deps = [ ":swapfs_native_test" ]
+}
