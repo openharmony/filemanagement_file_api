@@ -40,11 +40,27 @@ public:
 
     // n_class GetEntityOf
     virtual napi_status napi_unwrap(napi_env env, napi_value js_object, void **result) = 0;
+    // CC-OFFNXT(G.FUN.01-CPP) Signature mirrors the fixed N-API ABI for transparent mocking.
+    virtual napi_status napi_wrap(napi_env env, napi_value jsObject, void *nativeObject,
+        napi_finalize finalizeCb, void *finalizeHint, napi_ref *result) = 0;
     virtual napi_status napi_remove_wrap(napi_env env, napi_value js_object, void **result) = 0;
     virtual napi_status napi_create_array(napi_env env, napi_value *result) = 0;
     virtual napi_status napi_delete_reference(napi_env env, napi_ref ref) = 0;
     virtual napi_status napi_get_reference_value(napi_env env, napi_ref ref, napi_value *result) = 0;
     virtual napi_status napi_typeof(napi_env env, napi_value value, napi_valuetype *result) = 0;
+    virtual napi_status napi_load_module(napi_env env, const char *path, napi_value *result) = 0;
+    virtual napi_status napi_get_named_property(
+        napi_env env, napi_value object, const char *utf8name, napi_value *result) = 0;
+    virtual napi_status napi_new_instance(napi_env env, napi_value constructor, size_t argc,
+        const napi_value *argv, napi_value *result) = 0;
+    virtual napi_status napi_create_reference(
+        napi_env env, napi_value value, uint32_t initialRefcount, napi_ref *result) = 0;
+    virtual napi_status napi_open_handle_scope(napi_env env, napi_handle_scope *result) = 0;
+    virtual napi_status napi_close_handle_scope(napi_env env, napi_handle_scope scope) = 0;
+    // CC-OFFNXT(G.FUN.01-CPP) Signature mirrors the fixed N-API ABI for transparent mocking.
+    virtual napi_status napi_call_function(napi_env env, napi_value recv, napi_value func,
+        size_t argc, const napi_value *argv, napi_value *result) = 0;
+    virtual napi_status napi_get_and_clear_last_exception(napi_env env, napi_value *result) = 0;
     virtual napi_value InstantiateClass(
         napi_env env, const std::string &className, const std::vector<napi_value> &args) = 0;
 
@@ -87,11 +103,24 @@ public:
     MOCK_METHOD(napi_value, GetThisVar, (), (override));
 
     MOCK_METHOD(napi_status, napi_unwrap, (napi_env, napi_value, void **), (override));
+    MOCK_METHOD(napi_status, napi_wrap,
+        (napi_env, napi_value, void *, napi_finalize, void *, napi_ref *), (override));
     MOCK_METHOD(napi_status, napi_remove_wrap, (napi_env, napi_value, void **), (override));
     MOCK_METHOD(napi_status, napi_create_array, (napi_env, napi_value *), (override));
     MOCK_METHOD(napi_status, napi_delete_reference, (napi_env, napi_ref), (override));
     MOCK_METHOD(napi_status, napi_get_reference_value, (napi_env, napi_ref, napi_value *), (override));
     MOCK_METHOD(napi_status, napi_typeof, (napi_env, napi_value, napi_valuetype *), (override));
+    MOCK_METHOD(napi_status, napi_load_module, (napi_env, const char *, napi_value *), (override));
+    MOCK_METHOD(napi_status, napi_get_named_property,
+        (napi_env, napi_value, const char *, napi_value *), (override));
+    MOCK_METHOD(napi_status, napi_new_instance,
+        (napi_env, napi_value, size_t, const napi_value *, napi_value *), (override));
+    MOCK_METHOD(napi_status, napi_create_reference, (napi_env, napi_value, uint32_t, napi_ref *), (override));
+    MOCK_METHOD(napi_status, napi_open_handle_scope, (napi_env, napi_handle_scope *), (override));
+    MOCK_METHOD(napi_status, napi_close_handle_scope, (napi_env, napi_handle_scope), (override));
+    MOCK_METHOD(napi_status, napi_call_function,
+        (napi_env, napi_value, napi_value, size_t, const napi_value *, napi_value *), (override));
+    MOCK_METHOD(napi_status, napi_get_and_clear_last_exception, (napi_env, napi_value *), (override));
     MOCK_METHOD(
         napi_value, InstantiateClass, (napi_env, const std::string&, const std::vector<napi_value>&), (override));
 
