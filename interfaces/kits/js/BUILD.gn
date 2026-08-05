@@ -47,6 +47,7 @@ ohos_shared_library("fileio") {
     "-Oz",
   ]
   branch_protector_ret = "pac_ret"
+  branch_protector_frt = "bti"
   sanitize = {
     integer_overflow = true
     ubsan = true
