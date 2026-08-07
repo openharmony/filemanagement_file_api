@@ -82,6 +82,7 @@ public:
     virtual std::tuple<bool, int64_t> ToInt64() = 0;
     virtual std::tuple<bool, int64_t> ToInt64(int64_t defaultValue) = 0;
     virtual std::tuple<bool, double> ToDouble() = 0;
+    virtual std::tuple<bool, std::vector<std::string>, uint32_t> ToStringArray() = 0;
 
     virtual bool HasProp(std::string propName) = 0;
     virtual NVal GetProp(std::string propName) = 0;
@@ -140,6 +141,7 @@ public:
     MOCK_METHOD((std::tuple<bool, int64_t>), ToInt64, (), (override));
     MOCK_METHOD((std::tuple<bool, int64_t>), ToInt64, (int64_t), (override));
     MOCK_METHOD((std::tuple<bool, double>), ToDouble, (), (override));
+    MOCK_METHOD((std::tuple<bool, std::vector<std::string>, uint32_t>), ToStringArray, (), (override));
 
     MOCK_METHOD(bool, HasProp, (std::string), (override));
     MOCK_METHOD(NVal, GetProp, (std::string), (override));
