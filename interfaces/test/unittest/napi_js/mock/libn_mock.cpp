@@ -852,6 +852,27 @@ std::tuple<bool, double> NVal::ToDouble() const
     return realToDouble();
 }
 
+std::tuple<bool, std::vector<std::string>, uint32_t> NVal::ToStringArray()
+{
+    if (LibnMock::IsMockable()) {
+        return LibnMock::GetMock()->ToStringArray();
+    }
+
+    static std::tuple<bool, std::vector<std::string>, uint32_t> (*realToStringArray)() = []() {
+        auto func = (std::tuple<bool, std::vector<std::string>, uint32_t>(*)())dlsym(
+            RTLD_NEXT, "_ZN4OHOS14FileManagement4LibN4NVal13ToStringArrayEv");
+        if (!func) {
+            GTEST_LOG_(ERROR) << "Failed to resolve real ToStringArray: " << dlerror();
+        }
+        return func;
+    }();
+
+    if (!realToStringArray) {
+        return { false, {}, 0 };
+    }
+    return realToStringArray();
+}
+
 bool NVal::HasProp(std::string propName) const
 {
     if (LibnMock::IsMockable()) {
