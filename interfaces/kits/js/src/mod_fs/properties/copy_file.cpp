@@ -28,8 +28,6 @@
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
 
-#include "file_fs_metrics.h"
-
 namespace OHOS {
 namespace FileManagement {
 namespace ModuleFileIO {
@@ -250,14 +248,12 @@ napi_value CopyFile::Sync(napi_env env, napi_callback_info info)
     if (src.isPath && dest.isPath) {
         auto err = IsAllPath(src, dest);
         if (err) {
-            METRICS_ERROR("CoreFileKit.fileio.Dyn.copyFileSync.Err", err.GetErrCode());
             err.ThrowErr(env);
             return nullptr;
         }
     } else {
         auto err = OpenFile(src, dest);
         if (err) {
-            METRICS_ERROR("CoreFileKit.fileio.Dyn.copyFileSync.Err", err.GetErrCode());
             err.ThrowErr(env);
             return nullptr;
         }
@@ -294,17 +290,9 @@ napi_value CopyFile::Async(napi_env env, napi_callback_info info)
     }
     auto cbExec = [para]() -> NError {
         if (para->src_.isPath && para->dest_.isPath) {
-            auto err = IsAllPath(para->src_, para->dest_);
-            if (err) {
-                METRICS_ERROR("CoreFileKit.fileio.Dyn.copyFile.Err", err.GetErrCode());
-            }
-            return err;
+            return IsAllPath(para->src_, para->dest_);
         }
-        auto err = OpenFile(para->src_, para->dest_);
-        if (err) {
-            METRICS_ERROR("CoreFileKit.fileio.Dyn.copyFile.Err", err.GetErrCode());
-        }
-        return err;
+        return OpenFile(para->src_, para->dest_);
     };
     auto cbCompl = [](napi_env env, NError err) -> NVal {
         if (err) {

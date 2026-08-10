@@ -25,7 +25,6 @@
 #include "file_fs_trace.h"
 #include "file_utils.h"
 #include "filemgmt_libhilog.h"
-#include "file_fs_metrics.h"
 
 namespace OHOS::FileManagement::ModuleFileIO {
 using namespace std;
@@ -122,13 +121,11 @@ napi_value Stat::Sync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!stat_req) {
         HILOGE("Failed to request heap memory.");
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.statSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
     auto err = CheckFsStat(fileInfo, stat_req.get());
     if (err) {
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.statSync.Err", err.GetErrCode());
         err.ThrowErr(env);
         return nullptr;
     }
@@ -169,12 +166,10 @@ napi_value Stat::Async(napi_env env, napi_callback_info info)
             new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!stat_req) {
             HILOGE("Failed to request heap memory.");
-            METRICS_ERROR("CoreFileKit.fileio.Dyn.stat.Err", NError(ENOMEM).GetErrCode());
             return NError(ENOMEM);
         }
         auto err = CheckFsStat(*fileInfo, stat_req.get());
         if (err) {
-            METRICS_ERROR("CoreFileKit.fileio.Dyn.stat.Err", err.GetErrCode());
             return err;
         }
         arg->stat_ = stat_req->statbuf;
