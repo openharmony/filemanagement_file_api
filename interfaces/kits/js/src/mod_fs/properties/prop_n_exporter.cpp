@@ -358,13 +358,11 @@ napi_value PropNExporter::Unlink(napi_env env, napi_callback_info info)
             new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
         if (!unlink_req) {
             HILOGE("Failed to request heap memory.");
-            METRICS_ERROR("CoreFileKit.fileio.Dyn.unlink.Err", NError(ENOMEM).GetErrCode());
             return NError(ENOMEM);
         }
         int ret = uv_fs_unlink(nullptr, unlink_req.get(), path.c_str(), nullptr);
         if (ret < 0) {
             HILOGE("Failed to unlink with path ret %{public}d", ret);
-            METRICS_ERROR("CoreFileKit.fileio.Dyn.unlink.Err", NError(ret).GetErrCode());
             return NError(ret);
         }
         return NError(ERRNO_NOERR);
@@ -407,7 +405,6 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
         new (std::nothrow) uv_fs_t, CommonFunc::fs_req_cleanup };
     if (!unlink_req) {
         HILOGE("Failed to request heap memory.");
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.unlinkSync.Err", NError(ENOMEM).GetErrCode());
         NError(ENOMEM).ThrowErr(env);
         return nullptr;
     }
@@ -416,7 +413,6 @@ napi_value PropNExporter::UnlinkSync(napi_env env, napi_callback_info info)
     traceUvUnlink.End();
     if (ret < 0) {
         HILOGE("Failed to unlink with path ret %{public}d", ret);
-        METRICS_ERROR("CoreFileKit.fileio.Dyn.unlinkSync.Err", NError(ret).GetErrCode());
         NError(ret).ThrowErr(env);
         if (FileApiDebug::isLogEnabled) {
             HILOGD("Path is %{private}s", path.get());
