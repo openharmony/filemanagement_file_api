@@ -39,7 +39,7 @@ typedef struct {
 } ErrCodeMap;
 
 int CreateDirectory(const char *path, const char *base);
-int CreateSymlink(const char *old, const char *newSym);
+int CreateSymlink(const char *targetPath, const char *symlinkPath);
 int CreateParentDirectory(const char *filePath, const char* base);
 int GetOutputFilePath(const char *fileName, const char *outDir, char *outPath,
     size_t size);
@@ -48,5 +48,6 @@ char *ConvertStrGBKToUTF8(const char *str);
 int IsFileExists(const char *fileName);
 int GenerateNewFilename(const char *originalPath, char *newPath, size_t newPathSize);
 int IsSymlinkExists(const char *fileName);
+int ValidateSymlinkTarget(const char *target, const char *linkPath, const char *outDir);
 bool IsUtf8Encoded(unsigned char *data, bool skipTwoBytes);
 #endif

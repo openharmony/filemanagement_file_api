@@ -40,7 +40,7 @@
 #define EXTRA_FIELD_UNICODE_PATH_MIN_LEN 5
 
 #define ZIP_FILE_NAME_LEN_MAX PATH_MAX
-#define ZIP_BUF_INTERNAL 32768
+#define ZIP_BUF_INTERNAL 65536
 
 #define RETURN_IF_MAGIC_ERR(obj, val) ((void)0)
 #define ASSERT_IF_MAGIC_ERR(obj, val) ASSERT(((obj)->magic) == (val))
