@@ -43,9 +43,8 @@ enum Location {
 #endif
 
 class StatImpl : public OHOS::FFI::FFIData {
+    DECL_TYPE(StatImpl, OHOS::FFI::FFIData)
 public:
-    OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
-
     explicit StatImpl(uv_stat_t stat) : real_(std::move(stat)) {}
 #ifdef WIN_PLATFORM
     inline static const int S_IFSOCK = 0140000;
@@ -81,14 +80,6 @@ private:
 #if !defined(WIN_PLATFORM) && !defined(IOS_PLATFORM)
     std::shared_ptr<FileInfo> fileInfo_ = nullptr;
 #endif
-
-    friend class OHOS::FFI::RuntimeType;
-    friend class OHOS::FFI::TypeBase;
-    static OHOS::FFI::RuntimeType* GetClassType()
-    {
-        static OHOS::FFI::RuntimeType runtimeType = OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("StatImpl");
-        return &runtimeType;
-    }
 };
 
 }

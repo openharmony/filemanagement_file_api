@@ -116,6 +116,7 @@ struct FileInfos {
 };
 
 class CopyInfo : public OHOS::FFI::FFIData {
+    DECL_TYPE(CopyInfo, OHOS::FFI::FFIData)
     friend class CopyImpl;
 public:
     CopyInfo(int64_t listener, int64_t signal) : listenerId(listener), signalId(signal) {}

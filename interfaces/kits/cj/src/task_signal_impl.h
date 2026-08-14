@@ -33,6 +33,7 @@ public:
 };
 
 class TaskSignalImpl : public OHOS::FFI::FFIData {
+    DECL_TYPE(TaskSignalImpl, OHOS::FFI::FFIData)
 public:
     TaskSignalImpl();
     std::shared_ptr<TaskSignalEntity> signalEntity = nullptr;

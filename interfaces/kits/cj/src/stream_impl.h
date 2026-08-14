@@ -27,6 +27,7 @@ namespace CJSystemapi {
 namespace FileFs {
 
 class StreamImpl : public OHOS::FFI::FFIData {
+    DECL_TYPE(StreamImpl, OHOS::FFI::FFIData)
 public:
     explicit StreamImpl(std::shared_ptr<FILE> fp) : fp_(fp) {}
 
@@ -42,20 +43,10 @@ public:
 
     std::tuple<int, int64_t> Write(void* buffer, int64_t length, int64_t offset, const std::string& encode);
 
-    OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
-
     std::shared_ptr<FILE> GetRealFp() { return fp_; }
 
 private:
     std::shared_ptr<FILE> fp_;
-
-    friend class OHOS::FFI::RuntimeType;
-    friend class OHOS::FFI::TypeBase;
-    static OHOS::FFI::RuntimeType* GetClassType()
-    {
-        static OHOS::FFI::RuntimeType runtimeType = OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("StreamImpl");
-        return &runtimeType;
-    }
 };
 
 }
