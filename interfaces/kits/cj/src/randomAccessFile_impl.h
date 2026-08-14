@@ -28,6 +28,7 @@
 namespace OHOS {
 namespace CJSystemapi {
 class RandomAccessFileImpl : public OHOS::FFI::FFIData {
+    DECL_TYPE(RandomAccessFileImpl, OHOS::FFI::FFIData)
 public:
     explicit RandomAccessFileImpl(std::shared_ptr<OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity> entity);
     int32_t GetFd();
@@ -37,19 +38,8 @@ public:
     std::shared_ptr<OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity> GetEntity();
     std::tuple<int32_t, int64_t> WriteSync(char* buf, size_t len, int64_t offset);
     std::tuple<int32_t, int64_t> ReadSync(char* buf, size_t len, int64_t offset);
-
-    OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 private:
     std::shared_ptr<OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity> entity_;
-
-    friend class OHOS::FFI::RuntimeType;
-    friend class OHOS::FFI::TypeBase;
-    static OHOS::FFI::RuntimeType* GetClassType()
-    {
-        static OHOS::FFI::RuntimeType runtimeType =
-            OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("RandomAccessFileImpl");
-        return &runtimeType;
-    }
 };
 } // OHOS::FileManagement::ModuleFileIO
 }

@@ -31,6 +31,7 @@ namespace CJSystemapi {
 namespace FileFs {
 
 class FileEntity : public OHOS::FFI::FFIData {
+    DECL_TYPE(FileEntity, OHOS::FFI::FFIData)
 public:
     std::unique_ptr<DistributedFS::FDGuard> fd_ = { nullptr };
     std::string path_;
@@ -51,16 +52,6 @@ public:
     int UnLock(int64_t id);
     RetDataCString GetParent();
 #endif
-    OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
-
-private:
-    friend class OHOS::FFI::RuntimeType;
-    friend class OHOS::FFI::TypeBase;
-    static OHOS::FFI::RuntimeType* GetClassType()
-    {
-        static OHOS::FFI::RuntimeType runtimeType = OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("FileEntity");
-        return &runtimeType;
-    }
 };
 
 }

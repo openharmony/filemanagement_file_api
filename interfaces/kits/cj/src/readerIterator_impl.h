@@ -27,22 +27,12 @@
 namespace OHOS {
 namespace CJSystemapi {
 class ReadIteratorImpl : public OHOS::FFI::FFIData {
+    DECL_TYPE(ReadIteratorImpl, OHOS::FFI::FFIData)
 public:
     explicit ReadIteratorImpl(std::shared_ptr<OHOS::FileManagement::ModuleFileIO::ReaderIteratorEntity> entity);
     std::tuple<int32_t, bool, char*> Next();
-
-    OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
 private:
     std::shared_ptr<OHOS::FileManagement::ModuleFileIO::ReaderIteratorEntity> entity_;
-
-    friend class OHOS::FFI::RuntimeType;
-    friend class OHOS::FFI::TypeBase;
-    static OHOS::FFI::RuntimeType* GetClassType()
-    {
-        static OHOS::FFI::RuntimeType runtimeType =
-            OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("ReadIteratorImpl");
-        return &runtimeType;
-    }
 };
 }
 }
