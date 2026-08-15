@@ -793,7 +793,7 @@ LOCAL int  ZipReaderSaveFile(struct ZipReaderExtractContext *context, struct Rea
 LOCAL int ZipReaderCreateSymlink(struct ZipReaderExtractContext *context, struct ReadResource *resource,
     const char *newFilePath)
 {
-    if (GETV(context->entryInfo.uncompressedSize) >= UINT16_MAX) {
+    if (GETV(context->entryInfo.uncompressedSize) >= sizeof(resource->buffer)) {
         return ARCHIVE_FORMAT_ERROR;
     }
     int ret;
@@ -806,6 +806,13 @@ LOCAL int ZipReaderCreateSymlink(struct ZipReaderExtractContext *context, struct
     resource->buffer[GETV(context->entryInfo.uncompressedSize)] = '\0';
     if (IsSymlinkExists(newFilePath) == ARCHIVE_OK) {
         unlink(newFilePath);
+    }
+    /* Validate symlink target is within outDir */
+    /* resource->buffer 为软链接文件存储的内容字符串，对应目标路径 */
+    if (ValidateSymlinkTarget((const char *)resource->buffer,
+        context->entryInfo.entryName, context->outDir) != ARCHIVE_OK) {
+        ZipReaderCloseEntry(context, resource);
+        return ARCHIVE_SYMLINK_ERROR;
     }
     ret = CreateSymlink((const char *)resource->buffer, newFilePath);
     ZipReaderCloseEntry(context, resource);
