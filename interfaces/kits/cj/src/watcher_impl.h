@@ -51,17 +51,9 @@ struct WatcherInfoArg {
 };
 
 class WatcherImpl : public OHOS::FFI::FFIData {
+    DECL_TYPE(WatcherImpl, OHOS::FFI::FFIData)
 public:
     std::shared_ptr<WatcherInfoArg> data_;
-    OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
-private:
-    friend class OHOS::FFI::RuntimeType;
-    friend class OHOS::FFI::TypeBase;
-    static OHOS::FFI::RuntimeType* GetClassType()
-    {
-        static OHOS::FFI::RuntimeType runtimeType = OHOS::FFI::RuntimeType::Create<OHOS::FFI::FFIData>("WatcherImpl");
-        return &runtimeType;
-    }
 };
 
 class FileWatcherManager : public Singleton<FileWatcherManager> {
