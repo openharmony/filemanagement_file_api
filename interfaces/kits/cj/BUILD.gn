@@ -52,20 +52,29 @@ ohos_source_set("js_common_src") {
     "-flto",
   ]
   use_exceptions = true
+  if (use_mingw_win) {
+    defines = [ "WIN_PLATFORM" ]
+  } else if (use_mac) {
+    defines = [ "IOS_PLATFORM" ]
+  }
   external_deps = [
-    "ability_base:zuri",
-    "ability_runtime:app_context",
-    "access_token:libtokenid_sdk",
-    "app_file_service:fileuri_native",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "ipc:ipc_single",
+    "hilog:libhilog",
     "libuv:uv",
     "napi:ace_napi",
     "node:node_header_notice",
-    "hilog:libhilog",
   ]
+  if (!use_mingw_win && !use_mac) {
+    external_deps += [
+      "ability_base:zuri",
+      "ability_runtime:app_context",
+      "access_token:libtokenid_sdk",
+      "app_file_service:fileuri_native",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "ipc:ipc_single",
+    ]
+  }
   part_name = "file_api"
   subsystem_name = "filemanagement"
 }
@@ -275,8 +284,8 @@ ohos_shared_library("cj_file_fs_ffi") {
       "hitrace:hitrace_meter",
       "samgr:samgr_proxy",
     ]
+    version_script = "libcj_file_api.map"
   }
-  version_script = "libcj_file_api.map"
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "file_api"
