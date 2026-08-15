@@ -83,10 +83,11 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_001, testing::ext::TestSize.Lev
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    LibnMock::GetMock()->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -100,10 +101,11 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_002, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(std::make_tuple(false, std::unique_ptr<char[]>(), 0)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    LibnMock::GetMock()->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -115,10 +117,11 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Async_001, testing::ext::TestSize.Le
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(Rmdirent::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    LibnMock::GetMock()->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -132,10 +135,11 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Async_002, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(std::make_tuple(false, std::unique_ptr<char[]>(), 0)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(Rmdirent::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    LibnMock::GetMock()->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -152,6 +156,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_003, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -171,6 +177,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_004, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -190,6 +198,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_005, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -211,6 +221,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_006, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -225,10 +237,11 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_007, testing::ext::TestSize.Lev
 {
     fs::path target = TEST_ROOT / "does-not-exist";
     ExpectSyncPath(target);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_));
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    LibnMock::GetMock()->VerifyAndClearErr(13900002);
     EXPECT_FALSE(fs::exists(target));
 }
 
@@ -246,6 +259,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_008, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -265,6 +280,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_009, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -284,6 +301,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_010, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -302,10 +321,11 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Async_003, testing::ext::TestSize.Le
         .WillOnce(testing::Return(reinterpret_cast<napi_value>(0x1100)));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(make_tuple(false, unique_ptr<char[]>(), 0)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(Rmdirent::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    LibnMock::GetMock()->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -322,6 +342,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_011, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -341,6 +363,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_012, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -360,6 +384,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_013, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -379,6 +405,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_014, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -398,6 +426,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_015, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -417,6 +447,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_016, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -436,6 +468,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_017, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -455,6 +489,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_018, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -474,6 +510,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_019, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -493,6 +531,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_020, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));

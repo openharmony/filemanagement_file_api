@@ -116,7 +116,7 @@ HWTEST_F(UtimesMockTest, UtimesMockTest_Sync_001, testing::ext::TestSize.Level1)
 
 /**
  * @tc.name: UtimesMockTest_Sync_002
- * @tc.desc: Test function of Utimes::Sync interface for FAILURE when uv_fs_utime fails.
+ * @tc.desc: Test function of Utimes::Sync interface for FAILURE when InitArgs fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

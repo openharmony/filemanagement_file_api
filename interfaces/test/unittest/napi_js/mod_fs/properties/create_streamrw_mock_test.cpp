@@ -90,10 +90,11 @@ HWTEST_F(CreateStreamRwMockTest, CreateStreamRwMockTest_Read_001, testing::ext::
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CreateStreamRw::Read(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -105,10 +106,11 @@ HWTEST_F(CreateStreamRwMockTest, CreateStreamRwMockTest_Write_001, testing::ext:
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CreateStreamRw::Write(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -121,6 +123,8 @@ HWTEST_F(CreateStreamRwMockTest, CreateStreamRwMockTest_Read_002, testing::ext::
     napi_value expected = reinterpret_cast<napi_value>(0x2500);
     ExpectCreateStream({ "ReadStream", NARG_CNT::ONE, napi_ok, expected });
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CreateStreamRw::Read(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
 }
@@ -135,6 +139,8 @@ HWTEST_F(CreateStreamRwMockTest, CreateStreamRwMockTest_Read_003, testing::ext::
     napi_value expected = reinterpret_cast<napi_value>(0x2600);
     ExpectCreateStream({ "ReadStream", NARG_CNT::TWO, napi_ok, expected });
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CreateStreamRw::Read(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
 }
@@ -175,6 +181,8 @@ HWTEST_F(CreateStreamRwMockTest, CreateStreamRwMockTest_Write_002, testing::ext:
     napi_value expected = reinterpret_cast<napi_value>(0x2700);
     ExpectCreateStream({ "WriteStream", NARG_CNT::ONE, napi_ok, expected });
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CreateStreamRw::Write(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
 }
@@ -189,6 +197,8 @@ HWTEST_F(CreateStreamRwMockTest, CreateStreamRwMockTest_Write_003, testing::ext:
     napi_value expected = reinterpret_cast<napi_value>(0x2800);
     ExpectCreateStream({ "WriteStream", NARG_CNT::TWO, napi_ok, expected });
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CreateStreamRw::Write(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
 }
@@ -230,6 +240,8 @@ HWTEST_F(CreateStreamRwMockTest, CreateStreamRwMockTest_Read_006, testing::ext::
     napi_value expected = reinterpret_cast<napi_value>(0x3200);
     ExpectCreateStream({ "ReadStream", NARG_CNT::ONE, napi_ok, expected, first });
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CreateStreamRw::Read(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
 }
@@ -246,6 +258,8 @@ HWTEST_F(CreateStreamRwMockTest, CreateStreamRwMockTest_Write_006, testing::ext:
     napi_value expected = reinterpret_cast<napi_value>(0x3500);
     ExpectCreateStream({ "WriteStream", NARG_CNT::TWO, napi_ok, expected, first, second });
 
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CreateStreamRw::Write(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
 }
