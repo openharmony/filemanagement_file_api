@@ -100,9 +100,10 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_001, testing::ext::TestSize.Lev
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -114,9 +115,10 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Async_001, testing::ext::TestSize.Le
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -132,9 +134,10 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_002, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, ToUTF8StringPath()).Times(2)
         .WillRepeatedly(testing::Invoke([]() { return InvalidPathResult(); }));
     EXPECT_CALL(*mock, ToInt32()).Times(2).WillRepeatedly(testing::Return(make_tuple(false, -1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -150,9 +153,10 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Async_002, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, ToUTF8StringPath()).Times(2)
         .WillRepeatedly(testing::Invoke([]() { return InvalidPathResult(); }));
     EXPECT_CALL(*mock, ToInt32()).Times(2).WillRepeatedly(testing::Return(make_tuple(false, -1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -170,9 +174,10 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_003, testing::ext::TestSize.Lev
         .WillOnce(testing::Return(testing::ByMove(PathResult((TEST_ROOT / "dst").string()))));
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*mock, ToInt32(0)).WillOnce(testing::Return(make_tuple(true, 1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -190,9 +195,10 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Async_003, testing::ext::TestSize.Le
         .WillOnce(testing::Return(testing::ByMove(PathResult((TEST_ROOT / "dst").string()))));
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*mock, ToInt32(0)).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -217,6 +223,8 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_004, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO));
     EXPECT_CALL(*mock, CreateUndefined(ENV)).WillOnce(testing::Return(NVal(ENV, expected)));
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), expected);
     EXPECT_EQ(ReadFile(destination), content);
 }
@@ -237,9 +245,10 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_005, testing::ext::TestSize.Lev
         .WillOnce(testing::Return(testing::ByMove(PathResult(source.string()))))
         .WillOnce(testing::Return(testing::ByMove(PathResult(destination.string()))));
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002);
     EXPECT_FALSE(fs::exists(destination));
 }
 
@@ -265,6 +274,8 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_006, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO));
     EXPECT_CALL(*mock, CreateUndefined(ENV)).WillOnce(testing::Return(NVal(ENV, expected)));
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), expected);
     EXPECT_EQ(ReadFile(destination), "new-data");
 }
