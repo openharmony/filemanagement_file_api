@@ -87,7 +87,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_001, testing::ext::TestSize.Lev
 
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
-    LibnMock::GetMock()->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -105,7 +105,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_002, testing::ext::TestSize.Lev
 
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
-    LibnMock::GetMock()->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -121,7 +121,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Async_001, testing::ext::TestSize.Le
 
     EXPECT_EQ(Rmdirent::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
-    LibnMock::GetMock()->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -139,7 +139,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Async_002, testing::ext::TestSize.Le
 
     EXPECT_EQ(Rmdirent::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
-    LibnMock::GetMock()->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -149,6 +149,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Async_002, testing::ext::TestSize.Le
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_003, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "empty";
     fs::create_directories(target);
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -156,8 +157,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_003, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -170,6 +171,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_003, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_004, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "nested";
     fs::create_directories(target / "one/two/three");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -177,8 +179,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_004, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -191,6 +193,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_004, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_005, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "one-file";
     WriteText(target / "file.txt", "content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -198,8 +201,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_005, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -212,6 +215,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_005, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_006, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "tree";
     WriteText(target / "root.txt", "root");
     WriteText(target / "child/child.txt", "child");
@@ -221,8 +225,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_006, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -235,13 +239,14 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_006, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_007, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "does-not-exist";
     ExpectSyncPath(target);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(1);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
-    LibnMock::GetMock()->VerifyAndClearErr(13900002);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
     EXPECT_FALSE(fs::exists(target));
 }
 
@@ -252,6 +257,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_007, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_008, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "trailing-slash";
     fs::create_directories(target);
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -259,8 +265,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_008, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -273,6 +279,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_008, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_009, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "hidden";
     WriteText(target / ".hidden-file", "hidden");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -280,8 +287,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_009, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -294,6 +301,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_009, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_010, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "unicode";
     WriteText(target / "测试文件.txt", "unicode");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -301,8 +309,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_010, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -325,7 +333,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Async_003, testing::ext::TestSize.Le
 
     EXPECT_EQ(Rmdirent::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
-    LibnMock::GetMock()->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -335,6 +343,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Async_003, testing::ext::TestSize.Le
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_011, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "directory with spaces";
     WriteText(target / "file.txt", "payload-011");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -342,8 +351,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_011, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -356,6 +365,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_011, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_012, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "中文目录";
     WriteText(target / "文件.txt", "payload-012");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -363,8 +373,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_012, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -377,6 +387,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_012, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_013, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "empty-file";
     WriteText(target / "empty.bin", "payload-013");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -384,8 +395,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_013, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -398,6 +409,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_013, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_014, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / ".hidden-tree";
     WriteText(target / ".hidden-file", "payload-014");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -405,8 +417,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_014, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -419,6 +431,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_014, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_015, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "MixedCase";
     WriteText(target / "File.TxT", "payload-015");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -426,8 +439,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_015, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -440,6 +453,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_015, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_016, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "name-_.+@";
     WriteText(target / "item.conf", "payload-016");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -447,8 +461,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_016, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -461,6 +475,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_016, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_017, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "20260724/0001";
     WriteText(target / "data", "payload-017");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -468,8 +483,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_017, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -482,6 +497,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_017, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_018, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "config.d/sub";
     WriteText(target / "item.conf", "payload-018");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -489,8 +505,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_018, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -503,6 +519,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_018, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_019, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "a/b/c/d/e/f";
     WriteText(target / "leaf.txt", "payload-019");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -510,8 +527,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_019, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));
@@ -524,6 +541,7 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_019, testing::ext::TestSize.Lev
  */
 HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_020, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     fs::path target = TEST_ROOT / "project/docs";
     WriteText(target / "README", "payload-020");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
@@ -531,8 +549,8 @@ HWTEST_F(RmdirentMockTest, RmdirentMockTest_Sync_020, testing::ext::TestSize.Lev
     EXPECT_CALL(*LibnMock::GetMock(), CreateUndefined(testing::_))
         .WillOnce(testing::Return(LibN::NVal(reinterpret_cast<napi_env>(0x1000), expected)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(testing::_)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(Rmdirent::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_FALSE(fs::exists(target));

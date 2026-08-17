@@ -103,7 +103,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Sync_001, testing::ext::Test
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -117,7 +117,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Async_001, testing::ext::Tes
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -132,7 +132,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Sync_002, testing::ext::Test
     ExpectInvalidFd(mock);
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -147,7 +147,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Async_002, testing::ext::Tes
     ExpectInvalidFd(mock);
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -162,7 +162,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Sync_003, testing::ext::Test
     ExpectArguments(mock, -1, "r");
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -177,7 +177,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Async_003, testing::ext::Tes
     ExpectArguments(mock, -1, "r");
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -192,7 +192,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Sync_004, testing::ext::Test
     ExpectInvalidMode(mock, STDIN_FILENO);
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -207,7 +207,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Async_004, testing::ext::Tes
     ExpectInvalidMode(mock, STDIN_FILENO);
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -226,7 +226,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Sync_005, testing::ext::Test
     ExpectArguments(mock, fd, "r");
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900008);
+    mock->VerifyAndClearErr(13900008, "Bad file descriptor");
 }
 
 /**
@@ -244,7 +244,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Sync_006, testing::ext::Test
     ExpectArguments(mock, fd, "invalid-mode");
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(close(fd), 0);
 }
 
@@ -263,7 +263,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Sync_007, testing::ext::Test
     ExpectArguments(mock, fd, "");
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(close(fd), 0);
 }
 
@@ -282,7 +282,7 @@ HWTEST_F(FdopenStreamMockTest, FdopenStreamMockTest_Sync_008, testing::ext::Test
     ExpectArguments(mock, fd, "q");
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(FdopenStream::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
     EXPECT_EQ(close(fd), 0);
 }
 } // namespace Test

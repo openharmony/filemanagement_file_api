@@ -172,8 +172,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_004, testing::ext::Test
     ExpectArguments(EXISTING_FILE, "r");
     ExpectStreamInstantiation();
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
 }
 
@@ -189,8 +189,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_005, testing::ext::Test
     ExpectArguments(CREATED_FILE, "w");
     ExpectStreamInstantiation();
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::exists(CREATED_FILE));
 }
@@ -207,8 +207,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_006, testing::ext::Test
     ExpectArguments(CREATED_FILE, "a");
     ExpectStreamInstantiation();
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::is_regular_file(CREATED_FILE));
 }
@@ -225,8 +225,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_007, testing::ext::Test
     ExpectArguments(EXISTING_FILE, "r+");
     ExpectStreamInstantiation();
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
 }
 
@@ -309,8 +309,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_012, testing::ext::Test
     ExpectArguments(EXISTING_FILE, "rb");
     ExpectStreamInstantiation();
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
 }
 
@@ -377,8 +377,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_013, testing::ext::Test
     ExpectArguments(CREATED_FILE, "w+");
     ExpectStreamInstantiation();
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::exists(CREATED_FILE));
 }
@@ -395,8 +395,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_014, testing::ext::Test
     ExpectArguments(CREATED_FILE, "a+");
     ExpectStreamInstantiation();
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::is_regular_file(CREATED_FILE));
 }
@@ -413,8 +413,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_015, testing::ext::Test
     ExpectArguments(CREATED_FILE, "wb");
     ExpectStreamInstantiation();
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::exists(CREATED_FILE));
 }

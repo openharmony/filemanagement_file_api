@@ -103,7 +103,7 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_001, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -118,7 +118,7 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Async_001, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -137,7 +137,7 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_002, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -156,7 +156,7 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Async_002, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -177,7 +177,7 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_003, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -198,7 +198,7 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Async_003, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -248,7 +248,7 @@ HWTEST_F(CopyFileMockTest, CopyFileMockTest_Sync_005, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CopyFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900002);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
     EXPECT_FALSE(fs::exists(destination));
 }
 

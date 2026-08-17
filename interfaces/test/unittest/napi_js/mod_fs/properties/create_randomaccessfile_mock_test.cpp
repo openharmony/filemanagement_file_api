@@ -112,7 +112,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_001
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -127,7 +127,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -143,7 +143,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_002
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -159,7 +159,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -179,7 +179,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_003
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -199,7 +199,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -219,7 +219,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_004
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -239,7 +239,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -265,7 +265,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_005
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -291,7 +291,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -318,7 +318,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_006
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -345,7 +345,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -363,7 +363,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_007
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900002);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -383,7 +383,7 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_008
     EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
-    mock->VerifyAndClearErr(13900005);
+    mock->VerifyAndClearErr(13900005, "I/O error");
 }
 } // namespace Test
 } // namespace ModuleFileIO
