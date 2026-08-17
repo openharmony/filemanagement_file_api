@@ -204,10 +204,11 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_006, testing::ext::TestSize.Level1)
  */
 HWTEST_F(MoveMockTest, MoveMockTest_Sync_007, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     ExpectSuccessfulRename();
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(Move::Sync(ENV, INFO), UNDEFINED);
 }
 
@@ -229,8 +230,8 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_008, testing::ext::TestSize.Level1)
         testing::StrEq(DEST_PATH), nullptr)).WillOnce(testing::Return(0));
     EXPECT_CALL(*mock, CreateUndefined(ENV)).WillOnce(testing::Return(NVal(ENV, UNDEFINED)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(Move::Sync(ENV, INFO), UNDEFINED);
 }
 
@@ -241,10 +242,11 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_008, testing::ext::TestSize.Level1)
  */
 HWTEST_F(MoveMockTest, MoveMockTest_Sync_009, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     ExpectSuccessfulRename(MODE_THROW_ERR);
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(Move::Sync(ENV, INFO), UNDEFINED);
 }
 
@@ -397,8 +399,8 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_016, testing::ext::TestSize.Level1)
         testing::StrEq(customDest), nullptr)).WillOnce(testing::Return(0));
     EXPECT_CALL(*mock, CreateUndefined(ENV)).WillOnce(testing::Return(NVal(ENV, UNDEFINED)));
 
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErr(ENV)).Times(0);
-    EXPECT_CALL(*LibnMock::GetMock(), ThrowErrWithMsg(ENV, testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(Move::Sync(ENV, INFO), UNDEFINED);
 }
 

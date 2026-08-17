@@ -49,7 +49,7 @@ HWTEST_F(ReaderIteratorNExporterMockTest, ReaderIteratorNExporterMockTest_Constr
 
     EXPECT_EQ(ReaderIteratorNExporter::Constructor(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -66,7 +66,7 @@ HWTEST_F(ReaderIteratorNExporterMockTest, ReaderIteratorNExporterMockTest_Next_0
 
     EXPECT_EQ(ReaderIteratorNExporter::Next(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
-    mock->VerifyAndClearErr(13900020);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -87,7 +87,7 @@ HWTEST_F(ReaderIteratorNExporterMockTest, ReaderIteratorNExporterMockTest_Next_0
 
     EXPECT_EQ(ReaderIteratorNExporter::Next(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
-    mock->VerifyAndClearErr(13900001);
+    mock->VerifyAndClearErr(13900001, "Operation not permitted");
 }
 
 /**
