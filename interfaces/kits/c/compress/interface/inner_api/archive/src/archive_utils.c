@@ -19,15 +19,19 @@
 #include <ctype.h>
 #include <iconv.h>
 #include <stdlib.h>
+#include <libgen.h>
 
 #include "archive_macros.h"
 #include "securec.h"
 #include "errorcode.h"
 #include "archive_inner.h"
+#include "file/stream_file.h"
 
 #define MKDIR(dir) mkdir(dir, 0755)
 #define PATH_SEPARATOR '/'
 #define MAX_RENAME_COUNT 1000
+
+static char *NormalizePath(const char *path);
 
 static bool IsDirectoryExists(const char *path)
 {
@@ -104,11 +108,78 @@ ARCHIVE_IMPL int CreateDirectory(const char *path, const char *base)
     return ARCHIVE_OK;
 }
 
-ARCHIVE_IMPL int CreateSymlink(const char *old, const char *newSym)
+ARCHIVE_IMPL int CreateSymlink(const char *targetPath, const char *symlinkPath)
 {
-    if (symlink(old, newSym) != 0) {
+    if (symlink(targetPath, symlinkPath) != 0) {
         return ARCHIVE_INTERNAL_ERROR;
     }
+    return ARCHIVE_OK;
+}
+
+/* 计算 symlink 所在的父目录的绝对路径：resolvedBaseDir + dirname(entryName) */
+static int GetSymlinkParentDir(const char *entryName, const char *resolvedBaseDir, char *symlinkParentDir,
+    size_t dirSize)
+{
+    char entryNameCopy[ZIP_FILE_NAME_LEN_MAX];
+    if (strcpy_s(entryNameCopy, sizeof(entryNameCopy), entryName) != EOK) {
+        return ARCHIVE_INTERNAL_ERROR;
+    }
+    char *parentDirName = dirname(entryNameCopy);
+    if (snprintf_s(symlinkParentDir, dirSize, dirSize - 1, "%s/%s", resolvedBaseDir, parentDirName) < 0) {
+        return ARCHIVE_INTERNAL_ERROR;
+    }
+    return ARCHIVE_OK;
+}
+
+/* 判断 symlink 目标文件是否穿越outDir, 需要两步拼接, symlink 所在的绝对路径：resolvedBaseDir + entryName - fileName;
+    和 target 拼接，然后正则化，最后和 resolvedBaseDir 对比，是否路径穿越
+*/
+ARCHIVE_IMPL int ValidateSymlinkTarget(const char *targetPath, const char *entryName, const char *outDir)
+{
+    if (targetPath == NULL || entryName == NULL || outDir == NULL) {
+        return ARCHIVE_INTERNAL_ERROR;
+    }
+    
+    char fullPath[PATH_MAX];
+    char symlinkParentDir[PATH_MAX];
+    char *normalizedPath = NULL;
+    char resolvedBaseDir[PATH_MAX];
+    
+    if (targetPath[0] == '\0') {
+        return ARCHIVE_INTERNAL_ERROR;
+    }
+
+    if (realpath(outDir, resolvedBaseDir) == NULL) {
+        return ARCHIVE_INTERNAL_ERROR;
+    }
+
+    int len;
+    if (targetPath[0] == '/') {
+        len = snprintf_s(fullPath, sizeof(fullPath), sizeof(fullPath) - 1, "%s", targetPath);
+    } else {
+        if (GetSymlinkParentDir(entryName, resolvedBaseDir, symlinkParentDir, sizeof(symlinkParentDir))
+            != ARCHIVE_OK) {
+            return ARCHIVE_INTERNAL_ERROR;
+        }
+        len = snprintf_s(fullPath, sizeof(fullPath), sizeof(fullPath) - 1, "%s/%s",
+            symlinkParentDir, targetPath);
+    }
+
+    if (len < 0) {
+        return ARCHIVE_INTERNAL_ERROR;
+    }
+
+    normalizedPath = NormalizePath(fullPath);
+    if (normalizedPath == NULL) {
+        return ARCHIVE_INTERNAL_ERROR;
+    }
+
+    if (ValidatePathPrefix(normalizedPath, resolvedBaseDir) != ARCHIVE_OK) {
+        free(normalizedPath);
+        return ARCHIVE_SYMLINK_ERROR;
+    }
+
+    free(normalizedPath);
     return ARCHIVE_OK;
 }
 

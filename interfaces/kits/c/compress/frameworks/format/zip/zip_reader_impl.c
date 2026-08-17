@@ -252,7 +252,7 @@ ARCHIVE_IMPL int ZipReadZip64ExtraField(void *extraField, uint16_t cur, uint16_t
     }
 
     if (field->diskNumberStart == UINT16_MAX) {
-        field->diskNumberStart = *((uint32_t *)extraField + cur + pos);
+        field->diskNumberStart = GetLittleEndianValue(extraField + cur + pos, sizeof(uint32_t));
     }
 
     return ARCHIVE_OK;
