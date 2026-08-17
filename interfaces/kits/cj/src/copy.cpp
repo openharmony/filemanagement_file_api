@@ -643,6 +643,9 @@ int64_t CopyImpl::SubscribeLocalListener(std::shared_ptr<FileInfos>& infos, std:
     infos->eventFd = eventfd(0, EFD_CLOEXEC);
     if (infos->eventFd < 0) {
         LOGE("Failed to init eventFd, errno:%{public}d", errno);
+        fdsan_exchange_owner_tag(infos->notifyFd, CJ_FILE_FDSAN_TAG, 0);
+        close(infos->notifyFd);
+        infos->notifyFd = -1;
         return errno;
     }
     fdsan_exchange_owner_tag(infos->eventFd, 0, CJ_FILE_FDSAN_TAG);

@@ -93,8 +93,8 @@ static int RecurCopyDir(const std::string &srcPath, const std::string &destPath,
         if ((pNameList->namelist[i])->d_type == DT_DIR) {
             std::string srcTemp = srcPath + '/' + std::string((pNameList->namelist[i])->d_name);
             std::string destTemp = destPath + '/' + std::string((pNameList->namelist[i])->d_name);
-            LOGI("srcTemp %{public}s from", srcTemp.c_str());
-            LOGI("destTemp %{public}s to", destTemp.c_str());
+            LOGI("srcTemp %{private}s from", srcTemp.c_str());
+            LOGI("destTemp %{private}s to", destTemp.c_str());
             int res = CopySubDir(srcTemp, destTemp, mode, errfiles);
             if (res == OHOS::FileManagement::LibN::ERRNO_NOERR) {
                 continue;
