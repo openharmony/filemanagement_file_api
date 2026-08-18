@@ -33,11 +33,6 @@ config("js_common_config") {
 }
 
 ohos_source_set("js_common_src") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
   sources = [
     "../js/src/common/file_helper/fd_guard.cpp",
     "../js/src/mod_fs/common_func.cpp",
@@ -49,13 +44,22 @@ ohos_source_set("js_common_src") {
     "-fno-rtti",
     "-fmerge-all-constants",
     "-fomit-frame-pointer",
-    "-flto",
   ]
   use_exceptions = true
   if (use_mingw_win) {
     defines = [ "WIN_PLATFORM" ]
   } else if (use_mac) {
     defines = [ "IOS_PLATFORM" ]
+  }
+  if (!use_mingw_win && !use_mac) {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    cflags_cc += [
+      "-flto",
+    ]
   }
   external_deps = [
     "c_utils:utils",
@@ -188,7 +192,6 @@ ohos_shared_library("cj_file_fs_ffi") {
     "-fno-rtti",
     "-fmerge-all-constants",
     "-fomit-frame-pointer",
-    "-flto",
   ]
   use_exceptions = false
   if (use_mingw_win) {
