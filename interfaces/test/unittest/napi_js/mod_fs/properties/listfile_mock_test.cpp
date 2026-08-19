@@ -103,8 +103,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_001, testing::ext::TestSize.Lev
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -116,8 +117,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_001, testing::ext::TestSize.Le
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -130,8 +132,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_002, testing::ext::TestSize.Lev
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)).WillOnce(testing::Return(true));
     ExpectInvalidPath(mock);
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -144,8 +147,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_002, testing::ext::TestSize.Le
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)).WillOnce(testing::Return(true));
     ExpectInvalidPath(mock);
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -163,8 +167,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_003, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, TypeIs(napi_object)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, TypeIs(napi_function)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -182,8 +187,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_003, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, TypeIs(napi_object)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, TypeIs(napi_function)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -200,8 +206,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_004, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, HasProp("listNum")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("listNum")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToInt64(0)).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -218,8 +225,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_004, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, HasProp("listNum")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("listNum")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToInt64(0)).WillOnce(testing::Return(make_tuple(true, -1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -237,8 +245,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_005, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, HasProp("recursion")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("recursion")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToBool(false)).WillOnce(testing::Return(make_tuple(false, false)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -256,8 +265,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_005, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, HasProp("recursion")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("recursion")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToBool(false)).WillOnce(testing::Return(make_tuple(false, false)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -275,8 +285,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_006, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, GetArg(NARG_POS::SECOND)).WillOnce(testing::Return(ARG_OPTIONS));
     EXPECT_CALL(*mock, TypeIs(napi_object)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -295,8 +306,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_007, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, TypeIs(napi_object)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, TypeIs(napi_function)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -316,8 +328,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_008, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, ToInt64(0)).WillOnce(testing::Return(make_tuple(true, 0)));
     EXPECT_CALL(*mock, HasProp("recursion")).WillOnce(testing::Return(false));
     ExpectNoFilterProperties(mock);
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -337,8 +350,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_009, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, ToInt64(0)).WillOnce(testing::Return(make_tuple(true, 10)));
     EXPECT_CALL(*mock, HasProp("recursion")).WillOnce(testing::Return(false));
     ExpectNoFilterProperties(mock);
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -358,8 +372,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_010, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, GetProp("recursion")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToBool(false)).WillOnce(testing::Return(make_tuple(true, false)));
     ExpectNoFilterProperties(mock);
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -379,8 +394,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_011, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, GetProp("recursion")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToBool(false)).WillOnce(testing::Return(make_tuple(true, true)));
     ExpectNoFilterProperties(mock);
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -403,8 +419,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_012, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, GetProp("suffix")).Times(2).WillRepeatedly(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray()).WillOnce(testing::Return(make_tuple(false, vector<string> {}, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -427,8 +444,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_013, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, GetProp("suffix")).Times(2).WillRepeatedly(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray()).WillOnce(testing::Return(make_tuple(true, vector<string> {}, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -452,8 +470,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_014, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(true, vector<string> { "txt" }, 1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -477,8 +496,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_015, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(true, vector<string> { ".tar.gz" }, 1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -502,8 +522,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_016, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, GetProp("displayName")).Times(2).WillRepeatedly(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray()).WillOnce(testing::Return(make_tuple(true, vector<string> {}, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -528,8 +549,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_017, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, GetProp("fileSizeOver")).Times(2).WillRepeatedly(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToInt64()).WillOnce(testing::Return(make_tuple(true, -1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -556,8 +578,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_018, testing::ext::TestSize.Lev
         .Times(2).WillRepeatedly(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToDouble()).WillOnce(testing::Return(make_tuple(true, -0.5)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -583,8 +606,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_019, testing::ext::TestSize.Lev
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(true, vector<string> { "." }, 1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -611,8 +635,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_020, testing::ext::TestSize.Lev
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(true, vector<string> { suffix }, 1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -640,8 +665,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_021, testing::ext::TestSize.Lev
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(false, vector<string> {}, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -669,8 +695,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_022, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, TypeIs(napi_undefined))
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToInt64()).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -699,8 +726,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Sync_023, testing::ext::TestSize.Lev
     EXPECT_CALL(*mock, TypeIs(napi_undefined))
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToDouble()).WillOnce(testing::Return(make_tuple(false, 0.0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -726,8 +754,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_006, testing::ext::TestSize.Le
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(false, vector<string> {}, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -753,8 +782,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_007, testing::ext::TestSize.Le
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(true, vector<string> {}, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -780,8 +810,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_008, testing::ext::TestSize.Le
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(true, vector<string> { "log" }, 1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -807,8 +838,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_009, testing::ext::TestSize.Le
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(true, vector<string> { ".tar.gz" }, 1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -836,8 +868,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_010, testing::ext::TestSize.Le
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(false, vector<string> {}, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -865,8 +898,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_011, testing::ext::TestSize.Le
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(true, vector<string> {}, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -894,8 +928,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_012, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, TypeIs(napi_undefined))
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToInt64()).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -923,8 +958,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_013, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, TypeIs(napi_undefined))
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToInt64()).WillOnce(testing::Return(make_tuple(true, -1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -953,8 +989,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_014, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, TypeIs(napi_undefined))
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToDouble()).WillOnce(testing::Return(make_tuple(false, 0.0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -983,8 +1020,9 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_015, testing::ext::TestSize.Le
     EXPECT_CALL(*mock, TypeIs(napi_undefined))
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToDouble()).WillOnce(testing::Return(make_tuple(true, -0.5)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -1010,7 +1048,8 @@ HWTEST_F(ListFileMockTest, ListFileMockTest_Async_016, testing::ext::TestSize.Le
         .WillOnce(testing::Return(false)).RetiresOnSaturation();
     EXPECT_CALL(*mock, ToStringArray())
         .WillOnce(testing::Return(make_tuple(true, vector<string> { "." }, 1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

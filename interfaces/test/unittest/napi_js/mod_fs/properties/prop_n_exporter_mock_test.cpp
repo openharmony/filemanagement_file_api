@@ -203,7 +203,7 @@ HWTEST_F(PropNExporterMockTest, PropNExporterMockTest_UnlinkSync_004, TestSize.L
 
 /**
  * @tc.name: AccessTest_Sync_001
- * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILURE with ARGS ERROR.
+ * @tc.desc: Test function of PropNExporter::AccessSync interface for FAILURE when InitArgs fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

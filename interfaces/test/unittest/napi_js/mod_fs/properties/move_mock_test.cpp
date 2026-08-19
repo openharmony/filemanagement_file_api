@@ -102,7 +102,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_001, testing::ext::TestSize.Level1)
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -119,7 +119,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_002, testing::ext::TestSize.Level1)
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult("", false))));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -137,7 +137,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_003, testing::ext::TestSize.Level1)
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult(SRC_PATH))))
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult("", false))));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -155,7 +155,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_004, testing::ext::TestSize.Level1)
     ExpectTwoValidPaths();
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*mock, ToInt32(MODE_FORCE_MOVE)).WillOnce(testing::Return(std::make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -173,7 +173,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_005, testing::ext::TestSize.Level1)
     ExpectTwoValidPaths();
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*mock, ToInt32(MODE_FORCE_MOVE)).WillOnce(testing::Return(std::make_tuple(true, -1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -191,7 +191,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_006, testing::ext::TestSize.Level1)
     ExpectTwoValidPaths();
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*mock, ToInt32(MODE_FORCE_MOVE)).WillOnce(testing::Return(std::make_tuple(true, 2)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -204,8 +204,11 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_006, testing::ext::TestSize.Level1)
  */
 HWTEST_F(MoveMockTest, MoveMockTest_Sync_007, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     ExpectSuccessfulRename();
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(Move::Sync(ENV, INFO), UNDEFINED);
 }
 
@@ -227,6 +230,8 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_008, testing::ext::TestSize.Level1)
         testing::StrEq(DEST_PATH), nullptr)).WillOnce(testing::Return(0));
     EXPECT_CALL(*mock, CreateUndefined(ENV)).WillOnce(testing::Return(NVal(ENV, UNDEFINED)));
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(Move::Sync(ENV, INFO), UNDEFINED);
 }
 
@@ -237,8 +242,11 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_008, testing::ext::TestSize.Level1)
  */
 HWTEST_F(MoveMockTest, MoveMockTest_Sync_009, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     ExpectSuccessfulRename(MODE_THROW_ERR);
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(Move::Sync(ENV, INFO), UNDEFINED);
 }
 
@@ -258,7 +266,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_010, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_access(nullptr, testing::_, testing::StrEq(DEST_PATH), 0, nullptr))
         .WillOnce(testing::Return(0));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900015, "File exists");
@@ -280,7 +288,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_011, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_access(nullptr, testing::_, testing::StrEq(DEST_PATH), 0, nullptr))
         .WillOnce(testing::Return(-EACCES));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900012, "Permission denied");
@@ -301,7 +309,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_012, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_rename(nullptr, testing::_, testing::StrEq(SRC_PATH),
         testing::StrEq(DEST_PATH), nullptr)).WillOnce(testing::Return(-EACCES));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900012, "Permission denied");
@@ -322,7 +330,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_013, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_rename(nullptr, testing::_, testing::StrEq(SRC_PATH),
         testing::StrEq(DEST_PATH), nullptr)).WillOnce(testing::Return(-ENOENT));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900002, "No such file or directory");
@@ -343,7 +351,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_014, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_rename(nullptr, testing::_, testing::StrEq(SRC_PATH),
         testing::StrEq(DEST_PATH), nullptr)).WillOnce(testing::Return(-EROFS));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900027, "Read-only file system");
@@ -364,7 +372,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_015, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_rename(nullptr, testing::_, testing::StrEq(SRC_PATH),
         testing::StrEq(DEST_PATH), nullptr)).WillOnce(testing::Return(-EINVAL));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -391,6 +399,8 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_016, testing::ext::TestSize.Level1)
         testing::StrEq(customDest), nullptr)).WillOnce(testing::Return(0));
     EXPECT_CALL(*mock, CreateUndefined(ENV)).WillOnce(testing::Return(NVal(ENV, UNDEFINED)));
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(Move::Sync(ENV, INFO), UNDEFINED);
 }
 
@@ -410,7 +420,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_017, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_access(nullptr, testing::_, testing::StrEq(DEST_PATH), 0, nullptr))
         .WillOnce(testing::Return(-ENOTDIR));
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900018, "Not a directory");
@@ -432,7 +442,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Sync_018, testing::ext::TestSize.Level1)
     EXPECT_CALL(*uvMock, uv_fs_req_cleanup(testing::_));
     EXPECT_CALL(*uvMock, uv_fs_rename(nullptr, testing::_, testing::StrEq(SRC_PATH),
         testing::StrEq(DEST_PATH), nullptr)).WillOnce(testing::Return(-EBUSY));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900014, "Device or resource busy");
@@ -447,7 +457,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Async_001, testing::ext::TestSize.Level1)
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Async(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -464,7 +474,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Async_002, testing::ext::TestSize.Level1)
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO, NARG_CNT::FOUR)).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult("", false))));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Async(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -482,7 +492,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Async_003, testing::ext::TestSize.Level1)
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult(SRC_PATH))))
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult("", false))));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Async(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -500,7 +510,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Async_004, testing::ext::TestSize.Level1)
     ExpectTwoValidPaths();
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*mock, ToInt32(MODE_FORCE_MOVE)).WillOnce(testing::Return(std::make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Async(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -518,7 +528,7 @@ HWTEST_F(MoveMockTest, MoveMockTest_Async_005, testing::ext::TestSize.Level1)
     ExpectTwoValidPaths();
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::FOUR));
     EXPECT_CALL(*mock, ToInt32(MODE_FORCE_MOVE)).WillOnce(testing::Return(std::make_tuple(true, 99)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(Move::Async(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");

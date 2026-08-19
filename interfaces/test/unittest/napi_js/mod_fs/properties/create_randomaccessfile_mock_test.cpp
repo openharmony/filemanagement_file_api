@@ -109,9 +109,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_001
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -123,9 +124,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -138,9 +140,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_002
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)).WillOnce(testing::Return(true));
     ExpectInvalidFileArgument(mock);
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -153,9 +156,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)).WillOnce(testing::Return(true));
     ExpectInvalidFileArgument(mock);
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -172,9 +176,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_003
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO));
     EXPECT_CALL(*mock, GetArg(NARG_POS::SECOND)).WillOnce(testing::Return(ARG));
     EXPECT_CALL(*mock, ToInt32(0)).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -191,9 +196,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO));
     EXPECT_CALL(*mock, GetArg(NARG_POS::SECOND)).WillOnce(testing::Return(ARG));
     EXPECT_CALL(*mock, ToInt32(0)).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -210,9 +216,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_004
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO));
     EXPECT_CALL(*mock, GetArg(NARG_POS::SECOND)).WillOnce(testing::Return(ARG));
     EXPECT_CALL(*mock, ToInt32(0)).WillOnce(testing::Return(make_tuple(true, -1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -229,9 +236,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::TWO));
     EXPECT_CALL(*mock, GetArg(NARG_POS::SECOND)).WillOnce(testing::Return(ARG));
     EXPECT_CALL(*mock, ToInt32(0)).WillOnce(testing::Return(make_tuple(true, -1)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -253,10 +261,11 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_005
     EXPECT_CALL(*mock, HasProp("start")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("start")).WillOnce(testing::Return(NVal(ENV, ARG)));
     EXPECT_CALL(*mock, ToInt64()).WillOnce(testing::Return(make_tuple(true, -1)));
-    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::HasSubstr("option.start")));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::HasSubstr("option.start"))).Times(1);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -278,10 +287,11 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, HasProp("start")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("start")).WillOnce(testing::Return(NVal(ENV, ARG)));
     EXPECT_CALL(*mock, ToInt64()).WillOnce(testing::Return(make_tuple(true, -1)));
-    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::HasSubstr("option.start")));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::HasSubstr("option.start"))).Times(1);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -304,10 +314,11 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_006
     EXPECT_CALL(*mock, HasProp("end")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("end")).WillOnce(testing::Return(NVal(ENV, ARG)));
     EXPECT_CALL(*mock, ToInt64()).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::HasSubstr("option.end")));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::HasSubstr("option.end"))).Times(1);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -330,10 +341,11 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Async_00
     EXPECT_CALL(*mock, HasProp("end")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("end")).WillOnce(testing::Return(NVal(ENV, ARG)));
     EXPECT_CALL(*mock, ToInt64()).WillOnce(testing::Return(make_tuple(true, -1)));
-    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::HasSubstr("option.end")));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::HasSubstr("option.end"))).Times(1);
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -348,9 +360,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_007
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::THREE)).WillOnce(testing::Return(true));
     ExpectPathArgument(mock, path.string());
     EXPECT_CALL(*mock, GetArgc()).WillRepeatedly(testing::Return(NARG_CNT::ONE));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -367,9 +380,10 @@ HWTEST_F(CreateRandomAccessFileMockTest, CreateRandomAccessFileMockTest_Sync_008
     ExpectPathArgument(mock, path.string());
     EXPECT_CALL(*mock, GetArgc()).WillRepeatedly(testing::Return(NARG_CNT::ONE));
     EXPECT_CALL(*mock, InstantiateClass(ENV, testing::_, testing::_)).WillOnce(testing::Return(nullptr));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateRandomAccessFile::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900005, "I/O error");
 }
 } // namespace Test
 } // namespace ModuleFileIO

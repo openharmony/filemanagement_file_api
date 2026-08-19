@@ -92,8 +92,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Sync_001, testing::ext
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -105,8 +106,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Async_001, testing::ex
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::ONE, NARG_CNT::TWO)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -121,8 +123,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Sync_002, testing::ext
     EXPECT_CALL(*mock, GetArg(NARG_POS::FIRST)).WillOnce(testing::Return(ARG_PATH));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Invoke([]() { return InvalidPathResult(); }));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -137,8 +140,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Async_002, testing::ex
     EXPECT_CALL(*mock, GetArg(NARG_POS::FIRST)).WillOnce(testing::Return(ARG_PATH));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Invoke([]() { return InvalidPathResult(); }));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -156,8 +160,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Sync_003, testing::ext
     EXPECT_CALL(*mock, TypeIs(napi_object)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, TypeIs(napi_function)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -175,8 +180,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Async_003, testing::ex
     EXPECT_CALL(*mock, TypeIs(napi_object)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, TypeIs(napi_function)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -193,8 +199,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Sync_004, testing::ext
     EXPECT_CALL(*mock, HasProp("listNum")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("listNum")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToInt64(0)).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -211,8 +218,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Async_004, testing::ex
     EXPECT_CALL(*mock, HasProp("listNum")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("listNum")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToInt64(0)).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -230,8 +238,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Sync_005, testing::ext
     EXPECT_CALL(*mock, HasProp("recursion")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("recursion")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToBool(false)).WillOnce(testing::Return(make_tuple(false, false)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -249,8 +258,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Async_005, testing::ex
     EXPECT_CALL(*mock, HasProp("recursion")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("recursion")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToBool(false)).WillOnce(testing::Return(make_tuple(false, false)));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -271,8 +281,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Sync_006, testing::ext
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, GetProp("filter")).WillOnce(testing::Return(NVal(ENV, ARG_FILTER)));
     EXPECT_CALL(*mock, TypeIs(napi_function)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -293,8 +304,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Async_006, testing::ex
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, GetProp("filter")).WillOnce(testing::Return(NVal(ENV, ARG_FILTER)));
     EXPECT_CALL(*mock, TypeIs(napi_function)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Async(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -312,8 +324,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Sync_007, testing::ext
     EXPECT_CALL(*mock, GetArg(NARG_POS::SECOND)).WillOnce(testing::Return(ARG_OPTIONS));
     EXPECT_CALL(*mock, TypeIs(napi_object)).WillOnce(testing::Return(false));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -333,8 +346,9 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Sync_008, testing::ext
     EXPECT_CALL(*mock, HasProp("fileFilter")).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetProp("fileFilter")).WillOnce(testing::Return(NVal(ENV, ARG_FILTER)));
     EXPECT_CALL(*mock, TypeIs(napi_undefined)).WillOnce(testing::Return(true));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 
 /**
@@ -356,7 +370,8 @@ HWTEST_F(ListFileExtNapiMockTest, ListFileExtNapiMockTest_Sync_009, testing::ext
     EXPECT_CALL(*mock, GetProp("recursion")).WillOnce(testing::Return(NVal(ENV, ARG_OPTIONS)));
     EXPECT_CALL(*mock, ToBool(false)).WillOnce(testing::Return(make_tuple(true, true)));
     EXPECT_CALL(*mock, HasProp("fileFilter")).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
     EXPECT_EQ(ListFileExtNapi::Sync(ENV, INFO), nullptr);
+    mock->VerifyAndClearErr(13900002, "No such file or directory");
 }
 } // namespace OHOS::FileManagement::ModuleFileIO::Test
