@@ -30,6 +30,7 @@ public:
 
     void TearDown() override
     {
+        LibnMock::GetMock()->ResetErrState();
         LibnMock::DisableMock();
     }
 };
@@ -44,10 +45,11 @@ HWTEST_F(ReaderIteratorNExporterMockTest, ReaderIteratorNExporterMockTest_Constr
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(ReaderIteratorNExporter::Constructor(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -60,10 +62,11 @@ HWTEST_F(ReaderIteratorNExporterMockTest, ReaderIteratorNExporterMockTest_Next_0
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(testing::A<size_t>())).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(ReaderIteratorNExporter::Next(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020, "Invalid argument");
 }
 
 /**
@@ -80,10 +83,11 @@ HWTEST_F(ReaderIteratorNExporterMockTest, ReaderIteratorNExporterMockTest_Next_0
     EXPECT_CALL(*mock, GetThisVar()).WillOnce(testing::Return(thisVar));
     EXPECT_CALL(*mock, napi_unwrap(testing::_, thisVar, testing::_))
         .WillOnce(testing::DoAll(testing::SetArgPointee<2>(nullptr), testing::Return(napi_ok)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(ReaderIteratorNExporter::Next(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900001, "Operation not permitted");
 }
 
 /**

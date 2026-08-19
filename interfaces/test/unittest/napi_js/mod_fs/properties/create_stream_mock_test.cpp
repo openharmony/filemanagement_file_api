@@ -118,7 +118,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_001, testing::ext::Test
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -135,7 +135,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_002, testing::ext::Test
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO)).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult("", false))));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -154,7 +154,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_003, testing::ext::Test
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult(EXISTING_FILE))));
     EXPECT_CALL(*mock, ToUTF8String())
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult("", false))));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -172,6 +172,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_004, testing::ext::Test
     ExpectArguments(EXISTING_FILE, "r");
     ExpectStreamInstantiation();
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
 }
 
@@ -187,6 +189,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_005, testing::ext::Test
     ExpectArguments(CREATED_FILE, "w");
     ExpectStreamInstantiation();
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::exists(CREATED_FILE));
 }
@@ -203,6 +207,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_006, testing::ext::Test
     ExpectArguments(CREATED_FILE, "a");
     ExpectStreamInstantiation();
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::is_regular_file(CREATED_FILE));
 }
@@ -219,6 +225,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_007, testing::ext::Test
     ExpectArguments(EXISTING_FILE, "r+");
     ExpectStreamInstantiation();
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
 }
 
@@ -232,7 +240,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_008, testing::ext::Test
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO)).WillOnce(testing::Return(true));
     ExpectArguments(MISSING_FILE, "r");
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900002, "No such file or directory");
@@ -248,7 +256,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_009, testing::ext::Test
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO)).WillOnce(testing::Return(true));
     ExpectArguments(EXISTING_FILE, "not-a-mode");
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -265,7 +273,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_010, testing::ext::Test
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO)).WillOnce(testing::Return(true));
     ExpectArguments(EXISTING_FILE, "r");
     EXPECT_CALL(*mock, InstantiateClass(ENV, testing::_, testing::_)).WillOnce(testing::Return(nullptr));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900005, "I/O error");
@@ -283,7 +291,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_011, testing::ext::Test
     ExpectArguments(EXISTING_FILE, "r");
     EXPECT_CALL(*mock, InstantiateClass(ENV, testing::_, testing::_)).WillOnce(testing::Return(STREAM_OBJECT));
     EXPECT_CALL(*mock, napi_unwrap(ENV, STREAM_OBJECT, testing::_)).WillOnce(testing::Return(napi_generic_failure));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900005, "I/O error");
@@ -301,6 +309,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_012, testing::ext::Test
     ExpectArguments(EXISTING_FILE, "rb");
     ExpectStreamInstantiation();
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
 }
 
@@ -313,7 +323,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Async_001, testing::ext::Tes
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Async(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -330,7 +340,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Async_002, testing::ext::Tes
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO, NARG_CNT::THREE)).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult("", false))));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Async(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -349,7 +359,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Async_003, testing::ext::Tes
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult(EXISTING_FILE))));
     EXPECT_CALL(*mock, ToUTF8String())
         .WillOnce(testing::Return(testing::ByMove(MakeStringResult("", false))));
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Async(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -367,6 +377,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_013, testing::ext::Test
     ExpectArguments(CREATED_FILE, "w+");
     ExpectStreamInstantiation();
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::exists(CREATED_FILE));
 }
@@ -383,6 +395,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_014, testing::ext::Test
     ExpectArguments(CREATED_FILE, "a+");
     ExpectStreamInstantiation();
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::is_regular_file(CREATED_FILE));
 }
@@ -399,6 +413,8 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_015, testing::ext::Test
     ExpectArguments(CREATED_FILE, "wb");
     ExpectStreamInstantiation();
 
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(ENV, testing::_)).Times(0);
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), STREAM_OBJECT);
     EXPECT_TRUE(std::filesystem::exists(CREATED_FILE));
 }
@@ -413,7 +429,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_016, testing::ext::Test
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO)).WillOnce(testing::Return(true));
     ExpectArguments(EXISTING_FILE, "");
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900020, "Invalid argument");
@@ -430,7 +446,7 @@ HWTEST_F(CreateStreamMockTest, CreateStreamMockTest_Sync_017, testing::ext::Test
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(NARG_CNT::TWO)).WillOnce(testing::Return(true));
     ExpectArguments(path, "w");
-    EXPECT_CALL(*mock, ThrowErr(ENV));
+    EXPECT_CALL(*mock, ThrowErr(ENV)).Times(1);
 
     EXPECT_EQ(CreateStream::Sync(ENV, INFO), nullptr);
     mock->VerifyAndClearErr(13900002, "No such file or directory");

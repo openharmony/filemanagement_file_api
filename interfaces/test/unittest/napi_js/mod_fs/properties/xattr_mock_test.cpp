@@ -174,7 +174,7 @@ HWTEST_F(XattrMockTest, XattrMockTest_SetXattr_Sync_003, TestSize.Level1)
 
 /**
  * @tc.name: XattrMockTest_SetXattr_Sync_004
- * @tc.desc: Test function of Xattr::SetSync interface for FAILURE when ToUTF8StringPath fails.
+ * @tc.desc: Test function of Xattr::SetSync interface for FAILURE when value ToUTF8String fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1

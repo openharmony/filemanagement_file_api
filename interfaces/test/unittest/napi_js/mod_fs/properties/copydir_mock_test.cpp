@@ -107,10 +107,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_001, testing::ext::TestSize.Level
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -124,10 +125,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_002, testing::ext::TestSize.Level
     EXPECT_CALL(*mock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(make_tuple(false, unique_ptr<char[]>(), 0)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -142,10 +144,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_003, testing::ext::TestSize.Level
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "src")))
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "src")));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -161,10 +164,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_004, testing::ext::TestSize.Level
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "src")))
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "src/child")));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -182,10 +186,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_005, testing::ext::TestSize.Level
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*mock, ToInt32(testing::_))
         .WillOnce(testing::Return(make_tuple(true, COPYMODE_MAX + 1)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -197,10 +202,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Async_001, testing::ext::TestSize.Leve
 {
     auto mock = LibnMock::GetMock();
     EXPECT_CALL(*mock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(false));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -214,10 +220,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_006, testing::ext::TestSize.Level
     EXPECT_CALL(*mock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetArg(NARG_POS::FIRST)).WillOnce(testing::Return(reinterpret_cast<napi_value>(0x1100)));
     EXPECT_CALL(*mock, ToUTF8StringPath()).WillOnce(testing::Return(MakePath(TEST_ROOT / "missing")));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -232,10 +239,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_007, testing::ext::TestSize.Level
     EXPECT_CALL(*mock, InitArgs(testing::_, testing::_)).WillOnce(testing::Return(true));
     EXPECT_CALL(*mock, GetArg(NARG_POS::FIRST)).WillOnce(testing::Return(reinterpret_cast<napi_value>(0x1100)));
     EXPECT_CALL(*mock, ToUTF8StringPath()).WillOnce(testing::Return(MakePath(TEST_ROOT / "source-file.txt")));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -252,10 +260,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_008, testing::ext::TestSize.Level
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "src")))
         .WillOnce(testing::Return(make_tuple(false, unique_ptr<char[]>(), 0)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -272,10 +281,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_009, testing::ext::TestSize.Level
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "src")))
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "missing-dest")));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -292,10 +302,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_010, testing::ext::TestSize.Level
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "src")))
         .WillOnce(testing::Return(MakePath(TEST_ROOT)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -307,10 +318,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_011, testing::ext::TestSize.Level
 {
     auto mock = LibnMock::GetMock();
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest", NARG_CNT::THREE, COPYMODE_MIN - 1);
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -330,10 +342,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_012, testing::ext::TestSize.Level
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "dest")));
     EXPECT_CALL(*mock, GetArgc()).WillOnce(testing::Return(NARG_CNT::THREE));
     EXPECT_CALL(*mock, ToInt32(testing::_)).WillOnce(testing::Return(make_tuple(false, 0)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -343,10 +356,13 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_012, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_013, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::is_directory(TEST_ROOT / "dest/src"));
@@ -359,11 +375,14 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_013, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_014, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     WriteText(TEST_ROOT / "src/file.txt", "copy-dir-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_EQ(ReadText(TEST_ROOT / "dest/src/file.txt"), "copy-dir-content");
@@ -376,11 +395,14 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_014, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_015, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     WriteText(TEST_ROOT / "src/level1/level2/nested.txt", "nested-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_EQ(ReadText(TEST_ROOT / "dest/src/level1/level2/nested.txt"), "nested-content");
@@ -393,12 +415,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_015, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_016, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     WriteText(TEST_ROOT / "src/file.txt", "new-content");
     WriteText(TEST_ROOT / "dest/src/file.txt", "old-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest", NARG_CNT::THREE, DIRMODE_FILE_COPY_REPLACE);
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_EQ(ReadText(TEST_ROOT / "dest/src/file.txt"), "new-content");
@@ -411,12 +436,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_016, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_017, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     WriteText(TEST_ROOT / "src/source.txt", "source");
     WriteText(TEST_ROOT / "dest/src/unrelated.txt", "unrelated");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest", NARG_CNT::THREE, DIRMODE_FILE_COPY_REPLACE);
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_EQ(ReadText(TEST_ROOT / "dest/src/source.txt"), "source");
@@ -435,10 +463,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Async_002, testing::ext::TestSize.Leve
     EXPECT_CALL(*mock, GetArg(NARG_POS::FIRST)).WillOnce(testing::Return(reinterpret_cast<napi_value>(0x1100)));
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(make_tuple(false, unique_ptr<char[]>(), 0)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -455,10 +484,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Async_003, testing::ext::TestSize.Leve
     EXPECT_CALL(*mock, ToUTF8StringPath())
         .WillOnce(testing::Return(MakePath(TEST_ROOT / "src")))
         .WillOnce(testing::Return(make_tuple(false, unique_ptr<char[]>(), 0)));
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -470,10 +500,11 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Async_004, testing::ext::TestSize.Leve
 {
     auto mock = LibnMock::GetMock();
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest", NARG_CNT::THREE, COPYMODE_MAX + 1);
-    EXPECT_CALL(*mock, ThrowErr(testing::_));
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(1);
 
     EXPECT_EQ(CopyDir::Async(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), nullptr);
+    mock->VerifyAndClearErr(13900020);
 }
 
 /**
@@ -483,12 +514,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Async_004, testing::ext::TestSize.Leve
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_018, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = ".hidden";
     WriteText(TEST_ROOT / "src" / relativePath, "hidden-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -502,12 +536,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_018, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_019, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "file with spaces.txt";
     WriteText(TEST_ROOT / "src" / relativePath, "space-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -521,12 +558,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_019, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_020, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "中文文件.txt";
     WriteText(TEST_ROOT / "src" / relativePath, "unicode-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -540,12 +580,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_020, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_021, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "empty.bin";
     WriteText(TEST_ROOT / "src" / relativePath, "");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -559,12 +602,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_021, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_022, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = ".config/settings.json";
     WriteText(TEST_ROOT / "src" / relativePath, "{enabled:true}");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -578,12 +624,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_022, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_023, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "a/b/c/d/e/deep.txt";
     WriteText(TEST_ROOT / "src" / relativePath, "deep-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -597,12 +646,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_023, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_024, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "name-_.+@.txt";
     WriteText(TEST_ROOT / "src" / relativePath, "punctuation-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -616,12 +668,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_024, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_025, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "left/branch/file.txt";
     WriteText(TEST_ROOT / "src" / relativePath, "left-branch");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -635,12 +690,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_025, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_026, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "README";
     WriteText(TEST_ROOT / "src" / relativePath, "readme-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -654,12 +712,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_026, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_027, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "数据/记录.txt";
     WriteText(TEST_ROOT / "src" / relativePath, "directory-unicode");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -673,12 +734,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_027, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_028, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "20260724/0001";
     WriteText(TEST_ROOT / "src" / relativePath, "numeric-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -692,12 +756,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_028, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_029, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "config.d/item.conf";
     WriteText(TEST_ROOT / "src" / relativePath, "config-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -711,12 +778,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_029, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_030, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "MixedCase/File.TxT";
     WriteText(TEST_ROOT / "src" / relativePath, "mixed-case-content");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
@@ -730,12 +800,15 @@ HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_030, testing::ext::TestSize.Level
  */
 HWTEST_F(CopyDirMockTest, CopyDirMockTest_Sync_031, testing::ext::TestSize.Level1)
 {
+    auto mock = LibnMock::GetMock();
     const fs::path relativePath = "existing/child.txt";
     WriteText(TEST_ROOT / "src" / relativePath, "existing-branch");
     napi_value expected = reinterpret_cast<napi_value>(0x2000);
     ExpectValidOperands(TEST_ROOT / "src", TEST_ROOT / "dest");
     ExpectUndefined(expected);
 
+    EXPECT_CALL(*mock, ThrowErr(testing::_)).Times(0);
+    EXPECT_CALL(*mock, ThrowErrWithMsg(testing::_, testing::_)).Times(0);
     EXPECT_EQ(CopyDir::Sync(reinterpret_cast<napi_env>(0x1000),
         reinterpret_cast<napi_callback_info>(0x1000)), expected);
     EXPECT_TRUE(fs::exists(TEST_ROOT / "dest/src" / relativePath));
