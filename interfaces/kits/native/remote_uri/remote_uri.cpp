@@ -14,6 +14,7 @@
  */
 
 #include "remote_uri.h"
+#include <charconv>
 #include <string>
 #include <fcntl.h>
 #include <tuple>
@@ -97,7 +98,13 @@ bool RemoteUri::IsRemoteUri(const string& path, int &fd, const int& flags)
             if (fdStr.size() > DIGIT_LENGTH_LIMIT || fdStr.size() < 1) {
                 return false;
             }
-            fd = stoi(fdStr.c_str());
+            int parsedFd = -1;
+            auto [ptr, ec] = std::from_chars(fdStr.data(), fdStr.data() + fdStr.size(), parsedFd);
+            if (ec != std::errc{} || ptr != fdStr.data() + fdStr.size()) {
+                fd = -1;
+                return true;
+            }
+            fd = parsedFd;
             if (fd < 0 || flags != O_RDONLY) {
                 fd = -1;
             }
