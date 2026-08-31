@@ -75,7 +75,7 @@ HWTEST_F(MmapCoreTest, MmapCoreTest_DoMmap_001, TestSize.Level1)
 
     EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
-    EXPECT_EQ(err.GetErrNo(), 13900008);
+    EXPECT_EQ(err.GetErrNo(), 13900008); // Bad file descriptor
 
     GTEST_LOG_(INFO) << "MmapCoreTest-end MmapCoreTest_DoMmap_001";
 }
@@ -99,7 +99,7 @@ HWTEST_F(MmapCoreTest, MmapCoreTest_DoMmap_002, TestSize.Level1)
 
     EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
-    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     close(fd);
     GTEST_LOG_(INFO) << "MmapCoreTest-end MmapCoreTest_DoMmap_002";
@@ -124,7 +124,7 @@ HWTEST_F(MmapCoreTest, MmapCoreTest_DoMmap_003, TestSize.Level1)
 
     EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
-    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     close(fd);
     GTEST_LOG_(INFO) << "MmapCoreTest-end MmapCoreTest_DoMmap_003";
@@ -149,7 +149,7 @@ HWTEST_F(MmapCoreTest, MmapCoreTest_DoMmap_004, TestSize.Level1)
 
     EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
-    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     close(fd);
     GTEST_LOG_(INFO) << "MmapCoreTest-end MmapCoreTest_DoMmap_004";
@@ -174,7 +174,7 @@ HWTEST_F(MmapCoreTest, MmapCoreTest_DoMmap_005, TestSize.Level1)
 
     EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
-    EXPECT_EQ(err.GetErrNo(), 13900020);
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     close(fd);
     GTEST_LOG_(INFO) << "MmapCoreTest-end MmapCoreTest_DoMmap_005";
@@ -345,6 +345,8 @@ HWTEST_F(MmapCoreTest, MmapCoreTest_DoMmap_011, TestSize.Level1)
     auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900056); // Mmap does not support mapping this file
 
     close(fd);
     GTEST_LOG_(INFO) << "MmapCoreTest-end MmapCoreTest_DoMmap_011";

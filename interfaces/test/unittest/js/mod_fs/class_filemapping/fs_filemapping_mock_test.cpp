@@ -121,12 +121,14 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Msync_001, TestSize.Level1
 
     auto mmapMock = MmapMock::GetMock();
     EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
-    EXPECT_CALL(*mmapMock, msync(_, _, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*mmapMock, msync(_, _, _)).WillOnce(SetErrnoAndReturn(EIO, -1));
 
     auto result = mapping->Msync(0, mapping->GetEntity()->capacity);
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005); // I/O error
 
     delete mapping;
 
@@ -154,6 +156,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Msync_002, TestSize.Level1
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005); // I/O error
 
     delete mapping;
 
@@ -162,7 +166,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Msync_002, TestSize.Level1
 
 /**
  * @tc.name: FsFileMappingMockTest_Msync_003
- * @tc.desc: Test function of FsFileMapping::Msync interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Msync interface for SUCCESS when msync returns success.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -205,6 +209,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Msync_004, TestSize.Level1
     auto result = mapping->Msync(SIZE_MAX, 100);
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     delete mapping;
 
@@ -228,6 +234,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Msync_005, TestSize.Level1
     auto result = mapping->Msync(mapping->GetEntity()->rawCapacity + 100, 100);
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     delete mapping;
 
@@ -249,12 +257,14 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Unmap_001, TestSize.Level1
     ASSERT_NE(mapping, nullptr);
 
     auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*mmapMock, munmap(_, _)).WillOnce(SetErrnoAndReturn(EINVAL, -1));
 
     auto result = mapping->Unmap();
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     delete mapping;
 
@@ -263,7 +273,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Unmap_001, TestSize.Level1
 
 /**
  * @tc.name: FsFileMappingMockTest_Unmap_002
- * @tc.desc: Test function of FsFileMapping::Unmap interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Unmap interface for SUCCESS when munmap succeeds and mapping becomes invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -321,6 +331,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Write_ReadOnly_001, TestSi
     auto result = mapping->Write(data, strlen(data), strlen(data));
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900053); // Read-only mmap buffer
 
     delete mapping;
 
@@ -358,6 +370,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_WriteTo_ReadOnly_001, Test
     auto result = mapping->WriteTo(0, data, strlen(data), strlen(data));
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900053); // Read-only mmap buffer
 
     delete mapping;
 
@@ -382,6 +396,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_InvalidPosition_0
     auto result = mapping->ReadFrom(mapping->GetEntity()->capacity + 100, buffer, sizeof(buffer), 10);
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     delete mapping;
 
@@ -406,6 +422,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_WriteTo_InvalidPosition_00
     auto result = mapping->WriteTo(mapping->GetEntity()->capacity + 100, data, strlen(data), strlen(data));
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     delete mapping;
 
@@ -428,7 +446,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_SetPosition_AfterUnmap_001
 
     auto result = mapping->SetPosition(10);
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -451,7 +469,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_GetPosition_AfterUnmap_001
 
     auto result = mapping->GetPosition();
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -474,7 +492,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Capacity_AfterUnmap_001, T
 
     auto result = mapping->Capacity();
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -497,7 +515,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_SetLimit_AfterUnmap_001, T
 
     auto result = mapping->SetLimit(100);
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -520,7 +538,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_GetLimit_AfterUnmap_001, T
 
     auto result = mapping->GetLimit();
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -543,7 +561,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Flip_AfterUnmap_001, TestS
 
     auto result = mapping->Flip();
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -566,7 +584,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Remaining_AfterUnmap_001, 
 
     auto result = mapping->Remaining();
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -590,7 +608,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_AfterUnmap_001, TestS
     char buffer[100] = {0};
     auto result = mapping->Read(buffer, sizeof(buffer), 10);
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -614,7 +632,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Write_AfterUnmap_001, Test
     const char *data = "test";
     auto result = mapping->Write(data, strlen(data), strlen(data));
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -637,7 +655,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Msync_AfterUnmap_001, Test
 
     auto result = mapping->Msync(0, 100);
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -661,7 +679,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_WriteTo_AfterUnmap_001, Te
     const char *data = "test";
     auto result = mapping->WriteTo(0, data, strlen(data), strlen(data));
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -685,7 +703,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_AfterUnmap_001, T
     char buffer[100] = {0};
     auto result = mapping->ReadFrom(0, buffer, sizeof(buffer), 10);
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
 
     delete mapping;
 
@@ -709,7 +727,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_MemcpyFailed_EINVAL_0
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL); // Invalid argument
 
     delete mapping;
 
@@ -733,7 +751,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_MemcpyFailed_OOB_001,
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB); // Buffer read/write out of bounds
 
     delete mapping;
 
@@ -757,7 +775,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_MemcpyFailed_EINV
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL); // Invalid argument
 
     delete mapping;
 
@@ -781,7 +799,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_MemcpyFailed_OOB_
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB); // Buffer read/write out of bounds
 
     delete mapping;
 
@@ -805,7 +823,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Write_MemcpyFailed_EINVAL_
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL); // Invalid argument
 
     delete mapping;
 
@@ -829,7 +847,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Write_MemcpyFailed_OOB_001
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB); // Buffer read/write out of bounds
 
     delete mapping;
 
@@ -853,7 +871,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_WriteTo_MemcpyFailed_EINVA
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_INVAL); // Invalid argument
 
     delete mapping;
 
@@ -877,7 +895,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_WriteTo_MemcpyFailed_OOB_0
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
-    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB);
+    EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_OOB); // Buffer read/write out of bounds
 
     delete mapping;
 

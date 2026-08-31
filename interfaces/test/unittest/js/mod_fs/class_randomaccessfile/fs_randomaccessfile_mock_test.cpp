@@ -100,7 +100,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, Te
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_ReadSync_002
- * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for SUCCESS when uv_fs_read returns expected length.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -161,7 +161,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, T
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_WriteSync_004
- * @tc.desc: Test function of FsRandomAccessFile::WriteSync(string) interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(string) interface for SUCCESS when uv_fs_write succeeds with a string.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -225,7 +225,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, T
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_WriteSync_006
- * @tc.desc: Test function of FsRandomAccessFile::WriteSync(ArrayBuffer) interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(ArrayBuffer) interface for SUCCESS when uv_fs_write succeeds with an ArrayBuffer.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -285,7 +285,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, T
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_CloseSync_008
- * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for SUCCESS.
+ * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for SUCCESS when uv_fs_close returns success.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -356,7 +356,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_010, T
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_CloseSync_011
- * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for failed.
+ * @tc.desc: Test function of FsRandomAccessFile::CloseSync interface for FAILURE when fdsan_close fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -372,6 +372,8 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_011, T
     auto result = raf->CloseSync();
 
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900039); // File descriptor in bad state
  
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_011";
 }
