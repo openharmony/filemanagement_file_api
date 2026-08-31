@@ -356,6 +356,8 @@ HWTEST_F(HashCoreTest, HashCoreTest_InvalidAlgorithm_001, testing::ext::TestSize
 
     auto ret = HashCore::DoHash(path, "invalid_algorithm");
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     GTEST_LOG_(INFO) << "HashCoreTest_InvalidAlgorithm_001 end";
 }
@@ -369,6 +371,8 @@ HWTEST_F(HashCoreTest, HashCoreTest_InvalidAlgorithm_002, testing::ext::TestSize
 
     auto ret = HashCore::DoHash(path, "SHA256");
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     GTEST_LOG_(INFO) << "HashCoreTest_InvalidAlgorithm_002 end";
 }
@@ -412,6 +416,7 @@ HWTEST_F(HashCoreTest, HashCoreTest_Directory_001, testing::ext::TestSize.Level2
 
     auto ret = HashCore::DoHash(path, "sha256");
     EXPECT_FALSE(ret.IsSuccess());
+    // TODO: 待推包确认 fopen(目录) 行为后补 errCode 断言（可能 EISDIR 13900019）
 
     GTEST_LOG_(INFO) << "HashCoreTest_Directory_001 end";
 }
@@ -422,6 +427,8 @@ HWTEST_F(HashCoreTest, HashCoreTest_EmptyPath_001, testing::ext::TestSize.Level2
 
     auto ret = HashCore::DoHash("", "sha256");
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002); // No such file or directory
 
     GTEST_LOG_(INFO) << "HashCoreTest_EmptyPath_001 end";
 }

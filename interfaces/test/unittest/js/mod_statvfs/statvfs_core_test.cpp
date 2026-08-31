@@ -63,7 +63,7 @@ void StatvFsCoreTest::TearDown()
 
 /**
  * @tc.name: StatvFsCoreTest_DoGetFreeSize_001
- * @tc.desc: Test function of StatvfsCore::DoGetFreeSize interface for SUCCESS.
+ * @tc.desc: Test function of StatvfsCore::DoGetFreeSize interface for SUCCESS when path exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -109,7 +109,7 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetFreeSize_002, testing::ext::TestS
 
 /**
  * @tc.name: StatvFsCoreTest_DoGetTotalSize_001
- * @tc.desc: Test function of StatvfsCore::DoGetTotalSize interface for SUCCESS.
+ * @tc.desc: Test function of StatvfsCore::DoGetTotalSize interface for SUCCESS when path exists.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -188,6 +188,8 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetFreeSize_007, testing::ext::TestS
     auto path = string("/nonexistent/path/DoGetFreeSize_007.txt");
     auto ret = StatvfsCore::DoGetFreeSize(path);
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002); // No such file or directory
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest_DoGetFreeSize_007 end";
 }
@@ -198,6 +200,8 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetFreeSize_008, testing::ext::TestS
 
     auto ret = StatvfsCore::DoGetFreeSize("");
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002); // No such file or directory
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest_DoGetFreeSize_008 end";
 }
@@ -259,6 +263,8 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_007, testing::ext::Test
     auto path = string("/nonexistent/path/DoGetTotalSize_007.txt");
     auto ret = StatvfsCore::DoGetTotalSize(path);
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002); // No such file or directory
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest_DoGetTotalSize_007 end";
 }
@@ -269,6 +275,8 @@ HWTEST_F(StatvFsCoreTest, StatvFsCoreTest_DoGetTotalSize_008, testing::ext::Test
 
     auto ret = StatvfsCore::DoGetTotalSize("");
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900002); // No such file or directory
 
     GTEST_LOG_(INFO) << "StatvFsCoreTest_DoGetTotalSize_008 end";
 }

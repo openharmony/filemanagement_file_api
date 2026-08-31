@@ -106,7 +106,7 @@ void FsFileMappingTest::TearDown()
 
 /**
  * @tc.name: FsFileMappingTest_CheckValid_001
- * @tc.desc: Test function of FsFileMapping::CheckValid interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::CheckValid interface for SUCCESS when mapping is valid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -123,7 +123,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_CheckValid_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_IsReadOnly_001
- * @tc.desc: Test function of FsFileMapping::IsReadOnly interface for READ_WRITE mode.
+ * @tc.desc: Test function of FsFileMapping::IsReadOnly interface for SUCCESS when mode is READ_WRITE.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -140,7 +140,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_IsReadOnly_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_SetPosition_001
- * @tc.desc: Test function of FsFileMapping::SetPosition interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::SetPosition interface for SUCCESS when setting a valid position.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -175,13 +175,15 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_SetPosition_002, TestSize.Level1)
     auto result = testMapping_->SetPosition(invalidPos);
     
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     GTEST_LOG_(INFO) << "FsFileMappingTest-end FsFileMappingTest_SetPosition_002";
 }
 
 /**
  * @tc.name: FsFileMappingTest_GetPosition_001
- * @tc.desc: Test function of FsFileMapping::GetPosition interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::GetPosition interface for SUCCESS when getting current position.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -201,7 +203,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_GetPosition_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_Capacity_001
- * @tc.desc: Test function of FsFileMapping::Capacity interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Capacity interface for SUCCESS when getting capacity.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -221,7 +223,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Capacity_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_SetLimit_001
- * @tc.desc: Test function of FsFileMapping::SetLimit interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::SetLimit interface for SUCCESS when setting a valid limit.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -256,6 +258,8 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_SetLimit_002, TestSize.Level1)
     auto result = testMapping_->SetLimit(invalidLimit);
     
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     GTEST_LOG_(INFO) << "FsFileMappingTest-end FsFileMappingTest_SetLimit_002";
 }
@@ -285,7 +289,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_SetLimit_003, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_GetLimit_001
- * @tc.desc: Test function of FsFileMapping::GetLimit interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::GetLimit interface for SUCCESS when getting limit.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -305,7 +309,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_GetLimit_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_Flip_001
- * @tc.desc: Test function of FsFileMapping::Flip interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Flip interface for SUCCESS when flipping position to limit.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -329,7 +333,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Flip_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_Remaining_001
- * @tc.desc: Test function of FsFileMapping::Remaining interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Remaining interface for SUCCESS when getting remaining size.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -352,7 +356,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Remaining_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_Read_001
- * @tc.desc: Test function of FsFileMapping::Read interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Read interface for SUCCESS when reading data from current position.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -390,13 +394,15 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Read_002, TestSize.Level1)
     auto result = testMapping_->Read(nullptr, 100, 10);
     
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     GTEST_LOG_(INFO) << "FsFileMappingTest-end FsFileMappingTest_Read_002";
 }
 
 /**
  * @tc.name: FsFileMappingTest_ReadFrom_001
- * @tc.desc: Test function of FsFileMapping::ReadFrom interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::ReadFrom interface for SUCCESS when reading data from a given position.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -418,7 +424,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_ReadFrom_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_Write_001
- * @tc.desc: Test function of FsFileMapping::Write interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Write interface for SUCCESS when writing data to current position.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -456,13 +462,15 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Write_002, TestSize.Level1)
     auto result = testMapping_->Write(nullptr, 100, 10);
     
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     GTEST_LOG_(INFO) << "FsFileMappingTest-end FsFileMappingTest_Write_002";
 }
 
 /**
  * @tc.name: FsFileMappingTest_WriteTo_001
- * @tc.desc: Test function of FsFileMapping::WriteTo interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::WriteTo interface for SUCCESS when writing data to a given position.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -485,7 +493,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_WriteTo_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_Msync_001
- * @tc.desc: Test function of FsFileMapping::Msync interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Msync interface for SUCCESS when syncing the whole mapping.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -505,7 +513,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Msync_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_Unmap_001
- * @tc.desc: Test function of FsFileMapping::Unmap interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Unmap interface for SUCCESS when unmapping a valid mapping.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -537,7 +545,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Unmap_001, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_Unmap_002
- * @tc.desc: Test function of FsFileMapping::Unmap interface for idempotent behavior.
+ * @tc.desc: Test function of FsFileMapping::Unmap interface for SUCCESS when unmap is called twice (idempotent).
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -570,7 +578,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Unmap_002, TestSize.Level1)
 
 /**
  * @tc.name: FsFileMappingTest_Constructor_001
- * @tc.desc: Test function of FsFileMapping::Constructor interface for SUCCESS.
+ * @tc.desc: Test function of FsFileMapping::Constructor interface for SUCCESS when constructing with valid params.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -682,7 +690,7 @@ HWTEST_F(FsFileMappingTest, FsFileMappingTest_Remaining_LimitLessThanPosition_00
 
 /**
  * @tc.name: FsFileMappingTest_ReadFrom_PositionExceedLimit_001
- * @tc.desc: Test function of FsFileMapping::ReadFrom interface when position >= limit.
+ * @tc.desc: Test function of FsFileMapping::ReadFrom interface for SUCCESS when position >= limit.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
