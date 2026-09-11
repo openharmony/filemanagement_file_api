@@ -148,6 +148,10 @@ ARCHIVE_IMPL int ZipSearchEOCD(struct Stream *stream, struct EndOfCentralDir *eo
     ret = StreamSeek(stream, 0, ARCHIVE_SEEK_END);
     RETURN_IF_FAIL(ret);
     int64_t fileSize = StreamTell(stream);
+    if (fileSize < 0) {
+        ARCHIVE_ERR("failed to get stream size, StreamTell returned: %ld\n", fileSize);
+        return fileSize;
+    }
     maxRead = fileSize < maxRead ? fileSize : maxRead;
 
     unsigned char *buffer = (unsigned char *)malloc(maxRead * sizeof(unsigned char));
@@ -220,7 +224,7 @@ ARCHIVE_IMPL int ZipReadZip64ExtraField(void *extraField, uint16_t cur, uint16_t
         return ARCHIVE_INTERNAL_ERROR;
     }
     uint16_t pos = 0;
-    if (pos >= dataSize) {
+    if (pos + sizeof(uint64_t) > dataSize) {
         return ARCHIVE_OK;
     }
 
@@ -229,7 +233,7 @@ ARCHIVE_IMPL int ZipReadZip64ExtraField(void *extraField, uint16_t cur, uint16_t
         pos += sizeof(uint64_t);
     }
 
-    if (pos >= dataSize) {
+    if (pos + sizeof(uint64_t) > dataSize) {
         return ARCHIVE_OK;
     }
 
@@ -238,7 +242,7 @@ ARCHIVE_IMPL int ZipReadZip64ExtraField(void *extraField, uint16_t cur, uint16_t
         pos += sizeof(uint64_t);
     }
 
-    if (pos >= dataSize) {
+    if (pos + sizeof(uint64_t) > dataSize) {
         return ARCHIVE_OK;
     }
 
@@ -247,7 +251,7 @@ ARCHIVE_IMPL int ZipReadZip64ExtraField(void *extraField, uint16_t cur, uint16_t
         pos += sizeof(uint64_t);
     }
 
-    if (pos >= dataSize) {
+    if (pos + sizeof(uint32_t) > dataSize) {
         return ARCHIVE_OK;
     }
 

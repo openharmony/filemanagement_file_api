@@ -267,11 +267,13 @@ LOCAL int ZipReaderProcessExtraField(struct ZipReader *reader, void *extraField,
                 if (dataSize < EXTRA_FIELD_UNICODE_PATH_MIN_LEN) {
                     break;
                 }
+                size_t fileNameSize = GETV(reader->context.centralDirHeader.fileNameLength);
+                fileNameSize = fileNameSize < ZIP_FILE_NAME_LEN_MAX ? fileNameSize : ZIP_FILE_NAME_LEN_MAX;
                 ret = ZipReadUnicodePathExtraField(extraField,
                     cur,
                     dataSize,
                     (unsigned char *)&reader->context.entryInfo.entryName,
-                    GETV(reader->context.centralDirHeader.fileNameLength));
+                    fileNameSize);
                 if (ret == ARCHIVE_OK) {
                     reader->context.entryInfo.useUnicodePath = true;
                 }
@@ -506,8 +508,13 @@ LOCAL int64_t ZipReaderReadData(struct ZipReaderExtractContext *context, struct 
     }
 
     // Decompress the data using different methods depending on the compresssed stream
-    size_t read = StreamRead(resource->compressStream, buf, len);
+    int64_t read = StreamRead(resource->compressStream, buf, len);
+    if (read < 0) {
+        ARCHIVE_ERR("failed to read file data, expected size: %u, errno: %ld\n", len, read);
+        return read;
+    }
     if (read > UINT32_MAX) {
+        ARCHIVE_ERR("failed to read file data, expected size: %u, errno: %ld\n", len, read);
         return ARCHIVE_READ_ERROR;
     }
 
@@ -652,6 +659,9 @@ LOCAL int ZipReaderInitStream(struct ZipReaderExtractContext *context, struct Re
     RETURN_IF_FAIL(ret);
     if (!ZipReaderEntryIsSymlink(&context->centralDirHeader)) {
         resource->extractStream = FileStreamCreate(outPath);
+        if (resource->extractStream == NULL) {
+            return ARCHIVE_STREAM_ERROR;
+        }
         ret = StreamOpen(resource->extractStream, ARCHIVE_OPEN_MODE_CREATE);
     }
     return ret;
