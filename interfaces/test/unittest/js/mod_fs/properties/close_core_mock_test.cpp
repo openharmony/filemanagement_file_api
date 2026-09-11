@@ -82,7 +82,7 @@ HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_001, testing::ext::TestSiz
     GTEST_LOG_(INFO) << "CloseCoreMockTest-begin CloseCoreMockTest_DoClose_001";
 
     // Prepare test parameters
-    int fd = EXPECTED_FD;
+    int32_t fd = EXPECTED_FD;
     // Set mock behaviors
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_))
@@ -112,7 +112,7 @@ HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_002, testing::ext::TestSiz
     GTEST_LOG_(INFO) << "CloseCoreMockTest-begin CloseCoreMockTest_DoClose_002";
  
     // Prepare test parameters
-    int fd = EXPECTED_MAX_FD;
+    int32_t fd = EXPECTED_MAX_FD;
     // Set mock behaviors
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_))

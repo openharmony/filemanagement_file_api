@@ -416,7 +416,8 @@ HWTEST_F(HashCoreTest, HashCoreTest_Directory_001, testing::ext::TestSize.Level2
 
     auto ret = HashCore::DoHash(path, "sha256");
     EXPECT_FALSE(ret.IsSuccess());
-    // TODO: 待推包确认 fopen(目录) 行为后补 errCode 断言（可能 EISDIR 13900019）
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900019); // Is a directory (fopen on a directory fails with EISDIR)
 
     GTEST_LOG_(INFO) << "HashCoreTest_Directory_001 end";
 }
