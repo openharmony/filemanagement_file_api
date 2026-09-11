@@ -76,7 +76,7 @@ inline const int32_t MAX_FD = 2048;
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_ReadSync_001";
@@ -100,11 +100,12 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_001, Te
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_ReadSync_002
- * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for SUCCESS when uv_fs_read returns expected length.
+ * @tc.desc: Test function of FsRandomAccessFile::ReadSync interface for SUCCESS when uv_fs_read returns expected
+ * length.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_ReadSync_002";
@@ -139,7 +140,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_ReadSync_002, Te
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_003";
@@ -161,11 +162,12 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_003, T
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_WriteSync_004
- * @tc.desc: Test function of FsRandomAccessFile::WriteSync(string) interface for SUCCESS when uv_fs_write succeeds with a string.
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(string) interface for SUCCESS when uv_fs_write succeeds with
+ * a string.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_004";
@@ -197,7 +199,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_004, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_005";
@@ -225,11 +227,12 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_005, T
 
 /**
  * @tc.name: FsRandomAccessFileMockTest_WriteSync_006
- * @tc.desc: Test function of FsRandomAccessFile::WriteSync(ArrayBuffer) interface for SUCCESS when uv_fs_write succeeds with an ArrayBuffer.
+ * @tc.desc: Test function of FsRandomAccessFile::WriteSync(ArrayBuffer) interface for SUCCESS when uv_fs_write succeeds
+ * with an ArrayBuffer.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_WriteSync_006";
@@ -263,7 +266,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_WriteSync_006, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_007";
@@ -289,7 +292,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_007, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_008";
@@ -312,7 +315,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_008, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_009, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_009";
@@ -341,7 +344,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_009, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_010, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_010";
@@ -360,11 +363,11 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_010, T
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
-*/
+ */
 HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_011, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-begin FsRandomAccessFileMockTest_CloseSync_011";
- 
+
     auto fdsanMock = FdsanMock::GetMock();
     EXPECT_CALL(*fdsanMock, fdsan_close_with_tag(testing::_, testing::_))
         .WillOnce(testing::SetErrnoAndReturn(EBADFD, -1));
@@ -374,7 +377,7 @@ HWTEST_F(FsRandomAccessFileMockTest, FsRandomAccessFileMockTest_CloseSync_011, T
     EXPECT_FALSE(result.IsSuccess());
     auto err = result.GetError();
     EXPECT_EQ(err.GetErrNo(), 13900039); // File descriptor in bad state
- 
+
     GTEST_LOG_(INFO) << "FsRandomAccessFileMockTest-end FsRandomAccessFileMockTest_CloseSync_011";
 }
 } // namespace OHOS::FileManagement::ModuleFileIO::Test

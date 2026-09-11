@@ -69,7 +69,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_001";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     EXPECT_CALL(*mmapMock, fstat(fd, _)).WillOnce(SetErrnoAndReturn(EIO, -1));
 
@@ -94,7 +94,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_002";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     EXPECT_CALL(*mmapMock, fstat(fd, _))
         .WillOnce(Invoke([](int fd, struct stat* st) {
@@ -123,7 +123,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_003";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -152,7 +152,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_004";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -187,7 +187,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_005";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -218,7 +218,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_006";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -251,7 +251,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_007";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFBLK;
@@ -281,7 +281,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_008";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -313,7 +313,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_009, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_009";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -344,7 +344,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_010, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_010";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;

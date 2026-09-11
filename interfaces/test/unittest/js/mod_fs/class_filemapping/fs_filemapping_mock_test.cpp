@@ -273,7 +273,8 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Unmap_001, TestSize.Level1
 
 /**
  * @tc.name: FsFileMappingMockTest_Unmap_002
- * @tc.desc: Test function of FsFileMapping::Unmap interface for SUCCESS when munmap succeeds and mapping becomes invalid.
+ * @tc.desc: Test function of FsFileMapping::Unmap interface for SUCCESS when munmap succeeds and mapping becomes
+ * invalid.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -310,7 +311,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Write_ReadOnly_001, TestSi
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_Write_ReadOnly_001";
 
-    char mockBuffer[BUFFER_LENGTH] = {0};
+    char mockBuffer[BUFFER_LENGTH] = { 0 };
     struct FileMappingParams params;
     params.mapAddr = mockBuffer + 100;
     params.rawMapAddr = mockBuffer;
@@ -350,7 +351,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_WriteTo_ReadOnly_001, Test
 {
     GTEST_LOG_(INFO) << "FsFileMappingMockTest-begin FsFileMappingMockTest_WriteTo_ReadOnly_001";
 
-    char mockBuffer[BUFFER_LENGTH] = {0};
+    char mockBuffer[BUFFER_LENGTH] = { 0 };
     struct FileMappingParams params;
     params.mapAddr = mockBuffer + 100;
     params.rawMapAddr = mockBuffer;
@@ -392,7 +393,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_InvalidPosition_0
     auto mapping = CreateTestMapping();
     ASSERT_NE(mapping, nullptr);
 
-    char buffer[100] = {0};
+    char buffer[100] = { 0 };
     auto result = mapping->ReadFrom(mapping->GetEntity()->capacity + 100, buffer, sizeof(buffer), 10);
 
     EXPECT_FALSE(result.IsSuccess());
@@ -605,7 +606,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_AfterUnmap_001, TestS
     auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
 
-    char buffer[100] = {0};
+    char buffer[100] = { 0 };
     auto result = mapping->Read(buffer, sizeof(buffer), 10);
     EXPECT_FALSE(result.IsSuccess());
     EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
@@ -700,7 +701,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_AfterUnmap_001, T
     auto mapping = DoUnmapAfterCreate();
     ASSERT_NE(mapping, nullptr);
 
-    char buffer[100] = {0};
+    char buffer[100] = { 0 };
     auto result = mapping->ReadFrom(0, buffer, sizeof(buffer), 10);
     EXPECT_FALSE(result.IsSuccess());
     EXPECT_EQ(result.GetError().GetErrNo(), FILEIO_SYS_CAP_TAG + E_MMAP_FREE); // Mmap buffer released
@@ -722,7 +723,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_MemcpyFailed_EINVAL_0
     EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
     EXPECT_CALL(*mmapMock, memcpy_s(_, _, srcPtr, _)).WillOnce(Return(EINVAL));
 
-    char buffer[100] = {0};
+    char buffer[100] = { 0 };
     auto result = mapping->Read(buffer, sizeof(buffer), 10);
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
@@ -746,7 +747,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_Read_MemcpyFailed_OOB_001,
     EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
     EXPECT_CALL(*mmapMock, memcpy_s(_, _, srcPtr, _)).WillOnce(Return(ERANGE));
 
-    char buffer[100] = {0};
+    char buffer[100] = { 0 };
     auto result = mapping->Read(buffer, sizeof(buffer), 10);
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
@@ -770,7 +771,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_MemcpyFailed_EINV
     EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
     EXPECT_CALL(*mmapMock, memcpy_s(_, _, srcPtr, _)).WillOnce(Return(EINVAL));
 
-    char buffer[100] = {0};
+    char buffer[100] = { 0 };
     auto result = mapping->ReadFrom(0, buffer, sizeof(buffer), 10);
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
@@ -794,7 +795,7 @@ HWTEST_F(FsFileMappingMockTest, FsFileMappingMockTest_ReadFrom_MemcpyFailed_OOB_
     EXPECT_CALL(*mmapMock, memcpy_s(_, _, _, _)).Times(testing::AnyNumber()).WillRepeatedly(Return(0));
     EXPECT_CALL(*mmapMock, memcpy_s(_, _, srcPtr, _)).WillOnce(Return(ERANGE));
 
-    char buffer[100] = {0};
+    char buffer[100] = { 0 };
     auto result = mapping->ReadFrom(0, buffer, sizeof(buffer), 10);
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
