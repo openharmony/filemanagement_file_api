@@ -82,7 +82,7 @@ HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_001, testing::ext::TestSiz
     GTEST_LOG_(INFO) << "CloseCoreMockTest-begin CloseCoreMockTest_DoClose_001";
 
     // Prepare test parameters
-    int fd = EXPECTED_FD;
+    int32_t fd = EXPECTED_FD;
     // Set mock behaviors
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_))
@@ -112,7 +112,7 @@ HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_002, testing::ext::TestSiz
     GTEST_LOG_(INFO) << "CloseCoreMockTest-begin CloseCoreMockTest_DoClose_002";
  
     // Prepare test parameters
-    int fd = EXPECTED_MAX_FD;
+    int32_t fd = EXPECTED_MAX_FD;
     // Set mock behaviors
     auto uvMock = UvFsMock::GetMock();
     EXPECT_CALL(*uvMock, uv_fs_close(testing::_, testing::_, testing::_, testing::_))
@@ -132,7 +132,7 @@ HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_002, testing::ext::TestSiz
  
 /**
  * @tc.name: CloseCoreMockTest_DoClose_003
- * @tc.desc: Test function of CloseCore::DoClose(file) interface for FAILURE when uv_fs_close fails
+ * @tc.desc: Test function of CloseCore::DoClose(file) interface for FAILURE when fdsan_close fails.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -156,7 +156,9 @@ HWTEST_F(CloseCoreMockTest, CloseCoreMockTest_DoClose_003, testing::ext::TestSiz
     auto ret = CloseCore::DoClose(file.get());
     testing::Mock::VerifyAndClearExpectations(fdsanMock.get());
     EXPECT_FALSE(ret.IsSuccess());
- 
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900039); // File descriptor in bad state
+
     GTEST_LOG_(INFO) << "CloseCoreMockTest-end CloseCoreMockTest_DoClose_003";
 }
 } // namespace Test

@@ -69,14 +69,16 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_001";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
-    EXPECT_CALL(*mmapMock, fstat(fd, _)).WillOnce(Return(-1));
+    EXPECT_CALL(*mmapMock, fstat(fd, _)).WillOnce(SetErrnoAndReturn(EIO, -1));
 
     auto result = MmapCore::DoMmap(fd, MappingMode::READ_ONLY, 0, 1024);
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005); // I/O error
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_001";
 }
@@ -92,7 +94,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_002";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     EXPECT_CALL(*mmapMock, fstat(fd, _))
         .WillOnce(Invoke([](int fd, struct stat* st) {
@@ -104,6 +106,8 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_002, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900056); // Mmap does not support mapping this file
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_002";
 }
@@ -119,7 +123,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_003";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -131,6 +135,8 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_003, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005); // I/O error
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_003";
 }
@@ -146,7 +152,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_004";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -164,6 +170,8 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_004, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_004";
 }
@@ -179,7 +187,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_005";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -187,12 +195,14 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_005, TestSize.Level1)
     EXPECT_CALL(*mmapMock, fstat(fd, _))
         .WillRepeatedly(DoAll(SetArgPointee<1>(mockStat), Return(0)));
     EXPECT_CALL(*mmapMock, sysconf(_SC_PAGESIZE)).WillOnce(Return(4096));
-    EXPECT_CALL(*mmapMock, mmap(_, _, _, _, _, _)).WillOnce(Return(MAP_FAILED));
+    EXPECT_CALL(*mmapMock, mmap(_, _, _, _, _, _)).WillOnce(SetErrnoAndReturn(EIO, MAP_FAILED));
 
     auto result = MmapCore::DoMmap(fd, MappingMode::READ_WRITE, 0, 1024);
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005); // I/O error
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_005";
 }
@@ -208,7 +218,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_006";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -241,7 +251,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_007";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFBLK;
@@ -253,10 +263,13 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_007, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900056); // Mmap does not support mapping this file
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_007";
 }
 
+#if defined(_WIN64) || defined(__x86_64__) || defined(__ppc64__) || defined(__LP64__)
 /**
  * @tc.name: MmapCoreMockTest_DoMmap_008
  * @tc.desc: Test function of MmapCore::DoMmap interface for FAILURE when size exceeds INT64_MAX.
@@ -268,7 +281,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_008, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_008";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -282,9 +295,12 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_008, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900038); // Value too large for defined data type
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_008";
 }
+#endif
 
 /**
  * @tc.name: MmapCoreMockTest_DoMmap_009
@@ -297,7 +313,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_009, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_009";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -311,6 +327,8 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_009, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900038); // Value too large for defined data type
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_009";
 }
@@ -326,7 +344,7 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_010, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "MmapCoreMockTest-begin MmapCoreMockTest_DoMmap_010";
 
-    int fd = 10;
+    int32_t fd = 10;
     auto mmapMock = MmapMock::GetMock();
     struct stat mockStat = {0};
     mockStat.st_mode = S_IFREG;
@@ -340,6 +358,8 @@ HWTEST_F(MmapCoreMockTest, MmapCoreMockTest_DoMmap_010, TestSize.Level1)
 
     testing::Mock::VerifyAndClearExpectations(mmapMock.get());
     EXPECT_FALSE(result.IsSuccess());
+    auto err = result.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900005); // I/O error
 
     GTEST_LOG_(INFO) << "MmapCoreMockTest-end MmapCoreMockTest_DoMmap_010";
 }

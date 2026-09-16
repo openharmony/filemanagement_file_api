@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ HWTEST_F(HashStreamTest, HashStreamTest_GetHsEntity_001, testing::ext::TestSize.
 
 /**
  * @tc.name: HashStreamTest_GetHsEntity_002
- * @tc.desc: Test function of HsHashStream::GetHsEntity interface for SUCCESS.
+ * @tc.desc: Test function of HsHashStream::GetHsEntity interface for SUCCESS when getting a valid entity.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -247,7 +247,7 @@ HWTEST_F(HashStreamTest, HashStreamTest_Digest_001, testing::ext::TestSize.Level
 
 /**
  * @tc.name: HashStreamTest_Digest_002
- * @tc.desc: Test function of HsHashStream::Digest interface SUCCESS with MD5 algorithm.
+ * @tc.desc: Test function of HsHashStream::Digest interface for SUCCESS with MD5 algorithm.
  * @tc.size: MEDIUM
  * @tc.type: FUNC
  * @tc.level Level 1
@@ -382,6 +382,8 @@ HWTEST_F(HashStreamTest, HashStreamTest_Constructor_004, testing::ext::TestSize.
 
     auto ret = HsHashStream::Constructor("invalid");
     EXPECT_FALSE(ret.IsSuccess());
+    auto err = ret.GetError();
+    EXPECT_EQ(err.GetErrNo(), 13900020); // Invalid argument
 
     GTEST_LOG_(INFO) << "HashStreamTest_Constructor_004 end";
 }
