@@ -138,12 +138,9 @@ napi_value FfiConvertFile2Napi(napi_env env, int64_t id)
         return undefined;
     }
 
-    OHOS::FileManagement::ModuleFileIO::FileEntity *rafEntity = nullptr;
-    napi_status status = napi_unwrap(env, objRAF, reinterpret_cast<void **>(&rafEntity));
-    if (status != napi_ok) {
-        LOGE("Cannot unwrap for pointer: %d", status);
-        return undefined;
-    }
+    using ModuleFileIOFileEntity = OHOS::FileManagement::ModuleFileIO::FileEntity;
+
+    auto rafEntity = FileManagement::LibN::NClass::GetEntityOf<ModuleFileIOFileEntity>(env, objRAF);
     if (!rafEntity) {
         LOGE("Cannot instantiate file because of void entity");
         return undefined;
@@ -154,7 +151,7 @@ napi_value FfiConvertFile2Napi(napi_env env, int64_t id)
     rafEntity->uri_ = instance->uri_;
 
     napi_valuetype type;
-    status = napi_typeof(env, objRAF, &type);
+    napi_status status = napi_typeof(env, objRAF, &type);
     if (status != napi_ok || type == napi_undefined) {
         LOGE("[File]: create napiobj failed");
         return undefined;
