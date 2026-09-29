@@ -386,7 +386,8 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(dupFd, false);
     if (fdg == nullptr) {
         HILOGE("Failed to request heap memory.");
-        close(dupFd);
+        fdsan_exchange_owner_tag(dupFd, 0, FileFs::CJ_FILE_FDSAN_TAG);
+        fdsan_close_with_tag(dupFd, FileFs::CJ_FILE_FDSAN_TAG);
         return { GetErrorCode(ENOMEM), nullptr};
     }
     fileInfo = FileInfo { false, nullptr, move(fdg) };
@@ -396,7 +397,8 @@ std::tuple<int32_t, sptr<RandomAccessFileImpl>> FileFsImpl::CreateRandomAccessFi
     ptr->filePointer = 0;
     auto randomAccessFileImpl = FFIData::Create<RandomAccessFileImpl>(std::move(ptr));
     if (!randomAccessFileImpl) {
-        close(dupFd);
+        fdsan_exchange_owner_tag(dupFd, 0, FileFs::CJ_FILE_FDSAN_TAG);
+        fdsan_close_with_tag(dupFd, FileFs::CJ_FILE_FDSAN_TAG);
         return {GetErrorCode(ENOMEM), nullptr};
     }
     return {SUCCESS_CODE, randomAccessFileImpl};

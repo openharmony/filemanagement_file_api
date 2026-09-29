@@ -166,7 +166,8 @@ FileEntity* InstantiateFile(int fd, const std::string& pathOrUri, bool isUri)
     auto fdg = CreateUniquePtr<DistributedFS::FDGuard>(fd, false);
     if (fdg == nullptr) {
         LOGE("Failed to request heap memory.");
-        close(fd);
+        fdsan_exchange_owner_tag(fd, 0, FileFs::CJ_FILE_FDSAN_TAG);
+        fdsan_close_with_tag(fd, FileFs::CJ_FILE_FDSAN_TAG);
         return nullptr;
     }
     FileEntity *fileEntity = new(std::nothrow) FileEntity();
@@ -272,26 +273,30 @@ std::tuple<int32_t, sptr<FileEntity>> FileEntity::Dup(int32_t fd)
         new (std::nothrow) uv_fs_t, CommonFunc::FsReqCleanup };
     if (!readlink_req) {
         LOGE("Failed to request heap memory.");
-        close(dstFd);
+        fdsan_exchange_owner_tag(dstFd, 0, FileFs::CJ_FILE_FDSAN_TAG);
+        fdsan_close_with_tag(dstFd, FileFs::CJ_FILE_FDSAN_TAG);
         return {ENOMEM, nullptr};
     }
     string path = "/proc/self/fd/" + to_string(dstFd);
     int ret = uv_fs_readlink(nullptr, readlink_req.get(), path.c_str(), nullptr);
     if (ret < 0) {
         LOGE("Failed to readlink fd, ret: %{public}d", ret);
-        close(dstFd);
+        fdsan_exchange_owner_tag(dstFd, 0, FileFs::CJ_FILE_FDSAN_TAG);
+        fdsan_close_with_tag(dstFd, FileFs::CJ_FILE_FDSAN_TAG);
         return {ret, nullptr};
     }
     auto fdPrt = CreateUniquePtr<DistributedFS::FDGuard>(dstFd, false);
     if (fdPrt == nullptr) {
         LOGE("Failed to request heap memory.");
-        close(dstFd);
+        fdsan_exchange_owner_tag(dstFd, 0, FileFs::CJ_FILE_FDSAN_TAG);
+        fdsan_close_with_tag(dstFd, FileFs::CJ_FILE_FDSAN_TAG);
         return {ENOMEM, nullptr};
     }
     auto pathStr = string(static_cast<const char *>(readlink_req->ptr));
     auto fileEntity = FFIData::Create<FileEntity>(std::move(fdPrt), pathStr, "");
     if (!fileEntity) {
-        close(dstFd);
+        fdsan_exchange_owner_tag(dstFd, 0, FileFs::CJ_FILE_FDSAN_TAG);
+        fdsan_close_with_tag(dstFd, FileFs::CJ_FILE_FDSAN_TAG);
         return {ENOMEM, nullptr};
     }
     return {SUCCESS_CODE, fileEntity};
