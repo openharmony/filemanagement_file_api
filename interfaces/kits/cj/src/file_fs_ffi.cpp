@@ -552,12 +552,9 @@ napi_value FfiConvertRandomAccessFile2Napi(napi_env env, int64_t id)
         return undefined;
     }
 
-    OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity *rafEntity = nullptr;
-    napi_status status = napi_unwrap(env, objRAF, reinterpret_cast<void **>(&rafEntity));
-    if (status != napi_ok) {
-        LOGE("Cannot unwrap for pointer: %d", status);
-        return undefined;
-    }
+    using ModuleFileIORafEntity = OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity;
+
+    auto rafEntity = FileManagement::LibN::NClass::GetEntityOf<ModuleFileIORafEntity>(env, objRAF);
     if (!rafEntity) {
         LOGE("Cannot instantiate randomaccessfile because of void entity");
         return undefined;
@@ -569,7 +566,7 @@ napi_value FfiConvertRandomAccessFile2Napi(napi_env env, int64_t id)
     rafEntity->end = instance->GetEntity()->end;
 
     napi_valuetype type;
-    status = napi_typeof(env, objRAF, &type);
+    napi_status status = napi_typeof(env, objRAF, &type);
     if (status != napi_ok || type == napi_undefined) {
         LOGE("[RandomAccessFile]: create napiobj failed");
         return undefined;
@@ -592,15 +589,21 @@ int64_t FfiCreateRandomAccessFileFromNapi(napi_env env, napi_value objRAF)
         return ERR_INVALID_INSTANCE_CODE;
     }
 
-    std::shared_ptr<OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity>* entity = nullptr;
-    napi_status status = napi_unwrap(env, objRAF, reinterpret_cast<void **>(&entity));
-    if (status != napi_ok || entity == nullptr) {
-        LOGE("Cannot unwrap for pointer: %d", status);
+    using ModuleFileIORafEntity = OHOS::FileManagement::ModuleFileIO::RandomAccessFileEntity;
+
+    auto entity = FileManagement::LibN::NClass::GetEntityOf<ModuleFileIORafEntity>(env, objRAF);
+    if (entity == nullptr) {
+        LOGE("[RandomAccessFile]: Cannot unwrap for entity");
         return ERR_INVALID_INSTANCE_CODE;
     }
 
-    auto native = FFIData::Create<RandomAccessFileImpl>(*entity);
+    auto newEntity = std::make_shared<ModuleFileIORafEntity>();
+    newEntity->fd.swap(entity->fd);
+    newEntity->filePointer = entity->filePointer;
+    newEntity->start = entity->start;
+    newEntity->end = entity->end;
 
+    auto native = FFIData::Create<RandomAccessFileImpl>(std::move(newEntity));
     if (native == nullptr) {
         LOGE("[RandomAccessFile]: Create ffidata failed");
         return ERR_INVALID_INSTANCE_CODE;
